@@ -1,0 +1,107 @@
+import { memo, useMemo } from 'react'
+
+import { getUiTheme } from '../utils/designSystem'
+
+function scoreTone(ui, score) {
+  if (score >= 85) {
+    return ui.isDark
+      ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-100'
+      : 'border-emerald-300 bg-emerald-50 text-emerald-800'
+  }
+
+  if (score >= 70) {
+    return ui.isDark
+      ? 'border-sky-400/20 bg-sky-400/10 text-sky-100'
+      : 'border-sky-300 bg-sky-50 text-sky-800'
+  }
+
+  if (score >= 55) {
+    return ui.isDark
+      ? 'border-amber-400/20 bg-amber-400/10 text-amber-100'
+      : 'border-amber-300 bg-amber-50 text-amber-800'
+  }
+
+  return ui.isDark
+    ? 'border-rose-400/20 bg-rose-400/10 text-rose-100'
+    : 'border-rose-300 bg-rose-50 text-rose-800'
+}
+
+function ATSScorePanel({ atsScore, theme = 'dark', atsFriendlyMode, onToggleAtsFriendlyMode }) {
+  const ui = useMemo(() => getUiTheme(theme), [theme])
+  const breakdownItems = Object.values(atsScore.breakdown)
+
+  return (
+    <section
+      className={`fade-in-up surface-shadow rounded-[var(--radius-card)] border p-5 sm:p-6 print:hidden ${ui.surface}`}
+    >
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <p className={`ds-kicker ${ui.textMuted}`}>ATS score</p>
+          <h3 className={`ds-section-title mt-2 font-semibold ${ui.textPrimary}`}>
+            Parser-readiness overview
+          </h3>
+          <p className={`ds-body-sm mt-3 ${ui.textSecondary}`}>
+            This score estimates how easily applicant tracking systems can parse and rank the CV.
+          </p>
+        </div>
+
+        <div className={`rounded-[1.5rem] border px-5 py-4 text-center ${scoreTone(ui, atsScore.score)}`}>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em]">ATS score</p>
+          <p className="mt-2 text-4xl font-semibold leading-none">{atsScore.score}</p>
+          <p className="mt-2 text-sm font-medium">{atsScore.rating}</p>
+        </div>
+      </div>
+
+      <div className={`mt-5 rounded-[1.4rem] border p-4 ${ui.surfaceMuted}`}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className={`text-sm font-semibold ${ui.textPrimary}`}>ATS-friendly mode</p>
+            <p className={`mt-1 text-sm ${ui.textSecondary}`}>
+              Switch the preview to a simplified, parser-safe layout with reduced styling.
+            </p>
+          </div>
+          <button
+            type="button"
+            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+              atsFriendlyMode ? ui.buttonActive : ui.button
+            }`}
+            onClick={onToggleAtsFriendlyMode}
+          >
+            {atsFriendlyMode ? 'ATS mode on' : 'Enable ATS mode'}
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3">
+        {breakdownItems.map((item) => (
+          <article key={item.label} className={`rounded-2xl border px-4 py-4 ${ui.surfaceMuted}`}>
+            <div className="flex items-center justify-between gap-3">
+              <p className={`text-sm font-semibold ${ui.textPrimary}`}>{item.label}</p>
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${scoreTone(ui, item.score)}`}>
+                {item.score}/{item.maxScore}
+              </span>
+            </div>
+            <p className={`mt-2 text-sm leading-6 ${ui.textSecondary}`}>{item.summary}</p>
+          </article>
+        ))}
+      </div>
+
+      <div className="mt-5">
+        <p className={`text-sm font-semibold ${ui.textPrimary}`}>Score improvement tips</p>
+        <ul className={`mt-3 space-y-2 ${ui.textSecondary}`}>
+          {atsScore.improvementTips.map((tip) => (
+            <li key={tip} className={`rounded-2xl border px-4 py-3 text-sm ${ui.surfaceMuted}`}>
+              {tip}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+const MemoizedATSScorePanel = memo(ATSScorePanel)
+
+MemoizedATSScorePanel.displayName = 'ATSScorePanel'
+
+export default MemoizedATSScorePanel
