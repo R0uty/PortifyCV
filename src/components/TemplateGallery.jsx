@@ -2,30 +2,36 @@ import { memo, useMemo } from 'react'
 
 import { getUiTheme } from '../utils/designSystem'
 
-function TemplateThumbnail({ template }) {
+function TemplateThumbnail({ template, isDark }) {
   const thumbnail = template.thumbnail
+  const frameClassName = isDark
+    ? 'border-white/15 bg-slate-950/70'
+    : 'border-slate-200 bg-slate-50'
+  const accentClassName = isDark ? 'bg-slate-200' : 'bg-slate-800'
+  const titleLineClassName = isDark ? 'bg-slate-500' : 'bg-slate-300'
+  const bodyLineClassName = isDark ? 'bg-slate-700' : 'bg-slate-200'
+  const chipClassName = isDark
+    ? 'rounded-md border border-white/10 bg-slate-900 px-2 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-300'
+    : 'rounded-md border border-slate-200 bg-white px-2 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-500'
 
   return (
-    <div className={`overflow-hidden rounded-2xl border border-slate-200 ${thumbnail.surfaceClassName}`}>
-      <div className={`h-8 w-full ${thumbnail.accentClassName}`} />
+    <div className={`overflow-hidden rounded-2xl border ${frameClassName}`}>
+      <div className={`h-8 w-full ${accentClassName}`} />
       <div className="space-y-3 p-3">
         <div className="space-y-2">
-          <div className={`h-2 rounded-full bg-slate-300 ${thumbnail.titleWidthClassName}`} />
-          <div className={`h-2 rounded-full bg-slate-200 ${thumbnail.subtitleWidthClassName}`} />
+          <div className={`h-2 rounded-full ${titleLineClassName} ${thumbnail.titleWidthClassName}`} />
+          <div className={`h-2 rounded-full ${bodyLineClassName} ${thumbnail.subtitleWidthClassName}`} />
         </div>
         <div className={`grid gap-2 ${thumbnail.primaryRatioClassName}`}>
           <div className="space-y-2">
             {thumbnail.blockWidths.map((widthClassName) => (
-              <div key={widthClassName} className={`h-2 rounded-full bg-slate-200 ${widthClassName}`} />
+              <div key={widthClassName} className={`h-2 rounded-full ${bodyLineClassName} ${widthClassName}`} />
             ))}
           </div>
           {template.layout === 'split' ? (
             <div className="space-y-2">
               {thumbnail.chips.map((chip) => (
-                <div
-                  key={chip}
-                  className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-500"
-                >
+                <div key={chip} className={chipClassName}>
                   {chip}
                 </div>
               ))}
@@ -35,10 +41,7 @@ function TemplateThumbnail({ template }) {
         {template.layout === 'stacked' ? (
           <div className="flex flex-wrap gap-1.5">
             {thumbnail.chips.map((chip) => (
-              <div
-                key={chip}
-                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-500"
-              >
+              <div key={chip} className={chipClassName}>
                 {chip}
               </div>
             ))}
@@ -74,7 +77,7 @@ function TemplateGallery({ templates, selectedTemplateId, onSelectTemplate, them
               className={`group rounded-[1.5rem] border p-3 text-left transition ${
                 isSelected
                   ? `${ui.buttonActive} shadow-[0_10px_30px_-18px_var(--accent-border)]`
-                  : `${ui.surfaceMuted} hover:border-[var(--accent-border)] hover:bg-white/80`
+                  : `${ui.surfaceMuted} hover:border-[var(--accent-border)] ${ui.isDark ? 'hover:bg-white/8' : 'hover:bg-white'}`
               }`}
               onClick={() => onSelectTemplate(template.id)}
             >
@@ -100,7 +103,7 @@ function TemplateGallery({ templates, selectedTemplateId, onSelectTemplate, them
               </div>
 
               <div className="mt-3">
-                <TemplateThumbnail template={template} />
+                <TemplateThumbnail template={template} isDark={ui.isDark} />
               </div>
 
               <p className={`mt-3 text-sm leading-6 ${ui.textSecondary}`}>

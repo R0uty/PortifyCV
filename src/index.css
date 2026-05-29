@@ -51,6 +51,7 @@
   --preview-paper-min-height: 297mm;
   --preview-divider: rgba(148, 163, 184, 0.22);
   --preview-paper-shadow: 0 32px 70px -42px rgba(15, 23, 42, 0.28);
+  --preview-panel-bg: linear-gradient(180deg, rgba(248, 250, 252, 0.72) 0%, rgba(241, 245, 249, 0.88) 100%);
   --action-bar-bg: rgba(255, 255, 255, 0.88);
   --action-button-primary-bg: var(--accent-solid);
   --action-button-primary-text: #ffffff;
@@ -210,6 +211,7 @@ textarea {
   --app-text: #e2e8f0;
   --app-text-muted: #94a3b8;
   --app-shadow: 0 26px 70px -40px rgba(2, 6, 23, 0.55);
+  --preview-panel-bg: linear-gradient(180deg, rgba(15, 23, 42, 0.55) 0%, rgba(2, 6, 23, 0.72) 100%);
   --action-bar-bg: rgba(15, 23, 42, 0.88);
   --action-button-secondary-bg: rgba(15, 23, 42, 0.76);
   --action-button-secondary-text: #e2e8f0;
@@ -243,7 +245,7 @@ textarea {
 }
 
 .app-shell__preview {
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0.72) 0%, rgba(241, 245, 249, 0.88) 100%);
+  background: var(--preview-panel-bg);
 }
 
 .editor-panel {
@@ -366,10 +368,7 @@ textarea {
   align-self: center;
   min-height: var(--preview-paper-min-height);
   margin: 0 auto;
-  background: #ffffff !important;
-  color: #0f172a !important;
-  border-color: rgba(226, 232, 240, 0.9) !important;
-  box-shadow: var(--preview-paper-shadow) !important;
+  box-shadow: var(--preview-paper-shadow);
 }
 
 .preview-document--full-width {
@@ -379,13 +378,11 @@ textarea {
 }
 
 .preview-document__header {
-  background: #ffffff !important;
-  color: #0f172a !important;
-  border-bottom: 1px solid var(--preview-divider) !important;
+  border-bottom: 1px solid var(--preview-divider);
 }
 
 .preview-document__content {
-  padding: 1.75rem clamp(1.25rem, 2vw, 2rem) 2rem !important;
+  padding: 1.75rem clamp(1.25rem, 2vw, 2rem) 2rem;
 }
 
 .preview-document__column {
@@ -393,34 +390,19 @@ textarea {
 }
 
 .preview-document [data-export-section] {
-  padding: 0 0 1.5rem !important;
-  margin: 0 !important;
-  background: transparent !important;
-  border: 0 !important;
-  border-bottom: 1px solid var(--preview-divider) !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
+  margin: 0;
 }
 
 .preview-document [data-export-section]:last-child {
-  padding-bottom: 0 !important;
-  border-bottom: 0 !important;
+  padding-bottom: 0;
 }
 
 .preview-document [data-export-card] {
-  background: transparent !important;
-  border: 0 !important;
-  border-left: 2px solid rgba(203, 213, 225, 0.95) !important;
-  border-radius: 0 !important;
-  padding: 0.25rem 0 0.25rem 1rem !important;
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
 .preview-document [data-export-skill='true'] {
-  background: rgba(248, 250, 252, 0.95) !important;
-  color: #334155 !important;
-  border: 1px solid rgba(203, 213, 225, 0.95) !important;
-  border-radius: 999px !important;
+  border-radius: 999px;
 }
 
 .preview-document .accent-text {
@@ -450,15 +432,48 @@ textarea {
 }
 
 .pdf-export-root [data-export-header] {
-  padding: 0 0 1.5rem !important;
-  background: #ffffff !important;
+  padding: 0 0 1rem !important;
+  background: transparent !important;
   color: #0f172a !important;
   border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
 }
 
 .pdf-export-root [data-export-content] {
   padding: 1.5rem 0 0 !important;
 }
+
+.pdf-export-root [data-export-section] {
+  padding: 0 0 1.5rem !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.pdf-export-root [data-export-section]:last-child {
+  padding-bottom: 0 !important;
+  border-bottom: 0 !important;
+}
+
+.pdf-export-root [data-export-card] {
+  background: transparent !important;
+  border: 0 !important;
+  border-left: 2px solid #cbd5e1 !important;
+  border-radius: 0 !important;
+  padding: 0.25rem 0 0.25rem 1rem !important;
+  box-shadow: none !important;
+}
+
+.pdf-export-root [data-export-skill='true'] {
+  background: rgba(248, 250, 252, 0.95) !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 999px !important;
+}
+
 
 .pdf-export-root [data-export-primary],
 .pdf-export-root [data-export-secondary] {
@@ -584,7 +599,7 @@ textarea {
 
   .app-shell__surface {
     display: grid;
-    grid-template-columns: minmax(0, 30fr) minmax(0, 70fr);
+    grid-template-columns: minmax(0, 40fr) minmax(0, 60fr);
     height: 100dvh;
     border-radius: 0;
     overflow: hidden;

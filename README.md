@@ -1,16 +1,90 @@
-# React + Vite
+# PortifyCV
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, minimal CV builder for creating and exporting professional resumes in real-time.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Live Preview**: See your CV update instantly as you edit
+- **Multiple Templates**: Choose from four unified minimal design variants (A-D)
+- **Theme System**: 7 accent color themes with dark/light mode support
+- **Smart Export**: PDF (with design fallback) and JSON export
+- **ATS Optimization**: Feedback and dedicated ATS-friendly mode
+- **CV Suggestions**: Smart feedback on clarity, impact, and completeness
+- **Share & Import**: Generate shareable links and import JSON backups
+- **Local Storage**: All changes auto-save to browser storage
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19.2.6**: UI framework with hooks
+- **Vite 8.0.13**: Build tool with HMR
+- **Tailwind CSS 4.3.0**: Utility-first styling
+- **html2canvas 1.4.1**: PDF design rendering
+- **jsPDF 4.2.1**: PDF generation
+- **ESLint**: Code quality checks
 
-## Expanding the ESLint configuration
+## Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+# Install dependencies
+npm install
+
+# Start dev server (with HMR)
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Run linter
+npm run lint
+```
+
+## Production Build
+
+The production build outputs to `/dist/`:
+
+```bash
+npm run build
+```
+
+Static files are ready to be served:
+- `dist/index.html` - Main entry point
+- `dist/assets/` - JS and CSS bundles
+- `dist/favicon.svg` - Site icon
+- `dist/icons.svg` - Icon sprite
+
+## Deployment
+
+Deploy the `dist/` folder to any static hosting:
+
+```bash
+# GitHub Pages
+npm run build
+# Push dist/ to gh-pages branch
+
+# Vercel/Netlify
+npm run build
+# Connect your repository and auto-deploy from main
+
+# Traditional server
+npm run build
+scp -r dist/* user@server:/var/www/portifycv/
+```
+
+## Performance
+
+- Bundle size: ~860KB (html2canvas + jsPDF are large dependencies)
+- Gzipped CSS: ~10KB
+- Gzipped JS (after chunking): ~48KB + 257KB
+- Page-sliced PDF rendering for large multi-page CVs
+- Adaptive rendering scale to prevent memory overflow
+
+## Browser Support
+
+Modern browsers (Chrome, Firefox, Safari, Edge) with ES2020+ support.
+
+## License
+
+Built as a portfolio CV builder.

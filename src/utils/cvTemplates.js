@@ -3,14 +3,14 @@ export const defaultTemplateId = 'minimal'
 const templateMap = {
   minimal: {
     id: 'minimal',
-    label: 'Minimal',
-    description: 'Clean editorial spacing with a wider single-column flow.',
+    label: 'Minimal A',
+    description: 'Balanced single-column flow with clean editorial spacing.',
     variant: 'minimal',
     mostPopular: true,
     layout: 'stacked',
     primarySections: ['about', 'experience', 'education', 'skills', 'links'],
     secondarySections: [],
-    summaryBadgeLabel: 'Summary',
+    summaryBadgeLabel: 'Profile',
     thumbnail: {
       accentClassName: 'bg-slate-900',
       surfaceClassName: 'bg-slate-100',
@@ -23,13 +23,13 @@ const templateMap = {
   },
   developer: {
     id: 'developer',
-    label: 'Developer',
-    description: 'Code-inspired hierarchy with experience-first ordering.',
+    label: 'Minimal B',
+    description: 'Split layout with experience-forward ordering and compact side notes.',
     variant: 'developer',
     layout: 'split',
     primarySections: ['experience', 'about', 'education'],
     secondarySections: ['skills', 'links'],
-    summaryBadgeLabel: 'Readme',
+    summaryBadgeLabel: 'Focus',
     thumbnail: {
       accentClassName: 'bg-sky-700',
       surfaceClassName: 'bg-slate-100',
@@ -42,13 +42,13 @@ const templateMap = {
   },
   corporate: {
     id: 'corporate',
-    label: 'Corporate',
-    description: 'Structured business layout with a single flowing column.',
+    label: 'Minimal C',
+    description: 'Structured single-column rhythm tuned for predictable scanning.',
     variant: 'corporate',
     layout: 'stacked',
     primarySections: ['about', 'experience', 'education', 'skills', 'links'],
     secondarySections: [],
-    summaryBadgeLabel: 'Profile',
+    summaryBadgeLabel: 'Outline',
     thumbnail: {
       accentClassName: 'bg-slate-700',
       surfaceClassName: 'bg-slate-100',
@@ -61,13 +61,13 @@ const templateMap = {
   },
   creative: {
     id: 'creative',
-    label: 'Creative',
-    description: 'Expressive visual treatment with flexible supporting panels.',
+    label: 'Minimal D',
+    description: 'Split layout with softer grouping between primary and supporting sections.',
     variant: 'creative',
     layout: 'split',
     primarySections: ['about', 'experience', 'education'],
     secondarySections: ['links', 'skills'],
-    summaryBadgeLabel: 'Story',
+    summaryBadgeLabel: 'Notes',
     thumbnail: {
       accentClassName: 'bg-gradient-to-r from-fuchsia-500 to-sky-500',
       surfaceClassName: 'bg-gradient-to-br from-fuchsia-50 to-sky-50',

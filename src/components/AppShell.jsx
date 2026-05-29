@@ -23,16 +23,12 @@ function AppShell({
     >
       <div
         className={`app-shell__surface page-shadow mx-auto w-full border backdrop-blur transition-all duration-300 print:min-h-0 print:h-auto print:max-w-none print:rounded-none print:border-0 print:bg-white print:shadow-none ${
-          isDark
-            ? 'border-white/10 bg-slate-950/70'
-            : 'border-slate-200 bg-white/88'
+          isDark ? 'border-white/10' : 'border-slate-200'
         }`}
       >
         <aside
           className={`app-shell__editor min-w-0 border-b transition-colors print:hidden ${
-            isDark
-              ? 'border-white/10 bg-slate-950/42'
-              : 'border-slate-200 bg-white/70'
+            isDark ? 'border-white/10' : 'border-slate-200'
           }`}
         >
           {sidebar}
@@ -40,8 +36,6 @@ function AppShell({
         <main
           className={`app-shell__preview min-w-0 transition-colors print:bg-white ${
             showContentOnMobile ? 'block' : 'hidden lg:block'
-          } ${
-            isDark ? 'bg-slate-950/18' : 'bg-slate-50/55'
           }`}
         >
           {content}

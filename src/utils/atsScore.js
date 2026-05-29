@@ -126,7 +126,7 @@ function scoreLength(snapshot) {
   }
 }
 
-function scoreFormattingSimplicity({ template, atsFriendly }) {
+function scoreFormattingSimplicity({ atsFriendly }) {
   if (atsFriendly) {
     return {
       score: 20,
@@ -134,30 +134,9 @@ function scoreFormattingSimplicity({ template, atsFriendly }) {
     }
   }
 
-  if (template === 'creative') {
-    return {
-      score: 10,
-      summary: 'Creative styling may be harder for parsers. Switch to ATS-friendly mode for a simpler layout.',
-    }
-  }
-
-  if (template === 'developer') {
-    return {
-      score: 14,
-      summary: 'Developer styling is fairly structured, but ATS-friendly mode is safer.',
-    }
-  }
-
-  if (template === 'corporate') {
-    return {
-      score: 18,
-      summary: 'Corporate layout is already close to ATS-friendly formatting.',
-    }
-  }
-
   return {
     score: 16,
-    summary: 'Minimal styling is fairly safe, but ATS-friendly mode remains the simplest option.',
+    summary: 'All templates use a minimal styling system. Enable ATS-friendly mode for maximum parser compatibility.',
   }
 }
 

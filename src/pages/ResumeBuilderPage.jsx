@@ -30,9 +30,7 @@ import {
 import {
   createExportFileName,
   exportCvAsJson,
-  exportCvAsMarkdown,
   exportCvAsPdf,
-  exportCvAsText,
 } from '../utils/exporters'
 import {
   buildShareUrl,
@@ -309,51 +307,35 @@ function ResumeBuilderPage() {
 
     try {
       if (type === 'pdf-designer') {
-        await exportCvAsPdf(previewRef.current, exportFileName, { mode: 'designer' })
-      }
-
-      if (type === 'pdf-ats') {
-        await exportCvAsPdf(previewRef.current, exportFileName, { mode: 'ats' })
+        await exportCvAsPdf(previewRef.current, exportFileName, {
+          mode: 'designer',
+          formData,
+          theme,
+          template: selectedTemplate,
+          atsFriendlyMode,
+        })
       }
 
       if (type === 'json') {
         exportCvAsJson(formData, exportFileName)
       }
 
-      if (type === 'markdown') {
-        exportCvAsMarkdown(formData, exportFileName)
-      }
+      const exportLabel = type === 'pdf-designer' ? 'Designer PDF' : 'JSON'
 
-      if (type === 'txt') {
-        exportCvAsText(formData, exportFileName)
-      }
-
-      showToast(
-        `${
-          type === 'pdf-designer'
-            ? 'Designer PDF'
-            : type === 'pdf-ats'
-              ? 'ATS PDF'
-              : type.toUpperCase()
-        } export downloaded.`,
-      )
+      showToast(`${exportLabel} export downloaded.`)
     } catch (error) {
+      const exportLabel = type === 'pdf-designer' ? 'Designer PDF' : 'JSON'
+
       showToast(
         error instanceof Error
           ? error.message
-          : `Failed to export ${
-              type === 'pdf-designer'
-                ? 'Designer PDF'
-                : type === 'pdf-ats'
-                  ? 'ATS PDF'
-                  : type.toUpperCase()
-            }.`,
+          : `Failed to export ${exportLabel}.`,
         'error',
       )
     } finally {
       setActiveExport('')
     }
-  }, [exportFileName, formData, previewRef])
+  }, [atsFriendlyMode, exportFileName, formData, previewRef, selectedTemplate, theme])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()
@@ -530,7 +512,7 @@ function ResumeBuilderPage() {
                   <h1
                     className={`mt-4 max-w-[14ch] text-[clamp(2rem,1.55rem+1.55vw,3.25rem)] font-semibold leading-[0.96] tracking-[-0.04em] ${ui.textPrimary}`}
                   >
-                    Build your portfolio-ready CV
+                    Build your CV
                   </h1>
                 </div>
                 <div className={`hidden w-fit rounded-full border p-1 sm:flex ${ui.surfaceMuted}`}>
@@ -548,11 +530,6 @@ function ResumeBuilderPage() {
                   ))}
                 </div>
               </div>
-
-              <p className={`ds-body max-w-xl ${ui.textSecondary}`}>
-                Starter workspace for collecting candidate details, shaping project
-                highlights, and preparing a polished export experience.
-              </p>
 
               <div className="flex flex-wrap gap-3">
                 <div className={`flex rounded-full border p-1 sm:hidden ${ui.surfaceMuted}`}>
@@ -585,13 +562,6 @@ function ResumeBuilderPage() {
                 </button>
                 <button
                   type="button"
-                  className={secondaryButtonClassName}
-                  onClick={handleCopyShareLink}
-                >
-                  Copy share link
-                </button>
-                <button
-                  type="button"
                   className={`rounded-full border px-4 py-2 text-sm font-medium transition lg:hidden ${
                     mobilePreviewVisible ? ui.buttonActive : ui.button
                   }`}
@@ -601,11 +571,7 @@ function ResumeBuilderPage() {
                 </button>
                 <button
                   type="button"
-                  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-                    isDark
-                      ? 'border-rose-400/20 bg-rose-400/10 text-rose-100 hover:border-rose-300/50'
-                      : 'border-rose-300 bg-rose-50 text-rose-700 hover:border-rose-400'
-                  }`}
+                  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.buttonDanger}`}
                   onClick={handleResetForm}
                 >
                   Reset form
@@ -719,10 +685,7 @@ function ResumeBuilderPage() {
             <div className="preview-action-bar print:hidden">
               <div className="preview-action-bar__inner">
                 <div className="preview-action-bar__heading">
-                  <p className={`ds-kicker ${ui.textMuted}`}>Live Preview</p>
-                  <h2 className={`preview-action-bar__title ${ui.textPrimary}`}>
-                    Resume preview
-                  </h2>
+                  <h2 className={`preview-action-bar__title mt-0 ${ui.textPrimary}`}>Preview</h2>
                 </div>
                 <div className="preview-action-bar__actions">
                   <button

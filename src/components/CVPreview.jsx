@@ -4,8 +4,7 @@ import { createCvSnapshot } from '../utils/exporters'
 import { getUiTheme } from '../utils/designSystem'
 import { getCvTemplate } from '../utils/cvTemplates'
 
-const previewSectionTitleClasses =
-  'text-xs font-semibold uppercase tracking-[0.24em] text-slate-400'
+const previewSectionTitleClasses = 'text-xs font-semibold uppercase tracking-[0.24em]'
 
 function formatDateRange(startDate, endDate) {
   return [startDate, endDate].map((value) => value.trim()).filter(Boolean).join(' - ')
@@ -24,228 +23,64 @@ function formatLinkLabel(key) {
 }
 
 function getPreviewClasses(variant, isDark) {
-  if (variant === 'developer') {
-    return isDark
-      ? 'border-sky-900/60 bg-[#020817] shadow-slate-950/30'
-      : 'border-slate-300 bg-slate-50 shadow-slate-950/10'
-  }
-
-  if (variant === 'corporate') {
-    return isDark
-      ? 'border-slate-800 bg-slate-950 shadow-slate-950/30'
-      : 'border-slate-200 bg-white shadow-slate-950/10'
-  }
-
-  if (variant === 'creative') {
-    return isDark
-      ? 'border-fuchsia-900/40 bg-slate-950 shadow-slate-950/35'
-      : 'border-fuchsia-200 bg-white shadow-fuchsia-100/40'
-  }
-
   return isDark
     ? 'border-slate-800 bg-slate-950 shadow-slate-950/30'
     : 'border-slate-200 bg-white shadow-slate-950/10'
 }
 
-function getHeaderClasses(variant) {
-  if (variant === 'creative') {
-    return 'bg-gradient-to-r from-fuchsia-700 via-sky-600 to-blue-700'
-  }
-
-  if (variant === 'corporate') {
-    return 'bg-slate-800'
-  }
-
+function getHeaderClasses() {
   return 'bg-slate-900'
 }
 
-function getTitleClasses(variant) {
-  if (variant === 'developer') {
-    return 'mt-3 font-mono text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[2.8rem]'
-  }
-
-  if (variant === 'corporate') {
-    return 'mt-3 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-[3.15rem] font-serif'
-  }
-
-  if (variant === 'creative') {
-    return 'mt-3 text-4xl font-semibold tracking-tight sm:text-5xl'
-  }
-
+function getTitleClasses() {
   return 'mt-3 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl'
 }
 
-function getSectionTitleClasses(variant) {
-  if (variant === 'developer') {
-    return `${previewSectionTitleClasses} font-mono`
-  }
-
-  if (variant === 'corporate') {
-    return `${previewSectionTitleClasses} tracking-[0.18em]`
-  }
-
-  return previewSectionTitleClasses
+function getSectionTitleClasses() {
+  return `${previewSectionTitleClasses} text-slate-200`
 }
 
 function getMainSectionClasses(variant, isDark) {
-  if (variant === 'developer') {
-    return isDark
-      ? 'rounded-3xl border border-sky-900/50 bg-slate-950/70 p-5 sm:p-6 print:border-0 print:px-0'
-      : 'rounded-3xl border border-slate-300 bg-white p-5 sm:p-6 print:border-0 print:px-0'
-  }
-
-  if (variant === 'corporate') {
-    return isDark
-      ? 'rounded-2xl border border-slate-800 bg-slate-900/70 p-5 sm:p-6 print:border-0 print:px-0'
-      : 'rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 print:border-0 print:px-0'
-  }
-
-  if (variant === 'creative') {
-    return isDark
-      ? 'rounded-[2rem] border border-fuchsia-900/40 bg-gradient-to-br from-fuchsia-500/10 via-slate-900/70 to-sky-500/10 p-5 sm:p-6 print:border-0 print:px-0'
-      : 'rounded-[2rem] border border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-sky-50 p-5 sm:p-6 print:border-0 print:px-0'
-  }
-
   return isDark
-    ? 'rounded-3xl border border-slate-800 bg-slate-900/70 p-5 sm:p-6 print:border-0 print:px-0'
+    ? 'rounded-3xl border border-slate-800 bg-slate-950/70 p-5 sm:p-6 print:border-0 print:px-0'
     : 'rounded-3xl border border-slate-200 bg-slate-50/80 p-5 sm:p-6 print:border-0 print:px-0'
 }
 
 function getSideContainerClasses(variant, isDark) {
-  if (variant === 'developer') {
-    return isDark
-      ? 'space-y-5 rounded-3xl border border-sky-900/40 bg-slate-950/75 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:border-0 print:bg-transparent print:p-0'
-      : 'space-y-5 rounded-3xl border border-slate-300 bg-slate-100 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:border-0 print:bg-transparent print:p-0'
-  }
-
-  if (variant === 'creative') {
-    return isDark
-      ? 'space-y-5 rounded-[2rem] border border-fuchsia-900/40 bg-gradient-to-br from-fuchsia-500/10 via-slate-950/80 to-sky-500/10 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:border-0 print:bg-transparent print:p-0'
-      : 'space-y-5 rounded-[2rem] border border-fuchsia-200 bg-gradient-to-br from-fuchsia-50 via-white to-sky-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:border-0 print:bg-transparent print:p-0'
-  }
-
-  if (variant === 'corporate') {
-    return 'space-y-5 print:space-y-4'
-  }
-
   return isDark
-    ? 'space-y-5 rounded-3xl bg-slate-900/80 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+    ? 'space-y-5 rounded-3xl bg-slate-950/80 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
     : 'space-y-5 rounded-3xl bg-slate-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
 }
 
 function getSideSectionClasses(variant, isDark) {
-  if (variant === 'developer') {
-    return isDark
-      ? 'rounded-3xl border border-sky-900/40 bg-slate-950/60 p-5 transition-colors print:border-0 print:px-0'
-      : 'rounded-3xl border border-slate-300 bg-white p-5 transition-colors print:border-0 print:px-0'
-  }
-
-  if (variant === 'creative') {
-    return isDark
-      ? 'rounded-[1.75rem] border border-fuchsia-900/40 bg-slate-950/40 p-5 transition-colors print:border-0 print:px-0'
-      : 'rounded-[1.75rem] border border-fuchsia-200 bg-white/90 p-5 transition-colors print:border-0 print:px-0'
-  }
-
-  if (variant === 'corporate') {
-    return isDark
-      ? 'rounded-2xl border border-slate-800 bg-slate-900/70 p-5 transition-colors print:border-0 print:px-0'
-      : 'rounded-2xl border border-slate-200 bg-white p-5 transition-colors print:border-0 print:px-0'
-  }
-
   return isDark
-    ? 'rounded-3xl border border-slate-800 bg-slate-950/40 p-5 transition-colors print:border-0 print:px-0'
+    ? 'rounded-3xl border border-slate-800 bg-slate-950/50 p-5 transition-colors print:border-0 print:px-0'
     : 'rounded-3xl border border-slate-200 bg-white/80 p-5 transition-colors print:border-0 print:px-0'
 }
 
 function getSkillTagClasses(variant, isDark) {
-  if (variant === 'developer') {
-    return isDark
-      ? 'rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-200'
-      : 'rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-800'
-  }
-
-  if (variant === 'corporate') {
-    return isDark
-      ? 'rounded-md bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200'
-      : 'rounded-md bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700'
-  }
-
-  if (variant === 'creative') {
-    return isDark
-      ? 'rounded-full bg-gradient-to-r from-fuchsia-500/20 to-sky-500/20 px-3 py-1.5 text-xs font-semibold text-fuchsia-100'
-      : 'rounded-full bg-gradient-to-r from-fuchsia-100 to-sky-100 px-3 py-1.5 text-xs font-semibold text-fuchsia-800'
-  }
-
   return isDark
-    ? 'rounded-full bg-sky-500/15 px-3 py-1.5 text-xs font-semibold text-sky-200'
-    : 'rounded-full bg-sky-100 px-3 py-1.5 text-xs font-semibold text-sky-800'
+    ? 'rounded-full border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs font-semibold text-slate-200'
+    : 'rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700'
 }
 
 function getTimelineBorderClasses(variant, isDark) {
-  if (variant === 'developer') {
-    return isDark ? 'border-sky-900/70' : 'border-sky-200'
-  }
-
-  if (variant === 'creative') {
-    return isDark ? 'border-fuchsia-900/60' : 'border-fuchsia-200'
-  }
-
-  return isDark ? 'border-sky-900/70' : 'border-sky-100'
+  return isDark ? 'border-slate-700' : 'border-slate-200'
 }
 
 function getTimelineDotClasses(variant, isDark) {
-  if (variant === 'creative') {
-    return isDark ? 'border-slate-950 bg-fuchsia-500' : 'border-white bg-fuchsia-500'
-  }
-
-  return isDark ? 'border-slate-950 bg-sky-500' : 'border-white bg-sky-500'
+  return isDark ? 'border-slate-950 bg-slate-300' : 'border-white bg-slate-500'
 }
 
 function getEducationCardClasses(variant, isDark) {
-  if (variant === 'developer') {
-    return isDark
-      ? 'rounded-2xl border border-sky-900/40 bg-slate-950/60 px-4 py-4'
-      : 'rounded-2xl border border-slate-300 bg-slate-50 px-4 py-4'
-  }
-
-  if (variant === 'creative') {
-    return isDark
-      ? 'rounded-[1.5rem] border border-fuchsia-900/40 bg-slate-950/50 px-4 py-4'
-      : 'rounded-[1.5rem] border border-fuchsia-200 bg-white px-4 py-4'
-  }
-
-  if (variant === 'corporate') {
-    return isDark
-      ? 'rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-4'
-      : 'rounded-xl border border-slate-200 bg-slate-50 px-4 py-4'
-  }
-
   return isDark
-    ? 'rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-4'
+    ? 'rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-4'
     : 'rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4'
 }
 
 function getLinkCardClasses(variant, isDark) {
-  if (variant === 'developer') {
-    return isDark
-      ? 'rounded-2xl border border-sky-900/40 bg-slate-950/60 px-4 py-3'
-      : 'rounded-2xl border border-slate-300 bg-white px-4 py-3'
-  }
-
-  if (variant === 'creative') {
-    return isDark
-      ? 'rounded-[1.5rem] border border-fuchsia-900/40 bg-slate-950/50 px-4 py-3'
-      : 'rounded-[1.5rem] border border-fuchsia-200 bg-white px-4 py-3'
-  }
-
-  if (variant === 'corporate') {
-    return isDark
-      ? 'rounded-xl border border-slate-800 bg-slate-900/70 px-4 py-3'
-      : 'rounded-xl border border-slate-200 bg-slate-50 px-4 py-3'
-  }
-
   return isDark
-    ? 'rounded-2xl border border-slate-800 bg-slate-950/70 px-4 py-3'
+    ? 'rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3'
     : 'rounded-2xl border border-slate-200 bg-white px-4 py-3'
 }
 
@@ -283,6 +118,7 @@ function CVPreview({
   const links = Object.entries(snapshot.links)
 
   const sectionTitleClasses = getSectionTitleClasses(templateConfig.variant)
+  const isMinimalVariant = templateConfig.variant === 'minimal'
   const mainSectionClasses = getMainSectionClasses(templateConfig.variant, isDark)
   const sideSectionClasses = getSideSectionClasses(templateConfig.variant, isDark)
   const skillTagClasses = getSkillTagClasses(templateConfig.variant, isDark)
@@ -299,6 +135,32 @@ function CVPreview({
   const resolvedSideSectionClasses = atsFriendlyMode
     ? 'border-b border-slate-200 pb-6 print:border-0 print:px-0'
     : sideSectionClasses
+  const bodyTextClasses = atsFriendlyMode
+    ? 'text-slate-700'
+    : isDark
+      ? isMinimalVariant
+        ? 'text-slate-100'
+        : 'text-slate-300'
+      : 'text-slate-600'
+  const supportingTextClasses = atsFriendlyMode
+    ? 'text-slate-700'
+    : isDark
+      ? isMinimalVariant
+        ? 'text-slate-200'
+        : 'text-slate-200'
+      : 'text-slate-700'
+  const metaTextClasses = atsFriendlyMode
+    ? 'text-slate-500'
+    : isDark
+      ? isMinimalVariant
+        ? 'text-slate-300'
+        : 'text-slate-400'
+      : 'text-slate-400'
+  const summaryBadgeClasses = isDark
+    ? isMinimalVariant
+      ? 'bg-slate-800 text-slate-100'
+      : 'bg-slate-900 text-slate-300'
+    : 'bg-slate-100 text-slate-500'
 
   const renderSection = (section, placement = 'main') => {
     const sectionClasses =
@@ -324,23 +186,13 @@ function CVPreview({
               {!atsFriendlyMode ? (
                 <div
                   data-export-summary-chip="true"
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    isDark ? 'bg-slate-900 text-slate-300' : 'bg-slate-100 text-slate-500'
-                  }`}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${summaryBadgeClasses}`}
                 >
                   {templateConfig.summaryBadgeLabel}
                 </div>
               ) : null}
             </div>
-            <p
-              className={`mt-5 text-[0.98rem] leading-8 ${
-                atsFriendlyMode
-                  ? 'text-slate-700'
-                  : isDark
-                    ? 'text-slate-300'
-                    : 'text-slate-600'
-              }`}
-            >
+            <p className={`mt-5 text-[0.98rem] leading-8 ${bodyTextClasses}`}>
               {about}
             </p>
           </>
@@ -390,21 +242,13 @@ function CVPreview({
                             {heading || 'Untitled role'}
                           </p>
                           {item.description.trim() ? (
-                            <p
-                              className={`mt-3 text-sm leading-7 ${
-                                atsFriendlyMode
-                                  ? 'text-slate-700'
-                                  : isDark
-                                    ? 'text-slate-300'
-                                    : 'text-slate-600'
-                              }`}
-                            >
+                            <p className={`mt-3 text-sm leading-7 ${bodyTextClasses}`}>
                               {item.description}
                             </p>
                           ) : null}
                         </div>
 
-                        <p className="shrink-0 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+                        <p className={`shrink-0 text-xs font-medium uppercase tracking-[0.16em] ${metaTextClasses}`}>
                           {dateRange || 'Dates pending'}
                         </p>
                       </div>
@@ -454,7 +298,7 @@ function CVPreview({
                             .join(', ') || 'Education entry'}
                         </p>
                       </div>
-                      <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+                      <p className={`text-xs font-medium uppercase tracking-[0.16em] ${metaTextClasses}`}>
                         {formatDateRange(item.startDate, item.endDate) || 'Dates pending'}
                       </p>
                     </div>
@@ -519,18 +363,10 @@ function CVPreview({
                     data-export-card="true"
                     className={atsFriendlyMode ? 'border border-slate-200 px-4 py-3' : linkCardClasses}
                   >
-                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+                    <p className={`text-xs font-semibold uppercase tracking-[0.16em] ${metaTextClasses}`}>
                       {formatLinkLabel(key)}
                     </p>
-                    <p
-                      className={`mt-2 break-all text-sm ${
-                        atsFriendlyMode
-                          ? 'text-slate-700'
-                          : isDark
-                            ? 'text-slate-200'
-                            : 'text-slate-700'
-                      }`}
-                    >
+                    <p className={`mt-2 break-all text-sm ${supportingTextClasses}`}>
                       {value}
                     </p>
                   </div>
@@ -585,23 +421,10 @@ function CVPreview({
             >
               {fullName}
             </h3>
-            <p
-              className={`mt-3 text-base leading-7 sm:text-lg ${
-                atsFriendlyMode ? 'text-slate-600' : 'text-slate-300'
-              }`}
-            >
+            <p className={`mt-3 text-base leading-7 sm:text-lg ${isDark ? 'text-slate-200' : 'text-slate-300'}`}>
               {title}
             </p>
           </div>
-
-          {!atsFriendlyMode ? (
-            <div
-              data-export-ignore="true"
-              className="inline-flex w-fit rounded-full border accent-border accent-surface px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] accent-text"
-            >
-              Real-time sync
-            </div>
-          ) : null}
         </div>
       </header>
 
