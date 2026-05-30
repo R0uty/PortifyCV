@@ -23,6 +23,22 @@ export const createEmptyLinks = () => ({
   website: '',
 })
 
+export const createSectionVisibility = () => ({
+  about: true,
+  skills: true,
+  experience: true,
+  education: true,
+  links: true,
+})
+
+export const sectionVisibilityFields = [
+  { key: 'about', label: 'About' },
+  { key: 'skills', label: 'Skills' },
+  { key: 'experience', label: 'Experience' },
+  { key: 'education', label: 'Education' },
+  { key: 'links', label: 'Links' },
+]
+
 export const createInitialCvData = () => ({
   fullName: '',
   title: '',
@@ -31,6 +47,7 @@ export const createInitialCvData = () => ({
   experience: [createEmptyExperience()],
   education: [createEmptyEducation()],
   links: createEmptyLinks(),
+  sectionVisibility: createSectionVisibility(),
 })
 
 export const initialCvData = createInitialCvData()
@@ -105,6 +122,82 @@ export const linkFields = [
   },
 ]
 
+function createStorageError(error) {
+  return error instanceof Error ? error : new Error('Storage access failed.')
+}
+
+export function safeStorageGet(key, fallback = null) {
+  if (typeof window === 'undefined') {
+    return {
+      ok: false,
+      value: fallback,
+      error: new Error('Window is unavailable.'),
+    }
+  }
+
+  try {
+    const value = window.localStorage.getItem(key)
+
+    return {
+      ok: true,
+      value: value === null ? fallback : value,
+      error: null,
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      value: fallback,
+      error: createStorageError(error),
+    }
+  }
+}
+
+export function safeStorageSet(key, value) {
+  if (typeof window === 'undefined') {
+    return {
+      ok: false,
+      error: new Error('Window is unavailable.'),
+    }
+  }
+
+  try {
+    window.localStorage.setItem(key, value)
+
+    return {
+      ok: true,
+      error: null,
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      error: createStorageError(error),
+    }
+  }
+}
+
+export function safeStorageRemove(key) {
+  if (typeof window === 'undefined') {
+    return {
+      ok: false,
+      error: new Error('Window is unavailable.'),
+    }
+  }
+
+  try {
+    window.localStorage.removeItem(key)
+
+    return {
+      ok: true,
+      error: null,
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      error: createStorageError(error),
+    }
+  }
+}
+
 function isPlainObject(value) {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -143,10 +236,20 @@ export function parseImportedCvData(value) {
   const experience = value.experience ?? defaultState.experience
   const education = value.education ?? defaultState.education
   const links = value.links ?? defaultState.links
+  const sectionVisibility = value.sectionVisibility ?? defaultState.sectionVisibility
 
   validateAllowedKeys(
     value,
-    ['fullName', 'title', 'about', 'skills', 'experience', 'education', 'links'],
+    [
+      'fullName',
+      'title',
+      'about',
+      'skills',
+      'experience',
+      'education',
+      'links',
+      'sectionVisibility',
+    ],
     'Imported CV JSON',
   )
 
@@ -196,6 +299,22 @@ export function parseImportedCvData(value) {
 
   validateAllowedKeys(links, ['github', 'linkedin', 'portfolio', 'website'], 'links')
 
+  if (!isPlainObject(sectionVisibility)) {
+    throw new Error('sectionVisibility must be an object.')
+  }
+
+  validateAllowedKeys(
+    sectionVisibility,
+    ['about', 'skills', 'experience', 'education', 'links'],
+    'sectionVisibility',
+  )
+
+  Object.entries(sectionVisibility).forEach(([key, entryValue]) => {
+    if (typeof entryValue !== 'boolean') {
+      throw new Error(`sectionVisibility.${key} must be true or false.`)
+    }
+  })
+
   return {
     fullName: readOptionalString(value.fullName, 'fullName'),
     title: readOptionalString(value.title, 'title'),
@@ -228,6 +347,10 @@ export function parseImportedCvData(value) {
       linkedin: readOptionalString(links.linkedin, 'links.linkedin'),
       portfolio: readOptionalString(links.portfolio, 'links.portfolio'),
       website: readOptionalString(links.website, 'links.website'),
+    },
+    sectionVisibility: {
+      ...createSectionVisibility(),
+      ...sectionVisibility,
     },
   }
 }

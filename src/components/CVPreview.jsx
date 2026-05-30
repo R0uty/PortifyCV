@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react'
 
 import { createCvSnapshot } from '../utils/exporters'
+import { createSectionVisibility } from '../utils/cvForm'
 import { getUiTheme } from '../utils/designSystem'
 import { getCvTemplate } from '../utils/cvTemplates'
 
@@ -23,65 +24,183 @@ function formatLinkLabel(key) {
 }
 
 function getPreviewClasses(variant, isDark) {
+  if (variant === 'creative') {
+    return isDark
+      ? 'border-[var(--accent-border)] bg-slate-950 shadow-[var(--accent-glow)]'
+      : 'border-[var(--accent-border)] bg-white shadow-[var(--accent-glow)]'
+  }
+
   return isDark
     ? 'border-slate-800 bg-slate-950 shadow-slate-950/30'
     : 'border-slate-200 bg-white shadow-slate-950/10'
 }
 
-function getHeaderClasses() {
-  return 'bg-slate-900'
+function getHeaderColorClasses(variant, isDark) {
+  if (variant === 'corporate') {
+    return isDark
+      ? 'bg-slate-950 text-white border-b border-slate-800'
+      : 'bg-white text-slate-900 border-b border-slate-300'
+  }
+
+  if (variant === 'creative') {
+    return 'bg-gradient-to-br from-slate-900 to-slate-800 text-white'
+  }
+
+  if (variant === 'developer') {
+    return 'bg-slate-950 text-white'
+  }
+
+  return 'bg-slate-900 text-white'
 }
 
-function getTitleClasses() {
+function getHeaderTitleClasses(variant) {
+  if (variant === 'developer' || variant === 'corporate') {
+    return 'mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl'
+  }
+
   return 'mt-3 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl'
 }
 
-function getSectionTitleClasses() {
+function getHeaderSubtitleClasses(variant, isDark) {
+  if (variant === 'corporate' && !isDark) {
+    return 'mt-3 text-base leading-7 sm:text-lg text-slate-500'
+  }
+
+  return `mt-3 text-base leading-7 sm:text-lg ${isDark ? 'text-slate-200' : 'text-slate-300'}`
+}
+
+function getSectionTitleClasses(variant) {
+  if (variant === 'developer') {
+    return `${previewSectionTitleClasses} font-mono text-sky-400`
+  }
+
+  if (variant === 'creative') {
+    return `${previewSectionTitleClasses} accent-text`
+  }
+
+  if (variant === 'corporate') {
+    return `${previewSectionTitleClasses} tracking-[0.32em] text-slate-400`
+  }
+
   return `${previewSectionTitleClasses} text-slate-200`
 }
 
 function getMainSectionClasses(variant, isDark) {
+  if (variant === 'corporate') {
+    return isDark
+      ? 'border-b border-slate-800 pb-6 print:border-slate-300 print:pb-6'
+      : 'border-b border-slate-200 pb-6 print:pb-6'
+  }
+
   return isDark
     ? 'rounded-3xl border border-slate-800 bg-slate-950/70 p-5 sm:p-6 print:border-0 print:px-0'
     : 'rounded-3xl border border-slate-200 bg-slate-50/80 p-5 sm:p-6 print:border-0 print:px-0'
 }
 
 function getSideContainerClasses(variant, isDark) {
+  if (variant === 'creative') {
+    return 'space-y-5 rounded-3xl bg-[var(--accent-soft)] p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+  }
+
+  if (variant === 'developer') {
+    return isDark
+      ? 'space-y-5 rounded-2xl border border-slate-800 bg-slate-950/90 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+      : 'space-y-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+  }
+
   return isDark
     ? 'space-y-5 rounded-3xl bg-slate-950/80 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
     : 'space-y-5 rounded-3xl bg-slate-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
 }
 
 function getSideSectionClasses(variant, isDark) {
+  if (variant === 'creative') {
+    return isDark
+      ? 'rounded-2xl border border-[var(--accent-border)] bg-slate-950/40 p-5 print:border-0 print:px-0'
+      : 'rounded-2xl border border-[var(--accent-border)] bg-white/80 p-5 print:border-0 print:px-0'
+  }
+
   return isDark
     ? 'rounded-3xl border border-slate-800 bg-slate-950/50 p-5 transition-colors print:border-0 print:px-0'
     : 'rounded-3xl border border-slate-200 bg-white/80 p-5 transition-colors print:border-0 print:px-0'
 }
 
 function getSkillTagClasses(variant, isDark) {
+  if (variant === 'developer') {
+    return isDark
+      ? 'rounded-md border border-sky-800/60 bg-sky-950/40 px-3 py-1.5 text-xs font-mono font-medium text-sky-300'
+      : 'rounded-md border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-mono font-medium text-sky-700'
+  }
+
+  if (variant === 'creative') {
+    return 'rounded-full border border-[var(--accent-border)] bg-[var(--accent-soft)] px-3 py-1.5 text-xs font-semibold text-[var(--accent-text-strong)]'
+  }
+
+  if (variant === 'corporate') {
+    return isDark
+      ? 'rounded-sm border border-slate-700 bg-transparent px-3 py-1.5 text-xs font-semibold text-slate-200'
+      : 'rounded-sm border border-slate-400 bg-transparent px-3 py-1.5 text-xs font-semibold text-slate-700'
+  }
+
   return isDark
     ? 'rounded-full border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs font-semibold text-slate-200'
     : 'rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700'
 }
 
 function getTimelineBorderClasses(variant, isDark) {
+  if (variant === 'developer') {
+    return isDark ? 'border-sky-800' : 'border-sky-300'
+  }
+
+  if (variant === 'creative') {
+    return 'border-[var(--accent-border)]'
+  }
+
   return isDark ? 'border-slate-700' : 'border-slate-200'
 }
 
 function getTimelineDotClasses(variant, isDark) {
+  if (variant === 'developer') {
+    return isDark ? 'border-slate-950 bg-sky-400' : 'border-white bg-sky-600'
+  }
+
+  if (variant === 'creative') {
+    return isDark ? 'border-slate-950 bg-[var(--accent-solid)]' : 'border-white bg-[var(--accent-solid)]'
+  }
+
   return isDark ? 'border-slate-950 bg-slate-300' : 'border-white bg-slate-500'
 }
 
 function getEducationCardClasses(variant, isDark) {
+  if (variant === 'corporate') {
+    return isDark
+      ? 'border-b border-slate-800 py-4'
+      : 'border-b border-slate-200 py-4'
+  }
+
   return isDark
     ? 'rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-4'
     : 'rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4'
 }
 
 function getLinkCardClasses(variant, isDark) {
+  if (variant === 'corporate') {
+    return isDark
+      ? 'border-b border-slate-800 py-3'
+      : 'border-b border-slate-200 py-3'
+  }
+
   return isDark
     ? 'rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3'
     : 'rounded-2xl border border-slate-200 bg-white px-4 py-3'
+}
+
+function getSplitColumnsClasses(variant) {
+  if (variant === 'creative') {
+    return 'grid gap-5 sm:gap-6 md:grid-cols-[minmax(0,1.35fr)_minmax(200px,0.95fr)] md:gap-8 print:grid-cols-1'
+  }
+
+  return 'grid gap-5 sm:gap-6 md:grid-cols-[minmax(0,1.62fr)_minmax(200px,0.88fr)] md:gap-8 print:grid-cols-1'
 }
 
 function renderSectionCard({ section, placement, children, classes }) {
@@ -116,16 +235,27 @@ function CVPreview({
   const experience = snapshot.experience
   const education = snapshot.education
   const links = Object.entries(snapshot.links)
+  const sectionVisibility = {
+    ...createSectionVisibility(),
+    ...(formData.sectionVisibility ?? {}),
+  }
+  const visiblePrimarySections = templateConfig.primarySections.filter(
+    (section) => sectionVisibility[section],
+  )
+  const visibleSecondarySections = templateConfig.secondarySections.filter(
+    (section) => sectionVisibility[section],
+  )
 
-  const sectionTitleClasses = getSectionTitleClasses(templateConfig.variant)
-  const isMinimalVariant = templateConfig.variant === 'minimal'
-  const mainSectionClasses = getMainSectionClasses(templateConfig.variant, isDark)
-  const sideSectionClasses = getSideSectionClasses(templateConfig.variant, isDark)
-  const skillTagClasses = getSkillTagClasses(templateConfig.variant, isDark)
-  const timelineBorderClasses = getTimelineBorderClasses(templateConfig.variant, isDark)
-  const timelineDotClasses = getTimelineDotClasses(templateConfig.variant, isDark)
-  const educationCardClasses = getEducationCardClasses(templateConfig.variant, isDark)
-  const linkCardClasses = getLinkCardClasses(templateConfig.variant, isDark)
+  const variant = templateConfig.variant
+  const sectionTitleClasses = getSectionTitleClasses(variant)
+  const isMinimalVariant = variant === 'minimal'
+  const mainSectionClasses = getMainSectionClasses(variant, isDark)
+  const sideSectionClasses = getSideSectionClasses(variant, isDark)
+  const skillTagClasses = getSkillTagClasses(variant, isDark)
+  const timelineBorderClasses = getTimelineBorderClasses(variant, isDark)
+  const timelineDotClasses = getTimelineDotClasses(variant, isDark)
+  const educationCardClasses = getEducationCardClasses(variant, isDark)
+  const linkCardClasses = getLinkCardClasses(variant, isDark)
   const resolvedSectionTitleClasses = atsFriendlyMode
     ? 'text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'
     : sectionTitleClasses
@@ -156,13 +286,20 @@ function CVPreview({
         ? 'text-slate-300'
         : 'text-slate-400'
       : 'text-slate-400'
-  const summaryBadgeClasses = isDark
-    ? isMinimalVariant
-      ? 'bg-slate-800 text-slate-100'
-      : 'bg-slate-900 text-slate-300'
-    : 'bg-slate-100 text-slate-500'
+  const summaryBadgeClasses =
+    variant === 'creative'
+      ? 'border border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent-text-strong)]'
+      : isDark
+        ? isMinimalVariant
+          ? 'bg-slate-800 text-slate-100'
+          : 'bg-slate-900 text-slate-300'
+        : 'bg-slate-100 text-slate-500'
 
   const renderSection = (section, placement = 'main') => {
+    if (!sectionVisibility[section]) {
+      return null
+    }
+
     const sectionClasses =
       placement === 'main' ? resolvedMainSectionClasses : resolvedSideSectionClasses
 
@@ -389,16 +526,13 @@ function CVPreview({
     <article
       ref={previewRef}
       data-export-root="true"
+      data-export-variant={variant}
       className={`preview-document fade-in-soft overflow-hidden rounded-[2rem] border shadow-xl transition-all duration-300 print:rounded-none print:border-0 print:bg-white print:shadow-none ${
         atsFriendlyMode ? 'preview-document--ats' : 'preview-document--designer'
       } ${
-        templateConfig.variant === 'minimal' && !atsFriendlyMode
-          ? 'preview-document--full-width'
-          : ''
-      } ${
         atsFriendlyMode
           ? 'border-slate-300 bg-white text-slate-900 shadow-slate-300/15'
-          : getPreviewClasses(templateConfig.variant, isDark)
+          : getPreviewClasses(variant, isDark)
       }`}
     >
       <header
@@ -406,7 +540,7 @@ function CVPreview({
         className={`preview-document__header px-5 py-7 sm:px-8 sm:py-9 print:px-0 ${
           atsFriendlyMode
             ? 'border-b border-slate-200 bg-white text-slate-900'
-            : `${getHeaderClasses(templateConfig.variant)} text-white`
+            : getHeaderColorClasses(variant, isDark)
         }`}
       >
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
@@ -416,12 +550,12 @@ function CVPreview({
             </p>
             <h3
               className={`leading-none ${
-                atsFriendlyMode ? 'mt-3 text-4xl font-semibold tracking-tight text-slate-900' : getTitleClasses(templateConfig.variant)
+                atsFriendlyMode ? 'mt-3 text-4xl font-semibold tracking-tight text-slate-900' : getHeaderTitleClasses(variant)
               }`}
             >
               {fullName}
             </h3>
-            <p className={`mt-3 text-base leading-7 sm:text-lg ${isDark ? 'text-slate-200' : 'text-slate-300'}`}>
+            <p className={getHeaderSubtitleClasses(variant, isDark)}>
               {title}
             </p>
           </div>
@@ -434,7 +568,7 @@ function CVPreview({
           atsFriendlyMode
             ? 'space-y-6'
             : templateConfig.layout === 'split'
-            ? 'grid gap-5 sm:gap-6 2xl:grid-cols-[minmax(0,1.62fr)_minmax(240px,0.88fr)] 2xl:gap-8 print:grid-cols-1'
+            ? getSplitColumnsClasses(variant)
             : 'space-y-5 sm:space-y-6'
         }`}
       >
@@ -442,23 +576,23 @@ function CVPreview({
           className="preview-document__column space-y-5 sm:space-y-6 lg:space-y-7"
           data-export-primary="true"
         >
-          {templateConfig.primarySections.map((section) => renderSection(section, 'main'))}
+          {visiblePrimarySections.map((section) => renderSection(section, 'main'))}
         </div>
 
-        {templateConfig.secondarySections.length > 0 && !atsFriendlyMode ? (
+        {visibleSecondarySections.length > 0 && !atsFriendlyMode ? (
           <aside
-            className={`preview-document__column ${getSideContainerClasses(templateConfig.variant, isDark)}`}
+            className={`preview-document__column ${getSideContainerClasses(variant, isDark)}`}
             data-export-secondary="true"
           >
-            {templateConfig.secondarySections.map((section) =>
+            {visibleSecondarySections.map((section) =>
               renderSection(section, 'side'),
             )}
           </aside>
         ) : null}
 
-        {templateConfig.secondarySections.length > 0 && atsFriendlyMode ? (
+        {visibleSecondarySections.length > 0 && atsFriendlyMode ? (
           <div className="preview-document__column space-y-6" data-export-secondary="true">
-            {templateConfig.secondarySections.map((section) => renderSection(section, 'main'))}
+            {visibleSecondarySections.map((section) => renderSection(section, 'main'))}
           </div>
         ) : null}
       </div>

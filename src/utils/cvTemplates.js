@@ -3,10 +3,9 @@ export const defaultTemplateId = 'minimal'
 const templateMap = {
   minimal: {
     id: 'minimal',
-    label: 'Minimal A',
-    description: 'Balanced single-column flow with clean editorial spacing.',
+    label: 'Editorial',
+    description: 'Single-column with rounded section cards, clean spacing, and a bold dark header.',
     variant: 'minimal',
-    mostPopular: true,
     layout: 'stacked',
     primarySections: ['about', 'experience', 'education', 'skills', 'links'],
     secondarySections: [],
@@ -23,8 +22,8 @@ const templateMap = {
   },
   developer: {
     id: 'developer',
-    label: 'Minimal B',
-    description: 'Split layout with experience-forward ordering and compact side notes.',
+    label: 'Technical',
+    description: 'Split layout with experience on the left and a compact sidebar. Monospace skill tags.',
     variant: 'developer',
     layout: 'split',
     primarySections: ['experience', 'about', 'education'],
@@ -42,8 +41,8 @@ const templateMap = {
   },
   corporate: {
     id: 'corporate',
-    label: 'Minimal C',
-    description: 'Structured single-column rhythm tuned for predictable scanning.',
+    label: 'Classic',
+    description: 'Single-column with flat section rules and no card chrome — clean and formal.',
     variant: 'corporate',
     layout: 'stacked',
     primarySections: ['about', 'experience', 'education', 'skills', 'links'],
@@ -61,8 +60,8 @@ const templateMap = {
   },
   creative: {
     id: 'creative',
-    label: 'Minimal D',
-    description: 'Split layout with softer grouping between primary and supporting sections.',
+    label: 'Creative',
+    description: 'Split layout with accent-tinted sidebar, coloured skill tags, and a gradient header.',
     variant: 'creative',
     layout: 'split',
     primarySections: ['about', 'experience', 'education'],

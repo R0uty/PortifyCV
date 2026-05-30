@@ -3,7 +3,6 @@ import { memo, useMemo } from 'react'
 import { getUiTheme } from '../utils/designSystem'
 
 function TemplateThumbnail({ template, isDark }) {
-  const thumbnail = template.thumbnail
   const frameClassName = isDark
     ? 'border-white/15 bg-slate-950/70'
     : 'border-slate-200 bg-slate-50'
@@ -11,26 +10,26 @@ function TemplateThumbnail({ template, isDark }) {
   const titleLineClassName = isDark ? 'bg-slate-500' : 'bg-slate-300'
   const bodyLineClassName = isDark ? 'bg-slate-700' : 'bg-slate-200'
   const chipClassName = isDark
-    ? 'rounded-md border border-white/10 bg-slate-900 px-2 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-300'
-    : 'rounded-md border border-slate-200 bg-white px-2 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-500'
+    ? 'w-full rounded-md border border-white/10 bg-slate-900 px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-300'
+    : 'w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-500'
 
   return (
     <div className={`overflow-hidden rounded-2xl border ${frameClassName}`}>
       <div className={`h-8 w-full ${accentClassName}`} />
       <div className="space-y-3 p-3">
         <div className="space-y-2">
-          <div className={`h-2 rounded-full ${titleLineClassName} ${thumbnail.titleWidthClassName}`} />
-          <div className={`h-2 rounded-full ${bodyLineClassName} ${thumbnail.subtitleWidthClassName}`} />
+          <div className={`h-2 w-full rounded-full ${titleLineClassName}`} />
+          <div className={`h-2 w-full rounded-full ${bodyLineClassName}`} />
         </div>
-        <div className={`grid gap-2 ${thumbnail.primaryRatioClassName}`}>
+        <div className={`grid gap-2 ${template.layout === 'split' ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <div className="space-y-2">
-            {thumbnail.blockWidths.map((widthClassName) => (
-              <div key={widthClassName} className={`h-2 rounded-full ${bodyLineClassName} ${widthClassName}`} />
+            {template.thumbnail.blockWidths.map((_, index) => (
+              <div key={index} className={`h-2 w-full rounded-full ${bodyLineClassName}`} />
             ))}
           </div>
           {template.layout === 'split' ? (
             <div className="space-y-2">
-              {thumbnail.chips.map((chip) => (
+              {template.thumbnail.chips.map((chip) => (
                 <div key={chip} className={chipClassName}>
                   {chip}
                 </div>
@@ -39,8 +38,8 @@ function TemplateThumbnail({ template, isDark }) {
           ) : null}
         </div>
         {template.layout === 'stacked' ? (
-          <div className="flex flex-wrap gap-1.5">
-            {thumbnail.chips.map((chip) => (
+          <div className="grid grid-cols-2 gap-1.5">
+            {template.thumbnail.chips.map((chip) => (
               <div key={chip} className={chipClassName}>
                 {chip}
               </div>
@@ -74,7 +73,7 @@ function TemplateGallery({ templates, selectedTemplateId, onSelectTemplate, them
             <button
               key={template.id}
               type="button"
-              className={`group rounded-[1.5rem] border p-3 text-left transition ${
+              className={`group h-full w-full rounded-[1.5rem] border p-3 text-left transition ${
                 isSelected
                   ? `${ui.buttonActive} shadow-[0_10px_30px_-18px_var(--accent-border)]`
                   : `${ui.surfaceMuted} hover:border-[var(--accent-border)] ${ui.isDark ? 'hover:bg-white/8' : 'hover:bg-white'}`
@@ -89,11 +88,6 @@ function TemplateGallery({ templates, selectedTemplateId, onSelectTemplate, them
                   </p>
                 </div>
                 <div className="flex flex-wrap justify-end gap-2">
-                  {template.mostPopular ? (
-                    <span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[var(--accent-text-strong)]">
-                      Most popular
-                    </span>
-                  ) : null}
                   {isSelected ? (
                     <span className="rounded-full border border-[var(--accent-border)] px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[var(--accent-text-strong)]">
                       Active

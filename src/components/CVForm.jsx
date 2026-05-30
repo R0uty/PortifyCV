@@ -3,9 +3,11 @@ import { useEffect, useRef, useState } from 'react'
 import PanelSection from './PanelSection'
 import { getUiTheme } from '../utils/designSystem'
 import {
+  createSectionVisibility,
   createEmptyEducation,
   createEmptyExperience,
   linkFields,
+  sectionVisibilityFields,
 } from '../utils/cvForm'
 
 function AutoGrowTextarea({
@@ -127,10 +129,15 @@ function CVForm({
 }) {
   const [skillInput, setSkillInput] = useState('')
   const ui = getUiTheme(theme)
+  const sectionVisibility = {
+    ...createSectionVisibility(),
+    ...(formData.sectionVisibility ?? {}),
+  }
   const inputClasses = `mt-2 w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-border)] focus:ring-2 focus:ring-[var(--accent-ring)] ${ui.input}`
   const textareaClasses = `${inputClasses} resize-none overflow-hidden`
   const actionButtonClasses = `rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`
   const removeButtonClasses = `rounded-full border px-3 py-2 text-xs font-medium transition ${ui.buttonDanger}`
+  const utilityButtonClasses = `rounded-full border px-3 py-2 text-xs font-medium transition ${ui.button}`
   const improveButtonClasses = `rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`
   const tagClasses = `inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
     ui.isDark
@@ -155,6 +162,17 @@ function CVForm({
       links: {
         ...current.links,
         [field]: value,
+      },
+    }))
+  }
+
+  const toggleSectionVisibility = (section) => {
+    setFormData((current) => ({
+      ...current,
+      sectionVisibility: {
+        ...createSectionVisibility(),
+        ...(current.sectionVisibility ?? {}),
+        [section]: !(current.sectionVisibility ?? {})[section],
       },
     }))
   }
@@ -187,6 +205,43 @@ function CVForm({
     }))
   }
 
+  const duplicateSkill = (index) => {
+    setFormData((current) => {
+      const currentSkill = current.skills[index]
+
+      if (!currentSkill) {
+        return current
+      }
+
+      return {
+        ...current,
+        skills: current.skills.flatMap((skill, skillIndex) =>
+          skillIndex === index ? [skill, currentSkill] : [skill],
+        ),
+      }
+    })
+  }
+
+  const moveSkill = (index, direction) => {
+    setFormData((current) => {
+      const nextIndex = index + direction
+
+      if (nextIndex < 0 || nextIndex >= current.skills.length) {
+        return current
+      }
+
+      const nextSkills = [...current.skills]
+      const [movedSkill] = nextSkills.splice(index, 1)
+
+      nextSkills.splice(nextIndex, 0, movedSkill)
+
+      return {
+        ...current,
+        skills: nextSkills,
+      }
+    })
+  }
+
   const updateArrayItem = (section, index, field, value) => {
     setFormData((current) => ({
       ...current,
@@ -215,6 +270,43 @@ function CVForm({
     }))
   }
 
+  const duplicateArrayItem = (section, index) => {
+    setFormData((current) => {
+      const currentItem = current[section][index]
+
+      if (!currentItem) {
+        return current
+      }
+
+      return {
+        ...current,
+        [section]: current[section].flatMap((item, itemIndex) =>
+          itemIndex === index ? [item, structuredClone(currentItem)] : [item],
+        ),
+      }
+    })
+  }
+
+  const moveArrayItem = (section, index, direction) => {
+    setFormData((current) => {
+      const nextIndex = index + direction
+
+      if (nextIndex < 0 || nextIndex >= current[section].length) {
+        return current
+      }
+
+      const nextItems = [...current[section]]
+      const [movedItem] = nextItems.splice(index, 1)
+
+      nextItems.splice(nextIndex, 0, movedItem)
+
+      return {
+        ...current,
+        [section]: nextItems,
+      }
+    })
+  }
+
   const handleSkillKeyDown = (event) => {
     if (event.key === 'Enter' || event.key === ',') {
       event.preventDefault()
@@ -228,6 +320,32 @@ function CVForm({
 
   return (
     <form className="mt-8 space-y-4 sm:space-y-5">
+      <PanelSection
+        eyebrow="Step 00"
+        title="Visible sections"
+        description="Toggle sections on or off in the preview without deleting your data."
+        theme={theme}
+      >
+        <div className="flex flex-wrap gap-2">
+          {sectionVisibilityFields.map((field) => {
+            const isVisible = sectionVisibility[field.key]
+
+            return (
+              <button
+                key={field.key}
+                type="button"
+                className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+                  isVisible ? ui.buttonActive : ui.button
+                }`}
+                onClick={() => toggleSectionVisibility(field.key)}
+              >
+                {field.label}: {isVisible ? 'On' : 'Off'}
+              </button>
+            )
+          })}
+        </div>
+      </PanelSection>
+
       <PanelSection
         eyebrow="Step 01"
         title="Profile"
@@ -313,11 +431,37 @@ function CVForm({
                     {skill}
                     <button
                       type="button"
-                      className="text-current/80 transition hover:text-current"
+                      className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
+                      onClick={() => moveSkill(index, -1)}
+                      disabled={index === 0}
+                      aria-label={`Move ${skill} up`}
+                    >
+                      Up
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
+                      onClick={() => moveSkill(index, 1)}
+                      disabled={index === formData.skills.length - 1}
+                      aria-label={`Move ${skill} down`}
+                    >
+                      Down
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
+                      onClick={() => duplicateSkill(index)}
+                      aria-label={`Duplicate ${skill}`}
+                    >
+                      Dup
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
                       onClick={() => removeSkill(index)}
                       aria-label={`Remove ${skill}`}
                     >
-                      ×
+                      X
                     </button>
                   </span>
                 ))}
@@ -362,13 +506,38 @@ function CVForm({
                   </p>
                   <EntryBadge count={feedback.inlineTips.experienceItems[index]?.length ?? 0} theme={theme} />
                 </div>
-                <button
-                  type="button"
-                  className={removeButtonClasses}
-                  onClick={() => removeArrayItem('experience', index)}
-                >
-                  Remove
-                </button>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('experience', index, -1)}
+                    disabled={index === 0}
+                  >
+                    Up
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('experience', index, 1)}
+                    disabled={index === formData.experience.length - 1}
+                  >
+                    Down
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => duplicateArrayItem('experience', index)}
+                  >
+                    Duplicate
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('experience', index)}
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Role" labelClassName={fieldLabelClassName}>
@@ -476,13 +645,38 @@ function CVForm({
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
                   Education #{index + 1}
                 </p>
-                <button
-                  type="button"
-                  className={removeButtonClasses}
-                  onClick={() => removeArrayItem('education', index)}
-                >
-                  Remove
-                </button>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('education', index, -1)}
+                    disabled={index === 0}
+                  >
+                    Up
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('education', index, 1)}
+                    disabled={index === formData.education.length - 1}
+                  >
+                    Down
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => duplicateArrayItem('education', index)}
+                  >
+                    Duplicate
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('education', index)}
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="School" labelClassName={fieldLabelClassName}>

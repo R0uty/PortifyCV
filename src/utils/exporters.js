@@ -18,6 +18,32 @@ const PX_PER_INCH = 96
 const MM_PER_INCH = 25.4
 const MAX_CAPTURE_PIXEL_AREA = 12_000_000
 
+function waitForAnimationFrame() {
+  return new Promise((resolve) => {
+    window.requestAnimationFrame(() => resolve())
+  })
+}
+
+async function waitForPreviewVariant(previewElement, expectedVariant, maxFrames = 24) {
+  if (!expectedVariant) {
+    await waitForAnimationFrame()
+    await waitForAnimationFrame()
+    return
+  }
+
+  for (let frame = 0; frame < maxFrames; frame += 1) {
+    const activeVariant = previewElement.getAttribute('data-export-variant')
+
+    if (activeVariant === expectedVariant) {
+      // Give layout one extra frame after the variant flips.
+      await waitForAnimationFrame()
+      return
+    }
+
+    await waitForAnimationFrame()
+  }
+}
+
 function trimValue(value) {
   return value.trim()
 }
@@ -95,6 +121,119 @@ export function exportCvAsJson(formData, fileName) {
   saveAs(blob, `${fileName}.json`)
 }
 
+export function exportCvAsHtml(formData, fileName) {
+  const snapshot = createCvSnapshot(formData)
+
+  function esc(text) {
+    return String(text ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+  }
+
+  const experienceItems = snapshot.experience
+    .map((item) => {
+      const heading = [item.role, item.company].filter(Boolean).join(' at ') || 'Untitled role'
+      const dateRange = formatDateRange(item.startDate, item.endDate)
+
+      return `  <div class="xp-item">
+    <div class="xp-head"><p class="xp-role">${esc(heading)}</p>${dateRange ? `<p class="xp-date">${esc(dateRange)}</p>` : ''}</div>
+    ${item.description ? `<p class="xp-desc">${esc(item.description)}</p>` : ''}
+  </div>`
+    })
+    .join('\n')
+
+  const educationItems = snapshot.education
+    .map((item) => {
+      const heading =
+        [item.degree, item.school].filter(Boolean).join(', ') || 'Education entry'
+      const dateRange = formatDateRange(item.startDate, item.endDate)
+
+      return `  <div class="edu-item">
+    <p class="edu-degree">${esc(heading)}</p>${dateRange ? `<p class="edu-date">${esc(dateRange)}</p>` : ''}
+  </div>`
+    })
+    .join('\n')
+
+  const skillTags = snapshot.skills
+    .map((skill) => `<span class="skill">${esc(skill)}</span>`)
+    .join('\n    ')
+
+  const linkItems = Object.entries(snapshot.links)
+    .map(
+      ([key, value]) =>
+        `  <div class="link-item"><p class="link-label">${esc(formatLinkLabel(key))}</p><p class="link-url">${esc(value)}</p></div>`,
+    )
+    .join('\n')
+
+  const sections = [
+    snapshot.about
+      ? `<section>\n  <h2 class="section-heading">About</h2>\n  <p class="about-text">${esc(snapshot.about)}</p>\n</section>`
+      : '',
+    snapshot.experience.length > 0
+      ? `<section>\n  <h2 class="section-heading">Experience</h2>\n${experienceItems}\n</section>`
+      : '',
+    snapshot.education.length > 0
+      ? `<section>\n  <h2 class="section-heading">Education</h2>\n${educationItems}\n</section>`
+      : '',
+    snapshot.skills.length > 0
+      ? `<section>\n  <h2 class="section-heading">Skills</h2>\n  <div class="skills">\n    ${skillTags}\n  </div>\n</section>`
+      : '',
+    Object.keys(snapshot.links).length > 0
+      ? `<section>\n  <h2 class="section-heading">Links</h2>\n${linkItems}\n</section>`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('\n\n')
+
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>${esc(snapshot.fullName || 'CV')}</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #0f172a; background: #fff; max-width: 820px; margin: 0 auto; padding: 2.5rem 2rem; line-height: 1.7; }
+header { padding-bottom: 1.75rem; margin-bottom: 2.5rem; border-bottom: 2px solid #0f172a; }
+.cv-name { font-size: 2.75rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em; }
+.cv-job-title { margin-top: 0.625rem; font-size: 1.1rem; color: #475569; }
+section { margin-bottom: 2.5rem; }
+.section-heading { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; color: #64748b; padding-bottom: 0.625rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 1.5rem; }
+.about-text { color: #334155; font-size: 0.975rem; line-height: 1.8; }
+.xp-item { margin-bottom: 1.75rem; padding-left: 1.125rem; border-left: 2px solid #cbd5e1; }
+.xp-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: baseline; }
+.xp-role { font-weight: 600; font-size: 1.05rem; }
+.xp-date { font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap; }
+.xp-desc { margin-top: 0.625rem; font-size: 0.9rem; color: #334155; line-height: 1.75; }
+.edu-item { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: baseline; padding: 0.875rem 1rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; margin-bottom: 0.75rem; }
+.edu-degree { font-weight: 600; font-size: 0.975rem; }
+.edu-date { font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.12em; }
+.skills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.skill { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 999px; padding: 0.3rem 0.875rem; font-size: 0.78rem; font-weight: 600; color: #334155; }
+.link-item { margin-bottom: 0.875rem; }
+.link-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: #94a3b8; margin-bottom: 0.25rem; }
+.link-url { font-size: 0.9rem; color: #0284c7; word-break: break-all; }
+@media print { body { padding: 0; max-width: none; } }
+</style>
+</head>
+<body>
+<header>
+  <p class="cv-name">${esc(snapshot.fullName || 'Your Name')}</p>
+  <p class="cv-job-title">${esc(snapshot.title || 'Professional Title')}</p>
+</header>
+
+${sections}
+</body>
+</html>
+`
+
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+
+  saveAs(blob, `${fileName}.html`)
+}
+
 function mmToPx(value) {
   return Math.round((value * PX_PER_INCH) / MM_PER_INCH)
 }
@@ -106,9 +245,11 @@ function createPdfMode(mode) {
 function createExportSandbox(previewElement, mode) {
   const pdfMode = createPdfMode(mode)
   const clone = previewElement.cloneNode(true)
-  const contentWidthPx = mmToPx(
+  const previewWidthPx = Math.max(1, Math.round(previewElement.getBoundingClientRect().width))
+  const a4ContentWidthPx = mmToPx(
     A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right,
   )
+  const contentWidthPx = mode === 'designer' ? previewWidthPx : a4ContentWidthPx
   const sandbox = document.createElement('div')
   const captureRoot = document.createElement('div')
 
@@ -132,6 +273,25 @@ function createExportSandbox(previewElement, mode) {
   clone.style.margin = '0'
   clone.style.background = '#ffffff'
   clone.style.color = '#0f172a'
+
+  // Inject resolved accent CSS variables so the PDF reflects the active accent palette
+  const rootComputedStyle = getComputedStyle(document.documentElement)
+  const accentVars = [
+    '--accent-solid',
+    '--accent-text',
+    '--accent-text-strong',
+    '--accent-border',
+    '--accent-soft',
+    '--accent-soft-strong',
+    '--accent-ring',
+    '--accent-glow',
+  ]
+  accentVars.forEach((prop) => {
+    const value = rootComputedStyle.getPropertyValue(prop).trim()
+    if (value) {
+      clone.style.setProperty(prop, value)
+    }
+  })
 
   captureRoot.appendChild(clone)
   sandbox.appendChild(captureRoot)
@@ -425,6 +585,10 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
   }
 
   const mode = options.mode === 'ats' ? 'ats' : 'designer'
+  const expectedVariant = typeof options.template === 'string' ? options.template : ''
+
+  await waitForPreviewVariant(previewElement, expectedVariant)
+
   const { sandbox, captureRoot, pdfMode } = createExportSandbox(previewElement, mode)
 
   try {

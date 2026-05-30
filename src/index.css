@@ -59,6 +59,9 @@
   --action-button-secondary-text: #0f172a;
   --shell-max-width: 100%;
   --preview-stage-width: 100%;
+  --scrollbar-track: rgba(148, 163, 184, 0.16);
+  --scrollbar-thumb: rgba(100, 116, 139, 0.5);
+  --scrollbar-thumb-hover: rgba(71, 85, 105, 0.7);
 }
 
 * {
@@ -147,6 +150,13 @@ textarea {
   letter-spacing: -0.05em;
 }
 
+.brand-mark {
+  font-size: clamp(1.5rem, 1.1rem + 1.25vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
 .stack-4 > * + * {
   margin-top: var(--space-4);
 }
@@ -215,6 +225,9 @@ textarea {
   --action-bar-bg: rgba(15, 23, 42, 0.88);
   --action-button-secondary-bg: rgba(15, 23, 42, 0.76);
   --action-button-secondary-text: #e2e8f0;
+  --scrollbar-track: rgba(51, 65, 85, 0.4);
+  --scrollbar-thumb: rgba(148, 163, 184, 0.45);
+  --scrollbar-thumb-hover: rgba(148, 163, 184, 0.68);
 }
 
 .app-shell--light {
@@ -236,7 +249,34 @@ textarea {
   min-height: 0;
   overflow-y: auto;
   scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   min-width: 0;
+}
+
+.app-shell__editor::-webkit-scrollbar,
+.app-shell__preview::-webkit-scrollbar {
+  width: 12px;
+}
+
+.app-shell__editor::-webkit-scrollbar-track,
+.app-shell__preview::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 999px;
+}
+
+.app-shell__editor::-webkit-scrollbar-thumb,
+.app-shell__preview::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.app-shell__editor::-webkit-scrollbar-thumb:hover,
+.app-shell__preview::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
 }
 
 .app-shell__editor {
@@ -422,58 +462,9 @@ textarea {
 }
 
 .pdf-export-root {
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
   overflow: visible !important;
-  background: #ffffff !important;
-  color: #0f172a !important;
   animation: none !important;
 }
-
-.pdf-export-root [data-export-header] {
-  padding: 0 0 1rem !important;
-  background: transparent !important;
-  color: #0f172a !important;
-  border-bottom: 1px solid #e2e8f0 !important;
-  box-shadow: none !important;
-}
-
-.pdf-export-root [data-export-content] {
-  padding: 1.5rem 0 0 !important;
-}
-
-.pdf-export-root [data-export-section] {
-  padding: 0 0 1.5rem !important;
-  margin: 0 !important;
-  background: transparent !important;
-  border: 0 !important;
-  border-bottom: 1px solid #e2e8f0 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-
-.pdf-export-root [data-export-section]:last-child {
-  padding-bottom: 0 !important;
-  border-bottom: 0 !important;
-}
-
-.pdf-export-root [data-export-card] {
-  background: transparent !important;
-  border: 0 !important;
-  border-left: 2px solid #cbd5e1 !important;
-  border-radius: 0 !important;
-  padding: 0.25rem 0 0.25rem 1rem !important;
-  box-shadow: none !important;
-}
-
-.pdf-export-root [data-export-skill='true'] {
-  background: rgba(248, 250, 252, 0.95) !important;
-  color: #334155 !important;
-  border: 1px solid #cbd5e1 !important;
-  border-radius: 999px !important;
-}
-
 
 .pdf-export-root [data-export-primary],
 .pdf-export-root [data-export-secondary] {
@@ -485,18 +476,14 @@ textarea {
   page-break-inside: avoid;
 }
 
-.pdf-export-root [data-export-summary-chip],
 .pdf-export-root [data-export-ignore='true'] {
   display: none !important;
-}
-
-.pdf-export-root [data-export-card] {
-  box-shadow: none !important;
 }
 
 .pdf-export-root.pdf-mode-ats [data-export-content] {
   display: block !important;
   gap: 0 !important;
+  padding: 1.5rem 0 0 !important;
 }
 
 .pdf-export-root.pdf-mode-ats [data-export-primary],
@@ -515,6 +502,23 @@ textarea {
   border-radius: 0 !important;
 }
 
+.pdf-export-root.pdf-mode-ats [data-export-header] {
+  padding: 0 0 1rem !important;
+  background: transparent !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+.pdf-export-root.pdf-mode-ats [data-export-card] {
+  background: transparent !important;
+  border: 0 !important;
+  border-left: 2px solid #cbd5e1 !important;
+  border-radius: 0 !important;
+  padding: 0.25rem 0 0.25rem 1rem !important;
+  box-shadow: none !important;
+}
+
 .pdf-export-root.pdf-mode-ats [data-export-skill='true'],
 .pdf-export-root.pdf-mode-ats [data-export-card] {
   background: #ffffff !important;
@@ -523,13 +527,8 @@ textarea {
   border-radius: 0.5rem !important;
 }
 
-.pdf-export-root.pdf-mode-ats [data-export-header] .accent-text,
-.pdf-export-root.pdf-mode-designer [data-export-header] .accent-text {
+.pdf-export-root.pdf-mode-ats [data-export-header] .accent-text {
   color: #64748b !important;
-}
-
-.pdf-export-root.pdf-mode-designer [data-export-content] {
-  padding-top: 1.75rem !important;
 }
 
 .fade-in-up {

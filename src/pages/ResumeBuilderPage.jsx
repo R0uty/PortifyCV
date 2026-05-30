@@ -1,11 +1,11 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import AppShell from '../components/AppShell'
+import AppErrorBoundary from '../components/AppErrorBoundary'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
 import ToastStack from '../components/ToastStack'
 import {
-  accentOptions,
   defaultAccentId,
   getAccentOption,
   getAccentThemeStyles,
@@ -21,6 +21,9 @@ import {
   initialCvData,
   parsePastedCvText,
   parseImportedCvData,
+  safeStorageGet,
+  safeStorageRemove,
+  safeStorageSet,
 } from '../utils/cvForm'
 import {
   cvTemplates,
@@ -31,6 +34,7 @@ import {
   createExportFileName,
   exportCvAsJson,
   exportCvAsPdf,
+  exportCvAsHtml,
 } from '../utils/exporters'
 import {
   buildShareUrl,
@@ -42,11 +46,12 @@ import {
   improveAboutText,
   improveExperienceText,
 } from '../utils/cvFeedback'
-import { evaluateAtsScore } from '../utils/atsScore'
+import { analyzeJobDescription, evaluateAtsScore } from '../utils/atsScore'
 
 const TemplateGallery = lazy(() => import('../components/TemplateGallery'))
 const CVSuggestionsPanel = lazy(() => import('../components/CVSuggestionsPanel'))
 const ATSScorePanel = lazy(() => import('../components/ATSScorePanel'))
+const JOB_DESCRIPTION_STORAGE_KEY = 'portifycv-job-description'
 
 function createToast(message, type = 'success') {
   return {
@@ -72,6 +77,32 @@ function SurfaceFallback({ theme = 'dark', title = 'Loading panel...' }) {
   )
 }
 
+function isEditableTarget(target) {
+  if (!(target instanceof HTMLElement)) {
+    return false
+  }
+
+  const tagName = target.tagName.toLowerCase()
+
+  return (
+    tagName === 'input' ||
+    tagName === 'textarea' ||
+    tagName === 'select' ||
+    target.isContentEditable
+  )
+}
+
+function waitForFrame() {
+  return new Promise((resolve) => {
+    window.requestAnimationFrame(() => resolve())
+  })
+}
+
+async function waitForPreviewRefresh() {
+  await waitForFrame()
+  await waitForFrame()
+}
+
 function loadInitialCvSession() {
   if (typeof window === 'undefined') {
     return {
@@ -80,19 +111,28 @@ function loadInitialCvSession() {
       accent: defaultAccentId,
       initialToast: null,
       clearShareParam: false,
+      storageIssue: false,
     }
   }
 
   try {
-    const storedDraft = window.localStorage.getItem(CV_DRAFT_STORAGE_KEY)
-    const hasSeenOnboarding =
-      window.localStorage.getItem(CV_ONBOARDING_SEEN_STORAGE_KEY) === 'true'
-    const storedTheme = window.localStorage.getItem(UI_THEME_STORAGE_KEY)
-    const storedAccent = window.localStorage.getItem(UI_ACCENT_STORAGE_KEY)
+    const storedDraftState = safeStorageGet(CV_DRAFT_STORAGE_KEY)
+    const onboardingState = safeStorageGet(CV_ONBOARDING_SEEN_STORAGE_KEY, 'false')
+    const storedThemeState = safeStorageGet(UI_THEME_STORAGE_KEY)
+    const storedAccentState = safeStorageGet(UI_ACCENT_STORAGE_KEY)
+    const storedDraft = storedDraftState.value
+    const hasSeenOnboarding = onboardingState.value === 'true'
+    const storedTheme = storedThemeState.value
+    const storedAccent = storedAccentState.value
+    const hasStorageIssue =
+      !storedDraftState.ok ||
+      !onboardingState.ok ||
+      !storedThemeState.ok ||
+      !storedAccentState.ok
     const nextTheme = storedTheme === 'light' ? 'light' : 'dark'
     const nextAccent = getAccentOption(storedAccent).id
     const markOnboardingSeen = () => {
-      window.localStorage.setItem(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+      safeStorageSet(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
     }
 
     try {
@@ -106,6 +146,7 @@ function loadInitialCvSession() {
           accent: nextAccent,
           initialToast: createToast('Loaded CV from share link.', 'success'),
           clearShareParam: false,
+          storageIssue: hasStorageIssue,
         }
       }
     } catch (error) {
@@ -128,6 +169,7 @@ function loadInitialCvSession() {
           'error',
         ),
         clearShareParam: true,
+        storageIssue: hasStorageIssue,
       }
     }
 
@@ -141,6 +183,7 @@ function loadInitialCvSession() {
           accent: nextAccent,
           initialToast: createToast('Loaded a sample CV to help you get started.', 'success'),
           clearShareParam: false,
+          storageIssue: hasStorageIssue,
         }
       }
 
@@ -150,6 +193,7 @@ function loadInitialCvSession() {
         accent: nextAccent,
         initialToast: null,
         clearShareParam: false,
+        storageIssue: hasStorageIssue,
       }
     }
 
@@ -161,6 +205,7 @@ function loadInitialCvSession() {
       accent: nextAccent,
       initialToast: createToast('Restored your saved draft.', 'success'),
       clearShareParam: false,
+      storageIssue: hasStorageIssue,
     }
   } catch (error) {
     const message =
@@ -171,37 +216,48 @@ function loadInitialCvSession() {
       error instanceof Error && error.message.startsWith('Shared CV link')
 
     if (!shouldClearShareParam) {
-      window.localStorage.removeItem(CV_DRAFT_STORAGE_KEY)
+      safeStorageRemove(CV_DRAFT_STORAGE_KEY)
     }
+
+    const storedThemeState = safeStorageGet(UI_THEME_STORAGE_KEY)
+    const storedAccentState = safeStorageGet(UI_ACCENT_STORAGE_KEY)
 
     return {
       formData: createInitialCvData(),
-      theme: window.localStorage.getItem(UI_THEME_STORAGE_KEY) === 'light' ? 'light' : 'dark',
-      accent: getAccentOption(window.localStorage.getItem(UI_ACCENT_STORAGE_KEY)).id,
+      theme: storedThemeState.value === 'light' ? 'light' : 'dark',
+      accent: getAccentOption(storedAccentState.value).id,
       initialToast: createToast(message, 'error'),
       clearShareParam: shouldClearShareParam,
+      storageIssue: !storedThemeState.ok || !storedAccentState.ok,
     }
   }
 }
 
 function ResumeBuilderPage() {
   const initialSession = useMemo(() => loadInitialCvSession(), [])
+  const initialJobDescriptionState = useMemo(
+    () => safeStorageGet(JOB_DESCRIPTION_STORAGE_KEY, ''),
+    [],
+  )
   const [formData, setFormData] = useState(initialSession.formData)
-  const [theme, setTheme] = useState(initialSession.theme)
-  const [accent, setAccent] = useState(initialSession.accent)
+  const [theme] = useState('dark')
+  const [accent] = useState(initialSession.accent)
   const [selectedTemplate, setSelectedTemplate] = useState(defaultTemplateId)
   const [atsFriendlyMode, setAtsFriendlyMode] = useState(false)
   const [mobilePreviewVisible, setMobilePreviewVisible] = useState(false)
   const [activeExport, setActiveExport] = useState('')
+  const [isImporting, setIsImporting] = useState(false)
+  const [showShortcutHelp, setShowShortcutHelp] = useState(false)
+  const [jobDescription, setJobDescription] = useState(initialJobDescriptionState.value)
   const [pastedCvText, setPastedCvText] = useState('')
   const [toasts, setToasts] = useState(
     initialSession.initialToast ? [initialSession.initialToast] : [],
   )
   const ui = getUiTheme(theme)
-  const isDark = ui.isDark
   const previewRef = useRef(null)
   const importInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
+  const storageWarningShownRef = useRef(false)
 
   const errors = useMemo(
     () => ({
@@ -231,6 +287,10 @@ function ResumeBuilderPage() {
       }),
     [atsFriendlyMode, formData, selectedTemplate],
   )
+  const jobDescriptionAnalysis = useMemo(
+    () => analyzeJobDescription(formData, jobDescription),
+    [formData, jobDescription],
+  )
   const showToast = (message, type = 'success') => {
     const nextToast = createToast(message, type)
 
@@ -244,23 +304,72 @@ function ResumeBuilderPage() {
     toastTimeoutsRef.current.set(nextToast.id, timeoutId)
   }
 
+  const reportStorageIssue = useCallback(() => {
+    if (storageWarningShownRef.current) {
+      return
+    }
+
+    storageWarningShownRef.current = true
+    showToast('Storage access is limited. Your changes may not persist after refresh.', 'error')
+  }, [])
+
+  const setStorageValue = useCallback((key, value) => {
+    const result = safeStorageSet(key, value)
+
+    if (!result.ok) {
+      reportStorageIssue()
+    }
+
+    return result
+  }, [reportStorageIssue])
+
+  const removeStorageValue = useCallback((key) => {
+    const result = safeStorageRemove(key)
+
+    if (!result.ok) {
+      reportStorageIssue()
+    }
+
+    return result
+  }, [reportStorageIssue])
+
+  const isActionBusy = Boolean(activeExport) || isImporting
+
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      window.localStorage.setItem(CV_DRAFT_STORAGE_KEY, JSON.stringify(formData))
+      setStorageValue(CV_DRAFT_STORAGE_KEY, JSON.stringify(formData))
     }, 180)
 
     return () => {
       window.clearTimeout(timeoutId)
     }
-  }, [formData])
+  }, [formData, setStorageValue])
 
   useEffect(() => {
-    window.localStorage.setItem(UI_THEME_STORAGE_KEY, theme)
-  }, [theme])
+    setStorageValue(UI_ACCENT_STORAGE_KEY, accent)
+  }, [accent, setStorageValue])
 
   useEffect(() => {
-    window.localStorage.setItem(UI_ACCENT_STORAGE_KEY, accent)
-  }, [accent])
+    if (!initialJobDescriptionState.ok) {
+      reportStorageIssue()
+    }
+  }, [initialJobDescriptionState.ok, reportStorageIssue])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setStorageValue(JOB_DESCRIPTION_STORAGE_KEY, jobDescription)
+    }, 180)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [jobDescription, setStorageValue])
+
+  useEffect(() => {
+    if (initialSession.storageIssue) {
+      reportStorageIssue()
+    }
+  }, [initialSession.storageIssue, reportStorageIssue])
 
   useEffect(() => {
     if (initialSession.clearShareParam) {
@@ -305,14 +414,30 @@ function ResumeBuilderPage() {
   const handleExport = useCallback(async (type) => {
     setActiveExport(type)
 
+    const toastLabel =
+      type === 'pdf-designer'
+        ? 'Preparing PDF export...'
+        : type === 'html'
+          ? 'Preparing HTML export...'
+          : 'Preparing JSON export...'
+
+    showToast(toastLabel)
+
+    const shouldForceDesignerPreview = type === 'pdf-designer' && atsFriendlyMode
+
     try {
       if (type === 'pdf-designer') {
+        if (shouldForceDesignerPreview) {
+          setAtsFriendlyMode(false)
+          await waitForPreviewRefresh()
+        }
+
         await exportCvAsPdf(previewRef.current, exportFileName, {
           mode: 'designer',
           formData,
           theme,
           template: selectedTemplate,
-          atsFriendlyMode,
+          atsFriendlyMode: false,
         })
       }
 
@@ -320,11 +445,17 @@ function ResumeBuilderPage() {
         exportCvAsJson(formData, exportFileName)
       }
 
-      const exportLabel = type === 'pdf-designer' ? 'Designer PDF' : 'JSON'
+      if (type === 'html') {
+        exportCvAsHtml(formData, exportFileName)
+      }
+
+      const exportLabel =
+        type === 'pdf-designer' ? 'Designer PDF' : type === 'html' ? 'HTML' : 'JSON'
 
       showToast(`${exportLabel} export downloaded.`)
     } catch (error) {
-      const exportLabel = type === 'pdf-designer' ? 'Designer PDF' : 'JSON'
+      const exportLabel =
+        type === 'pdf-designer' ? 'Designer PDF' : type === 'html' ? 'HTML' : 'JSON'
 
       showToast(
         error instanceof Error
@@ -333,6 +464,10 @@ function ResumeBuilderPage() {
         'error',
       )
     } finally {
+      if (shouldForceDesignerPreview) {
+        setAtsFriendlyMode(true)
+      }
+
       setActiveExport('')
     }
   }, [atsFriendlyMode, exportFileName, formData, previewRef, selectedTemplate, theme])
@@ -348,13 +483,16 @@ function ResumeBuilderPage() {
       return
     }
 
+    setIsImporting(true)
+
     try {
+      showToast(`Importing ${file.name}...`)
       const fileText = await file.text()
       const parsedValue = JSON.parse(fileText)
       const importedData = parseImportedCvData(parsedValue)
 
       setFormData(importedData)
-      window.localStorage.setItem(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+      setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
       showToast(`Imported CV data from ${file.name}.`)
     } catch (error) {
       if (error instanceof SyntaxError) {
@@ -369,21 +507,22 @@ function ResumeBuilderPage() {
         )
       }
     } finally {
+      setIsImporting(false)
       event.target.value = ''
     }
-  }, [])
+  }, [setStorageValue])
 
   const handleResetForm = useCallback(() => {
     setFormData(createInitialCvData())
-    window.localStorage.removeItem(CV_DRAFT_STORAGE_KEY)
+    removeStorageValue(CV_DRAFT_STORAGE_KEY)
     showToast('Form reset to a blank CV.')
-  }, [])
+  }, [removeStorageValue])
 
   const handleLoadDemo = useCallback(() => {
     setFormData(structuredClone(demoCvData))
-    window.localStorage.setItem(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+    setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
     showToast('Demo CV loaded.')
-  }, [])
+  }, [setStorageValue])
 
   const handlePasteCvImport = useCallback(() => {
     try {
@@ -394,12 +533,12 @@ function ResumeBuilderPage() {
         ...parsedData,
       }))
       setPastedCvText('')
-      window.localStorage.setItem(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+      setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
       showToast('Pasted CV text imported.')
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Failed to parse pasted CV text.', 'error')
     }
-  }, [pastedCvText])
+  }, [pastedCvText, setStorageValue])
 
   const handleCopySummary = useCallback(async () => {
     const summary = [formData.fullName.trim(), formData.title.trim(), formData.about.trim()]
@@ -490,6 +629,116 @@ function ResumeBuilderPage() {
     setSelectedTemplate(templateId)
   }, [])
 
+  const handleToggleShortcutHelp = useCallback(() => {
+    setShowShortcutHelp((current) => !current)
+  }, [])
+
+  const handleAddMissingKeywordToSkills = useCallback((keyword) => {
+    const normalizedKeyword = keyword.trim()
+
+    if (!normalizedKeyword) {
+      return
+    }
+
+    let wasAdded = false
+
+    setFormData((current) => {
+      if (
+        current.skills.some(
+          (skill) => skill.toLowerCase() === normalizedKeyword.toLowerCase(),
+        )
+      ) {
+        return current
+      }
+
+      wasAdded = true
+
+      return {
+        ...current,
+        skills: [...current.skills, normalizedKeyword],
+      }
+    })
+
+    showToast(
+      wasAdded
+        ? `Added "${normalizedKeyword}" to skills.`
+        : `"${normalizedKeyword}" is already in skills.`,
+    )
+  }, [])
+
+  const handleCopyMissingKeywords = useCallback(async () => {
+    const missingKeywords = jobDescriptionAnalysis.missingKeywords
+
+    if (missingKeywords.length === 0) {
+      showToast('No missing keywords to copy.', 'error')
+      return
+    }
+
+    try {
+      await window.navigator.clipboard.writeText(missingKeywords.join(', '))
+      showToast('Missing keywords copied.')
+    } catch {
+      showToast('Clipboard access failed. Please try again.', 'error')
+    }
+  }, [jobDescriptionAnalysis.missingKeywords])
+
+  const handleClearJobDescription = useCallback(() => {
+    if (!jobDescription.trim()) {
+      return
+    }
+
+    setJobDescription('')
+    showToast('Job description cleared.')
+  }, [jobDescription])
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (isEditableTarget(event.target) || isActionBusy) {
+        return
+      }
+
+      if (!(event.ctrlKey || event.metaKey)) {
+        return
+      }
+
+      const key = event.key.toLowerCase()
+
+      if (key === 'e') {
+        event.preventDefault()
+        handleExport('pdf-designer')
+        return
+      }
+
+      if (key === 'j') {
+        event.preventDefault()
+        handleExport('json')
+        return
+      }
+
+      if (key === 'i') {
+        event.preventDefault()
+        handleImportClick()
+        return
+      }
+
+      if (key === 'p' && event.shiftKey) {
+        event.preventDefault()
+        handleToggleMobilePreview()
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [
+    handleExport,
+    handleImportClick,
+    handleToggleMobilePreview,
+    isActionBusy,
+  ])
+
   return (
     <>
       <AppShell
@@ -508,47 +757,20 @@ function ResumeBuilderPage() {
             <div className="stack-5">
               <div className="stack-4">
                 <div>
-                  <p className="ds-kicker accent-text">PortifyCV</p>
+                  <p className="brand-mark accent-text">PortifyCV</p>
                   <h1
-                    className={`mt-4 max-w-[14ch] text-[clamp(2rem,1.55rem+1.55vw,3.25rem)] font-semibold leading-[0.96] tracking-[-0.04em] ${ui.textPrimary}`}
+                    className={`mt-4 max-w-[14ch] text-[clamp(1.05rem,0.95rem+0.4vw,1.35rem)] font-normal leading-[1.05] tracking-[-0.02em] ${ui.textPrimary}`}
                   >
                     Build your CV
                   </h1>
                 </div>
-                <div className={`hidden w-fit rounded-full border p-1 sm:flex ${ui.surfaceMuted}`}>
-                  {['dark', 'light'].map((mode) => (
-                    <button
-                      key={mode}
-                      type="button"
-                      className={`rounded-full px-3 py-2 text-sm font-medium transition ${
-                        theme === mode ? ui.buttonActive : ui.button
-                      }`}
-                      onClick={() => setTheme(mode)}
-                    >
-                      {mode === 'dark' ? 'Dark' : 'Light'}
-                    </button>
-                  ))}
-                </div>
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <div className={`flex rounded-full border p-1 sm:hidden ${ui.surfaceMuted}`}>
-                  {['dark', 'light'].map((mode) => (
-                    <button
-                      key={mode}
-                      type="button"
-                      className={`rounded-full px-3 py-2 text-sm font-medium transition ${
-                        theme === mode ? ui.buttonActive : ui.button
-                      }`}
-                      onClick={() => setTheme(mode)}
-                    >
-                      {mode === 'dark' ? 'Dark' : 'Light'}
-                    </button>
-                  ))}
-                </div>
                 <button
                   type="button"
                   className={secondaryButtonClassName}
+                  disabled={isActionBusy}
                   onClick={handleLoadDemo}
                 >
                   Load demo CV
@@ -556,9 +778,17 @@ function ResumeBuilderPage() {
                 <button
                   type="button"
                   className={secondaryButtonClassName}
+                  disabled={isActionBusy}
                   onClick={handleCopySummary}
                 >
                   Copy summary
+                </button>
+                <button
+                  type="button"
+                  className={`${secondaryButtonClassName} ${showShortcutHelp ? ui.buttonActive : ''}`}
+                  onClick={handleToggleShortcutHelp}
+                >
+                  {showShortcutHelp ? 'Hide shortcuts' : 'Show shortcuts'}
                 </button>
                 <button
                   type="button"
@@ -572,6 +802,7 @@ function ResumeBuilderPage() {
                 <button
                   type="button"
                   className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.buttonDanger}`}
+                  disabled={isActionBusy}
                   onClick={handleResetForm}
                 >
                   Reset form
@@ -591,6 +822,7 @@ function ResumeBuilderPage() {
                 <textarea
                   className={`mt-4 min-h-32 w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-border)] focus:ring-2 focus:ring-[var(--accent-ring)] ${ui.input}`}
                   value={pastedCvText}
+                  disabled={isActionBusy}
                   onChange={(event) => setPastedCvText(event.target.value)}
                   placeholder={`Alex Morgan\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
                 />
@@ -598,6 +830,7 @@ function ResumeBuilderPage() {
                   <button
                     type="button"
                     className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+                    disabled={isActionBusy}
                     onClick={handlePasteCvImport}
                   >
                     Paste CV text
@@ -605,13 +838,15 @@ function ResumeBuilderPage() {
                   <button
                     type="button"
                     className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+                    disabled={isActionBusy}
                     onClick={handleImportClick}
                   >
-                    Import JSON
+                    {isImporting ? 'Importing JSON...' : 'Import JSON'}
                   </button>
                   <button
                     type="button"
                     className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+                    disabled={isActionBusy}
                     onClick={handleLoadDemo}
                   >
                     Load demo CV
@@ -620,53 +855,47 @@ function ResumeBuilderPage() {
               </section>
 
               <section className={`surface-shadow rounded-[var(--radius-card)] border p-4 sm:p-5 ${ui.surface}`}>
-                <p className={`ds-kicker ${ui.textMuted}`}>Theme settings</p>
-                <div className="mt-4">
-                  <p className={`text-sm font-medium ${ui.textSoft}`}>Accent color</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {accentOptions.map((option) => (
-                      <button
-                        key={option.id}
-                        type="button"
-                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition ${
-                          accent === option.id ? ui.buttonActive : ui.button
-                        }`}
-                        onClick={() => setAccent(option.id)}
-                      >
-                        <span
-                          className={`h-2.5 w-2.5 rounded-full bg-gradient-to-r ${option.swatchClassName}`}
-                        />
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="mt-5">
-                  <p className={`text-sm font-medium ${ui.textSoft}`}>ATS-friendly mode</p>
-                  <button
-                    type="button"
-                    className={`mt-3 rounded-full border px-4 py-2 text-sm font-medium transition ${
-                      atsFriendlyMode ? ui.buttonActive : ui.button
-                    }`}
-                    onClick={handleToggleAtsFriendlyMode}
-                  >
-                    {atsFriendlyMode ? 'ATS mode enabled' : 'Enable ATS mode'}
-                  </button>
-                </div>
+                <p className={`ds-kicker ${ui.textMuted}`}>Export mode</p>
+                <p className={`mt-3 text-sm ${ui.textSecondary}`}>
+                  ATS mode simplifies formatting for parsers. Leave it off for fully styled template exports.
+                </p>
+                <button
+                  type="button"
+                  className={`mt-4 rounded-full border px-4 py-2 text-sm font-medium transition ${
+                    atsFriendlyMode ? ui.buttonActive : ui.button
+                  }`}
+                  disabled={isActionBusy}
+                  onClick={handleToggleAtsFriendlyMode}
+                >
+                  {atsFriendlyMode ? 'ATS mode enabled' : 'Enable ATS mode'}
+                </button>
               </section>
 
-              <Suspense fallback={<SurfaceFallback theme={theme} title="Loading templates" />}>
-                <TemplateGallery
-                  templates={cvTemplates}
-                  selectedTemplateId={selectedTemplate}
-                  onSelectTemplate={handleSelectTemplate}
-                  theme={theme}
-                />
-              </Suspense>
+              <AppErrorBoundary theme={theme} panelTitle="Template gallery">
+                <Suspense fallback={<SurfaceFallback theme={theme} title="Loading templates" />}>
+                  <TemplateGallery
+                    templates={cvTemplates}
+                    selectedTemplateId={selectedTemplate}
+                    onSelectTemplate={handleSelectTemplate}
+                    theme={theme}
+                  />
+                </Suspense>
+              </AppErrorBoundary>
 
               <p className={`ds-kicker lg:hidden ${ui.textMuted}`}>
                 Mobile layout stacks the form above the preview.
               </p>
+              {showShortcutHelp ? (
+                <section className={`rounded-2xl border p-4 ${ui.surfaceMuted}`}>
+                  <p className={`ds-kicker ${ui.textMuted}`}>Keyboard shortcuts</p>
+                  <ul className={`mt-3 space-y-2 text-sm ${ui.textSecondary}`}>
+                    <li>Ctrl/Cmd+E: Export PDF</li>
+                    <li>Ctrl/Cmd+J: Export JSON</li>
+                    <li>Ctrl/Cmd+I: Open import</li>
+                    <li>Ctrl/Cmd+Shift+P: Toggle preview</li>
+                  </ul>
+                </section>
+              ) : null}
             </div>
 
             <CVForm
@@ -691,6 +920,7 @@ function ResumeBuilderPage() {
                   <button
                     type="button"
                     className={`${primaryActionButtonClassName} accent-border accent-surface accent-text-strong`}
+                    disabled={isActionBusy}
                     onClick={() => handleExport('pdf-designer')}
                   >
                     {activeExport === 'pdf-designer' ? 'Exporting PDF...' : 'Export PDF'}
@@ -698,6 +928,15 @@ function ResumeBuilderPage() {
                   <button
                     type="button"
                     className={`${secondaryActionButtonClassName} ${ui.button}`}
+                    disabled={isActionBusy}
+                    onClick={() => handleExport('html')}
+                  >
+                    {activeExport === 'html' ? 'Exporting HTML...' : 'Export HTML'}
+                  </button>
+                  <button
+                    type="button"
+                    className={`${secondaryActionButtonClassName} ${ui.button}`}
+                    disabled={isActionBusy}
                     onClick={() => handleExport('json')}
                   >
                     {activeExport === 'json' ? 'Exporting JSON...' : 'Export JSON'}
@@ -705,9 +944,17 @@ function ResumeBuilderPage() {
                   <button
                     type="button"
                     className={`${secondaryActionButtonClassName} ${ui.button}`}
+                    disabled={isActionBusy}
                     onClick={handleCopyShareLink}
                   >
                     Copy Link
+                  </button>
+                  <button
+                    type="button"
+                    className={`${secondaryActionButtonClassName} ${showShortcutHelp ? ui.buttonActive : ui.button}`}
+                    onClick={handleToggleShortcutHelp}
+                  >
+                    Shortcuts
                   </button>
                 </div>
               </div>
@@ -764,32 +1011,36 @@ function ResumeBuilderPage() {
                     <li className={checklistItemClassName}>
                       Active template: {currentTemplate.label}
                     </li>
-                    <li className={checklistItemClassName}>
-                      Theme mode: {isDark ? 'Dark' : 'Light'}
-                    </li>
-                    <li className={checklistItemClassName}>
-                      Accent color: {getAccentOption(accent).label}
-                    </li>
                   </ul>
                 </section>
 
-                <Suspense fallback={<SurfaceFallback theme={theme} title="Loading suggestions" />}>
-                  <CVSuggestionsPanel
-                    feedback={feedback}
-                    theme={theme}
-                    onImproveAboutText={handleImproveAboutText}
-                    onImproveExperienceText={handleImproveExperienceText}
-                  />
-                </Suspense>
+                <AppErrorBoundary theme={theme} panelTitle="Smart suggestions">
+                  <Suspense fallback={<SurfaceFallback theme={theme} title="Loading suggestions" />}>
+                    <CVSuggestionsPanel
+                      feedback={feedback}
+                      theme={theme}
+                      onImproveAboutText={handleImproveAboutText}
+                      onImproveExperienceText={handleImproveExperienceText}
+                    />
+                  </Suspense>
+                </AppErrorBoundary>
 
-                <Suspense fallback={<SurfaceFallback theme={theme} title="Loading ATS score" />}>
-                  <ATSScorePanel
-                    atsScore={atsScore}
-                    theme={theme}
-                    atsFriendlyMode={atsFriendlyMode}
-                    onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
-                  />
-                </Suspense>
+                <AppErrorBoundary theme={theme} panelTitle="ATS score">
+                  <Suspense fallback={<SurfaceFallback theme={theme} title="Loading ATS score" />}>
+                    <ATSScorePanel
+                      atsScore={atsScore}
+                      theme={theme}
+                      atsFriendlyMode={atsFriendlyMode}
+                      onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
+                      jobDescription={jobDescription}
+                      onJobDescriptionChange={setJobDescription}
+                      jobDescriptionAnalysis={jobDescriptionAnalysis}
+                      onAddMissingKeyword={handleAddMissingKeywordToSkills}
+                      onCopyMissingKeywords={handleCopyMissingKeywords}
+                      onClearJobDescription={handleClearJobDescription}
+                    />
+                  </Suspense>
+                </AppErrorBoundary>
               </div>
             </div>
           </div>
@@ -806,6 +1057,13 @@ function ResumeBuilderPage() {
             onClick={() => handleExport('pdf-designer')}
           >
             {activeExport === 'pdf-designer' ? 'PDF...' : 'PDF'}
+          </button>
+          <button
+            type="button"
+            className={compactButtonClassName}
+            onClick={() => handleExport('html')}
+          >
+            {activeExport === 'html' ? 'HTML...' : 'HTML'}
           </button>
           <button
             type="button"

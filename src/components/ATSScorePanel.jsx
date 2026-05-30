@@ -26,7 +26,24 @@ function scoreTone(ui, score) {
     : 'border-rose-300 bg-rose-50 text-rose-800'
 }
 
-function ATSScorePanel({ atsScore, theme = 'dark', atsFriendlyMode, onToggleAtsFriendlyMode }) {
+function ATSScorePanel({
+  atsScore,
+  theme = 'dark',
+  atsFriendlyMode,
+  onToggleAtsFriendlyMode,
+  jobDescription = '',
+  onJobDescriptionChange = () => {},
+  onAddMissingKeyword = () => {},
+  onCopyMissingKeywords = () => {},
+  onClearJobDescription = () => {},
+  jobDescriptionAnalysis = {
+    hasInput: false,
+    coverageScore: 0,
+    totalKeywords: 0,
+    matchedKeywords: [],
+    missingKeywords: [],
+  },
+}) {
   const ui = useMemo(() => getUiTheme(theme), [theme])
   const breakdownItems = Object.values(atsScore.breakdown)
 
@@ -95,6 +112,75 @@ function ATSScorePanel({ atsScore, theme = 'dark', atsFriendlyMode, onToggleAtsF
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className={`mt-5 rounded-[1.4rem] border p-4 ${ui.surfaceMuted}`}>
+        <p className={`text-sm font-semibold ${ui.textPrimary}`}>Job description keyword match</p>
+        <p className={`mt-1 text-sm ${ui.textSecondary}`}>
+          Paste a target role description to spot important terms your CV is missing.
+        </p>
+        <textarea
+          className={`mt-3 min-h-28 w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-border)] focus:ring-2 focus:ring-[var(--accent-ring)] ${ui.input}`}
+          value={jobDescription}
+          onChange={(event) => onJobDescriptionChange(event.target.value)}
+          placeholder="Paste a job description here to analyze keyword coverage."
+        />
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
+            onClick={onCopyMissingKeywords}
+            disabled={jobDescriptionAnalysis.missingKeywords.length === 0}
+          >
+            Copy missing
+          </button>
+          <button
+            type="button"
+            className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
+            onClick={onClearJobDescription}
+            disabled={!jobDescription.trim()}
+          >
+            Clear JD
+          </button>
+        </div>
+
+        {jobDescriptionAnalysis.hasInput ? (
+          <div className="mt-4 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${scoreTone(ui, jobDescriptionAnalysis.coverageScore)}`}>
+                Coverage {jobDescriptionAnalysis.coverageScore}%
+              </span>
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${ui.surface}`}>
+                {jobDescriptionAnalysis.matchedKeywords.length}/{jobDescriptionAnalysis.totalKeywords} keywords matched
+              </span>
+            </div>
+
+            {jobDescriptionAnalysis.missingKeywords.length > 0 ? (
+              <div>
+                <p className={`text-xs font-semibold uppercase tracking-[0.14em] ${ui.textMuted}`}>
+                  Missing keywords
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {jobDescriptionAnalysis.missingKeywords.slice(0, 12).map((keyword) => (
+                    <button
+                      type="button"
+                      key={`missing-${keyword}`}
+                      onClick={() => onAddMissingKeyword(keyword)}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium ${ui.isDark ? 'border-amber-400/25 bg-amber-400/10 text-amber-100' : 'border-amber-300 bg-amber-50 text-amber-800'}`}
+                    >
+                      + {keyword}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className={`text-sm ${ui.textSecondary}`}>
+                Strong match. Your CV already covers the most frequent JD keywords.
+              </p>
+            )}
+          </div>
+        ) : null}
       </div>
     </section>
   )
