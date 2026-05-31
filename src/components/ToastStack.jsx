@@ -16,8 +16,8 @@ function ToastStack({ toasts = [], theme = 'dark' }) {
           key={toast.id}
           className={`fade-in-up rounded-2xl border px-4 py-3 shadow-xl backdrop-blur ${
             toast.type === 'success'
-              ? 'border-emerald-400/30 bg-emerald-500/90 text-white'
-              : 'border-rose-400/30 bg-rose-500/90 text-white'
+              ? 'border-gray-400/30 bg-gray-500/90 text-white'
+              : 'border-gray-400/30 bg-gray-500/90 text-white'
           }`}
           role="status"
           aria-live="polite"

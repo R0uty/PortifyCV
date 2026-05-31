@@ -5,20 +5,20 @@ import { getUiTheme } from '../utils/designSystem'
 function typeClasses(ui, type) {
   if (type === 'warning') {
     return ui.isDark
-      ? 'border-amber-400/20 bg-amber-400/10 text-amber-100'
-      : 'border-amber-300 bg-amber-50 text-amber-800'
+      ? 'border-gray-400/20 bg-gray-400/10 text-gray-100'
+      : 'border-gray-300 bg-gray-50 text-gray-800'
   }
 
   return ui.isDark
-    ? 'border-white/10 bg-white/5 text-slate-100'
-    : 'border-slate-200 bg-slate-50 text-slate-700'
+    ? 'border-white/12 bg-white/6 text-gray-100'
+    : 'border-black/12 bg-gray-50 text-gray-700'
 }
 
 function badgeClasses(ui, type) {
   if (type === 'warning') {
     return ui.isDark
-      ? 'bg-amber-400/15 text-amber-100'
-      : 'bg-amber-100 text-amber-700'
+      ? 'bg-gray-400/15 text-gray-100'
+      : 'bg-gray-100 text-gray-700'
   }
 
   return 'accent-surface accent-text-strong'

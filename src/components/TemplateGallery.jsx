@@ -4,14 +4,14 @@ import { getUiTheme } from '../utils/designSystem'
 
 function TemplateThumbnail({ template, isDark }) {
   const frameClassName = isDark
-    ? 'border-white/15 bg-slate-950/70'
-    : 'border-slate-200 bg-slate-50'
-  const accentClassName = isDark ? 'bg-slate-200' : 'bg-slate-800'
-  const titleLineClassName = isDark ? 'bg-slate-500' : 'bg-slate-300'
-  const bodyLineClassName = isDark ? 'bg-slate-700' : 'bg-slate-200'
+    ? 'border-white/12 bg-black/50'
+    : 'border-black/12 bg-gray-50'
+  const accentClassName = isDark ? 'bg-gray-400' : 'bg-gray-700'
+  const titleLineClassName = isDark ? 'bg-gray-600' : 'bg-gray-400'
+  const bodyLineClassName = isDark ? 'bg-gray-700' : 'bg-gray-300'
   const chipClassName = isDark
-    ? 'w-full rounded-md border border-white/10 bg-slate-900 px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-300'
-    : 'w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-slate-500'
+    ? 'w-full rounded-md border border-white/12 bg-black/70 px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-gray-300'
+    : 'w-full rounded-md border border-black/12 bg-white px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-gray-600'
 
   return (
     <div className={`overflow-hidden rounded-2xl border ${frameClassName}`}>

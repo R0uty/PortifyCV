@@ -5,25 +5,25 @@ import { getUiTheme } from '../utils/designSystem'
 function scoreTone(ui, score) {
   if (score >= 85) {
     return ui.isDark
-      ? 'border-emerald-400/20 bg-emerald-400/10 text-emerald-100'
-      : 'border-emerald-300 bg-emerald-50 text-emerald-800'
+      ? 'border-gray-400/20 bg-gray-400/10 text-gray-100'
+      : 'border-gray-300 bg-gray-50 text-gray-800'
   }
 
   if (score >= 70) {
     return ui.isDark
-      ? 'border-sky-400/20 bg-sky-400/10 text-sky-100'
-      : 'border-sky-300 bg-sky-50 text-sky-800'
+      ? 'border-gray-400/25 bg-gray-400/12 text-gray-200'
+      : 'border-gray-300 bg-gray-100 text-gray-800'
   }
 
   if (score >= 55) {
     return ui.isDark
-      ? 'border-amber-400/20 bg-amber-400/10 text-amber-100'
-      : 'border-amber-300 bg-amber-50 text-amber-800'
+      ? 'border-gray-500/25 bg-gray-500/10 text-gray-300'
+      : 'border-gray-300 bg-gray-50 text-gray-700'
   }
 
   return ui.isDark
-    ? 'border-rose-400/20 bg-rose-400/10 text-rose-100'
-    : 'border-rose-300 bg-rose-50 text-rose-800'
+    ? 'border-gray-400/20 bg-gray-400/10 text-gray-100'
+    : 'border-gray-300 bg-gray-50 text-gray-800'
 }
 
 function ATSScorePanel({
@@ -167,7 +167,7 @@ function ATSScorePanel({
                       type="button"
                       key={`missing-${keyword}`}
                       onClick={() => onAddMissingKeyword(keyword)}
-                      className={`rounded-full border px-3 py-1 text-xs font-medium ${ui.isDark ? 'border-amber-400/25 bg-amber-400/10 text-amber-100' : 'border-amber-300 bg-amber-50 text-amber-800'}`}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium ${ui.isDark ? 'border-gray-400/25 bg-gray-400/10 text-gray-100' : 'border-gray-300 bg-gray-50 text-gray-800'}`}
                     >
                       + {keyword}
                     </button>

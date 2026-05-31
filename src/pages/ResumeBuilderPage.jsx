@@ -240,7 +240,7 @@ function ResumeBuilderPage() {
     [],
   )
   const [formData, setFormData] = useState(initialSession.formData)
-  const [theme] = useState('dark')
+  const [theme] = useState('light')
   const [accent] = useState(initialSession.accent)
   const [selectedTemplate, setSelectedTemplate] = useState(defaultTemplateId)
   const [atsFriendlyMode, setAtsFriendlyMode] = useState(false)

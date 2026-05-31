@@ -11,8 +11,8 @@ const templateMap = {
     secondarySections: [],
     summaryBadgeLabel: 'Profile',
     thumbnail: {
-      accentClassName: 'bg-slate-900',
-      surfaceClassName: 'bg-slate-100',
+      accentClassName: 'bg-gray-900',
+      surfaceClassName: 'bg-gray-100',
       primaryRatioClassName: 'grid-cols-[1.45fr_0.85fr]',
       titleWidthClassName: 'w-24',
       subtitleWidthClassName: 'w-16',
@@ -30,8 +30,8 @@ const templateMap = {
     secondarySections: ['skills', 'links'],
     summaryBadgeLabel: 'Focus',
     thumbnail: {
-      accentClassName: 'bg-sky-700',
-      surfaceClassName: 'bg-slate-100',
+      accentClassName: 'bg-gray-700',
+      surfaceClassName: 'bg-gray-100',
       primaryRatioClassName: 'grid-cols-[1.55fr_0.75fr]',
       titleWidthClassName: 'w-24',
       subtitleWidthClassName: 'w-20',
@@ -49,8 +49,8 @@ const templateMap = {
     secondarySections: [],
     summaryBadgeLabel: 'Outline',
     thumbnail: {
-      accentClassName: 'bg-slate-700',
-      surfaceClassName: 'bg-slate-100',
+      accentClassName: 'bg-gray-700',
+      surfaceClassName: 'bg-gray-100',
       primaryRatioClassName: 'grid-cols-1',
       titleWidthClassName: 'w-28',
       subtitleWidthClassName: 'w-18',
@@ -68,8 +68,8 @@ const templateMap = {
     secondarySections: ['links', 'skills'],
     summaryBadgeLabel: 'Notes',
     thumbnail: {
-      accentClassName: 'bg-gradient-to-r from-fuchsia-500 to-sky-500',
-      surfaceClassName: 'bg-gradient-to-br from-fuchsia-50 to-sky-50',
+      accentClassName: 'bg-gradient-to-r from-gray-500 to-gray-500',
+      surfaceClassName: 'bg-gradient-to-br from-gray-50 to-gray-50',
       primaryRatioClassName: 'grid-cols-[1.35fr_0.95fr]',
       titleWidthClassName: 'w-24',
       subtitleWidthClassName: 'w-16',

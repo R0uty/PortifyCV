@@ -26,31 +26,31 @@ function formatLinkLabel(key) {
 function getPreviewClasses(variant, isDark) {
   if (variant === 'creative') {
     return isDark
-      ? 'border-[var(--accent-border)] bg-slate-950 shadow-[var(--accent-glow)]'
+      ? 'border-[var(--accent-border)] bg-gray-950 shadow-[var(--accent-glow)]'
       : 'border-[var(--accent-border)] bg-white shadow-[var(--accent-glow)]'
   }
 
   return isDark
-    ? 'border-slate-800 bg-slate-950 shadow-slate-950/30'
-    : 'border-slate-200 bg-white shadow-slate-950/10'
+    ? 'border-gray-800 bg-black shadow-black/30'
+    : 'border-black/10 bg-white shadow-black/10'
 }
 
 function getHeaderColorClasses(variant, isDark) {
   if (variant === 'corporate') {
     return isDark
-      ? 'bg-slate-950 text-white border-b border-slate-800'
-      : 'bg-white text-slate-900 border-b border-slate-300'
+      ? 'bg-black text-white border-b border-gray-800'
+      : 'bg-white text-black border-b border-black/10'
   }
 
   if (variant === 'creative') {
-    return 'bg-gradient-to-br from-slate-900 to-slate-800 text-white'
+    return 'bg-gradient-to-br from-black to-gray-800 text-white'
   }
 
   if (variant === 'developer') {
-    return 'bg-slate-950 text-white'
+    return 'bg-black text-white'
   }
 
-  return 'bg-slate-900 text-white'
+  return 'bg-gray-900 text-white'
 }
 
 function getHeaderTitleClasses(variant) {
@@ -63,15 +63,15 @@ function getHeaderTitleClasses(variant) {
 
 function getHeaderSubtitleClasses(variant, isDark) {
   if (variant === 'corporate' && !isDark) {
-    return 'mt-3 text-base leading-7 sm:text-lg text-slate-500'
+    return 'mt-3 text-base leading-7 sm:text-lg text-gray-600'
   }
 
-  return `mt-3 text-base leading-7 sm:text-lg ${isDark ? 'text-slate-200' : 'text-slate-300'}`
+  return `mt-3 text-base leading-7 sm:text-lg ${isDark ? 'text-gray-300' : 'text-gray-400'}`
 }
 
 function getSectionTitleClasses(variant) {
   if (variant === 'developer') {
-    return `${previewSectionTitleClasses} font-mono text-sky-400`
+    return `${previewSectionTitleClasses} font-mono text-gray-500`
   }
 
   if (variant === 'creative') {
@@ -79,22 +79,22 @@ function getSectionTitleClasses(variant) {
   }
 
   if (variant === 'corporate') {
-    return `${previewSectionTitleClasses} tracking-[0.32em] text-slate-400`
+    return `${previewSectionTitleClasses} tracking-[0.32em] text-gray-500`
   }
 
-  return `${previewSectionTitleClasses} text-slate-200`
+  return `${previewSectionTitleClasses} text-gray-300`
 }
 
 function getMainSectionClasses(variant, isDark) {
   if (variant === 'corporate') {
     return isDark
-      ? 'border-b border-slate-800 pb-6 print:border-slate-300 print:pb-6'
-      : 'border-b border-slate-200 pb-6 print:pb-6'
+      ? 'border-b border-gray-800 pb-6 print:border-gray-400 print:pb-6'
+      : 'border-b border-black/10 pb-6 print:pb-6'
   }
 
   return isDark
-    ? 'rounded-3xl border border-slate-800 bg-slate-950/70 p-5 sm:p-6 print:border-0 print:px-0'
-    : 'rounded-3xl border border-slate-200 bg-slate-50/80 p-5 sm:p-6 print:border-0 print:px-0'
+    ? 'rounded-3xl border border-gray-800 bg-black/50 p-5 sm:p-6 print:border-0 print:px-0'
+    : 'rounded-3xl border border-black/10 bg-gray-50/80 p-5 sm:p-6 print:border-0 print:px-0'
 }
 
 function getSideContainerClasses(variant, isDark) {
@@ -104,32 +104,32 @@ function getSideContainerClasses(variant, isDark) {
 
   if (variant === 'developer') {
     return isDark
-      ? 'space-y-5 rounded-2xl border border-slate-800 bg-slate-950/90 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
-      : 'space-y-5 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+      ? 'space-y-5 rounded-2xl border border-gray-800 bg-black/80 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+      : 'space-y-5 rounded-2xl border border-black/10 bg-gray-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
   }
 
   return isDark
-    ? 'space-y-5 rounded-3xl bg-slate-950/80 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
-    : 'space-y-5 rounded-3xl bg-slate-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+    ? 'space-y-5 rounded-3xl bg-black/60 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+    : 'space-y-5 rounded-3xl bg-gray-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
 }
 
 function getSideSectionClasses(variant, isDark) {
   if (variant === 'creative') {
     return isDark
-      ? 'rounded-2xl border border-[var(--accent-border)] bg-slate-950/40 p-5 print:border-0 print:px-0'
+      ? 'rounded-2xl border border-[var(--accent-border)] bg-black/40 p-5 print:border-0 print:px-0'
       : 'rounded-2xl border border-[var(--accent-border)] bg-white/80 p-5 print:border-0 print:px-0'
   }
 
   return isDark
-    ? 'rounded-3xl border border-slate-800 bg-slate-950/50 p-5 transition-colors print:border-0 print:px-0'
-    : 'rounded-3xl border border-slate-200 bg-white/80 p-5 transition-colors print:border-0 print:px-0'
+    ? 'rounded-3xl border border-gray-800 bg-black/50 p-5 transition-colors print:border-0 print:px-0'
+    : 'rounded-3xl border border-black/10 bg-white/80 p-5 transition-colors print:border-0 print:px-0'
 }
 
 function getSkillTagClasses(variant, isDark) {
   if (variant === 'developer') {
     return isDark
-      ? 'rounded-md border border-sky-800/60 bg-sky-950/40 px-3 py-1.5 text-xs font-mono font-medium text-sky-300'
-      : 'rounded-md border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-mono font-medium text-sky-700'
+      ? 'rounded-md border border-gray-700/60 bg-gray-900/40 px-3 py-1.5 text-xs font-mono font-medium text-gray-300'
+      : 'rounded-md border border-gray-300 bg-gray-100 px-3 py-1.5 text-xs font-mono font-medium text-gray-700'
   }
 
   if (variant === 'creative') {
@@ -138,61 +138,61 @@ function getSkillTagClasses(variant, isDark) {
 
   if (variant === 'corporate') {
     return isDark
-      ? 'rounded-sm border border-slate-700 bg-transparent px-3 py-1.5 text-xs font-semibold text-slate-200'
-      : 'rounded-sm border border-slate-400 bg-transparent px-3 py-1.5 text-xs font-semibold text-slate-700'
+      ? 'rounded-sm border border-gray-700 bg-transparent px-3 py-1.5 text-xs font-semibold text-gray-300'
+      : 'rounded-sm border border-gray-400 bg-transparent px-3 py-1.5 text-xs font-semibold text-gray-700'
   }
 
   return isDark
-    ? 'rounded-full border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs font-semibold text-slate-200'
-    : 'rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700'
+    ? 'rounded-full border border-gray-700 bg-gray-900/60 px-3 py-1.5 text-xs font-semibold text-gray-300'
+    : 'rounded-full border border-gray-300 bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-700'
 }
 
 function getTimelineBorderClasses(variant, isDark) {
   if (variant === 'developer') {
-    return isDark ? 'border-sky-800' : 'border-sky-300'
+    return isDark ? 'border-gray-700' : 'border-gray-300'
   }
 
   if (variant === 'creative') {
     return 'border-[var(--accent-border)]'
   }
 
-  return isDark ? 'border-slate-700' : 'border-slate-200'
+  return isDark ? 'border-gray-700' : 'border-black/10'
 }
 
 function getTimelineDotClasses(variant, isDark) {
   if (variant === 'developer') {
-    return isDark ? 'border-slate-950 bg-sky-400' : 'border-white bg-sky-600'
+    return isDark ? 'border-black bg-gray-400' : 'border-white bg-gray-600'
   }
 
   if (variant === 'creative') {
-    return isDark ? 'border-slate-950 bg-[var(--accent-solid)]' : 'border-white bg-[var(--accent-solid)]'
+    return isDark ? 'border-black bg-[var(--accent-solid)]' : 'border-white bg-[var(--accent-solid)]'
   }
 
-  return isDark ? 'border-slate-950 bg-slate-300' : 'border-white bg-slate-500'
+  return isDark ? 'border-black bg-gray-400' : 'border-white bg-gray-600'
 }
 
 function getEducationCardClasses(variant, isDark) {
   if (variant === 'corporate') {
     return isDark
-      ? 'border-b border-slate-800 py-4'
-      : 'border-b border-slate-200 py-4'
+      ? 'border-b border-gray-800 py-4'
+      : 'border-b border-black/10 py-4'
   }
 
   return isDark
-    ? 'rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-4'
-    : 'rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4'
+    ? 'rounded-2xl border border-gray-800 bg-gray-950/60 px-4 py-4'
+    : 'rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4'
 }
 
 function getLinkCardClasses(variant, isDark) {
   if (variant === 'corporate') {
     return isDark
-      ? 'border-b border-slate-800 py-3'
-      : 'border-b border-slate-200 py-3'
+      ? 'border-b border-gray-800 py-3'
+      : 'border-b border-gray-200 py-3'
   }
 
   return isDark
-    ? 'rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3'
-    : 'rounded-2xl border border-slate-200 bg-white px-4 py-3'
+    ? 'rounded-2xl border border-gray-800 bg-gray-950/60 px-4 py-3'
+    : 'rounded-2xl border border-gray-200 bg-white px-4 py-3'
 }
 
 function getSplitColumnsClasses(variant) {
@@ -257,43 +257,43 @@ function CVPreview({
   const educationCardClasses = getEducationCardClasses(variant, isDark)
   const linkCardClasses = getLinkCardClasses(variant, isDark)
   const resolvedSectionTitleClasses = atsFriendlyMode
-    ? 'text-xs font-semibold uppercase tracking-[0.18em] text-slate-500'
+    ? 'text-xs font-semibold uppercase tracking-[0.18em] text-gray-500'
     : sectionTitleClasses
   const resolvedMainSectionClasses = atsFriendlyMode
-    ? 'border-b border-slate-200 pb-6 print:border-0 print:px-0'
+    ? 'border-b border-gray-200 pb-6 print:border-0 print:px-0'
     : mainSectionClasses
   const resolvedSideSectionClasses = atsFriendlyMode
-    ? 'border-b border-slate-200 pb-6 print:border-0 print:px-0'
+    ? 'border-b border-gray-200 pb-6 print:border-0 print:px-0'
     : sideSectionClasses
   const bodyTextClasses = atsFriendlyMode
-    ? 'text-slate-700'
+    ? 'text-gray-700'
     : isDark
       ? isMinimalVariant
-        ? 'text-slate-100'
-        : 'text-slate-300'
-      : 'text-slate-600'
+        ? 'text-gray-100'
+        : 'text-gray-300'
+      : 'text-gray-600'
   const supportingTextClasses = atsFriendlyMode
-    ? 'text-slate-700'
+    ? 'text-gray-700'
     : isDark
       ? isMinimalVariant
-        ? 'text-slate-200'
-        : 'text-slate-200'
-      : 'text-slate-700'
+        ? 'text-gray-200'
+        : 'text-gray-200'
+      : 'text-gray-700'
   const metaTextClasses = atsFriendlyMode
-    ? 'text-slate-500'
+    ? 'text-gray-500'
     : isDark
       ? isMinimalVariant
-        ? 'text-slate-300'
-        : 'text-slate-400'
-      : 'text-slate-400'
+        ? 'text-gray-300'
+        : 'text-gray-400'
+      : 'text-gray-400'
   const summaryBadgeClasses =
     variant === 'creative'
       ? 'border border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent-text-strong)]'
       : isDark
         ? isMinimalVariant
-          ? 'bg-slate-800 text-slate-100'
-          : 'bg-slate-900 text-slate-300'
-        : 'bg-slate-100 text-slate-500'
+          ? 'bg-gray-800 text-gray-100'
+          : 'bg-gray-900 text-gray-300'
+        : 'bg-gray-100 text-gray-500'
 
   const renderSection = (section, placement = 'main') => {
     if (!sectionVisibility[section]) {
@@ -313,7 +313,7 @@ function CVPreview({
             <div
               className={`flex items-center justify-between gap-4 border-b pb-4 ${
                 atsFriendlyMode
-                  ? 'border-slate-200'
+                  ? 'border-gray-200'
                   : isDark
                     ? 'border-white/6'
                     : 'border-black/5'
@@ -357,12 +357,12 @@ function CVPreview({
                     <div
                       key={`${item.role}-${item.company}-${index}`}
                       className={`relative border-l-2 pl-5 ${
-                        atsFriendlyMode ? 'border-slate-300' : timelineBorderClasses
+                        atsFriendlyMode ? 'border-gray-300' : timelineBorderClasses
                       }`}
                     >
                       <span
                         className={`absolute -left-[9px] top-1 h-4 w-4 rounded-full border-4 shadow-sm ${
-                          atsFriendlyMode ? 'border-white bg-slate-500' : timelineDotClasses
+                          atsFriendlyMode ? 'border-white bg-gray-500' : timelineDotClasses
                         }`}
                       />
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -370,10 +370,10 @@ function CVPreview({
                           <p
                             className={`text-lg font-semibold tracking-tight ${
                               atsFriendlyMode
-                                ? 'text-slate-900'
+                                ? 'text-gray-900'
                                 : isDark
                                   ? 'text-white'
-                                  : 'text-slate-900'
+                                  : 'text-gray-900'
                             }`}
                           >
                             {heading || 'Untitled role'}
@@ -393,7 +393,7 @@ function CVPreview({
                   )
                 })
               ) : (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-gray-500">
                   Experience entries will render here in a timeline layout.
                 </p>
               )}
@@ -416,7 +416,7 @@ function CVPreview({
                 education.map((item, index) => (
                   <div
                     key={`${item.school}-${item.degree}-${index}`}
-                    className={atsFriendlyMode ? 'border border-slate-200 px-4 py-4' : educationCardClasses}
+                    className={atsFriendlyMode ? 'border border-gray-200 px-4 py-4' : educationCardClasses}
                     data-export-card="true"
                   >
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -424,10 +424,10 @@ function CVPreview({
                         <p
                           className={`text-base font-semibold tracking-tight ${
                             atsFriendlyMode
-                              ? 'text-slate-900'
+                              ? 'text-gray-900'
                               : isDark
                                 ? 'text-white'
-                                : 'text-slate-900'
+                                : 'text-gray-900'
                           }`}
                         >
                           {[item.degree.trim(), item.school.trim()]
@@ -442,7 +442,7 @@ function CVPreview({
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-gray-500">
                   Education items will appear here once you add them.
                 </p>
               )}
@@ -468,7 +468,7 @@ function CVPreview({
                     data-export-skill="true"
                     className={
                       atsFriendlyMode
-                        ? 'rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700'
+                        ? 'rounded-md border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700'
                         : skillTagClasses
                     }
                   >
@@ -476,7 +476,7 @@ function CVPreview({
                   </span>
                 ))
               ) : (
-                <p className="text-sm text-slate-500">Add skills to display them as tags.</p>
+                <p className="text-sm text-gray-500">Add skills to display them as tags.</p>
               )}
             </div>
           </>
@@ -498,7 +498,7 @@ function CVPreview({
                   <div
                     key={key}
                     data-export-card="true"
-                    className={atsFriendlyMode ? 'border border-slate-200 px-4 py-3' : linkCardClasses}
+                    className={atsFriendlyMode ? 'border border-gray-200 px-4 py-3' : linkCardClasses}
                   >
                     <p className={`text-xs font-semibold uppercase tracking-[0.16em] ${metaTextClasses}`}>
                       {formatLinkLabel(key)}
@@ -509,7 +509,7 @@ function CVPreview({
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-gray-500">
                   Portfolio and social links will appear here.
                 </p>
               )}
@@ -531,7 +531,7 @@ function CVPreview({
         atsFriendlyMode ? 'preview-document--ats' : 'preview-document--designer'
       } ${
         atsFriendlyMode
-          ? 'border-slate-300 bg-white text-slate-900 shadow-slate-300/15'
+          ? 'border-gray-300 bg-white text-gray-900 shadow-gray-300/15'
           : getPreviewClasses(variant, isDark)
       }`}
     >
@@ -539,18 +539,18 @@ function CVPreview({
         data-export-header="true"
         className={`preview-document__header px-5 py-7 sm:px-8 sm:py-9 print:px-0 ${
           atsFriendlyMode
-            ? 'border-b border-slate-200 bg-white text-slate-900'
+            ? 'border-b border-gray-200 bg-white text-gray-900'
             : getHeaderColorClasses(variant, isDark)
         }`}
       >
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className={`ds-kicker ${atsFriendlyMode ? 'text-slate-500' : 'accent-text'}`}>
+            <p className={`ds-kicker ${atsFriendlyMode ? 'text-gray-500' : 'accent-text'}`}>
               {atsFriendlyMode ? 'ATS-friendly mode' : `${templateConfig.label} Template`}
             </p>
             <h3
               className={`leading-none ${
-                atsFriendlyMode ? 'mt-3 text-4xl font-semibold tracking-tight text-slate-900' : getHeaderTitleClasses(variant)
+                atsFriendlyMode ? 'mt-3 text-4xl font-semibold tracking-tight text-gray-900' : getHeaderTitleClasses(variant)
               }`}
             >
               {fullName}

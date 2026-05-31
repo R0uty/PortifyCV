@@ -12,8 +12,8 @@ function PanelSection({
   const badgeClasses =
     badge?.tone === 'warning'
       ? ui.isDark
-        ? 'bg-amber-400/15 text-amber-100'
-        : 'bg-amber-100 text-amber-700'
+        ? 'bg-gray-400/15 text-gray-100'
+        : 'bg-gray-100 text-gray-700'
       : 'accent-surface accent-text-strong'
 
   return (
