@@ -52,6 +52,7 @@ const TemplateGallery = lazy(() => import('../components/TemplateGallery'))
 const CVSuggestionsPanel = lazy(() => import('../components/CVSuggestionsPanel'))
 const ATSScorePanel = lazy(() => import('../components/ATSScorePanel'))
 const JOB_DESCRIPTION_STORAGE_KEY = 'portifycv-job-description'
+const DEBUG_PDF_EXPORT = true
 
 function createToast(message, type = 'success') {
   return {
@@ -101,6 +102,28 @@ function waitForFrame() {
 async function waitForPreviewRefresh() {
   await waitForFrame()
   await waitForFrame()
+}
+
+async function waitForPreviewVariantSync(previewElement, expectedVariant, maxFrames = 60) {
+  if (!previewElement || !expectedVariant) {
+    await waitForPreviewRefresh()
+    return true
+  }
+
+  for (let frame = 0; frame < maxFrames; frame += 1) {
+    const activeVariant =
+      previewElement.querySelector('[data-export-variant]')?.getAttribute('data-export-variant')
+      || previewElement.getAttribute('data-export-variant')
+
+    if (activeVariant === expectedVariant) {
+      await waitForPreviewRefresh()
+      return true
+    }
+
+    await waitForFrame()
+  }
+
+  return false
 }
 
 function loadInitialCvSession() {
@@ -411,6 +434,21 @@ function ResumeBuilderPage() {
   const checklistItemClassName = `rounded-2xl border px-4 py-3.5 transition-colors ${ui.surfaceMuted}`
   const panelSurfaceClassName = `fade-in-up surface-shadow rounded-[var(--radius-card)] border p-5 sm:p-6 print:hidden ${ui.surface}`
 
+  useEffect(() => {
+    if (!DEBUG_PDF_EXPORT) {
+      return
+    }
+
+    const previewVariant =
+      previewRef.current?.querySelector('[data-export-variant]')?.getAttribute('data-export-variant')
+      || previewRef.current?.getAttribute('data-export-variant')
+      || null
+    console.debug('[PDF DEBUG] selectedTemplate state changed', {
+      selectedTemplate,
+      previewVariant,
+    })
+  }, [selectedTemplate])
+
   const handleExport = useCallback(async (type) => {
     setActiveExport(type)
 
@@ -427,9 +465,43 @@ function ResumeBuilderPage() {
 
     try {
       if (type === 'pdf-designer') {
+        const expectedVariant = getCvTemplate(selectedTemplate).variant
+        const initialPreviewVariant =
+          previewRef.current?.querySelector('[data-export-variant]')?.getAttribute('data-export-variant')
+          || previewRef.current?.getAttribute('data-export-variant')
+          || null
+
+        if (DEBUG_PDF_EXPORT) {
+          console.debug('[PDF DEBUG] before PDF export', {
+            selectedTemplate,
+            expectedVariant,
+            optionsTemplate: selectedTemplate,
+            optionsVariant: expectedVariant,
+            previewElementVariant: initialPreviewVariant,
+            hasPreviewRef: Boolean(previewRef.current),
+          })
+        }
+
         if (shouldForceDesignerPreview) {
           setAtsFriendlyMode(false)
-          await waitForPreviewRefresh()
+        }
+
+        const didSyncVariant = await waitForPreviewVariantSync(
+          previewRef.current,
+          expectedVariant,
+        )
+
+        if (!didSyncVariant) {
+          const activeVariant =
+            previewRef.current?.querySelector('[data-export-variant]')?.getAttribute('data-export-variant')
+            || previewRef.current?.getAttribute('data-export-variant')
+            || 'unknown'
+
+          showToast(
+            `Template preview is not synced yet (expected ${expectedVariant}, got ${activeVariant}). Try again.`,
+            'error',
+          )
+          return
         }
 
         await exportCvAsPdf(previewRef.current, exportFileName, {
@@ -437,6 +509,7 @@ function ResumeBuilderPage() {
           formData,
           theme,
           template: selectedTemplate,
+          variant: expectedVariant,
           atsFriendlyMode: false,
         })
       }
@@ -626,8 +699,15 @@ function ResumeBuilderPage() {
   }, [])
 
   const handleSelectTemplate = useCallback((templateId) => {
+    if (DEBUG_PDF_EXPORT) {
+      console.debug('[PDF DEBUG] template selected', {
+        previousTemplate: selectedTemplate,
+        nextTemplate: templateId,
+      })
+    }
+
     setSelectedTemplate(templateId)
-  }, [])
+  }, [selectedTemplate])
 
   const handleToggleShortcutHelp = useCallback(() => {
     setShowShortcutHelp((current) => !current)

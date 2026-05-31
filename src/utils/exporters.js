@@ -17,6 +17,36 @@ const A4_HEIGHT_MM = 297
 const PX_PER_INCH = 96
 const MM_PER_INCH = 25.4
 const MAX_CAPTURE_PIXEL_AREA = 12_000_000
+const DEBUG_PDF_EXPORT = true
+
+function resolveExportRoot(previewElement) {
+  if (!previewElement) {
+    return null
+  }
+
+  if (previewElement.getAttribute?.('data-export-root') === 'true') {
+    return previewElement
+  }
+
+  return previewElement.querySelector?.('[data-export-root="true"]') ?? previewElement
+}
+
+function getExportVariant(previewElement) {
+  if (!previewElement) {
+    return ''
+  }
+
+  const ownVariant = previewElement.getAttribute?.('data-export-variant')
+
+  if (ownVariant) {
+    return ownVariant
+  }
+
+  return (
+    previewElement.querySelector?.('[data-export-variant]')?.getAttribute('data-export-variant')
+    ?? ''
+  )
+}
 
 function waitForAnimationFrame() {
   return new Promise((resolve) => {
@@ -24,24 +54,28 @@ function waitForAnimationFrame() {
   })
 }
 
-async function waitForPreviewVariant(previewElement, expectedVariant, maxFrames = 24) {
+async function waitForPreviewVariant(previewElement, expectedVariant, maxFrames = 48) {
   if (!expectedVariant) {
     await waitForAnimationFrame()
     await waitForAnimationFrame()
-    return
+    return true
   }
 
+  const exportRoot = resolveExportRoot(previewElement)
+
   for (let frame = 0; frame < maxFrames; frame += 1) {
-    const activeVariant = previewElement.getAttribute('data-export-variant')
+    const activeVariant = getExportVariant(exportRoot)
 
     if (activeVariant === expectedVariant) {
       // Give layout one extra frame after the variant flips.
       await waitForAnimationFrame()
-      return
+      return true
     }
 
     await waitForAnimationFrame()
   }
+
+  return false
 }
 
 function trimValue(value) {
@@ -244,8 +278,14 @@ function createPdfMode(mode) {
 
 function createExportSandbox(previewElement, mode) {
   const pdfMode = createPdfMode(mode)
-  const clone = previewElement.cloneNode(true)
-  const previewWidthPx = Math.max(1, Math.round(previewElement.getBoundingClientRect().width))
+  const exportRoot = resolveExportRoot(previewElement)
+
+  if (!exportRoot) {
+    throw new Error('Unable to resolve active export template root.')
+  }
+
+  const clone = exportRoot.cloneNode(true)
+  const previewWidthPx = Math.max(1, Math.round(exportRoot.getBoundingClientRect().width))
   const a4ContentWidthPx = mmToPx(
     A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right,
   )
@@ -296,6 +336,15 @@ function createExportSandbox(previewElement, mode) {
   captureRoot.appendChild(clone)
   sandbox.appendChild(captureRoot)
   document.body.appendChild(sandbox)
+
+  if (DEBUG_PDF_EXPORT) {
+    console.debug('[PDF DEBUG] createExportSandbox', {
+      mode,
+      sourceVariant: getExportVariant(exportRoot) || null,
+      clonedVariant: getExportVariant(clone) || null,
+      contentWidthPx,
+    })
+  }
 
   return { sandbox, captureRoot, pdfMode }
 }
@@ -584,14 +633,56 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     throw new Error('Preview element is unavailable for PDF export.')
   }
 
+  const exportRoot = resolveExportRoot(previewElement)
+
+  if (!exportRoot) {
+    throw new Error('Active template preview root is unavailable for PDF export.')
+  }
+
   const mode = options.mode === 'ats' ? 'ats' : 'designer'
-  const expectedVariant = typeof options.template === 'string' ? options.template : ''
+  const expectedVariant =
+    typeof options.variant === 'string'
+      ? options.variant
+      : typeof options.template === 'string'
+        ? options.template
+        : ''
 
-  await waitForPreviewVariant(previewElement, expectedVariant)
+  if (DEBUG_PDF_EXPORT) {
+    console.debug('[PDF DEBUG] exportCvAsPdf inputs', {
+      fileName,
+      mode,
+      selectedTemplate: options.template,
+      optionsTemplate: options.template,
+      optionsVariant: options.variant,
+      expectedVariant,
+      previewDatasetExportVariant: previewElement.dataset.exportVariant || null,
+      previewAttrExportVariant: previewElement.getAttribute('data-export-variant') || null,
+      rootDatasetExportVariant: exportRoot.dataset.exportVariant || null,
+      rootAttrExportVariant: exportRoot.getAttribute('data-export-variant') || null,
+      queryVariant:
+        previewElement.querySelector?.('[data-export-variant]')?.getAttribute('data-export-variant') || null,
+    })
+  }
 
-  const { sandbox, captureRoot, pdfMode } = createExportSandbox(previewElement, mode)
+  const didMatchExpectedVariant = await waitForPreviewVariant(exportRoot, expectedVariant)
+
+  if (expectedVariant && !didMatchExpectedVariant) {
+    // Do not hard-fail export; proceed with the active preview to avoid blocking users.
+    await waitForAnimationFrame()
+    await waitForAnimationFrame()
+  }
+
+  const { sandbox, captureRoot, pdfMode } = createExportSandbox(exportRoot, mode)
 
   try {
+    if (DEBUG_PDF_EXPORT) {
+      console.debug('[PDF DEBUG] before html2canvas', {
+        previewVariant: getExportVariant(exportRoot) || null,
+        previewInnerHTML: exportRoot.innerHTML,
+        previewInnerHTMLLength: exportRoot.innerHTML.length,
+      })
+    }
+
     const captureWidth = Math.max(captureRoot.scrollWidth, captureRoot.offsetWidth, 1)
     const captureHeight = Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1)
     const captureScale = createSafeCaptureScale(captureWidth, captureHeight)
