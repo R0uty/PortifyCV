@@ -51,10 +51,10 @@ function Field({
     <label className="block">
       <span className={`text-sm font-medium ${labelClassName}`}>
         {label}
-        {required ? <span className="ml-1 text-gray-300">*</span> : null}
+        {required ? <span className="ml-1 text-rose-300">*</span> : null}
       </span>
       {children}
-      {error ? <p className="mt-2 text-xs text-gray-300">{error}</p> : null}
+      {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
     </label>
   )
 }
@@ -74,8 +74,8 @@ function InlineTipList({ items = [], theme = 'dark', actionLabel = '', onAction 
           className={`rounded-2xl border px-4 py-3 ${
             item.type === 'warning'
               ? ui.isDark
-                ? 'border-gray-400/20 bg-gray-400/10 text-gray-100'
-                : 'border-gray-300 bg-gray-50 text-gray-800'
+                ? 'border-amber-400/20 bg-amber-400/10 text-amber-100'
+                : 'border-amber-300 bg-amber-50 text-amber-800'
               : `${ui.surfaceMuted} ${ui.textSecondary}`
           }`}
         >
@@ -110,7 +110,7 @@ function EntryBadge({ count = 0, theme = 'dark' }) {
   return (
     <span
       className={`rounded-full px-3 py-1 text-xs font-semibold ${
-        ui.isDark ? 'bg-gray-400/15 text-gray-100' : 'bg-gray-100 text-gray-700'
+        ui.isDark ? 'bg-amber-400/15 text-amber-100' : 'bg-amber-100 text-amber-700'
       }`}
     >
       {count} tip{count === 1 ? '' : 's'}
@@ -468,8 +468,8 @@ function CVForm({
                 <input
                   className={`min-w-[140px] flex-1 border-0 bg-transparent py-1 text-sm outline-none ${
                     ui.isDark
-                      ? 'text-white placeholder:text-gray-500'
-                      : 'text-gray-900 placeholder:text-gray-400'
+                      ? 'text-white placeholder:text-slate-500'
+                      : 'text-slate-900 placeholder:text-slate-400'
                   }`}
                   type="text"
                   value={skillInput}
