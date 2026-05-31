@@ -1,6 +1,7 @@
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import { saveAs } from 'file-saver'
+import { defaultTemplateId, getCvTemplate } from './cvTemplates'
 
 const PDF_MODES = {
   designer: {
@@ -18,6 +19,19 @@ const PX_PER_INCH = 96
 const MM_PER_INCH = 25.4
 const MAX_CAPTURE_PIXEL_AREA = 12_000_000
 const DEBUG_PDF_EXPORT = true
+const COLOR_STYLE_PROPS = [
+  'color',
+  'background-color',
+  'background-image',
+  'border-color',
+  'border-top-color',
+  'border-right-color',
+  'border-bottom-color',
+  'border-left-color',
+  'outline-color',
+  'text-decoration-color',
+  'box-shadow',
+]
 
 function resolveExportRoot(previewElement) {
   if (!previewElement) {
@@ -54,26 +68,29 @@ function waitForAnimationFrame() {
   })
 }
 
-async function waitForPreviewVariant(previewElement, expectedVariant, maxFrames = 48) {
+async function waitForPreviewVariant(previewElement, expectedVariant, maxWaitMs = 3000) {
   if (!expectedVariant) {
-    await waitForAnimationFrame()
-    await waitForAnimationFrame()
+    await new Promise((resolve) => setTimeout(resolve, 100))
     return true
   }
 
+  const start = Date.now()
   const exportRoot = resolveExportRoot(previewElement)
 
-  for (let frame = 0; frame < maxFrames; frame += 1) {
+  while (Date.now() - start < maxWaitMs) {
     const activeVariant = getExportVariant(exportRoot)
 
     if (activeVariant === expectedVariant) {
-      // Give layout one extra frame after the variant flips.
-      await waitForAnimationFrame()
+      await new Promise((resolve) => setTimeout(resolve, 150))
       return true
     }
 
-    await waitForAnimationFrame()
+    await new Promise((resolve) => setTimeout(resolve, 60))
   }
+
+  console.warn(
+    `PDF Export: Variant mismatch. Expected "${expectedVariant}", got "${getExportVariant(exportRoot)}"`,
+  )
 
   return false
 }
@@ -276,7 +293,7 @@ function createPdfMode(mode) {
   return PDF_MODES[mode] ?? PDF_MODES.designer
 }
 
-function createExportSandbox(previewElement, mode) {
+function createExportSandbox(previewElement, mode, expectedVariant = '') {
   const pdfMode = createPdfMode(mode)
   const exportRoot = resolveExportRoot(previewElement)
 
@@ -308,6 +325,7 @@ function createExportSandbox(previewElement, mode) {
 
   clone.classList.add('pdf-export-root')
   clone.classList.add(`pdf-mode-${mode}`)
+  clone.setAttribute('data-export-variant', mode === 'ats' ? 'ats' : expectedVariant || '')
   clone.style.width = `${contentWidthPx}px`
   clone.style.maxWidth = 'none'
   clone.style.margin = '0'
@@ -346,7 +364,7 @@ function createExportSandbox(previewElement, mode) {
     })
   }
 
-  return { sandbox, captureRoot, pdfMode }
+  return { sandbox, captureRoot, clone, pdfMode }
 }
 
 function removeExportSandbox(sandbox) {
@@ -369,6 +387,89 @@ function createSafeCaptureScale(width, height) {
   const reducedScale = Math.sqrt(MAX_CAPTURE_PIXEL_AREA / pixelArea)
 
   return Math.max(1, Math.min(2, reducedScale * 2))
+}
+
+async function renderCaptureCanvas(captureRoot, captureOptions = {}) {
+  const captureWidth = Math.max(captureRoot.scrollWidth, captureRoot.offsetWidth, 1)
+  const captureHeight = Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1)
+  const captureScale = createSafeCaptureScale(captureWidth, captureHeight)
+
+  if (document.fonts?.ready) {
+    await document.fonts.ready
+  }
+
+  return html2canvas(captureRoot, {
+    scale: captureScale,
+    useCORS: true,
+    backgroundColor: '#ffffff',
+    width: captureWidth,
+    height: captureHeight,
+    windowWidth: captureWidth,
+    windowHeight: captureHeight,
+    scrollX: 0,
+    scrollY: 0,
+    imageTimeout: 0,
+    ignoreElements: (element) => element?.getAttribute?.('data-export-ignore') === 'true',
+    ...captureOptions,
+  })
+}
+
+function applyComputedColorFallbackStyles(sourceRoot, cloneRoot) {
+  if (!sourceRoot || !cloneRoot) {
+    return
+  }
+
+  const sourceNodes = [sourceRoot, ...sourceRoot.querySelectorAll('*')]
+  const cloneNodes = [cloneRoot, ...cloneRoot.querySelectorAll('*')]
+  const count = Math.min(sourceNodes.length, cloneNodes.length)
+
+  for (let index = 0; index < count; index += 1) {
+    const sourceNode = sourceNodes[index]
+    const cloneNode = cloneNodes[index]
+    const computed = window.getComputedStyle(sourceNode)
+
+    COLOR_STYLE_PROPS.forEach((prop) => {
+      const value = computed.getPropertyValue(prop)
+
+      if (value) {
+        cloneNode.style.setProperty(prop, value, 'important')
+      }
+    })
+  }
+}
+
+function isCanvasLikelyBlank(canvas) {
+  const context = canvas.getContext('2d', { willReadFrequently: true })
+
+  if (!context || canvas.width <= 0 || canvas.height <= 0) {
+    return true
+  }
+
+  const sampleColumns = 8
+  const sampleRows = 10
+  let nonWhitePixelCount = 0
+
+  for (let row = 0; row < sampleRows; row += 1) {
+    for (let column = 0; column < sampleColumns; column += 1) {
+      const x = Math.min(
+        canvas.width - 1,
+        Math.floor(((column + 0.5) / sampleColumns) * canvas.width),
+      )
+      const y = Math.min(
+        canvas.height - 1,
+        Math.floor(((row + 0.5) / sampleRows) * canvas.height),
+      )
+      const [r, g, b, a] = context.getImageData(x, y, 1, 1).data
+      const isTransparent = a < 8
+      const isNearWhite = r > 248 && g > 248 && b > 248
+
+      if (!isTransparent && !isNearWhite) {
+        nonWhitePixelCount += 1
+      }
+    }
+  }
+
+  return nonWhitePixelCount === 0
 }
 
 function addCanvasPagesToPdf(pdf, canvas, pdfMode) {
@@ -518,7 +619,12 @@ function drawFallbackBullets(pdf, values, cursor, marginMm, palette) {
   cursor.y += 1.2
 }
 
-function exportCvAsPdfTextFallback(formData, fileName, mode) {
+function exportCvAsPdfTextFallback(
+  formData,
+  fileName,
+  mode,
+  templateId = defaultTemplateId,
+) {
   const pdfMode = createPdfMode(mode)
   const pdf = new jsPDF({
     orientation: 'portrait',
@@ -526,99 +632,150 @@ function exportCvAsPdfTextFallback(formData, fileName, mode) {
     format: 'a4',
   })
   const snapshot = createCvSnapshot(formData)
+  const templateConfig = getCvTemplate(templateId)
+  const sectionVisibility = {
+    about: true,
+    experience: true,
+    education: true,
+    skills: true,
+    links: true,
+    ...(formData.sectionVisibility ?? {}),
+  }
+  const templateSectionOrder = [
+    ...templateConfig.primarySections,
+    ...templateConfig.secondarySections,
+  ]
   const palette = createFallbackPalette()
   const cursor = { y: drawFallbackHeader(pdf, snapshot, pdfMode.marginMm, palette) }
 
-  drawFallbackSectionHeading(pdf, 'About', cursor, pdfMode.marginMm, palette)
-  drawFallbackParagraph(
-    pdf,
-    snapshot.about || 'Add a professional summary.',
-    cursor,
-    pdfMode.marginMm,
-    palette,
-    { size: 10.6, lineHeight: 5.1 },
-  )
+  const isVisible = (section) => sectionVisibility[section] !== false
 
-  drawFallbackSectionHeading(pdf, 'Skills', cursor, pdfMode.marginMm, palette)
-  if (snapshot.skills.length > 0) {
-    drawFallbackBullets(pdf, snapshot.skills, cursor, pdfMode.marginMm, palette)
-  } else {
-    drawFallbackParagraph(pdf, 'Add skills', cursor, pdfMode.marginMm, palette, { subtle: true })
+  const renderAbout = () => {
+    drawFallbackSectionHeading(pdf, 'About', cursor, pdfMode.marginMm, palette)
+    drawFallbackParagraph(
+      pdf,
+      snapshot.about || 'Add a professional summary.',
+      cursor,
+      pdfMode.marginMm,
+      palette,
+      { size: 10.6, lineHeight: 5.1 },
+    )
   }
 
-  drawFallbackSectionHeading(pdf, 'Experience', cursor, pdfMode.marginMm, palette)
-  if (snapshot.experience.length > 0) {
-    snapshot.experience.forEach((item) => {
-      const heading = [item.role, item.company].filter(Boolean).join(' @ ') || 'Untitled role'
-      drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
-        bold: true,
-        size: 10.7,
-        after: 0.6,
+  const renderSkills = () => {
+    drawFallbackSectionHeading(pdf, 'Skills', cursor, pdfMode.marginMm, palette)
+    if (snapshot.skills.length > 0) {
+      drawFallbackBullets(pdf, snapshot.skills, cursor, pdfMode.marginMm, palette)
+    } else {
+      drawFallbackParagraph(pdf, 'Add skills', cursor, pdfMode.marginMm, palette, { subtle: true })
+    }
+  }
+
+  const renderExperience = () => {
+    drawFallbackSectionHeading(pdf, 'Experience', cursor, pdfMode.marginMm, palette)
+    if (snapshot.experience.length > 0) {
+      snapshot.experience.forEach((item) => {
+        const heading = [item.role, item.company].filter(Boolean).join(' @ ') || 'Untitled role'
+        drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
+          bold: true,
+          size: 10.7,
+          after: 0.6,
+        })
+
+        const dateRange = formatDateRange(item.startDate, item.endDate)
+        if (dateRange) {
+          drawFallbackParagraph(pdf, dateRange, cursor, pdfMode.marginMm, palette, {
+            subtle: true,
+            size: 9.8,
+            after: 0.8,
+          })
+        }
+
+        if (item.description) {
+          drawFallbackParagraph(pdf, item.description, cursor, pdfMode.marginMm, palette, {
+            size: 10.3,
+            lineHeight: 4.85,
+            after: 1.5,
+          })
+        } else {
+          cursor.y += 1.2
+        }
       })
-
-      const dateRange = formatDateRange(item.startDate, item.endDate)
-      if (dateRange) {
-        drawFallbackParagraph(pdf, dateRange, cursor, pdfMode.marginMm, palette, {
-          subtle: true,
-          size: 9.8,
-          after: 0.8,
-        })
-      }
-
-      if (item.description) {
-        drawFallbackParagraph(pdf, item.description, cursor, pdfMode.marginMm, palette, {
-          size: 10.3,
-          lineHeight: 4.85,
-          after: 1.5,
-        })
-      } else {
-        cursor.y += 1.2
-      }
-    })
-  } else {
-    drawFallbackParagraph(pdf, 'No experience added yet.', cursor, pdfMode.marginMm, palette, { subtle: true })
+    } else {
+      drawFallbackParagraph(pdf, 'No experience added yet.', cursor, pdfMode.marginMm, palette, { subtle: true })
+    }
   }
 
-  drawFallbackSectionHeading(pdf, 'Education', cursor, pdfMode.marginMm, palette)
-  if (snapshot.education.length > 0) {
-    snapshot.education.forEach((item) => {
-      const heading = [item.degree, item.school].filter(Boolean).join(', ') || 'Education entry'
-      const dateRange = formatDateRange(item.startDate, item.endDate)
+  const renderEducation = () => {
+    drawFallbackSectionHeading(pdf, 'Education', cursor, pdfMode.marginMm, palette)
+    if (snapshot.education.length > 0) {
+      snapshot.education.forEach((item) => {
+        const heading = [item.degree, item.school].filter(Boolean).join(', ') || 'Education entry'
+        const dateRange = formatDateRange(item.startDate, item.endDate)
 
-      drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
-        bold: true,
-        size: 10.5,
-        after: dateRange ? 0.5 : 1.3,
+        drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
+          bold: true,
+          size: 10.5,
+          after: dateRange ? 0.5 : 1.3,
+        })
+
+        if (dateRange) {
+          drawFallbackParagraph(pdf, dateRange, cursor, pdfMode.marginMm, palette, {
+            subtle: true,
+            size: 9.8,
+            after: 1.3,
+          })
+        }
       })
-
-      if (dateRange) {
-        drawFallbackParagraph(pdf, dateRange, cursor, pdfMode.marginMm, palette, {
-          subtle: true,
-          size: 9.8,
-          after: 1.3,
-        })
-      }
-    })
-  } else {
-    drawFallbackParagraph(pdf, 'No education added yet.', cursor, pdfMode.marginMm, palette, { subtle: true })
+    } else {
+      drawFallbackParagraph(pdf, 'No education added yet.', cursor, pdfMode.marginMm, palette, { subtle: true })
+    }
   }
 
-  drawFallbackSectionHeading(pdf, 'Links', cursor, pdfMode.marginMm, palette)
-  const links = Object.entries(snapshot.links)
-  if (links.length > 0) {
-    links.forEach(([key, value]) => {
-      drawFallbackParagraph(
-        pdf,
-        `${formatLinkLabel(key)}: ${value}`,
-        cursor,
-        pdfMode.marginMm,
-        palette,
-        { size: 10.2, after: 1.1 },
-      )
-    })
-  } else {
-    drawFallbackParagraph(pdf, 'No links added yet.', cursor, pdfMode.marginMm, palette, { subtle: true })
+  const renderLinks = () => {
+    drawFallbackSectionHeading(pdf, 'Links', cursor, pdfMode.marginMm, palette)
+    const links = Object.entries(snapshot.links)
+    if (links.length > 0) {
+      links.forEach(([key, value]) => {
+        drawFallbackParagraph(
+          pdf,
+          `${formatLinkLabel(key)}: ${value}`,
+          cursor,
+          pdfMode.marginMm,
+          palette,
+          { size: 10.2, after: 1.1 },
+        )
+      })
+    } else {
+      drawFallbackParagraph(pdf, 'No links added yet.', cursor, pdfMode.marginMm, palette, { subtle: true })
+    }
   }
+
+  const sectionRenderers = {
+    about: renderAbout,
+    experience: renderExperience,
+    education: renderEducation,
+    skills: renderSkills,
+    links: renderLinks,
+  }
+
+  const renderedSections = new Set()
+
+  templateSectionOrder.forEach((section) => {
+    const render = sectionRenderers[section]
+
+    if (render && !renderedSections.has(section) && isVisible(section)) {
+      render()
+      renderedSections.add(section)
+    }
+  })
+
+  Object.keys(sectionRenderers).forEach((section) => {
+    if (!renderedSections.has(section) && isVisible(section)) {
+      sectionRenderers[section]()
+      renderedSections.add(section)
+    }
+  })
 
   const blob = pdf.output('blob')
   const exportName = mode === 'designer'
@@ -672,7 +829,23 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     await waitForAnimationFrame()
   }
 
-  const { sandbox, captureRoot, pdfMode } = createExportSandbox(exportRoot, mode)
+  // === FORCE CORRECT VARIANT FIX ===
+  if (expectedVariant && exportRoot) {
+    exportRoot.setAttribute('data-export-variant', expectedVariant)
+
+    exportRoot.style.display = 'none'
+    void exportRoot.offsetHeight
+    exportRoot.style.display = ''
+
+    await new Promise((resolve) => setTimeout(resolve, 120))
+  }
+  // === END FIX ===
+
+  const { sandbox, captureRoot, clone, pdfMode } = createExportSandbox(
+    exportRoot,
+    mode,
+    expectedVariant,
+  )
 
   try {
     if (DEBUG_PDF_EXPORT) {
@@ -683,28 +856,27 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
       })
     }
 
-    const captureWidth = Math.max(captureRoot.scrollWidth, captureRoot.offsetWidth, 1)
-    const captureHeight = Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1)
-    const captureScale = createSafeCaptureScale(captureWidth, captureHeight)
+    let canvas = await renderCaptureCanvas(captureRoot, {
+      foreignObjectRendering: false,
+    })
 
-    if (document.fonts?.ready) {
-      await document.fonts.ready
+    if (isCanvasLikelyBlank(canvas)) {
+      canvas = await renderCaptureCanvas(captureRoot, {
+        foreignObjectRendering: true,
+      })
     }
 
-    const canvas = await html2canvas(captureRoot, {
-      scale: captureScale,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      width: captureWidth,
-      height: captureHeight,
-      windowWidth: captureWidth,
-      windowHeight: captureHeight,
-      scrollX: 0,
-      scrollY: 0,
-      foreignObjectRendering: false,
-      imageTimeout: 0,
-      ignoreElements: (element) => element?.getAttribute?.('data-export-ignore') === 'true',
-    })
+    if (isCanvasLikelyBlank(canvas)) {
+      applyComputedColorFallbackStyles(exportRoot, clone)
+      canvas = await renderCaptureCanvas(captureRoot, {
+        foreignObjectRendering: false,
+      })
+    }
+
+    if (isCanvasLikelyBlank(canvas) && options.formData) {
+      exportCvAsPdfTextFallback(options.formData, fileName, mode, options.template)
+      return
+    }
 
     if (canvas.width <= 0 || canvas.height <= 0) {
       throw new Error('Captured preview is empty. Open preview and try exporting again.')
@@ -727,7 +899,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     const isUnsupportedColorError = /unsupported color|oklch/i.test(message)
 
     if (isUnsupportedColorError && options.formData) {
-      exportCvAsPdfTextFallback(options.formData, fileName, mode)
+      exportCvAsPdfTextFallback(options.formData, fileName, mode, options.template)
       return
     }
 

@@ -126,6 +126,27 @@ async function waitForPreviewVariantSync(previewElement, expectedVariant, maxFra
   return false
 }
 
+async function waitForPreviewModeSync(previewElement, expectedMode, maxFrames = 60) {
+  if (!previewElement || !expectedMode) {
+    await waitForPreviewRefresh()
+    return true
+  }
+
+  const expectedClassName =
+    expectedMode === 'ats' ? 'preview-document--ats' : 'preview-document--designer'
+
+  for (let frame = 0; frame < maxFrames; frame += 1) {
+    if (previewElement.classList.contains(expectedClassName)) {
+      await waitForPreviewRefresh()
+      return true
+    }
+
+    await waitForFrame()
+  }
+
+  return false
+}
+
 function loadInitialCvSession() {
   if (typeof window === 'undefined') {
     return {
@@ -484,6 +505,19 @@ function ResumeBuilderPage() {
 
         if (shouldForceDesignerPreview) {
           setAtsFriendlyMode(false)
+
+          const didSyncDesignerMode = await waitForPreviewModeSync(
+            previewRef.current,
+            'designer',
+          )
+
+          if (!didSyncDesignerMode) {
+            showToast(
+              'Preview mode is still in ATS layout. Try exporting again in a moment.',
+              'error',
+            )
+            return
+          }
         }
 
         const didSyncVariant = await waitForPreviewVariantSync(
@@ -509,7 +543,7 @@ function ResumeBuilderPage() {
           formData,
           theme,
           template: selectedTemplate,
-          variant: expectedVariant,
+          variant: selectedTemplate,
           atsFriendlyMode: false,
         })
       }
