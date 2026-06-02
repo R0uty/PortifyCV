@@ -9,10 +9,7 @@ function AppShell({
 
   return (
     <div
-      style={{
-        background: isDark ? '#1a1a1a' : '#ffffff',
-        ...shellStyle,
-      }}
+      style={shellStyle}
       className={`app-shell app-shell--${theme} min-h-screen px-0 transition-colors print:px-0 print:py-0 ${
         isDark ? 'text-gray-100' : 'text-gray-900'
       }`}
