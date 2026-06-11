@@ -469,10 +469,6 @@ select {
   margin: 0;
 }
 
-.preview-document [data-export-section]:last-child {
-  padding-bottom: 0;
-}
-
 .preview-document [data-export-card] {
   box-shadow: var(--shadow-soft);
 }
