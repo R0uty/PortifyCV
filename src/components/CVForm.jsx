@@ -4,11 +4,70 @@ import PanelSection from './PanelSection'
 import { getUiTheme } from '../utils/designSystem'
 import {
   createSectionVisibility,
+  createSectionItemVisibility,
+  isPhotoVisibleForTemplate,
   createEmptyEducation,
   createEmptyExperience,
   linkFields,
   sectionVisibilityFields,
 } from '../utils/cvForm'
+
+const MAX_PROFILE_PHOTO_SIZE_BYTES = 2 * 1024 * 1024
+const MAX_PROFILE_PHOTO_EDGE_PX = 480
+const MAX_PROFILE_PHOTO_DATA_URL_LENGTH = 450_000
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result ?? ''))
+    reader.onerror = () => reject(new Error('Could not read the selected image file.'))
+    reader.readAsDataURL(file)
+  })
+}
+
+function loadImageElement(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error('Could not process the selected image file.'))
+    image.src = dataUrl
+  })
+}
+
+async function buildProfilePhotoDataUrl(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    throw new Error('Select a valid image file.')
+  }
+
+  if (file.size > MAX_PROFILE_PHOTO_SIZE_BYTES) {
+    throw new Error('Image must be 2MB or smaller.')
+  }
+
+  const sourceDataUrl = await readFileAsDataUrl(file)
+  const sourceImage = await loadImageElement(sourceDataUrl)
+  const maxSide = Math.max(sourceImage.naturalWidth, sourceImage.naturalHeight, 1)
+  const scale = Math.min(1, MAX_PROFILE_PHOTO_EDGE_PX / maxSide)
+  const width = Math.max(1, Math.round(sourceImage.naturalWidth * scale))
+  const height = Math.max(1, Math.round(sourceImage.naturalHeight * scale))
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')
+
+  if (!context) {
+    throw new Error('Could not process the selected image file.')
+  }
+
+  canvas.width = width
+  canvas.height = height
+  context.drawImage(sourceImage, 0, 0, width, height)
+
+  const normalizedDataUrl = canvas.toDataURL('image/jpeg', 0.86)
+
+  if (normalizedDataUrl.length > MAX_PROFILE_PHOTO_DATA_URL_LENGTH) {
+    throw new Error('Image is too large after processing. Try a smaller image.')
+  }
+
+  return normalizedDataUrl
+}
 
 function AutoGrowTextarea({
   className,
@@ -118,6 +177,73 @@ function EntryBadge({ count = 0, theme = 'dark' }) {
   )
 }
 
+function isSectionItemVisible(sectionItemVisibility, section, itemKey) {
+  return sectionItemVisibility?.[section]?.[String(itemKey)] !== false
+}
+
+function shiftVisibilityMapAfterRemove(visibilityMap = {}, removedIndex) {
+  return Object.entries(visibilityMap).reduce((next, [key, value]) => {
+    const index = Number.parseInt(key, 10)
+
+    if (!Number.isInteger(index)) {
+      next[key] = value
+      return next
+    }
+
+    if (index < removedIndex) {
+      next[String(index)] = value
+      return next
+    }
+
+    if (index > removedIndex) {
+      next[String(index - 1)] = value
+    }
+
+    return next
+  }, {})
+}
+
+function shiftVisibilityMapAfterInsert(visibilityMap = {}, insertedIndex) {
+  return Object.entries(visibilityMap).reduce((next, [key, value]) => {
+    const index = Number.parseInt(key, 10)
+
+    if (!Number.isInteger(index)) {
+      next[key] = value
+      return next
+    }
+
+    if (index >= insertedIndex) {
+      next[String(index + 1)] = value
+      return next
+    }
+
+    next[String(index)] = value
+    return next
+  }, {})
+}
+
+function swapVisibilityMapIndexes(visibilityMap = {}, firstIndex, secondIndex) {
+  const firstKey = String(firstIndex)
+  const secondKey = String(secondIndex)
+  const next = { ...visibilityMap }
+  const hasFirst = Object.prototype.hasOwnProperty.call(visibilityMap, firstKey)
+  const hasSecond = Object.prototype.hasOwnProperty.call(visibilityMap, secondKey)
+
+  if (hasFirst) {
+    next[secondKey] = visibilityMap[firstKey]
+  } else {
+    delete next[secondKey]
+  }
+
+  if (hasSecond) {
+    next[firstKey] = visibilityMap[secondKey]
+  } else {
+    delete next[firstKey]
+  }
+
+  return next
+}
+
 function CVForm({
   formData,
   setFormData,
@@ -126,13 +252,25 @@ function CVForm({
   feedback,
   onImproveAboutText,
   onImproveExperienceText,
+  onPhotoError,
+  selectedTemplate = '',
+  selectedTemplateLabel = 'Current template',
 }) {
   const [skillInput, setSkillInput] = useState('')
+  const photoInputRef = useRef(null)
   const ui = getUiTheme(theme)
   const sectionVisibility = {
     ...createSectionVisibility(),
     ...(formData.sectionVisibility ?? {}),
   }
+  const sectionItemVisibility = {
+    ...createSectionItemVisibility(),
+    ...(formData.sectionItemVisibility ?? {}),
+  }
+  const isPhotoVisibleInSelectedTemplate = isPhotoVisibleForTemplate(
+    formData.photoVisibilityByTemplate,
+    selectedTemplate,
+  )
   const inputClasses = `mt-2 w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-border)] focus:ring-2 focus:ring-[var(--accent-ring)] ${ui.input}`
   const textareaClasses = `${inputClasses} resize-none overflow-hidden`
   const actionButtonClasses = `rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`
@@ -156,6 +294,24 @@ function CVForm({
     }))
   }
 
+  const handlePhotoUpload = async (event) => {
+    const [file] = event.target.files ?? []
+    event.target.value = ''
+
+    if (!file) {
+      return
+    }
+
+    try {
+      const photoDataUrl = await buildProfilePhotoDataUrl(file)
+      updateRootField('photo', photoDataUrl)
+    } catch (error) {
+      if (onPhotoError) {
+        onPhotoError(error instanceof Error ? error.message : 'Could not upload profile image.')
+      }
+    }
+  }
+
   const updateLinkField = (field, value) => {
     setFormData((current) => ({
       ...current,
@@ -173,6 +329,45 @@ function CVForm({
         ...createSectionVisibility(),
         ...(current.sectionVisibility ?? {}),
         [section]: !(current.sectionVisibility ?? {})[section],
+      },
+    }))
+  }
+
+  const toggleSectionItemVisibility = (section, itemKey) => {
+    const normalizedItemKey = String(itemKey)
+    setFormData((current) => {
+      const nextSectionItemVisibility = {
+        ...createSectionItemVisibility(),
+        ...(current.sectionItemVisibility ?? {}),
+      }
+      const currentSection = nextSectionItemVisibility[section] ?? {}
+
+      return {
+        ...current,
+        sectionItemVisibility: {
+          ...nextSectionItemVisibility,
+          [section]: {
+            ...currentSection,
+            [normalizedItemKey]: currentSection[normalizedItemKey] === false,
+          },
+        },
+      }
+    })
+  }
+
+  const togglePhotoVisibilityForSelectedTemplate = () => {
+    if (!selectedTemplate) {
+      return
+    }
+
+    setFormData((current) => ({
+      ...current,
+      photoVisibilityByTemplate: {
+        ...(current.photoVisibilityByTemplate ?? {}),
+        [selectedTemplate]: !isPhotoVisibleForTemplate(
+          current.photoVisibilityByTemplate,
+          selectedTemplate,
+        ),
       },
     }))
   }
@@ -202,6 +397,11 @@ function CVForm({
     setFormData((current) => ({
       ...current,
       skills: current.skills.filter((_, skillIndex) => skillIndex !== index),
+      sectionItemVisibility: {
+        ...createSectionItemVisibility(),
+        ...(current.sectionItemVisibility ?? {}),
+        skills: shiftVisibilityMapAfterRemove(current.sectionItemVisibility?.skills, index),
+      },
     }))
   }
 
@@ -218,6 +418,11 @@ function CVForm({
         skills: current.skills.flatMap((skill, skillIndex) =>
           skillIndex === index ? [skill, currentSkill] : [skill],
         ),
+        sectionItemVisibility: {
+          ...createSectionItemVisibility(),
+          ...(current.sectionItemVisibility ?? {}),
+          skills: shiftVisibilityMapAfterInsert(current.sectionItemVisibility?.skills, index + 1),
+        },
       }
     })
   }
@@ -238,6 +443,11 @@ function CVForm({
       return {
         ...current,
         skills: nextSkills,
+        sectionItemVisibility: {
+          ...createSectionItemVisibility(),
+          ...(current.sectionItemVisibility ?? {}),
+          skills: swapVisibilityMapIndexes(current.sectionItemVisibility?.skills, index, nextIndex),
+        },
       }
     })
   }
@@ -260,14 +470,29 @@ function CVForm({
     setFormData((current) => ({
       ...current,
       [section]: [...current[section], factory()],
+      sectionItemVisibility: {
+        ...createSectionItemVisibility(),
+        ...(current.sectionItemVisibility ?? {}),
+      },
     }))
   }
 
   const removeArrayItem = (section, index) => {
-    setFormData((current) => ({
-      ...current,
-      [section]: current[section].filter((_, itemIndex) => itemIndex !== index),
-    }))
+    setFormData((current) => {
+      const currentItemVisibility = {
+        ...createSectionItemVisibility(),
+        ...(current.sectionItemVisibility ?? {}),
+      }
+
+      return {
+        ...current,
+        [section]: current[section].filter((_, itemIndex) => itemIndex !== index),
+        sectionItemVisibility: {
+          ...currentItemVisibility,
+          [section]: shiftVisibilityMapAfterRemove(currentItemVisibility[section], index),
+        },
+      }
+    })
   }
 
   const duplicateArrayItem = (section, index) => {
@@ -283,6 +508,11 @@ function CVForm({
         [section]: current[section].flatMap((item, itemIndex) =>
           itemIndex === index ? [item, structuredClone(currentItem)] : [item],
         ),
+        sectionItemVisibility: {
+          ...createSectionItemVisibility(),
+          ...(current.sectionItemVisibility ?? {}),
+          [section]: shiftVisibilityMapAfterInsert(current.sectionItemVisibility?.[section], index + 1),
+        },
       }
     })
   }
@@ -303,6 +533,15 @@ function CVForm({
       return {
         ...current,
         [section]: nextItems,
+        sectionItemVisibility: {
+          ...createSectionItemVisibility(),
+          ...(current.sectionItemVisibility ?? {}),
+          [section]: swapVisibilityMapIndexes(
+            current.sectionItemVisibility?.[section],
+            index,
+            nextIndex,
+          ),
+        },
       }
     })
   }
@@ -321,9 +560,9 @@ function CVForm({
   return (
     <form className="mt-8 space-y-4 sm:space-y-5">
       <PanelSection
-        eyebrow="Step 00"
+        eyebrow="Section 00"
         title="Visible sections"
-        description="Toggle sections on or off in the preview without deleting your data."
+        description="Toggle whole sections or specific section items without deleting your data."
         theme={theme}
       >
         <div className="flex flex-wrap gap-2">
@@ -343,11 +582,21 @@ function CVForm({
               </button>
             )
           })}
+          <button
+            type="button"
+            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+              isPhotoVisibleInSelectedTemplate ? ui.buttonActive : ui.button
+            }`}
+            onClick={togglePhotoVisibilityForSelectedTemplate}
+            disabled={!selectedTemplate}
+          >
+            Photo ({selectedTemplateLabel}): {isPhotoVisibleInSelectedTemplate ? 'On' : 'Off'}
+          </button>
         </div>
       </PanelSection>
 
       <PanelSection
-        eyebrow="Step 01"
+        eyebrow="Section 01"
         title="Profile"
         description="Add the core information that appears at the top of the CV."
         theme={theme}
@@ -394,6 +643,42 @@ function CVForm({
               placeholder="Summarize your experience, strengths, and the kind of roles you want."
             />
           </Field>
+          <Field label="Profile image (optional)" labelClassName={fieldLabelClassName}>
+            <input
+              ref={photoInputRef}
+              className="hidden"
+              type="file"
+              accept="image/png,image/jpeg,image/jpg"
+              onChange={handlePhotoUpload}
+            />
+            <button
+              type="button"
+              className={`mt-2 rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+              onClick={() => photoInputRef.current?.click()}
+            >
+              Choose image
+            </button>
+            <p className={`mt-2 text-xs ${helperTextClasses}`}>
+              JPG or PNG, up to 2MB. Image is resized for exports.
+            </p>
+            {formData.photo ? (
+              <div className="mt-3 flex items-center gap-3">
+                <img
+                  src={formData.photo}
+                  alt="Profile preview"
+                  className={`rounded-2xl border ${ui.isDark ? 'border-gray-700' : 'border-gray-300'}`}
+                  style={{ width: '5.75rem', height: '5.75rem', objectFit: 'cover' }}
+                />
+                <button
+                  type="button"
+                  className={removeButtonClasses}
+                  onClick={() => updateRootField('photo', '')}
+                >
+                  Remove image
+                </button>
+              </div>
+            ) : null}
+          </Field>
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
@@ -416,7 +701,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Step 02"
+        eyebrow="Section 02"
         title="Skills"
         description="Press Enter or comma to turn each skill into a tag."
         theme={theme}
@@ -429,6 +714,14 @@ function CVForm({
                 {formData.skills.map((skill, index) => (
                   <span key={`${skill}-${index}`} className={tagClasses}>
                     {skill}
+                    <button
+                      type="button"
+                      className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
+                      onClick={() => toggleSectionItemVisibility('skills', index)}
+                      aria-label={`${isSectionItemVisible(sectionItemVisibility, 'skills', index) ? 'Hide' : 'Show'} ${skill}`}
+                    >
+                      {isSectionItemVisible(sectionItemVisibility, 'skills', index) ? 'Hide' : 'Show'}
+                    </button>
                     <button
                       type="button"
                       className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
@@ -489,7 +782,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Step 03"
+        eyebrow="Section 03"
         title="Experience"
         description="Capture roles, timelines, and responsibilities for each work experience."
         theme={theme}
@@ -507,6 +800,13 @@ function CVForm({
                   <EntryBadge count={feedback.inlineTips.experienceItems[index]?.length ?? 0} theme={theme} />
                 </div>
                 <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('experience', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'experience', index) ? 'Hide' : 'Show'}
+                  </button>
                   <button
                     type="button"
                     className={utilityButtonClasses}
@@ -633,7 +933,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Step 04"
+        eyebrow="Section 04"
         title="Education"
         description="Include degrees, institutions, and timelines for your academic background."
         theme={theme}
@@ -646,6 +946,13 @@ function CVForm({
                   Education #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('education', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'education', index) ? 'Hide' : 'Show'}
+                  </button>
                   <button
                     type="button"
                     className={utilityButtonClasses}
@@ -737,14 +1044,29 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Step 05"
+        eyebrow="Section 05"
         title="Links"
         description="Add the platforms and portfolio links that support your CV."
         theme={theme}
       >
         <div className="grid gap-4 sm:grid-cols-2">
           {linkFields.map(({ key, label, placeholder }) => (
-            <Field key={key} label={label} labelClassName={fieldLabelClassName}>
+            <Field
+              key={key}
+              label={
+                <span className="inline-flex items-center gap-2">
+                  <span>{label}</span>
+                  <button
+                    type="button"
+                    className="rounded-full border px-2 py-0.5 text-[10px] font-semibold transition"
+                    onClick={() => toggleSectionItemVisibility('links', key)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'links', key) ? 'Hide' : 'Show'}
+                  </button>
+                </span>
+              }
+              labelClassName={fieldLabelClassName}
+            >
               <input
                 className={inputClasses}
                 type="url"

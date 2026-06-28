@@ -2,6 +2,7 @@ import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import { saveAs } from 'file-saver'
 import { defaultTemplateId, getCvTemplate } from './cvTemplates'
+import { createSectionItemVisibility, isPhotoVisibleForTemplate } from './cvForm'
 
 const PDF_MODES = {
   designer: {
@@ -18,6 +19,8 @@ const A4_HEIGHT_MM = 297
 const PX_PER_INCH = 96
 const MM_PER_INCH = 25.4
 const MAX_CAPTURE_PIXEL_AREA = 12_000_000
+const PAGE_BREAK_SELECTOR = '[data-export-section], [data-export-card], [data-export-skill="true"]'
+const MAX_BREAK_PULLUP_RATIO = 0.08
 const DEBUG_PDF_EXPORT = true
 const COLOR_STYLE_PROPS = [
   'color',
@@ -99,10 +102,6 @@ function trimValue(value) {
   return value.trim()
 }
 
-function normalizeArray(values) {
-  return values.map(trimValue).filter(Boolean)
-}
-
 function formatDateRange(startDate, endDate) {
   return [startDate, endDate].map(trimValue).filter(Boolean).join(' - ')
 }
@@ -119,38 +118,106 @@ function formatLinkLabel(key) {
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
+function getPhotoDataUrl(value) {
+  if (typeof value !== 'string') {
+    return ''
+  }
+
+  const trimmedValue = value.trim()
+
+  if (!/^data:image\/(png|jpe?g);base64,/i.test(trimmedValue)) {
+    return ''
+  }
+
+  return trimmedValue
+}
+
+function getImageFormatFromDataUrl(dataUrl) {
+  if (/^data:image\/png;base64,/i.test(dataUrl)) {
+    return 'PNG'
+  }
+
+  return 'JPEG'
+}
+
 export function createCvSnapshot(formData) {
+  const sectionItemVisibility = {
+    ...createSectionItemVisibility(),
+    ...(formData.sectionItemVisibility ?? {}),
+  }
+  const isSectionItemVisible = (section, itemKey) =>
+    sectionItemVisibility[section]?.[String(itemKey)] !== false
+
   return {
     fullName: trimValue(formData.fullName),
     title: trimValue(formData.title),
     about: trimValue(formData.about),
-    skills: normalizeArray(formData.skills),
-    experience: formData.experience
-      .map((item) => ({
+    photo: getPhotoDataUrl(formData.photo),
+    skills: formData.skills.reduce((next, skill, index) => {
+      if (!isSectionItemVisible('skills', index)) {
+        return next
+      }
+
+      const normalizedSkill = trimValue(skill)
+
+      if (normalizedSkill) {
+        next.push(normalizedSkill)
+      }
+
+      return next
+    }, []),
+    experience: formData.experience.reduce((next, item, index) => {
+      if (!isSectionItemVisible('experience', index)) {
+        return next
+      }
+
+      const normalizedItem = {
         role: trimValue(item.role),
         company: trimValue(item.company),
         startDate: trimValue(item.startDate),
         endDate: trimValue(item.endDate),
         description: trimValue(item.description),
-      }))
-      .filter(
-        (item) =>
-          item.role ||
-          item.company ||
-          item.startDate ||
-          item.endDate ||
-          item.description,
-      ),
-    education: formData.education
-      .map((item) => ({
+      }
+
+      if (
+        normalizedItem.role ||
+        normalizedItem.company ||
+        normalizedItem.startDate ||
+        normalizedItem.endDate ||
+        normalizedItem.description
+      ) {
+        next.push(normalizedItem)
+      }
+
+      return next
+    }, []),
+    education: formData.education.reduce((next, item, index) => {
+      if (!isSectionItemVisible('education', index)) {
+        return next
+      }
+
+      const normalizedItem = {
         school: trimValue(item.school),
         degree: trimValue(item.degree),
         startDate: trimValue(item.startDate),
         endDate: trimValue(item.endDate),
-      }))
-      .filter((item) => item.school || item.degree || item.startDate || item.endDate),
+      }
+
+      if (
+        normalizedItem.school ||
+        normalizedItem.degree ||
+        normalizedItem.startDate ||
+        normalizedItem.endDate
+      ) {
+        next.push(normalizedItem)
+      }
+
+      return next
+    }, []),
     links: Object.fromEntries(
-      Object.entries(formData.links).filter(([, value]) => trimValue(value)),
+      Object.entries(formData.links).filter(
+        ([key, value]) => isSectionItemVisible('links', key) && trimValue(value),
+      ),
     ),
   }
 }
@@ -253,7 +320,7 @@ header { padding-bottom: 1.75rem; margin-bottom: 2.5rem; border-bottom: 2px soli
 section { margin-bottom: 2.5rem; }
 .section-heading { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; color: #64748b; padding-bottom: 0.625rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 1.5rem; }
 .about-text { color: #334155; font-size: 0.975rem; line-height: 1.8; }
-.xp-item { margin-bottom: 1.75rem; padding-left: 1.125rem; border-left: 2px solid #cbd5e1; }
+.xp-item { margin-bottom: 1.75rem; padding-left: 1.375rem; border-left: 2px solid #cbd5e1; }
 .xp-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: baseline; }
 .xp-role { font-weight: 600; font-size: 1.05rem; }
 .xp-date { font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap; }
@@ -472,7 +539,231 @@ function isCanvasLikelyBlank(canvas) {
   return nonWhitePixelCount === 0
 }
 
-function addCanvasPagesToPdf(pdf, canvas, pdfMode) {
+function collectCanvasPageBreakpoints(captureRoot, canvas) {
+  if (!captureRoot || !canvas) {
+    return []
+  }
+
+  const sourceHeight = Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1)
+  const sourceRect = captureRoot.getBoundingClientRect()
+  const scaleY = canvas.height / sourceHeight
+  const breakpoints = new Set([0, canvas.height])
+  const candidates = captureRoot.querySelectorAll(PAGE_BREAK_SELECTOR)
+
+  candidates.forEach((element) => {
+    const rect = element.getBoundingClientRect()
+    const top = rect.top - sourceRect.top
+    const bottom = rect.bottom - sourceRect.top
+    const scaledTop = Math.round(top * scaleY)
+    const scaledBottom = Math.round(bottom * scaleY)
+
+    if (scaledTop > 0 && scaledTop < canvas.height) {
+      breakpoints.add(scaledTop)
+    }
+
+    if (scaledBottom > 0 && scaledBottom < canvas.height) {
+      breakpoints.add(scaledBottom)
+    }
+  })
+
+  return Array.from(breakpoints).sort((a, b) => a - b)
+}
+
+function collectCanvasContentBlocks(captureRoot, canvas) {
+  if (!captureRoot || !canvas) {
+    return []
+  }
+
+  const sourceHeight = Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1)
+  const sourceRect = captureRoot.getBoundingClientRect()
+  const scaleY = canvas.height / sourceHeight
+  const anchors = captureRoot.querySelectorAll('[data-export-header], [data-export-section]')
+  const ranges = []
+  let hasSidePlacement = false
+
+  anchors.forEach((anchor) => {
+    const rect = anchor.getBoundingClientRect()
+    const top = Math.max(0, Math.round((rect.top - sourceRect.top) * scaleY))
+    const bottom = Math.min(canvas.height, Math.round((rect.bottom - sourceRect.top) * scaleY))
+
+    if (bottom > top) {
+      const placement = anchor.getAttribute('data-export-placement')
+
+      if (placement === 'side') {
+        hasSidePlacement = true
+      }
+
+      ranges.push({ top, bottom, placement })
+    }
+  })
+
+  if (ranges.length === 0) {
+    return [{ top: 0, bottom: canvas.height }]
+  }
+
+  ranges.sort((a, b) => a.top - b.top)
+
+  if (!hasSidePlacement) {
+    const blocks = []
+    let cursorTop = 0
+
+    for (let index = 0; index < ranges.length; index += 1) {
+      const current = ranges[index]
+      const next = ranges[index + 1]
+      const blockTop = Math.max(cursorTop, current.top)
+
+      if (blockTop > cursorTop) {
+        blocks.push({ top: cursorTop, bottom: blockTop })
+      }
+
+      const blockBottom = Math.max(
+        blockTop,
+        Math.min(canvas.height, next ? next.top : canvas.height),
+      )
+
+      if (blockBottom > blockTop) {
+        blocks.push({ top: blockTop, bottom: blockBottom })
+      }
+
+      cursorTop = blockBottom
+    }
+
+    if (cursorTop < canvas.height) {
+      blocks.push({ top: cursorTop, bottom: canvas.height })
+    }
+
+    return blocks.filter((block) => block.bottom > block.top)
+  }
+
+  const blocks = []
+  let cursorTop = 0
+
+  for (let index = 0; index < ranges.length; index += 1) {
+    const current = ranges[index]
+    const next = ranges[index + 1]
+
+    if (current.top > cursorTop) {
+      blocks.push({ top: cursorTop, bottom: current.top })
+    }
+
+    const blockBottom = Math.max(current.bottom, next ? next.top : canvas.height)
+    blocks.push({ top: current.top, bottom: Math.min(canvas.height, blockBottom) })
+    cursorTop = Math.min(canvas.height, blockBottom)
+  }
+
+  if (cursorTop < canvas.height) {
+    blocks.push({ top: cursorTop, bottom: canvas.height })
+  }
+
+  return blocks.filter((block) => block.bottom > block.top)
+}
+
+function resolvePageSliceHeight(offsetY, pageHeightPx, totalHeight, breakpoints) {
+  const remainingHeight = totalHeight - offsetY
+
+  if (remainingHeight <= pageHeightPx) {
+    return remainingHeight
+  }
+
+  const naturalBreakY = offsetY + pageHeightPx
+  const maxBreakPullUp = Math.max(1, Math.floor(pageHeightPx * MAX_BREAK_PULLUP_RATIO))
+  const earliestAllowedBreakY = naturalBreakY - maxBreakPullUp
+  let selectedBreakY = 0
+
+  for (let index = breakpoints.length - 1; index >= 0; index -= 1) {
+    const breakpoint = breakpoints[index]
+
+    if (breakpoint > naturalBreakY) {
+      continue
+    }
+
+    if (breakpoint <= earliestAllowedBreakY) {
+      break
+    }
+
+    selectedBreakY = breakpoint
+    break
+  }
+
+  if (!selectedBreakY) {
+    return pageHeightPx
+  }
+
+  return Math.max(1, selectedBreakY - offsetY)
+}
+
+function splitRangeIntoSlices(rangeTop, rangeBottom, pageHeightPx, breakpoints = []) {
+  const slices = []
+  let offsetY = rangeTop
+
+  while (offsetY < rangeBottom) {
+    const sliceHeight = resolvePageSliceHeight(
+      offsetY,
+      pageHeightPx,
+      rangeBottom,
+      breakpoints,
+    )
+
+    const nextY = Math.min(rangeBottom, offsetY + sliceHeight)
+    slices.push({ top: offsetY, bottom: nextY })
+    offsetY = nextY
+  }
+
+  return slices
+}
+
+function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []) {
+  if (!contentBlocks.length) {
+    return []
+  }
+
+  const pages = []
+  let currentPageTop = 0
+  let currentPageBottom = 0
+  let currentPageHeight = 0
+
+  const pushCurrentPage = () => {
+    if (currentPageBottom > currentPageTop) {
+      pages.push({ top: currentPageTop, bottom: currentPageBottom })
+      currentPageTop = currentPageBottom
+      currentPageHeight = 0
+    }
+  }
+
+  contentBlocks.forEach((block) => {
+    const blockHeight = block.bottom - block.top
+
+    if (blockHeight <= pageHeightPx) {
+      if (currentPageHeight === 0) {
+        currentPageTop = block.top
+        currentPageBottom = block.bottom
+        currentPageHeight = blockHeight
+        return
+      }
+
+      if (currentPageHeight + blockHeight > pageHeightPx) {
+        pushCurrentPage()
+        currentPageTop = block.top
+        currentPageBottom = block.bottom
+        currentPageHeight = blockHeight
+        return
+      }
+
+      currentPageBottom = block.bottom
+      currentPageHeight += blockHeight
+      return
+    }
+
+    pushCurrentPage()
+    const slices = splitRangeIntoSlices(block.top, block.bottom, pageHeightPx, breakpoints)
+    slices.forEach((slice) => pages.push(slice))
+  })
+
+  pushCurrentPage()
+  return pages
+}
+
+function addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints = [], contentBlocks = []) {
   const renderedWidth = A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right
   const printableHeight = A4_HEIGHT_MM - pdfMode.marginMm.top - pdfMode.marginMm.bottom
   const pageHeightPx = Math.max(1, Math.floor((printableHeight * canvas.width) / renderedWidth))
@@ -483,10 +774,14 @@ function addCanvasPagesToPdf(pdf, canvas, pdfMode) {
     throw new Error('Unable to prepare page canvas for PDF export.')
   }
 
-  let pageIndex = 0
+  const pageSlices = buildPageSlicesFromBlocks(
+    pageHeightPx,
+    contentBlocks.length > 0 ? contentBlocks : [{ top: 0, bottom: canvas.height }],
+    breakpoints,
+  )
 
-  for (let offsetY = 0; offsetY < canvas.height; offsetY += pageHeightPx) {
-    const sliceHeight = Math.min(pageHeightPx, canvas.height - offsetY)
+  pageSlices.forEach((slice, pageIndex) => {
+    const sliceHeight = slice.bottom - slice.top
 
     pageCanvas.width = canvas.width
     pageCanvas.height = sliceHeight
@@ -494,7 +789,7 @@ function addCanvasPagesToPdf(pdf, canvas, pdfMode) {
     pageContext.drawImage(
       canvas,
       0,
-      offsetY,
+      slice.top,
       canvas.width,
       sliceHeight,
       0,
@@ -517,9 +812,7 @@ function addCanvasPagesToPdf(pdf, canvas, pdfMode) {
       renderedWidth,
       sliceHeightMm,
     )
-
-    pageIndex += 1
-  }
+  })
 }
 
 function createFallbackPalette() {
@@ -543,27 +836,56 @@ function ensurePdfCursorSpace(pdf, cursor, heightNeeded, marginMm) {
   cursor.y = marginMm.top
 }
 
-function drawFallbackHeader(pdf, snapshot, marginMm, palette) {
+async function drawFallbackHeader(pdf, snapshot, marginMm, palette, includePhoto = true) {
   const fullWidth = A4_WIDTH_MM - marginMm.left - marginMm.right
   const headerX = marginMm.left
   const headerY = marginMm.top
   const title = snapshot.fullName || 'Your Name'
   const subtitle = snapshot.title || 'Professional Title'
+  const photoDataUrl = getPhotoDataUrl(snapshot.photo)
+  const photoSize = 21
+  const photoGap = 6
+  const hasPhoto = includePhoto && Boolean(photoDataUrl)
+  const photoX = A4_WIDTH_MM - marginMm.right - photoSize
+  const photoY = headerY
+  const availableTextWidth = hasPhoto
+    ? Math.max(56, photoX - photoGap - headerX)
+    : fullWidth
 
   pdf.setTextColor(...palette.headerText)
   pdf.setFont('helvetica', 'bold')
   pdf.setFontSize(16)
-  pdf.text(title, headerX, headerY + 4.2)
+  const titleLines = pdf.splitTextToSize(title, availableTextWidth)
+  pdf.text(titleLines, headerX, headerY + 4.2)
+  const titleLineCount = Array.isArray(titleLines) ? titleLines.length : 1
 
   pdf.setFont('helvetica', 'normal')
   pdf.setFontSize(10.5)
-  pdf.text(subtitle, headerX, headerY + 9.8)
+  const subtitleY = headerY + 4.2 + titleLineCount * 5.2
+  const subtitleLines = pdf.splitTextToSize(subtitle, availableTextWidth)
+  pdf.text(subtitleLines, headerX, subtitleY)
+  const subtitleLineCount = Array.isArray(subtitleLines) ? subtitleLines.length : 1
+  const textBottomY = subtitleY + subtitleLineCount * 4.6
+
+  if (hasPhoto) {
+    pdf.addImage(
+      photoDataUrl,
+      getImageFormatFromDataUrl(photoDataUrl),
+      photoX,
+      photoY,
+      photoSize,
+      photoSize,
+    )
+  }
 
   pdf.setDrawColor(...palette.divider)
   pdf.setLineWidth(0.35)
-  pdf.line(headerX, headerY + 14.3, headerX + fullWidth, headerY + 14.3)
+  const dividerY = hasPhoto
+    ? Math.max(headerY + photoSize + 2.4, textBottomY + 2.6)
+    : textBottomY + 2.6
+  pdf.line(headerX, dividerY, headerX + fullWidth, dividerY)
 
-  return headerY + 18.5
+  return dividerY + 4.2
 }
 
 function drawFallbackSectionHeading(pdf, heading, cursor, marginMm, palette) {
@@ -619,7 +941,7 @@ function drawFallbackBullets(pdf, values, cursor, marginMm, palette) {
   cursor.y += 1.2
 }
 
-function exportCvAsPdfTextFallback(
+async function exportCvAsPdfTextFallback(
   formData,
   fileName,
   mode,
@@ -646,7 +968,13 @@ function exportCvAsPdfTextFallback(
     ...templateConfig.secondarySections,
   ]
   const palette = createFallbackPalette()
-  const cursor = { y: drawFallbackHeader(pdf, snapshot, pdfMode.marginMm, palette) }
+  const includePhoto = isPhotoVisibleForTemplate(
+    formData.photoVisibilityByTemplate,
+    templateConfig.id,
+  )
+  const cursor = {
+    y: await drawFallbackHeader(pdf, snapshot, pdfMode.marginMm, palette, includePhoto),
+  }
 
   const isVisible = (section) => sectionVisibility[section] !== false
 
@@ -874,7 +1202,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     }
 
     if (isCanvasLikelyBlank(canvas) && options.formData) {
-      exportCvAsPdfTextFallback(options.formData, fileName, mode, options.template)
+      await exportCvAsPdfTextFallback(options.formData, fileName, mode, options.template)
       return
     }
 
@@ -888,7 +1216,9 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
       format: 'a4',
     })
 
-    addCanvasPagesToPdf(pdf, canvas, pdfMode)
+    const breakpoints = collectCanvasPageBreakpoints(captureRoot, canvas)
+    const contentBlocks = collectCanvasContentBlocks(captureRoot, canvas)
+    addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints, contentBlocks)
 
     const blob = pdf.output('blob')
     const exportName =
@@ -899,7 +1229,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     const isUnsupportedColorError = /unsupported color|oklch/i.test(message)
 
     if (isUnsupportedColorError && options.formData) {
-      exportCvAsPdfTextFallback(options.formData, fileName, mode, options.template)
+      await exportCvAsPdfTextFallback(options.formData, fileName, mode, options.template)
       return
     }
 

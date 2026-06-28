@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react'
 
 import { createCvSnapshot } from '../utils/exporters'
-import { createSectionVisibility } from '../utils/cvForm'
+import { createSectionVisibility, isPhotoVisibleForTemplate } from '../utils/cvForm'
 import { getUiTheme } from '../utils/designSystem'
 import { getCvTemplate } from '../utils/cvTemplates'
 
@@ -55,18 +55,18 @@ function getHeaderColorClasses(variant, isDark) {
 
 function getHeaderTitleClasses(variant) {
   if (variant === 'developer' || variant === 'corporate') {
-    return 'mt-3 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl'
+    return 'mt-2 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl'
   }
 
-  return 'mt-3 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl'
+  return 'mt-2 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl'
 }
 
 function getHeaderSubtitleClasses(variant, isDark) {
   if (variant === 'corporate' && !isDark) {
-    return 'mt-3 text-base leading-7 sm:text-lg text-gray-600'
+    return 'mt-2 text-base leading-7 sm:text-lg text-gray-600'
   }
 
-  return `mt-3 text-base leading-7 sm:text-lg ${isDark ? 'text-gray-300' : 'text-gray-400'}`
+  return `mt-2 text-base leading-7 sm:text-lg ${isDark ? 'text-gray-300' : 'text-gray-400'}`
 }
 
 function getSectionTitleClasses(variant) {
@@ -99,18 +99,18 @@ function getMainSectionClasses(variant, isDark) {
 
 function getSideContainerClasses(variant, isDark) {
   if (variant === 'creative') {
-    return 'space-y-5 rounded-3xl bg-[var(--accent-soft)] p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+    return 'space-y-6 rounded-3xl bg-[var(--accent-soft)] p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
   }
 
   if (variant === 'developer') {
     return isDark
-      ? 'space-y-5 rounded-2xl border border-gray-800 bg-black/80 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
-      : 'space-y-5 rounded-2xl border border-black/10 bg-gray-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+      ? 'space-y-6 rounded-2xl border border-gray-800 bg-black/80 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+      : 'space-y-6 rounded-2xl border border-black/10 bg-gray-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
   }
 
   return isDark
-    ? 'space-y-5 rounded-3xl bg-black/60 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
-    : 'space-y-5 rounded-3xl bg-gray-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+    ? 'space-y-6 rounded-3xl bg-black/60 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+    : 'space-y-6 rounded-3xl bg-gray-50 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
 }
 
 function getSideSectionClasses(variant, isDark) {
@@ -229,6 +229,11 @@ function CVPreview({
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
   const fullName = snapshot.fullName || 'Your Name'
   const title = snapshot.title || 'Professional Title'
+  const photo = snapshot.photo
+  const showPhoto = Boolean(photo) && isPhotoVisibleForTemplate(
+    formData.photoVisibilityByTemplate,
+    templateConfig.id,
+  )
   const about =
     snapshot.about || 'Your professional summary will appear here as you fill out the CV form.'
   const skills = snapshot.skills
@@ -356,9 +361,10 @@ function CVPreview({
                   return (
                     <div
                       key={`${item.role}-${item.company}-${index}`}
-                      className={`relative border-l-2 pl-5 ${
+                      className={`relative border-l-2 pl-6 ${
                         atsFriendlyMode ? 'border-gray-300' : timelineBorderClasses
                       }`}
+                      data-export-card="true"
                     >
                       <span
                         className={`absolute -left-[9px] top-1 h-4 w-4 rounded-full border-4 shadow-sm ${
@@ -537,7 +543,7 @@ function CVPreview({
     >
       <header
         data-export-header="true"
-        className={`preview-document__header px-5 py-7 sm:px-8 sm:py-9 print:px-0 ${
+        className={`preview-document__header px-5 py-6 sm:px-8 sm:py-7 print:px-0 ${
           atsFriendlyMode
             ? 'border-b border-gray-200 bg-white text-gray-900'
             : getHeaderColorClasses(variant, isDark)
@@ -545,12 +551,15 @@ function CVPreview({
       >
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className={`ds-kicker ${atsFriendlyMode ? 'text-gray-500' : 'accent-text'}`}>
+            <p
+              data-export-ignore="true"
+              className={`ds-kicker print:hidden ${atsFriendlyMode ? 'text-gray-500' : 'accent-text'}`}
+            >
               {atsFriendlyMode ? 'ATS-friendly mode' : `${templateConfig.label} Template`}
             </p>
             <h3
               className={`leading-none ${
-                atsFriendlyMode ? 'mt-3 text-4xl font-semibold tracking-tight text-gray-900' : getHeaderTitleClasses(variant)
+                atsFriendlyMode ? 'mt-2 text-4xl font-semibold tracking-tight text-gray-900' : getHeaderTitleClasses(variant)
               }`}
             >
               {fullName}
@@ -559,6 +568,23 @@ function CVPreview({
               {title}
             </p>
           </div>
+          {showPhoto ? (
+            <div className="shrink-0">
+              <img
+                src={photo}
+                alt={`${fullName} profile`}
+                data-export-photo="true"
+                className={`rounded-2xl border ${
+                  atsFriendlyMode
+                    ? 'border-gray-300'
+                    : isDark
+                      ? 'border-white/15'
+                      : 'border-black/10'
+                }`}
+                style={{ width: '6.2rem', height: '6.2rem', objectFit: 'cover' }}
+              />
+            </div>
+          ) : null}
         </div>
       </header>
 
@@ -566,14 +592,14 @@ function CVPreview({
         data-export-content="true"
         className={`preview-document__content px-5 py-6 sm:px-8 sm:py-8 print:px-0 print:py-6 ${
           atsFriendlyMode
-            ? 'space-y-6'
+            ? 'space-y-7'
             : templateConfig.layout === 'split'
             ? getSplitColumnsClasses(variant)
-            : 'space-y-5 sm:space-y-6'
+            : 'space-y-6 sm:space-y-6'
         }`}
       >
         <div
-          className="preview-document__column space-y-5 sm:space-y-6 lg:space-y-7"
+          className="preview-document__column space-y-6 sm:space-y-6 lg:space-y-7"
           data-export-primary="true"
         >
           {visiblePrimarySections.map((section) => renderSection(section, 'main'))}

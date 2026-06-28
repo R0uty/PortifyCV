@@ -31,6 +31,27 @@ export const createSectionVisibility = () => ({
   links: true,
 })
 
+export const createSectionItemVisibility = () => ({
+  skills: {},
+  experience: {},
+  education: {},
+  links: {},
+})
+
+export const createTemplatePhotoVisibility = () => ({})
+
+export function isPhotoVisibleForTemplate(photoVisibilityByTemplate, templateId) {
+  if (typeof templateId !== 'string' || !templateId.trim()) {
+    return true
+  }
+
+  if (!isPlainObject(photoVisibilityByTemplate)) {
+    return true
+  }
+
+  return photoVisibilityByTemplate[templateId] !== false
+}
+
 export const sectionVisibilityFields = [
   { key: 'about', label: 'About' },
   { key: 'skills', label: 'Skills' },
@@ -43,11 +64,14 @@ export const createInitialCvData = () => ({
   fullName: '',
   title: '',
   about: '',
+  photo: '',
+  photoVisibilityByTemplate: createTemplatePhotoVisibility(),
   skills: [],
   experience: [createEmptyExperience()],
   education: [createEmptyEducation()],
   links: createEmptyLinks(),
   sectionVisibility: createSectionVisibility(),
+  sectionItemVisibility: createSectionItemVisibility(),
 })
 
 export const initialCvData = createInitialCvData()
@@ -57,6 +81,8 @@ export const demoCvData = {
   title: 'Senior Product Designer',
   about:
     'Product designer with 7+ years of experience shaping SaaS workflows, design systems, and portfolio-ready product storytelling across startup and enterprise teams.',
+  photo: '',
+  photoVisibilityByTemplate: createTemplatePhotoVisibility(),
   skills: [
     'Product Strategy',
     'Design Systems',
@@ -237,6 +263,9 @@ export function parseImportedCvData(value) {
   const education = value.education ?? defaultState.education
   const links = value.links ?? defaultState.links
   const sectionVisibility = value.sectionVisibility ?? defaultState.sectionVisibility
+  const sectionItemVisibility = value.sectionItemVisibility ?? defaultState.sectionItemVisibility
+  const photoVisibilityByTemplate =
+    value.photoVisibilityByTemplate ?? defaultState.photoVisibilityByTemplate
 
   validateAllowedKeys(
     value,
@@ -244,11 +273,14 @@ export function parseImportedCvData(value) {
       'fullName',
       'title',
       'about',
+      'photo',
+      'photoVisibilityByTemplate',
       'skills',
       'experience',
       'education',
       'links',
       'sectionVisibility',
+      'sectionItemVisibility',
     ],
     'Imported CV JSON',
   )
@@ -315,10 +347,47 @@ export function parseImportedCvData(value) {
     }
   })
 
+  if (!isPlainObject(sectionItemVisibility)) {
+    throw new Error('sectionItemVisibility must be an object.')
+  }
+
+  validateAllowedKeys(
+    sectionItemVisibility,
+    ['skills', 'experience', 'education', 'links'],
+    'sectionItemVisibility',
+  )
+
+  Object.entries(sectionItemVisibility).forEach(([sectionKey, sectionValue]) => {
+    if (!isPlainObject(sectionValue)) {
+      throw new Error(`sectionItemVisibility.${sectionKey} must be an object.`)
+    }
+
+    Object.entries(sectionValue).forEach(([itemKey, itemValue]) => {
+      if (typeof itemValue !== 'boolean') {
+        throw new Error(`sectionItemVisibility.${sectionKey}.${itemKey} must be true or false.`)
+      }
+    })
+  })
+
+  if (!isPlainObject(photoVisibilityByTemplate)) {
+    throw new Error('photoVisibilityByTemplate must be an object.')
+  }
+
+  Object.entries(photoVisibilityByTemplate).forEach(([key, entryValue]) => {
+    if (typeof entryValue !== 'boolean') {
+      throw new Error(`photoVisibilityByTemplate.${key} must be true or false.`)
+    }
+  })
+
   return {
     fullName: readOptionalString(value.fullName, 'fullName'),
     title: readOptionalString(value.title, 'title'),
     about: readOptionalString(value.about, 'about'),
+    photo: readOptionalString(value.photo, 'photo'),
+    photoVisibilityByTemplate: {
+      ...createTemplatePhotoVisibility(),
+      ...photoVisibilityByTemplate,
+    },
     skills: skills.map((skill, index) => readOptionalString(skill, `skills[${index}]`)),
     experience:
       experience.length > 0
@@ -351,6 +420,10 @@ export function parseImportedCvData(value) {
     sectionVisibility: {
       ...createSectionVisibility(),
       ...sectionVisibility,
+    },
+    sectionItemVisibility: {
+      ...createSectionItemVisibility(),
+      ...sectionItemVisibility,
     },
   }
 }

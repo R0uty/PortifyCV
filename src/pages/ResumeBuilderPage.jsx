@@ -4,6 +4,7 @@ import AppShell from '../components/AppShell'
 import AppErrorBoundary from '../components/AppErrorBoundary'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
+import ProjectHeader from '../components/ProjectHeader'
 import ToastStack from '../components/ToastStack'
 import {
   defaultAccentId,
@@ -46,12 +47,8 @@ import {
   improveAboutText,
   improveExperienceText,
 } from '../utils/cvFeedback'
-import { analyzeJobDescription, evaluateAtsScore } from '../utils/atsScore'
 
 const TemplateGallery = lazy(() => import('../components/TemplateGallery'))
-const CVSuggestionsPanel = lazy(() => import('../components/CVSuggestionsPanel'))
-const ATSScorePanel = lazy(() => import('../components/ATSScorePanel'))
-const JOB_DESCRIPTION_STORAGE_KEY = 'portifycv-job-description'
 const DEBUG_PDF_EXPORT = true
 
 function createToast(message, type = 'success') {
@@ -75,21 +72,6 @@ function SurfaceFallback({ theme = 'dark', title = 'Loading panel...' }) {
       <div className={`mt-3 h-3 w-full rounded-full ${ui.surfaceMuted}`} />
       <div className={`mt-3 h-3 w-5/6 rounded-full ${ui.surfaceMuted}`} />
     </section>
-  )
-}
-
-function isEditableTarget(target) {
-  if (!(target instanceof HTMLElement)) {
-    return false
-  }
-
-  const tagName = target.tagName.toLowerCase()
-
-  return (
-    tagName === 'input' ||
-    tagName === 'textarea' ||
-    tagName === 'select' ||
-    target.isContentEditable
   )
 }
 
@@ -279,10 +261,6 @@ function loadInitialCvSession() {
 
 function ResumeBuilderPage() {
   const initialSession = useMemo(() => loadInitialCvSession(), [])
-  const initialJobDescriptionState = useMemo(
-    () => safeStorageGet(JOB_DESCRIPTION_STORAGE_KEY, ''),
-    [],
-  )
   const [formData, setFormData] = useState(initialSession.formData)
   const [theme] = useState('light')
   const [accent] = useState(initialSession.accent)
@@ -291,8 +269,6 @@ function ResumeBuilderPage() {
   const [mobilePreviewVisible, setMobilePreviewVisible] = useState(false)
   const [activeExport, setActiveExport] = useState('')
   const [isImporting, setIsImporting] = useState(false)
-  const [showShortcutHelp, setShowShortcutHelp] = useState(false)
-  const [jobDescription, setJobDescription] = useState(initialJobDescriptionState.value)
   const [pastedCvText, setPastedCvText] = useState('')
   const [toasts, setToasts] = useState(
     initialSession.initialToast ? [initialSession.initialToast] : [],
@@ -311,11 +287,6 @@ function ResumeBuilderPage() {
     [formData.fullName, formData.title],
   )
 
-  const completedRequiredFields = Object.values(errors).filter((value) => !value).length
-  const populatedSkills = formData.skills.filter((skill) => skill.trim()).length
-  const populatedExperience = formData.experience.filter(
-    (item) => item.role.trim() || item.company.trim() || item.description.trim(),
-  ).length
   const exportFileName = createExportFileName(formData) || 'cv'
   const currentTemplate = useMemo(
     () => getCvTemplate(selectedTemplate),
@@ -323,18 +294,6 @@ function ResumeBuilderPage() {
   )
   const shellStyle = useMemo(() => getAccentThemeStyles(theme, accent), [theme, accent])
   const feedback = useMemo(() => evaluateCvFeedback(formData), [formData])
-  const atsScore = useMemo(
-    () =>
-      evaluateAtsScore(formData, {
-        template: selectedTemplate,
-        atsFriendly: atsFriendlyMode,
-      }),
-    [atsFriendlyMode, formData, selectedTemplate],
-  )
-  const jobDescriptionAnalysis = useMemo(
-    () => analyzeJobDescription(formData, jobDescription),
-    [formData, jobDescription],
-  )
   const showToast = (message, type = 'success') => {
     const nextToast = createToast(message, type)
 
@@ -394,22 +353,6 @@ function ResumeBuilderPage() {
   }, [accent, setStorageValue])
 
   useEffect(() => {
-    if (!initialJobDescriptionState.ok) {
-      reportStorageIssue()
-    }
-  }, [initialJobDescriptionState.ok, reportStorageIssue])
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setStorageValue(JOB_DESCRIPTION_STORAGE_KEY, jobDescription)
-    }, 180)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [jobDescription, setStorageValue])
-
-  useEffect(() => {
     if (initialSession.storageIssue) {
       reportStorageIssue()
     }
@@ -448,12 +391,6 @@ function ResumeBuilderPage() {
 
   const secondaryButtonClassName = `rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`
   const compactButtonClassName = `shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`
-  const primaryActionButtonClassName =
-    'action-button action-button--primary rounded-full border px-4 py-2.5 text-sm font-semibold transition'
-  const secondaryActionButtonClassName =
-    'action-button action-button--secondary rounded-full border px-4 py-2.5 text-sm font-semibold transition'
-  const checklistItemClassName = `rounded-2xl border px-4 py-3.5 transition-colors ${ui.surfaceMuted}`
-  const panelSurfaceClassName = `fade-in-up surface-shadow rounded-[var(--radius-card)] border p-5 sm:p-6 print:hidden ${ui.surface}`
 
   useEffect(() => {
     if (!DEBUG_PDF_EXPORT) {
@@ -482,11 +419,14 @@ function ResumeBuilderPage() {
 
     showToast(toastLabel)
 
-    const shouldForceDesignerPreview = type === 'pdf-designer' && atsFriendlyMode
-
     try {
       if (type === 'pdf-designer') {
         const expectedVariant = getCvTemplate(selectedTemplate).variant
+        const exportPdfMode = atsFriendlyMode ? 'ats' : 'designer'
+        const didSyncPreviewMode = await waitForPreviewModeSync(
+          previewRef.current,
+          exportPdfMode,
+        )
         const initialPreviewVariant =
           previewRef.current?.querySelector('[data-export-variant]')?.getAttribute('data-export-variant')
           || previewRef.current?.getAttribute('data-export-variant')
@@ -503,21 +443,12 @@ function ResumeBuilderPage() {
           })
         }
 
-        if (shouldForceDesignerPreview) {
-          setAtsFriendlyMode(false)
-
-          const didSyncDesignerMode = await waitForPreviewModeSync(
-            previewRef.current,
-            'designer',
+        if (!didSyncPreviewMode) {
+          showToast(
+            `Preview mode is not synced (${exportPdfMode.toUpperCase()}). Try exporting again in a moment.`,
+            'error',
           )
-
-          if (!didSyncDesignerMode) {
-            showToast(
-              'Preview mode is still in ATS layout. Try exporting again in a moment.',
-              'error',
-            )
-            return
-          }
+          return
         }
 
         const didSyncVariant = await waitForPreviewVariantSync(
@@ -539,12 +470,12 @@ function ResumeBuilderPage() {
         }
 
         await exportCvAsPdf(previewRef.current, exportFileName, {
-          mode: 'designer',
+          mode: exportPdfMode,
           formData,
           theme,
           template: selectedTemplate,
           variant: selectedTemplate,
-          atsFriendlyMode: false,
+          atsFriendlyMode,
         })
       }
 
@@ -557,12 +488,24 @@ function ResumeBuilderPage() {
       }
 
       const exportLabel =
-        type === 'pdf-designer' ? 'Designer PDF' : type === 'html' ? 'HTML' : 'JSON'
+        type === 'pdf-designer'
+          ? atsFriendlyMode
+            ? 'ATS PDF'
+            : 'Designer PDF'
+          : type === 'html'
+            ? 'HTML'
+            : 'JSON'
 
       showToast(`${exportLabel} export downloaded.`)
     } catch (error) {
       const exportLabel =
-        type === 'pdf-designer' ? 'Designer PDF' : type === 'html' ? 'HTML' : 'JSON'
+        type === 'pdf-designer'
+          ? atsFriendlyMode
+            ? 'ATS PDF'
+            : 'Designer PDF'
+          : type === 'html'
+            ? 'HTML'
+            : 'JSON'
 
       showToast(
         error instanceof Error
@@ -571,10 +514,6 @@ function ResumeBuilderPage() {
         'error',
       )
     } finally {
-      if (shouldForceDesignerPreview) {
-        setAtsFriendlyMode(true)
-      }
-
       setActiveExport('')
     }
   }, [atsFriendlyMode, exportFileName, formData, previewRef, selectedTemplate, theme])
@@ -743,118 +682,14 @@ function ResumeBuilderPage() {
     setSelectedTemplate(templateId)
   }, [selectedTemplate])
 
-  const handleToggleShortcutHelp = useCallback(() => {
-    setShowShortcutHelp((current) => !current)
-  }, [])
-
-  const handleAddMissingKeywordToSkills = useCallback((keyword) => {
-    const normalizedKeyword = keyword.trim()
-
-    if (!normalizedKeyword) {
-      return
-    }
-
-    let wasAdded = false
-
-    setFormData((current) => {
-      if (
-        current.skills.some(
-          (skill) => skill.toLowerCase() === normalizedKeyword.toLowerCase(),
-        )
-      ) {
-        return current
-      }
-
-      wasAdded = true
-
-      return {
-        ...current,
-        skills: [...current.skills, normalizedKeyword],
-      }
-    })
-
-    showToast(
-      wasAdded
-        ? `Added "${normalizedKeyword}" to skills.`
-        : `"${normalizedKeyword}" is already in skills.`,
-    )
-  }, [])
-
-  const handleCopyMissingKeywords = useCallback(async () => {
-    const missingKeywords = jobDescriptionAnalysis.missingKeywords
-
-    if (missingKeywords.length === 0) {
-      showToast('No missing keywords to copy.', 'error')
-      return
-    }
-
-    try {
-      await window.navigator.clipboard.writeText(missingKeywords.join(', '))
-      showToast('Missing keywords copied.')
-    } catch {
-      showToast('Clipboard access failed. Please try again.', 'error')
-    }
-  }, [jobDescriptionAnalysis.missingKeywords])
-
-  const handleClearJobDescription = useCallback(() => {
-    if (!jobDescription.trim()) {
-      return
-    }
-
-    setJobDescription('')
-    showToast('Job description cleared.')
-  }, [jobDescription])
-
-  useEffect(() => {
-    const onKeyDown = (event) => {
-      if (isEditableTarget(event.target) || isActionBusy) {
-        return
-      }
-
-      if (!(event.ctrlKey || event.metaKey)) {
-        return
-      }
-
-      const key = event.key.toLowerCase()
-
-      if (key === 'e') {
-        event.preventDefault()
-        handleExport('pdf-designer')
-        return
-      }
-
-      if (key === 'j') {
-        event.preventDefault()
-        handleExport('json')
-        return
-      }
-
-      if (key === 'i') {
-        event.preventDefault()
-        handleImportClick()
-        return
-      }
-
-      if (key === 'p' && event.shiftKey) {
-        event.preventDefault()
-        handleToggleMobilePreview()
-      }
-    }
-
-    window.addEventListener('keydown', onKeyDown)
-
-    return () => {
-      window.removeEventListener('keydown', onKeyDown)
-    }
-  }, [
-    handleExport,
-    handleImportClick,
-    handleToggleMobilePreview,
-    isActionBusy,
-  ])
-
   return (
     <>
+      <ProjectHeader
+        theme={theme}
+        activeExport={activeExport}
+        isActionBusy={isActionBusy}
+        onExport={handleExport}
+      />
       <AppShell
         theme={theme}
         shellStyle={shellStyle}
@@ -869,17 +704,6 @@ function ResumeBuilderPage() {
               onChange={handleImportFile}
             />
             <div className="stack-5">
-              <div className="stack-4">
-                <div>
-                  <p className="brand-mark accent-text">PortifyCV</p>
-                  <h1
-                    className={`mt-4 max-w-[14ch] text-[clamp(1.05rem,0.95rem+0.4vw,1.35rem)] font-normal leading-[1.05] tracking-[-0.02em] ${ui.textPrimary}`}
-                  >
-                    Build your CV
-                  </h1>
-                </div>
-              </div>
-
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
@@ -896,13 +720,6 @@ function ResumeBuilderPage() {
                   onClick={handleCopySummary}
                 >
                   Copy summary
-                </button>
-                <button
-                  type="button"
-                  className={`${secondaryButtonClassName} ${showShortcutHelp ? ui.buttonActive : ''}`}
-                  onClick={handleToggleShortcutHelp}
-                >
-                  {showShortcutHelp ? 'Hide shortcuts' : 'Show shortcuts'}
                 </button>
                 <button
                   type="button"
@@ -999,17 +816,6 @@ function ResumeBuilderPage() {
               <p className={`ds-kicker lg:hidden ${ui.textMuted}`}>
                 Mobile layout stacks the form above the preview.
               </p>
-              {showShortcutHelp ? (
-                <section className={`rounded-2xl border p-4 ${ui.surfaceMuted}`}>
-                  <p className={`ds-kicker ${ui.textMuted}`}>Keyboard shortcuts</p>
-                  <ul className={`mt-3 space-y-2 text-sm ${ui.textSecondary}`}>
-                    <li>Ctrl/Cmd+E: Export PDF</li>
-                    <li>Ctrl/Cmd+J: Export JSON</li>
-                    <li>Ctrl/Cmd+I: Open import</li>
-                    <li>Ctrl/Cmd+Shift+P: Toggle preview</li>
-                  </ul>
-                </section>
-              ) : null}
             </div>
 
             <CVForm
@@ -1020,60 +826,14 @@ function ResumeBuilderPage() {
               feedback={feedback}
               onImproveAboutText={handleImproveAboutText}
               onImproveExperienceText={handleImproveExperienceText}
+              onPhotoError={(message) => showToast(message, 'error')}
+              selectedTemplate={selectedTemplate}
+              selectedTemplateLabel={currentTemplate.label}
             />
           </div>
         }
         content={
           <div className="preview-panel pb-28 sm:pb-6 print:p-0">
-            <div className="preview-action-bar print:hidden">
-              <div className="preview-action-bar__inner">
-                <div className="preview-action-bar__heading">
-                  <h2 className={`preview-action-bar__title mt-0 ${ui.textPrimary}`}>Preview</h2>
-                </div>
-                <div className="preview-action-bar__actions">
-                  <button
-                    type="button"
-                    className={`${primaryActionButtonClassName} accent-border accent-surface accent-text-strong`}
-                    disabled={isActionBusy}
-                    onClick={() => handleExport('pdf-designer')}
-                  >
-                    {activeExport === 'pdf-designer' ? 'Exporting PDF...' : 'Export PDF'}
-                  </button>
-                  <button
-                    type="button"
-                    className={`${secondaryActionButtonClassName} ${ui.button}`}
-                    disabled={isActionBusy}
-                    onClick={() => handleExport('html')}
-                  >
-                    {activeExport === 'html' ? 'Exporting HTML...' : 'Export HTML'}
-                  </button>
-                  <button
-                    type="button"
-                    className={`${secondaryActionButtonClassName} ${ui.button}`}
-                    disabled={isActionBusy}
-                    onClick={() => handleExport('json')}
-                  >
-                    {activeExport === 'json' ? 'Exporting JSON...' : 'Export JSON'}
-                  </button>
-                  <button
-                    type="button"
-                    className={`${secondaryActionButtonClassName} ${ui.button}`}
-                    disabled={isActionBusy}
-                    onClick={handleCopyShareLink}
-                  >
-                    Copy Link
-                  </button>
-                  <button
-                    type="button"
-                    className={`${secondaryActionButtonClassName} ${showShortcutHelp ? ui.buttonActive : ui.button}`}
-                    onClick={handleToggleShortcutHelp}
-                  >
-                    Shortcuts
-                  </button>
-                </div>
-              </div>
-            </div>
-
             <div className="preview-scroll px-3 pb-6 pt-4 sm:px-5 lg:px-6 print:px-0">
               <div className="mb-4 lg:hidden print:hidden">
                 <div className={`surface-shadow rounded-[var(--radius-card)] border p-4 ${ui.surface}`}>
@@ -1106,56 +866,6 @@ function ResumeBuilderPage() {
                 />
               </div>
 
-              <div className="mt-6 flex flex-col gap-5 print:hidden">
-                <section className={panelSurfaceClassName}>
-                  <p className={`ds-kicker ${ui.textMuted}`}>Project checklist</p>
-                  <ul className={`mt-5 grid gap-3 text-sm sm:grid-cols-2 ${ui.textSecondary}`}>
-                    <li className={checklistItemClassName}>
-                      Required fields completed: {completedRequiredFields}/2
-                    </li>
-                    <li className={checklistItemClassName}>
-                      Skills added: {populatedSkills}
-                    </li>
-                    <li className={checklistItemClassName}>
-                      Experience entries started: {populatedExperience}
-                    </li>
-                    <li className={checklistItemClassName}>
-                      Export base filename: {exportFileName}
-                    </li>
-                    <li className={checklistItemClassName}>
-                      Active template: {currentTemplate.label}
-                    </li>
-                  </ul>
-                </section>
-
-                <AppErrorBoundary theme={theme} panelTitle="Smart suggestions">
-                  <Suspense fallback={<SurfaceFallback theme={theme} title="Loading suggestions" />}>
-                    <CVSuggestionsPanel
-                      feedback={feedback}
-                      theme={theme}
-                      onImproveAboutText={handleImproveAboutText}
-                      onImproveExperienceText={handleImproveExperienceText}
-                    />
-                  </Suspense>
-                </AppErrorBoundary>
-
-                <AppErrorBoundary theme={theme} panelTitle="ATS score">
-                  <Suspense fallback={<SurfaceFallback theme={theme} title="Loading ATS score" />}>
-                    <ATSScorePanel
-                      atsScore={atsScore}
-                      theme={theme}
-                      atsFriendlyMode={atsFriendlyMode}
-                      onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
-                      jobDescription={jobDescription}
-                      onJobDescriptionChange={setJobDescription}
-                      jobDescriptionAnalysis={jobDescriptionAnalysis}
-                      onAddMissingKeyword={handleAddMissingKeywordToSkills}
-                      onCopyMissingKeywords={handleCopyMissingKeywords}
-                      onClearJobDescription={handleClearJobDescription}
-                    />
-                  </Suspense>
-                </AppErrorBoundary>
-              </div>
             </div>
           </div>
         }
