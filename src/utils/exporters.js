@@ -2,6 +2,7 @@ import { saveAs } from 'file-saver'
 import { defaultTemplateId, getCvTemplate } from './cvTemplates'
 import { isPhotoVisibleForTemplate } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
+import { formatDateRange, formatLinkLabel } from './shared'
 
 const PDF_MODES = {
   designer: {
@@ -111,26 +112,6 @@ async function waitForPreviewVariant(previewElement, expectedVariant, maxWaitMs 
   )
 
   return false
-}
-
-function trimValue(value) {
-  return value.trim()
-}
-
-function formatDateRange(startDate, endDate) {
-  return [startDate, endDate].map(trimValue).filter(Boolean).join(' - ')
-}
-
-function formatLinkLabel(key) {
-  if (key === 'github') {
-    return 'GitHub'
-  }
-
-  if (key === 'linkedin') {
-    return 'LinkedIn'
-  }
-
-  return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
 function createExportCopy(locale = 'en') {

@@ -1,5 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 
+import AutoGrowTextarea from './AutoGrowTextarea'
+import EntryBadge from './EntryBadge'
+import Field from './Field'
+import InlineTipList from './InlineTipList'
 import PanelSection from './PanelSection'
 import { getUiTheme } from '../utils/designSystem'
 import {
@@ -9,6 +13,7 @@ import {
   getLinkFields,
   getSectionVisibilityFields,
 } from '../utils/cvForm'
+import { FORM_ACTION } from '../reducers/cvFormReducer'
 
 const MAX_PROFILE_PHOTO_SIZE_BYTES = 2 * 1024 * 1024
 const MAX_PROFILE_PHOTO_EDGE_PX = 480
@@ -83,124 +88,6 @@ function localizePhotoErrorMessage(message, locale = 'en') {
   return map[message] ?? message
 }
 
-function AutoGrowTextarea({
-  className,
-  value,
-  onChange,
-  placeholder,
-  minHeight = 112,
-}) {
-  const textareaRef = useRef(null)
-
-  useEffect(() => {
-    if (!textareaRef.current) {
-      return
-    }
-
-    textareaRef.current.style.height = '0px'
-    textareaRef.current.style.height = `${Math.max(textareaRef.current.scrollHeight, minHeight)}px`
-  }, [minHeight, value])
-
-  return (
-    <textarea
-      ref={textareaRef}
-      className={className}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      rows={1}
-    />
-  )
-}
-
-function Field({
-  label,
-  error,
-  required = false,
-  children,
-  labelClassName = 'text-gray-300',
-}) {
-  return (
-    <label className="block">
-      <span className={`text-sm font-medium ${labelClassName}`}>
-        {label}
-        {required ? <span className="ml-1 text-gray-500">*</span> : null}
-      </span>
-      {children}
-      {error ? <p className="mt-2 text-xs text-gray-500">{error}</p> : null}
-    </label>
-  )
-}
-
-function InlineTipList({
-  items = [],
-  theme = 'dark',
-  locale = 'en',
-  actionLabel = '',
-  onAction = null,
-}) {
-  const ui = getUiTheme(theme)
-  const isFinnish = locale === 'fi'
-
-  if (items.length === 0) {
-    return null
-  }
-
-  return (
-    <div className="mt-3 space-y-2">
-      {items.map((item) => (
-        <div
-          key={item.id}
-          className={`rounded-2xl border px-4 py-3 ${
-            item.type === 'warning'
-              ? ui.isDark
-                ? 'border-gray-400/20 bg-gray-400/10 text-gray-100'
-                : 'border-gray-300 bg-gray-50 text-gray-800'
-              : `${ui.surfaceMuted} ${ui.textSecondary}`
-          }`}
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold">{item.title}</p>
-              <p className="mt-1 text-sm/6 opacity-90">{item.message}</p>
-            </div>
-            {item.action && onAction ? (
-              <button
-                type="button"
-                className={`shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
-                onClick={onAction}
-              >
-                {actionLabel || (isFinnish ? 'Paranna tekstiä' : 'Improve text')}
-              </button>
-            ) : null}
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function EntryBadge({ count = 0, theme = 'dark', locale = 'en' }) {
-  const ui = getUiTheme(theme)
-  const isFinnish = locale === 'fi'
-
-  if (count === 0) {
-    return null
-  }
-
-  return (
-    <span
-      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-        ui.isDark ? 'bg-gray-400/15 text-gray-100' : 'bg-gray-100 text-gray-700'
-      }`}
-    >
-      {isFinnish
-        ? `${count} vinkkiä`
-        : `${count} tip${count === 1 ? '' : 's'}`}
-    </span>
-  )
-}
-
 function isSectionItemVisible(sectionItemVisibility, section, itemKey) {
   return sectionItemVisibility?.[section]?.[String(itemKey)] !== false
 }
@@ -265,7 +152,7 @@ function CVForm({
   }
 
   const updateRootField = (field, value) => {
-    dispatchFormData({ type: 'SET_ROOT_FIELD', field, value })
+    dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field, value })
   }
 
   const handlePhotoUpload = async (event) => {
@@ -291,15 +178,15 @@ function CVForm({
   }
 
   const updateLinkField = (field, value) => {
-    dispatchFormData({ type: 'SET_LINK_FIELD', field, value })
+    dispatchFormData({ type: FORM_ACTION.SET_LINK_FIELD, field, value })
   }
 
   const toggleSectionVisibility = (section) => {
-    dispatchFormData({ type: 'TOGGLE_SECTION_VISIBILITY', section })
+    dispatchFormData({ type: FORM_ACTION.TOGGLE_SECTION_VISIBILITY, section })
   }
 
   const toggleSectionItemVisibility = (section, itemKey) => {
-    dispatchFormData({ type: 'TOGGLE_SECTION_ITEM_VISIBILITY', section, itemKey })
+    dispatchFormData({ type: FORM_ACTION.TOGGLE_SECTION_ITEM_VISIBILITY, section, itemKey })
   }
 
   const togglePhotoVisibilityForSelectedTemplate = () => {
@@ -307,7 +194,7 @@ function CVForm({
       return
     }
 
-    dispatchFormData({ type: 'TOGGLE_PHOTO_VISIBILITY', template: selectedTemplate })
+    dispatchFormData({ type: FORM_ACTION.TOGGLE_PHOTO_VISIBILITY, template: selectedTemplate })
   }
 
   const addSkill = (value) => {
@@ -315,40 +202,40 @@ function CVForm({
       return
     }
 
-    dispatchFormData({ type: 'ADD_SKILL', skill: value })
+    dispatchFormData({ type: FORM_ACTION.ADD_SKILL, skill: value })
     setSkillInput('')
   }
 
   const removeSkill = (index) => {
-    dispatchFormData({ type: 'REMOVE_SKILL', index })
+    dispatchFormData({ type: FORM_ACTION.REMOVE_SKILL, index })
   }
 
   const duplicateSkill = (index) => {
-    dispatchFormData({ type: 'DUPLICATE_SKILL', index })
+    dispatchFormData({ type: FORM_ACTION.DUPLICATE_SKILL, index })
   }
 
   const moveSkill = (index, direction) => {
-    dispatchFormData({ type: 'MOVE_SKILL', index, direction })
+    dispatchFormData({ type: FORM_ACTION.MOVE_SKILL, index, direction })
   }
 
   const updateArrayItem = (section, index, field, value) => {
-    dispatchFormData({ type: 'UPDATE_ARRAY_ITEM', section, index, field, value })
+    dispatchFormData({ type: FORM_ACTION.UPDATE_ARRAY_ITEM, section, index, field, value })
   }
 
   const addArrayItem = (section) => {
-    dispatchFormData({ type: 'ADD_ARRAY_ITEM', section })
+    dispatchFormData({ type: FORM_ACTION.ADD_ARRAY_ITEM, section })
   }
 
   const removeArrayItem = (section, index) => {
-    dispatchFormData({ type: 'REMOVE_ARRAY_ITEM', section, index })
+    dispatchFormData({ type: FORM_ACTION.REMOVE_ARRAY_ITEM, section, index })
   }
 
   const duplicateArrayItem = (section, index) => {
-    dispatchFormData({ type: 'DUPLICATE_ARRAY_ITEM', section, index })
+    dispatchFormData({ type: FORM_ACTION.DUPLICATE_ARRAY_ITEM, section, index })
   }
 
   const moveArrayItem = (section, index, direction) => {
-    dispatchFormData({ type: 'MOVE_ARRAY_ITEM', section, index, direction })
+    dispatchFormData({ type: FORM_ACTION.MOVE_ARRAY_ITEM, section, index, direction })
   }
 
   const handleSkillKeyDown = (event) => {

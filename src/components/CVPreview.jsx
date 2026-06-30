@@ -4,24 +4,9 @@ import { createCvSnapshot } from '../utils/cvSnapshot'
 import { createSectionVisibility, isPhotoVisibleForTemplate } from '../utils/cvForm'
 import { getUiTheme } from '../utils/designSystem'
 import { getCvTemplate } from '../utils/cvTemplates'
+import { formatDateRange, formatLinkLabel } from '../utils/shared'
 
 const previewSectionTitleClasses = 'text-xs font-semibold uppercase tracking-[0.24em]'
-
-function formatDateRange(startDate, endDate) {
-  return [startDate, endDate].map((value) => value.trim()).filter(Boolean).join(' - ')
-}
-
-function formatLinkLabel(key) {
-  if (key === 'github') {
-    return 'GitHub'
-  }
-
-  if (key === 'linkedin') {
-    return 'LinkedIn'
-  }
-
-  return key.charAt(0).toUpperCase() + key.slice(1)
-}
 
 function getPreviewClasses(variant, isDark) {
   if (variant === 'creative') {

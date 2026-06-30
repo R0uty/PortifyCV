@@ -30,8 +30,8 @@ import {
   getCvTemplates,
   getCvTemplate,
 } from '../utils/cvTemplates'
-import { cvFormReducer } from '../reducers/cvFormReducer'
-import { uiReducer, createInitialUiState } from '../reducers/uiReducer'
+import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
+import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
 import {
   createExportFileName,
 } from '../utils/cvSnapshot'
@@ -302,10 +302,10 @@ function ResumeBuilderPage() {
   const showToast = (message, type = 'success') => {
     const nextToast = createToast(message, type)
 
-    dispatchUi({ type: 'ADD_TOAST', toast: nextToast })
+    dispatchUi({ type: UI_ACTION.ADD_TOAST, toast: nextToast })
 
     const timeoutId = window.setTimeout(() => {
-      dispatchUi({ type: 'REMOVE_TOAST', toastId: nextToast.id })
+      dispatchUi({ type: UI_ACTION.REMOVE_TOAST, toastId: nextToast.id })
       toastTimeoutsRef.current.delete(nextToast.id)
     }, 2800)
 
@@ -388,7 +388,7 @@ function ResumeBuilderPage() {
       }
 
       const timeoutId = window.setTimeout(() => {
-        dispatchUi({ type: 'REMOVE_TOAST', toastId: toast.id })
+        dispatchUi({ type: UI_ACTION.REMOVE_TOAST, toastId: toast.id })
         toastTimeoutsRef.current.delete(toast.id)
       }, 2800)
 
@@ -410,7 +410,7 @@ function ResumeBuilderPage() {
   const compactButtonClassName = `shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`
 
   const handleExport = useCallback(async (type) => {
-    dispatchUi({ type: 'SET_ACTIVE_EXPORT', value: type })
+    dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: type })
 
     const toastLabel =
       type === 'pdf-designer'
@@ -518,7 +518,7 @@ function ResumeBuilderPage() {
         'error',
       )
     } finally {
-      dispatchUi({ type: 'SET_ACTIVE_EXPORT', value: '' })
+      dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
     }
   }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate, theme])
 
@@ -533,7 +533,7 @@ function ResumeBuilderPage() {
       return
     }
 
-    dispatchUi({ type: 'SET_IMPORTING', value: true })
+    dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: true })
 
     try {
       showToast(locale === 'fi' ? `Tuodaan ${file.name}...` : `Importing ${file.name}...`)
@@ -541,7 +541,7 @@ function ResumeBuilderPage() {
       const parsedValue = JSON.parse(fileText)
       const importedData = parseImportedCvData(parsedValue)
 
-      dispatchFormData({ type: 'SET_FORM_DATA', formData: importedData })
+      dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: importedData })
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
       showToast(locale === 'fi' ? `CV-tiedot tuotu tiedostosta ${file.name}.` : `Imported CV data from ${file.name}.`)
     } catch (error) {
@@ -561,19 +561,19 @@ function ResumeBuilderPage() {
         )
       }
     } finally {
-      dispatchUi({ type: 'SET_IMPORTING', value: false })
+      dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: false })
       event.target.value = ''
     }
   }, [locale, setStorageValue])
 
   const handleResetForm = useCallback(() => {
-    dispatchFormData({ type: 'RESET_FORM' })
+    dispatchFormData({ type: FORM_ACTION.RESET_FORM })
     removeStorageValue(CV_DRAFT_STORAGE_KEY)
     showToast(locale === 'fi' ? 'Lomake nollattu tyhjäksi CV:ksi.' : 'Form reset to a blank CV.')
   }, [locale, removeStorageValue])
 
   const handleLoadDemo = useCallback(() => {
-    dispatchFormData({ type: 'SET_FORM_DATA', formData: structuredClone(demoCvData) })
+    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: structuredClone(demoCvData) })
     setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
     showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
   }, [locale, setStorageValue])
@@ -582,8 +582,8 @@ function ResumeBuilderPage() {
     try {
       const parsedData = parsePastedCvText(pastedCvText, { locale })
 
-      dispatchFormData({ type: 'MERGE_FORM_DATA', partialData: parsedData })
-      dispatchUi({ type: 'SET_PASTED_CV_TEXT', value: '' })
+      dispatchFormData({ type: FORM_ACTION.MERGE_FORM_DATA, partialData: parsedData })
+      dispatchUi({ type: UI_ACTION.SET_PASTED_CV_TEXT, value: '' })
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
       showToast(locale === 'fi' ? 'Liitetty CV-teksti tuotu.' : 'Pasted CV text imported.')
     } catch (error) {
@@ -622,7 +622,7 @@ function ResumeBuilderPage() {
       return
     }
 
-    dispatchFormData({ type: 'SET_ROOT_FIELD', field: 'about', value: nextAbout })
+    dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'about', value: nextAbout })
     showToast(locale === 'fi' ? 'Esittelytekstiä parannettu.' : 'About text improved.')
   }, [formData, locale])
 
@@ -646,7 +646,7 @@ function ResumeBuilderPage() {
     }
 
     dispatchFormData({
-      type: 'UPDATE_ARRAY_ITEM',
+      type: FORM_ACTION.UPDATE_ARRAY_ITEM,
       section: 'experience',
       index,
       field: 'description',
@@ -660,23 +660,23 @@ function ResumeBuilderPage() {
   }, [formData.experience, locale])
 
   const handleToggleAtsFriendlyMode = useCallback(() => {
-    dispatchUi({ type: 'TOGGLE_ATS_MODE' })
+    dispatchUi({ type: UI_ACTION.TOGGLE_ATS_MODE })
   }, [])
 
   const handleToggleMobilePreview = useCallback(() => {
-    dispatchUi({ type: 'TOGGLE_MOBILE_PREVIEW' })
+    dispatchUi({ type: UI_ACTION.TOGGLE_MOBILE_PREVIEW })
   }, [])
 
   const handleSelectTemplate = useCallback((templateId) => {
-    dispatchUi({ type: 'SET_SELECTED_TEMPLATE', templateId })
+    dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
   }, [])
 
   const handleLocaleChange = useCallback((nextLocale) => {
-    dispatchUi({ type: 'SET_LOCALE', locale: nextLocale === 'fi' ? 'fi' : 'en' })
+    dispatchUi({ type: UI_ACTION.SET_LOCALE, locale: nextLocale === 'fi' ? 'fi' : 'en' })
   }, [])
 
   const handlePastedCvTextChange = useCallback((event) => {
-    dispatchUi({ type: 'SET_PASTED_CV_TEXT', value: event.target.value })
+    dispatchUi({ type: UI_ACTION.SET_PASTED_CV_TEXT, value: event.target.value })
   }, [])
 
   const sidebarContent = useMemo(() => (
@@ -814,19 +814,25 @@ function ResumeBuilderPage() {
         </p>
       </div>
 
-      <CVForm
-        formData={formData}
-        dispatchFormData={dispatchFormData}
-        errors={errors}
+      <AppErrorBoundary
         theme={theme}
-        feedback={feedback}
-        onImproveAboutText={handleImproveAboutText}
-        onImproveExperienceText={handleImproveExperienceText}
-        onPhotoError={(message) => showToast(message, 'error')}
-        selectedTemplate={selectedTemplate}
-        selectedTemplateLabel={currentTemplate.label}
+        panelTitle={locale === 'fi' ? 'CV-lomake' : 'CV form'}
         locale={locale}
-      />
+      >
+        <CVForm
+          formData={formData}
+          dispatchFormData={dispatchFormData}
+          errors={errors}
+          theme={theme}
+          feedback={feedback}
+          onImproveAboutText={handleImproveAboutText}
+          onImproveExperienceText={handleImproveExperienceText}
+          onPhotoError={(message) => showToast(message, 'error')}
+          selectedTemplate={selectedTemplate}
+          selectedTemplateLabel={currentTemplate.label}
+          locale={locale}
+        />
+      </AppErrorBoundary>
     </div>
   ), [
     atsFriendlyMode,
@@ -892,14 +898,20 @@ function ResumeBuilderPage() {
           >
             {locale === 'fi' ? 'Takaisin editoriin' : 'Back to editor'}
           </button>
-          <CVPreview
-            formData={formData}
+          <AppErrorBoundary
             theme={theme}
-            previewRef={previewRef}
-            template={selectedTemplate}
+            panelTitle={locale === 'fi' ? 'CV-esikatselu' : 'CV preview'}
             locale={locale}
-            atsFriendlyMode={atsFriendlyMode}
-          />
+          >
+            <CVPreview
+              formData={formData}
+              theme={theme}
+              previewRef={previewRef}
+              template={selectedTemplate}
+              locale={locale}
+              atsFriendlyMode={atsFriendlyMode}
+            />
+          </AppErrorBoundary>
         </div>
 
       </div>

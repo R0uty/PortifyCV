@@ -7,6 +7,26 @@ import {
   createEmptyEducation,
 } from '../utils/cvForm'
 
+export const FORM_ACTION = {
+  SET_ROOT_FIELD: 'SET_ROOT_FIELD',
+  SET_LINK_FIELD: 'SET_LINK_FIELD',
+  TOGGLE_SECTION_VISIBILITY: 'TOGGLE_SECTION_VISIBILITY',
+  TOGGLE_SECTION_ITEM_VISIBILITY: 'TOGGLE_SECTION_ITEM_VISIBILITY',
+  TOGGLE_PHOTO_VISIBILITY: 'TOGGLE_PHOTO_VISIBILITY',
+  ADD_SKILL: 'ADD_SKILL',
+  REMOVE_SKILL: 'REMOVE_SKILL',
+  DUPLICATE_SKILL: 'DUPLICATE_SKILL',
+  MOVE_SKILL: 'MOVE_SKILL',
+  UPDATE_ARRAY_ITEM: 'UPDATE_ARRAY_ITEM',
+  ADD_ARRAY_ITEM: 'ADD_ARRAY_ITEM',
+  REMOVE_ARRAY_ITEM: 'REMOVE_ARRAY_ITEM',
+  DUPLICATE_ARRAY_ITEM: 'DUPLICATE_ARRAY_ITEM',
+  MOVE_ARRAY_ITEM: 'MOVE_ARRAY_ITEM',
+  SET_FORM_DATA: 'SET_FORM_DATA',
+  RESET_FORM: 'RESET_FORM',
+  MERGE_FORM_DATA: 'MERGE_FORM_DATA',
+}
+
 function shiftVisibilityMapAfterRemove(visibilityMap = {}, removedIndex) {
   return Object.entries(visibilityMap).reduce((next, [key, value]) => {
     const index = Number.parseInt(key, 10)
@@ -72,16 +92,16 @@ function swapVisibilityMapIndexes(visibilityMap = {}, firstIndex, secondIndex) {
 
 export function cvFormReducer(state, action) {
   switch (action.type) {
-    case 'SET_ROOT_FIELD':
+    case FORM_ACTION.SET_ROOT_FIELD:
       return { ...state, [action.field]: action.value }
 
-    case 'SET_LINK_FIELD':
+    case FORM_ACTION.SET_LINK_FIELD:
       return {
         ...state,
         links: { ...state.links, [action.field]: action.value },
       }
 
-    case 'TOGGLE_SECTION_VISIBILITY':
+    case FORM_ACTION.TOGGLE_SECTION_VISIBILITY:
       return {
         ...state,
         sectionVisibility: {
@@ -91,7 +111,7 @@ export function cvFormReducer(state, action) {
         },
       }
 
-    case 'TOGGLE_SECTION_ITEM_VISIBILITY': {
+    case FORM_ACTION.TOGGLE_SECTION_ITEM_VISIBILITY: {
       const normalizedItemKey = String(action.itemKey)
       const nextSectionItemVisibility = {
         ...createSectionItemVisibility(),
@@ -111,7 +131,7 @@ export function cvFormReducer(state, action) {
       }
     }
 
-    case 'TOGGLE_PHOTO_VISIBILITY':
+    case FORM_ACTION.TOGGLE_PHOTO_VISIBILITY:
       if (!action.template) {
         return state
       }
@@ -127,7 +147,7 @@ export function cvFormReducer(state, action) {
         },
       }
 
-    case 'ADD_SKILL': {
+    case FORM_ACTION.ADD_SKILL: {
       const trimmed = action.skill.trim()
 
       if (!trimmed) {
@@ -141,7 +161,7 @@ export function cvFormReducer(state, action) {
       return { ...state, skills: [...state.skills, trimmed] }
     }
 
-    case 'REMOVE_SKILL':
+    case FORM_ACTION.REMOVE_SKILL:
       return {
         ...state,
         skills: state.skills.filter((_, i) => i !== action.index),
@@ -152,7 +172,7 @@ export function cvFormReducer(state, action) {
         },
       }
 
-    case 'DUPLICATE_SKILL': {
+    case FORM_ACTION.DUPLICATE_SKILL: {
       const currentSkill = state.skills[action.index]
 
       if (!currentSkill) {
@@ -175,7 +195,7 @@ export function cvFormReducer(state, action) {
       }
     }
 
-    case 'MOVE_SKILL': {
+    case FORM_ACTION.MOVE_SKILL: {
       const nextIndex = action.index + action.direction
 
       if (nextIndex < 0 || nextIndex >= state.skills.length) {
@@ -202,7 +222,7 @@ export function cvFormReducer(state, action) {
       }
     }
 
-    case 'UPDATE_ARRAY_ITEM':
+    case FORM_ACTION.UPDATE_ARRAY_ITEM:
       return {
         ...state,
         [action.section]: state[action.section].map((item, i) =>
@@ -210,7 +230,7 @@ export function cvFormReducer(state, action) {
         ),
       }
 
-    case 'ADD_ARRAY_ITEM': {
+    case FORM_ACTION.ADD_ARRAY_ITEM: {
       const factory = action.section === 'experience' ? createEmptyExperience : createEmptyEducation
 
       return {
@@ -223,7 +243,7 @@ export function cvFormReducer(state, action) {
       }
     }
 
-    case 'REMOVE_ARRAY_ITEM': {
+    case FORM_ACTION.REMOVE_ARRAY_ITEM: {
       const currentItemVisibility = {
         ...createSectionItemVisibility(),
         ...(state.sectionItemVisibility ?? {}),
@@ -242,7 +262,7 @@ export function cvFormReducer(state, action) {
       }
     }
 
-    case 'DUPLICATE_ARRAY_ITEM': {
+    case FORM_ACTION.DUPLICATE_ARRAY_ITEM: {
       const currentItem = state[action.section][action.index]
 
       if (!currentItem) {
@@ -265,7 +285,7 @@ export function cvFormReducer(state, action) {
       }
     }
 
-    case 'MOVE_ARRAY_ITEM': {
+    case FORM_ACTION.MOVE_ARRAY_ITEM: {
       const nextIndex = action.index + action.direction
 
       if (nextIndex < 0 || nextIndex >= state[action.section].length) {
@@ -292,13 +312,13 @@ export function cvFormReducer(state, action) {
       }
     }
 
-    case 'SET_FORM_DATA':
+    case FORM_ACTION.SET_FORM_DATA:
       return action.formData
 
-    case 'RESET_FORM':
+    case FORM_ACTION.RESET_FORM:
       return createInitialCvData()
 
-    case 'MERGE_FORM_DATA':
+    case FORM_ACTION.MERGE_FORM_DATA:
       return { ...state, ...action.partialData }
 
     default:
