@@ -29,8 +29,9 @@ class ErrorBoundaryInner extends Component {
   }
 }
 
-function AppErrorBoundary({ children, theme = 'dark', panelTitle = 'Panel' }) {
+function AppErrorBoundary({ children, theme = 'dark', panelTitle = 'Panel', locale = 'en' }) {
   const ui = getUiTheme(theme)
+  const isFinnish = locale === 'fi'
 
   return (
     <ErrorBoundaryInner
@@ -41,17 +42,19 @@ function AppErrorBoundary({ children, theme = 'dark', panelTitle = 'Panel' }) {
         >
           <p className={`ds-kicker ${ui.textMuted}`}>{panelTitle}</p>
           <h3 className={`ds-section-title mt-2 font-semibold ${ui.textPrimary}`}>
-            This section failed to render.
+            {isFinnish ? 'Tämän osion renderöinti epäonnistui.' : 'This section failed to render.'}
           </h3>
           <p className={`ds-body-sm mt-3 ${ui.textSecondary}`}>
-            Try loading it again. Your CV data is still available.
+            {isFinnish
+              ? 'Yritä ladata osio uudelleen. CV-tietosi ovat edelleen tallessa.'
+              : 'Try loading it again. Your CV data is still available.'}
           </p>
           <button
             type="button"
             className={`mt-4 rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
             onClick={onRetry}
           >
-            Retry panel
+            {isFinnish ? 'Yritä uudelleen' : 'Retry panel'}
           </button>
         </section>
       )}

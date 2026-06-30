@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react'
 
-import { createCvSnapshot } from '../utils/exporters'
+import { createCvSnapshot } from '../utils/cvSnapshot'
 import { createSectionVisibility, isPhotoVisibleForTemplate } from '../utils/cvForm'
 import { getUiTheme } from '../utils/designSystem'
 import { getCvTemplate } from '../utils/cvTemplates'
@@ -221,21 +221,25 @@ function CVPreview({
   theme = 'dark',
   previewRef = null,
   template = 'minimal',
+  locale = 'en',
   atsFriendlyMode = false,
 }) {
   const ui = useMemo(() => getUiTheme(theme), [theme])
   const isDark = ui.isDark
-  const templateConfig = useMemo(() => getCvTemplate(template), [template])
+  const templateConfig = useMemo(() => getCvTemplate(template, locale), [locale, template])
+  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
-  const fullName = snapshot.fullName || 'Your Name'
-  const title = snapshot.title || 'Professional Title'
+  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
+  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
   const photo = snapshot.photo
   const showPhoto = Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
-  const about =
-    snapshot.about || 'Your professional summary will appear here as you fill out the CV form.'
+  const about = snapshot.about
+    || (isFinnish
+      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+      : 'Your professional summary will appear here as you fill out the CV form.')
   const skills = snapshot.skills
   const experience = snapshot.experience
   const education = snapshot.education
@@ -324,7 +328,7 @@ function CVPreview({
                     : 'border-black/5'
               }`}
             >
-              <h4 className={resolvedSectionTitleClasses}>About</h4>
+              <h4 className={resolvedSectionTitleClasses}>{isFinnish ? 'Esittely' : 'About'}</h4>
               {!atsFriendlyMode ? (
                 <div
                   data-export-summary-chip="true"
@@ -349,7 +353,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            <h4 className={resolvedSectionTitleClasses}>Experience</h4>
+            <h4 className={resolvedSectionTitleClasses}>{isFinnish ? 'Kokemus' : 'Experience'}</h4>
             <div className="mt-6 space-y-7">
               {experience.length > 0 ? (
                 experience.map((item, index) => {
@@ -382,7 +386,7 @@ function CVPreview({
                                   : 'text-gray-900'
                             }`}
                           >
-                            {heading || 'Untitled role'}
+                            {heading || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')}
                           </p>
                           {item.description.trim() ? (
                             <p className={`mt-3 text-sm leading-7 ${bodyTextClasses}`}>
@@ -392,7 +396,7 @@ function CVPreview({
                         </div>
 
                         <p className={`shrink-0 text-xs font-medium uppercase tracking-[0.16em] ${metaTextClasses}`}>
-                          {dateRange || 'Dates pending'}
+                          {dateRange || (isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending')}
                         </p>
                       </div>
                     </div>
@@ -400,7 +404,9 @@ function CVPreview({
                 })
               ) : (
                 <p className="text-sm text-gray-500">
-                  Experience entries will render here in a timeline layout.
+                  {isFinnish
+                    ? 'Kokemuskohdat näkyvät tässä aikajanamuodossa.'
+                    : 'Experience entries will render here in a timeline layout.'}
                 </p>
               )}
             </div>
@@ -416,7 +422,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            <h4 className={resolvedSectionTitleClasses}>Education</h4>
+            <h4 className={resolvedSectionTitleClasses}>{isFinnish ? 'Koulutus' : 'Education'}</h4>
             <div className="mt-6 space-y-4">
               {education.length > 0 ? (
                 education.map((item, index) => (
@@ -438,18 +444,21 @@ function CVPreview({
                         >
                           {[item.degree.trim(), item.school.trim()]
                             .filter(Boolean)
-                            .join(', ') || 'Education entry'}
+                            .join(', ') || (isFinnish ? 'Koulutusmerkintä' : 'Education entry')}
                         </p>
                       </div>
                       <p className={`text-xs font-medium uppercase tracking-[0.16em] ${metaTextClasses}`}>
-                        {formatDateRange(item.startDate, item.endDate) || 'Dates pending'}
+                        {formatDateRange(item.startDate, item.endDate)
+                          || (isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending')}
                       </p>
                     </div>
                   </div>
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  Education items will appear here once you add them.
+                  {isFinnish
+                    ? 'Koulutuskohdat näkyvät tässä, kun lisäät niitä.'
+                    : 'Education items will appear here once you add them.'}
                 </p>
               )}
             </div>
@@ -465,7 +474,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            <h4 className={resolvedSectionTitleClasses}>Skills</h4>
+            <h4 className={resolvedSectionTitleClasses}>{isFinnish ? 'Taidot' : 'Skills'}</h4>
             <div className="mt-4 flex flex-wrap gap-2">
               {skills.length > 0 ? (
                 skills.map((skill) => (
@@ -482,7 +491,9 @@ function CVPreview({
                   </span>
                 ))
               ) : (
-                <p className="text-sm text-gray-500">Add skills to display them as tags.</p>
+                <p className="text-sm text-gray-500">
+                  {isFinnish ? 'Lisää taitoja näyttääksesi ne tageina.' : 'Add skills to display them as tags.'}
+                </p>
               )}
             </div>
           </>
@@ -497,7 +508,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            <h4 className={resolvedSectionTitleClasses}>Links</h4>
+            <h4 className={resolvedSectionTitleClasses}>{isFinnish ? 'Linkit' : 'Links'}</h4>
             <div className="mt-4 space-y-3">
               {links.length > 0 ? (
                 links.map(([key, value]) => (
@@ -516,7 +527,9 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  Portfolio and social links will appear here.
+                  {isFinnish
+                    ? 'Portfolio- ja some-linkit näkyvät tässä.'
+                    : 'Portfolio and social links will appear here.'}
                 </p>
               )}
             </div>
@@ -555,7 +568,9 @@ function CVPreview({
               data-export-ignore="true"
               className={`ds-kicker print:hidden ${atsFriendlyMode ? 'text-gray-500' : 'accent-text'}`}
             >
-              {atsFriendlyMode ? 'ATS-friendly mode' : `${templateConfig.label} Template`}
+              {atsFriendlyMode
+                ? isFinnish ? 'ATS-ystävällinen tila' : 'ATS-friendly mode'
+                : `${templateConfig.label} ${isFinnish ? 'pohja' : 'Template'}`}
             </p>
             <h3
               className={`leading-none ${

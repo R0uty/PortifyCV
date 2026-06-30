@@ -6,10 +6,8 @@ import {
   createSectionVisibility,
   createSectionItemVisibility,
   isPhotoVisibleForTemplate,
-  createEmptyEducation,
-  createEmptyExperience,
-  linkFields,
-  sectionVisibilityFields,
+  getLinkFields,
+  getSectionVisibilityFields,
 } from '../utils/cvForm'
 
 const MAX_PROFILE_PHOTO_SIZE_BYTES = 2 * 1024 * 1024
@@ -69,6 +67,22 @@ async function buildProfilePhotoDataUrl(file) {
   return normalizedDataUrl
 }
 
+function localizePhotoErrorMessage(message, locale = 'en') {
+  if (locale !== 'fi') {
+    return message
+  }
+
+  const map = {
+    'Could not read the selected image file.': 'Valittua kuvatiedostoa ei voitu lukea.',
+    'Could not process the selected image file.': 'Valittua kuvatiedostoa ei voitu käsitellä.',
+    'Select a valid image file.': 'Valitse kelvollinen kuvatiedosto.',
+    'Image must be 2MB or smaller.': 'Kuvan on oltava enintään 2 Mt.',
+    'Image is too large after processing. Try a smaller image.': 'Kuva on käsittelyn jälkeen liian suuri. Kokeile pienempää kuvaa.',
+  }
+
+  return map[message] ?? message
+}
+
 function AutoGrowTextarea({
   className,
   value,
@@ -118,8 +132,15 @@ function Field({
   )
 }
 
-function InlineTipList({ items = [], theme = 'dark', actionLabel = '', onAction = null }) {
+function InlineTipList({
+  items = [],
+  theme = 'dark',
+  locale = 'en',
+  actionLabel = '',
+  onAction = null,
+}) {
   const ui = getUiTheme(theme)
+  const isFinnish = locale === 'fi'
 
   if (items.length === 0) {
     return null
@@ -149,7 +170,7 @@ function InlineTipList({ items = [], theme = 'dark', actionLabel = '', onAction 
                 className={`shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
                 onClick={onAction}
               >
-                {actionLabel || 'Improve text'}
+                {actionLabel || (isFinnish ? 'Paranna tekstiä' : 'Improve text')}
               </button>
             ) : null}
           </div>
@@ -159,8 +180,9 @@ function InlineTipList({ items = [], theme = 'dark', actionLabel = '', onAction 
   )
 }
 
-function EntryBadge({ count = 0, theme = 'dark' }) {
+function EntryBadge({ count = 0, theme = 'dark', locale = 'en' }) {
   const ui = getUiTheme(theme)
+  const isFinnish = locale === 'fi'
 
   if (count === 0) {
     return null
@@ -172,7 +194,9 @@ function EntryBadge({ count = 0, theme = 'dark' }) {
         ui.isDark ? 'bg-gray-400/15 text-gray-100' : 'bg-gray-100 text-gray-700'
       }`}
     >
-      {count} tip{count === 1 ? '' : 's'}
+      {isFinnish
+        ? `${count} vinkkiä`
+        : `${count} tip${count === 1 ? '' : 's'}`}
     </span>
   )
 }
@@ -181,74 +205,12 @@ function isSectionItemVisible(sectionItemVisibility, section, itemKey) {
   return sectionItemVisibility?.[section]?.[String(itemKey)] !== false
 }
 
-function shiftVisibilityMapAfterRemove(visibilityMap = {}, removedIndex) {
-  return Object.entries(visibilityMap).reduce((next, [key, value]) => {
-    const index = Number.parseInt(key, 10)
-
-    if (!Number.isInteger(index)) {
-      next[key] = value
-      return next
-    }
-
-    if (index < removedIndex) {
-      next[String(index)] = value
-      return next
-    }
-
-    if (index > removedIndex) {
-      next[String(index - 1)] = value
-    }
-
-    return next
-  }, {})
-}
-
-function shiftVisibilityMapAfterInsert(visibilityMap = {}, insertedIndex) {
-  return Object.entries(visibilityMap).reduce((next, [key, value]) => {
-    const index = Number.parseInt(key, 10)
-
-    if (!Number.isInteger(index)) {
-      next[key] = value
-      return next
-    }
-
-    if (index >= insertedIndex) {
-      next[String(index + 1)] = value
-      return next
-    }
-
-    next[String(index)] = value
-    return next
-  }, {})
-}
-
-function swapVisibilityMapIndexes(visibilityMap = {}, firstIndex, secondIndex) {
-  const firstKey = String(firstIndex)
-  const secondKey = String(secondIndex)
-  const next = { ...visibilityMap }
-  const hasFirst = Object.prototype.hasOwnProperty.call(visibilityMap, firstKey)
-  const hasSecond = Object.prototype.hasOwnProperty.call(visibilityMap, secondKey)
-
-  if (hasFirst) {
-    next[secondKey] = visibilityMap[firstKey]
-  } else {
-    delete next[secondKey]
-  }
-
-  if (hasSecond) {
-    next[firstKey] = visibilityMap[secondKey]
-  } else {
-    delete next[firstKey]
-  }
-
-  return next
-}
-
 function CVForm({
   formData,
-  setFormData,
+  dispatchFormData,
   errors,
   theme = 'dark',
+  locale = 'en',
   feedback,
   onImproveAboutText,
   onImproveExperienceText,
@@ -259,6 +221,9 @@ function CVForm({
   const [skillInput, setSkillInput] = useState('')
   const photoInputRef = useRef(null)
   const ui = getUiTheme(theme)
+  const isFinnish = locale === 'fi'
+  const sectionVisibilityFields = getSectionVisibilityFields(locale)
+  const linkFields = getLinkFields(locale)
   const sectionVisibility = {
     ...createSectionVisibility(),
     ...(formData.sectionVisibility ?? {}),
@@ -286,12 +251,21 @@ function CVForm({
   const itemCardClasses = `rounded-[1.4rem] border p-4 ${ui.surfaceMuted}`
   const itemHeadingClasses = ui.textPrimary
   const helperTextClasses = ui.textMuted
+  const copy = {
+    improveText: isFinnish ? 'Paranna tekstiä' : 'Improve text',
+    hide: isFinnish ? 'Piilota' : 'Hide',
+    show: isFinnish ? 'Näytä' : 'Show',
+    up: isFinnish ? 'Ylös' : 'Up',
+    down: isFinnish ? 'Alas' : 'Down',
+    duplicate: isFinnish ? 'Monista' : 'Duplicate',
+    duplicateShort: isFinnish ? 'Kopioi' : 'Dup',
+    remove: isFinnish ? 'Poista' : 'Remove',
+    on: isFinnish ? 'Päällä' : 'On',
+    off: isFinnish ? 'Pois' : 'Off',
+  }
 
   const updateRootField = (field, value) => {
-    setFormData((current) => ({
-      ...current,
-      [field]: value,
-    }))
+    dispatchFormData({ type: 'SET_ROOT_FIELD', field, value })
   }
 
   const handlePhotoUpload = async (event) => {
@@ -307,52 +281,25 @@ function CVForm({
       updateRootField('photo', photoDataUrl)
     } catch (error) {
       if (onPhotoError) {
-        onPhotoError(error instanceof Error ? error.message : 'Could not upload profile image.')
+        onPhotoError(
+          error instanceof Error
+            ? localizePhotoErrorMessage(error.message, locale)
+            : isFinnish ? 'Profiilikuvan lataus epäonnistui.' : 'Could not upload profile image.',
+        )
       }
     }
   }
 
   const updateLinkField = (field, value) => {
-    setFormData((current) => ({
-      ...current,
-      links: {
-        ...current.links,
-        [field]: value,
-      },
-    }))
+    dispatchFormData({ type: 'SET_LINK_FIELD', field, value })
   }
 
   const toggleSectionVisibility = (section) => {
-    setFormData((current) => ({
-      ...current,
-      sectionVisibility: {
-        ...createSectionVisibility(),
-        ...(current.sectionVisibility ?? {}),
-        [section]: !(current.sectionVisibility ?? {})[section],
-      },
-    }))
+    dispatchFormData({ type: 'TOGGLE_SECTION_VISIBILITY', section })
   }
 
   const toggleSectionItemVisibility = (section, itemKey) => {
-    const normalizedItemKey = String(itemKey)
-    setFormData((current) => {
-      const nextSectionItemVisibility = {
-        ...createSectionItemVisibility(),
-        ...(current.sectionItemVisibility ?? {}),
-      }
-      const currentSection = nextSectionItemVisibility[section] ?? {}
-
-      return {
-        ...current,
-        sectionItemVisibility: {
-          ...nextSectionItemVisibility,
-          [section]: {
-            ...currentSection,
-            [normalizedItemKey]: currentSection[normalizedItemKey] === false,
-          },
-        },
-      }
-    })
+    dispatchFormData({ type: 'TOGGLE_SECTION_ITEM_VISIBILITY', section, itemKey })
   }
 
   const togglePhotoVisibilityForSelectedTemplate = () => {
@@ -360,190 +307,48 @@ function CVForm({
       return
     }
 
-    setFormData((current) => ({
-      ...current,
-      photoVisibilityByTemplate: {
-        ...(current.photoVisibilityByTemplate ?? {}),
-        [selectedTemplate]: !isPhotoVisibleForTemplate(
-          current.photoVisibilityByTemplate,
-          selectedTemplate,
-        ),
-      },
-    }))
+    dispatchFormData({ type: 'TOGGLE_PHOTO_VISIBILITY', template: selectedTemplate })
   }
 
   const addSkill = (value) => {
-    const normalizedValue = value.trim()
-
-    if (!normalizedValue) {
+    if (!value.trim()) {
       return
     }
 
-    setFormData((current) => {
-      if (current.skills.some((skill) => skill.toLowerCase() === normalizedValue.toLowerCase())) {
-        return current
-      }
-
-      return {
-        ...current,
-        skills: [...current.skills, normalizedValue],
-      }
-    })
-
+    dispatchFormData({ type: 'ADD_SKILL', skill: value })
     setSkillInput('')
   }
 
   const removeSkill = (index) => {
-    setFormData((current) => ({
-      ...current,
-      skills: current.skills.filter((_, skillIndex) => skillIndex !== index),
-      sectionItemVisibility: {
-        ...createSectionItemVisibility(),
-        ...(current.sectionItemVisibility ?? {}),
-        skills: shiftVisibilityMapAfterRemove(current.sectionItemVisibility?.skills, index),
-      },
-    }))
+    dispatchFormData({ type: 'REMOVE_SKILL', index })
   }
 
   const duplicateSkill = (index) => {
-    setFormData((current) => {
-      const currentSkill = current.skills[index]
-
-      if (!currentSkill) {
-        return current
-      }
-
-      return {
-        ...current,
-        skills: current.skills.flatMap((skill, skillIndex) =>
-          skillIndex === index ? [skill, currentSkill] : [skill],
-        ),
-        sectionItemVisibility: {
-          ...createSectionItemVisibility(),
-          ...(current.sectionItemVisibility ?? {}),
-          skills: shiftVisibilityMapAfterInsert(current.sectionItemVisibility?.skills, index + 1),
-        },
-      }
-    })
+    dispatchFormData({ type: 'DUPLICATE_SKILL', index })
   }
 
   const moveSkill = (index, direction) => {
-    setFormData((current) => {
-      const nextIndex = index + direction
-
-      if (nextIndex < 0 || nextIndex >= current.skills.length) {
-        return current
-      }
-
-      const nextSkills = [...current.skills]
-      const [movedSkill] = nextSkills.splice(index, 1)
-
-      nextSkills.splice(nextIndex, 0, movedSkill)
-
-      return {
-        ...current,
-        skills: nextSkills,
-        sectionItemVisibility: {
-          ...createSectionItemVisibility(),
-          ...(current.sectionItemVisibility ?? {}),
-          skills: swapVisibilityMapIndexes(current.sectionItemVisibility?.skills, index, nextIndex),
-        },
-      }
-    })
+    dispatchFormData({ type: 'MOVE_SKILL', index, direction })
   }
 
   const updateArrayItem = (section, index, field, value) => {
-    setFormData((current) => ({
-      ...current,
-      [section]: current[section].map((item, itemIndex) =>
-        itemIndex === index
-          ? {
-              ...item,
-              [field]: value,
-            }
-          : item,
-      ),
-    }))
+    dispatchFormData({ type: 'UPDATE_ARRAY_ITEM', section, index, field, value })
   }
 
-  const addArrayItem = (section, factory) => {
-    setFormData((current) => ({
-      ...current,
-      [section]: [...current[section], factory()],
-      sectionItemVisibility: {
-        ...createSectionItemVisibility(),
-        ...(current.sectionItemVisibility ?? {}),
-      },
-    }))
+  const addArrayItem = (section) => {
+    dispatchFormData({ type: 'ADD_ARRAY_ITEM', section })
   }
 
   const removeArrayItem = (section, index) => {
-    setFormData((current) => {
-      const currentItemVisibility = {
-        ...createSectionItemVisibility(),
-        ...(current.sectionItemVisibility ?? {}),
-      }
-
-      return {
-        ...current,
-        [section]: current[section].filter((_, itemIndex) => itemIndex !== index),
-        sectionItemVisibility: {
-          ...currentItemVisibility,
-          [section]: shiftVisibilityMapAfterRemove(currentItemVisibility[section], index),
-        },
-      }
-    })
+    dispatchFormData({ type: 'REMOVE_ARRAY_ITEM', section, index })
   }
 
   const duplicateArrayItem = (section, index) => {
-    setFormData((current) => {
-      const currentItem = current[section][index]
-
-      if (!currentItem) {
-        return current
-      }
-
-      return {
-        ...current,
-        [section]: current[section].flatMap((item, itemIndex) =>
-          itemIndex === index ? [item, structuredClone(currentItem)] : [item],
-        ),
-        sectionItemVisibility: {
-          ...createSectionItemVisibility(),
-          ...(current.sectionItemVisibility ?? {}),
-          [section]: shiftVisibilityMapAfterInsert(current.sectionItemVisibility?.[section], index + 1),
-        },
-      }
-    })
+    dispatchFormData({ type: 'DUPLICATE_ARRAY_ITEM', section, index })
   }
 
   const moveArrayItem = (section, index, direction) => {
-    setFormData((current) => {
-      const nextIndex = index + direction
-
-      if (nextIndex < 0 || nextIndex >= current[section].length) {
-        return current
-      }
-
-      const nextItems = [...current[section]]
-      const [movedItem] = nextItems.splice(index, 1)
-
-      nextItems.splice(nextIndex, 0, movedItem)
-
-      return {
-        ...current,
-        [section]: nextItems,
-        sectionItemVisibility: {
-          ...createSectionItemVisibility(),
-          ...(current.sectionItemVisibility ?? {}),
-          [section]: swapVisibilityMapIndexes(
-            current.sectionItemVisibility?.[section],
-            index,
-            nextIndex,
-          ),
-        },
-      }
-    })
+    dispatchFormData({ type: 'MOVE_ARRAY_ITEM', section, index, direction })
   }
 
   const handleSkillKeyDown = (event) => {
@@ -561,8 +366,12 @@ function CVForm({
     <form className="mt-8 space-y-4 sm:space-y-5">
       <PanelSection
         eyebrow="Section 00"
-        title="Visible sections"
-        description="Toggle whole sections or specific section items without deleting your data."
+        title={isFinnish ? 'Näkyvät osiot' : 'Visible sections'}
+        description={
+          isFinnish
+            ? 'Kytke osioita tai yksittäisiä kohtia pois ilman tietojen poistamista.'
+            : 'Toggle whole sections or specific section items without deleting your data.'
+        }
         theme={theme}
       >
         <div className="flex flex-wrap gap-2">
@@ -578,7 +387,7 @@ function CVForm({
                 }`}
                 onClick={() => toggleSectionVisibility(field.key)}
               >
-                {field.label}: {isVisible ? 'On' : 'Off'}
+                {field.label}: {isVisible ? copy.on : copy.off}
               </button>
             )
           })}
@@ -590,21 +399,25 @@ function CVForm({
             onClick={togglePhotoVisibilityForSelectedTemplate}
             disabled={!selectedTemplate}
           >
-            Photo ({selectedTemplateLabel}): {isPhotoVisibleInSelectedTemplate ? 'On' : 'Off'}
+            {isFinnish ? 'Kuva' : 'Photo'} ({selectedTemplateLabel}): {isPhotoVisibleInSelectedTemplate ? copy.on : copy.off}
           </button>
         </div>
       </PanelSection>
 
       <PanelSection
         eyebrow="Section 01"
-        title="Profile"
-        description="Add the core information that appears at the top of the CV."
+        title={isFinnish ? 'Profiili' : 'Profile'}
+        description={
+          isFinnish
+            ? 'Lisää CV:n yläosassa näkyvät perustiedot.'
+            : 'Add the core information that appears at the top of the CV.'
+        }
         theme={theme}
         badge={feedback.sectionBadges.profile}
       >
         <div className="space-y-4">
           <Field
-            label="Full name"
+            label={isFinnish ? 'Koko nimi' : 'Full name'}
             error={errors.fullName}
             required
             labelClassName={fieldLabelClassName}
@@ -614,13 +427,13 @@ function CVForm({
               type="text"
               value={formData.fullName}
               onChange={(event) => updateRootField('fullName', event.target.value)}
-              placeholder="Alex Morgan"
+              placeholder={isFinnish ? 'Matti Meikäläinen' : 'Alex Morgan'}
               aria-invalid={Boolean(errors.fullName)}
             />
           </Field>
 
           <Field
-            label="Professional title"
+            label={isFinnish ? 'Ammattinimike' : 'Professional title'}
             error={errors.title}
             required
             labelClassName={fieldLabelClassName}
@@ -630,20 +443,22 @@ function CVForm({
               type="text"
               value={formData.title}
               onChange={(event) => updateRootField('title', event.target.value)}
-              placeholder="Product Designer"
+              placeholder={isFinnish ? 'Tuotesuunnittelija' : 'Product Designer'}
               aria-invalid={Boolean(errors.title)}
             />
           </Field>
 
-          <Field label="About" labelClassName={fieldLabelClassName}>
+          <Field label={isFinnish ? 'Esittely' : 'About'} labelClassName={fieldLabelClassName}>
             <AutoGrowTextarea
               className={textareaClasses}
               value={formData.about}
               onChange={(event) => updateRootField('about', event.target.value)}
-              placeholder="Summarize your experience, strengths, and the kind of roles you want."
+              placeholder={isFinnish
+                ? 'Tiivistä kokemuksesi, vahvuutesi ja tavoittelemasi roolit.'
+                : 'Summarize your experience, strengths, and the kind of roles you want.'}
             />
           </Field>
-          <Field label="Profile image (optional)" labelClassName={fieldLabelClassName}>
+          <Field label={isFinnish ? 'Profiilikuva (valinnainen)' : 'Profile image (optional)'} labelClassName={fieldLabelClassName}>
             <input
               ref={photoInputRef}
               className="hidden"
@@ -656,16 +471,18 @@ function CVForm({
               className={`mt-2 rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
               onClick={() => photoInputRef.current?.click()}
             >
-              Choose image
+              {isFinnish ? 'Valitse kuva' : 'Choose image'}
             </button>
             <p className={`mt-2 text-xs ${helperTextClasses}`}>
-              JPG or PNG, up to 2MB. Image is resized for exports.
+              {isFinnish
+                ? 'JPG tai PNG, enintään 2 Mt. Kuva skaalataan vientiä varten.'
+                : 'JPG or PNG, up to 2MB. Image is resized for exports.'}
             </p>
             {formData.photo ? (
               <div className="mt-3 flex items-center gap-3">
                 <img
                   src={formData.photo}
-                  alt="Profile preview"
+                  alt={isFinnish ? 'Profiilin esikatselu' : 'Profile preview'}
                   className={`rounded-2xl border ${ui.isDark ? 'border-gray-700' : 'border-gray-300'}`}
                   style={{ width: '5.75rem', height: '5.75rem', objectFit: 'cover' }}
                 />
@@ -674,7 +491,7 @@ function CVForm({
                   className={removeButtonClasses}
                   onClick={() => updateRootField('photo', '')}
                 >
-                  Remove image
+                  {isFinnish ? 'Poista kuva' : 'Remove image'}
                 </button>
               </div>
             ) : null}
@@ -685,16 +502,19 @@ function CVForm({
               className={improveButtonClasses}
               onClick={onImproveAboutText}
             >
-              Improve text
+              {copy.improveText}
             </button>
             <p className={`text-xs ${helperTextClasses}`}>
-              Rule-based cleanup shortens long copy and keeps the summary focused.
+              {isFinnish
+                ? 'Sääntöpohjainen siivous lyhentää pitkää tekstiä ja pitää yhteenvedon fokusoituna.'
+                : 'Rule-based cleanup shortens long copy and keeps the summary focused.'}
             </p>
           </div>
           <InlineTipList
             items={feedback.inlineTips.profile}
             theme={theme}
-            actionLabel="Improve text"
+            locale={locale}
+            actionLabel={copy.improveText}
             onAction={onImproveAboutText}
           />
         </div>
@@ -702,13 +522,13 @@ function CVForm({
 
       <PanelSection
         eyebrow="Section 02"
-        title="Skills"
-        description="Press Enter or comma to turn each skill into a tag."
+        title={isFinnish ? 'Taidot' : 'Skills'}
+        description={isFinnish ? 'Paina Enter tai pilkku muuttaaksesi taidon tagiksi.' : 'Press Enter or comma to turn each skill into a tag.'}
         theme={theme}
         badge={feedback.sectionBadges.skills}
       >
         <div className="space-y-3">
-          <Field label="Skill tags" labelClassName={fieldLabelClassName}>
+          <Field label={isFinnish ? 'Taitotagit' : 'Skill tags'} labelClassName={fieldLabelClassName}>
             <div className={`mt-2 rounded-xl border px-3 py-3 ${ui.inputShell}`}>
               <div className="flex flex-wrap gap-2">
                 {formData.skills.map((skill, index) => (
@@ -718,41 +538,41 @@ function CVForm({
                       type="button"
                       className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
                       onClick={() => toggleSectionItemVisibility('skills', index)}
-                      aria-label={`${isSectionItemVisible(sectionItemVisibility, 'skills', index) ? 'Hide' : 'Show'} ${skill}`}
+                      aria-label={`${isSectionItemVisible(sectionItemVisibility, 'skills', index) ? copy.hide : copy.show} ${skill}`}
                     >
-                      {isSectionItemVisible(sectionItemVisibility, 'skills', index) ? 'Hide' : 'Show'}
+                      {isSectionItemVisible(sectionItemVisibility, 'skills', index) ? copy.hide : copy.show}
                     </button>
                     <button
                       type="button"
                       className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
                       onClick={() => moveSkill(index, -1)}
                       disabled={index === 0}
-                      aria-label={`Move ${skill} up`}
+                      aria-label={`Move ${skill} ${copy.up.toLowerCase()}`}
                     >
-                      Up
+                      {copy.up}
                     </button>
                     <button
                       type="button"
                       className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
                       onClick={() => moveSkill(index, 1)}
                       disabled={index === formData.skills.length - 1}
-                      aria-label={`Move ${skill} down`}
+                      aria-label={`Move ${skill} ${copy.down.toLowerCase()}`}
                     >
-                      Down
+                      {copy.down}
                     </button>
                     <button
                       type="button"
                       className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
                       onClick={() => duplicateSkill(index)}
-                      aria-label={`Duplicate ${skill}`}
+                      aria-label={`${copy.duplicate} ${skill}`}
                     >
-                      Dup
+                      {copy.duplicateShort}
                     </button>
                     <button
                       type="button"
                       className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
                       onClick={() => removeSkill(index)}
-                      aria-label={`Remove ${skill}`}
+                      aria-label={`${copy.remove} ${skill}`}
                     >
                       X
                     </button>
@@ -769,35 +589,45 @@ function CVForm({
                   onChange={(event) => setSkillInput(event.target.value)}
                   onKeyDown={handleSkillKeyDown}
                   onBlur={() => addSkill(skillInput)}
-                  placeholder="Add a skill"
+                  placeholder={isFinnish ? 'Lisää taito' : 'Add a skill'}
                 />
               </div>
             </div>
           </Field>
           <p className={`text-xs ${helperTextClasses}`}>
-            Tip: Backspace removes the last tag when the input is empty.
+            {isFinnish
+              ? 'Vinkki: Backspace poistaa viimeisen tagin, kun kenttä on tyhjä.'
+              : 'Tip: Backspace removes the last tag when the input is empty.'}
           </p>
-          <InlineTipList items={feedback.inlineTips.skills} theme={theme} />
+          <InlineTipList items={feedback.inlineTips.skills} theme={theme} locale={locale} />
         </div>
       </PanelSection>
 
       <PanelSection
         eyebrow="Section 03"
-        title="Experience"
-        description="Capture roles, timelines, and responsibilities for each work experience."
+        title={isFinnish ? 'Kokemus' : 'Experience'}
+        description={
+          isFinnish
+            ? 'Kuvaa roolit, ajanjaksot ja vastuut jokaisesta työkokemuksesta.'
+            : 'Capture roles, timelines, and responsibilities for each work experience.'
+        }
         theme={theme}
         badge={feedback.sectionBadges.experience}
       >
         <div className="space-y-4">
-          <InlineTipList items={feedback.inlineTips.experience} theme={theme} />
+          <InlineTipList items={feedback.inlineTips.experience} theme={theme} locale={locale} />
           {formData.experience.map((item, index) => (
             <div key={`experience-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                    Experience #{index + 1}
+                    {isFinnish ? 'Kokemus' : 'Experience'} #{index + 1}
                   </p>
-                  <EntryBadge count={feedback.inlineTips.experienceItems[index]?.length ?? 0} theme={theme} />
+                  <EntryBadge
+                    count={feedback.inlineTips.experienceItems[index]?.length ?? 0}
+                    theme={theme}
+                    locale={locale}
+                  />
                 </div>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -805,7 +635,7 @@ function CVForm({
                     className={utilityButtonClasses}
                     onClick={() => toggleSectionItemVisibility('experience', index)}
                   >
-                    {isSectionItemVisible(sectionItemVisibility, 'experience', index) ? 'Hide' : 'Show'}
+                    {isSectionItemVisible(sectionItemVisibility, 'experience', index) ? copy.hide : copy.show}
                   </button>
                   <button
                     type="button"
@@ -813,7 +643,7 @@ function CVForm({
                     onClick={() => moveArrayItem('experience', index, -1)}
                     disabled={index === 0}
                   >
-                    Up
+                    {copy.up}
                   </button>
                   <button
                     type="button"
@@ -821,26 +651,26 @@ function CVForm({
                     onClick={() => moveArrayItem('experience', index, 1)}
                     disabled={index === formData.experience.length - 1}
                   >
-                    Down
+                    {copy.down}
                   </button>
                   <button
                     type="button"
                     className={utilityButtonClasses}
                     onClick={() => duplicateArrayItem('experience', index)}
                   >
-                    Duplicate
+                    {copy.duplicate}
                   </button>
                   <button
                     type="button"
                     className={removeButtonClasses}
                     onClick={() => removeArrayItem('experience', index)}
                   >
-                    Remove
+                    {copy.remove}
                   </button>
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Role" labelClassName={fieldLabelClassName}>
+                <Field label={isFinnish ? 'Rooli' : 'Role'} labelClassName={fieldLabelClassName}>
                   <input
                     className={inputClasses}
                     type="text"
@@ -848,10 +678,10 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('experience', index, 'role', event.target.value)
                     }
-                    placeholder="Senior Product Designer"
+                    placeholder={isFinnish ? 'Senior Product Designer' : 'Senior Product Designer'}
                   />
                 </Field>
-                <Field label="Company" labelClassName={fieldLabelClassName}>
+                <Field label={isFinnish ? 'Yritys' : 'Company'} labelClassName={fieldLabelClassName}>
                   <input
                     className={inputClasses}
                     type="text"
@@ -859,10 +689,10 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('experience', index, 'company', event.target.value)
                     }
-                    placeholder="Studio North"
+                    placeholder={isFinnish ? 'Studio North' : 'Studio North'}
                   />
                 </Field>
-                <Field label="Start date" labelClassName={fieldLabelClassName}>
+                <Field label={isFinnish ? 'Aloituspäivä' : 'Start date'} labelClassName={fieldLabelClassName}>
                   <input
                     className={inputClasses}
                     type="text"
@@ -870,10 +700,10 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('experience', index, 'startDate', event.target.value)
                     }
-                    placeholder="Jan 2022"
+                    placeholder={isFinnish ? 'Tammi 2022' : 'Jan 2022'}
                   />
                 </Field>
-                <Field label="End date" labelClassName={fieldLabelClassName}>
+                <Field label={isFinnish ? 'Lopetuspäivä' : 'End date'} labelClassName={fieldLabelClassName}>
                   <input
                     className={inputClasses}
                     type="text"
@@ -881,11 +711,11 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('experience', index, 'endDate', event.target.value)
                     }
-                    placeholder="Present"
+                    placeholder={isFinnish ? 'Nykyinen' : 'Present'}
                   />
                 </Field>
                 <div className="sm:col-span-2">
-                  <Field label="Description" labelClassName={fieldLabelClassName}>
+                  <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
                     <AutoGrowTextarea
                       className={textareaClasses}
                       value={item.description}
@@ -897,7 +727,9 @@ function CVForm({
                           event.target.value,
                         )
                       }
-                      placeholder="Describe the work, achievements, and impact."
+                      placeholder={isFinnish
+                        ? 'Kuvaa työ, saavutukset ja vaikutus.'
+                        : 'Describe the work, achievements, and impact.'}
                     />
                   </Field>
                 </div>
@@ -908,16 +740,19 @@ function CVForm({
                   className={improveButtonClasses}
                   onClick={() => onImproveExperienceText(index)}
                 >
-                  Improve text
+                  {copy.improveText}
                 </button>
                 <p className={`text-xs ${helperTextClasses}`}>
-                  Keep each entry short, action-oriented, and easy to scan.
+                  {isFinnish
+                    ? 'Pidä jokainen kohta lyhyenä, toimintakeskeisenä ja helposti silmäiltävänä.'
+                    : 'Keep each entry short, action-oriented, and easy to scan.'}
                 </p>
               </div>
               <InlineTipList
                 items={feedback.inlineTips.experienceItems[index]}
                 theme={theme}
-                actionLabel="Improve text"
+                locale={locale}
+                actionLabel={copy.improveText}
                 onAction={() => onImproveExperienceText(index)}
               />
             </div>
@@ -925,17 +760,21 @@ function CVForm({
           <button
             type="button"
             className={actionButtonClasses}
-            onClick={() => addArrayItem('experience', createEmptyExperience)}
+            onClick={() => addArrayItem('experience')}
           >
-            Add experience
+            {isFinnish ? 'Lisää kokemus' : 'Add experience'}
           </button>
         </div>
       </PanelSection>
 
       <PanelSection
         eyebrow="Section 04"
-        title="Education"
-        description="Include degrees, institutions, and timelines for your academic background."
+        title={isFinnish ? 'Koulutus' : 'Education'}
+        description={
+          isFinnish
+            ? 'Lisää tutkinto, oppilaitos ja ajanjakso koulutustaustastasi.'
+            : 'Include degrees, institutions, and timelines for your academic background.'
+        }
         theme={theme}
       >
         <div className="space-y-4">
@@ -943,7 +782,7 @@ function CVForm({
             <div key={`education-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  Education #{index + 1}
+                  {isFinnish ? 'Koulutus' : 'Education'} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -951,7 +790,7 @@ function CVForm({
                     className={utilityButtonClasses}
                     onClick={() => toggleSectionItemVisibility('education', index)}
                   >
-                    {isSectionItemVisible(sectionItemVisibility, 'education', index) ? 'Hide' : 'Show'}
+                    {isSectionItemVisible(sectionItemVisibility, 'education', index) ? copy.hide : copy.show}
                   </button>
                   <button
                     type="button"
@@ -959,7 +798,7 @@ function CVForm({
                     onClick={() => moveArrayItem('education', index, -1)}
                     disabled={index === 0}
                   >
-                    Up
+                    {copy.up}
                   </button>
                   <button
                     type="button"
@@ -967,26 +806,26 @@ function CVForm({
                     onClick={() => moveArrayItem('education', index, 1)}
                     disabled={index === formData.education.length - 1}
                   >
-                    Down
+                    {copy.down}
                   </button>
                   <button
                     type="button"
                     className={utilityButtonClasses}
                     onClick={() => duplicateArrayItem('education', index)}
                   >
-                    Duplicate
+                    {copy.duplicate}
                   </button>
                   <button
                     type="button"
                     className={removeButtonClasses}
                     onClick={() => removeArrayItem('education', index)}
                   >
-                    Remove
+                    {copy.remove}
                   </button>
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="School" labelClassName={fieldLabelClassName}>
+                <Field label={isFinnish ? 'Oppilaitos' : 'School'} labelClassName={fieldLabelClassName}>
                   <input
                     className={inputClasses}
                     type="text"
@@ -994,10 +833,10 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('education', index, 'school', event.target.value)
                     }
-                    placeholder="University of the Arts"
+                    placeholder={isFinnish ? 'Taideyliopisto' : 'University of the Arts'}
                   />
                 </Field>
-                <Field label="Degree" labelClassName={fieldLabelClassName}>
+                <Field label={isFinnish ? 'Tutkinto' : 'Degree'} labelClassName={fieldLabelClassName}>
                   <input
                     className={inputClasses}
                     type="text"
@@ -1005,10 +844,10 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('education', index, 'degree', event.target.value)
                     }
-                    placeholder="B.A. Graphic Design"
+                    placeholder={isFinnish ? 'BA Graafinen suunnittelu' : 'B.A. Graphic Design'}
                   />
                 </Field>
-                <Field label="Start date" labelClassName={fieldLabelClassName}>
+                <Field label={isFinnish ? 'Aloituspäivä' : 'Start date'} labelClassName={fieldLabelClassName}>
                   <input
                     className={inputClasses}
                     type="text"
@@ -1019,7 +858,7 @@ function CVForm({
                     placeholder="2016"
                   />
                 </Field>
-                <Field label="End date" labelClassName={fieldLabelClassName}>
+                <Field label={isFinnish ? 'Lopetuspäivä' : 'End date'} labelClassName={fieldLabelClassName}>
                   <input
                     className={inputClasses}
                     type="text"
@@ -1036,17 +875,21 @@ function CVForm({
           <button
             type="button"
             className={actionButtonClasses}
-            onClick={() => addArrayItem('education', createEmptyEducation)}
+            onClick={() => addArrayItem('education')}
           >
-            Add education
+            {isFinnish ? 'Lisää koulutus' : 'Add education'}
           </button>
         </div>
       </PanelSection>
 
       <PanelSection
         eyebrow="Section 05"
-        title="Links"
-        description="Add the platforms and portfolio links that support your CV."
+        title={isFinnish ? 'Linkit' : 'Links'}
+        description={
+          isFinnish
+            ? 'Lisää alustat ja portfolio-linkit, jotka tukevat CV:täsi.'
+            : 'Add the platforms and portfolio links that support your CV.'
+        }
         theme={theme}
       >
         <div className="grid gap-4 sm:grid-cols-2">
@@ -1061,7 +904,7 @@ function CVForm({
                     className="rounded-full border px-2 py-0.5 text-[10px] font-semibold transition"
                     onClick={() => toggleSectionItemVisibility('links', key)}
                   >
-                    {isSectionItemVisible(sectionItemVisibility, 'links', key) ? 'Hide' : 'Show'}
+                    {isSectionItemVisible(sectionItemVisibility, 'links', key) ? copy.hide : copy.show}
                   </button>
                 </span>
               }

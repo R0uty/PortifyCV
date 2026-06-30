@@ -79,8 +79,65 @@ const templateMap = {
   },
 }
 
-export const cvTemplates = Object.values(templateMap)
+const templateLocalization = {
+  fi: {
+    minimal: {
+      label: 'Editorial',
+      description: 'Yhden palstan asettelu pyöristetyillä osioilla, selkeällä rytmillä ja vahvalla tummalla otsikolla.',
+      summaryBadgeLabel: 'Profiili',
+      chips: ['Esittely', 'Taidot'],
+    },
+    developer: {
+      label: 'Technical',
+      description: 'Jaettu asettelu: kokemus vasemmalla ja tiivis sivupalsta. Monospace-osaamistagit.',
+      summaryBadgeLabel: 'Painotus',
+      chips: ['Kokemus', 'Stack'],
+    },
+    corporate: {
+      label: 'Classic',
+      description: 'Yhden palstan asettelu ilman korttikehyksiä - selkeä ja muodollinen.',
+      summaryBadgeLabel: 'Yhteenveto',
+      chips: ['Profiili', 'Aikajana'],
+    },
+    creative: {
+      label: 'Creative',
+      description: 'Jaettu asettelu korostevärisellä sivupalstalla, värillisillä tageilla ja liukuvalla otsikolla.',
+      summaryBadgeLabel: 'Huomiot',
+      chips: ['Tarina', 'Linkit'],
+    },
+  },
+}
 
-export function getCvTemplate(templateId) {
-  return templateMap[templateId] ?? templateMap[defaultTemplateId]
+function localizeTemplate(template, locale = 'en') {
+  if (locale !== 'fi') {
+    return template
+  }
+
+  const localized = templateLocalization.fi[template.id]
+
+  if (!localized) {
+    return template
+  }
+
+  return {
+    ...template,
+    label: localized.label,
+    description: localized.description,
+    summaryBadgeLabel: localized.summaryBadgeLabel,
+    thumbnail: {
+      ...template.thumbnail,
+      chips: localized.chips,
+    },
+  }
+}
+
+export function getCvTemplates(locale = 'en') {
+  return Object.values(templateMap).map((template) => localizeTemplate(template, locale))
+}
+
+export const cvTemplates = getCvTemplates('en')
+
+export function getCvTemplate(templateId, locale = 'en') {
+  const template = templateMap[templateId] ?? templateMap[defaultTemplateId]
+  return localizeTemplate(template, locale)
 }

@@ -1,8 +1,7 @@
-import html2canvas from 'html2canvas'
-import { jsPDF } from 'jspdf'
 import { saveAs } from 'file-saver'
 import { defaultTemplateId, getCvTemplate } from './cvTemplates'
-import { createSectionItemVisibility, isPhotoVisibleForTemplate } from './cvForm'
+import { isPhotoVisibleForTemplate } from './cvForm'
+import { createCvSnapshot } from './cvSnapshot'
 
 const PDF_MODES = {
   designer: {
@@ -19,9 +18,7 @@ const A4_HEIGHT_MM = 297
 const PX_PER_INCH = 96
 const MM_PER_INCH = 25.4
 const MAX_CAPTURE_PIXEL_AREA = 12_000_000
-const PAGE_BREAK_SELECTOR = '[data-export-section], [data-export-card], [data-export-skill="true"]'
-const MAX_BREAK_PULLUP_RATIO = 0.08
-const DEBUG_PDF_EXPORT = true
+const PAGE_BREAK_SELECTOR = '[data-export-header], [data-export-section], [data-export-card], [data-export-skill="true"]'
 const COLOR_STYLE_PROPS = [
   'color',
   'background-color',
@@ -35,6 +32,24 @@ const COLOR_STYLE_PROPS = [
   'text-decoration-color',
   'box-shadow',
 ]
+let html2canvasLoader = null
+let jsPdfLoader = null
+
+function loadHtml2Canvas() {
+  if (!html2canvasLoader) {
+    html2canvasLoader = import('html2canvas').then((module) => module.default)
+  }
+
+  return html2canvasLoader
+}
+
+function loadJsPdf() {
+  if (!jsPdfLoader) {
+    jsPdfLoader = import('jspdf').then((module) => module.jsPDF)
+  }
+
+  return jsPdfLoader
+}
 
 function resolveExportRoot(previewElement) {
   if (!previewElement) {
@@ -118,6 +133,29 @@ function formatLinkLabel(key) {
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
+function createExportCopy(locale = 'en') {
+  const isFinnish = locale === 'fi'
+
+  return {
+    lang: isFinnish ? 'fi' : 'en',
+    yourName: isFinnish ? 'Nimesi' : 'Your Name',
+    professionalTitle: isFinnish ? 'Ammattinimike' : 'Professional Title',
+    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    educationEntry: isFinnish ? 'Koulutusmerkintä' : 'Education entry',
+    about: isFinnish ? 'Esittely' : 'About',
+    experience: isFinnish ? 'Kokemus' : 'Experience',
+    education: isFinnish ? 'Koulutus' : 'Education',
+    skills: isFinnish ? 'Taidot' : 'Skills',
+    links: isFinnish ? 'Linkit' : 'Links',
+    addSummary: isFinnish ? 'Lisää ammatillinen yhteenveto.' : 'Add a professional summary.',
+    addSkills: isFinnish ? 'Lisää taitoja' : 'Add skills',
+    noExperience: isFinnish ? 'Työkokemusta ei ole vielä lisätty.' : 'No experience added yet.',
+    noEducation: isFinnish ? 'Koulutusta ei ole vielä lisätty.' : 'No education added yet.',
+    noLinks: isFinnish ? 'Linkkejä ei ole vielä lisätty.' : 'No links added yet.',
+    cv: isFinnish ? 'CV' : 'CV',
+  }
+}
+
 function getPhotoDataUrl(value) {
   if (typeof value !== 'string') {
     return ''
@@ -140,97 +178,6 @@ function getImageFormatFromDataUrl(dataUrl) {
   return 'JPEG'
 }
 
-export function createCvSnapshot(formData) {
-  const sectionItemVisibility = {
-    ...createSectionItemVisibility(),
-    ...(formData.sectionItemVisibility ?? {}),
-  }
-  const isSectionItemVisible = (section, itemKey) =>
-    sectionItemVisibility[section]?.[String(itemKey)] !== false
-
-  return {
-    fullName: trimValue(formData.fullName),
-    title: trimValue(formData.title),
-    about: trimValue(formData.about),
-    photo: getPhotoDataUrl(formData.photo),
-    skills: formData.skills.reduce((next, skill, index) => {
-      if (!isSectionItemVisible('skills', index)) {
-        return next
-      }
-
-      const normalizedSkill = trimValue(skill)
-
-      if (normalizedSkill) {
-        next.push(normalizedSkill)
-      }
-
-      return next
-    }, []),
-    experience: formData.experience.reduce((next, item, index) => {
-      if (!isSectionItemVisible('experience', index)) {
-        return next
-      }
-
-      const normalizedItem = {
-        role: trimValue(item.role),
-        company: trimValue(item.company),
-        startDate: trimValue(item.startDate),
-        endDate: trimValue(item.endDate),
-        description: trimValue(item.description),
-      }
-
-      if (
-        normalizedItem.role ||
-        normalizedItem.company ||
-        normalizedItem.startDate ||
-        normalizedItem.endDate ||
-        normalizedItem.description
-      ) {
-        next.push(normalizedItem)
-      }
-
-      return next
-    }, []),
-    education: formData.education.reduce((next, item, index) => {
-      if (!isSectionItemVisible('education', index)) {
-        return next
-      }
-
-      const normalizedItem = {
-        school: trimValue(item.school),
-        degree: trimValue(item.degree),
-        startDate: trimValue(item.startDate),
-        endDate: trimValue(item.endDate),
-      }
-
-      if (
-        normalizedItem.school ||
-        normalizedItem.degree ||
-        normalizedItem.startDate ||
-        normalizedItem.endDate
-      ) {
-        next.push(normalizedItem)
-      }
-
-      return next
-    }, []),
-    links: Object.fromEntries(
-      Object.entries(formData.links).filter(
-        ([key, value]) => isSectionItemVisible('links', key) && trimValue(value),
-      ),
-    ),
-  }
-}
-
-export function createExportFileName(formData) {
-  const baseName = trimValue(formData.fullName) || 'cv'
-
-  return baseName
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
 export function exportCvAsJson(formData, fileName) {
   const blob = new Blob([`${JSON.stringify(formData, null, 2)}\n`], {
     type: 'application/json;charset=utf-8',
@@ -239,7 +186,9 @@ export function exportCvAsJson(formData, fileName) {
   saveAs(blob, `${fileName}.json`)
 }
 
-export function exportCvAsHtml(formData, fileName) {
+export function exportCvAsHtml(formData, fileName, options = {}) {
+  const locale = options.locale === 'fi' ? 'fi' : 'en'
+  const copy = createExportCopy(locale)
   const snapshot = createCvSnapshot(formData)
 
   function esc(text) {
@@ -252,7 +201,7 @@ export function exportCvAsHtml(formData, fileName) {
 
   const experienceItems = snapshot.experience
     .map((item) => {
-      const heading = [item.role, item.company].filter(Boolean).join(' at ') || 'Untitled role'
+      const heading = [item.role, item.company].filter(Boolean).join(' at ') || copy.untitledRole
       const dateRange = formatDateRange(item.startDate, item.endDate)
 
       return `  <div class="xp-item">
@@ -265,7 +214,7 @@ export function exportCvAsHtml(formData, fileName) {
   const educationItems = snapshot.education
     .map((item) => {
       const heading =
-        [item.degree, item.school].filter(Boolean).join(', ') || 'Education entry'
+        [item.degree, item.school].filter(Boolean).join(', ') || copy.educationEntry
       const dateRange = formatDateRange(item.startDate, item.endDate)
 
       return `  <div class="edu-item">
@@ -287,30 +236,30 @@ export function exportCvAsHtml(formData, fileName) {
 
   const sections = [
     snapshot.about
-      ? `<section>\n  <h2 class="section-heading">About</h2>\n  <p class="about-text">${esc(snapshot.about)}</p>\n</section>`
+      ? `<section>\n  <h2 class="section-heading">${copy.about}</h2>\n  <p class="about-text">${esc(snapshot.about)}</p>\n</section>`
       : '',
     snapshot.experience.length > 0
-      ? `<section>\n  <h2 class="section-heading">Experience</h2>\n${experienceItems}\n</section>`
+      ? `<section>\n  <h2 class="section-heading">${copy.experience}</h2>\n${experienceItems}\n</section>`
       : '',
     snapshot.education.length > 0
-      ? `<section>\n  <h2 class="section-heading">Education</h2>\n${educationItems}\n</section>`
+      ? `<section>\n  <h2 class="section-heading">${copy.education}</h2>\n${educationItems}\n</section>`
       : '',
     snapshot.skills.length > 0
-      ? `<section>\n  <h2 class="section-heading">Skills</h2>\n  <div class="skills">\n    ${skillTags}\n  </div>\n</section>`
+      ? `<section>\n  <h2 class="section-heading">${copy.skills}</h2>\n  <div class="skills">\n    ${skillTags}\n  </div>\n</section>`
       : '',
     Object.keys(snapshot.links).length > 0
-      ? `<section>\n  <h2 class="section-heading">Links</h2>\n${linkItems}\n</section>`
+      ? `<section>\n  <h2 class="section-heading">${copy.links}</h2>\n${linkItems}\n</section>`
       : '',
   ]
     .filter(Boolean)
     .join('\n\n')
 
   const html = `<!doctype html>
-<html lang="en">
+<html lang="${copy.lang}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${esc(snapshot.fullName || 'CV')}</title>
+<title>${esc(snapshot.fullName || copy.cv)}</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #0f172a; background: #fff; max-width: 820px; margin: 0 auto; padding: 2.5rem 2rem; line-height: 1.7; }
@@ -338,8 +287,8 @@ section { margin-bottom: 2.5rem; }
 </head>
 <body>
 <header>
-  <p class="cv-name">${esc(snapshot.fullName || 'Your Name')}</p>
-  <p class="cv-job-title">${esc(snapshot.title || 'Professional Title')}</p>
+  <p class="cv-name">${esc(snapshot.fullName || copy.yourName)}</p>
+  <p class="cv-job-title">${esc(snapshot.title || copy.professionalTitle)}</p>
 </header>
 
 ${sections}
@@ -422,15 +371,6 @@ function createExportSandbox(previewElement, mode, expectedVariant = '') {
   sandbox.appendChild(captureRoot)
   document.body.appendChild(sandbox)
 
-  if (DEBUG_PDF_EXPORT) {
-    console.debug('[PDF DEBUG] createExportSandbox', {
-      mode,
-      sourceVariant: getExportVariant(exportRoot) || null,
-      clonedVariant: getExportVariant(clone) || null,
-      contentWidthPx,
-    })
-  }
-
   return { sandbox, captureRoot, clone, pdfMode }
 }
 
@@ -457,6 +397,7 @@ function createSafeCaptureScale(width, height) {
 }
 
 async function renderCaptureCanvas(captureRoot, captureOptions = {}) {
+  const html2canvas = await loadHtml2Canvas()
   const captureWidth = Math.max(captureRoot.scrollWidth, captureRoot.offsetWidth, 1)
   const captureHeight = Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1)
   const captureScale = createSafeCaptureScale(captureWidth, captureHeight)
@@ -658,6 +599,31 @@ function collectCanvasContentBlocks(captureRoot, canvas) {
   return blocks.filter((block) => block.bottom > block.top)
 }
 
+function collectCanvasSectionRanges(captureRoot, canvas) {
+  if (!captureRoot || !canvas) {
+    return []
+  }
+
+  const sourceHeight = Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1)
+  const sourceWidth = Math.max(captureRoot.scrollWidth, captureRoot.offsetWidth, 1)
+  const sourceRect = captureRoot.getBoundingClientRect()
+  const scaleY = canvas.height / sourceHeight
+  const scaleX = canvas.width / sourceWidth
+  const sections = captureRoot.querySelectorAll('[data-export-section]')
+
+  return Array.from(sections)
+    .map((section) => {
+      const rect = section.getBoundingClientRect()
+      const top = Math.max(0, Math.round((rect.top - sourceRect.top) * scaleY))
+      const bottom = Math.min(canvas.height, Math.round((rect.bottom - sourceRect.top) * scaleY))
+      const left = Math.max(0, Math.round((rect.left - sourceRect.left) * scaleX))
+      const right = Math.min(canvas.width, Math.round((rect.right - sourceRect.left) * scaleX))
+
+      return { top, bottom, left, right }
+    })
+    .filter((range) => range.bottom > range.top && range.right > range.left)
+}
+
 function resolvePageSliceHeight(offsetY, pageHeightPx, totalHeight, breakpoints) {
   const remainingHeight = totalHeight - offsetY
 
@@ -666,19 +632,17 @@ function resolvePageSliceHeight(offsetY, pageHeightPx, totalHeight, breakpoints)
   }
 
   const naturalBreakY = offsetY + pageHeightPx
-  const maxBreakPullUp = Math.max(1, Math.floor(pageHeightPx * MAX_BREAK_PULLUP_RATIO))
-  const earliestAllowedBreakY = naturalBreakY - maxBreakPullUp
   let selectedBreakY = 0
 
   for (let index = breakpoints.length - 1; index >= 0; index -= 1) {
     const breakpoint = breakpoints[index]
 
-    if (breakpoint > naturalBreakY) {
-      continue
+    if (breakpoint <= offsetY) {
+      break
     }
 
-    if (breakpoint <= earliestAllowedBreakY) {
-      break
+    if (breakpoint > naturalBreakY) {
+      continue
     }
 
     selectedBreakY = breakpoint
@@ -741,7 +705,14 @@ function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []
         return
       }
 
-      if (currentPageHeight + blockHeight > pageHeightPx) {
+      const projectedBottom = Math.max(currentPageBottom, block.bottom)
+      const projectedHeight = projectedBottom - currentPageTop
+
+      if (projectedHeight > pageHeightPx) {
+        if (block.top > currentPageBottom) {
+          currentPageBottom = block.top
+          currentPageHeight = currentPageBottom - currentPageTop
+        }
         pushCurrentPage()
         currentPageTop = block.top
         currentPageBottom = block.bottom
@@ -749,8 +720,8 @@ function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []
         return
       }
 
-      currentPageBottom = block.bottom
-      currentPageHeight += blockHeight
+      currentPageBottom = projectedBottom
+      currentPageHeight = projectedHeight
       return
     }
 
@@ -763,9 +734,44 @@ function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []
   return pages
 }
 
-function addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints = [], contentBlocks = []) {
+function doesBoundarySplitRange(boundaryY, ranges) {
+  return ranges.some((range) => boundaryY > range.top && boundaryY < range.bottom)
+}
+
+function mergeRanges(ranges) {
+  if (!ranges.length) {
+    return []
+  }
+
+  const sorted = [...ranges].sort((a, b) => a.start - b.start)
+  const merged = [sorted[0]]
+
+  for (let index = 1; index < sorted.length; index += 1) {
+    const current = sorted[index]
+    const last = merged[merged.length - 1]
+
+    if (current.start <= last.end + 0.2) {
+      last.end = Math.max(last.end, current.end)
+      continue
+    }
+
+    merged.push(current)
+  }
+
+  return merged
+}
+
+function addCanvasPagesToPdf(
+  pdf,
+  canvas,
+  pdfMode,
+  breakpoints = [],
+  contentBlocks = [],
+  sectionRanges = [],
+) {
   const renderedWidth = A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right
   const printableHeight = A4_HEIGHT_MM - pdfMode.marginMm.top - pdfMode.marginMm.bottom
+  const pageBottomY = A4_HEIGHT_MM - pdfMode.marginMm.bottom
   const pageHeightPx = Math.max(1, Math.floor((printableHeight * canvas.width) / renderedWidth))
   const pageCanvas = document.createElement('canvas')
   const pageContext = pageCanvas.getContext('2d')
@@ -779,6 +785,9 @@ function addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints = [], contentBloc
     contentBlocks.length > 0 ? contentBlocks : [{ top: 0, bottom: canvas.height }],
     breakpoints,
   )
+  const effectiveContentBlocks = contentBlocks.length > 0
+    ? contentBlocks
+    : [{ top: 0, bottom: canvas.height }]
 
   pageSlices.forEach((slice, pageIndex) => {
     const sliceHeight = slice.bottom - slice.top
@@ -812,6 +821,165 @@ function addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints = [], contentBloc
       renderedWidth,
       sliceHeightMm,
     )
+
+    const nextSlice = pageSlices[pageIndex + 1]
+    const boundaryY = slice.bottom
+    const continuedSections = nextSlice
+      ? sectionRanges.filter((section) => boundaryY > section.top && boundaryY < section.bottom)
+      : []
+    const shouldDrawFallbackLine = Boolean(
+      nextSlice
+      && continuedSections.length === 0
+      && doesBoundarySplitRange(boundaryY, effectiveContentBlocks),
+    )
+
+    if (continuedSections.length > 0 || shouldDrawFallbackLine) {
+      const lineY = Math.min(pageBottomY, pdfMode.marginMm.top + sliceHeightMm)
+      pdf.setDrawColor(203, 213, 225)
+      pdf.setLineWidth(0.3)
+
+      if (continuedSections.length > 0) {
+        const lineRanges = mergeRanges(
+          continuedSections.map((section) => ({
+            start: pdfMode.marginMm.left + (section.left * renderedWidth) / canvas.width,
+            end: pdfMode.marginMm.left + (section.right * renderedWidth) / canvas.width,
+          })),
+        )
+
+        lineRanges.forEach((range) => {
+          pdf.line(range.start, lineY, range.end, lineY)
+        })
+      } else {
+        pdf.line(
+          pdfMode.marginMm.left,
+          lineY,
+          A4_WIDTH_MM - pdfMode.marginMm.right,
+          lineY,
+        )
+      }
+    }
+  })
+}
+
+function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks = [], sectionRanges = []) {
+  const renderedWidth = A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right
+  const printableHeight = A4_HEIGHT_MM - pdfMode.marginMm.top - pdfMode.marginMm.bottom
+  const pageBottomY = A4_HEIGHT_MM - pdfMode.marginMm.bottom
+  const pageHeightPx = Math.max(1, Math.floor((printableHeight * canvas.width) / renderedWidth))
+  const pageCanvas = document.createElement('canvas')
+  const pageContext = pageCanvas.getContext('2d')
+
+  if (!pageContext) {
+    throw new Error('Unable to prepare page canvas for PDF export.')
+  }
+
+  const pageSlices = buildPageSlicesFromBlocks(
+    pageHeightPx,
+    contentBlocks.length > 0 ? contentBlocks : [{ top: 0, bottom: canvas.height }],
+    breakpoints,
+  )
+  const effectiveContentBlocks = contentBlocks.length > 0
+    ? contentBlocks
+    : [{ top: 0, bottom: canvas.height }]
+
+  return pageSlices.map((slice, pageIndex) => {
+    const sliceHeight = slice.bottom - slice.top
+
+    pageCanvas.width = canvas.width
+    pageCanvas.height = sliceHeight
+    pageContext.clearRect(0, 0, pageCanvas.width, pageCanvas.height)
+    pageContext.drawImage(
+      canvas,
+      0,
+      slice.top,
+      canvas.width,
+      sliceHeight,
+      0,
+      0,
+      canvas.width,
+      sliceHeight,
+    )
+
+    const sliceHeightMm = (sliceHeight * renderedWidth) / canvas.width
+    const nextSlice = pageSlices[pageIndex + 1]
+    const boundaryY = slice.bottom
+    const continuedSections = nextSlice
+      ? sectionRanges.filter((section) => boundaryY > section.top && boundaryY < section.bottom)
+      : []
+    const shouldDrawFallbackLine = Boolean(
+      nextSlice
+      && continuedSections.length === 0
+      && doesBoundarySplitRange(boundaryY, effectiveContentBlocks),
+    )
+
+    let separatorLineSegments = []
+
+    if (continuedSections.length > 0 || shouldDrawFallbackLine) {
+      const lineY = Math.min(pageBottomY, pdfMode.marginMm.top + sliceHeightMm)
+
+      if (continuedSections.length > 0) {
+        separatorLineSegments = mergeRanges(
+          continuedSections.map((section) => ({
+            start: pdfMode.marginMm.left + (section.left * renderedWidth) / canvas.width,
+            end: pdfMode.marginMm.left + (section.right * renderedWidth) / canvas.width,
+          })),
+        ).map((segment) => ({
+          start: segment.start,
+          end: segment.end,
+          y: lineY,
+        }))
+      } else {
+        separatorLineSegments = [{
+          start: pdfMode.marginMm.left,
+          end: A4_WIDTH_MM - pdfMode.marginMm.right,
+          y: lineY,
+        }]
+      }
+    }
+
+    return {
+      imageDataUrl: pageCanvas.toDataURL('image/png'),
+      sliceHeightMm,
+      separatorLineSegments,
+    }
+  })
+}
+
+async function exportPdfInWorker(pages, pdfMode) {
+  if (typeof Worker === 'undefined') {
+    throw new Error('Web Worker is not available in this browser.')
+  }
+
+  const worker = new Worker(
+    new URL('../workers/pdfExportWorker.js', import.meta.url),
+    { type: 'module' },
+  )
+
+  return new Promise((resolve, reject) => {
+    worker.onmessage = (event) => {
+      const { type, blob, message } = event.data ?? {}
+
+      worker.terminate()
+
+      if (type === 'success' && blob) {
+        resolve(blob)
+        return
+      }
+
+      reject(new Error(message || 'Worker PDF export failed.'))
+    }
+
+    worker.onerror = () => {
+      worker.terminate()
+      reject(new Error('Worker PDF export crashed.'))
+    }
+
+    worker.postMessage({
+      type: 'export-pdf',
+      pages,
+      pdfMode,
+      renderedWidth: A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right,
+    })
   })
 }
 
@@ -836,12 +1004,12 @@ function ensurePdfCursorSpace(pdf, cursor, heightNeeded, marginMm) {
   cursor.y = marginMm.top
 }
 
-async function drawFallbackHeader(pdf, snapshot, marginMm, palette, includePhoto = true) {
+async function drawFallbackHeader(pdf, snapshot, marginMm, palette, includePhoto = true, copy = createExportCopy()) {
   const fullWidth = A4_WIDTH_MM - marginMm.left - marginMm.right
   const headerX = marginMm.left
   const headerY = marginMm.top
-  const title = snapshot.fullName || 'Your Name'
-  const subtitle = snapshot.title || 'Professional Title'
+  const title = snapshot.fullName || copy.yourName
+  const subtitle = snapshot.title || copy.professionalTitle
   const photoDataUrl = getPhotoDataUrl(snapshot.photo)
   const photoSize = 21
   const photoGap = 6
@@ -946,7 +1114,9 @@ async function exportCvAsPdfTextFallback(
   fileName,
   mode,
   templateId = defaultTemplateId,
+  locale = 'en',
 ) {
+  const jsPDF = await loadJsPdf()
   const pdfMode = createPdfMode(mode)
   const pdf = new jsPDF({
     orientation: 'portrait',
@@ -954,6 +1124,7 @@ async function exportCvAsPdfTextFallback(
     format: 'a4',
   })
   const snapshot = createCvSnapshot(formData)
+  const copy = createExportCopy(locale)
   const templateConfig = getCvTemplate(templateId)
   const sectionVisibility = {
     about: true,
@@ -973,16 +1144,16 @@ async function exportCvAsPdfTextFallback(
     templateConfig.id,
   )
   const cursor = {
-    y: await drawFallbackHeader(pdf, snapshot, pdfMode.marginMm, palette, includePhoto),
+    y: await drawFallbackHeader(pdf, snapshot, pdfMode.marginMm, palette, includePhoto, copy),
   }
 
   const isVisible = (section) => sectionVisibility[section] !== false
 
   const renderAbout = () => {
-    drawFallbackSectionHeading(pdf, 'About', cursor, pdfMode.marginMm, palette)
+    drawFallbackSectionHeading(pdf, copy.about, cursor, pdfMode.marginMm, palette)
     drawFallbackParagraph(
       pdf,
-      snapshot.about || 'Add a professional summary.',
+      snapshot.about || copy.addSummary,
       cursor,
       pdfMode.marginMm,
       palette,
@@ -991,19 +1162,19 @@ async function exportCvAsPdfTextFallback(
   }
 
   const renderSkills = () => {
-    drawFallbackSectionHeading(pdf, 'Skills', cursor, pdfMode.marginMm, palette)
+    drawFallbackSectionHeading(pdf, copy.skills, cursor, pdfMode.marginMm, palette)
     if (snapshot.skills.length > 0) {
       drawFallbackBullets(pdf, snapshot.skills, cursor, pdfMode.marginMm, palette)
     } else {
-      drawFallbackParagraph(pdf, 'Add skills', cursor, pdfMode.marginMm, palette, { subtle: true })
+      drawFallbackParagraph(pdf, copy.addSkills, cursor, pdfMode.marginMm, palette, { subtle: true })
     }
   }
 
   const renderExperience = () => {
-    drawFallbackSectionHeading(pdf, 'Experience', cursor, pdfMode.marginMm, palette)
+    drawFallbackSectionHeading(pdf, copy.experience, cursor, pdfMode.marginMm, palette)
     if (snapshot.experience.length > 0) {
       snapshot.experience.forEach((item) => {
-        const heading = [item.role, item.company].filter(Boolean).join(' @ ') || 'Untitled role'
+        const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
         drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
           bold: true,
           size: 10.7,
@@ -1030,15 +1201,15 @@ async function exportCvAsPdfTextFallback(
         }
       })
     } else {
-      drawFallbackParagraph(pdf, 'No experience added yet.', cursor, pdfMode.marginMm, palette, { subtle: true })
+      drawFallbackParagraph(pdf, copy.noExperience, cursor, pdfMode.marginMm, palette, { subtle: true })
     }
   }
 
   const renderEducation = () => {
-    drawFallbackSectionHeading(pdf, 'Education', cursor, pdfMode.marginMm, palette)
+    drawFallbackSectionHeading(pdf, copy.education, cursor, pdfMode.marginMm, palette)
     if (snapshot.education.length > 0) {
       snapshot.education.forEach((item) => {
-        const heading = [item.degree, item.school].filter(Boolean).join(', ') || 'Education entry'
+        const heading = [item.degree, item.school].filter(Boolean).join(', ') || copy.educationEntry
         const dateRange = formatDateRange(item.startDate, item.endDate)
 
         drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
@@ -1056,12 +1227,12 @@ async function exportCvAsPdfTextFallback(
         }
       })
     } else {
-      drawFallbackParagraph(pdf, 'No education added yet.', cursor, pdfMode.marginMm, palette, { subtle: true })
+      drawFallbackParagraph(pdf, copy.noEducation, cursor, pdfMode.marginMm, palette, { subtle: true })
     }
   }
 
   const renderLinks = () => {
-    drawFallbackSectionHeading(pdf, 'Links', cursor, pdfMode.marginMm, palette)
+    drawFallbackSectionHeading(pdf, copy.links, cursor, pdfMode.marginMm, palette)
     const links = Object.entries(snapshot.links)
     if (links.length > 0) {
       links.forEach(([key, value]) => {
@@ -1075,7 +1246,7 @@ async function exportCvAsPdfTextFallback(
         )
       })
     } else {
-      drawFallbackParagraph(pdf, 'No links added yet.', cursor, pdfMode.marginMm, palette, { subtle: true })
+      drawFallbackParagraph(pdf, copy.noLinks, cursor, pdfMode.marginMm, palette, { subtle: true })
     }
   }
 
@@ -1132,23 +1303,6 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
         ? options.template
         : ''
 
-  if (DEBUG_PDF_EXPORT) {
-    console.debug('[PDF DEBUG] exportCvAsPdf inputs', {
-      fileName,
-      mode,
-      selectedTemplate: options.template,
-      optionsTemplate: options.template,
-      optionsVariant: options.variant,
-      expectedVariant,
-      previewDatasetExportVariant: previewElement.dataset.exportVariant || null,
-      previewAttrExportVariant: previewElement.getAttribute('data-export-variant') || null,
-      rootDatasetExportVariant: exportRoot.dataset.exportVariant || null,
-      rootAttrExportVariant: exportRoot.getAttribute('data-export-variant') || null,
-      queryVariant:
-        previewElement.querySelector?.('[data-export-variant]')?.getAttribute('data-export-variant') || null,
-    })
-  }
-
   const didMatchExpectedVariant = await waitForPreviewVariant(exportRoot, expectedVariant)
 
   if (expectedVariant && !didMatchExpectedVariant) {
@@ -1157,7 +1311,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     await waitForAnimationFrame()
   }
 
-  // === FORCE CORRECT VARIANT FIX ===
+  // Keep export variant aligned with the selected template before capture.
   if (expectedVariant && exportRoot) {
     exportRoot.setAttribute('data-export-variant', expectedVariant)
 
@@ -1167,7 +1321,6 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
 
     await new Promise((resolve) => setTimeout(resolve, 120))
   }
-  // === END FIX ===
 
   const { sandbox, captureRoot, clone, pdfMode } = createExportSandbox(
     exportRoot,
@@ -1176,14 +1329,6 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
   )
 
   try {
-    if (DEBUG_PDF_EXPORT) {
-      console.debug('[PDF DEBUG] before html2canvas', {
-        previewVariant: getExportVariant(exportRoot) || null,
-        previewInnerHTML: exportRoot.innerHTML,
-        previewInnerHTMLLength: exportRoot.innerHTML.length,
-      })
-    }
-
     let canvas = await renderCaptureCanvas(captureRoot, {
       foreignObjectRendering: false,
     })
@@ -1202,7 +1347,13 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     }
 
     if (isCanvasLikelyBlank(canvas) && options.formData) {
-      await exportCvAsPdfTextFallback(options.formData, fileName, mode, options.template)
+      await exportCvAsPdfTextFallback(
+        options.formData,
+        fileName,
+        mode,
+        options.template,
+        options.locale === 'fi' ? 'fi' : 'en',
+      )
       return
     }
 
@@ -1210,26 +1361,47 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
       throw new Error('Captured preview is empty. Open preview and try exporting again.')
     }
 
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-    })
-
     const breakpoints = collectCanvasPageBreakpoints(captureRoot, canvas)
     const contentBlocks = collectCanvasContentBlocks(captureRoot, canvas)
-    addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints, contentBlocks)
-
-    const blob = pdf.output('blob')
+    const sectionRanges = collectCanvasSectionRanges(captureRoot, canvas)
     const exportName =
       mode === 'designer' ? fileName : `${fileName}-${createPdfMode(mode).fileSuffix}`
-    saveAs(blob, `${exportName}.pdf`)
+    const workerPages = createWorkerPageSlices(
+      canvas,
+      pdfMode,
+      breakpoints,
+      contentBlocks,
+      sectionRanges,
+    )
+
+    try {
+      const workerBlob = await exportPdfInWorker(workerPages, pdfMode)
+      saveAs(workerBlob, `${exportName}.pdf`)
+      return
+    } catch {
+      const jsPDF = await loadJsPdf()
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      })
+
+      addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints, contentBlocks, sectionRanges)
+      const blob = pdf.output('blob')
+      saveAs(blob, `${exportName}.pdf`)
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : ''
     const isUnsupportedColorError = /unsupported color|oklch/i.test(message)
 
     if (isUnsupportedColorError && options.formData) {
-      await exportCvAsPdfTextFallback(options.formData, fileName, mode, options.template)
+      await exportCvAsPdfTextFallback(
+        options.formData,
+        fileName,
+        mode,
+        options.template,
+        options.locale === 'fi' ? 'fi' : 'en',
+      )
       return
     }
 

@@ -73,6 +73,17 @@ npm run build
 scp -r dist/* user@server:/var/www/portifycv/
 ```
 
+## Google SEO Setup
+
+After deployment, complete Google indexing and performance monitoring:
+
+1. Open Google Search Console and add your production domain.
+2. Verify ownership with your preferred method (DNS TXT is recommended).
+3. Submit `https://your-domain/sitemap.xml`.
+4. Use Search Console "Page indexing" and "Core Web Vitals" reports to track visibility and performance.
+
+If your live domain is not `https://portifycv.app`, update canonical/OG URLs in `index.html` and the domain in `public/sitemap.xml` and `public/robots.txt`.
+
 ## Performance
 
 - Bundle size: ~860KB (html2canvas + jsPDF are large dependencies)

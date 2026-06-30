@@ -1,4 +1,7 @@
-import { createCvSnapshot } from './exporters'
+// @ts-check
+import { createCvSnapshot } from './cvSnapshot'
+
+/** @typedef {import('../types/cv').CvData} CvData */
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
@@ -61,6 +64,10 @@ function sortByFrequency(tokens) {
     .map(([token]) => token)
 }
 
+/**
+ * @param {CvData} formData
+ * @param {string} [jobDescription='']
+ */
 export function analyzeJobDescription(formData, jobDescription = '') {
   const snapshot = createCvSnapshot(formData)
   const normalizedDescription = jobDescription.trim()
@@ -234,6 +241,10 @@ function createImprovementTips(breakdown, options) {
   return tips
 }
 
+/**
+ * @param {CvData} formData
+ * @param {{ locale?: 'en' | 'fi', jobDescription?: string }} [options]
+ */
 export function evaluateAtsScore(formData, options = {}) {
   const snapshot = createCvSnapshot(formData)
   const keywordDensity = scoreKeywordDensity(snapshot)

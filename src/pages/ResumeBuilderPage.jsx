@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import AppShell from '../components/AppShell'
 import AppErrorBoundary from '../components/AppErrorBoundary'
@@ -27,16 +27,14 @@ import {
   safeStorageSet,
 } from '../utils/cvForm'
 import {
-  cvTemplates,
-  defaultTemplateId,
+  getCvTemplates,
   getCvTemplate,
 } from '../utils/cvTemplates'
+import { cvFormReducer } from '../reducers/cvFormReducer'
+import { uiReducer, createInitialUiState } from '../reducers/uiReducer'
 import {
   createExportFileName,
-  exportCvAsJson,
-  exportCvAsPdf,
-  exportCvAsHtml,
-} from '../utils/exporters'
+} from '../utils/cvSnapshot'
 import {
   buildShareUrl,
   readCvStateFromLocation,
@@ -49,7 +47,7 @@ import {
 } from '../utils/cvFeedback'
 
 const TemplateGallery = lazy(() => import('../components/TemplateGallery'))
-const DEBUG_PDF_EXPORT = true
+const UI_LOCALE_STORAGE_KEY = 'ui-locale'
 
 function createToast(message, type = 'success') {
   return {
@@ -60,7 +58,7 @@ function createToast(message, type = 'success') {
 }
 
 function SurfaceFallback({ theme = 'dark', title = 'Loading panel...' }) {
-  const ui = getUiTheme(theme)
+  const ui = useMemo(() => getUiTheme(theme), [theme])
 
   return (
     <section
@@ -261,18 +259,24 @@ function loadInitialCvSession() {
 
 function ResumeBuilderPage() {
   const initialSession = useMemo(() => loadInitialCvSession(), [])
-  const [formData, setFormData] = useState(initialSession.formData)
+  const [formData, dispatchFormData] = useReducer(cvFormReducer, initialSession.formData)
   const [theme] = useState('light')
   const [accent] = useState(initialSession.accent)
-  const [selectedTemplate, setSelectedTemplate] = useState(defaultTemplateId)
-  const [atsFriendlyMode, setAtsFriendlyMode] = useState(false)
-  const [mobilePreviewVisible, setMobilePreviewVisible] = useState(false)
-  const [activeExport, setActiveExport] = useState('')
-  const [isImporting, setIsImporting] = useState(false)
-  const [pastedCvText, setPastedCvText] = useState('')
-  const [toasts, setToasts] = useState(
-    initialSession.initialToast ? [initialSession.initialToast] : [],
+  const [uiState, dispatchUi] = useReducer(
+    uiReducer,
+    initialSession,
+    createInitialUiState,
   )
+  const {
+    selectedTemplate,
+    atsFriendlyMode,
+    locale,
+    mobilePreviewVisible,
+    activeExport,
+    isImporting,
+    pastedCvText,
+    toasts,
+  } = uiState
   const ui = getUiTheme(theme)
   const previewRef = useRef(null)
   const importInputRef = useRef(null)
@@ -281,26 +285,27 @@ function ResumeBuilderPage() {
 
   const errors = useMemo(
     () => ({
-      fullName: formData.fullName.trim() ? '' : 'Full name is required.',
-      title: formData.title.trim() ? '' : 'Professional title is required.',
+      fullName: formData.fullName.trim() ? '' : locale === 'fi' ? 'Koko nimi on pakollinen.' : 'Full name is required.',
+      title: formData.title.trim() ? '' : locale === 'fi' ? 'Ammattinimike on pakollinen.' : 'Professional title is required.',
     }),
-    [formData.fullName, formData.title],
+    [formData.fullName, formData.title, locale],
   )
 
   const exportFileName = createExportFileName(formData) || 'cv'
   const currentTemplate = useMemo(
-    () => getCvTemplate(selectedTemplate),
-    [selectedTemplate],
+    () => getCvTemplate(selectedTemplate, locale),
+    [locale, selectedTemplate],
   )
+  const templates = useMemo(() => getCvTemplates(locale), [locale])
   const shellStyle = useMemo(() => getAccentThemeStyles(theme, accent), [theme, accent])
-  const feedback = useMemo(() => evaluateCvFeedback(formData), [formData])
+  const feedback = useMemo(() => evaluateCvFeedback(formData, { locale }), [formData, locale])
   const showToast = (message, type = 'success') => {
     const nextToast = createToast(message, type)
 
-    setToasts((current) => [...current, nextToast])
+    dispatchUi({ type: 'ADD_TOAST', toast: nextToast })
 
     const timeoutId = window.setTimeout(() => {
-      setToasts((current) => current.filter((toast) => toast.id !== nextToast.id))
+      dispatchUi({ type: 'REMOVE_TOAST', toastId: nextToast.id })
       toastTimeoutsRef.current.delete(nextToast.id)
     }, 2800)
 
@@ -313,8 +318,13 @@ function ResumeBuilderPage() {
     }
 
     storageWarningShownRef.current = true
-    showToast('Storage access is limited. Your changes may not persist after refresh.', 'error')
-  }, [])
+    showToast(
+      locale === 'fi'
+        ? 'Tallennustila on rajoitettu. Muutokset eivät välttämättä säily päivityksen jälkeen.'
+        : 'Storage access is limited. Your changes may not persist after refresh.',
+      'error',
+    )
+  }, [locale])
 
   const setStorageValue = useCallback((key, value) => {
     const result = safeStorageSet(key, value)
@@ -353,6 +363,13 @@ function ResumeBuilderPage() {
   }, [accent, setStorageValue])
 
   useEffect(() => {
+    setStorageValue(UI_LOCALE_STORAGE_KEY, locale)
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = locale
+    }
+  }, [locale, setStorageValue])
+
+  useEffect(() => {
     if (initialSession.storageIssue) {
       reportStorageIssue()
     }
@@ -371,7 +388,7 @@ function ResumeBuilderPage() {
       }
 
       const timeoutId = window.setTimeout(() => {
-        setToasts((current) => current.filter((entry) => entry.id !== toast.id))
+        dispatchUi({ type: 'REMOVE_TOAST', toastId: toast.id })
         toastTimeoutsRef.current.delete(toast.id)
       }, 2800)
 
@@ -392,60 +409,38 @@ function ResumeBuilderPage() {
   const secondaryButtonClassName = `rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`
   const compactButtonClassName = `shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`
 
-  useEffect(() => {
-    if (!DEBUG_PDF_EXPORT) {
-      return
-    }
-
-    const previewVariant =
-      previewRef.current?.querySelector('[data-export-variant]')?.getAttribute('data-export-variant')
-      || previewRef.current?.getAttribute('data-export-variant')
-      || null
-    console.debug('[PDF DEBUG] selectedTemplate state changed', {
-      selectedTemplate,
-      previewVariant,
-    })
-  }, [selectedTemplate])
-
   const handleExport = useCallback(async (type) => {
-    setActiveExport(type)
+    dispatchUi({ type: 'SET_ACTIVE_EXPORT', value: type })
 
     const toastLabel =
       type === 'pdf-designer'
-        ? 'Preparing PDF export...'
+        ? locale === 'fi' ? 'Valmistellaan PDF-vientiä...' : 'Preparing PDF export...'
         : type === 'html'
-          ? 'Preparing HTML export...'
-          : 'Preparing JSON export...'
+          ? locale === 'fi' ? 'Valmistellaan HTML-vientiä...' : 'Preparing HTML export...'
+          : locale === 'fi' ? 'Valmistellaan JSON-vientiä...' : 'Preparing JSON export...'
 
     showToast(toastLabel)
 
     try {
+      const {
+        exportCvAsJson,
+        exportCvAsPdf,
+        exportCvAsHtml,
+      } = await import('../utils/exporters')
+
       if (type === 'pdf-designer') {
-        const expectedVariant = getCvTemplate(selectedTemplate).variant
+        const expectedVariant = getCvTemplate(selectedTemplate, locale).variant
         const exportPdfMode = atsFriendlyMode ? 'ats' : 'designer'
         const didSyncPreviewMode = await waitForPreviewModeSync(
           previewRef.current,
           exportPdfMode,
         )
-        const initialPreviewVariant =
-          previewRef.current?.querySelector('[data-export-variant]')?.getAttribute('data-export-variant')
-          || previewRef.current?.getAttribute('data-export-variant')
-          || null
-
-        if (DEBUG_PDF_EXPORT) {
-          console.debug('[PDF DEBUG] before PDF export', {
-            selectedTemplate,
-            expectedVariant,
-            optionsTemplate: selectedTemplate,
-            optionsVariant: expectedVariant,
-            previewElementVariant: initialPreviewVariant,
-            hasPreviewRef: Boolean(previewRef.current),
-          })
-        }
 
         if (!didSyncPreviewMode) {
           showToast(
-            `Preview mode is not synced (${exportPdfMode.toUpperCase()}). Try exporting again in a moment.`,
+            locale === 'fi'
+              ? `Esikatselutila ei ole synkronoitu (${exportPdfMode.toUpperCase()}). Yritä hetken kuluttua uudelleen.`
+              : `Preview mode is not synced (${exportPdfMode.toUpperCase()}). Try exporting again in a moment.`,
             'error',
           )
           return
@@ -463,7 +458,9 @@ function ResumeBuilderPage() {
             || 'unknown'
 
           showToast(
-            `Template preview is not synced yet (expected ${expectedVariant}, got ${activeVariant}). Try again.`,
+            locale === 'fi'
+              ? `Pohjan esikatselu ei ole vielä synkronoitu (odotettu ${expectedVariant}, saatu ${activeVariant}). Yritä uudelleen.`
+              : `Template preview is not synced yet (expected ${expectedVariant}, got ${activeVariant}). Try again.`,
             'error',
           )
           return
@@ -476,6 +473,7 @@ function ResumeBuilderPage() {
           template: selectedTemplate,
           variant: selectedTemplate,
           atsFriendlyMode,
+          locale,
         })
       }
 
@@ -484,7 +482,7 @@ function ResumeBuilderPage() {
       }
 
       if (type === 'html') {
-        exportCvAsHtml(formData, exportFileName)
+        exportCvAsHtml(formData, exportFileName, { locale })
       }
 
       const exportLabel =
@@ -496,7 +494,11 @@ function ResumeBuilderPage() {
             ? 'HTML'
             : 'JSON'
 
-      showToast(`${exportLabel} export downloaded.`)
+      showToast(
+        locale === 'fi'
+          ? `${exportLabel} on ladattu.`
+          : `${exportLabel} export downloaded.`,
+      )
     } catch (error) {
       const exportLabel =
         type === 'pdf-designer'
@@ -510,13 +512,15 @@ function ResumeBuilderPage() {
       showToast(
         error instanceof Error
           ? error.message
-          : `Failed to export ${exportLabel}.`,
+          : locale === 'fi'
+            ? `${exportLabel}-vienti epäonnistui.`
+            : `Failed to export ${exportLabel}.`,
         'error',
       )
     } finally {
-      setActiveExport('')
+      dispatchUi({ type: 'SET_ACTIVE_EXPORT', value: '' })
     }
-  }, [atsFriendlyMode, exportFileName, formData, previewRef, selectedTemplate, theme])
+  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate, theme])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()
@@ -529,111 +533,98 @@ function ResumeBuilderPage() {
       return
     }
 
-    setIsImporting(true)
+    dispatchUi({ type: 'SET_IMPORTING', value: true })
 
     try {
-      showToast(`Importing ${file.name}...`)
+      showToast(locale === 'fi' ? `Tuodaan ${file.name}...` : `Importing ${file.name}...`)
       const fileText = await file.text()
       const parsedValue = JSON.parse(fileText)
       const importedData = parseImportedCvData(parsedValue)
 
-      setFormData(importedData)
+      dispatchFormData({ type: 'SET_FORM_DATA', formData: importedData })
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
-      showToast(`Imported CV data from ${file.name}.`)
+      showToast(locale === 'fi' ? `CV-tiedot tuotu tiedostosta ${file.name}.` : `Imported CV data from ${file.name}.`)
     } catch (error) {
       if (error instanceof SyntaxError) {
         showToast(
-          'Invalid JSON file. Upload a valid PortifyCV export with fullName, title, skills, experience, education, and links.',
+          locale === 'fi'
+            ? 'Virheellinen JSON-tiedosto. Lataa kelvollinen PortifyCV-vienti, jossa on fullName, title, skills, experience, education ja links.'
+            : 'Invalid JSON file. Upload a valid PortifyCV export with fullName, title, skills, experience, education, and links.',
           'error',
         )
       } else {
         showToast(
-          error instanceof Error ? error.message : 'Failed to import the selected file.',
+          error instanceof Error
+            ? error.message
+            : locale === 'fi' ? 'Valitun tiedoston tuonti epäonnistui.' : 'Failed to import the selected file.',
           'error',
         )
       }
     } finally {
-      setIsImporting(false)
+      dispatchUi({ type: 'SET_IMPORTING', value: false })
       event.target.value = ''
     }
-  }, [setStorageValue])
+  }, [locale, setStorageValue])
 
   const handleResetForm = useCallback(() => {
-    setFormData(createInitialCvData())
+    dispatchFormData({ type: 'RESET_FORM' })
     removeStorageValue(CV_DRAFT_STORAGE_KEY)
-    showToast('Form reset to a blank CV.')
-  }, [removeStorageValue])
+    showToast(locale === 'fi' ? 'Lomake nollattu tyhjäksi CV:ksi.' : 'Form reset to a blank CV.')
+  }, [locale, removeStorageValue])
 
   const handleLoadDemo = useCallback(() => {
-    setFormData(structuredClone(demoCvData))
+    dispatchFormData({ type: 'SET_FORM_DATA', formData: structuredClone(demoCvData) })
     setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
-    showToast('Demo CV loaded.')
-  }, [setStorageValue])
+    showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
+  }, [locale, setStorageValue])
 
   const handlePasteCvImport = useCallback(() => {
     try {
-      const parsedData = parsePastedCvText(pastedCvText)
+      const parsedData = parsePastedCvText(pastedCvText, { locale })
 
-      setFormData((current) => ({
-        ...current,
-        ...parsedData,
-      }))
-      setPastedCvText('')
+      dispatchFormData({ type: 'MERGE_FORM_DATA', partialData: parsedData })
+      dispatchUi({ type: 'SET_PASTED_CV_TEXT', value: '' })
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
-      showToast('Pasted CV text imported.')
+      showToast(locale === 'fi' ? 'Liitetty CV-teksti tuotu.' : 'Pasted CV text imported.')
     } catch (error) {
-      showToast(error instanceof Error ? error.message : 'Failed to parse pasted CV text.', 'error')
+      showToast(
+        error instanceof Error
+          ? error.message
+          : locale === 'fi' ? 'Liitetyn CV-tekstin jäsentäminen epäonnistui.' : 'Failed to parse pasted CV text.',
+        'error',
+      )
     }
-  }, [pastedCvText, setStorageValue])
-
-  const handleCopySummary = useCallback(async () => {
-    const summary = [formData.fullName.trim(), formData.title.trim(), formData.about.trim()]
-      .filter(Boolean)
-      .join('\n')
-
-    if (!summary) {
-      showToast('Add a name, title, or about text before copying the summary.', 'error')
-      return
-    }
-
-    try {
-      await window.navigator.clipboard.writeText(summary)
-      showToast('CV summary copied to clipboard.')
-    } catch {
-      showToast('Clipboard access failed. Please try again.', 'error')
-    }
-  }, [formData.about, formData.fullName, formData.title])
+  }, [locale, pastedCvText, setStorageValue])
 
   const handleCopyShareLink = useCallback(async () => {
     try {
       const shareUrl = buildShareUrl(formData)
 
       await window.navigator.clipboard.writeText(shareUrl)
-      showToast('Share link copied to clipboard.')
+      showToast(locale === 'fi' ? 'Jakolinkki kopioitu leikepöydälle.' : 'Share link copied to clipboard.')
     } catch (error) {
       showToast(
         error instanceof Error
           ? error.message
-          : 'Failed to create a shareable link for this CV.',
+          : locale === 'fi'
+            ? 'Tälle CV:lle ei voitu luoda jaettavaa linkkiä.'
+            : 'Failed to create a shareable link for this CV.',
         'error',
       )
     }
-  }, [formData])
+  }, [formData, locale])
 
   const handleImproveAboutText = useCallback(() => {
-    const nextAbout = improveAboutText(formData)
+    const nextAbout = improveAboutText(formData, { locale })
 
     if (nextAbout === formData.about.trim()) {
-      showToast('About text already looks concise.', 'success')
+      showToast(locale === 'fi' ? 'Esittelyteksti on jo tiivis.' : 'About text already looks concise.', 'success')
       return
     }
 
-    setFormData((current) => ({
-      ...current,
-      about: nextAbout,
-    }))
-    showToast('About text improved.')
-  }, [formData])
+    dispatchFormData({ type: 'SET_ROOT_FIELD', field: 'about', value: nextAbout })
+    showToast(locale === 'fi' ? 'Esittelytekstiä parannettu.' : 'About text improved.')
+  }, [formData, locale])
 
   const handleImproveExperienceText = useCallback((index) => {
     const currentItem = formData.experience[index]
@@ -642,45 +633,335 @@ function ResumeBuilderPage() {
       return
     }
 
-    const nextDescription = improveExperienceText(currentItem)
+    const nextDescription = improveExperienceText(currentItem, { locale })
 
     if (nextDescription === currentItem.description.trim()) {
-      showToast(`Experience ${index + 1} already looks concise.`, 'success')
+      showToast(
+        locale === 'fi'
+          ? `Kokemus ${index + 1} on jo riittävän tiivis.`
+          : `Experience ${index + 1} already looks concise.`,
+        'success',
+      )
       return
     }
 
-    setFormData((current) => ({
-      ...current,
-      experience: current.experience.map((item, itemIndex) =>
-        itemIndex === index
-          ? {
-              ...item,
-              description: nextDescription,
-            }
-          : item,
-      ),
-    }))
-    showToast(`Experience ${index + 1} text improved.`)
-  }, [formData.experience])
+    dispatchFormData({
+      type: 'UPDATE_ARRAY_ITEM',
+      section: 'experience',
+      index,
+      field: 'description',
+      value: nextDescription,
+    })
+    showToast(
+      locale === 'fi'
+        ? `Kokemus ${index + 1} -tekstiä parannettu.`
+        : `Experience ${index + 1} text improved.`,
+    )
+  }, [formData.experience, locale])
 
   const handleToggleAtsFriendlyMode = useCallback(() => {
-    setAtsFriendlyMode((current) => !current)
+    dispatchUi({ type: 'TOGGLE_ATS_MODE' })
   }, [])
 
   const handleToggleMobilePreview = useCallback(() => {
-    setMobilePreviewVisible((current) => !current)
+    dispatchUi({ type: 'TOGGLE_MOBILE_PREVIEW' })
   }, [])
 
   const handleSelectTemplate = useCallback((templateId) => {
-    if (DEBUG_PDF_EXPORT) {
-      console.debug('[PDF DEBUG] template selected', {
-        previousTemplate: selectedTemplate,
-        nextTemplate: templateId,
-      })
-    }
+    dispatchUi({ type: 'SET_SELECTED_TEMPLATE', templateId })
+  }, [])
 
-    setSelectedTemplate(templateId)
-  }, [selectedTemplate])
+  const handleLocaleChange = useCallback((nextLocale) => {
+    dispatchUi({ type: 'SET_LOCALE', locale: nextLocale === 'fi' ? 'fi' : 'en' })
+  }, [])
+
+  const handlePastedCvTextChange = useCallback((event) => {
+    dispatchUi({ type: 'SET_PASTED_CV_TEXT', value: event.target.value })
+  }, [])
+
+  const sidebarContent = useMemo(() => (
+    <div className="editor-panel p-4 sm:p-6 lg:p-8">
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".json,application/json"
+        className="hidden"
+        onChange={handleImportFile}
+      />
+      <div className="stack-5">
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            className={secondaryButtonClassName}
+            disabled={isActionBusy}
+            onClick={handleLoadDemo}
+          >
+            {locale === 'fi' ? 'Lataa demo-CV' : 'Load demo CV'}
+          </button>
+          <button
+            type="button"
+            className={`rounded-full border px-4 py-2 text-sm font-medium transition lg:hidden ${
+              mobilePreviewVisible ? ui.buttonActive : ui.button
+            }`}
+            onClick={handleToggleMobilePreview}
+          >
+            {mobilePreviewVisible
+              ? locale === 'fi' ? 'Piilota esikatselu' : 'Hide preview'
+              : locale === 'fi' ? 'Näytä esikatselu' : 'Show preview'}
+          </button>
+          <button
+            type="button"
+            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.buttonDanger}`}
+            disabled={isActionBusy}
+            onClick={handleResetForm}
+          >
+            {locale === 'fi' ? 'Nollaa lomake' : 'Reset form'}
+          </button>
+          <div
+            className={`inline-flex items-center rounded-full px-3 py-2 text-xs font-medium ${ui.surfaceMuted} ${ui.textMuted}`}
+          >
+            {locale === 'fi' ? 'Automaattitallennus käytössä' : 'Autosave enabled'}
+          </div>
+        </div>
+
+        <section className={`surface-shadow rounded-[var(--radius-card)] border p-4 sm:p-5 ${ui.surface}`}>
+          <p className={`ds-kicker ${ui.textMuted}`}>{locale === 'fi' ? 'Pikatuonti' : 'Quick import'}</p>
+          <p className={`mt-3 text-sm ${ui.textSecondary}`}>
+            {locale === 'fi'
+              ? 'Liitä CV-katkelma nimen, tittelin, taitojen ja lyhyen yhteenvedon tunnistamiseksi.'
+              : 'Paste a resume snippet to detect a name, title, skills, and a short summary.'}
+          </p>
+          <textarea
+            className={`mt-4 min-h-32 w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-border)] focus:ring-2 focus:ring-[var(--accent-ring)] ${ui.input}`}
+            value={pastedCvText}
+            disabled={isActionBusy}
+            onChange={handlePastedCvTextChange}
+            placeholder={locale === 'fi'
+              ? `Matti Meikäläinen\nSenior Product Designer\nTaidot: Figma, käyttäjätutkimus, design systemit`
+              : `Alex Morgan\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
+          />
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+              disabled={isActionBusy}
+              onClick={handlePasteCvImport}
+            >
+              {locale === 'fi' ? 'Tuo liitetty teksti' : 'Paste CV text'}
+            </button>
+            <button
+              type="button"
+              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+              disabled={isActionBusy}
+              onClick={handleImportClick}
+            >
+              {isImporting
+                ? locale === 'fi' ? 'Tuodaan JSON...' : 'Importing JSON...'
+                : locale === 'fi' ? 'Tuo JSON' : 'Import JSON'}
+            </button>
+            <button
+              type="button"
+              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+              disabled={isActionBusy}
+              onClick={handleLoadDemo}
+            >
+              {locale === 'fi' ? 'Lataa demo-CV' : 'Load demo CV'}
+            </button>
+          </div>
+        </section>
+
+        <section className={`surface-shadow rounded-[var(--radius-card)] border p-4 sm:p-5 ${ui.surface}`}>
+          <p className={`ds-kicker ${ui.textMuted}`}>{locale === 'fi' ? 'Vientitila' : 'Export mode'}</p>
+          <p className={`mt-3 text-sm ${ui.textSecondary}`}>
+            {locale === 'fi'
+              ? 'ATS-tila yksinkertaistaa muotoilua jäsennystä varten. Jätä se pois päältä täysin tyyliteltyä vientiä varten.'
+              : 'ATS mode simplifies formatting for parsers. Leave it off for fully styled template exports.'}
+          </p>
+          <button
+            type="button"
+            className={`mt-4 rounded-full border px-4 py-2 text-sm font-medium transition ${
+              atsFriendlyMode ? ui.buttonActive : ui.button
+            }`}
+            disabled={isActionBusy}
+            onClick={handleToggleAtsFriendlyMode}
+          >
+            {atsFriendlyMode
+              ? locale === 'fi' ? 'ATS-tila käytössä' : 'ATS mode enabled'
+              : locale === 'fi' ? 'Ota ATS-tila käyttöön' : 'Enable ATS mode'}
+          </button>
+        </section>
+
+        <AppErrorBoundary
+          theme={theme}
+          panelTitle={locale === 'fi' ? 'Pohjagalleria' : 'Template gallery'}
+          locale={locale}
+        >
+          <Suspense fallback={<SurfaceFallback theme={theme} title={locale === 'fi' ? 'Ladataan pohjia' : 'Loading templates'} />}>
+            <TemplateGallery
+              templates={templates}
+              selectedTemplateId={selectedTemplate}
+              onSelectTemplate={handleSelectTemplate}
+              theme={theme}
+              locale={locale}
+            />
+          </Suspense>
+        </AppErrorBoundary>
+
+        <p className={`ds-kicker lg:hidden ${ui.textMuted}`}>
+          {locale === 'fi'
+            ? 'Mobiilinäkymässä lomake on esikatselun yläpuolella.'
+            : 'Mobile layout stacks the form above the preview.'}
+        </p>
+      </div>
+
+      <CVForm
+        formData={formData}
+        dispatchFormData={dispatchFormData}
+        errors={errors}
+        theme={theme}
+        feedback={feedback}
+        onImproveAboutText={handleImproveAboutText}
+        onImproveExperienceText={handleImproveExperienceText}
+        onPhotoError={(message) => showToast(message, 'error')}
+        selectedTemplate={selectedTemplate}
+        selectedTemplateLabel={currentTemplate.label}
+        locale={locale}
+      />
+    </div>
+  ), [
+    atsFriendlyMode,
+    currentTemplate.label,
+    errors,
+    feedback,
+    formData,
+    handleImportClick,
+    handleImportFile,
+    handleImproveAboutText,
+    handleImproveExperienceText,
+    handleLoadDemo,
+    handlePasteCvImport,
+    handlePastedCvTextChange,
+    handleResetForm,
+    handleSelectTemplate,
+    handleToggleAtsFriendlyMode,
+    handleToggleMobilePreview,
+    isActionBusy,
+    isImporting,
+    locale,
+    mobilePreviewVisible,
+    pastedCvText,
+    secondaryButtonClassName,
+    selectedTemplate,
+    dispatchFormData,
+    templates,
+    theme,
+    ui.button,
+    ui.buttonActive,
+    ui.buttonDanger,
+    ui.input,
+    ui.surface,
+    ui.surfaceMuted,
+    ui.textMuted,
+    ui.textSecondary,
+  ])
+
+  const previewContent = useMemo(() => (
+    <div className="preview-panel pb-28 sm:pb-6 print:p-0">
+      <div className="preview-scroll px-3 pb-6 pt-4 sm:px-5 lg:px-6 print:px-0">
+        <div className="mb-4 lg:hidden print:hidden">
+          <div className={`surface-shadow rounded-[var(--radius-card)] border p-4 ${ui.surface}`}>
+            <p className={`ds-kicker ${ui.textMuted}`}>{locale === 'fi' ? 'Esikatselupaneeli' : 'Preview panel'}</p>
+            <h2 className={`ds-section-title mt-2 font-semibold ${ui.textPrimary}`}>
+              {locale === 'fi' ? 'CV-esikatselu' : 'Resume document view'}
+            </h2>
+            <p className={`ds-body-sm mt-3 ${ui.textSecondary}`}>
+              {locale === 'fi'
+                ? 'Voit palata editoriin milloin tahansa tai pitää tämän näkymän auki viimeistelyn aikana.'
+                : 'Switch back to the editor any time or keep this view open while you polish the layout.'}
+            </p>
+          </div>
+        </div>
+
+        <div className="preview-stage">
+          <button
+            type="button"
+            className={`preview-mobile-toggle rounded-full border px-4 py-2 text-sm font-medium transition lg:hidden ${
+              ui.button
+            }`}
+            onClick={handleToggleMobilePreview}
+          >
+            {locale === 'fi' ? 'Takaisin editoriin' : 'Back to editor'}
+          </button>
+          <CVPreview
+            formData={formData}
+            theme={theme}
+            previewRef={previewRef}
+            template={selectedTemplate}
+            locale={locale}
+            atsFriendlyMode={atsFriendlyMode}
+          />
+        </div>
+
+      </div>
+    </div>
+  ), [
+    atsFriendlyMode,
+    formData,
+    handleToggleMobilePreview,
+    locale,
+    selectedTemplate,
+    theme,
+    ui.button,
+    ui.surface,
+    ui.textMuted,
+    ui.textPrimary,
+    ui.textSecondary,
+  ])
+
+  const mobileBottomActions = useMemo(() => (
+    <div
+      className={`fixed inset-x-0 bottom-0 z-40 border-t px-3 py-3 backdrop-blur md:px-4 lg:hidden print:hidden ${ui.surfaceStrong}`}
+    >
+      <div className="mx-auto flex max-w-[110rem] items-center gap-2 overflow-x-auto no-scrollbar">
+        <button
+          type="button"
+          className={`${compactButtonClassName} accent-border accent-surface accent-text-strong`}
+          onClick={() => handleExport('pdf-designer')}
+        >
+          {activeExport === 'pdf-designer' ? 'PDF...' : locale === 'fi' ? 'Vie PDF' : 'PDF'}
+        </button>
+        <button
+          type="button"
+          className={compactButtonClassName}
+          onClick={handleCopyShareLink}
+        >
+          {locale === 'fi' ? 'Linkki' : 'Link'}
+        </button>
+        <button
+          type="button"
+          className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${
+            mobilePreviewVisible ? ui.buttonActive : ui.button
+          }`}
+          onClick={handleToggleMobilePreview}
+        >
+          {mobilePreviewVisible
+            ? locale === 'fi' ? 'Editori' : 'Editor'
+            : locale === 'fi' ? 'Esikatselu' : 'Preview'}
+        </button>
+      </div>
+    </div>
+  ), [
+    activeExport,
+    compactButtonClassName,
+    handleCopyShareLink,
+    handleExport,
+    handleToggleMobilePreview,
+    locale,
+    mobilePreviewVisible,
+    ui.button,
+    ui.buttonActive,
+    ui.surfaceStrong,
+  ])
 
   return (
     <>
@@ -688,232 +969,19 @@ function ResumeBuilderPage() {
         theme={theme}
         activeExport={activeExport}
         isActionBusy={isActionBusy}
+        locale={locale}
+        onLocaleChange={handleLocaleChange}
         onExport={handleExport}
       />
       <AppShell
         theme={theme}
         shellStyle={shellStyle}
         showContentOnMobile={mobilePreviewVisible}
-        sidebar={
-          <div className="editor-panel p-4 sm:p-6 lg:p-8">
-            <input
-              ref={importInputRef}
-              type="file"
-              accept=".json,application/json"
-              className="hidden"
-              onChange={handleImportFile}
-            />
-            <div className="stack-5">
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  className={secondaryButtonClassName}
-                  disabled={isActionBusy}
-                  onClick={handleLoadDemo}
-                >
-                  Load demo CV
-                </button>
-                <button
-                  type="button"
-                  className={secondaryButtonClassName}
-                  disabled={isActionBusy}
-                  onClick={handleCopySummary}
-                >
-                  Copy summary
-                </button>
-                <button
-                  type="button"
-                  className={`rounded-full border px-4 py-2 text-sm font-medium transition lg:hidden ${
-                    mobilePreviewVisible ? ui.buttonActive : ui.button
-                  }`}
-                  onClick={handleToggleMobilePreview}
-                >
-                  {mobilePreviewVisible ? 'Hide preview' : 'Show preview'}
-                </button>
-                <button
-                  type="button"
-                  className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.buttonDanger}`}
-                  disabled={isActionBusy}
-                  onClick={handleResetForm}
-                >
-                  Reset form
-                </button>
-                <div
-                  className={`inline-flex items-center rounded-full px-3 py-2 text-xs font-medium ${ui.surfaceMuted} ${ui.textMuted}`}
-                >
-                  Autosave enabled
-                </div>
-              </div>
-
-              <section className={`surface-shadow rounded-[var(--radius-card)] border p-4 sm:p-5 ${ui.surface}`}>
-                <p className={`ds-kicker ${ui.textMuted}`}>Quick import</p>
-                <p className={`mt-3 text-sm ${ui.textSecondary}`}>
-                  Paste a resume snippet to detect a name, title, skills, and a short summary.
-                </p>
-                <textarea
-                  className={`mt-4 min-h-32 w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-border)] focus:ring-2 focus:ring-[var(--accent-ring)] ${ui.input}`}
-                  value={pastedCvText}
-                  disabled={isActionBusy}
-                  onChange={(event) => setPastedCvText(event.target.value)}
-                  placeholder={`Alex Morgan\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
-                />
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
-                    disabled={isActionBusy}
-                    onClick={handlePasteCvImport}
-                  >
-                    Paste CV text
-                  </button>
-                  <button
-                    type="button"
-                    className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
-                    disabled={isActionBusy}
-                    onClick={handleImportClick}
-                  >
-                    {isImporting ? 'Importing JSON...' : 'Import JSON'}
-                  </button>
-                  <button
-                    type="button"
-                    className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
-                    disabled={isActionBusy}
-                    onClick={handleLoadDemo}
-                  >
-                    Load demo CV
-                  </button>
-                </div>
-              </section>
-
-              <section className={`surface-shadow rounded-[var(--radius-card)] border p-4 sm:p-5 ${ui.surface}`}>
-                <p className={`ds-kicker ${ui.textMuted}`}>Export mode</p>
-                <p className={`mt-3 text-sm ${ui.textSecondary}`}>
-                  ATS mode simplifies formatting for parsers. Leave it off for fully styled template exports.
-                </p>
-                <button
-                  type="button"
-                  className={`mt-4 rounded-full border px-4 py-2 text-sm font-medium transition ${
-                    atsFriendlyMode ? ui.buttonActive : ui.button
-                  }`}
-                  disabled={isActionBusy}
-                  onClick={handleToggleAtsFriendlyMode}
-                >
-                  {atsFriendlyMode ? 'ATS mode enabled' : 'Enable ATS mode'}
-                </button>
-              </section>
-
-              <AppErrorBoundary theme={theme} panelTitle="Template gallery">
-                <Suspense fallback={<SurfaceFallback theme={theme} title="Loading templates" />}>
-                  <TemplateGallery
-                    templates={cvTemplates}
-                    selectedTemplateId={selectedTemplate}
-                    onSelectTemplate={handleSelectTemplate}
-                    theme={theme}
-                  />
-                </Suspense>
-              </AppErrorBoundary>
-
-              <p className={`ds-kicker lg:hidden ${ui.textMuted}`}>
-                Mobile layout stacks the form above the preview.
-              </p>
-            </div>
-
-            <CVForm
-              formData={formData}
-              setFormData={setFormData}
-              errors={errors}
-              theme={theme}
-              feedback={feedback}
-              onImproveAboutText={handleImproveAboutText}
-              onImproveExperienceText={handleImproveExperienceText}
-              onPhotoError={(message) => showToast(message, 'error')}
-              selectedTemplate={selectedTemplate}
-              selectedTemplateLabel={currentTemplate.label}
-            />
-          </div>
-        }
-        content={
-          <div className="preview-panel pb-28 sm:pb-6 print:p-0">
-            <div className="preview-scroll px-3 pb-6 pt-4 sm:px-5 lg:px-6 print:px-0">
-              <div className="mb-4 lg:hidden print:hidden">
-                <div className={`surface-shadow rounded-[var(--radius-card)] border p-4 ${ui.surface}`}>
-                  <p className={`ds-kicker ${ui.textMuted}`}>Preview panel</p>
-                  <h2 className={`ds-section-title mt-2 font-semibold ${ui.textPrimary}`}>
-                    Resume document view
-                  </h2>
-                  <p className={`ds-body-sm mt-3 ${ui.textSecondary}`}>
-                    Switch back to the editor any time or keep this view open while you polish the layout.
-                  </p>
-                </div>
-              </div>
-
-              <div className="preview-stage">
-                <button
-                  type="button"
-                  className={`preview-mobile-toggle rounded-full border px-4 py-2 text-sm font-medium transition lg:hidden ${
-                    ui.button
-                  }`}
-                  onClick={handleToggleMobilePreview}
-                >
-                  Back to editor
-                </button>
-                <CVPreview
-                  formData={formData}
-                  theme={theme}
-                  previewRef={previewRef}
-                  template={selectedTemplate}
-                  atsFriendlyMode={atsFriendlyMode}
-                />
-              </div>
-
-            </div>
-          </div>
-        }
+        sidebar={sidebarContent}
+        content={previewContent}
       />
 
-      <div
-        className={`fixed inset-x-0 bottom-0 z-40 border-t px-3 py-3 backdrop-blur md:px-4 lg:hidden print:hidden ${ui.surfaceStrong}`}
-      >
-        <div className="mx-auto flex max-w-[110rem] items-center gap-2 overflow-x-auto no-scrollbar">
-          <button
-            type="button"
-            className={`${compactButtonClassName} accent-border accent-surface accent-text-strong`}
-            onClick={() => handleExport('pdf-designer')}
-          >
-            {activeExport === 'pdf-designer' ? 'PDF...' : 'PDF'}
-          </button>
-          <button
-            type="button"
-            className={compactButtonClassName}
-            onClick={() => handleExport('html')}
-          >
-            {activeExport === 'html' ? 'HTML...' : 'HTML'}
-          </button>
-          <button
-            type="button"
-            className={compactButtonClassName}
-            onClick={() => handleExport('json')}
-          >
-            {activeExport === 'json' ? 'JSON...' : 'JSON'}
-          </button>
-          <button
-            type="button"
-            className={compactButtonClassName}
-            onClick={handleCopyShareLink}
-          >
-            Link
-          </button>
-          <button
-            type="button"
-            className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${
-              mobilePreviewVisible ? ui.buttonActive : ui.button
-            }`}
-            onClick={handleToggleMobilePreview}
-          >
-            {mobilePreviewVisible ? 'Editor' : 'Preview'}
-          </button>
-        </div>
-      </div>
+      {mobileBottomActions}
 
       <ToastStack toasts={toasts} theme={theme} />
     </>

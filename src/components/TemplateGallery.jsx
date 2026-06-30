@@ -51,16 +51,27 @@ function TemplateThumbnail({ template, isDark }) {
   )
 }
 
-function TemplateGallery({ templates, selectedTemplateId, onSelectTemplate, theme = 'dark' }) {
+function TemplateGallery({
+  templates,
+  selectedTemplateId,
+  onSelectTemplate,
+  theme = 'dark',
+  locale = 'en',
+}) {
   const ui = useMemo(() => getUiTheme(theme), [theme])
+  const isFinnish = locale === 'fi'
 
   return (
     <section className={`surface-shadow rounded-[var(--radius-card)] border p-4 sm:p-5 ${ui.surface}`}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className={`ds-kicker ${ui.textMuted}`}>Template gallery</p>
+          <p className={`ds-kicker ${ui.textMuted}`}>
+            {isFinnish ? 'Pohjagalleria' : 'Template gallery'}
+          </p>
           <p className={`mt-3 text-sm ${ui.textSecondary}`}>
-            Switch layouts any time without changing the CV content you already entered.
+            {isFinnish
+              ? 'Vaihda asettelua milloin tahansa ilman että jo syöttämäsi sisältö muuttuu.'
+              : 'Switch layouts any time without changing the CV content you already entered.'}
           </p>
         </div>
       </div>
@@ -84,13 +95,15 @@ function TemplateGallery({ templates, selectedTemplateId, onSelectTemplate, them
                 <div>
                   <p className={`text-sm font-semibold ${ui.textPrimary}`}>{template.label}</p>
                   <p className={`mt-1 text-xs ${ui.textMuted}`}>
-                    {template.layout === 'split' ? 'Split layout' : 'Single-column layout'}
+                    {template.layout === 'split'
+                      ? isFinnish ? 'Jaettu asettelu' : 'Split layout'
+                      : isFinnish ? 'Yhden palstan asettelu' : 'Single-column layout'}
                   </p>
                 </div>
                 <div className="flex flex-wrap justify-end gap-2">
                   {isSelected ? (
                     <span className="rounded-full border border-[var(--accent-border)] px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[var(--accent-text-strong)]">
-                      Active
+                      {isFinnish ? 'Aktiivinen' : 'Active'}
                     </span>
                   ) : null}
                 </div>

@@ -1,4 +1,7 @@
-import { createCvSnapshot } from './exporters'
+// @ts-check
+import { createCvSnapshot } from './cvSnapshot'
+
+/** @typedef {import('../types/cv').CvData} CvData */
 
 const MIN_SKILL_COUNT = 4
 const ABOUT_WORD_LIMIT = 60
@@ -64,7 +67,7 @@ function createFeedbackItem({
   return { id, type, section, title, message, action, category }
 }
 
-function createSectionBadge(items) {
+function createSectionBadge(items, locale = 'en') {
   if (items.length === 0) {
     return null
   }
@@ -74,13 +77,23 @@ function createSectionBadge(items) {
   return {
     label:
       warningCount > 0
-        ? `${warningCount} warning${warningCount > 1 ? 's' : ''}`
-        : `${items.length} tip${items.length > 1 ? 's' : ''}`,
+        ? locale === 'fi'
+          ? `${warningCount} varoitus${warningCount > 1 ? 'ta' : ''}`
+          : `${warningCount} warning${warningCount > 1 ? 's' : ''}`
+        : locale === 'fi'
+          ? `${items.length} vinkkiä`
+          : `${items.length} tip${items.length > 1 ? 's' : ''}`,
     tone: warningCount > 0 ? 'warning' : 'tip',
   }
 }
 
-export function evaluateCvFeedback(formData) {
+/**
+ * @param {CvData} formData
+ * @param {{ locale?: 'en' | 'fi' }} [options]
+ */
+export function evaluateCvFeedback(formData, options = {}) {
+  const locale = options.locale === 'fi' ? 'fi' : 'en'
+  const isFinnish = locale === 'fi'
   const snapshot = createCvSnapshot(formData)
   const profileItems = []
   const skillsItems = []
@@ -94,8 +107,10 @@ export function evaluateCvFeedback(formData) {
         id: 'about-missing',
         type: 'tip',
         section: 'profile',
-        title: 'Add a stronger summary',
-        message: 'Write 2-3 lines about your strengths, focus, and the kind of value you deliver.',
+        title: isFinnish ? 'Lisää vahvempi yhteenveto' : 'Add a stronger summary',
+        message: isFinnish
+          ? 'Kirjoita 2-3 riviä vahvuuksistasi, painotuksestasi ja tuottamastasi arvosta.'
+          : 'Write 2-3 lines about your strengths, focus, and the kind of value you deliver.',
         action: { type: 'about' },
       }),
     )
@@ -107,8 +122,10 @@ export function evaluateCvFeedback(formData) {
         id: 'about-too-long',
         type: 'warning',
         section: 'profile',
-        title: 'Tighten your summary',
-        message: 'Keep the About section concise so recruiters can scan it quickly.',
+        title: isFinnish ? 'Tiivistä yhteenvetoa' : 'Tighten your summary',
+        message: isFinnish
+          ? 'Pidä esittelyosio tiiviinä, jotta rekrytoija pystyy silmäilemään sen nopeasti.'
+          : 'Keep the About section concise so recruiters can scan it quickly.',
         action: { type: 'about' },
       }),
     )
@@ -120,8 +137,10 @@ export function evaluateCvFeedback(formData) {
         id: 'about-metrics',
         type: 'tip',
         section: 'profile',
-        title: 'Add a quantified outcome',
-        message: 'Mention a result such as growth, time saved, or conversion lift to make the summary stronger.',
+        title: isFinnish ? 'Lisää mitattava tulos' : 'Add a quantified outcome',
+        message: isFinnish
+          ? 'Mainitse esimerkiksi kasvu, säästetty aika tai konversioparannus vahvistaaksesi yhteenvetoa.'
+          : 'Mention a result such as growth, time saved, or conversion lift to make the summary stronger.',
         category: 'metrics',
       }),
     )
@@ -133,8 +152,10 @@ export function evaluateCvFeedback(formData) {
         id: 'skills-missing',
         type: 'warning',
         section: 'skills',
-        title: 'Add core skills',
-        message: 'Your CV needs a visible skills section so hiring teams can match you to roles faster.',
+        title: isFinnish ? 'Lisää ydintaidot' : 'Add core skills',
+        message: isFinnish
+          ? 'CV tarvitsee näkyvän taito-osion, jotta rekrytointi voi kohdistaa sinut rooleihin nopeammin.'
+          : 'Your CV needs a visible skills section so hiring teams can match you to roles faster.',
       }),
     )
   } else if (snapshot.skills.length < MIN_SKILL_COUNT) {
@@ -143,8 +164,10 @@ export function evaluateCvFeedback(formData) {
         id: 'skills-thin',
         type: 'warning',
         section: 'skills',
-        title: 'Expand your skills list',
-        message: `Aim for at least ${MIN_SKILL_COUNT} relevant skills to show range and improve keyword coverage.`,
+        title: isFinnish ? 'Laajenna taitolistaa' : 'Expand your skills list',
+        message: isFinnish
+          ? `Pyri vähintään ${MIN_SKILL_COUNT} relevanttiin taitoon osaamisen laajuuden ja avainsanojen kattavuuden parantamiseksi.`
+          : `Aim for at least ${MIN_SKILL_COUNT} relevant skills to show range and improve keyword coverage.`,
       }),
     )
   }
@@ -155,8 +178,10 @@ export function evaluateCvFeedback(formData) {
         id: 'experience-empty',
         type: 'warning',
         section: 'experience',
-        title: 'Add work experience',
-        message: 'Even one strong role with a result-focused description makes the CV more credible.',
+        title: isFinnish ? 'Lisää työkokemusta' : 'Add work experience',
+        message: isFinnish
+          ? 'Jo yksi vahva rooli tuloskeskeisellä kuvauksella tekee CV:stä uskottavamman.'
+          : 'Even one strong role with a result-focused description makes the CV more credible.',
       }),
     )
   }
@@ -182,8 +207,10 @@ export function evaluateCvFeedback(formData) {
           id: `experience-description-${index}`,
           type: 'warning',
           section: 'experience',
-          title: `Add impact for role ${index + 1}`,
-          message: 'Describe what you shipped, improved, or owned so this role reads as real experience.',
+          title: isFinnish ? `Lisää vaikutus rooliin ${index + 1}` : `Add impact for role ${index + 1}`,
+          message: isFinnish
+            ? 'Kuvaa mitä toimitit, paransit tai omistit, jotta rooli näkyy aidosti kokemuksena.'
+            : 'Describe what you shipped, improved, or owned so this role reads as real experience.',
           action: { type: 'experience', index },
         }),
       )
@@ -197,8 +224,10 @@ export function evaluateCvFeedback(formData) {
           id: `experience-too-long-${index}`,
           type: 'warning',
           section: 'experience',
-          title: `Trim experience ${index + 1}`,
-          message: 'Shorter accomplishment statements are easier to scan than long paragraphs.',
+          title: isFinnish ? `Tiivistä kokemus ${index + 1}` : `Trim experience ${index + 1}`,
+          message: isFinnish
+            ? 'Lyhyet saavutuksia kuvaavat lauseet ovat helpommin silmäiltäviä kuin pitkät kappaleet.'
+            : 'Shorter accomplishment statements are easier to scan than long paragraphs.',
           action: { type: 'experience', index },
         }),
       )
@@ -210,8 +239,10 @@ export function evaluateCvFeedback(formData) {
           id: `experience-metrics-${index}`,
           type: 'tip',
           section: 'experience',
-          title: `Add numbers to experience ${index + 1}`,
-          message: 'Include a metric like adoption, revenue, time saved, or growth to show measurable impact.',
+          title: isFinnish ? `Lisää lukuja kokemukseen ${index + 1}` : `Add numbers to experience ${index + 1}`,
+          message: isFinnish
+            ? 'Lisää mittari, kuten käyttöönotto, liikevaihto, säästetty aika tai kasvu, osoittamaan mitattava vaikutus.'
+            : 'Include a metric like adoption, revenue, time saved, or growth to show measurable impact.',
           category: 'metrics',
         }),
       )
@@ -234,23 +265,27 @@ export function evaluateCvFeedback(formData) {
       experienceItems: experienceItemTips,
     },
     sectionBadges: {
-      profile: createSectionBadge(profileItems),
-      skills: createSectionBadge(skillsItems),
-      experience: createSectionBadge([...experienceItems, ...flattenedExperienceItems]),
+    profile: createSectionBadge(profileItems, locale),
+    skills: createSectionBadge(skillsItems, locale),
+    experience: createSectionBadge([...experienceItems, ...flattenedExperienceItems], locale),
     },
   }
 }
 
-export function improveAboutText(formData) {
+export function improveAboutText(formData, options = {}) {
+  const locale = options.locale === 'fi' ? 'fi' : 'en'
+  const isFinnish = locale === 'fi'
   const snapshot = createCvSnapshot(formData)
-  const title = snapshot.title || 'Professional'
+  const title = snapshot.title || (isFinnish ? 'Ammattilainen' : 'Professional')
   const skillsText =
-    snapshot.skills.length > 0
-      ? snapshot.skills.slice(0, 3).join(', ')
-      : 'strategy, execution, and collaboration'
+  snapshot.skills.length > 0
+    ? snapshot.skills.slice(0, 3).join(', ')
+    : isFinnish ? 'strategia, toteutus ja yhteistyö' : 'strategy, execution, and collaboration'
 
   if (!snapshot.about) {
-    return `${title} focused on ${skillsText}, cross-functional delivery, and measurable business impact.`
+  return isFinnish
+    ? `${title}, painotus ${skillsText}, monialainen yhteistyö ja mitattava liiketoimintavaikutus.`
+    : `${title} focused on ${skillsText}, cross-functional delivery, and measurable business impact.`
   }
 
   const shortenedText = limitWordCount(snapshot.about, 38)
@@ -258,25 +293,35 @@ export function improveAboutText(formData) {
   return ensureSentence(shortenedText)
 }
 
-export function improveExperienceText(item) {
+export function improveExperienceText(item, options = {}) {
+  const locale = options.locale === 'fi' ? 'fi' : 'en'
+  const isFinnish = locale === 'fi'
   const role = trimValue(item.role)
   const company = trimValue(item.company)
   const description = trimValue(item.description)
 
   if (!description) {
     if (role && company) {
-      return `Led ${role.toLowerCase()} work at ${company}, partnering across teams to ship improvements with clear business impact.`
+      return isFinnish
+        ? `Johdin ${role.toLowerCase()}-työtä yrityksessä ${company}, yhteistyössä eri tiimien kanssa selkeän liiketoimintavaikutuksen saavuttamiseksi.`
+        : `Led ${role.toLowerCase()} work at ${company}, partnering across teams to ship improvements with clear business impact.`
     }
 
     if (role) {
-      return `Delivered ${role.toLowerCase()} work across planning, execution, and measurable outcome tracking.`
+      return isFinnish
+        ? `Toteutin ${role.toLowerCase()}-työtä suunnittelusta toteutukseen ja mitattaviin tuloksiin asti.`
+        : `Delivered ${role.toLowerCase()} work across planning, execution, and measurable outcome tracking.`
     }
 
     if (company) {
-      return `Supported key initiatives at ${company}, helping the team deliver stronger results and smoother execution.`
+      return isFinnish
+        ? `Tuin keskeisiä hankkeita yrityksessä ${company} ja autoin tiimiä saavuttamaan parempia tuloksia sujuvammin.`
+        : `Supported key initiatives at ${company}, helping the team deliver stronger results and smoother execution.`
     }
 
-    return 'Led cross-functional work, improved execution, and delivered stronger outcomes for the team.'
+    return isFinnish
+      ? 'Johdin monialaista työtä, paransin toteutusta ja saavutimme tiiminä parempia tuloksia.'
+      : 'Led cross-functional work, improved execution, and delivered stronger outcomes for the team.'
   }
 
   return ensureSentence(limitWordCount(description, 30))

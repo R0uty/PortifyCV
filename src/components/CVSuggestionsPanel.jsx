@@ -27,10 +27,12 @@ function badgeClasses(ui, type) {
 function CVSuggestionsPanel({
   feedback,
   theme = 'dark',
+  locale = 'en',
   onImproveAboutText,
   onImproveExperienceText,
 }) {
   const ui = useMemo(() => getUiTheme(theme), [theme])
+  const isFinnish = locale === 'fi'
 
   const runAction = (action) => {
     if (!action) {
@@ -52,20 +54,28 @@ function CVSuggestionsPanel({
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className={`ds-kicker ${ui.textMuted}`}>Smart suggestions</p>
+          <p className={`ds-kicker ${ui.textMuted}`}>
+            {isFinnish ? 'Älykkäät ehdotukset' : 'Smart suggestions'}
+          </p>
           <h3 className={`ds-section-title mt-2 font-semibold ${ui.textPrimary}`}>
-            Improve clarity and impact
+            {isFinnish ? 'Paranna selkeyttä ja vaikuttavuutta' : 'Improve clarity and impact'}
           </h3>
           <p className={`ds-body-sm mt-3 ${ui.textSecondary}`}>
-            Rule-based checks flag missing detail, overly long copy, and places where measurable results would strengthen the CV.
+            {isFinnish
+              ? 'Sääntöpohjainen tarkistus löytää puuttuvat tiedot, liian pitkän tekstin ja kohdat, joissa mitattavat tulokset vahvistaisivat CV:tä.'
+              : 'Rule-based checks flag missing detail, overly long copy, and places where measurable results would strengthen the CV.'}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${badgeClasses(ui, 'warning')}`}>
-            {feedback.warningCount} warning{feedback.warningCount === 1 ? '' : 's'}
+            {isFinnish
+              ? `${feedback.warningCount} varoitus${feedback.warningCount === 1 ? '' : 'ta'}`
+              : `${feedback.warningCount} warning${feedback.warningCount === 1 ? '' : 's'}`}
           </span>
           <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${badgeClasses(ui, 'tip')}`}>
-            {feedback.metricsCount} metrics hint{feedback.metricsCount === 1 ? '' : 's'}
+            {isFinnish
+              ? `${feedback.metricsCount} mittarivinkki${feedback.metricsCount === 1 ? '' : 'ä'}`
+              : `${feedback.metricsCount} metrics hint${feedback.metricsCount === 1 ? '' : 's'}`}
           </span>
         </div>
       </div>
@@ -73,7 +83,9 @@ function CVSuggestionsPanel({
       {feedback.priorityItems.length === 0 && feedback.metricsItems.length === 0 ? (
         <div className={`mt-5 rounded-2xl border px-4 py-4 ${ui.surfaceMuted}`}>
           <p className={`text-sm font-medium ${ui.textPrimary}`}>
-            Nice work - your CV currently avoids the main rule-based issues.
+            {isFinnish
+              ? 'Hyvää työtä - CV:ssäsi ei tällä hetkellä ole merkittäviä sääntöpohjaisia puutteita.'
+              : 'Nice work - your CV currently avoids the main rule-based issues.'}
           </p>
         </div>
       ) : (
@@ -95,7 +107,7 @@ function CVSuggestionsPanel({
                       className={`shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
                       onClick={() => runAction(item.action)}
                     >
-                      Improve text
+                      {isFinnish ? 'Paranna tekstiä' : 'Improve text'}
                     </button>
                   ) : null}
                 </div>
@@ -105,7 +117,9 @@ function CVSuggestionsPanel({
 
           {feedback.metricsItems.length > 0 ? (
             <div className="mt-5">
-              <p className={`text-sm font-semibold ${ui.textPrimary}`}>Metrics suggestions</p>
+              <p className={`text-sm font-semibold ${ui.textPrimary}`}>
+                {isFinnish ? 'Mittariehdotukset' : 'Metrics suggestions'}
+              </p>
               <ul className={`mt-3 space-y-2 ${ui.textSecondary}`}>
                 {feedback.metricsItems.map((item) => (
                   <li key={item.id} className={`rounded-2xl border px-4 py-3 text-sm ${ui.surfaceMuted}`}>

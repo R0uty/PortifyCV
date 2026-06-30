@@ -1,3 +1,6 @@
+/** @typedef {import('../types/cv').CvData} CvData */
+/** @typedef {import('../types/cv').Locale} Locale */
+
 export const CV_DRAFT_STORAGE_KEY = 'portifycv-draft'
 export const CV_ONBOARDING_SEEN_STORAGE_KEY = 'portifycv-onboarding-seen'
 
@@ -52,7 +55,7 @@ export function isPhotoVisibleForTemplate(photoVisibilityByTemplate, templateId)
   return photoVisibilityByTemplate[templateId] !== false
 }
 
-export const sectionVisibilityFields = [
+const sectionVisibilityFieldsEn = [
   { key: 'about', label: 'About' },
   { key: 'skills', label: 'Skills' },
   { key: 'experience', label: 'Experience' },
@@ -60,6 +63,21 @@ export const sectionVisibilityFields = [
   { key: 'links', label: 'Links' },
 ]
 
+const sectionVisibilityFieldsFi = [
+  { key: 'about', label: 'Esittely' },
+  { key: 'skills', label: 'Taidot' },
+  { key: 'experience', label: 'Kokemus' },
+  { key: 'education', label: 'Koulutus' },
+  { key: 'links', label: 'Linkit' },
+]
+
+export function getSectionVisibilityFields(locale = 'en') {
+  return locale === 'fi' ? sectionVisibilityFieldsFi : sectionVisibilityFieldsEn
+}
+
+export const sectionVisibilityFields = getSectionVisibilityFields('en')
+
+/** @returns {CvData} */
 export const createInitialCvData = () => ({
   fullName: '',
   title: '',
@@ -125,7 +143,7 @@ export const demoCvData = {
   },
 }
 
-export const linkFields = [
+const linkFieldsEn = [
   {
     key: 'github',
     label: 'GitHub',
@@ -147,6 +165,38 @@ export const linkFields = [
     placeholder: 'https://yourwebsite.com',
   },
 ]
+
+const linkFieldsFi = [
+  {
+    key: 'github',
+    label: 'GitHub',
+    placeholder: 'https://github.com/kayttajatunnus',
+  },
+  {
+    key: 'linkedin',
+    label: 'LinkedIn',
+    placeholder: 'https://linkedin.com/in/kayttajatunnus',
+  },
+  {
+    key: 'portfolio',
+    label: 'Portfolio',
+    placeholder: 'https://portfolio.dev',
+  },
+  {
+    key: 'website',
+    label: 'Verkkosivu',
+    placeholder: 'https://omatkotisivut.fi',
+  },
+]
+
+/**
+ * @param {Locale} [locale='en']
+ */
+export function getLinkFields(locale = 'en') {
+  return locale === 'fi' ? linkFieldsFi : linkFieldsEn
+}
+
+export const linkFields = getLinkFields('en')
 
 function createStorageError(error) {
   return error instanceof Error ? error : new Error('Storage access failed.')
@@ -250,6 +300,11 @@ function readOptionalString(value, path) {
   return value
 }
 
+/**
+ * Parse imported JSON into a validated CV state.
+ * @param {unknown} value
+ * @returns {CvData}
+ */
 export function parseImportedCvData(value) {
   if (!isPlainObject(value)) {
     throw new Error(
@@ -449,15 +504,29 @@ function extractSkillTokens(value) {
     .filter(Boolean)
 }
 
-export function parsePastedCvText(value) {
+/**
+ * Parse freeform CV text and return a partial CV state with detected fields.
+ * @param {string} value
+ * @param {{ locale?: Locale }} [options]
+ * @returns {CvData}
+ */
+export function parsePastedCvText(value, options = {}) {
+  const locale = options.locale === 'fi' ? 'fi' : 'en'
+  const missingPasteMessage = locale === 'fi'
+    ? 'Liitä CV-teksti ennen tuontia.'
+    : 'Paste CV text before importing it.'
+  const detectFailMessage = locale === 'fi'
+    ? 'Liitetystä CV-tekstistä ei löytynyt nimeä, titteliä tai taitoja.'
+    : 'Could not detect a name, title, or skills from the pasted CV text.'
+
   if (typeof value !== 'string' || !value.trim()) {
-    throw new Error('Paste CV text before importing it.')
+    throw new Error(missingPasteMessage)
   }
 
   const lines = normalizeLines(value)
 
   if (lines.length === 0) {
-    throw new Error('Paste CV text before importing it.')
+    throw new Error(missingPasteMessage)
   }
 
   const nextState = createInitialCvData()
@@ -512,7 +581,7 @@ export function parsePastedCvText(value) {
   ).slice(0, 16)
 
   if (!nextState.fullName && !nextState.title && nextState.skills.length === 0) {
-    throw new Error('Could not detect a name, title, or skills from the pasted CV text.')
+    throw new Error(detectFailMessage)
   }
 
   return nextState
