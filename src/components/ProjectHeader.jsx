@@ -5,31 +5,45 @@ function ProjectHeader({
   activeExport = '',
   isActionBusy = false,
   locale = 'en',
+  onReturn = () => {},
   onLocaleChange = () => {},
+  onToggleTheme = () => {},
   onExport = () => {},
 }) {
   const ui = getUiTheme(theme)
   const isFinnish = locale === 'fi'
+  const isDark = theme === 'dark'
   const primaryActionButtonClassName =
     'action-button action-button--primary rounded-full border px-4 py-2.5 text-sm font-semibold transition'
 
   return (
-    <header className="project-header print:hidden">
-      <div className="project-header__container mx-auto w-full max-w-[110rem] px-3 pt-3 sm:px-6 sm:pt-4 lg:px-8">
+    <header className={`project-header project-header--${theme} print:hidden`}>
+      <div className="project-header__container w-full">
         <div className={`project-header__inner ${ui.surfaceStrong}`}>
           <div className="project-header__content">
-            <div className="project-header__heading">
-              <h1 className="brand-mark">
-                <span className="brand-mark__slashes" aria-hidden="true">
-                  //
-                </span>{' '}
-                PortifyCV
-              </h1>
-              <p className={`mt-2 text-sm font-medium leading-relaxed ${ui.textPrimary}`}>
-                {isFinnish ? 'Rakenna ja vie CV:si ilmaiseksi' : 'Build and export your cv for free'}
-              </p>
+            <div className="project-header__left">
+              <button
+                type="button"
+                className={`action-button action-button--secondary rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
+                onClick={onReturn}
+              >
+                {isFinnish ? 'Takaisin' : 'Return'}
+              </button>
             </div>
             <div className="project-header__actions">
+              <button
+                type="button"
+                className={`action-button action-button--secondary rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
+                onClick={onToggleTheme}
+                aria-label={isDark
+                  ? isFinnish ? 'Vaihda vaaleaan teemaan' : 'Switch to light theme'
+                  : isFinnish ? 'Vaihda tummaan teemaan' : 'Switch to dark theme'}
+                title={isDark
+                  ? isFinnish ? 'Vaihda vaaleaan teemaan' : 'Switch to light theme'
+                  : isFinnish ? 'Vaihda tummaan teemaan' : 'Switch to dark theme'}
+              >
+                {isDark ? (isFinnish ? 'Vaalea' : 'Light') : (isFinnish ? 'Tumma' : 'Dark')}
+              </button>
               <button
                 type="button"
                 className={`action-button action-button--secondary rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
@@ -39,7 +53,7 @@ function ProjectHeader({
               </button>
               <button
                 type="button"
-                className={`${primaryActionButtonClassName} accent-border accent-surface accent-text-strong`}
+                className={primaryActionButtonClassName}
                 disabled={isActionBusy}
                 onClick={() => onExport('pdf-designer')}
               >

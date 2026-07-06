@@ -74,13 +74,13 @@ export function getUiTheme(theme = 'dark') {
       ? 'border-white/12 bg-black'
       : 'border-black/10 bg-white',
     button: isDark
-      ? 'border-white/12 bg-white/6 text-gray-100 hover:bg-white/8'
-      : 'border-black/10 bg-white text-gray-800 hover:bg-gray-50',
+      ? 'border-white/12 bg-white/6 text-white hover:bg-white/8'
+      : 'border-black/10 bg-white text-black hover:bg-gray-50',
     buttonActive:
       'border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent-text-strong)]',
     buttonDanger: isDark
-      ? 'border-white/12 bg-white/6 text-gray-100 hover:bg-white/8'
-      : 'border-black/10 bg-white text-gray-800 hover:bg-gray-50',
+      ? 'border-white/12 bg-white/6 text-white hover:bg-white/8'
+      : 'border-black/10 bg-white text-black hover:bg-gray-50',
     input: isDark
       ? 'border-white/12 bg-black/70 text-white placeholder:text-gray-500'
       : 'border-black/10 bg-white text-black placeholder:text-gray-500',

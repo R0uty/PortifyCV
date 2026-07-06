@@ -257,15 +257,31 @@ function loadInitialCvSession() {
   }
 }
 
-function ResumeBuilderPage() {
+function ResumeBuilderPage({
+  onReturnToLanding = () => {},
+  initialTheme,
+  initialLocale,
+  onThemeChange = () => {},
+  onLocaleChange = () => {},
+}) {
   const initialSession = useMemo(() => loadInitialCvSession(), [])
   const [formData, dispatchFormData] = useReducer(cvFormReducer, initialSession.formData)
-  const [theme] = useState('light')
+  const [theme, setTheme] = useState(
+    initialTheme === 'light' || initialTheme === 'dark' ? initialTheme : initialSession.theme,
+  )
   const [accent] = useState(initialSession.accent)
   const [uiState, dispatchUi] = useReducer(
     uiReducer,
     initialSession,
-    createInitialUiState,
+    (session) => {
+      const nextState = createInitialUiState(session)
+
+      if (initialLocale === 'fi' || initialLocale === 'en') {
+        return { ...nextState, locale: initialLocale }
+      }
+
+      return nextState
+    },
   )
   const {
     selectedTemplate,
@@ -359,6 +375,14 @@ function ResumeBuilderPage() {
   }, [formData, setStorageValue])
 
   useEffect(() => {
+    setStorageValue(UI_THEME_STORAGE_KEY, theme)
+    if (typeof document !== 'undefined') {
+      document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light'
+    }
+    onThemeChange(theme)
+  }, [onThemeChange, setStorageValue, theme])
+
+  useEffect(() => {
     setStorageValue(UI_ACCENT_STORAGE_KEY, accent)
   }, [accent, setStorageValue])
 
@@ -367,7 +391,8 @@ function ResumeBuilderPage() {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale
     }
-  }, [locale, setStorageValue])
+    onLocaleChange(locale)
+  }, [locale, onLocaleChange, setStorageValue])
 
   useEffect(() => {
     if (initialSession.storageIssue) {
@@ -673,6 +698,10 @@ function ResumeBuilderPage() {
 
   const handleLocaleChange = useCallback((nextLocale) => {
     dispatchUi({ type: UI_ACTION.SET_LOCALE, locale: nextLocale === 'fi' ? 'fi' : 'en' })
+  }, [])
+
+  const handleToggleTheme = useCallback(() => {
+    setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'))
   }, [])
 
   const handlePastedCvTextChange = useCallback((event) => {
@@ -982,7 +1011,9 @@ function ResumeBuilderPage() {
         activeExport={activeExport}
         isActionBusy={isActionBusy}
         locale={locale}
+        onReturn={onReturnToLanding}
         onLocaleChange={handleLocaleChange}
+        onToggleTheme={handleToggleTheme}
         onExport={handleExport}
       />
       <AppShell

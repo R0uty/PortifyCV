@@ -551,7 +551,7 @@ function CVPreview({
           <div>
             <p
               data-export-ignore="true"
-              className={`ds-kicker print:hidden ${atsFriendlyMode ? 'text-gray-500' : 'accent-text'}`}
+              className={`ds-kicker print:hidden ${atsFriendlyMode ? 'text-gray-500' : 'text-current/80'}`}
             >
               {atsFriendlyMode
                 ? isFinnish ? 'ATS-ystävällinen tila' : 'ATS-friendly mode'

@@ -6,12 +6,12 @@ function TemplateThumbnail({ template, isDark }) {
   const frameClassName = isDark
     ? 'border-white/12 bg-black/50'
     : 'border-black/12 bg-gray-50'
-  const accentClassName = isDark ? 'bg-gray-400' : 'bg-gray-700'
-  const titleLineClassName = isDark ? 'bg-gray-600' : 'bg-gray-400'
-  const bodyLineClassName = isDark ? 'bg-gray-700' : 'bg-gray-300'
+  const accentClassName = isDark ? 'bg-white/80' : 'bg-black/70'
+  const titleLineClassName = isDark ? 'bg-white/80' : 'bg-black/60'
+  const bodyLineClassName = isDark ? 'bg-white/6' : 'bg-black/40'
   const chipClassName = isDark
-    ? 'w-full rounded-md border border-white/12 bg-black/70 px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-gray-300'
-    : 'w-full rounded-md border border-black/12 bg-white px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-gray-600'
+    ? 'w-full rounded-md border border-white bg-white px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-black'
+    : 'w-full rounded-md border border-black bg-black px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-white'
 
   return (
     <div className={`overflow-hidden rounded-2xl border ${frameClassName}`}>
