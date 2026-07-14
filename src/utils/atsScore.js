@@ -64,6 +64,64 @@ function sortByFrequency(tokens) {
     .map(([token]) => token)
 }
 
+function createAtsCopy(locale = 'en') {
+  const isFinnish = locale === 'fi'
+
+  return {
+    keywordDensityLabel: isFinnish ? 'Avainsanatiheys' : 'Keyword density',
+    sectionCompletenessLabel: isFinnish ? 'Osioiden kattavuus' : 'Section completeness',
+    lengthLabel: isFinnish ? 'Pituuspisteytys' : 'Length scoring',
+    formattingLabel: isFinnish ? 'Muotoilun yksinkertaisuus' : 'Formatting simplicity',
+    strong: isFinnish ? 'Vahva' : 'Strong',
+    solid: isFinnish ? 'Hyvä' : 'Solid',
+    needsPolish: isFinnish ? 'Kaipaa hiomista' : 'Needs polish',
+    needsWork: isFinnish ? 'Kaipaa työtä' : 'Needs work',
+    keywordMissing: isFinnish
+      ? 'Lisää roolikohtaisia avainsanoja otsikkoon, taitoihin ja kokemukseen.'
+      : 'Add more role-specific keywords in your title, skills, and experience.',
+    keywordGood: isFinnish
+      ? 'Avainsanojen kattavuus on hyvä yhteenvedossa ja kokemuksessa.'
+      : 'Good keyword coverage across your summary and experience.',
+    keywordImprove: isFinnish
+      ? 'Toista kohderoolin tärkeät avainsanat yhteenvedossa ja kokemuskohdissa.'
+      : 'Repeat important keywords from your target role inside your summary and experience bullets.',
+    sectionsReady: isFinnish
+      ? 'Keskeiset ATS-osiot ovat mukana.'
+      : 'Core ATS sections are present.',
+    sectionsMissingPrefix: isFinnish ? 'Lisää tai laajenna: ' : 'Add or expand: ',
+    lengthGood: isFinnish
+      ? 'Osioiden pituus on riittävän tiivis ATS:lle ja rekrytoijan silmäilyyn.'
+      : 'Section lengths are concise enough for fast ATS and recruiter scanning.',
+    lengthImprove: isFinnish
+      ? 'Lyhennä pitkiä kappaleita ja pidä jokainen kokemuskohde yhteen tulokseen fokusoituna.'
+      : 'Shorten long paragraphs and keep each experience entry focused on one result.',
+    atsModeOn: isFinnish
+      ? 'ATS-tila käyttää yksinkertaista ja jäsentäjäystävällistä asettelua.'
+      : 'ATS-friendly mode is using a simplified, parser-safe layout.',
+    atsModeOff: isFinnish
+      ? 'Kaikki pohjat ovat minimalistisia. Ota ATS-tila käyttöön maksimaalista yhteensopivuutta varten.'
+      : 'All templates use a minimal styling system. Enable ATS-friendly mode for maximum parser compatibility.',
+    tipKeyword: isFinnish
+      ? 'Peilaa työpaikkailmoitusta toistamalla ydintermit yhteenvedossa ja kokemuskohdissa.'
+      : 'Mirror the job description by repeating core role keywords in your About section and experience bullets.',
+    tipSections: isFinnish
+      ? 'Täydennä kaikki pääosiot: titteli, yhteenveto, taidot, kokemus, koulutus ja vähintään yksi linkki.'
+      : 'Complete every major section: title, summary, skills, experience, education, and at least one link.',
+    tipLength: isFinnish
+      ? 'Pidä yhteenveto noin 70-80 sanassa ja tiivistä kokemuskohdat yhteen saavutukseen.'
+      : 'Keep summaries under 70-80 words and trim each experience description into a focused accomplishment statement.',
+    tipAtsOn: isFinnish
+      ? 'Pidä nykyinen yksinkertainen asettelu hakuihin, joissa ATS-jäsennys on kriittinen.'
+      : 'Keep the current simplified layout for applications that rely heavily on ATS parsing.',
+    tipAtsOff: isFinnish
+      ? 'Ota ATS-tila käyttöön, jotta koristeelliset elementit vähenevät ja jäsennys paranee.'
+      : 'Enable ATS-friendly mode to remove decorative layout choices and improve parser compatibility.',
+    tipStrong: isFinnish
+      ? 'CV on ATS-näkökulmasta vahva. Räätälöi avainsanat jokaiseen hakemukseen.'
+      : 'Your CV is in strong ATS shape. Tailor keywords to each application for even better alignment.',
+  }
+}
+
 /**
  * @param {CvData} formData
  * @param {string} [jobDescription='']
@@ -102,7 +160,7 @@ export function analyzeJobDescription(formData, jobDescription = '') {
   }
 }
 
-function scoreKeywordDensity(snapshot) {
+function scoreKeywordDensity(snapshot, copy) {
   const keywords = extractKeywords(snapshot)
   const content = [snapshot.about, ...snapshot.experience.map((item) => item.description)]
     .join(' ')
@@ -111,7 +169,7 @@ function scoreKeywordDensity(snapshot) {
   if (keywords.length === 0) {
     return {
       score: 8,
-      summary: 'Add more role-specific keywords in your title, skills, and experience.',
+      summary: copy.keywordMissing,
     }
   }
 
@@ -123,12 +181,12 @@ function scoreKeywordDensity(snapshot) {
     score: clamp(score, 0, 25),
     summary:
       coverage >= 0.7
-        ? 'Good keyword coverage across your summary and experience.'
-        : 'Repeat important keywords from your target role inside your summary and experience bullets.',
+        ? copy.keywordGood
+        : copy.keywordImprove,
   }
 }
 
-function scoreSectionCompleteness(snapshot) {
+function scoreSectionCompleteness(snapshot, copy) {
   let score = 0
   const missingSections = []
 
@@ -157,12 +215,12 @@ function scoreSectionCompleteness(snapshot) {
     score,
     summary:
       missingSections.length === 0
-        ? 'Core ATS sections are present.'
-        : `Add or expand: ${missingSections.slice(0, 3).join(', ')}.`,
+        ? copy.sectionsReady
+        : `${copy.sectionsMissingPrefix}${missingSections.slice(0, 3).join(', ')}.`,
   }
 }
 
-function scoreLength(snapshot) {
+function scoreLength(snapshot, copy) {
   const aboutWords = countWords(snapshot.about)
   const experienceDescriptions = snapshot.experience.map((item) => countWords(item.description))
 
@@ -192,50 +250,50 @@ function scoreLength(snapshot) {
     score: clamp(score, 0, 25),
     summary:
       score >= 20
-        ? 'Section lengths are concise enough for fast ATS and recruiter scanning.'
-        : 'Shorten long paragraphs and keep each experience entry focused on one result.',
+        ? copy.lengthGood
+        : copy.lengthImprove,
   }
 }
 
-function scoreFormattingSimplicity({ atsFriendly }) {
+function scoreFormattingSimplicity({ atsFriendly }, copy) {
   if (atsFriendly) {
     return {
       score: 20,
-      summary: 'ATS-friendly mode is using a simplified, parser-safe layout.',
+      summary: copy.atsModeOn,
     }
   }
 
   return {
     score: 16,
-    summary: 'All templates use a minimal styling system. Enable ATS-friendly mode for maximum parser compatibility.',
+    summary: copy.atsModeOff,
   }
 }
 
-function createImprovementTips(breakdown, options) {
+function createImprovementTips(breakdown, options, copy) {
   const tips = []
 
   if (breakdown.keywordDensity.score < 18) {
-    tips.push('Mirror the job description by repeating core role keywords in your About section and experience bullets.')
+    tips.push(copy.tipKeyword)
   }
 
   if (breakdown.sectionCompleteness.score < 24) {
-    tips.push('Complete every major section: title, summary, skills, experience, education, and at least one link.')
+    tips.push(copy.tipSections)
   }
 
   if (breakdown.length.score < 18) {
-    tips.push('Keep summaries under 70-80 words and trim each experience description into a focused accomplishment statement.')
+    tips.push(copy.tipLength)
   }
 
   if (breakdown.formattingSimplicity.score < 16) {
     tips.push(
       options.atsFriendly
-        ? 'Keep the current simplified layout for applications that rely heavily on ATS parsing.'
-        : 'Enable ATS-friendly mode to remove decorative layout choices and improve parser compatibility.',
+        ? copy.tipAtsOn
+        : copy.tipAtsOff,
     )
   }
 
   if (tips.length === 0) {
-    tips.push('Your CV is in strong ATS shape. Tailor keywords to each application for even better alignment.')
+    tips.push(copy.tipStrong)
   }
 
   return tips
@@ -247,10 +305,12 @@ function createImprovementTips(breakdown, options) {
  */
 export function evaluateAtsScore(formData, options = {}) {
   const snapshot = createCvSnapshot(formData)
-  const keywordDensity = scoreKeywordDensity(snapshot)
-  const sectionCompleteness = scoreSectionCompleteness(snapshot)
-  const length = scoreLength(snapshot)
-  const formattingSimplicity = scoreFormattingSimplicity(options)
+  const locale = options.locale === 'fi' ? 'fi' : 'en'
+  const copy = createAtsCopy(locale)
+  const keywordDensity = scoreKeywordDensity(snapshot, copy)
+  const sectionCompleteness = scoreSectionCompleteness(snapshot, copy)
+  const length = scoreLength(snapshot, copy)
+  const formattingSimplicity = scoreFormattingSimplicity(options, copy)
   const totalScore =
     keywordDensity.score +
     sectionCompleteness.score +
@@ -259,22 +319,22 @@ export function evaluateAtsScore(formData, options = {}) {
 
   const breakdown = {
     keywordDensity: {
-      label: 'Keyword density',
+      label: copy.keywordDensityLabel,
       maxScore: 25,
       ...keywordDensity,
     },
     sectionCompleteness: {
-      label: 'Section completeness',
+      label: copy.sectionCompletenessLabel,
       maxScore: 30,
       ...sectionCompleteness,
     },
     length: {
-      label: 'Length scoring',
+      label: copy.lengthLabel,
       maxScore: 25,
       ...length,
     },
     formattingSimplicity: {
-      label: 'Formatting simplicity',
+      label: copy.formattingLabel,
       maxScore: 20,
       ...formattingSimplicity,
     },
@@ -284,13 +344,13 @@ export function evaluateAtsScore(formData, options = {}) {
     score: clamp(totalScore, 0, 100),
     rating:
       totalScore >= 85
-        ? 'Strong'
+        ? copy.strong
         : totalScore >= 70
-          ? 'Solid'
+          ? copy.solid
           : totalScore >= 55
-            ? 'Needs polish'
-            : 'Needs work',
+            ? copy.needsPolish
+            : copy.needsWork,
     breakdown,
-    improvementTips: createImprovementTips(breakdown, options),
+    improvementTips: createImprovementTips(breakdown, options, copy),
   }
 }

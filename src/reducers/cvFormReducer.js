@@ -90,6 +90,34 @@ function swapVisibilityMapIndexes(visibilityMap = {}, firstIndex, secondIndex) {
   return next
 }
 
+function mergeUniqueSkills(currentSkills, incomingSkills) {
+  if (!Array.isArray(incomingSkills) || incomingSkills.length === 0) {
+    return currentSkills
+  }
+
+  const nextSkills = [...currentSkills]
+  const seen = new Set(currentSkills.map((skill) => skill.toLowerCase()))
+
+  incomingSkills.forEach((skill) => {
+    const normalized = String(skill ?? '').trim()
+
+    if (!normalized) {
+      return
+    }
+
+    const key = normalized.toLowerCase()
+
+    if (seen.has(key)) {
+      return
+    }
+
+    seen.add(key)
+    nextSkills.push(normalized)
+  })
+
+  return nextSkills
+}
+
 export function cvFormReducer(state, action) {
   switch (action.type) {
     case FORM_ACTION.SET_ROOT_FIELD:
@@ -319,7 +347,22 @@ export function cvFormReducer(state, action) {
       return createInitialCvData()
 
     case FORM_ACTION.MERGE_FORM_DATA:
-      return { ...state, ...action.partialData }
+      return {
+        ...state,
+        ...(typeof action.partialData?.fullName === 'string'
+          ? { fullName: action.partialData.fullName }
+          : {}),
+        ...(typeof action.partialData?.title === 'string'
+          ? { title: action.partialData.title }
+          : {}),
+        ...(typeof action.partialData?.about === 'string'
+          ? { about: action.partialData.about }
+          : {}),
+        skills: mergeUniqueSkills(state.skills, action.partialData?.skills),
+        ...(action.partialData?.links
+          ? { links: { ...state.links, ...action.partialData.links } }
+          : {}),
+      }
 
     default:
       return state

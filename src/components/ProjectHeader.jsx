@@ -5,8 +5,12 @@ function ProjectHeader({
   activeExport = '',
   isActionBusy = false,
   locale = 'en',
+  canUndo = false,
+  canRedo = false,
   onReturn = () => {},
   onLocaleChange = () => {},
+  onUndo = () => {},
+  onRedo = () => {},
   onToggleTheme = () => {},
   onExport = () => {},
 }) {
@@ -22,6 +26,22 @@ function ProjectHeader({
         <div className={`project-header__inner ${ui.surfaceStrong}`}>
           <div className="project-header__content">
             <div className="project-header__left">
+              <button
+                type="button"
+                className={`action-button action-button--secondary rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
+                onClick={onUndo}
+                disabled={!canUndo}
+              >
+                {isFinnish ? 'Kumoa' : 'Undo'}
+              </button>
+              <button
+                type="button"
+                className={`action-button action-button--secondary rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
+                onClick={onRedo}
+                disabled={!canRedo}
+              >
+                {isFinnish ? 'Tee uudelleen' : 'Redo'}
+              </button>
               <button
                 type="button"
                 className={`action-button action-button--secondary rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
@@ -60,6 +80,26 @@ function ProjectHeader({
                 {activeExport === 'pdf-designer'
                   ? isFinnish ? 'Viedään PDF...' : 'Exporting PDF...'
                   : isFinnish ? 'Vie PDF' : 'Export PDF'}
+              </button>
+              <button
+                type="button"
+                className={`action-button action-button--secondary rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
+                disabled={isActionBusy}
+                onClick={() => onExport('html')}
+              >
+                {activeExport === 'html'
+                  ? 'HTML...'
+                  : isFinnish ? 'Vie HTML' : 'Export HTML'}
+              </button>
+              <button
+                type="button"
+                className={`action-button action-button--secondary rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
+                disabled={isActionBusy}
+                onClick={() => onExport('json')}
+              >
+                {activeExport === 'json'
+                  ? 'JSON...'
+                  : isFinnish ? 'Vie JSON' : 'Export JSON'}
               </button>
             </div>
           </div>

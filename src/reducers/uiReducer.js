@@ -11,6 +11,7 @@ export const UI_ACTION = {
   SET_SELECTED_TEMPLATE: 'SET_SELECTED_TEMPLATE',
   SET_LOCALE: 'SET_LOCALE',
   SET_PASTED_CV_TEXT: 'SET_PASTED_CV_TEXT',
+  SET_JOB_DESCRIPTION: 'SET_JOB_DESCRIPTION',
 }
 
 const UI_LOCALE_STORAGE_KEY = 'ui-locale'
@@ -26,6 +27,7 @@ export function createInitialUiState(initialSession) {
     activeExport: '',
     isImporting: false,
     pastedCvText: '',
+    jobDescription: '',
     toasts: initialSession.initialToast ? [initialSession.initialToast] : [],
   }
 }
@@ -58,6 +60,9 @@ export function uiReducer(state, action) {
 
     case UI_ACTION.SET_PASTED_CV_TEXT:
       return { ...state, pastedCvText: action.value }
+
+    case UI_ACTION.SET_JOB_DESCRIPTION:
+      return { ...state, jobDescription: action.value }
 
     default:
       return state

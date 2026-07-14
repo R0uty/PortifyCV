@@ -16,10 +16,12 @@ function ToastStack({ toasts = [], theme = 'dark' }) {
           key={toast.id}
           className={`fade-in-up rounded-2xl border px-4 py-3 shadow-xl backdrop-blur ${
             toast.type === 'success'
-              ? 'border-gray-400/30 bg-gray-500/90 text-white'
-              : 'border-gray-400/30 bg-gray-500/90 text-white'
+              ? 'border-emerald-300/50 bg-emerald-600/90 text-white'
+              : toast.type === 'error'
+                ? 'border-red-300/50 bg-red-600/90 text-white'
+                : 'border-slate-300/50 bg-slate-700/90 text-white'
           }`}
-          role="status"
+          role={toast.type === 'error' ? 'alert' : 'status'}
           aria-live="polite"
         >
           <p className="text-sm font-medium">{toast.message}</p>

@@ -2,8 +2,10 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useRef, us
 
 import AppShell from '../components/AppShell'
 import AppErrorBoundary from '../components/AppErrorBoundary'
+import ATSScorePanel from '../components/ATSScorePanel'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
+import CVSuggestionsPanel from '../components/CVSuggestionsPanel'
 import ProjectHeader from '../components/ProjectHeader'
 import ToastStack from '../components/ToastStack'
 import {
@@ -15,6 +17,7 @@ import {
   UI_THEME_STORAGE_KEY,
 } from '../utils/designSystem'
 import {
+  CV_DRAFT_PHOTO_STORAGE_KEY,
   CV_DRAFT_STORAGE_KEY,
   CV_ONBOARDING_SEEN_STORAGE_KEY,
   createInitialCvData,
@@ -40,6 +43,10 @@ import {
   readCvStateFromLocation,
   removeShareDataParamFromCurrentUrl,
 } from '../utils/shareLinks'
+import {
+  analyzeJobDescription,
+  evaluateAtsScore,
+} from '../utils/atsScore'
 import {
   evaluateCvFeedback,
   improveAboutText,
@@ -141,10 +148,14 @@ function loadInitialCvSession() {
 
   try {
     const storedDraftState = safeStorageGet(CV_DRAFT_STORAGE_KEY)
+    const storedDraftPhotoState = safeStorageGet(CV_DRAFT_PHOTO_STORAGE_KEY, '')
     const onboardingState = safeStorageGet(CV_ONBOARDING_SEEN_STORAGE_KEY, 'false')
     const storedThemeState = safeStorageGet(UI_THEME_STORAGE_KEY)
     const storedAccentState = safeStorageGet(UI_ACCENT_STORAGE_KEY)
     const storedDraft = storedDraftState.value
+    const storedDraftPhoto = typeof storedDraftPhotoState.value === 'string'
+      ? storedDraftPhotoState.value
+      : ''
     const hasSeenOnboarding = onboardingState.value === 'true'
     const storedTheme = storedThemeState.value
     const storedAccent = storedAccentState.value
@@ -152,7 +163,8 @@ function loadInitialCvSession() {
       !storedDraftState.ok ||
       !onboardingState.ok ||
       !storedThemeState.ok ||
-      !storedAccentState.ok
+      !storedAccentState.ok ||
+      !storedDraftPhotoState.ok
     const nextTheme = storedTheme === 'light' ? 'light' : 'dark'
     const nextAccent = getAccentOption(storedAccent).id
     const markOnboardingSeen = () => {
@@ -177,11 +189,14 @@ function loadInitialCvSession() {
       const fallbackFormData = storedDraft
         ? parseImportedCvData(JSON.parse(storedDraft))
         : createInitialCvData()
+      const restoredFormData = storedDraftPhoto
+        ? { ...fallbackFormData, photo: storedDraftPhoto }
+        : fallbackFormData
 
       markOnboardingSeen()
 
       return {
-        formData: fallbackFormData,
+        formData: restoredFormData,
         theme: nextTheme,
         accent: nextAccent,
         initialToast: createToast(
@@ -223,8 +238,12 @@ function loadInitialCvSession() {
 
     markOnboardingSeen()
 
+    const restoredDraft = parseImportedCvData(JSON.parse(storedDraft))
+
     return {
-      formData: parseImportedCvData(JSON.parse(storedDraft)),
+      formData: storedDraftPhoto
+        ? { ...restoredDraft, photo: storedDraftPhoto }
+        : restoredDraft,
       theme: nextTheme,
       accent: nextAccent,
       initialToast: createToast('Restored your saved draft.', 'success'),
@@ -241,6 +260,7 @@ function loadInitialCvSession() {
 
     if (!shouldClearShareParam) {
       safeStorageRemove(CV_DRAFT_STORAGE_KEY)
+      safeStorageRemove(CV_DRAFT_PHOTO_STORAGE_KEY)
     }
 
     const storedThemeState = safeStorageGet(UI_THEME_STORAGE_KEY)
@@ -265,7 +285,31 @@ function ResumeBuilderPage({
   onLocaleChange = () => {},
 }) {
   const initialSession = useMemo(() => loadInitialCvSession(), [])
-  const [formData, dispatchFormData] = useReducer(cvFormReducer, initialSession.formData)
+  const [formHistory, setFormHistory] = useState(() => ({
+    past: [],
+    present: initialSession.formData,
+    future: [],
+  }))
+  const formData = formHistory.present
+  const canUndo = formHistory.past.length > 0
+  const canRedo = formHistory.future.length > 0
+  const dispatchFormData = useCallback((action) => {
+    setFormHistory((currentHistory) => {
+      const nextPresent = cvFormReducer(currentHistory.present, action)
+
+      if (nextPresent === currentHistory.present) {
+        return currentHistory
+      }
+
+      const nextPast = [...currentHistory.past, currentHistory.present].slice(-80)
+
+      return {
+        past: nextPast,
+        present: nextPresent,
+        future: [],
+      }
+    })
+  }, [])
   const [theme, setTheme] = useState(
     initialTheme === 'light' || initialTheme === 'dark' ? initialTheme : initialSession.theme,
   )
@@ -291,6 +335,7 @@ function ResumeBuilderPage({
     activeExport,
     isImporting,
     pastedCvText,
+    jobDescription,
     toasts,
   } = uiState
   const ui = getUiTheme(theme)
@@ -298,6 +343,7 @@ function ResumeBuilderPage({
   const importInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
   const storageWarningShownRef = useRef(false)
+  const shareWarningShownRef = useRef(false)
 
   const errors = useMemo(
     () => ({
@@ -315,6 +361,14 @@ function ResumeBuilderPage({
   const templates = useMemo(() => getCvTemplates(locale), [locale])
   const shellStyle = useMemo(() => getAccentThemeStyles(theme, accent), [theme, accent])
   const feedback = useMemo(() => evaluateCvFeedback(formData, { locale }), [formData, locale])
+  const atsScore = useMemo(
+    () => evaluateAtsScore(formData, { locale, atsFriendly: atsFriendlyMode }),
+    [atsFriendlyMode, formData, locale],
+  )
+  const jobDescriptionAnalysis = useMemo(
+    () => analyzeJobDescription(formData, jobDescription),
+    [formData, jobDescription],
+  )
   const showToast = (message, type = 'success') => {
     const nextToast = createToast(message, type)
 
@@ -366,13 +420,25 @@ function ResumeBuilderPage({
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      setStorageValue(CV_DRAFT_STORAGE_KEY, JSON.stringify(formData))
-    }, 180)
+      const draftWithoutPhoto = { ...formData, photo: '' }
+
+      setStorageValue(CV_DRAFT_STORAGE_KEY, JSON.stringify(draftWithoutPhoto))
+    }, 520)
 
     return () => {
       window.clearTimeout(timeoutId)
     }
   }, [formData, setStorageValue])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setStorageValue(CV_DRAFT_PHOTO_STORAGE_KEY, formData.photo || '')
+    }, 1200)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [formData.photo, setStorageValue])
 
   useEffect(() => {
     setStorageValue(UI_THEME_STORAGE_KEY, theme)
@@ -444,7 +510,7 @@ function ResumeBuilderPage({
           ? locale === 'fi' ? 'Valmistellaan HTML-vientiä...' : 'Preparing HTML export...'
           : locale === 'fi' ? 'Valmistellaan JSON-vientiä...' : 'Preparing JSON export...'
 
-    showToast(toastLabel)
+    showToast(toastLabel, 'info')
 
     try {
       const {
@@ -561,7 +627,7 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: true })
 
     try {
-      showToast(locale === 'fi' ? `Tuodaan ${file.name}...` : `Importing ${file.name}...`)
+      showToast(locale === 'fi' ? `Tuodaan ${file.name}...` : `Importing ${file.name}...`, 'info')
       const fileText = await file.text()
       const parsedValue = JSON.parse(fileText)
       const importedData = parseImportedCvData(parsedValue)
@@ -589,19 +655,20 @@ function ResumeBuilderPage({
       dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: false })
       event.target.value = ''
     }
-  }, [locale, setStorageValue])
+  }, [dispatchFormData, locale, setStorageValue])
 
   const handleResetForm = useCallback(() => {
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
     removeStorageValue(CV_DRAFT_STORAGE_KEY)
+    removeStorageValue(CV_DRAFT_PHOTO_STORAGE_KEY)
     showToast(locale === 'fi' ? 'Lomake nollattu tyhjäksi CV:ksi.' : 'Form reset to a blank CV.')
-  }, [locale, removeStorageValue])
+  }, [dispatchFormData, locale, removeStorageValue])
 
   const handleLoadDemo = useCallback(() => {
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: structuredClone(demoCvData) })
     setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
     showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
-  }, [locale, setStorageValue])
+  }, [dispatchFormData, locale, setStorageValue])
 
   const handlePasteCvImport = useCallback(() => {
     try {
@@ -619,13 +686,22 @@ function ResumeBuilderPage({
         'error',
       )
     }
-  }, [locale, pastedCvText, setStorageValue])
+  }, [dispatchFormData, locale, pastedCvText, setStorageValue])
 
   const handleCopyShareLink = useCallback(async () => {
     try {
       const shareUrl = buildShareUrl(formData)
 
       await window.navigator.clipboard.writeText(shareUrl)
+      if (!shareWarningShownRef.current) {
+        shareWarningShownRef.current = true
+        showToast(
+          locale === 'fi'
+            ? 'Huom: jakolinkki sisältää CV-tietosi URL:ssa. Jaa vain luotetuille vastaanottajille.'
+            : 'Note: the share link embeds your CV data in the URL. Share it only with trusted recipients.',
+          'info',
+        )
+      }
       showToast(locale === 'fi' ? 'Jakolinkki kopioitu leikepöydälle.' : 'Share link copied to clipboard.')
     } catch (error) {
       showToast(
@@ -639,6 +715,38 @@ function ResumeBuilderPage({
     }
   }, [formData, locale])
 
+  const handleUndo = useCallback(() => {
+    setFormHistory((currentHistory) => {
+      if (currentHistory.past.length === 0) {
+        return currentHistory
+      }
+
+      const previousPresent = currentHistory.past[currentHistory.past.length - 1]
+
+      return {
+        past: currentHistory.past.slice(0, -1),
+        present: previousPresent,
+        future: [currentHistory.present, ...currentHistory.future].slice(0, 80),
+      }
+    })
+  }, [])
+
+  const handleRedo = useCallback(() => {
+    setFormHistory((currentHistory) => {
+      if (currentHistory.future.length === 0) {
+        return currentHistory
+      }
+
+      const [nextPresent, ...remainingFuture] = currentHistory.future
+
+      return {
+        past: [...currentHistory.past, currentHistory.present].slice(-80),
+        present: nextPresent,
+        future: remainingFuture,
+      }
+    })
+  }, [])
+
   const handleImproveAboutText = useCallback(() => {
     const nextAbout = improveAboutText(formData, { locale })
 
@@ -649,7 +757,7 @@ function ResumeBuilderPage({
 
     dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'about', value: nextAbout })
     showToast(locale === 'fi' ? 'Esittelytekstiä parannettu.' : 'About text improved.')
-  }, [formData, locale])
+  }, [dispatchFormData, formData, locale])
 
   const handleImproveExperienceText = useCallback((index) => {
     const currentItem = formData.experience[index]
@@ -682,7 +790,7 @@ function ResumeBuilderPage({
         ? `Kokemus ${index + 1} -tekstiä parannettu.`
         : `Experience ${index + 1} text improved.`,
     )
-  }, [formData.experience, locale])
+  }, [dispatchFormData, formData.experience, locale])
 
   const handleToggleAtsFriendlyMode = useCallback(() => {
     dispatchUi({ type: UI_ACTION.TOGGLE_ATS_MODE })
@@ -706,6 +814,55 @@ function ResumeBuilderPage({
 
   const handlePastedCvTextChange = useCallback((event) => {
     dispatchUi({ type: UI_ACTION.SET_PASTED_CV_TEXT, value: event.target.value })
+  }, [])
+
+  const handleJobDescriptionChange = useCallback((value) => {
+    dispatchUi({ type: UI_ACTION.SET_JOB_DESCRIPTION, value })
+  }, [])
+
+  const handleAddMissingKeyword = useCallback((keyword) => {
+    if (formData.skills.some((skill) => skill.toLowerCase() === keyword.toLowerCase())) {
+      showToast(
+        locale === 'fi'
+          ? `"${keyword}" löytyy jo taidoista.`
+          : `"${keyword}" is already in your skills.`,
+        'info',
+      )
+      return
+    }
+
+    dispatchFormData({ type: FORM_ACTION.ADD_SKILL, skill: keyword })
+    showToast(
+      locale === 'fi'
+        ? `"${keyword}" lisätty taitoihin.`
+        : `Added "${keyword}" to skills.`,
+    )
+  }, [dispatchFormData, formData.skills, locale])
+
+  const handleCopyMissingKeywords = useCallback(async () => {
+    if (jobDescriptionAnalysis.missingKeywords.length === 0) {
+      return
+    }
+
+    try {
+      await window.navigator.clipboard.writeText(jobDescriptionAnalysis.missingKeywords.join(', '))
+      showToast(
+        locale === 'fi'
+          ? 'Puuttuvat avainsanat kopioitu.'
+          : 'Missing keywords copied.',
+      )
+    } catch {
+      showToast(
+        locale === 'fi'
+          ? 'Avainsanojen kopiointi epäonnistui.'
+          : 'Failed to copy missing keywords.',
+        'error',
+      )
+    }
+  }, [jobDescriptionAnalysis.missingKeywords, locale])
+
+  const handleClearJobDescription = useCallback(() => {
+    dispatchUi({ type: UI_ACTION.SET_JOB_DESCRIPTION, value: '' })
   }, [])
 
   const sidebarContent = useMemo(() => (
@@ -820,6 +977,28 @@ function ResumeBuilderPage({
           </button>
         </section>
 
+        <ATSScorePanel
+          atsScore={atsScore}
+          theme={theme}
+          locale={locale}
+          atsFriendlyMode={atsFriendlyMode}
+          onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
+          jobDescription={jobDescription}
+          onJobDescriptionChange={handleJobDescriptionChange}
+          onAddMissingKeyword={handleAddMissingKeyword}
+          onCopyMissingKeywords={handleCopyMissingKeywords}
+          onClearJobDescription={handleClearJobDescription}
+          jobDescriptionAnalysis={jobDescriptionAnalysis}
+        />
+
+        <CVSuggestionsPanel
+          feedback={feedback}
+          theme={theme}
+          locale={locale}
+          onImproveAboutText={handleImproveAboutText}
+          onImproveExperienceText={handleImproveExperienceText}
+        />
+
         <AppErrorBoundary
           theme={theme}
           panelTitle={locale === 'fi' ? 'Pohjagalleria' : 'Template gallery'}
@@ -864,15 +1043,20 @@ function ResumeBuilderPage({
       </AppErrorBoundary>
     </div>
   ), [
+    atsScore,
     atsFriendlyMode,
     currentTemplate.label,
     errors,
     feedback,
     formData,
+    handleAddMissingKeyword,
+    handleClearJobDescription,
+    handleCopyMissingKeywords,
     handleImportClick,
     handleImportFile,
     handleImproveAboutText,
     handleImproveExperienceText,
+    handleJobDescriptionChange,
     handleLoadDemo,
     handlePasteCvImport,
     handlePastedCvTextChange,
@@ -882,6 +1066,8 @@ function ResumeBuilderPage({
     handleToggleMobilePreview,
     isActionBusy,
     isImporting,
+    jobDescription,
+    jobDescriptionAnalysis,
     locale,
     mobilePreviewVisible,
     pastedCvText,
@@ -967,6 +1153,7 @@ function ResumeBuilderPage({
         <button
           type="button"
           className={`${compactButtonClassName} accent-border accent-surface accent-text-strong`}
+          disabled={isActionBusy}
           onClick={() => handleExport('pdf-designer')}
         >
           {activeExport === 'pdf-designer' ? 'PDF...' : locale === 'fi' ? 'Vie PDF' : 'PDF'}
@@ -974,9 +1161,42 @@ function ResumeBuilderPage({
         <button
           type="button"
           className={compactButtonClassName}
+          disabled={isActionBusy}
+          onClick={() => handleExport('html')}
+        >
+          {activeExport === 'html' ? 'HTML...' : 'HTML'}
+        </button>
+        <button
+          type="button"
+          className={compactButtonClassName}
+          disabled={isActionBusy}
+          onClick={() => handleExport('json')}
+        >
+          {activeExport === 'json' ? 'JSON...' : 'JSON'}
+        </button>
+        <button
+          type="button"
+          className={compactButtonClassName}
+          disabled={isActionBusy}
           onClick={handleCopyShareLink}
         >
           {locale === 'fi' ? 'Linkki' : 'Link'}
+        </button>
+        <button
+          type="button"
+          className={compactButtonClassName}
+          disabled={!canUndo}
+          onClick={handleUndo}
+        >
+          {locale === 'fi' ? 'Kumoa' : 'Undo'}
+        </button>
+        <button
+          type="button"
+          className={compactButtonClassName}
+          disabled={!canRedo}
+          onClick={handleRedo}
+        >
+          {locale === 'fi' ? 'Uudelleen' : 'Redo'}
         </button>
         <button
           type="button"
@@ -993,10 +1213,15 @@ function ResumeBuilderPage({
     </div>
   ), [
     activeExport,
+    canRedo,
+    canUndo,
     compactButtonClassName,
     handleCopyShareLink,
     handleExport,
+    handleRedo,
     handleToggleMobilePreview,
+    handleUndo,
+    isActionBusy,
     locale,
     mobilePreviewVisible,
     ui.button,
@@ -1011,8 +1236,12 @@ function ResumeBuilderPage({
         activeExport={activeExport}
         isActionBusy={isActionBusy}
         locale={locale}
+        canUndo={canUndo}
+        canRedo={canRedo}
         onReturn={onReturnToLanding}
         onLocaleChange={handleLocaleChange}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
         onToggleTheme={handleToggleTheme}
         onExport={handleExport}
       />

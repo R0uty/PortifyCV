@@ -2,6 +2,7 @@
 /** @typedef {import('../types/cv').Locale} Locale */
 
 export const CV_DRAFT_STORAGE_KEY = 'portifycv-draft'
+export const CV_DRAFT_PHOTO_STORAGE_KEY = 'portifycv-draft-photo'
 export const CV_ONBOARDING_SEEN_STORAGE_KEY = 'portifycv-onboarding-seen'
 
 export const createEmptyExperience = () => ({
@@ -505,10 +506,10 @@ function extractSkillTokens(value) {
 }
 
 /**
- * Parse freeform CV text and return a partial CV state with detected fields.
+ * Parse freeform CV text and return partial CV fields with detected values.
  * @param {string} value
  * @param {{ locale?: Locale }} [options]
- * @returns {CvData}
+ * @returns {Partial<CvData>}
  */
 export function parsePastedCvText(value, options = {}) {
   const locale = options.locale === 'fi' ? 'fi' : 'en'
@@ -529,16 +530,19 @@ export function parsePastedCvText(value, options = {}) {
     throw new Error(missingPasteMessage)
   }
 
-  const nextState = createInitialCvData()
   let currentSection = 'about'
   const summaryLines = []
   const collectedSkills = []
-
-  nextState.fullName = lines[0] ?? ''
+  const partialData = {}
+  const detectedFullName = lines[0] ?? ''
   const startIndex = lines[1] && !isHeading(lines[1]) ? 2 : 1
 
+  if (detectedFullName) {
+    partialData.fullName = detectedFullName
+  }
+
   if (lines[1] && !isHeading(lines[1])) {
-    nextState.title = lines[1]
+    partialData.title = lines[1]
   }
 
   for (const line of lines.slice(startIndex)) {
@@ -575,14 +579,22 @@ export function parsePastedCvText(value, options = {}) {
     }
   }
 
-  nextState.about = summaryLines.slice(0, 3).join(' ')
-  nextState.skills = Array.from(
+  const detectedAbout = summaryLines.slice(0, 3).join(' ')
+  const detectedSkills = Array.from(
     new Set(collectedSkills.map((skill) => skill.trim()).filter(Boolean)),
   ).slice(0, 16)
 
-  if (!nextState.fullName && !nextState.title && nextState.skills.length === 0) {
+  if (detectedAbout) {
+    partialData.about = detectedAbout
+  }
+
+  if (detectedSkills.length > 0) {
+    partialData.skills = detectedSkills
+  }
+
+  if (!partialData.fullName && !partialData.title && !partialData.skills) {
     throw new Error(detectFailMessage)
   }
 
-  return nextState
+  return partialData
 }
