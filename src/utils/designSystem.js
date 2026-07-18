@@ -58,35 +58,35 @@ export function getUiTheme(theme = 'dark') {
     isDark,
     pageText: isDark ? 'text-gray-100' : 'text-gray-900',
     shell: isDark
-      ? 'border-white/12 bg-black'
-      : 'border-black/10 bg-white',
+      ? 'border-white/12 bg-gray-950'
+      : 'border-black/10 bg-gray-50',
     sidebar: isDark
-      ? 'border-white/12 bg-black'
-      : 'border-black/10 bg-white',
-    main: isDark ? 'bg-black' : 'bg-white',
+      ? 'border-white/12 bg-gray-950'
+      : 'border-black/10 bg-gray-50',
+    main: isDark ? 'bg-gray-950' : 'bg-gray-50',
     surface: isDark
-      ? 'border-white/12 bg-black/70'
-      : 'border-black/10 bg-white',
+      ? 'border-white/12 bg-gray-900/60'
+      : 'border-black/10 bg-gray-100',
     surfaceMuted: isDark
       ? 'border-white/12 bg-white/6'
       : 'border-black/10 bg-gray-50',
     surfaceStrong: isDark
-      ? 'border-white/12 bg-black'
-      : 'border-black/10 bg-white',
+      ? 'border-white/12 bg-gray-950'
+      : 'border-black/10 bg-gray-50',
     button: isDark
       ? 'border-white/12 bg-white/6 text-white hover:bg-white/8'
-      : 'border-black/10 bg-white text-black hover:bg-gray-50',
+      : 'border-black/10 bg-gray-100 text-black hover:bg-gray-50',
     buttonActive:
       'border-[var(--accent-border)] bg-[var(--accent-soft)] text-[var(--accent-text-strong)]',
     buttonDanger: isDark
       ? 'border-white/12 bg-white/6 text-white hover:bg-white/8'
-      : 'border-black/10 bg-white text-black hover:bg-gray-50',
+      : 'border-black/10 bg-gray-100 text-black hover:bg-gray-50',
     input: isDark
-      ? 'border-white/12 bg-black/70 text-white placeholder:text-gray-500'
-      : 'border-black/10 bg-white text-black placeholder:text-gray-500',
+      ? 'border-white/12 bg-gray-900/60 text-white placeholder:text-gray-500'
+      : 'border-black/10 bg-gray-100 text-black placeholder:text-gray-500',
     inputShell: isDark
-      ? 'border-white/12 bg-black/70'
-      : 'border-black/10 bg-white',
+      ? 'border-white/12 bg-gray-900/60'
+      : 'border-black/10 bg-gray-100',
     textPrimary: isDark ? 'text-white' : 'text-black',
     textSecondary: isDark ? 'text-gray-300' : 'text-gray-700',
     textMuted: isDark ? 'text-gray-400' : 'text-gray-500',

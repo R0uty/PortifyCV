@@ -398,7 +398,9 @@ async function renderCaptureCanvas(captureRoot, captureOptions = {}) {
     scrollX: 0,
     scrollY: 0,
     imageTimeout: 0,
-    ignoreElements: (element) => element?.getAttribute?.('data-export-ignore') === 'true',
+    ignoreElements: (element) =>
+      element?.getAttribute?.('data-export-ignore') === 'true'
+      || element?.getAttribute?.('data-export-summary-chip') === 'true',
     ...captureOptions,
   })
 }
@@ -501,7 +503,6 @@ function collectCanvasContentBlocks(captureRoot, canvas) {
   const scaleY = canvas.height / sourceHeight
   const anchors = captureRoot.querySelectorAll('[data-export-header], [data-export-section]')
   const ranges = []
-  let hasSidePlacement = false
 
   anchors.forEach((anchor) => {
     const rect = anchor.getBoundingClientRect()
@@ -509,13 +510,7 @@ function collectCanvasContentBlocks(captureRoot, canvas) {
     const bottom = Math.min(canvas.height, Math.round((rect.bottom - sourceRect.top) * scaleY))
 
     if (bottom > top) {
-      const placement = anchor.getAttribute('data-export-placement')
-
-      if (placement === 'side') {
-        hasSidePlacement = true
-      }
-
-      ranges.push({ top, bottom, placement })
+      ranges.push({ top, bottom })
     }
   })
 
@@ -525,52 +520,28 @@ function collectCanvasContentBlocks(captureRoot, canvas) {
 
   ranges.sort((a, b) => a.top - b.top)
 
-  if (!hasSidePlacement) {
-    const blocks = []
-    let cursorTop = 0
-
-    for (let index = 0; index < ranges.length; index += 1) {
-      const current = ranges[index]
-      const next = ranges[index + 1]
-      const blockTop = Math.max(cursorTop, current.top)
-
-      if (blockTop > cursorTop) {
-        blocks.push({ top: cursorTop, bottom: blockTop })
-      }
-
-      const blockBottom = Math.max(
-        blockTop,
-        Math.min(canvas.height, next ? next.top : canvas.height),
-      )
-
-      if (blockBottom > blockTop) {
-        blocks.push({ top: blockTop, bottom: blockBottom })
-      }
-
-      cursorTop = blockBottom
-    }
-
-    if (cursorTop < canvas.height) {
-      blocks.push({ top: cursorTop, bottom: canvas.height })
-    }
-
-    return blocks.filter((block) => block.bottom > block.top)
-  }
-
   const blocks = []
   let cursorTop = 0
 
   for (let index = 0; index < ranges.length; index += 1) {
     const current = ranges[index]
     const next = ranges[index + 1]
+    const blockTop = Math.max(cursorTop, current.top)
 
-    if (current.top > cursorTop) {
-      blocks.push({ top: cursorTop, bottom: current.top })
+    if (blockTop > cursorTop) {
+      blocks.push({ top: cursorTop, bottom: blockTop })
     }
 
-    const blockBottom = Math.max(current.bottom, next ? next.top : canvas.height)
-    blocks.push({ top: current.top, bottom: Math.min(canvas.height, blockBottom) })
-    cursorTop = Math.min(canvas.height, blockBottom)
+    const blockBottom = Math.max(
+      blockTop,
+      Math.min(canvas.height, next ? next.top : canvas.height),
+    )
+
+    if (blockBottom > blockTop) {
+      blocks.push({ top: blockTop, bottom: blockBottom })
+    }
+
+    cursorTop = blockBottom
   }
 
   if (cursorTop < canvas.height) {
@@ -706,6 +677,28 @@ function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []
       return
     }
 
+    if (currentPageHeight > 0 && currentPageHeight < pageHeightPx) {
+      const remainingPx = pageHeightPx - currentPageHeight
+      const naturalEnd = block.top + remainingPx
+      const minFillDepth = Math.max(50, Math.floor(pageHeightPx * 0.05))
+      let snapY = 0
+      for (let index = breakpoints.length - 1; index >= 0; index -= 1) {
+        if (breakpoints[index] <= block.top) break
+        if (breakpoints[index] > naturalEnd) continue
+        snapY = breakpoints[index]
+        break
+      }
+      if (snapY >= block.top + minFillDepth) {
+        currentPageBottom = Math.max(currentPageBottom, Math.min(snapY, block.bottom))
+        currentPageHeight = currentPageBottom - currentPageTop
+        pushCurrentPage()
+        if (currentPageTop < block.bottom) {
+          const slices = splitRangeIntoSlices(currentPageTop, block.bottom, pageHeightPx, breakpoints)
+          slices.forEach((slice) => pages.push(slice))
+        }
+        return
+      }
+    }
     pushCurrentPage()
     const slices = splitRangeIntoSlices(block.top, block.bottom, pageHeightPx, breakpoints)
     slices.forEach((slice) => pages.push(slice))
