@@ -11,8 +11,8 @@ export default {
   // Full name heading — extrabold, violet color, extra-large
   headerTitle: () => 'mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-[3.4rem] text-violet-600',
 
-  // Professional title — medium weight, muted gray
-  headerSubtitle: () => 'mt-2 text-base font-medium leading-7 sm:text-lg text-gray-500',
+  // Professional title — medium weight, violet accent
+  headerSubtitle: () => 'mt-2 text-base font-medium leading-7 sm:text-lg text-violet-500',
 
   // Section headings — bold, violet color, standard tracking
   sectionTitle: () => 'text-sm font-bold tracking-wide text-violet-600',
@@ -53,8 +53,8 @@ export default {
   // Profile photo border — violet
   photoBorder: () => 'border-violet-200',
 
-  // About section header bottom-border color
-  aboutBorder: () => 'border-slate-100',
+  // About section header bottom-border color — violet
+  aboutBorder: () => 'border-violet-100',
 
   // Experience rendering — role and company shown separately
   experienceLayout: 'clean',
@@ -80,8 +80,8 @@ export default {
   // Text size for contact items in header
   headerContactTextSize: 'text-[0.72rem]',
 
-  // Text color for contact items in header
-  headerContactTextColor: 'text-gray-500',
+  // Text color for contact items in header — violet
+  headerContactTextColor: 'text-violet-500',
 
   // Icon color class for contact icons — violet
   headerContactIconColor: 'text-violet-400',

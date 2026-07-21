@@ -5,17 +5,17 @@ export default {
   // Outer document border and background — white bg, no shadow
   preview: () => 'border-gray-200 bg-white shadow-none',
 
-  // Header strip — cool slate background, dark text, thin bottom border
-  headerColor: () => 'bg-slate-100 text-gray-900 border-b border-slate-300',
+  // Header strip — teal-tinted background, dark text, thin bottom border
+  headerColor: () => 'bg-teal-50 text-gray-900 border-b border-teal-200',
 
   // Full name heading — bold, large
   headerTitle: () => 'mt-2 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl',
 
-  // Professional title — medium weight, muted gray
-  headerSubtitle: () => 'mt-1.5 text-sm font-medium leading-6 text-gray-500',
+  // Professional title — medium weight, teal accent
+  headerSubtitle: () => 'mt-1.5 text-sm font-medium leading-6 text-teal-600',
 
-  // Section headings — tiny uppercase, tight tracking
-  sectionTitle: () => 'text-[0.65rem] font-bold uppercase tracking-[0.22em] text-gray-500',
+  // Section headings — tiny uppercase, tight tracking, teal accent
+  sectionTitle: () => 'text-[0.65rem] font-bold uppercase tracking-[0.22em] text-teal-600',
 
   // Main content section wrapper — bottom border separator
   mainSection: () => 'border-b border-gray-200 pb-6',
@@ -26,14 +26,14 @@ export default {
   // Individual sidebar section — clean spacing, no card wrapper
   sideSection: () => 'py-4 first:pt-0',
 
-  // Skill tag pill — small, flat, gray border, monospace feel
-  skillTag: () => 'rounded-sm border border-gray-200 bg-transparent px-2 py-0.5 text-[0.68rem] font-medium text-gray-600',
+  // Skill tag pill — small, teal border, monospace feel
+  skillTag: () => 'rounded-sm border border-teal-200 bg-teal-50/50 px-2 py-0.5 text-[0.68rem] font-medium text-teal-700',
 
-  // Timeline left-border color — adapts to dark/light mode
-  timelineBorder: (isDark) => isDark ? 'border-gray-700' : 'border-gray-300',
+  // Timeline left-border color — teal, adapts to dark/light mode
+  timelineBorder: (isDark) => isDark ? 'border-teal-700' : 'border-teal-300',
 
-  // Timeline dot circle color — adapts to dark/light mode
-  timelineDot: (isDark) => isDark ? 'border-black bg-gray-400' : 'border-white bg-gray-600',
+  // Timeline dot circle color — teal, adapts to dark/light mode
+  timelineDot: (isDark) => isDark ? 'border-black bg-teal-500' : 'border-white bg-teal-600',
 
   // Education card wrapper — simple bottom padding, no background
   educationCard: () => 'py-2',
@@ -44,17 +44,17 @@ export default {
   // Split-column grid — narrow sidebar (0.3fr), wide main (0.7fr)
   splitColumns: () => 'grid gap-6 md:grid-cols-[minmax(160px,0.3fr)_minmax(0,0.7fr)] md:gap-8 print:grid-cols-1',
 
-  // Accent color for ATS-friendly mode badge tinting — none for developer
-  accentColor: () => null,
+  // Accent color for ATS-friendly mode badge tinting — teal
+  accentColor: () => ({ light: 'teal', dark: 'teal' }),
 
-  // Summary badge pill in the About section header
-  summaryBadge: () => 'border border-gray-200 bg-gray-50 text-gray-600',
+  // Summary badge pill in the About section header — teal tint
+  summaryBadge: () => 'border border-teal-200 bg-teal-50 text-teal-700',
 
   // Profile photo border color
   photoBorder: () => 'border-black/10',
 
-  // About section header bottom-border color
-  aboutBorder: () => 'border-slate-100',
+  // About section header bottom-border color — teal
+  aboutBorder: () => 'border-teal-100',
 
   // Experience rendering — role and company shown separately, no timeline dots
   experienceLayout: 'clean',
@@ -65,8 +65,8 @@ export default {
   // Links rendering — icon + label + value in a vertical list
   linksLayout: 'icon-list',
 
-  // Color class for categorized skill group headings
-  categoryLabelColor: 'text-gray-400',
+  // Color class for categorized skill group headings — teal
+  categoryLabelColor: 'text-teal-500',
 
   // Color class for link icons and labels
   linkIconColor: '',
@@ -92,11 +92,11 @@ export default {
   // Text size for contact items in header
   headerContactTextSize: 'text-[0.7rem]',
 
-  // Text color for contact items in header
-  headerContactTextColor: 'text-gray-500',
+  // Text color for contact items in header — teal
+  headerContactTextColor: 'text-teal-600',
 
-  // Icon color class for contact icons (null = default gray)
-  headerContactIconColor: null,
+  // Icon color class for contact icons — teal
+  headerContactIconColor: 'text-teal-500',
 
   // Custom content area padding — wider than default for the two-column layout
   contentPadding: 'px-6 py-6 sm:px-8 sm:py-6 print:px-0 print:py-6',

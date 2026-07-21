@@ -5,10 +5,10 @@ export default {
   // Outer document border — adapts to dark/light mode
   preview: (isDark) => isDark ? 'border-gray-800 bg-black shadow-black/30' : 'border-black/10 bg-white shadow-black/10',
 
-  // Header strip — dark background, white text, subtle bottom border
+  // Header strip — dark background with sky blue accent, white text
   headerColor: (isDark) => isDark
-    ? 'bg-gray-900 text-white border-b border-gray-700'
-    : 'bg-gray-800 text-white border-b border-gray-600',
+    ? 'bg-gray-900 text-white border-b border-sky-800'
+    : 'bg-gray-800 text-white border-b border-sky-600',
 
   // Full name heading — bold, smaller than other templates
   headerTitle: () => 'mt-1 text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl',
@@ -16,8 +16,8 @@ export default {
   // Professional title — small, gray text
   headerSubtitle: (isDark) => `mt-1 text-sm leading-6 sm:text-base ${isDark ? 'text-gray-300' : 'text-gray-300'}`,
 
-  // Section headings — tiny uppercase, tight tracking
-  sectionTitle: () => 'text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-gray-500',
+  // Section headings — tiny uppercase, tight tracking, sky blue accent
+  sectionTitle: () => 'text-[0.65rem] font-semibold uppercase tracking-[0.22em] text-sky-500',
 
   // Main content section — thin bottom border, minimal padding
   mainSection: (isDark) => isDark
@@ -34,16 +34,16 @@ export default {
     ? 'rounded-3xl border border-gray-800 bg-black/50 p-5 transition-colors print:border-0 print:px-0'
     : 'rounded-3xl border border-black/10 bg-white/80 p-5 transition-colors print:border-0 print:px-0',
 
-  // Skill tag pill — tiny, flat, gray border
+  // Skill tag pill — tiny, sky blue border
   skillTag: (isDark) => isDark
-    ? 'rounded-sm border border-gray-700 bg-transparent px-2 py-1 text-[0.65rem] font-semibold text-gray-300'
-    : 'rounded-sm border border-gray-300 bg-transparent px-2 py-1 text-[0.65rem] font-semibold text-gray-700',
+    ? 'rounded-sm border border-sky-800 bg-sky-950/30 px-2 py-1 text-[0.65rem] font-semibold text-sky-300'
+    : 'rounded-sm border border-sky-200 bg-sky-50/50 px-2 py-1 text-[0.65rem] font-semibold text-sky-700',
 
-  // Timeline left-border color — adapts to dark/light mode
-  timelineBorder: (isDark) => isDark ? 'border-gray-700' : 'border-black/10',
+  // Timeline left-border color — sky blue, adapts to dark/light mode
+  timelineBorder: (isDark) => isDark ? 'border-sky-700' : 'border-sky-300',
 
-  // Timeline dot circle color — adapts to dark/light mode
-  timelineDot: (isDark) => isDark ? 'border-black bg-gray-400' : 'border-white bg-gray-600',
+  // Timeline dot circle color — sky blue, adapts to dark/light mode
+  timelineDot: (isDark) => isDark ? 'border-black bg-sky-500' : 'border-white bg-sky-600',
 
   // Education card — thin bottom border, minimal padding
   educationCard: (isDark) => isDark
@@ -58,13 +58,13 @@ export default {
   // Split-column grid — standard ratios
   splitColumns: () => 'grid gap-5 sm:gap-6 md:grid-cols-[minmax(0,1.62fr)_minmax(200px,0.88fr)] md:gap-8 print:grid-cols-1',
 
-  // Accent color — none for compact
-  accentColor: () => null,
+  // Accent color — sky blue for ATS badge tinting
+  accentColor: () => ({ light: 'sky', dark: 'sky' }),
 
-  // Summary badge — dark fill, muted text
+  // Summary badge — sky blue tint, adapts to dark/light mode
   summaryBadge: (isDark) => isDark
-    ? 'bg-gray-900 text-gray-300'
-    : 'bg-gray-100 text-gray-500',
+    ? 'bg-sky-950 text-sky-300'
+    : 'bg-sky-50 text-sky-600',
 
   // Profile photo border — adapts to dark/light mode
   photoBorder: (isDark) => isDark ? 'border-white/15' : 'border-black/10',
@@ -81,8 +81,8 @@ export default {
   // Links rendering — card-style
   linksLayout: 'cards',
 
-  // Color class for categorized skill group headings (unused in flat mode)
-  categoryLabelColor: 'text-gray-400',
+  // Color class for categorized skill group headings — sky blue
+  categoryLabelColor: 'text-sky-400',
 
   // Color class for link icons (unused in cards mode)
   linkIconColor: '',

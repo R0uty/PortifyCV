@@ -5,8 +5,8 @@ export default {
   // Outer document border — slate-tinted, white bg
   preview: () => 'border-slate-300 bg-white shadow-none',
 
-  // Header strip — white bg, slate bottom border
-  headerColor: () => 'bg-white text-gray-900 border-b border-slate-300',
+  // Header strip — white bg, indigo accent border
+  headerColor: () => 'bg-white text-gray-900 border-b border-indigo-200',
 
   // Full name heading — extrabold, large, dark
   headerTitle: () => 'mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-[3.4rem]',
@@ -14,8 +14,8 @@ export default {
   // Professional title — medium weight, muted gray
   headerSubtitle: () => 'mt-2 text-base font-medium leading-7 sm:text-lg text-gray-500',
 
-  // Section headings — tiny uppercase, wide tracking, slate color
-  sectionTitle: () => 'text-[0.7rem] font-bold uppercase tracking-[0.28em] text-slate-600',
+  // Section headings — tiny uppercase, wide tracking, indigo accent
+  sectionTitle: () => 'text-[0.7rem] font-bold uppercase tracking-[0.28em] text-indigo-600',
 
   // Main content section wrapper — slate-tinted bottom border, extra padding
   mainSection: () => 'border-b border-slate-200 pb-7',
@@ -26,14 +26,14 @@ export default {
   // Individual sidebar section — clean spacing, no card wrapper
   sideSection: () => 'py-4 first:pt-0',
 
-  // Skill tag pill — small, slate-tinted background
-  skillTag: () => 'rounded-sm border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700',
+  // Skill tag pill — small, indigo-tinted background
+  skillTag: () => 'rounded-sm border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700',
 
-  // Timeline left-border color — slate
-  timelineBorder: () => 'border-slate-300',
+  // Timeline left-border color — indigo
+  timelineBorder: () => 'border-indigo-300',
 
-  // Timeline dot circle color — slate fill
-  timelineDot: () => 'border-white bg-slate-600',
+  // Timeline dot circle color — indigo fill
+  timelineDot: () => 'border-white bg-indigo-600',
 
   // Education card — bottom border separator, no background
   educationCard: () => 'border-b border-slate-100 py-3',
@@ -44,17 +44,17 @@ export default {
   // Split-column grid — standard ratios (same as default)
   splitColumns: () => 'grid gap-5 sm:gap-6 md:grid-cols-[minmax(0,1.62fr)_minmax(200px,0.88fr)] md:gap-8 print:grid-cols-1',
 
-  // Accent color — none for executive (uses slate palette directly)
-  accentColor: () => null,
+  // Accent color — indigo for ATS badge tinting
+  accentColor: () => ({ light: 'indigo', dark: 'indigo' }),
 
-  // Summary badge — slate border and fill
-  summaryBadge: () => 'border border-slate-200 bg-slate-50 text-slate-700',
+  // Summary badge — indigo border and fill
+  summaryBadge: () => 'border border-indigo-200 bg-indigo-50 text-indigo-700',
 
   // Profile photo border — slate-tinted with background
   photoBorder: (isDark) => isDark ? 'border border-slate-200 bg-slate-50 text-slate-700' : 'border border-slate-200 bg-slate-50 text-slate-700',
 
-  // About section header bottom-border color
-  aboutBorder: () => 'border-slate-100',
+  // About section header bottom-border color — indigo
+  aboutBorder: () => 'border-indigo-100',
 
   // Experience rendering — role and company separately, no timeline dots
   experienceLayout: 'clean',
@@ -65,11 +65,11 @@ export default {
   // Links rendering — icon + label + value
   linksLayout: 'icon-list',
 
-  // Color class for categorized skill group headings — slate
-  categoryLabelColor: 'text-slate-400',
+  // Color class for categorized skill group headings — indigo
+  categoryLabelColor: 'text-indigo-400',
 
-  // Color class for link icons and labels — slate
-  linkIconColor: 'text-slate-400',
+  // Color class for link icons and labels — indigo
+  linkIconColor: 'text-indigo-400',
 
   // Header contact line mode — 'icons' with slate accent, wider gap
   headerContactMode: 'icons',
@@ -80,9 +80,9 @@ export default {
   // Text size for contact items in header
   headerContactTextSize: 'text-[0.72rem]',
 
-  // Text color for contact items in header — slate
-  headerContactTextColor: 'text-slate-500',
+  // Text color for contact items in header — indigo
+  headerContactTextColor: 'text-indigo-500',
 
-  // Icon color class for contact icons — slate
-  headerContactIconColor: 'text-slate-400',
+  // Icon color class for contact icons — indigo
+  headerContactIconColor: 'text-indigo-400',
 }
