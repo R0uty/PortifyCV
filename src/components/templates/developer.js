@@ -74,8 +74,20 @@ export default {
   // Header contact line mode — 'icons' renders icon + value pairs
   headerContactMode: 'icons',
 
+  // Header top-row layout (name/details block + optional photo block)
+  headerLayoutClass: 'flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between',
+
   // Gap between contact items in header
   headerContactGap: 'gap-x-3',
+
+  // Icon-contact wrapper classes (header <div>)
+  headerContactContainerClass: 'mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5',
+
+  // Icon-contact item classes (header <span>)
+  headerContactItemClass: 'inline-flex items-center gap-1.5 whitespace-nowrap text-[0.7rem] leading-5 text-gray-500',
+
+  // Icon wrapper classes for consistent header icon sizing/alignment
+  headerContactIconWrapClass: 'inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center text-gray-400',
 
   // Text size for contact items in header
   headerContactTextSize: 'text-[0.7rem]',

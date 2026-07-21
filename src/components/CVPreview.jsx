@@ -581,7 +581,7 @@ function CVPreview({
             : t.headerColor(isDark)
         }`}
       >
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className={t.headerLayoutClass || 'flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between'}>
           <div>
             {/* Template label — hidden in print, shows "ATS-friendly mode" when ATS is on */}
             <p
@@ -621,14 +621,14 @@ function CVPreview({
 
             {/* Contact info — icon layout (developer, creative, executive, timeline) */}
             {t.headerContactMode === 'icons' && links.length > 0 && links.some(([, v]) => v.trim()) ? (
-              <div className={`mt-3 flex flex-wrap items-center ${t.headerContactGap} gap-y-1.5`}>
+              <div className={t.headerContactContainerClass || `mt-3 flex flex-wrap ${t.headerContactGap} gap-y-1.5`}>
                 {links.filter(([, v]) => v.trim()).map(([key, value]) => (
-                  <span key={key} className={`flex items-center gap-1.5 ${t.headerContactTextSize} leading-5 ${t.headerContactTextColor}`}>
-                    {t.headerContactIconColor ? (
-                      <span className={t.headerContactIconColor}>{devIcons[key] || null}</span>
-                    ) : (
-                      devIcons[key] || null
-                    )}
+                  <span key={key} className={t.headerContactItemClass || `flex items-center gap-1.5 ${t.headerContactTextSize} leading-5 ${t.headerContactTextColor}`}>
+                    {devIcons[key] ? (
+                      <span className={`${t.headerContactIconWrapClass || 'inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center text-gray-400'} ${t.headerContactIconColor || ''}`}>
+                        {devIcons[key]}
+                      </span>
+                    ) : null}
                     <span>{value}</span>
                   </span>
                 ))}
@@ -669,10 +669,17 @@ function CVPreview({
             : sectionSpacing
         }`}
       >
+        {/* ATS mode + sidebarFirst — secondary sections rendered first to preserve intended order */}
+        {atsFriendlyMode && t.sidebarFirst && visibleSecondarySections.length > 0 ? (
+          <div className="preview-document__column space-y-6" data-export-secondary="true">
+            {visibleSecondarySections.map((section) => renderSection(section, 'main'))}
+          </div>
+        ) : null}
+
         {/* Primary sections column — experience, about, education, etc. */}
         <div
           className={`preview-document__column ${sectionSpacing} lg:space-y-7 ${
-            t.sidebarFirst ? 'order-2' : ''
+            !atsFriendlyMode && t.sidebarFirst ? 'order-2' : ''
           }`}
           data-export-primary="true"
         >
@@ -693,8 +700,8 @@ function CVPreview({
           </aside>
         ) : null}
 
-        {/* ATS mode — secondary sections rendered as flat main sections */}
-        {visibleSecondarySections.length > 0 && atsFriendlyMode ? (
+        {/* ATS mode (non-sidebarFirst) — secondary sections rendered after primary */}
+        {visibleSecondarySections.length > 0 && atsFriendlyMode && !t.sidebarFirst ? (
           <div className="preview-document__column space-y-6" data-export-secondary="true">
             {visibleSecondarySections.map((section) => renderSection(section, 'main'))}
           </div>

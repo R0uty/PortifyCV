@@ -340,6 +340,30 @@ select:focus {
   width: 100%;
   min-height: 100%;
   gap: var(--space-6);
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+.editor-panel::-webkit-scrollbar {
+  width: 12px;
+}
+
+.editor-panel::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 0;
+}
+
+.editor-panel::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 0;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.editor-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
 }
 
 .editor-panel > * {
@@ -1370,6 +1394,14 @@ select {
   .app-shell__editor {
     border-right: 1px solid var(--app-border);
     border-bottom: 1px solid var(--app-border);
+    overflow: hidden;
+  }
+
+  .editor-panel {
+    height: calc(100dvh - 9rem);
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .preview-action-bar { padding: var(--space-4) var(--space-4) var(--space-1); }
