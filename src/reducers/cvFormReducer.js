@@ -1,6 +1,7 @@
 import {
   createSectionVisibility,
   createSectionItemVisibility,
+  normalizeSectionOrder,
   isPhotoVisibleForTemplate,
   createInitialCvData,
   createEmptyExperience,
@@ -17,6 +18,7 @@ export const FORM_ACTION = {
   REMOVE_SKILL: 'REMOVE_SKILL',
   DUPLICATE_SKILL: 'DUPLICATE_SKILL',
   MOVE_SKILL: 'MOVE_SKILL',
+  MOVE_SECTION_ORDER: 'MOVE_SECTION_ORDER',
   UPDATE_ARRAY_ITEM: 'UPDATE_ARRAY_ITEM',
   ADD_ARRAY_ITEM: 'ADD_ARRAY_ITEM',
   REMOVE_ARRAY_ITEM: 'REMOVE_ARRAY_ITEM',
@@ -176,7 +178,11 @@ export function cvFormReducer(state, action) {
       }
 
     case FORM_ACTION.ADD_SKILL: {
-      const trimmed = action.skill.trim()
+      if (!Array.isArray(state.skills)) {
+        return state
+      }
+
+      const trimmed = String(action.skill ?? '').trim()
 
       if (!trimmed) {
         return state
@@ -250,15 +256,47 @@ export function cvFormReducer(state, action) {
       }
     }
 
-    case FORM_ACTION.UPDATE_ARRAY_ITEM:
+    case FORM_ACTION.MOVE_SECTION_ORDER: {
+      const sectionOrder = normalizeSectionOrder(
+        state.sectionOrder,
+        action.fallbackOrder,
+      )
+      const sourceIndex = sectionOrder.indexOf(action.fromSection)
+      const targetIndex = sectionOrder.indexOf(action.toSection)
+
+      if (sourceIndex < 0 || targetIndex < 0 || sourceIndex === targetIndex) {
+        return state
+      }
+
+      const nextSectionOrder = [...sectionOrder]
+      const [movedSection] = nextSectionOrder.splice(sourceIndex, 1)
+
+      nextSectionOrder.splice(targetIndex, 0, movedSection)
+
+      return {
+        ...state,
+        sectionOrder: nextSectionOrder,
+      }
+    }
+
+    case FORM_ACTION.UPDATE_ARRAY_ITEM: {
+      if (!Array.isArray(state[action.section])) {
+        return state
+      }
+
       return {
         ...state,
         [action.section]: state[action.section].map((item, i) =>
           i === action.index ? { ...item, [action.field]: action.value } : item,
         ),
       }
+    }
 
     case FORM_ACTION.ADD_ARRAY_ITEM: {
+      if (!Array.isArray(state[action.section])) {
+        return state
+      }
+
       const factory = action.section === 'experience' ? createEmptyExperience : createEmptyEducation
 
       return {
@@ -272,6 +310,10 @@ export function cvFormReducer(state, action) {
     }
 
     case FORM_ACTION.REMOVE_ARRAY_ITEM: {
+      if (!Array.isArray(state[action.section])) {
+        return state
+      }
+
       const currentItemVisibility = {
         ...createSectionItemVisibility(),
         ...(state.sectionItemVisibility ?? {}),
@@ -291,6 +333,10 @@ export function cvFormReducer(state, action) {
     }
 
     case FORM_ACTION.DUPLICATE_ARRAY_ITEM: {
+      if (!Array.isArray(state[action.section])) {
+        return state
+      }
+
       const currentItem = state[action.section][action.index]
 
       if (!currentItem) {
@@ -314,6 +360,10 @@ export function cvFormReducer(state, action) {
     }
 
     case FORM_ACTION.MOVE_ARRAY_ITEM: {
+      if (!Array.isArray(state[action.section])) {
+        return state
+      }
+
       const nextIndex = action.index + action.direction
 
       if (nextIndex < 0 || nextIndex >= state[action.section].length) {

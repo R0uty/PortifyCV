@@ -35,6 +35,10 @@ export const createSectionVisibility = () => ({
   links: true,
 })
 
+export const CV_SECTION_ORDER_KEYS = ['about', 'experience', 'education', 'skills', 'links']
+
+export const createSectionOrder = () => []
+
 export const createSectionItemVisibility = () => ({
   skills: {},
   experience: {},
@@ -85,6 +89,7 @@ export const createInitialCvData = () => ({
   about: '',
   photo: '',
   photoVisibilityByTemplate: createTemplatePhotoVisibility(),
+  sectionOrder: createSectionOrder(),
   skills: [],
   experience: [createEmptyExperience()],
   education: [createEmptyEducation()],
@@ -102,6 +107,7 @@ export const demoCvData = {
     'Product designer with 7+ years of experience shaping SaaS workflows, design systems, and portfolio-ready product storytelling across startup and enterprise teams.',
   photo: '',
   photoVisibilityByTemplate: createTemplatePhotoVisibility(),
+  sectionOrder: createSectionOrder(),
   skills: [
     'Product Strategy',
     'Design Systems',
@@ -301,6 +307,36 @@ function readOptionalString(value, path) {
   return value
 }
 
+export function normalizeSectionOrder(sectionOrder, fallbackOrder = CV_SECTION_ORDER_KEYS) {
+  const fallback = Array.isArray(fallbackOrder) && fallbackOrder.length > 0
+    ? fallbackOrder
+    : CV_SECTION_ORDER_KEYS
+  const allowedSections = new Set(CV_SECTION_ORDER_KEYS)
+  const dedupe = (values) =>
+    values.filter((value, index, list) => list.indexOf(value) === index)
+  const normalizedFallback = dedupe(
+    fallback.filter((section) => allowedSections.has(section)),
+  )
+  const normalizedInput = Array.isArray(sectionOrder)
+    ? dedupe(sectionOrder.filter((section) => allowedSections.has(section)))
+    : []
+  const nextOrder = [...normalizedInput]
+
+  normalizedFallback.forEach((section) => {
+    if (!nextOrder.includes(section)) {
+      nextOrder.push(section)
+    }
+  })
+
+  CV_SECTION_ORDER_KEYS.forEach((section) => {
+    if (!nextOrder.includes(section)) {
+      nextOrder.push(section)
+    }
+  })
+
+  return nextOrder
+}
+
 /**
  * Parse imported JSON into a validated CV state.
  * @param {unknown} value
@@ -322,6 +358,7 @@ export function parseImportedCvData(value) {
   const sectionItemVisibility = value.sectionItemVisibility ?? defaultState.sectionItemVisibility
   const photoVisibilityByTemplate =
     value.photoVisibilityByTemplate ?? defaultState.photoVisibilityByTemplate
+  const sectionOrder = value.sectionOrder ?? defaultState.sectionOrder
 
   validateAllowedKeys(
     value,
@@ -335,6 +372,7 @@ export function parseImportedCvData(value) {
       'experience',
       'education',
       'links',
+      'sectionOrder',
       'sectionVisibility',
       'sectionItemVisibility',
     ],
@@ -386,6 +424,24 @@ export function parseImportedCvData(value) {
   }
 
   validateAllowedKeys(links, ['github', 'linkedin', 'portfolio', 'website'], 'links')
+
+  if (!Array.isArray(sectionOrder)) {
+    throw new Error('sectionOrder must be an array of section keys.')
+  }
+
+  if (!sectionOrder.every((section) => typeof section === 'string')) {
+    throw new Error('sectionOrder must contain only text section keys.')
+  }
+
+  if (!sectionOrder.every((section) => CV_SECTION_ORDER_KEYS.includes(section))) {
+    throw new Error(
+      `sectionOrder supports only: ${CV_SECTION_ORDER_KEYS.join(', ')}.`,
+    )
+  }
+
+  if (new Set(sectionOrder).size !== sectionOrder.length) {
+    throw new Error('sectionOrder must not contain duplicate section keys.')
+  }
 
   if (!isPlainObject(sectionVisibility)) {
     throw new Error('sectionVisibility must be an object.')
@@ -473,6 +529,10 @@ export function parseImportedCvData(value) {
       portfolio: readOptionalString(links.portfolio, 'links.portfolio'),
       website: readOptionalString(links.website, 'links.website'),
     },
+    sectionOrder:
+      value.sectionOrder === undefined
+        ? createSectionOrder()
+        : normalizeSectionOrder(sectionOrder),
     sectionVisibility: {
       ...createSectionVisibility(),
       ...sectionVisibility,

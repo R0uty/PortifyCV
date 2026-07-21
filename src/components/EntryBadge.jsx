@@ -1,7 +1,4 @@
-import { getUiTheme } from '../utils/designSystem'
-
-export default function EntryBadge({ count = 0, theme = 'dark', locale = 'en' }) {
-  const ui = getUiTheme(theme)
+export default function EntryBadge({ count = 0, locale = 'en' }) {
   const isFinnish = locale === 'fi'
 
   if (count === 0) {
@@ -10,9 +7,12 @@ export default function EntryBadge({ count = 0, theme = 'dark', locale = 'en' })
 
   return (
     <span
-      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-        ui.isDark ? 'bg-gray-400/15 text-gray-100' : 'bg-gray-100 text-gray-700'
-      }`}
+      className="px-3 py-1 text-xs font-bold uppercase tracking-[0.06em]"
+      style={{
+        backgroundColor: 'rgba(0,0,0,0.06)',
+        color: '#111111',
+        border: '1px solid var(--app-border)',
+      }}
     >
       {isFinnish
         ? `${count} vinkkiä`

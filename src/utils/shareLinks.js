@@ -29,6 +29,7 @@ function compressCvData(formData) {
         b: item.endDate,
       })),
       l: formData.links,
+      so: formData.sectionOrder,
       sv: formData.sectionVisibility,
       siv: formData.sectionItemVisibility,
     },
@@ -71,6 +72,7 @@ function expandCvData(value) {
         }))
       : [],
     links: payload.d.l,
+    sectionOrder: payload.d.so,
     sectionVisibility: payload.d.sv,
     sectionItemVisibility: payload.d.siv,
   }

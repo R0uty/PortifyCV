@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 
 import AppShell from '../components/AppShell'
 import AppErrorBoundary from '../components/AppErrorBoundary'
@@ -6,15 +6,10 @@ import ATSScorePanel from '../components/ATSScorePanel'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
 import CVSuggestionsPanel from '../components/CVSuggestionsPanel'
-import ProjectHeader from '../components/ProjectHeader'
 import ToastStack from '../components/ToastStack'
 import {
-  defaultAccentId,
-  getAccentOption,
-  getAccentThemeStyles,
   getUiTheme,
-  UI_ACCENT_STORAGE_KEY,
-  UI_THEME_STORAGE_KEY,
+  UI_LOCALE_STORAGE_KEY,
 } from '../utils/designSystem'
 import {
   CV_DRAFT_PHOTO_STORAGE_KEY,
@@ -53,8 +48,8 @@ import {
   improveExperienceText,
 } from '../utils/cvFeedback'
 
-const TemplateGallery = lazy(() => import('../components/TemplateGallery'))
-const UI_LOCALE_STORAGE_KEY = 'ui-locale'
+const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
+const MAX_UNDO_HISTORY = 80
 
 function createToast(message, type = 'success') {
   return {
@@ -62,22 +57,6 @@ function createToast(message, type = 'success') {
     message,
     type,
   }
-}
-
-function SurfaceFallback({ theme = 'dark', title = 'Loading panel...' }) {
-  const ui = useMemo(() => getUiTheme(theme), [theme])
-
-  return (
-    <section
-      className={`fade-in-soft surface-shadow rounded-[var(--radius-card)] border p-5 sm:p-6 ${ui.surface}`}
-      aria-hidden="true"
-    >
-      <p className={`ds-kicker ${ui.textMuted}`}>{title}</p>
-      <div className={`mt-4 h-3 w-2/3 rounded-full ${ui.surfaceMuted}`} />
-      <div className={`mt-3 h-3 w-full rounded-full ${ui.surfaceMuted}`} />
-      <div className={`mt-3 h-3 w-5/6 rounded-full ${ui.surfaceMuted}`} />
-    </section>
-  )
 }
 
 function waitForFrame() {
@@ -138,8 +117,6 @@ function loadInitialCvSession() {
   if (typeof window === 'undefined') {
     return {
       formData: initialCvData,
-      theme: 'dark',
-      accent: defaultAccentId,
       initialToast: null,
       clearShareParam: false,
       storageIssue: false,
@@ -150,23 +127,15 @@ function loadInitialCvSession() {
     const storedDraftState = safeStorageGet(CV_DRAFT_STORAGE_KEY)
     const storedDraftPhotoState = safeStorageGet(CV_DRAFT_PHOTO_STORAGE_KEY, '')
     const onboardingState = safeStorageGet(CV_ONBOARDING_SEEN_STORAGE_KEY, 'false')
-    const storedThemeState = safeStorageGet(UI_THEME_STORAGE_KEY)
-    const storedAccentState = safeStorageGet(UI_ACCENT_STORAGE_KEY)
     const storedDraft = storedDraftState.value
     const storedDraftPhoto = typeof storedDraftPhotoState.value === 'string'
       ? storedDraftPhotoState.value
       : ''
     const hasSeenOnboarding = onboardingState.value === 'true'
-    const storedTheme = storedThemeState.value
-    const storedAccent = storedAccentState.value
     const hasStorageIssue =
       !storedDraftState.ok ||
       !onboardingState.ok ||
-      !storedThemeState.ok ||
-      !storedAccentState.ok ||
       !storedDraftPhotoState.ok
-    const nextTheme = storedTheme === 'light' ? 'light' : 'dark'
-    const nextAccent = getAccentOption(storedAccent).id
     const markOnboardingSeen = () => {
       safeStorageSet(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
     }
@@ -178,8 +147,6 @@ function loadInitialCvSession() {
         markOnboardingSeen()
         return {
           formData: sharedFormData,
-          theme: nextTheme,
-          accent: nextAccent,
           initialToast: createToast('Loaded CV from share link.', 'success'),
           clearShareParam: false,
           storageIssue: hasStorageIssue,
@@ -197,8 +164,6 @@ function loadInitialCvSession() {
 
       return {
         formData: restoredFormData,
-        theme: nextTheme,
-        accent: nextAccent,
         initialToast: createToast(
           storedDraft
             ? `${error instanceof Error ? error.message : 'Shared CV link could not be loaded.'} Restored your saved draft instead.`
@@ -218,8 +183,6 @@ function loadInitialCvSession() {
       if (!hasSeenOnboarding) {
         return {
           formData: structuredClone(demoCvData),
-          theme: nextTheme,
-          accent: nextAccent,
           initialToast: createToast('Loaded a sample CV to help you get started.', 'success'),
           clearShareParam: false,
           storageIssue: hasStorageIssue,
@@ -228,8 +191,6 @@ function loadInitialCvSession() {
 
       return {
         formData: initialCvData,
-        theme: nextTheme,
-        accent: nextAccent,
         initialToast: null,
         clearShareParam: false,
         storageIssue: hasStorageIssue,
@@ -237,15 +198,12 @@ function loadInitialCvSession() {
     }
 
     markOnboardingSeen()
-
     const restoredDraft = parseImportedCvData(JSON.parse(storedDraft))
 
     return {
       formData: storedDraftPhoto
         ? { ...restoredDraft, photo: storedDraftPhoto }
         : restoredDraft,
-      theme: nextTheme,
-      accent: nextAccent,
       initialToast: createToast('Restored your saved draft.', 'success'),
       clearShareParam: false,
       storageIssue: hasStorageIssue,
@@ -263,26 +221,19 @@ function loadInitialCvSession() {
       safeStorageRemove(CV_DRAFT_PHOTO_STORAGE_KEY)
     }
 
-    const storedThemeState = safeStorageGet(UI_THEME_STORAGE_KEY)
-    const storedAccentState = safeStorageGet(UI_ACCENT_STORAGE_KEY)
-
     return {
       formData: createInitialCvData(),
-      theme: storedThemeState.value === 'light' ? 'light' : 'dark',
-      accent: getAccentOption(storedAccentState.value).id,
       initialToast: createToast(message, 'error'),
       clearShareParam: shouldClearShareParam,
-      storageIssue: !storedThemeState.ok || !storedAccentState.ok,
+      storageIssue: true,
     }
   }
 }
 
 function ResumeBuilderPage({
-  onReturnToLanding = () => {},
-  initialTheme,
   initialLocale,
-  onThemeChange = () => {},
   onLocaleChange = () => {},
+  onHeaderChange,
 }) {
   const initialSession = useMemo(() => loadInitialCvSession(), [])
   const [formHistory, setFormHistory] = useState(() => ({
@@ -301,7 +252,7 @@ function ResumeBuilderPage({
         return currentHistory
       }
 
-      const nextPast = [...currentHistory.past, currentHistory.present].slice(-80)
+      const nextPast = [...currentHistory.past, currentHistory.present].slice(-MAX_UNDO_HISTORY)
 
       return {
         past: nextPast,
@@ -310,10 +261,6 @@ function ResumeBuilderPage({
       }
     })
   }, [])
-  const [theme, setTheme] = useState(
-    initialTheme === 'light' || initialTheme === 'dark' ? initialTheme : initialSession.theme,
-  )
-  const [accent] = useState(initialSession.accent)
   const [uiState, dispatchUi] = useReducer(
     uiReducer,
     initialSession,
@@ -338,7 +285,7 @@ function ResumeBuilderPage({
     jobDescription,
     toasts,
   } = uiState
-  const ui = getUiTheme(theme)
+  const ui = getUiTheme()
   const previewRef = useRef(null)
   const importInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
@@ -359,7 +306,7 @@ function ResumeBuilderPage({
     [locale, selectedTemplate],
   )
   const templates = useMemo(() => getCvTemplates(locale), [locale])
-  const shellStyle = useMemo(() => getAccentThemeStyles(theme, accent), [theme, accent])
+  const shellStyle = {}
   const feedback = useMemo(() => evaluateCvFeedback(formData, { locale }), [formData, locale])
   const atsScore = useMemo(
     () => evaluateAtsScore(formData, { locale, atsFriendly: atsFriendlyMode }),
@@ -441,18 +388,6 @@ function ResumeBuilderPage({
   }, [formData.photo, setStorageValue])
 
   useEffect(() => {
-    setStorageValue(UI_THEME_STORAGE_KEY, theme)
-    if (typeof document !== 'undefined') {
-      document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light'
-    }
-    onThemeChange(theme)
-  }, [onThemeChange, setStorageValue, theme])
-
-  useEffect(() => {
-    setStorageValue(UI_ACCENT_STORAGE_KEY, accent)
-  }, [accent, setStorageValue])
-
-  useEffect(() => {
     setStorageValue(UI_LOCALE_STORAGE_KEY, locale)
     if (typeof document !== 'undefined') {
       document.documentElement.lang = locale
@@ -497,11 +432,20 @@ function ResumeBuilderPage({
     }
   }, [])
 
-  const secondaryButtonClassName = `rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`
-  const compactButtonClassName = `shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`
+  const secondaryButtonClassName = `border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
+  const compactButtonClassName = `shrink-0 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
 
   const handleExport = useCallback(async (type) => {
     dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: type })
+
+    const exportLabel =
+      type === 'pdf-designer'
+        ? atsFriendlyMode
+          ? 'ATS PDF'
+          : 'Designer PDF'
+        : type === 'html'
+          ? 'HTML'
+          : 'JSON'
 
     const toastLabel =
       type === 'pdf-designer'
@@ -560,7 +504,6 @@ function ResumeBuilderPage({
         await exportCvAsPdf(previewRef.current, exportFileName, {
           mode: exportPdfMode,
           formData,
-          theme,
           template: selectedTemplate,
           variant: selectedTemplate,
           atsFriendlyMode,
@@ -576,30 +519,12 @@ function ResumeBuilderPage({
         exportCvAsHtml(formData, exportFileName, { locale })
       }
 
-      const exportLabel =
-        type === 'pdf-designer'
-          ? atsFriendlyMode
-            ? 'ATS PDF'
-            : 'Designer PDF'
-          : type === 'html'
-            ? 'HTML'
-            : 'JSON'
-
       showToast(
         locale === 'fi'
           ? `${exportLabel} on ladattu.`
           : `${exportLabel} export downloaded.`,
       )
     } catch (error) {
-      const exportLabel =
-        type === 'pdf-designer'
-          ? atsFriendlyMode
-            ? 'ATS PDF'
-            : 'Designer PDF'
-          : type === 'html'
-            ? 'HTML'
-            : 'JSON'
-
       showToast(
         error instanceof Error
           ? error.message
@@ -611,7 +536,7 @@ function ResumeBuilderPage({
     } finally {
       dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
     }
-  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate, theme])
+  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()
@@ -627,6 +552,16 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: true })
 
     try {
+      if (file.size > MAX_IMPORT_FILE_SIZE_BYTES) {
+        showToast(
+          locale === 'fi'
+            ? 'Tiedosto on liian suuri. Tuetun koko on enintään 5 Mt.'
+            : 'File is too large. Maximum supported size is 5MB.',
+          'error',
+        )
+        return
+      }
+
       showToast(locale === 'fi' ? `Tuodaan ${file.name}...` : `Importing ${file.name}...`, 'info')
       const fileText = await file.text()
       const parsedValue = JSON.parse(fileText)
@@ -726,7 +661,7 @@ function ResumeBuilderPage({
       return {
         past: currentHistory.past.slice(0, -1),
         present: previousPresent,
-        future: [currentHistory.present, ...currentHistory.future].slice(0, 80),
+        future: [currentHistory.present, ...currentHistory.future].slice(0, MAX_UNDO_HISTORY),
       }
     })
   }, [])
@@ -740,7 +675,7 @@ function ResumeBuilderPage({
       const [nextPresent, ...remainingFuture] = currentHistory.future
 
       return {
-        past: [...currentHistory.past, currentHistory.present].slice(-80),
+        past: [...currentHistory.past, currentHistory.present].slice(-MAX_UNDO_HISTORY),
         present: nextPresent,
         future: remainingFuture,
       }
@@ -808,9 +743,24 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.SET_LOCALE, locale: nextLocale === 'fi' ? 'fi' : 'en' })
   }, [])
 
-  const handleToggleTheme = useCallback(() => {
-    setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'))
-  }, [])
+  useEffect(() => {
+    if (!onHeaderChange) return
+    onHeaderChange({
+      activeExport,
+      isActionBusy,
+      locale,
+      canUndo,
+      canRedo,
+      onUndo: handleUndo,
+      onRedo: handleRedo,
+      onExport: handleExport,
+      onLocaleChange: handleLocaleChange,
+    })
+  }, [
+    activeExport, isActionBusy, locale, canUndo, canRedo,
+    handleUndo, handleRedo, handleExport, handleLocaleChange,
+    onHeaderChange,
+  ])
 
   const handlePastedCvTextChange = useCallback((event) => {
     dispatchUi({ type: UI_ACTION.SET_PASTED_CV_TEXT, value: event.target.value })
@@ -886,7 +836,7 @@ function ResumeBuilderPage({
           </button>
           <button
             type="button"
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition lg:hidden ${
+            className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition lg:hidden ${
               mobilePreviewVisible ? ui.buttonActive : ui.button
             }`}
             onClick={handleToggleMobilePreview}
@@ -897,28 +847,28 @@ function ResumeBuilderPage({
           </button>
           <button
             type="button"
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.buttonDanger}`}
+            className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonDanger}`}
             disabled={isActionBusy}
             onClick={handleResetForm}
           >
             {locale === 'fi' ? 'Nollaa lomake' : 'Reset form'}
           </button>
           <div
-            className={`inline-flex items-center rounded-full px-3 py-2 text-xs font-medium ${ui.surfaceMuted} ${ui.textMuted}`}
+            className={`inline-flex items-center px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] ${ui.surfaceMuted} ${ui.textMuted}`}
           >
             {locale === 'fi' ? 'Automaattitallennus käytössä' : 'Autosave enabled'}
           </div>
         </div>
 
-        <section className={`surface-shadow rounded-[var(--radius-card)] border p-4 sm:p-5 ${ui.surface}`}>
-          <p className={`ds-kicker ${ui.textMuted}`}>{locale === 'fi' ? 'Pikatuonti' : 'Quick import'}</p>
+        <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
+          <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Pikatuonti' : 'Quick import'}</p>
           <p className={`mt-3 text-sm ${ui.textSecondary}`}>
             {locale === 'fi'
               ? 'Liitä CV-katkelma nimen, tittelin, taitojen ja lyhyen yhteenvedon tunnistamiseksi.'
               : 'Paste a resume snippet to detect a name, title, skills, and a short summary.'}
           </p>
           <textarea
-            className={`mt-4 min-h-32 w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-border)] focus:ring-2 focus:ring-[var(--accent-ring)] ${ui.input}`}
+            className={`mt-4 min-h-32 w-full border px-4 py-3 text-sm transition ${ui.input}`}
             value={pastedCvText}
             disabled={isActionBusy}
             onChange={handlePastedCvTextChange}
@@ -929,7 +879,7 @@ function ResumeBuilderPage({
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               type="button"
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+              className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
               disabled={isActionBusy}
               onClick={handlePasteCvImport}
             >
@@ -937,7 +887,7 @@ function ResumeBuilderPage({
             </button>
             <button
               type="button"
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+              className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
               disabled={isActionBusy}
               onClick={handleImportClick}
             >
@@ -947,7 +897,7 @@ function ResumeBuilderPage({
             </button>
             <button
               type="button"
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+              className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
               disabled={isActionBusy}
               onClick={handleLoadDemo}
             >
@@ -956,8 +906,8 @@ function ResumeBuilderPage({
           </div>
         </section>
 
-        <section className={`surface-shadow rounded-[var(--radius-card)] border p-4 sm:p-5 ${ui.surface}`}>
-          <p className={`ds-kicker ${ui.textMuted}`}>{locale === 'fi' ? 'Vientitila' : 'Export mode'}</p>
+        <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
+          <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Vientitila' : 'Export mode'}</p>
           <p className={`mt-3 text-sm ${ui.textSecondary}`}>
             {locale === 'fi'
               ? 'ATS-tila yksinkertaistaa muotoilua jäsennystä varten. Jätä se pois päältä täysin tyyliteltyä vientiä varten.'
@@ -965,7 +915,7 @@ function ResumeBuilderPage({
           </p>
           <button
             type="button"
-            className={`mt-4 rounded-full border px-4 py-2 text-sm font-medium transition ${
+            className={`mt-4 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
               atsFriendlyMode ? ui.buttonActive : ui.button
             }`}
             disabled={isActionBusy}
@@ -979,7 +929,6 @@ function ResumeBuilderPage({
 
         <ATSScorePanel
           atsScore={atsScore}
-          theme={theme}
           locale={locale}
           atsFriendlyMode={atsFriendlyMode}
           onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
@@ -993,27 +942,10 @@ function ResumeBuilderPage({
 
         <CVSuggestionsPanel
           feedback={feedback}
-          theme={theme}
           locale={locale}
           onImproveAboutText={handleImproveAboutText}
           onImproveExperienceText={handleImproveExperienceText}
         />
-
-        <AppErrorBoundary
-          theme={theme}
-          panelTitle={locale === 'fi' ? 'Pohjagalleria' : 'Template gallery'}
-          locale={locale}
-        >
-          <Suspense fallback={<SurfaceFallback theme={theme} title={locale === 'fi' ? 'Ladataan pohjia' : 'Loading templates'} />}>
-            <TemplateGallery
-              templates={templates}
-              selectedTemplateId={selectedTemplate}
-              onSelectTemplate={handleSelectTemplate}
-              theme={theme}
-              locale={locale}
-            />
-          </Suspense>
-        </AppErrorBoundary>
 
         <p className={`ds-kicker lg:hidden ${ui.textMuted}`}>
           {locale === 'fi'
@@ -1023,7 +955,6 @@ function ResumeBuilderPage({
       </div>
 
       <AppErrorBoundary
-        theme={theme}
         panelTitle={locale === 'fi' ? 'CV-lomake' : 'CV form'}
         locale={locale}
       >
@@ -1031,7 +962,6 @@ function ResumeBuilderPage({
           formData={formData}
           dispatchFormData={dispatchFormData}
           errors={errors}
-          theme={theme}
           feedback={feedback}
           onImproveAboutText={handleImproveAboutText}
           onImproveExperienceText={handleImproveExperienceText}
@@ -1061,7 +991,6 @@ function ResumeBuilderPage({
     handlePasteCvImport,
     handlePastedCvTextChange,
     handleResetForm,
-    handleSelectTemplate,
     handleToggleAtsFriendlyMode,
     handleToggleMobilePreview,
     isActionBusy,
@@ -1074,8 +1003,6 @@ function ResumeBuilderPage({
     secondaryButtonClassName,
     selectedTemplate,
     dispatchFormData,
-    templates,
-    theme,
     ui.button,
     ui.buttonActive,
     ui.buttonDanger,
@@ -1090,9 +1017,9 @@ function ResumeBuilderPage({
     <div className="preview-panel pb-28 sm:pb-6 print:p-0">
       <div className="preview-scroll px-3 pb-6 pt-4 sm:px-5 lg:px-6 print:px-0">
         <div className="mb-4 lg:hidden print:hidden">
-          <div className={`surface-shadow rounded-[var(--radius-card)] border p-4 ${ui.surface}`}>
-            <p className={`ds-kicker ${ui.textMuted}`}>{locale === 'fi' ? 'Esikatselupaneeli' : 'Preview panel'}</p>
-            <h2 className={`ds-section-title mt-2 font-semibold ${ui.textPrimary}`}>
+          <div className={`p-4 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
+            <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Esikatselupaneeli' : 'Preview panel'}</p>
+            <h2 className={`ds-section-title mt-2 font-bold uppercase tracking-[-0.02em] ${ui.textPrimary}`}>
               {locale === 'fi' ? 'CV-esikatselu' : 'Resume document view'}
             </h2>
             <p className={`ds-body-sm mt-3 ${ui.textSecondary}`}>
@@ -1106,7 +1033,7 @@ function ResumeBuilderPage({
         <div className="preview-stage">
           <button
             type="button"
-            className={`preview-mobile-toggle rounded-full border px-4 py-2 text-sm font-medium transition lg:hidden ${
+            className={`preview-mobile-toggle border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition lg:hidden ${
               ui.button
             }`}
             onClick={handleToggleMobilePreview}
@@ -1114,13 +1041,11 @@ function ResumeBuilderPage({
             {locale === 'fi' ? 'Takaisin editoriin' : 'Back to editor'}
           </button>
           <AppErrorBoundary
-            theme={theme}
             panelTitle={locale === 'fi' ? 'CV-esikatselu' : 'CV preview'}
             locale={locale}
           >
             <CVPreview
               formData={formData}
-              theme={theme}
               previewRef={previewRef}
               template={selectedTemplate}
               locale={locale}
@@ -1137,7 +1062,6 @@ function ResumeBuilderPage({
     handleToggleMobilePreview,
     locale,
     selectedTemplate,
-    theme,
     ui.button,
     ui.surface,
     ui.textMuted,
@@ -1152,7 +1076,7 @@ function ResumeBuilderPage({
       <div className="mx-auto flex max-w-[110rem] items-center gap-2 overflow-x-auto no-scrollbar">
         <button
           type="button"
-          className={`${compactButtonClassName} accent-border accent-surface accent-text-strong`}
+          className={`${compactButtonClassName} border-black bg-gray-100 text-black`}
           disabled={isActionBusy}
           onClick={() => handleExport('pdf-designer')}
         >
@@ -1200,7 +1124,7 @@ function ResumeBuilderPage({
         </button>
         <button
           type="button"
-          className={`shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition ${
+          className={`shrink-0 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
             mobilePreviewVisible ? ui.buttonActive : ui.button
           }`}
           onClick={handleToggleMobilePreview}
@@ -1231,22 +1155,46 @@ function ResumeBuilderPage({
 
   return (
     <>
-      <ProjectHeader
-        theme={theme}
-        activeExport={activeExport}
-        isActionBusy={isActionBusy}
-        locale={locale}
-        canUndo={canUndo}
-        canRedo={canRedo}
-        onReturn={onReturnToLanding}
-        onLocaleChange={handleLocaleChange}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        onToggleTheme={handleToggleTheme}
-        onExport={handleExport}
-      />
+      <div
+        className="builder-template-selector overflow-x-auto no-scrollbar py-3 print:hidden"
+        style={{
+          borderBottom: '1px solid var(--app-border)',
+        }}
+      >
+        <div style={{ maxWidth: '90rem', margin: '0 auto', padding: '0 var(--space-5)' }}>
+          <div
+            className="mx-auto flex justify-center gap-2"
+            style={{ width: 'fit-content', minWidth: '100%' }}
+          >
+            {templates.map((t) => {
+              const isActive = selectedTemplate === t.id
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  className="flex shrink-0 flex-col items-center gap-1 rounded-lg border px-3 py-2 text-center transition"
+                  style={{
+                    minWidth: '4rem',
+                    border: `1.5px solid ${isActive ? '#000000' : 'var(--app-border)'}`,
+                    backgroundColor: isActive ? '#000000' : 'transparent',
+                  }}
+                  onClick={() => handleSelectTemplate(t.id)}
+                >
+                  <div className={`h-1.5 w-full rounded-full ${t.thumbnail.accentClassName}`} />
+                  <p
+                    className="text-[0.65rem] font-bold uppercase tracking-[0.06em] leading-tight"
+                    style={{ color: isActive ? '#ffffff' : 'var(--app-text)' }}
+                  >
+                    {t.label}
+                  </p>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
       <AppShell
-        theme={theme}
         shellStyle={shellStyle}
         showContentOnMobile={mobilePreviewVisible}
         sidebar={sidebarContent}
@@ -1255,7 +1203,7 @@ function ResumeBuilderPage({
 
       {mobileBottomActions}
 
-      <ToastStack toasts={toasts} theme={theme} />
+      <ToastStack toasts={toasts} />
     </>
   )
 }

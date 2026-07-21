@@ -6,9 +6,11 @@ import Field from './Field'
 import InlineTipList from './InlineTipList'
 import PanelSection from './PanelSection'
 import { getUiTheme } from '../utils/designSystem'
+import { getCvTemplate } from '../utils/cvTemplates'
 import {
   createSectionVisibility,
   createSectionItemVisibility,
+  normalizeSectionOrder,
   isPhotoVisibleForTemplate,
   getLinkFields,
   getSectionVisibilityFields,
@@ -106,10 +108,26 @@ function CVForm({
   selectedTemplateLabel = 'Current template',
 }) {
   const [skillInput, setSkillInput] = useState('')
+  const [draggedSectionKey, setDraggedSectionKey] = useState('')
   const photoInputRef = useRef(null)
   const ui = getUiTheme(theme)
   const isFinnish = locale === 'fi'
   const sectionVisibilityFields = getSectionVisibilityFields(locale)
+  const templateConfig = getCvTemplate(selectedTemplate, locale)
+  const templateSectionOrder = [
+    ...templateConfig.primarySections,
+    ...templateConfig.secondarySections,
+  ]
+  const sectionOrderKeys = normalizeSectionOrder(
+    formData.sectionOrder,
+    templateSectionOrder,
+  )
+  const sectionFieldByKey = Object.fromEntries(
+    sectionVisibilityFields.map((field) => [field.key, field]),
+  )
+  const orderedSectionFields = sectionOrderKeys
+    .map((sectionKey) => sectionFieldByKey[sectionKey])
+    .filter(Boolean)
   const linkFields = getLinkFields(locale)
   const sectionVisibility = {
     ...createSectionVisibility(),
@@ -123,20 +141,22 @@ function CVForm({
     formData.photoVisibilityByTemplate,
     selectedTemplate,
   )
-  const inputClasses = `mt-2 w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-border)] focus:ring-2 focus:ring-[var(--accent-ring)] ${ui.input}`
+  const inputClasses = `mt-2 w-full border px-4 py-3 text-sm transition ${ui.input}`
   const textareaClasses = `${inputClasses} resize-none overflow-hidden`
-  const actionButtonClasses = `rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`
-  const removeButtonClasses = `rounded-full border px-3 py-2 text-xs font-medium transition ${ui.buttonDanger}`
-  const utilityButtonClasses = `rounded-full border px-3 py-2 text-xs font-medium transition ${ui.button}`
-  const improveButtonClasses = `rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`
-  const tagClasses = `inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ${
+  const actionButtonClasses = `border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
+  const removeButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonDanger}`
+  const utilityButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
+  const improveButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
+  const sectionDragHandleClasses = `inline-flex cursor-grab select-none items-center gap-2 border px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em] ${ui.button}`
+  const sectionDragDotClasses = `h-1 w-1 ${ui.isDark ? 'bg-gray-300' : 'bg-gray-500'}`
+  const tagClasses = `inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold ${
     ui.isDark
       ? 'bg-[var(--accent-soft)] text-[var(--accent-text)]'
       : 'bg-[var(--accent-soft)] text-[var(--accent-text-strong)]'
   }`
-  const fieldLabelClassName = ui.textSoft
-  const itemCardClasses = `rounded-[1.4rem] border p-4 ${ui.surfaceMuted}`
-  const itemHeadingClasses = ui.textPrimary
+  const fieldLabelClassName = `${ui.textSoft} uppercase tracking-[0.06em] text-xs font-semibold`
+  const itemCardClasses = `border p-4 ${ui.surfaceMuted}`
+  const itemHeadingClasses = `${ui.textPrimary} uppercase tracking-[0.04em] text-xs font-bold`
   const helperTextClasses = ui.textMuted
   const copy = {
     improveText: isFinnish ? 'Paranna tekstiä' : 'Improve text',
@@ -147,6 +167,8 @@ function CVForm({
     duplicate: isFinnish ? 'Monista' : 'Duplicate',
     duplicateShort: isFinnish ? 'Kopioi' : 'Dup',
     remove: isFinnish ? 'Poista' : 'Remove',
+    move: isFinnish ? 'Siirrä' : 'Move',
+    drag: isFinnish ? 'Raahaa' : 'Drag',
     on: isFinnish ? 'Päällä' : 'On',
     off: isFinnish ? 'Pois' : 'Off',
   }
@@ -238,6 +260,50 @@ function CVForm({
     dispatchFormData({ type: FORM_ACTION.MOVE_ARRAY_ITEM, section, index, direction })
   }
 
+  const moveSectionOrder = (fromSection, toSection) => {
+    dispatchFormData({
+      type: FORM_ACTION.MOVE_SECTION_ORDER,
+      fromSection,
+      toSection,
+      fallbackOrder: sectionOrderKeys,
+    })
+  }
+
+  const moveSectionByDirection = (section, direction) => {
+    const sectionIndex = sectionOrderKeys.indexOf(section)
+    const targetSection = sectionOrderKeys[sectionIndex + direction]
+
+    if (!targetSection) {
+      return
+    }
+
+    moveSectionOrder(section, targetSection)
+  }
+
+  const handleSectionDragStart = (section) => {
+    setDraggedSectionKey(section)
+  }
+
+  const handleSectionDragOver = (event) => {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
+  }
+
+  const handleSectionDrop = (event, section) => {
+    event.preventDefault()
+
+    if (!draggedSectionKey || draggedSectionKey === section) {
+      return
+    }
+
+    moveSectionOrder(draggedSectionKey, section)
+    setDraggedSectionKey('')
+  }
+
+  const handleSectionDragEnd = () => {
+    setDraggedSectionKey('')
+  }
+
   const handleSkillKeyDown = (event) => {
     if (event.key === 'Enter' || event.key === ',') {
       event.preventDefault()
@@ -261,26 +327,77 @@ function CVForm({
         }
         theme={theme}
       >
-        <div className="flex flex-wrap gap-2">
-          {sectionVisibilityFields.map((field) => {
-            const isVisible = sectionVisibility[field.key]
+        <div className="space-y-3">
+          <p className={`text-xs ${helperTextClasses}`}>
+            {isFinnish
+              ? 'Raahaa osioita muuttaaksesi niiden järjestystä.'
+              : 'Drag sections to change their order.'}
+          </p>
+          <div className="space-y-2">
+            {orderedSectionFields.map((field, index) => {
+              const isVisible = sectionVisibility[field.key]
 
-            return (
-              <button
-                key={field.key}
-                type="button"
-                className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
-                  isVisible ? ui.buttonActive : ui.button
-                }`}
-                onClick={() => toggleSectionVisibility(field.key)}
-              >
-                {field.label}: {isVisible ? copy.on : copy.off}
-              </button>
-            )
-          })}
+              return (
+                <div
+                  key={field.key}
+                  draggable
+                  onDragStart={() => handleSectionDragStart(field.key)}
+                  onDragOver={handleSectionDragOver}
+                  onDrop={(event) => handleSectionDrop(event, field.key)}
+                  onDragEnd={handleSectionDragEnd}
+                  className={`flex cursor-grab items-center justify-between gap-3 border px-3 py-2 transition ${
+                    draggedSectionKey === field.key ? 'border-[var(--accent-border)] opacity-70' : ''
+                  } ${ui.surfaceMuted}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className={sectionDragHandleClasses} aria-hidden="true">
+                      <span className="grid grid-cols-2 gap-0.5">
+                        <span className={sectionDragDotClasses} />
+                        <span className={sectionDragDotClasses} />
+                        <span className={sectionDragDotClasses} />
+                        <span className={sectionDragDotClasses} />
+                        <span className={sectionDragDotClasses} />
+                        <span className={sectionDragDotClasses} />
+                      </span>
+                      <span>{copy.drag}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
+                        isVisible ? ui.buttonActive : ui.button
+                      }`}
+                      onClick={() => toggleSectionVisibility(field.key)}
+                    >
+                      {field.label}: {isVisible ? copy.on : copy.off}
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      className={utilityButtonClasses}
+                      onClick={() => moveSectionByDirection(field.key, -1)}
+                      disabled={index === 0}
+                      aria-label={`${copy.move} ${field.label} ${copy.up.toLowerCase()}`}
+                    >
+                      {copy.up}
+                    </button>
+                    <button
+                      type="button"
+                      className={utilityButtonClasses}
+                      onClick={() => moveSectionByDirection(field.key, 1)}
+                      disabled={index === orderedSectionFields.length - 1}
+                      aria-label={`${copy.move} ${field.label} ${copy.down.toLowerCase()}`}
+                    >
+                      {copy.down}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
           <button
             type="button"
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+            className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
               isPhotoVisibleInSelectedTemplate ? ui.buttonActive : ui.button
             }`}
             onClick={togglePhotoVisibilityForSelectedTemplate}
@@ -355,7 +472,7 @@ function CVForm({
             />
             <button
               type="button"
-              className={`mt-2 rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+              className={`mt-2 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
               onClick={() => photoInputRef.current?.click()}
             >
               {isFinnish ? 'Valitse kuva' : 'Choose image'}
@@ -370,7 +487,7 @@ function CVForm({
                 <img
                   src={formData.photo}
                   alt={isFinnish ? 'Profiilin esikatselu' : 'Profile preview'}
-                  className={`rounded-2xl border ${ui.isDark ? 'border-gray-700' : 'border-gray-300'}`}
+                  className={`border ${ui.isDark ? 'border-gray-700' : 'border-gray-300'}`}
                   style={{ width: '5.75rem', height: '5.75rem', objectFit: 'cover' }}
                 />
                 <button
@@ -416,14 +533,14 @@ function CVForm({
       >
         <div className="space-y-3">
           <Field label={isFinnish ? 'Taitotagit' : 'Skill tags'} labelClassName={fieldLabelClassName}>
-            <div className={`mt-2 rounded-xl border px-3 py-3 ${ui.inputShell}`}>
+            <div className={`mt-2 border px-3 py-3 ${ui.inputShell}`}>
               <div className="flex flex-wrap gap-2">
                 {formData.skills.map((skill, index) => (
                   <span key={`${skill}-${index}`} className={tagClasses}>
                     {skill}
                     <button
                       type="button"
-                      className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
+                      className="border px-2 py-0.5 text-[10px] font-bold text-current/80 transition hover:text-current"
                       onClick={() => toggleSectionItemVisibility('skills', index)}
                       aria-label={`${isSectionItemVisible(sectionItemVisibility, 'skills', index) ? copy.hide : copy.show} ${skill}`}
                     >
@@ -431,7 +548,7 @@ function CVForm({
                     </button>
                     <button
                       type="button"
-                      className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
+                      className="border px-2 py-0.5 text-[10px] font-bold text-current/80 transition hover:text-current"
                       onClick={() => moveSkill(index, -1)}
                       disabled={index === 0}
                       aria-label={`Move ${skill} ${copy.up.toLowerCase()}`}
@@ -440,7 +557,7 @@ function CVForm({
                     </button>
                     <button
                       type="button"
-                      className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
+                      className="border px-2 py-0.5 text-[10px] font-bold text-current/80 transition hover:text-current"
                       onClick={() => moveSkill(index, 1)}
                       disabled={index === formData.skills.length - 1}
                       aria-label={`Move ${skill} ${copy.down.toLowerCase()}`}
@@ -449,7 +566,7 @@ function CVForm({
                     </button>
                     <button
                       type="button"
-                      className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
+                      className="border px-2 py-0.5 text-[10px] font-bold text-current/80 transition hover:text-current"
                       onClick={() => duplicateSkill(index)}
                       aria-label={`${copy.duplicate} ${skill}`}
                     >
@@ -457,7 +574,7 @@ function CVForm({
                     </button>
                     <button
                       type="button"
-                      className="rounded-full border px-2 py-0.5 text-[10px] font-semibold text-current/80 transition hover:text-current"
+                      className="border px-2 py-0.5 text-[10px] font-bold text-current/80 transition hover:text-current"
                       onClick={() => removeSkill(index)}
                       aria-label={`${copy.remove} ${skill}`}
                     >
@@ -469,7 +586,7 @@ function CVForm({
                   className={`min-w-[140px] flex-1 border-0 bg-transparent py-1 text-sm outline-none ${
                     ui.isDark
                       ? 'text-white placeholder:text-gray-500'
-                      : 'text-gray-900 placeholder:text-gray-400'
+                      : 'text-black placeholder:text-gray-400'
                   }`}
                   type="text"
                   value={skillInput}
@@ -521,6 +638,7 @@ function CVForm({
                     type="button"
                     className={utilityButtonClasses}
                     onClick={() => toggleSectionItemVisibility('experience', index)}
+                    aria-label={`${isSectionItemVisible(sectionItemVisibility, 'experience', index) ? copy.hide : copy.show} ${isFinnish ? 'kokemus' : 'experience'} ${index + 1}`}
                   >
                     {isSectionItemVisible(sectionItemVisibility, 'experience', index) ? copy.hide : copy.show}
                   </button>
@@ -529,6 +647,7 @@ function CVForm({
                     className={utilityButtonClasses}
                     onClick={() => moveArrayItem('experience', index, -1)}
                     disabled={index === 0}
+                    aria-label={`${copy.move} ${isFinnish ? 'kokemus' : 'experience'} ${index + 1} ${copy.up.toLowerCase()}`}
                   >
                     {copy.up}
                   </button>
@@ -537,6 +656,7 @@ function CVForm({
                     className={utilityButtonClasses}
                     onClick={() => moveArrayItem('experience', index, 1)}
                     disabled={index === formData.experience.length - 1}
+                    aria-label={`${copy.move} ${isFinnish ? 'kokemus' : 'experience'} ${index + 1} ${copy.down.toLowerCase()}`}
                   >
                     {copy.down}
                   </button>
@@ -544,6 +664,7 @@ function CVForm({
                     type="button"
                     className={utilityButtonClasses}
                     onClick={() => duplicateArrayItem('experience', index)}
+                    aria-label={`${copy.duplicate} ${isFinnish ? 'kokemus' : 'experience'} ${index + 1}`}
                   >
                     {copy.duplicate}
                   </button>
@@ -551,6 +672,7 @@ function CVForm({
                     type="button"
                     className={removeButtonClasses}
                     onClick={() => removeArrayItem('experience', index)}
+                    aria-label={`${copy.remove} ${isFinnish ? 'kokemus' : 'experience'} ${index + 1}`}
                   >
                     {copy.remove}
                   </button>
@@ -676,6 +798,7 @@ function CVForm({
                     type="button"
                     className={utilityButtonClasses}
                     onClick={() => toggleSectionItemVisibility('education', index)}
+                    aria-label={`${isSectionItemVisible(sectionItemVisibility, 'education', index) ? copy.hide : copy.show} ${isFinnish ? 'koulutus' : 'education'} ${index + 1}`}
                   >
                     {isSectionItemVisible(sectionItemVisibility, 'education', index) ? copy.hide : copy.show}
                   </button>
@@ -684,6 +807,7 @@ function CVForm({
                     className={utilityButtonClasses}
                     onClick={() => moveArrayItem('education', index, -1)}
                     disabled={index === 0}
+                    aria-label={`${copy.move} ${isFinnish ? 'koulutus' : 'education'} ${index + 1} ${copy.up.toLowerCase()}`}
                   >
                     {copy.up}
                   </button>
@@ -692,6 +816,7 @@ function CVForm({
                     className={utilityButtonClasses}
                     onClick={() => moveArrayItem('education', index, 1)}
                     disabled={index === formData.education.length - 1}
+                    aria-label={`${copy.move} ${isFinnish ? 'koulutus' : 'education'} ${index + 1} ${copy.down.toLowerCase()}`}
                   >
                     {copy.down}
                   </button>
@@ -699,6 +824,7 @@ function CVForm({
                     type="button"
                     className={utilityButtonClasses}
                     onClick={() => duplicateArrayItem('education', index)}
+                    aria-label={`${copy.duplicate} ${isFinnish ? 'koulutus' : 'education'} ${index + 1}`}
                   >
                     {copy.duplicate}
                   </button>
@@ -706,6 +832,7 @@ function CVForm({
                     type="button"
                     className={removeButtonClasses}
                     onClick={() => removeArrayItem('education', index)}
+                    aria-label={`${copy.remove} ${isFinnish ? 'koulutus' : 'education'} ${index + 1}`}
                   >
                     {copy.remove}
                   </button>
@@ -788,7 +915,7 @@ function CVForm({
                   <span>{label}</span>
                   <button
                     type="button"
-                    className="rounded-full border px-2 py-0.5 text-[10px] font-semibold transition"
+                    className="border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] transition"
                     onClick={() => toggleSectionItemVisibility('links', key)}
                   >
                     {isSectionItemVisible(sectionItemVisibility, 'links', key) ? copy.hide : copy.show}

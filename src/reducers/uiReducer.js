@@ -1,5 +1,6 @@
 import { safeStorageGet } from '../utils/cvForm'
 import { defaultTemplateId } from '../utils/cvTemplates'
+import { UI_LOCALE_STORAGE_KEY } from '../utils/designSystem'
 
 export const UI_ACTION = {
   ADD_TOAST: 'ADD_TOAST',
@@ -13,8 +14,6 @@ export const UI_ACTION = {
   SET_PASTED_CV_TEXT: 'SET_PASTED_CV_TEXT',
   SET_JOB_DESCRIPTION: 'SET_JOB_DESCRIPTION',
 }
-
-const UI_LOCALE_STORAGE_KEY = 'ui-locale'
 
 export function createInitialUiState(initialSession) {
   const storedLocale = safeStorageGet(UI_LOCALE_STORAGE_KEY).value

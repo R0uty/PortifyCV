@@ -4,26 +4,18 @@ import { getUiTheme } from '../utils/designSystem'
 
 function scoreTone(ui, score) {
   if (score >= 85) {
-    return ui.isDark
-      ? 'border-gray-400/20 bg-gray-400/10 text-gray-100'
-      : 'border-gray-300 bg-gray-50 text-gray-800'
+    return { backgroundColor: 'rgba(0,0,0,0.06)', color: '#111111' }
   }
 
   if (score >= 70) {
-    return ui.isDark
-      ? 'border-gray-400/25 bg-gray-400/12 text-gray-200'
-      : 'border-gray-300 bg-gray-100 text-gray-800'
+    return { backgroundColor: 'rgba(0,0,0,0.04)', color: '#374151' }
   }
 
   if (score >= 55) {
-    return ui.isDark
-      ? 'border-gray-500/25 bg-gray-500/10 text-gray-300'
-      : 'border-gray-300 bg-gray-50 text-gray-700'
+    return { backgroundColor: 'rgba(0,0,0,0.04)', color: '#374151' }
   }
 
-  return ui.isDark
-    ? 'border-gray-400/20 bg-gray-400/10 text-gray-100'
-    : 'border-gray-300 bg-gray-50 text-gray-800'
+  return { backgroundColor: 'rgba(0,0,0,0.04)', color: '#6b7280' }
 }
 
 function ATSScorePanel({
@@ -51,12 +43,13 @@ function ATSScorePanel({
 
   return (
     <section
-      className={`fade-in-up surface-shadow rounded-[var(--radius-card)] border p-5 sm:p-6 print:hidden ${ui.surface}`}
+      className={`fade-in-up p-5 sm:p-6 print:hidden ${ui.surface}`}
+      style={{ border: '1px solid var(--app-border)' }}
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className={`ds-kicker ${ui.textMuted}`}>{isFinnish ? 'ATS-pisteet' : 'ATS score'}</p>
-          <h3 className={`ds-section-title mt-2 font-semibold ${ui.textPrimary}`}>
+          <p className="ds-kicker uppercase tracking-[0.14em] accent-text">{isFinnish ? 'ATS-pisteet' : 'ATS score'}</p>
+          <h3 className={`ds-section-title mt-2 font-bold uppercase tracking-[-0.02em] ${ui.textPrimary}`}>
             {isFinnish ? 'Yhteenveto jäsennysvalmiudesta' : 'Parser-readiness overview'}
           </h3>
           <p className={`ds-body-sm mt-3 ${ui.textSecondary}`}>
@@ -66,19 +59,19 @@ function ATSScorePanel({
           </p>
         </div>
 
-        <div className={`rounded-[1.5rem] border px-5 py-4 text-center ${scoreTone(ui, atsScore.score)}`}>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em]">
+        <div className="px-5 py-4 text-center" style={{ ...scoreTone(ui, atsScore.score), border: '1px solid var(--app-border-strong)' }}>
+          <p className="text-xs font-bold uppercase tracking-[0.14em]">
             {isFinnish ? 'ATS-pisteet' : 'ATS score'}
           </p>
-          <p className="mt-2 text-4xl font-semibold leading-none">{atsScore.score}</p>
-          <p className="mt-2 text-sm font-medium">{atsScore.rating}</p>
+          <p className="mt-2 text-4xl font-bold leading-none">{atsScore.score}</p>
+          <p className="mt-2 text-sm font-semibold">{atsScore.rating}</p>
         </div>
       </div>
 
-      <div className={`mt-5 rounded-[1.4rem] border p-4 ${ui.surfaceMuted}`}>
+      <div className={`mt-5 p-4 ${ui.surfaceMuted}`} style={{ border: '1px solid var(--app-border)' }}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className={`text-sm font-semibold ${ui.textPrimary}`}>ATS-friendly mode</p>
+            <p className={`text-sm font-bold uppercase tracking-[0.04em] ${ui.textPrimary}`}>ATS-friendly mode</p>
             <p className={`mt-1 text-sm ${ui.textSecondary}`}>
                 {isFinnish
                   ? 'Vaihda esikatselu yksinkertaiseen ATS-yhteensopivaan asetteluun.'
@@ -87,24 +80,24 @@ function ATSScorePanel({
           </div>
           <button
             type="button"
-            className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+            className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
               atsFriendlyMode ? ui.buttonActive : ui.button
             }`}
             onClick={onToggleAtsFriendlyMode}
           >
             {atsFriendlyMode
-              ? isFinnish ? 'ATS-tila päällä' : 'ATS mode on'
-              : isFinnish ? 'Ota ATS-tila käyttöön' : 'Enable ATS mode'}
+              ? isFinnish ? 'ATS-PÄÄLLÄ' : 'ATS ON'
+              : isFinnish ? 'Ota ATS käyttöön' : 'Enable ATS'}
           </button>
         </div>
       </div>
 
       <div className="mt-5 grid gap-3">
         {breakdownItems.map((item) => (
-          <article key={item.label} className={`rounded-2xl border px-4 py-4 ${ui.surfaceMuted}`}>
+          <article key={item.label} className={`p-4 ${ui.surfaceMuted}`} style={{ border: '1px solid var(--app-border)' }}>
             <div className="flex items-center justify-between gap-3">
-              <p className={`text-sm font-semibold ${ui.textPrimary}`}>{item.label}</p>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${scoreTone(ui, item.score)}`}>
+              <p className={`text-sm font-bold uppercase tracking-[0.04em] ${ui.textPrimary}`}>{item.label}</p>
+              <span className="px-3 py-1 text-xs font-bold" style={{ ...scoreTone(ui, item.score), border: '1px solid var(--app-border)' }}>
                 {item.score}/{item.maxScore}
               </span>
             </div>
@@ -114,20 +107,20 @@ function ATSScorePanel({
       </div>
 
       <div className="mt-5">
-        <p className={`text-sm font-semibold ${ui.textPrimary}`}>
+        <p className={`text-sm font-bold uppercase tracking-[0.04em] ${ui.textPrimary}`}>
           {isFinnish ? 'Parannusvinkit' : 'Score improvement tips'}
         </p>
         <ul className={`mt-3 space-y-2 ${ui.textSecondary}`}>
           {atsScore.improvementTips.map((tip) => (
-            <li key={tip} className={`rounded-2xl border px-4 py-3 text-sm ${ui.surfaceMuted}`}>
+            <li key={tip} className={`px-4 py-3 text-sm ${ui.surfaceMuted}`} style={{ border: '1px solid var(--app-border)' }}>
               {tip}
             </li>
           ))}
         </ul>
       </div>
 
-      <div className={`mt-5 rounded-[1.4rem] border p-4 ${ui.surfaceMuted}`}>
-        <p className={`text-sm font-semibold ${ui.textPrimary}`}>
+      <div className={`mt-5 p-4 ${ui.surfaceMuted}`} style={{ border: '1px solid var(--app-border)' }}>
+        <p className={`text-sm font-bold uppercase tracking-[0.04em] ${ui.textPrimary}`}>
           {isFinnish ? 'Työpaikkailmoituksen avainsanat' : 'Job description keyword match'}
         </p>
         <p className={`mt-1 text-sm ${ui.textSecondary}`}>
@@ -136,7 +129,7 @@ function ATSScorePanel({
             : 'Paste a target role description to spot important terms your CV is missing.'}
         </p>
         <textarea
-          className={`mt-3 min-h-28 w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-border)] focus:ring-2 focus:ring-[var(--accent-ring)] ${ui.input}`}
+          className={`mt-3 min-h-28 w-full border px-4 py-3 text-sm transition ${ui.input}`}
           value={jobDescription}
           onChange={(event) => onJobDescriptionChange(event.target.value)}
           placeholder={isFinnish
@@ -147,7 +140,7 @@ function ATSScorePanel({
         <div className="mt-3 flex flex-wrap gap-2">
           <button
             type="button"
-            className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
+            className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
             onClick={onCopyMissingKeywords}
             disabled={jobDescriptionAnalysis.missingKeywords.length === 0}
           >
@@ -155,7 +148,7 @@ function ATSScorePanel({
           </button>
           <button
             type="button"
-            className={`rounded-full border px-3 py-2 text-xs font-semibold transition ${ui.button}`}
+            className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
             onClick={onClearJobDescription}
             disabled={!jobDescription.trim()}
           >
@@ -166,10 +159,10 @@ function ATSScorePanel({
         {jobDescriptionAnalysis.hasInput ? (
           <div className="mt-4 space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${scoreTone(ui, jobDescriptionAnalysis.coverageScore)}`}>
+              <span className="px-3 py-1 text-xs font-bold" style={{ ...scoreTone(ui, jobDescriptionAnalysis.coverageScore), border: '1px solid var(--app-border)' }}>
                 {isFinnish ? 'Kattavuus' : 'Coverage'} {jobDescriptionAnalysis.coverageScore}%
               </span>
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${ui.surface}`}>
+              <span className={`px-3 py-1 text-xs font-bold ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
                 {isFinnish
                   ? `${jobDescriptionAnalysis.matchedKeywords.length}/${jobDescriptionAnalysis.totalKeywords} avainsanaa osui`
                   : `${jobDescriptionAnalysis.matchedKeywords.length}/${jobDescriptionAnalysis.totalKeywords} keywords matched`}
@@ -178,7 +171,7 @@ function ATSScorePanel({
 
             {jobDescriptionAnalysis.missingKeywords.length > 0 ? (
               <div>
-                <p className={`text-xs font-semibold uppercase tracking-[0.14em] ${ui.textMuted}`}>
+                <p className={`text-xs font-bold uppercase tracking-[0.14em] ${ui.textMuted}`}>
                   {isFinnish ? 'Puuttuvat avainsanat' : 'Missing keywords'}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -187,7 +180,8 @@ function ATSScorePanel({
                       type="button"
                       key={`missing-${keyword}`}
                       onClick={() => onAddMissingKeyword(keyword)}
-                      className={`rounded-full border px-3 py-1 text-xs font-medium ${ui.isDark ? 'border-gray-400/25 bg-gray-400/10 text-gray-100' : 'border-gray-300 bg-gray-50 text-gray-800'}`}
+                      className="border px-3 py-1 text-xs font-semibold"
+                      style={{ borderColor: 'rgba(0,0,0,0.2)', backgroundColor: 'rgba(0,0,0,0.04)', color: '#374151' }}
                     >
                       + {keyword}
                     </button>

@@ -1,25 +1,20 @@
-import { useCallback, useEffect, useState } from 'react'
+import { lazy, Suspense, useCallback, useRef, useState } from 'react'
 
 import LandingPage from './pages/LandingPage'
-import { safeStorageGet, safeStorageSet } from './utils/cvForm'
-import { UI_THEME_STORAGE_KEY } from './utils/designSystem'
+import Logo from './components/Logo'
+import ProjectHeader from './components/ProjectHeader'
+import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
+import { safeStorageGet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
-import ResumeBuilderPage from './pages/ResumeBuilderPage'
 
-const UI_LOCALE_STORAGE_KEY = 'ui-locale'
+const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
 
-function shouldOpenBuilderByDefault() {
+function shouldAutoStart() {
   if (typeof window === 'undefined') {
     return false
   }
-
   const currentUrl = new URL(window.location.href)
   return currentUrl.pathname === '/cv' || currentUrl.searchParams.has(SHARE_QUERY_PARAM)
-}
-
-function readStoredTheme() {
-  const storedTheme = safeStorageGet(UI_THEME_STORAGE_KEY).value
-  return storedTheme === 'light' ? 'light' : 'dark'
 }
 
 function readStoredLocale() {
@@ -27,65 +22,106 @@ function readStoredLocale() {
   return storedLocale === 'fi' ? 'fi' : 'en'
 }
 
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function SiteFooter() {
+  return (
+    <footer className="site-footer">
+      <div className="site-footer__inner">
+        <span>No login. No data saved.</span>
+      </div>
+    </footer>
+  )
+}
+
 function App() {
-  const [isBuilderOpen, setIsBuilderOpen] = useState(() => shouldOpenBuilderByDefault())
-  const [theme, setTheme] = useState(() => readStoredTheme())
   const [locale, setLocale] = useState(() => readStoredLocale())
+  const [view, setView] = useState(() => (shouldAutoStart() ? 'builder' : 'landing'))
+  const [headerProps, setHeaderProps] = useState(null)
+  const headerPropsRef = useRef(null)
 
-  useEffect(() => {
-    safeStorageSet(UI_THEME_STORAGE_KEY, theme)
-    if (typeof document !== 'undefined') {
-      document.documentElement.style.colorScheme = theme === 'dark' ? 'dark' : 'light'
-    }
-  }, [theme])
-
-  useEffect(() => {
-    safeStorageSet(UI_LOCALE_STORAGE_KEY, locale)
-    if (typeof document !== 'undefined') {
-      document.documentElement.lang = locale
-    }
-  }, [locale])
-
-  const handleToggleTheme = () => {
-    setTheme((currentTheme) => (currentTheme === 'dark' ? 'light' : 'dark'))
-  }
-
-  const handleToggleLocale = () => {
-    setLocale((currentLocale) => (currentLocale === 'fi' ? 'en' : 'fi'))
-  }
-
-  const handleReturnToLanding = () => {
-    setIsBuilderOpen(false)
-  }
-
-  const handleEditorThemeChange = useCallback((nextTheme) => {
-    setTheme((currentTheme) => (currentTheme === nextTheme ? currentTheme : nextTheme))
+  const handleToggleLocale = useCallback(() => {
+    setLocale((prev) => (prev === 'fi' ? 'en' : 'fi'))
   }, [])
 
   const handleEditorLocaleChange = useCallback((nextLocale) => {
-    setLocale((currentLocale) => (currentLocale === nextLocale ? currentLocale : nextLocale))
+    setLocale((prev) => (prev === nextLocale ? prev : nextLocale))
   }, [])
 
-  if (isBuilderOpen) {
+  const handleHeaderChange = useCallback((nextProps) => {
+    headerPropsRef.current = nextProps
+    setHeaderProps({ ...nextProps })
+  }, [])
+
+  const goToBuilder = useCallback(() => {
+    setView('builder')
+    scrollToTop()
+  }, [])
+
+  const goToLanding = useCallback(() => {
+    setView('landing')
+    scrollToTop()
+  }, [])
+
+  if (view === 'landing') {
     return (
-      <ResumeBuilderPage
-        onReturnToLanding={handleReturnToLanding}
-        initialTheme={theme}
-        initialLocale={locale}
-        onThemeChange={handleEditorThemeChange}
-        onLocaleChange={handleEditorLocaleChange}
-      />
+      <div className="one-pager">
+        <header className="project-header print:hidden">
+          <div className="project-header__container">
+            <div className="project-header__content">
+              <Logo size={24} />
+              <button
+                type="button"
+                className="action-button action-button--secondary border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
+                onClick={handleToggleLocale}
+              >
+                {locale === 'fi' ? 'EN' : 'FI'}
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <LandingPage
+          locale={locale}
+          onGetStarted={goToBuilder}
+        />
+
+        <SiteFooter />
+      </div>
     )
   }
 
   return (
-    <LandingPage
-      theme={theme}
-      locale={locale}
-      onToggleTheme={handleToggleTheme}
-      onToggleLocale={handleToggleLocale}
-      onGetStarted={() => setIsBuilderOpen(true)}
-    />
+    <div className="one-pager">
+      {headerProps && (
+        <ProjectHeader
+          locale={headerProps.locale}
+          activeExport={headerProps.activeExport}
+          isActionBusy={headerProps.isActionBusy}
+          canUndo={headerProps.canUndo}
+          canRedo={headerProps.canRedo}
+          onReturn={goToLanding}
+          onLocaleChange={headerProps.onLocaleChange}
+          onUndo={headerProps.onUndo}
+          onRedo={headerProps.onRedo}
+          onExport={headerProps.onExport}
+        />
+      )}
+
+      <section id="builder" className="builder-section">
+        <Suspense fallback={null}>
+          <ResumeBuilderPage
+            initialLocale={locale}
+            onLocaleChange={handleEditorLocaleChange}
+            onHeaderChange={handleHeaderChange}
+          />
+        </Suspense>
+      </section>
+
+      <SiteFooter />
+    </div>
   )
 }
 

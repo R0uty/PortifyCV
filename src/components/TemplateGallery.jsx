@@ -3,34 +3,44 @@ import { memo, useMemo } from 'react'
 import { getUiTheme } from '../utils/designSystem'
 
 function TemplateThumbnail({ template, isDark }) {
-  const frameClassName = isDark
-    ? 'border-white/12 bg-black/50'
-    : 'border-black/12 bg-gray-50'
-  const accentClassName = isDark ? 'bg-white/80' : 'bg-black/70'
-  const titleLineClassName = isDark ? 'bg-white/80' : 'bg-black/60'
-  const bodyLineClassName = isDark ? 'bg-white/6' : 'bg-black/40'
-  const chipClassName = isDark
-    ? 'w-full rounded-md border border-white bg-white px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-black'
-    : 'w-full rounded-md border border-black bg-black px-2 py-1 text-center text-[0.6rem] font-semibold uppercase tracking-[0.12em] text-white'
+  const frameStyle = {
+    borderColor: isDark ? 'rgba(229,229,229,0.15)' : 'rgba(0,0,0,0.12)',
+    backgroundColor: isDark ? '#0a0a0a' : '#f9fafb',
+  }
+  const accentStyle = { backgroundColor: '#111111' }
+  const titleLineStyle = { backgroundColor: isDark ? '#e5e5e5' : 'rgba(0,0,0,0.70)' }
+  const bodyLineStyle = { backgroundColor: isDark ? 'rgba(229,229,229,0.12)' : 'rgba(0,0,0,0.40)' }
+  const chipStyle = {
+    width: '100%',
+    border: `1px solid ${isDark ? 'rgba(229,229,229,0.15)' : '#111111'}`,
+    backgroundColor: isDark ? '#0a0a0a' : '#111111',
+    padding: '0.25rem 0.5rem',
+    textAlign: 'center',
+    fontSize: '0.6rem',
+    fontWeight: 700,
+    textTransform: 'uppercase',
+    letterSpacing: '0.12em',
+    color: isDark ? '#e5e5e5' : '#ffffff',
+  }
 
   return (
-    <div className={`overflow-hidden rounded-2xl border ${frameClassName}`}>
-      <div className={`h-8 w-full ${accentClassName}`} />
+    <div className="overflow-hidden border" style={frameStyle}>
+      <div className="h-8 w-full" style={accentStyle} />
       <div className="space-y-3 p-3">
         <div className="space-y-2">
-          <div className={`h-2 w-full rounded-full ${titleLineClassName}`} />
-          <div className={`h-2 w-full rounded-full ${bodyLineClassName}`} />
+          <div className="h-2 w-full" style={titleLineStyle} />
+          <div className="h-2 w-full" style={bodyLineStyle} />
         </div>
         <div className={`grid gap-2 ${template.layout === 'split' ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <div className="space-y-2">
             {template.thumbnail.blockWidths.map((_, index) => (
-              <div key={index} className={`h-2 w-full rounded-full ${bodyLineClassName}`} />
+              <div key={index} className="h-2 w-full" style={bodyLineStyle} />
             ))}
           </div>
           {template.layout === 'split' ? (
             <div className="space-y-2">
               {template.thumbnail.chips.map((chip) => (
-                <div key={chip} className={chipClassName}>
+                <div key={chip} style={chipStyle}>
                   {chip}
                 </div>
               ))}
@@ -40,7 +50,7 @@ function TemplateThumbnail({ template, isDark }) {
         {template.layout === 'stacked' ? (
           <div className="grid grid-cols-2 gap-1.5">
             {template.thumbnail.chips.map((chip) => (
-              <div key={chip} className={chipClassName}>
+              <div key={chip} style={chipStyle}>
                 {chip}
               </div>
             ))}
@@ -59,13 +69,14 @@ function TemplateGallery({
   locale = 'en',
 }) {
   const ui = useMemo(() => getUiTheme(theme), [theme])
+  const isDark = ui.isDark
   const isFinnish = locale === 'fi'
 
   return (
-    <section className={`surface-shadow rounded-[var(--radius-card)] border p-4 sm:p-5 ${ui.surface}`}>
+    <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className={`ds-kicker ${ui.textMuted}`}>
+          <p className="ds-kicker uppercase tracking-[0.14em] accent-text">
             {isFinnish ? 'Pohjagalleria' : 'Template gallery'}
           </p>
           <p className={`mt-3 text-sm ${ui.textSecondary}`}>
@@ -84,16 +95,22 @@ function TemplateGallery({
             <button
               key={template.id}
               type="button"
-              className={`group h-full w-full rounded-[1.5rem] border p-3 text-left transition ${
+              className={`group h-full w-full p-3 text-left transition ${
                 isSelected
-                  ? `${ui.buttonActive} shadow-[0_10px_30px_-18px_var(--accent-border)]`
-                  : `${ui.surfaceMuted} hover:border-[var(--accent-border)] ${ui.isDark ? 'hover:bg-white/8' : 'hover:bg-white'}`
+                  ? `${ui.buttonActive}`
+                  : `${ui.surfaceMuted}`
               }`}
+              style={{
+                border: `1px solid ${isSelected ? 'var(--accent-border)' : 'var(--app-border)'}`,
+                '--hover-bg': isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+              }}
+              onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = 'var(--hover-bg)' }}
+              onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.backgroundColor = '' }}
               onClick={() => onSelectTemplate(template.id)}
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className={`text-sm font-semibold ${ui.textPrimary}`}>{template.label}</p>
+                  <p className={`text-sm font-bold uppercase tracking-[0.04em] ${ui.textPrimary}`}>{template.label}</p>
                   <p className={`mt-1 text-xs ${ui.textMuted}`}>
                     {template.layout === 'split'
                       ? isFinnish ? 'Jaettu asettelu' : 'Split layout'
@@ -102,8 +119,8 @@ function TemplateGallery({
                 </div>
                 <div className="flex flex-wrap justify-end gap-2">
                   {isSelected ? (
-                    <span className="rounded-full border border-[var(--accent-border)] px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-[var(--accent-text-strong)]">
-                      {isFinnish ? 'Aktiivinen' : 'Active'}
+                    <span className="px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em]" style={{ color: 'var(--accent-text-strong)', border: '1px solid var(--accent-border)' }}>
+                      {isFinnish ? 'AKTIIVINEN' : 'ACTIVE'}
                     </span>
                   ) : null}
                 </div>

@@ -12,8 +12,10 @@ class ErrorBoundaryInner extends Component {
     return { hasError: true }
   }
 
-  componentDidCatch() {
-    // Intentionally silent in UI; fallback panel handles recovery.
+  componentDidCatch(error) {
+    if (import.meta.env.DEV) {
+      console.error('AppErrorBoundary caught:', error)
+    }
   }
 
   handleRetry = () => {
@@ -37,11 +39,12 @@ function AppErrorBoundary({ children, theme = 'dark', panelTitle = 'Panel', loca
     <ErrorBoundaryInner
       renderFallback={({ onRetry }) => (
         <section
-          className={`fade-in-up surface-shadow rounded-[var(--radius-card)] border p-5 sm:p-6 print:hidden ${ui.surface}`}
+          className={`fade-in-up p-5 sm:p-6 print:hidden ${ui.surface}`}
+          style={{ border: '1px solid var(--app-border)' }}
           role="alert"
         >
-          <p className={`ds-kicker ${ui.textMuted}`}>{panelTitle}</p>
-          <h3 className={`ds-section-title mt-2 font-semibold ${ui.textPrimary}`}>
+          <p className="ds-kicker uppercase tracking-[0.14em] accent-text">{panelTitle}</p>
+          <h3 className={`ds-section-title mt-2 font-bold uppercase tracking-[-0.02em] ${ui.textPrimary}`}>
             {isFinnish ? 'Tämän osion renderöinti epäonnistui.' : 'This section failed to render.'}
           </h3>
           <p className={`ds-body-sm mt-3 ${ui.textSecondary}`}>
@@ -51,7 +54,7 @@ function AppErrorBoundary({ children, theme = 'dark', panelTitle = 'Panel', loca
           </p>
           <button
             type="button"
-            className={`mt-4 rounded-full border px-4 py-2 text-sm font-medium transition ${ui.button}`}
+            className={`mt-4 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
             onClick={onRetry}
           >
             {isFinnish ? 'Yritä uudelleen' : 'Retry panel'}

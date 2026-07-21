@@ -1,30 +1,39 @@
-import { getUiTheme } from '../utils/designSystem'
-
-function ToastStack({ toasts = [], theme = 'dark' }) {
+function ToastStack({ toasts = [] }) {
   if (toasts.length === 0) {
     return null
   }
 
-  const ui = getUiTheme(theme)
+  const toastStyles = {
+    success: {
+      borderColor: '#111111',
+      backgroundColor: 'rgba(17,17,17,0.92)',
+      color: '#ffffff',
+    },
+    error: {
+      borderColor: '#6b7280',
+      backgroundColor: 'rgba(75,85,99,0.92)',
+      color: '#ffffff',
+    },
+    info: {
+      borderColor: 'rgba(0,0,0,0.2)',
+      backgroundColor: 'rgba(255,255,255,0.95)',
+      color: '#111111',
+    },
+  }
 
   return (
     <div
-      className={`pointer-events-none fixed right-4 z-50 flex w-[min(92vw,24rem)] flex-col gap-3 print:hidden ${ui.toastOffset}`}
+      className="pointer-events-none fixed right-4 z-50 flex w-[min(92vw,24rem)] flex-col gap-3 print:hidden bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:bottom-4"
     >
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className={`fade-in-up rounded-2xl border px-4 py-3 shadow-xl backdrop-blur ${
-            toast.type === 'success'
-              ? 'border-emerald-300/50 bg-emerald-600/90 text-white'
-              : toast.type === 'error'
-                ? 'border-red-300/50 bg-red-600/90 text-white'
-                : 'border-slate-300/50 bg-slate-700/90 text-white'
-          }`}
+          className="fade-in-up border px-4 py-3 backdrop-blur"
+          style={toastStyles[toast.type] || toastStyles.info}
           role={toast.type === 'error' ? 'alert' : 'status'}
           aria-live="polite"
         >
-          <p className="text-sm font-medium">{toast.message}</p>
+          <p className="text-sm font-bold uppercase tracking-[0.04em]">{toast.message}</p>
         </div>
       ))}
     </div>

@@ -30,6 +30,8 @@ export interface CvSectionVisibility {
   links: boolean
 }
 
+export type CvSectionKey = 'about' | 'skills' | 'experience' | 'education' | 'links'
+
 export interface CvSectionItemVisibility {
   skills: Record<string, boolean>
   experience: Record<string, boolean>
@@ -43,6 +45,7 @@ export interface CvData {
   about: string
   photo: string
   photoVisibilityByTemplate: Record<string, boolean>
+  sectionOrder: CvSectionKey[]
   skills: string[]
   experience: CvExperienceItem[]
   education: CvEducationItem[]

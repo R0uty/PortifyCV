@@ -1,6 +1,6 @@
 import { saveAs } from 'file-saver'
 import { defaultTemplateId, getCvTemplate } from './cvTemplates'
-import { isPhotoVisibleForTemplate } from './cvForm'
+import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
 import { formatDateRange, formatLinkLabel } from './shared'
 
@@ -107,9 +107,11 @@ async function waitForPreviewVariant(previewElement, expectedVariant, maxWaitMs 
     await new Promise((resolve) => setTimeout(resolve, 60))
   }
 
-  console.warn(
-    `PDF Export: Variant mismatch. Expected "${expectedVariant}", got "${getExportVariant(exportRoot)}"`,
-  )
+  if (import.meta.env.DEV) {
+    console.warn(
+      `PDF Export: Variant mismatch. Expected "${expectedVariant}", got "${getExportVariant(exportRoot)}"`,
+    )
+  }
 
   return false
 }
@@ -171,6 +173,11 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
   const locale = options.locale === 'fi' ? 'fi' : 'en'
   const copy = createExportCopy(locale)
   const snapshot = createCvSnapshot(formData)
+  const sectionVisibility = {
+    ...createSectionVisibility(),
+    ...(formData.sectionVisibility ?? {}),
+  }
+  const sectionOrder = normalizeSectionOrder(formData.sectionOrder)
 
   function esc(text) {
     return String(text ?? '')
@@ -215,23 +222,32 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
     )
     .join('\n')
 
-  const sections = [
-    snapshot.about
-      ? `<section>\n  <h2 class="section-heading">${copy.about}</h2>\n  <p class="about-text">${esc(snapshot.about)}</p>\n</section>`
-      : '',
-    snapshot.experience.length > 0
-      ? `<section>\n  <h2 class="section-heading">${copy.experience}</h2>\n${experienceItems}\n</section>`
-      : '',
-    snapshot.education.length > 0
-      ? `<section>\n  <h2 class="section-heading">${copy.education}</h2>\n${educationItems}\n</section>`
-      : '',
-    snapshot.skills.length > 0
-      ? `<section>\n  <h2 class="section-heading">${copy.skills}</h2>\n  <div class="skills">\n    ${skillTags}\n  </div>\n</section>`
-      : '',
-    Object.keys(snapshot.links).length > 0
-      ? `<section>\n  <h2 class="section-heading">${copy.links}</h2>\n${linkItems}\n</section>`
-      : '',
-  ]
+  const isVisible = (section) => sectionVisibility[section] !== false
+  const sectionMarkupByKey = {
+    about: () =>
+      snapshot.about
+      && isVisible('about')
+      && `<section>\n  <h2 class="section-heading">${copy.about}</h2>\n  <p class="about-text">${esc(snapshot.about)}</p>\n</section>`,
+    experience: () =>
+      snapshot.experience.length > 0
+      && isVisible('experience')
+      && `<section>\n  <h2 class="section-heading">${copy.experience}</h2>\n${experienceItems}\n</section>`,
+    education: () =>
+      snapshot.education.length > 0
+      && isVisible('education')
+      && `<section>\n  <h2 class="section-heading">${copy.education}</h2>\n${educationItems}\n</section>`,
+    skills: () =>
+      snapshot.skills.length > 0
+      && isVisible('skills')
+      && `<section>\n  <h2 class="section-heading">${copy.skills}</h2>\n  <div class="skills">\n    ${skillTags}\n  </div>\n</section>`,
+    links: () =>
+      Object.keys(snapshot.links).length > 0
+      && isVisible('links')
+      && `<section>\n  <h2 class="section-heading">${copy.links}</h2>\n${linkItems}\n</section>`,
+  }
+
+  const sections = sectionOrder
+    .map((section) => sectionMarkupByKey[section]?.())
     .filter(Boolean)
     .join('\n\n')
 
@@ -327,26 +343,9 @@ function createExportSandbox(previewElement, mode, expectedVariant = '') {
   clone.style.maxWidth = 'none'
   clone.style.margin = '0'
   clone.style.background = '#ffffff'
-  clone.style.color = '#0f172a'
-
-  // Inject resolved accent CSS variables so the PDF reflects the active accent palette
-  const rootComputedStyle = getComputedStyle(document.documentElement)
-  const accentVars = [
-    '--accent-solid',
-    '--accent-text',
-    '--accent-text-strong',
-    '--accent-border',
-    '--accent-soft',
-    '--accent-soft-strong',
-    '--accent-ring',
-    '--accent-glow',
-  ]
-  accentVars.forEach((prop) => {
-    const value = rootComputedStyle.getPropertyValue(prop).trim()
-    if (value) {
-      clone.style.setProperty(prop, value)
-    }
-  })
+  clone.style.color = '#111111'
+  clone.style.setProperty('--app-text', '#111111', 'important')
+  clone.style.setProperty('--app-text-muted', 'rgba(17, 17, 17, 0.45)', 'important')
 
   captureRoot.appendChild(clone)
   sandbox.appendChild(captureRoot)
@@ -420,6 +419,10 @@ function applyComputedColorFallbackStyles(sourceRoot, cloneRoot) {
     const computed = window.getComputedStyle(sourceNode)
 
     COLOR_STYLE_PROPS.forEach((prop) => {
+      if (prop === 'color') {
+        return
+      }
+
       const value = computed.getPropertyValue(prop)
 
       if (value) {
@@ -1112,6 +1115,7 @@ async function exportCvAsPdfTextFallback(
     ...templateConfig.primarySections,
     ...templateConfig.secondarySections,
   ]
+  const sectionOrder = normalizeSectionOrder(formData.sectionOrder, templateSectionOrder)
   const palette = createFallbackPalette()
   const includePhoto = isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
@@ -1234,7 +1238,7 @@ async function exportCvAsPdfTextFallback(
 
   const renderedSections = new Set()
 
-  templateSectionOrder.forEach((section) => {
+  sectionOrder.forEach((section) => {
     const render = sectionRenderers[section]
 
     if (render && !renderedSections.has(section) && isVisible(section)) {
