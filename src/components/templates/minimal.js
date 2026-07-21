@@ -5,8 +5,8 @@ export default {
   // Outer document border and background — white bg, subtle shadow
   preview: () => 'border-black/10 bg-white shadow-none',
 
-  // Header strip — white background, dark text, thin bottom border
-  headerColor: () => 'bg-white text-gray-900 border-b border-gray-200',
+  // Header strip — warm neutral background, dark text, thin bottom border
+  headerColor: () => 'bg-stone-100 text-gray-900 border-b border-stone-300',
 
   // Full name heading — bold, large, tight tracking
   headerTitle: () => 'mt-1 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl',

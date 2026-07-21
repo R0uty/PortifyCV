@@ -5,8 +5,8 @@ export default {
   // Outer document border — violet-tinted border, white bg
   preview: () => 'border-violet-200 bg-white shadow-none',
 
-  // Header strip — white bg, violet bottom accent border
-  headerColor: () => 'bg-white text-gray-900 border-b-2 border-violet-500',
+  // Header strip — richer violet tint with violet bottom accent border
+  headerColor: () => 'bg-violet-100 text-gray-900 border-b-2 border-violet-500',
 
   // Full name heading — extrabold, violet color, extra-large
   headerTitle: () => 'mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-[3.4rem] text-violet-600',
