@@ -106,6 +106,14 @@ function createToast(message, type = 'success') {
   }
 }
 
+function getScrollBehavior() {
+  if (typeof window === 'undefined' || !window.matchMedia) {
+    return 'smooth'
+  }
+
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+}
+
 function waitForFrame() {
   return new Promise((resolve) => {
     window.requestAnimationFrame(() => resolve())
@@ -830,7 +838,7 @@ function ResumeBuilderPage({
     const target = container?.querySelector(`#${item.anchor}`)
 
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      target.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' })
       setActiveSectionId(item.id)
     }
   }, [handleExport])
@@ -856,7 +864,7 @@ function ResumeBuilderPage({
 
     if (target) {
       window.requestAnimationFrame(() => {
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        target.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' })
       })
     }
   }, [])
@@ -1465,8 +1473,49 @@ function ResumeBuilderPage({
 
   const mobileBottomActions = useMemo(() => (
     <div
-      className={`fixed inset-x-0 bottom-0 z-40 border-t px-3 py-3 backdrop-blur md:px-4 lg:hidden print:hidden ${ui.surfaceStrong}`}
+      className={`fixed inset-x-0 bottom-0 z-40 border-t px-3 py-2 backdrop-blur md:px-4 lg:hidden print:hidden ${ui.surfaceStrong}`}
     >
+      <div
+        className="mx-auto mb-2 grid max-w-[110rem] grid-cols-3 gap-1.5"
+        role="tablist"
+        aria-label={locale === 'fi' ? 'Näkymän valinta' : 'View selector'}
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={!mobilePreviewVisible}
+          className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
+            !mobilePreviewVisible ? ui.buttonActive : ui.button
+          }`}
+          onClick={() => {
+            if (mobilePreviewVisible) handleToggleMobilePreview()
+          }}
+        >
+          {locale === 'fi' ? 'Editori' : 'Editor'}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mobilePreviewVisible}
+          className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
+            mobilePreviewVisible ? ui.buttonActive : ui.button
+          }`}
+          onClick={() => {
+            if (!mobilePreviewVisible) handleToggleMobilePreview()
+          }}
+        >
+          {locale === 'fi' ? 'Esikatselu' : 'Preview'}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={false}
+          className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+          onClick={() => setIsTemplateGalleryOpen(true)}
+        >
+          {locale === 'fi' ? 'Pohjat' : 'Templates'}
+        </button>
+      </div>
       <div className="mx-auto flex max-w-[110rem] items-center gap-2 overflow-x-auto no-scrollbar">
         <button
           type="button"
@@ -1499,17 +1548,6 @@ function ResumeBuilderPage({
           onClick={handleCopyShareLink}
         >
           {locale === 'fi' ? 'Linkki' : 'Link'}
-        </button>
-        <button
-          type="button"
-          className={`shrink-0 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
-            mobilePreviewVisible ? ui.buttonActive : ui.button
-          }`}
-          onClick={handleToggleMobilePreview}
-        >
-          {mobilePreviewVisible
-            ? locale === 'fi' ? 'Editori' : 'Editor'
-            : locale === 'fi' ? 'Esikatselu' : 'Preview'}
         </button>
       </div>
     </div>

@@ -64,8 +64,8 @@
   --app-border: rgba(15, 15, 25, 0.08);
   --app-border-strong: rgba(15, 15, 25, 0.16);
   --app-text: #16161a;
-  --app-text-muted: rgba(22, 22, 26, 0.58);
-  --app-text-subtle: rgba(22, 22, 26, 0.40);
+  --app-text-muted: rgba(22, 22, 26, 0.66);
+  --app-text-subtle: rgba(22, 22, 26, 0.54);
   --app-shadow: var(--shadow-md);
 
   --nav-width: clamp(13rem, 18vw, 16rem);
@@ -121,7 +121,7 @@
   --app-border-strong: rgba(255, 255, 255, 0.16);
   --app-text: #f3f3f6;
   --app-text-muted: rgba(243, 243, 246, 0.62);
-  --app-text-subtle: rgba(243, 243, 246, 0.42);
+  --app-text-subtle: rgba(243, 243, 246, 0.52);
   --app-shadow: var(--shadow-md);
 
   --preview-divider: var(--app-border);
@@ -747,7 +747,7 @@ select.floating-field__control {
 
 .drag-drop-upload__hint {
   font-size: 0.72rem;
-  color: var(--app-text-subtle);
+  color: var(--app-text-muted);
 }
 
 .drag-drop-upload__preview {
@@ -2083,6 +2083,23 @@ select.floating-field__control {
   .fade-in-soft {
     animation: none;
   }
+
+  /* Catch-all: neutralize every other app-chrome animation/transition
+     (nav rail, toolbar, cards, modal, zoom bar, drag/hover states, etc.)
+     for users who've asked the OS for reduced motion, without having to
+     track down each new transition individually as the UI grows. */
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Plain CSS utility layer replacing the former Tailwind-driven UI classes. */
@@ -2768,6 +2785,11 @@ select.floating-field__control {
 
   .preview-zoom-bar {
     display: none;
+  }
+
+  .editor-panel,
+  .preview-panel {
+    padding-bottom: 8.5rem;
   }
 
   .preview-action-bar { padding: var(--space-4) var(--space-4) 0; }

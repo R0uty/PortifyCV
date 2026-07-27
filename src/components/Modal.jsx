@@ -1,21 +1,57 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 
+const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
 function Modal({ isOpen, onClose, title, description, children, size = 'md' }) {
+  const panelRef = useRef(null)
+  const previouslyFocusedRef = useRef(null)
+
   useEffect(() => {
     if (!isOpen) {
       return undefined
     }
 
+    previouslyFocusedRef.current = document.activeElement
+
+    const focusTimeoutId = window.setTimeout(() => {
+      panelRef.current?.focus()
+    }, 0)
+
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         onClose()
+        return
+      }
+
+      if (event.key !== 'Tab' || !panelRef.current) {
+        return
+      }
+
+      const focusable = Array.from(panelRef.current.querySelectorAll(FOCUSABLE_SELECTOR))
+
+      if (focusable.length === 0) {
+        return
+      }
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
+
     return () => {
+      window.clearTimeout(focusTimeoutId)
       window.removeEventListener('keydown', handleKeyDown)
+      previouslyFocusedRef.current?.focus?.()
     }
   }, [isOpen, onClose])
 
@@ -26,10 +62,12 @@ function Modal({ isOpen, onClose, title, description, children, size = 'md' }) {
   return (
     <div className="modal-overlay print:hidden" onClick={onClose}>
       <div
+        ref={panelRef}
         className={`modal-panel modal-panel--${size}`}
         role="dialog"
         aria-modal="true"
         aria-label={title}
+        tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="modal-panel__header">
