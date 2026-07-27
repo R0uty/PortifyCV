@@ -1,4 +1,19 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import {
+  Award,
+  Briefcase,
+  Download,
+  FileText,
+  FolderKanban,
+  GraduationCap,
+  Heart,
+  Languages as LanguagesIcon,
+  Link2,
+  Settings as SettingsIcon,
+  Sparkles,
+  User,
+  LayoutTemplate,
+} from 'lucide-react'
 
 import AppShell from '../components/AppShell'
 import AppErrorBoundary from '../components/AppErrorBoundary'
@@ -6,9 +21,12 @@ import ATSScorePanel from '../components/ATSScorePanel'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
 import CVSuggestionsPanel from '../components/CVSuggestionsPanel'
+import NavRail from '../components/NavRail'
 import ToastStack from '../components/ToastStack'
 import {
+  getThemePreference,
   getUiTheme,
+  setThemePreference,
   UI_LOCALE_STORAGE_KEY,
 } from '../utils/designSystem'
 import {
@@ -49,6 +67,29 @@ import {
 } from '../utils/cvFeedback'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
+const HISTORY_COMMIT_DELAY_MS = 600
+const THEME_PREFERENCE_CYCLE = ['light', 'dark', 'system']
+
+const NAV_SECTIONS = [
+  { id: 'personal', anchor: 'section-personal', icon: User, kind: 'scroll', label: { en: 'Personal Information', fi: 'Henkilötiedot' } },
+  { id: 'summary', anchor: 'section-summary', icon: FileText, kind: 'scroll', label: { en: 'Summary', fi: 'Yhteenveto' } },
+  { id: 'experience', anchor: 'section-experience', icon: Briefcase, kind: 'scroll', label: { en: 'Experience', fi: 'Kokemus' } },
+  { id: 'education', anchor: 'section-education', icon: GraduationCap, kind: 'scroll', label: { en: 'Education', fi: 'Koulutus' } },
+  { id: 'projects', anchor: 'section-projects', icon: FolderKanban, kind: 'scroll', label: { en: 'Projects', fi: 'Projektit' } },
+  { id: 'skills', anchor: 'section-skills', icon: Sparkles, kind: 'scroll', label: { en: 'Skills', fi: 'Taidot' } },
+  { id: 'certificates', anchor: 'section-certificates', icon: Award, kind: 'scroll', label: { en: 'Certificates', fi: 'Sertifikaatit' } },
+  { id: 'languages', anchor: 'section-languages', icon: LanguagesIcon, kind: 'scroll', label: { en: 'Languages', fi: 'Kielet' } },
+  { id: 'links', anchor: 'section-links', icon: Link2, kind: 'scroll', label: { en: 'Links', fi: 'Linkit' } },
+  { id: 'interests', anchor: 'section-interests', icon: Heart, kind: 'scroll', label: { en: 'Interests', fi: 'Kiinnostuksen kohteet' } },
+]
+
+const NAV_UTILITY_ITEMS = [
+  { id: 'settings', anchor: 'section-settings', icon: SettingsIcon, kind: 'scroll', label: { en: 'Settings', fi: 'Asetukset' } },
+  { id: 'templates', icon: LayoutTemplate, kind: 'action', label: { en: 'Templates', fi: 'Pohjat' } },
+  { id: 'export', icon: Download, kind: 'action', label: { en: 'Export', fi: 'Vie' } },
+]
+
+const ALL_SCROLL_NAV_ITEMS = [...NAV_SECTIONS, ...NAV_UTILITY_ITEMS].filter((item) => item.kind === 'scroll')
 
 function createToast(message, type = 'success') {
   return {
@@ -266,6 +307,19 @@ function ResumeBuilderPage({
   const toastTimeoutsRef = useRef(new Map())
   const storageWarningShownRef = useRef(false)
   const shareWarningShownRef = useRef(false)
+  const editorScrollRef = useRef(null)
+  const templateSelectRef = useRef(null)
+
+  const [activeSectionId, setActiveSectionId] = useState('personal')
+  const [themePreference, setThemePreferenceState] = useState(() => getThemePreference())
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isFullscreenPreview, setIsFullscreenPreview] = useState(false)
+  const [isResponsivePreview, setIsResponsivePreview] = useState(false)
+
+  const [historyPast, setHistoryPast] = useState([])
+  const [historyFuture, setHistoryFuture] = useState([])
+  const historyCommittedRef = useRef(initialSession.formData)
+  const historySkipNextCommitRef = useRef(false)
 
   const errors = useMemo(
     () => ({
@@ -361,6 +415,59 @@ function ResumeBuilderPage({
       window.clearTimeout(timeoutId)
     }
   }, [formData.photo, setStorageValue])
+
+  useEffect(() => {
+    if (historySkipNextCommitRef.current) {
+      historySkipNextCommitRef.current = false
+      historyCommittedRef.current = formData
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      if (formData !== historyCommittedRef.current) {
+        const committed = historyCommittedRef.current
+
+        historyCommittedRef.current = formData
+        setHistoryPast((past) => [...past, committed])
+        setHistoryFuture([])
+      }
+    }, HISTORY_COMMIT_DELAY_MS)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [formData])
+
+  const canUndo = historyPast.length > 0
+  const canRedo = historyFuture.length > 0
+
+  const handleUndo = useCallback(() => {
+    if (historyPast.length === 0) {
+      return
+    }
+
+    const previousFormData = historyPast[historyPast.length - 1]
+
+    setHistoryPast(historyPast.slice(0, -1))
+    setHistoryFuture([...historyFuture, historyCommittedRef.current])
+    historyCommittedRef.current = previousFormData
+    historySkipNextCommitRef.current = true
+    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: previousFormData })
+  }, [dispatchFormData, historyPast, historyFuture])
+
+  const handleRedo = useCallback(() => {
+    if (historyFuture.length === 0) {
+      return
+    }
+
+    const nextFormData = historyFuture[historyFuture.length - 1]
+
+    setHistoryFuture(historyFuture.slice(0, -1))
+    setHistoryPast([...historyPast, historyCommittedRef.current])
+    historyCommittedRef.current = nextFormData
+    historySkipNextCommitRef.current = true
+    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: nextFormData })
+  }, [dispatchFormData, historyFuture, historyPast])
 
   useEffect(() => {
     setStorageValue(UI_LOCALE_STORAGE_KEY, locale)
@@ -686,6 +793,87 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.SET_LOCALE, locale: nextLocale === 'fi' ? 'fi' : 'en' })
   }, [])
 
+  const handleNavigate = useCallback((item) => {
+    if (item.kind === 'action') {
+      if (item.id === 'templates') {
+        if (templateSelectRef.current?.showPicker) {
+          templateSelectRef.current.showPicker()
+        } else {
+          templateSelectRef.current?.focus()
+        }
+      } else if (item.id === 'export') {
+        handleExport('pdf-designer')
+      }
+      return
+    }
+
+    const container = editorScrollRef.current
+    const target = container?.querySelector(`#${item.anchor}`)
+
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setActiveSectionId(item.id)
+    }
+  }, [handleExport])
+
+  const handleCycleThemePreference = useCallback(() => {
+    const currentIndex = THEME_PREFERENCE_CYCLE.indexOf(themePreference)
+    const nextPreference = THEME_PREFERENCE_CYCLE[(currentIndex + 1) % THEME_PREFERENCE_CYCLE.length]
+
+    setThemePreference(nextPreference)
+    setThemePreferenceState(nextPreference)
+  }, [themePreference])
+
+  const handlePrint = useCallback(() => {
+    window.print()
+  }, [])
+
+  const handleToggleFullscreenPreview = useCallback(() => {
+    setIsFullscreenPreview((value) => !value)
+  }, [])
+
+  const handleToggleResponsivePreview = useCallback(() => {
+    setIsResponsivePreview((value) => !value)
+  }, [])
+
+  useEffect(() => {
+    const container = editorScrollRef.current
+
+    if (!container) {
+      return undefined
+    }
+
+    const idToNavId = new Map(ALL_SCROLL_NAV_ITEMS.map((item) => [item.anchor, item.id]))
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+
+        if (visibleEntries.length > 0) {
+          const navId = idToNavId.get(visibleEntries[0].target.id)
+
+          if (navId) {
+            setActiveSectionId(navId)
+          }
+        }
+      },
+      { root: container, rootMargin: '-10% 0px -70% 0px', threshold: [0, 1] },
+    )
+
+    ALL_SCROLL_NAV_ITEMS.forEach((item) => {
+      const target = container.querySelector(`#${item.anchor}`)
+
+      if (target) {
+        observer.observe(target)
+      }
+    })
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
   useEffect(() => {
     if (!onHeaderChange) return
     onHeaderChange({
@@ -694,10 +882,30 @@ function ResumeBuilderPage({
       locale,
       onExport: handleExport,
       onLocaleChange: handleLocaleChange,
+      canUndo,
+      canRedo,
+      onUndo: handleUndo,
+      onRedo: handleRedo,
+      templates,
+      selectedTemplateId: selectedTemplate,
+      onSelectTemplate: handleSelectTemplate,
+      templateSelectRef,
+      searchQuery,
+      onSearchChange: setSearchQuery,
+      onPrint: handlePrint,
+      isFullscreenPreview,
+      onToggleFullscreenPreview: handleToggleFullscreenPreview,
+      isResponsivePreview,
+      onToggleResponsivePreview: handleToggleResponsivePreview,
     })
   }, [
     activeExport, isActionBusy, locale,
     handleExport, handleLocaleChange,
+    canUndo, canRedo, handleUndo, handleRedo,
+    templates, selectedTemplate, handleSelectTemplate,
+    searchQuery, handlePrint,
+    isFullscreenPreview, handleToggleFullscreenPreview,
+    isResponsivePreview, handleToggleResponsivePreview,
     onHeaderChange,
   ])
 
@@ -755,7 +963,7 @@ function ResumeBuilderPage({
   }, [])
 
   const sidebarContent = useMemo(() => (
-    <div className="editor-panel p-4 sm:p-6 lg:p-8">
+    <div className="editor-panel p-4 sm:p-6 lg:p-8" ref={editorScrollRef}>
       <input
         ref={importInputRef}
         type="file"
@@ -952,8 +1160,51 @@ function ResumeBuilderPage({
     ui.textSecondary,
   ])
 
+  const filteredNavSections = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+
+    if (!query) {
+      return NAV_SECTIONS
+    }
+
+    return NAV_SECTIONS.filter((item) => (item.label[locale] ?? item.label.en).toLowerCase().includes(query))
+  }, [searchQuery, locale])
+
+  const filteredNavUtilityItems = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase()
+
+    if (!query) {
+      return NAV_UTILITY_ITEMS
+    }
+
+    return NAV_UTILITY_ITEMS.filter((item) => (item.label[locale] ?? item.label.en).toLowerCase().includes(query))
+  }, [searchQuery, locale])
+
+  const navRailContent = useMemo(() => (
+    <NavRail
+      sections={filteredNavSections}
+      utilityItems={filteredNavUtilityItems}
+      activeSectionId={activeSectionId}
+      onNavigate={handleNavigate}
+      locale={locale}
+      themePreference={themePreference}
+      onCycleThemePreference={handleCycleThemePreference}
+      version="0.2"
+    />
+  ), [
+    filteredNavSections,
+    filteredNavUtilityItems,
+    activeSectionId,
+    handleNavigate,
+    locale,
+    themePreference,
+    handleCycleThemePreference,
+  ])
+
   const previewContent = useMemo(() => (
-    <div className="preview-panel pb-28 sm:pb-6 print:p-0">
+    <div
+      className={`preview-panel pb-28 sm:pb-6 print:p-0${isFullscreenPreview ? ' preview-panel--fullscreen' : ''}${isResponsivePreview ? ' preview-panel--responsive' : ''}`}
+    >
       <div className="preview-scroll px-4 pb-6 pt-4 sm:px-6 lg:px-8 print:px-0">
         <div className="mb-4 lg:hidden print:hidden">
           <div className={`p-4 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
@@ -999,6 +1250,8 @@ function ResumeBuilderPage({
     atsFriendlyMode,
     formData,
     handleToggleMobilePreview,
+    isFullscreenPreview,
+    isResponsivePreview,
     locale,
     selectedTemplate,
     ui.button,
@@ -1074,48 +1327,10 @@ function ResumeBuilderPage({
 
   return (
     <>
-      <div
-        className="builder-template-selector overflow-x-auto no-scrollbar py-3 print:hidden"
-        style={{
-          borderBottom: '1px solid var(--app-border)',
-        }}
-      >
-        <div className="builder-template-selector__inner">
-          <div
-            className="mx-auto flex justify-center gap-2"
-            style={{ width: 'fit-content', minWidth: '100%' }}
-          >
-            {templates.map((t) => {
-              const isActive = selectedTemplate === t.id
-              return (
-                <button
-                  key={t.id}
-                  type="button"
-                  className="flex shrink-0 flex-col items-center gap-1 rounded-lg border px-3 py-2 text-center transition"
-                  style={{
-                    minWidth: '4rem',
-                    border: `1.5px solid ${isActive ? '#000000' : 'var(--app-border)'}`,
-                    backgroundColor: isActive ? '#000000' : 'transparent',
-                  }}
-                  onClick={() => handleSelectTemplate(t.id)}
-                >
-                  <div className={`h-1.5 w-full rounded-full ${t.thumbnail.accentClassName}`} />
-                  <p
-                    className="text-[0.65rem] font-bold uppercase tracking-[0.06em] leading-tight"
-                    style={{ color: isActive ? '#ffffff' : 'var(--app-text)' }}
-                  >
-                    {t.label}
-                  </p>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-
       <AppShell
         shellStyle={shellStyle}
         showContentOnMobile={mobilePreviewVisible}
+        nav={navRailContent}
         sidebar={sidebarContent}
         content={previewContent}
       />

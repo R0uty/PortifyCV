@@ -320,6 +320,7 @@ function CVForm({
   return (
     <form className="mt-8 space-y-4 sm:space-y-5">
       <PanelSection
+        id="section-settings"
         eyebrow="Section 00"
         title={isFinnish ? 'Näkyvät osiot' : 'Visible sections'}
         description={
@@ -411,6 +412,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
+        id="section-personal"
         eyebrow="Section 01"
         title={isFinnish ? 'Profiili' : 'Profile'}
         description={
@@ -493,16 +495,18 @@ function CVForm({
               />
             </Field>
           </div>
-          <Field label={isFinnish ? 'Esittely' : 'About'} labelClassName={fieldLabelClassName}>
-            <AutoGrowTextarea
-              className={textareaClasses}
-              value={formData.about}
-              onChange={(event) => updateRootField('about', event.target.value)}
-              placeholder={isFinnish
-                ? 'Tiivistä kokemuksesi, vahvuutesi ja tavoittelemasi roolit.'
-                : 'Summarize your experience, strengths, and the kind of roles you want.'}
-            />
-          </Field>
+          <div id="section-summary">
+            <Field label={isFinnish ? 'Esittely' : 'About'} labelClassName={fieldLabelClassName}>
+              <AutoGrowTextarea
+                className={textareaClasses}
+                value={formData.about}
+                onChange={(event) => updateRootField('about', event.target.value)}
+                placeholder={isFinnish
+                  ? 'Tiivistä kokemuksesi, vahvuutesi ja tavoittelemasi roolit.'
+                  : 'Summarize your experience, strengths, and the kind of roles you want.'}
+              />
+            </Field>
+          </div>
           <Field label={isFinnish ? 'Profiilikuva (valinnainen)' : 'Profile image (optional)'} labelClassName={fieldLabelClassName}>
             <input
               ref={photoInputRef}
@@ -566,6 +570,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
+        id="section-skills"
         eyebrow="Section 02"
         title={isFinnish ? 'Taidot' : 'Skills'}
         description={isFinnish ? 'Paina Enter tai pilkku muuttaaksesi taidon tagiksi.' : 'Press Enter or comma to turn each skill into a tag.'}
@@ -649,6 +654,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
+        id="section-experience"
         eyebrow="Section 03"
         title={isFinnish ? 'Kokemus' : 'Experience'}
         description={
@@ -829,6 +835,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
+        id="section-education"
         eyebrow="Section 04"
         title={isFinnish ? 'Koulutus' : 'Education'}
         description={
@@ -1093,6 +1100,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
+        id="section-certificates"
         eyebrow="Section 07"
         title={isFinnish ? 'Sertifikaatit' : 'Certificates'}
         description={
@@ -1216,6 +1224,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
+        id="section-projects"
         eyebrow="Section 08"
         title={isFinnish ? 'Projektit' : 'Projects'}
         description={
@@ -1406,6 +1415,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
+        id="section-languages"
         eyebrow="Section 09"
         title={isFinnish ? 'Kielet' : 'Languages'}
         description={
@@ -1467,6 +1477,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
+        id="section-interests"
         eyebrow="Section 10"
         title={isFinnish ? 'Kiinnostuksen kohteet' : 'Interests'}
         description={
@@ -1864,6 +1875,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
+        id="section-links"
         eyebrow="Section 14"
         title={isFinnish ? 'Linkit' : 'Links'}
         description={

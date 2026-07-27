@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useRef, useState } from 'react'
 
 import LandingPage from './pages/LandingPage'
 import Logo from './components/Logo'
-import ProjectHeader from './components/ProjectHeader'
+import Toolbar from './components/Toolbar'
 import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
 import { safeStorageGet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
@@ -96,12 +96,27 @@ function App() {
   return (
     <div className="one-pager">
       {headerProps && (
-        <ProjectHeader
+        <Toolbar
           locale={headerProps.locale}
-          activeExport={headerProps.activeExport}
-          isActionBusy={headerProps.isActionBusy}
           onReturn={goToLanding}
           onLocaleChange={headerProps.onLocaleChange}
+          canUndo={headerProps.canUndo}
+          canRedo={headerProps.canRedo}
+          onUndo={headerProps.onUndo}
+          onRedo={headerProps.onRedo}
+          templates={headerProps.templates}
+          selectedTemplateId={headerProps.selectedTemplateId}
+          onSelectTemplate={headerProps.onSelectTemplate}
+          templateSelectRef={headerProps.templateSelectRef}
+          searchQuery={headerProps.searchQuery}
+          onSearchChange={headerProps.onSearchChange}
+          onPrint={headerProps.onPrint}
+          isFullscreenPreview={headerProps.isFullscreenPreview}
+          onToggleFullscreenPreview={headerProps.onToggleFullscreenPreview}
+          isResponsivePreview={headerProps.isResponsivePreview}
+          onToggleResponsivePreview={headerProps.onToggleResponsivePreview}
+          activeExport={headerProps.activeExport}
+          isActionBusy={headerProps.isActionBusy}
           onExport={headerProps.onExport}
         />
       )}

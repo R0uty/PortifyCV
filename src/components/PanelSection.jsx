@@ -1,6 +1,7 @@
 import { getUiTheme } from '../utils/designSystem'
 
 function PanelSection({
+  id,
   eyebrow,
   title,
   description,
@@ -18,6 +19,7 @@ function PanelSection({
 
   return (
     <section
+      id={id}
       className={`editor-card fade-in-up p-5 transition-all duration-300 sm:p-6 ${ui.surface}`}
     >
       <p className="ds-kicker accent-text uppercase tracking-[0.14em]">{eyebrow}</p>

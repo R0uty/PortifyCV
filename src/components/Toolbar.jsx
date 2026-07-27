@@ -1,0 +1,173 @@
+import {
+  ArrowLeft,
+  Maximize2,
+  Minimize2,
+  Printer,
+  Redo2,
+  Search,
+  Smartphone,
+  Undo2,
+} from 'lucide-react'
+
+import Logo from './Logo'
+
+function Toolbar({
+  locale = 'en',
+  onReturn = () => {},
+  onLocaleChange = () => {},
+  canUndo = false,
+  canRedo = false,
+  onUndo = () => {},
+  onRedo = () => {},
+  templates = [],
+  selectedTemplateId = '',
+  onSelectTemplate = () => {},
+  templateSelectRef,
+  searchQuery = '',
+  onSearchChange = () => {},
+  onPrint = () => {},
+  isFullscreenPreview = false,
+  onToggleFullscreenPreview = () => {},
+  isResponsivePreview = false,
+  onToggleResponsivePreview = () => {},
+  activeExport = '',
+  isActionBusy = false,
+  onExport = () => {},
+}) {
+  const isFinnish = locale === 'fi'
+
+  return (
+    <header className="app-toolbar print:hidden">
+      <div className="app-toolbar__inner">
+        <div className="app-toolbar__group">
+          <button
+            type="button"
+            className="app-toolbar__icon-button"
+            onClick={onReturn}
+            aria-label={isFinnish ? 'Takaisin' : 'Return to landing'}
+            title={isFinnish ? 'Takaisin' : 'Return'}
+          >
+            <ArrowLeft size={16} strokeWidth={2} aria-hidden="true" />
+          </button>
+          <span className="app-toolbar__title">
+            <Logo size={18} />
+            PortifyCV
+          </span>
+        </div>
+
+        <div className="app-toolbar__group">
+          <button
+            type="button"
+            className="app-toolbar__icon-button"
+            onClick={onUndo}
+            disabled={!canUndo}
+            aria-label={isFinnish ? 'Kumoa' : 'Undo'}
+            title={isFinnish ? 'Kumoa' : 'Undo'}
+          >
+            <Undo2 size={16} strokeWidth={2} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className="app-toolbar__icon-button"
+            onClick={onRedo}
+            disabled={!canRedo}
+            aria-label={isFinnish ? 'Tee uudelleen' : 'Redo'}
+            title={isFinnish ? 'Tee uudelleen' : 'Redo'}
+          >
+            <Redo2 size={16} strokeWidth={2} aria-hidden="true" />
+          </button>
+        </div>
+
+        <div className="app-toolbar__group app-toolbar__group--search">
+          <label className="app-toolbar__search">
+            <Search size={14} strokeWidth={2} aria-hidden="true" />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder={isFinnish ? 'Etsi osioita...' : 'Search sections...'}
+              aria-label={isFinnish ? 'Etsi osioita' : 'Search sections'}
+            />
+          </label>
+        </div>
+
+        <div className="app-toolbar__spacer" />
+
+        <div className="app-toolbar__group">
+          <select
+            ref={templateSelectRef}
+            className="app-toolbar__select"
+            value={selectedTemplateId}
+            onChange={(event) => onSelectTemplate(event.target.value)}
+            aria-label={isFinnish ? 'Valitse pohja' : 'Select template'}
+          >
+            {templates.map((template) => (
+              <option key={template.id} value={template.id}>
+                {template.label}
+              </option>
+            ))}
+          </select>
+
+          <button
+            type="button"
+            className="app-toolbar__icon-button"
+            onClick={() => onLocaleChange(isFinnish ? 'en' : 'fi')}
+            aria-label={isFinnish ? 'Vaihda kieli' : 'Switch language'}
+            title={isFinnish ? 'Vaihda kieli' : 'Switch language'}
+          >
+            {isFinnish ? 'EN' : 'FI'}
+          </button>
+
+          <button
+            type="button"
+            className="app-toolbar__icon-button"
+            onClick={onPrint}
+            aria-label={isFinnish ? 'Tulosta' : 'Print'}
+            title={isFinnish ? 'Tulosta' : 'Print'}
+          >
+            <Printer size={16} strokeWidth={2} aria-hidden="true" />
+          </button>
+
+          <button
+            type="button"
+            className={`app-toolbar__icon-button${isResponsivePreview ? ' app-toolbar__icon-button--active' : ''}`}
+            onClick={onToggleResponsivePreview}
+            aria-pressed={isResponsivePreview}
+            aria-label={isFinnish ? 'Responsiivinen esikatselu' : 'Responsive preview'}
+            title={isFinnish ? 'Responsiivinen esikatselu' : 'Responsive preview'}
+          >
+            <Smartphone size={16} strokeWidth={2} aria-hidden="true" />
+          </button>
+
+          <button
+            type="button"
+            className={`app-toolbar__icon-button${isFullscreenPreview ? ' app-toolbar__icon-button--active' : ''}`}
+            onClick={onToggleFullscreenPreview}
+            aria-pressed={isFullscreenPreview}
+            aria-label={isFinnish ? 'Koko näytön esikatselu' : 'Fullscreen preview'}
+            title={isFinnish ? 'Koko näytön esikatselu' : 'Fullscreen preview'}
+          >
+            {isFullscreenPreview ? (
+              <Minimize2 size={16} strokeWidth={2} aria-hidden="true" />
+            ) : (
+              <Maximize2 size={16} strokeWidth={2} aria-hidden="true" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            className="app-toolbar__primary"
+            disabled={isActionBusy}
+            onClick={() => onExport('pdf-designer')}
+          >
+            {activeExport === 'pdf-designer'
+              ? isFinnish ? 'Viedään...' : 'Exporting...'
+              : isFinnish ? 'Vie PDF' : 'Export PDF'}
+          </button>
+        </div>
+      </div>
+    </header>
+  )
+}
+
+export default Toolbar
