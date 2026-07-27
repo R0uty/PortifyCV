@@ -150,7 +150,6 @@ export default function DeveloperShowcase({
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
-    generatedWith: isFinnish ? 'Luotu PortifyCV:llä' : 'Generated with PortifyCV',
   }
 
   const renderSidebarSection = (key) => {
@@ -590,17 +589,6 @@ export default function DeveloperShowcase({
           {mainSectionKeys.map((key) => renderMainSection(key))}
         </main>
       </div>
-
-      <footer className="dev-showcase__footer">
-        <span>PortifyCV · v1.0</span>
-        <span><strong>{copy.generatedWith}</strong></span>
-        <span>
-          {new Date().toLocaleDateString(isFinnish ? 'fi-FI' : 'en-US', {
-            year: 'numeric',
-            month: 'short',
-          })}
-        </span>
-      </footer>
     </article>
   )
 }

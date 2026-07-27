@@ -1,18 +1,4 @@
-import { Laptop, Moon, Sun } from 'lucide-react'
-
 import Logo from './Logo'
-
-const THEME_ICONS = {
-  light: Sun,
-  dark: Moon,
-  system: Laptop,
-}
-
-const THEME_LABELS = {
-  light: { en: 'Light', fi: 'Vaalea' },
-  dark: { en: 'Dark', fi: 'Tumma' },
-  system: { en: 'System', fi: 'Järjestelmä' },
-}
 
 function NavItem({ item, isActive, locale, onNavigate }) {
   const Icon = item.icon
@@ -39,13 +25,9 @@ function NavRail({
   activeSectionId,
   onNavigate,
   locale = 'en',
-  themePreference = 'system',
-  onCycleThemePreference,
   version = '',
 }) {
   const isFinnish = locale === 'fi'
-  const ThemeIcon = THEME_ICONS[themePreference] ?? Laptop
-  const themeLabel = THEME_LABELS[themePreference]?.[locale] ?? THEME_LABELS[themePreference]?.en ?? themePreference
 
   return (
     <nav className="nav-rail" aria-label={isFinnish ? 'Osionavigointi' : 'Section navigation'}>
@@ -80,19 +62,11 @@ function NavRail({
         ))}
       </ul>
 
-      <div className="nav-rail__footer">
-        <button
-          type="button"
-          className="nav-rail__theme-toggle"
-          onClick={onCycleThemePreference}
-          aria-label={isFinnish ? `Teema: ${themeLabel}. Vaihda teemaa.` : `Theme: ${themeLabel}. Click to change.`}
-          title={isFinnish ? `Teema: ${themeLabel}` : `Theme: ${themeLabel}`}
-        >
-          <ThemeIcon size={16} strokeWidth={2} aria-hidden="true" />
-          <span>{themeLabel}</span>
-        </button>
-        {version ? <p className="nav-rail__version">v{version}</p> : null}
-      </div>
+      {version ? (
+        <div className="nav-rail__footer">
+          <p className="nav-rail__version">v{version}</p>
+        </div>
+      ) : null}
     </nav>
   )
 }

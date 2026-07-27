@@ -91,53 +91,6 @@
   --scrollbar-thumb-hover: rgba(15, 15, 25, 0.30);
 }
 
-:root[data-theme='dark'] {
-  color-scheme: dark;
-
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.30);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.40), 0 1px 2px rgba(0, 0, 0, 0.30);
-  --shadow-lg: 0 20px 44px rgba(0, 0, 0, 0.55), 0 2px 10px rgba(0, 0, 0, 0.35);
-  --shadow-soft: var(--shadow-sm);
-  --shadow-card: var(--shadow-sm);
-
-  --accent-solid: #818cf8;
-  --accent-solid-hover: #a5b4fc;
-  --accent-text: #a5b4fc;
-  --accent-text-strong: #c7d2fe;
-  --accent-contrast: #0b0b0e;
-  --accent-border: rgba(129, 140, 248, 0.35);
-  --accent-soft: rgba(129, 140, 248, 0.14);
-  --accent-soft-strong: rgba(129, 140, 248, 0.22);
-  --accent-ring: rgba(129, 140, 248, 0.45);
-  --accent-glow: rgba(129, 140, 248, 0.28);
-
-  --app-bg: #0b0b0e;
-  --app-bg-elevated: #121216;
-  --app-surface: #17171c;
-  --app-surface-strong: #1d1d23;
-  --app-panel: #141418;
-  --app-border: rgba(255, 255, 255, 0.08);
-  --app-border-strong: rgba(255, 255, 255, 0.16);
-  --app-text: #f3f3f6;
-  --app-text-muted: rgba(243, 243, 246, 0.62);
-  --app-text-subtle: rgba(243, 243, 246, 0.52);
-  --app-shadow: var(--shadow-md);
-
-  --preview-divider: var(--app-border);
-  --preview-paper-shadow: var(--shadow-lg);
-  --preview-panel-bg: var(--app-surface-strong);
-
-  --action-bar-bg: var(--app-bg-elevated);
-  --action-button-primary-bg: var(--accent-solid);
-  --action-button-primary-text: var(--accent-contrast);
-  --action-button-secondary-text: var(--app-text);
-
-  --scrollbar-track: rgba(255, 255, 255, 0.04);
-  --scrollbar-thumb: rgba(255, 255, 255, 0.14);
-  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.26);
-}
-
 * {
   box-sizing: border-box;
 }
@@ -332,11 +285,6 @@ select:focus {
   color: var(--app-text);
   background: transparent;
 }
-
-/* .app-shell--light is applied by AppShell.jsx but no longer redeclares
-   tokens here — :root / :root[data-theme='dark'] are the single source of
-   truth so this modifier doesn't shadow theme switching. Retained as a
-   selector hook for Phase 2's shell rebuild. */
 
 .app-shell__surface {
   display: flex;
@@ -1208,30 +1156,6 @@ select.floating-field__control {
   max-width: 24rem;
 }
 
-.settings-segmented {
-  display: inline-flex;
-  padding: 0.2rem;
-  border: 1px solid var(--app-border);
-  border-radius: var(--radius-sm);
-  background: var(--app-surface-strong);
-  flex-shrink: 0;
-}
-
-.settings-segmented__option {
-  padding: 0.3rem 0.65rem;
-  border-radius: calc(var(--radius-sm) - 2px);
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--app-text-muted);
-  transition: background-color 120ms ease, color 120ms ease;
-}
-
-.settings-segmented__option--active {
-  background: var(--app-bg-elevated);
-  color: var(--accent-text);
-  box-shadow: var(--shadow-xs);
-}
-
 .settings-link {
   flex-shrink: 0;
   padding: 0.4rem 0.7rem;
@@ -1608,30 +1532,8 @@ select.floating-field__control {
 
 .nav-rail__footer {
   margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   padding: var(--space-3) var(--space-2) 0;
   border-top: 1px solid var(--app-border);
-}
-
-.nav-rail__theme-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.6rem;
-  border: 1px solid var(--app-border);
-  border-radius: var(--radius-sm);
-  background: var(--app-surface);
-  color: var(--app-text-muted);
-  font-size: 0.75rem;
-  font-weight: 600;
-  transition: color 140ms ease, border-color 140ms ease;
-}
-
-.nav-rail__theme-toggle:hover {
-  color: var(--app-text);
-  border-color: var(--app-border-strong);
 }
 
 .nav-rail__version {
@@ -3640,26 +3542,6 @@ select.floating-field__control {
   color: var(--dev-muted);
 }
 
-/* ── Footer ── */
-
-.dev-showcase__footer {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.85rem 2.25rem;
-  background: linear-gradient(90deg, var(--dev-primary), #1e293b);
-  color: #94a3b8;
-  font-size: 0.68rem;
-}
-
-.dev-showcase__footer strong {
-  color: #e2e8f0;
-}
-
 /* ── Animations ── */
 
 @keyframes dev-fade-up {
@@ -3711,12 +3593,6 @@ select.floating-field__control {
 
   .dev-showcase__name {
     font-size: 2rem;
-  }
-
-  .dev-showcase__footer {
-    padding: 0.75rem 1.25rem;
-    justify-content: center;
-    text-align: center;
   }
 }
 

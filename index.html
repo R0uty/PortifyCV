@@ -4,29 +4,14 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0b0b0e" media="(prefers-color-scheme: dark)" />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#fbfbfd" />
+    <meta name="color-scheme" content="light" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
       rel="stylesheet"
     />
-    <script>
-      (function () {
-        try {
-          var stored = window.localStorage.getItem('portifycv-ui-theme');
-          var preference = stored === 'light' || stored === 'dark' ? stored : 'system';
-          var resolved = preference === 'system'
-            ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-            : preference;
-          document.documentElement.dataset.theme = resolved;
-        } catch (error) {
-          document.documentElement.dataset.theme = 'light';
-        }
-      })();
-    </script>
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="X-Frame-Options" content="DENY" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />

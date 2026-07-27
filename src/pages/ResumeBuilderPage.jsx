@@ -31,9 +31,7 @@ import SettingsModal from '../components/SettingsModal'
 import TemplateGalleryModal from '../components/TemplateGalleryModal'
 import ToastStack from '../components/ToastStack'
 import {
-  getThemePreference,
   getUiTheme,
-  setThemePreference,
   UI_LOCALE_STORAGE_KEY,
 } from '../utils/designSystem'
 import {
@@ -75,7 +73,6 @@ import {
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
-const THEME_PREFERENCE_CYCLE = ['light', 'dark', 'system']
 
 const NAV_SECTIONS = [
   { id: 'personal', anchor: 'section-personal', icon: User, kind: 'scroll', label: { en: 'Personal Information', fi: 'Henkilötiedot' } },
@@ -327,7 +324,6 @@ function ResumeBuilderPage({
   const previewViewportRef = useRef(null)
 
   const [activeSectionId, setActiveSectionId] = useState('personal')
-  const [themePreference, setThemePreferenceState] = useState(() => getThemePreference())
   const [searchQuery, setSearchQuery] = useState('')
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false)
   const [isResponsivePreview, setIsResponsivePreview] = useState(false)
@@ -843,19 +839,6 @@ function ResumeBuilderPage({
     }
   }, [handleExport])
 
-  const handleCycleThemePreference = useCallback(() => {
-    const currentIndex = THEME_PREFERENCE_CYCLE.indexOf(themePreference)
-    const nextPreference = THEME_PREFERENCE_CYCLE[(currentIndex + 1) % THEME_PREFERENCE_CYCLE.length]
-
-    setThemePreference(nextPreference)
-    setThemePreferenceState(nextPreference)
-  }, [themePreference])
-
-  const handleSetThemePreference = useCallback((nextPreference) => {
-    setThemePreference(nextPreference)
-    setThemePreferenceState(nextPreference)
-  }, [])
-
   const handleManageSections = useCallback(() => {
     setIsSettingsOpen(false)
 
@@ -1308,8 +1291,6 @@ function ResumeBuilderPage({
       activeSectionId={activeSectionId}
       onNavigate={handleNavigate}
       locale={locale}
-      themePreference={themePreference}
-      onCycleThemePreference={handleCycleThemePreference}
       version="0.2"
     />
   ), [
@@ -1318,8 +1299,6 @@ function ResumeBuilderPage({
     activeSectionId,
     handleNavigate,
     locale,
-    themePreference,
-    handleCycleThemePreference,
   ])
 
   const previewContent = useMemo(() => (
@@ -1591,8 +1570,6 @@ function ResumeBuilderPage({
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         locale={locale}
-        themePreference={themePreference}
-        onSetThemePreference={handleSetThemePreference}
         atsFriendlyMode={atsFriendlyMode}
         onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
         onManageSections={handleManageSections}
