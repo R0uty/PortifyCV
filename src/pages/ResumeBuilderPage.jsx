@@ -27,6 +27,8 @@ import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
 import CVSuggestionsPanel from '../components/CVSuggestionsPanel'
 import NavRail from '../components/NavRail'
+import SettingsModal from '../components/SettingsModal'
+import TemplateGalleryModal from '../components/TemplateGalleryModal'
 import ToastStack from '../components/ToastStack'
 import {
   getThemePreference,
@@ -89,7 +91,7 @@ const NAV_SECTIONS = [
 ]
 
 const NAV_UTILITY_ITEMS = [
-  { id: 'settings', anchor: 'section-settings', icon: SettingsIcon, kind: 'scroll', label: { en: 'Settings', fi: 'Asetukset' } },
+  { id: 'settings', icon: SettingsIcon, kind: 'action', label: { en: 'Settings', fi: 'Asetukset' } },
   { id: 'templates', icon: LayoutTemplate, kind: 'action', label: { en: 'Templates', fi: 'Pohjat' } },
   { id: 'export', icon: Download, kind: 'action', label: { en: 'Export', fi: 'Vie' } },
 ]
@@ -322,6 +324,8 @@ function ResumeBuilderPage({
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false)
   const [isResponsivePreview, setIsResponsivePreview] = useState(false)
   const [zoomPercent, setZoomPercent] = useState(100)
+  const [isTemplateGalleryOpen, setIsTemplateGalleryOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   const [historyPast, setHistoryPast] = useState([])
   const [historyFuture, setHistoryFuture] = useState([])
@@ -813,11 +817,9 @@ function ResumeBuilderPage({
   const handleNavigate = useCallback((item) => {
     if (item.kind === 'action') {
       if (item.id === 'templates') {
-        if (templateSelectRef.current?.showPicker) {
-          templateSelectRef.current.showPicker()
-        } else {
-          templateSelectRef.current?.focus()
-        }
+        setIsTemplateGalleryOpen(true)
+      } else if (item.id === 'settings') {
+        setIsSettingsOpen(true)
       } else if (item.id === 'export') {
         handleExport('pdf-designer')
       }
@@ -840,6 +842,24 @@ function ResumeBuilderPage({
     setThemePreference(nextPreference)
     setThemePreferenceState(nextPreference)
   }, [themePreference])
+
+  const handleSetThemePreference = useCallback((nextPreference) => {
+    setThemePreference(nextPreference)
+    setThemePreferenceState(nextPreference)
+  }, [])
+
+  const handleManageSections = useCallback(() => {
+    setIsSettingsOpen(false)
+
+    const container = editorScrollRef.current
+    const target = container?.querySelector('#section-settings')
+
+    if (target) {
+      window.requestAnimationFrame(() => {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      })
+    }
+  }, [])
 
   const handlePrint = useCallback(() => {
     window.print()
@@ -1518,6 +1538,27 @@ function ResumeBuilderPage({
       />
 
       {mobileBottomActions}
+
+      <TemplateGalleryModal
+        isOpen={isTemplateGalleryOpen}
+        onClose={() => setIsTemplateGalleryOpen(false)}
+        templates={templates}
+        selectedTemplateId={selectedTemplate}
+        onSelectTemplate={handleSelectTemplate}
+        atsScore={atsScore}
+        locale={locale}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        locale={locale}
+        themePreference={themePreference}
+        onSetThemePreference={handleSetThemePreference}
+        atsFriendlyMode={atsFriendlyMode}
+        onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
+        onManageSections={handleManageSections}
+      />
 
       <ToastStack toasts={toasts} />
     </>
