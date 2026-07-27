@@ -59,6 +59,7 @@ export const FORM_ACTION = {
   REMOVE_ARRAY_ITEM: 'REMOVE_ARRAY_ITEM',
   DUPLICATE_ARRAY_ITEM: 'DUPLICATE_ARRAY_ITEM',
   MOVE_ARRAY_ITEM: 'MOVE_ARRAY_ITEM',
+  MOVE_ARRAY_ITEM_TO_INDEX: 'MOVE_ARRAY_ITEM_TO_INDEX',
   SET_FORM_DATA: 'SET_FORM_DATA',
   RESET_FORM: 'RESET_FORM',
   MERGE_FORM_DATA: 'MERGE_FORM_DATA',
@@ -101,6 +102,34 @@ function shiftVisibilityMapAfterInsert(visibilityMap = {}, insertedIndex) {
     }
 
     next[String(index)] = value
+    return next
+  }, {})
+}
+
+function moveVisibilityMapIndex(visibilityMap = {}, fromIndex, toIndex) {
+  if (fromIndex === toIndex) {
+    return visibilityMap
+  }
+
+  return Object.entries(visibilityMap).reduce((next, [key, value]) => {
+    const index = Number.parseInt(key, 10)
+
+    if (!Number.isInteger(index)) {
+      next[key] = value
+      return next
+    }
+
+    let nextIndex = index
+
+    if (index === fromIndex) {
+      nextIndex = toIndex
+    } else if (fromIndex < toIndex && index > fromIndex && index <= toIndex) {
+      nextIndex = index - 1
+    } else if (fromIndex > toIndex && index >= toIndex && index < fromIndex) {
+      nextIndex = index + 1
+    }
+
+    next[String(nextIndex)] = value
     return next
   }, {})
 }
@@ -420,6 +449,45 @@ export function cvFormReducer(state, action) {
             state.sectionItemVisibility?.[action.section],
             action.index,
             nextIndex,
+          ),
+        },
+      }
+    }
+
+    case FORM_ACTION.MOVE_ARRAY_ITEM_TO_INDEX: {
+      if (!Array.isArray(state[action.section])) {
+        return state
+      }
+
+      const items = state[action.section]
+      const fromIndex = action.fromIndex
+      const toIndex = Math.max(0, Math.min(action.toIndex, items.length - 1))
+
+      if (
+        fromIndex < 0 ||
+        fromIndex >= items.length ||
+        toIndex < 0 ||
+        toIndex >= items.length ||
+        fromIndex === toIndex
+      ) {
+        return state
+      }
+
+      const nextItems = [...items]
+      const [movedItem] = nextItems.splice(fromIndex, 1)
+
+      nextItems.splice(toIndex, 0, movedItem)
+
+      return {
+        ...state,
+        [action.section]: nextItems,
+        sectionItemVisibility: {
+          ...createSectionItemVisibility(),
+          ...(state.sectionItemVisibility ?? {}),
+          [action.section]: moveVisibilityMapIndex(
+            state.sectionItemVisibility?.[action.section],
+            fromIndex,
+            toIndex,
           ),
         },
       }

@@ -1,5 +1,7 @@
-export function formatDateRange(startDate, endDate) {
-  return [startDate, endDate].map((value) => value.trim()).filter(Boolean).join(' - ')
+export function formatDateRange(startDate, endDate, isCurrent = false, presentLabel = 'Present') {
+  const resolvedEndDate = isCurrent ? presentLabel : endDate
+
+  return [startDate, resolvedEndDate].map((value) => value.trim()).filter(Boolean).join(' - ')
 }
 
 export function formatLinkLabel(key) {

@@ -4,9 +4,13 @@ export interface CvExperienceItem {
   role: string
   company: string
   location: string
+  employmentType: string
   startDate: string
   endDate: string
+  isCurrent: boolean
   description: string
+  achievements: string[]
+  technologies: string[]
 }
 
 export interface CvEducationItem {
@@ -62,6 +66,7 @@ export interface CvProjectItem {
   date: string
   teamSize: string
   contribution: string
+  image: string
 }
 
 export interface CvLanguageItem {

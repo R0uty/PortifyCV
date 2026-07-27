@@ -5,13 +5,25 @@ export const CV_DRAFT_STORAGE_KEY = 'portifycv-draft'
 export const CV_DRAFT_PHOTO_STORAGE_KEY = 'portifycv-draft-photo'
 export const CV_ONBOARDING_SEEN_STORAGE_KEY = 'portifycv-onboarding-seen'
 
+export const EMPLOYMENT_TYPE_OPTIONS = [
+  'Full-time',
+  'Part-time',
+  'Contract',
+  'Internship',
+  'Freelance',
+]
+
 export const createEmptyExperience = () => ({
   role: '',
   company: '',
   location: '',
+  employmentType: '',
   startDate: '',
   endDate: '',
+  isCurrent: false,
   description: '',
+  achievements: [],
+  technologies: [],
 })
 
 export const createEmptyEducation = () => ({
@@ -67,6 +79,7 @@ export const createEmptyProject = () => ({
   date: '',
   teamSize: '',
   contribution: '',
+  image: '',
 })
 
 export const createEmptyLanguage = () => ({
@@ -350,19 +363,32 @@ export const demoCvData = {
       role: 'Senior Product Designer',
       company: 'Studio North',
       location: 'Helsinki, Finland',
+      employmentType: 'Full-time',
       startDate: 'Jan 2022',
-      endDate: 'Present',
+      endDate: '',
+      isCurrent: true,
       description:
         'Led end-to-end design for a B2B collaboration suite, improving activation by 21% and building a reusable component library for cross-team delivery.',
+      achievements: [
+        'Grew activation by 21% through a redesigned onboarding flow.',
+        'Built a shared component library adopted by 6 product teams.',
+      ],
+      technologies: ['Figma', 'Design Systems', 'Storybook'],
     },
     {
       role: 'Product Designer',
       company: 'Atlas Labs',
       location: 'Remote',
+      employmentType: 'Full-time',
       startDate: 'Jun 2019',
       endDate: 'Dec 2021',
+      isCurrent: false,
       description:
         'Partnered with engineering and product teams to redesign onboarding flows, launch customer interview loops, and ship data-informed UX improvements.',
+      achievements: [
+        'Ran a recurring customer interview loop that shaped the 2020 roadmap.',
+      ],
+      technologies: ['Figma', 'User Research'],
     },
   ],
   education: [
@@ -432,6 +458,7 @@ export const demoCvData = {
       date: '2023',
       teamSize: 'Team of 4',
       contribution: 'Led the component API design and Storybook documentation.',
+      image: '',
     },
   ],
   languages: [
@@ -796,6 +823,30 @@ function readOptionalString(value, path) {
   return value
 }
 
+function readOptionalBoolean(value, path) {
+  if (value === undefined) {
+    return false
+  }
+
+  if (typeof value !== 'boolean') {
+    throw new Error(`${path} must be true or false.`)
+  }
+
+  return value
+}
+
+function readOptionalStringArray(value, path) {
+  if (value === undefined) {
+    return []
+  }
+
+  if (!Array.isArray(value) || !value.every((entry) => typeof entry === 'string')) {
+    throw new Error(`${path} must be a list of text values.`)
+  }
+
+  return value
+}
+
 export function normalizeSectionOrder(sectionOrder, fallbackOrder = CV_SECTION_ORDER_KEYS) {
   const fallback = Array.isArray(fallbackOrder) && fallbackOrder.length > 0
     ? fallbackOrder
@@ -921,7 +972,10 @@ export function parseImportedCvData(value) {
   experience.forEach((item, index) => {
     validateAllowedKeys(
       item,
-      ['role', 'company', 'location', 'startDate', 'endDate', 'description'],
+      [
+        'role', 'company', 'location', 'employmentType', 'startDate', 'endDate',
+        'isCurrent', 'description', 'achievements', 'technologies',
+      ],
       `experience[${index}]`,
     )
   })
@@ -979,7 +1033,7 @@ export function parseImportedCvData(value) {
       item,
       [
         'name', 'description', 'stack', 'githubUrl', 'demoUrl', 'organization', 'impact', 'date',
-        'teamSize', 'contribution',
+        'teamSize', 'contribution', 'image',
       ],
       `projects[${index}]`,
     )
@@ -1285,11 +1339,24 @@ export function parseImportedCvData(value) {
             role: readOptionalString(item.role, `experience[${index}].role`),
             company: readOptionalString(item.company, `experience[${index}].company`),
             location: readOptionalString(item.location, `experience[${index}].location`),
+            employmentType: readOptionalString(
+              item.employmentType,
+              `experience[${index}].employmentType`,
+            ),
             startDate: readOptionalString(item.startDate, `experience[${index}].startDate`),
             endDate: readOptionalString(item.endDate, `experience[${index}].endDate`),
+            isCurrent: readOptionalBoolean(item.isCurrent, `experience[${index}].isCurrent`),
             description: readOptionalString(
               item.description,
               `experience[${index}].description`,
+            ),
+            achievements: readOptionalStringArray(
+              item.achievements,
+              `experience[${index}].achievements`,
+            ),
+            technologies: readOptionalStringArray(
+              item.technologies,
+              `experience[${index}].technologies`,
             ),
           }))
         : [createEmptyExperience()],
@@ -1359,6 +1426,7 @@ export function parseImportedCvData(value) {
             date: readOptionalString(item.date, `projects[${index}].date`),
             teamSize: readOptionalString(item.teamSize, `projects[${index}].teamSize`),
             contribution: readOptionalString(item.contribution, `projects[${index}].contribution`),
+            image: readOptionalString(item.image, `projects[${index}].image`),
           }))
         : [createEmptyProject()],
     languages:

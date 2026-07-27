@@ -442,7 +442,12 @@ function CVPreview({
             <div className={`mt-5 ${experienceItemGap}`}>
               {experience.length > 0 ? (
                 experience.map((item, index) => {
-                  const dateRange = formatDateRange(item.startDate, item.endDate)
+                  const dateRange = formatDateRange(
+                    item.startDate,
+                    item.endDate,
+                    item.isCurrent,
+                    isFinnish ? 'Nykyinen' : 'Present',
+                  )
                   const heading = [item.role.trim(), item.company.trim()]
                     .filter(Boolean)
                     .join(' @ ')
@@ -461,6 +466,26 @@ function CVPreview({
 
                     return <p className={`mt-2 ${experienceDescSize} ${bodyTextClasses}`}>{text}</p>
                   }
+                  const renderExtras = () => (
+                    <>
+                      {item.achievements?.length > 0 ? (
+                        <ul className={`mt-2 list-disc space-y-1.5 pl-4 ${experienceDescSize} ${bodyTextClasses}`}>
+                          {item.achievements.map((achievement, achievementIndex) => (
+                            <li key={achievementIndex}>{achievement}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {item.technologies?.length > 0 ? (
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {item.technologies.map((technology) => (
+                            <span key={technology} data-export-skill="true" className={resolvedSkillTagClasses}>
+                              {technology}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null}
+                    </>
+                  )
 
                   // Timeline-clean layout — left-border + dot marker, with role, company,
                   // and location shown as separate lines (used by the Tech Executive template).
@@ -493,6 +518,7 @@ function CVPreview({
                               </p>
                             ) : null}
                             {item.description.trim() ? renderDescription(item.description) : null}
+                            {renderExtras()}
                           </div>
 
                           <p className={`shrink-0 sm:ml-4 ${experienceDateSize} font-medium uppercase tracking-[0.16em] ${metaTextClasses}`}>
@@ -528,6 +554,7 @@ function CVPreview({
                                 {item.description}
                               </p>
                             ) : null}
+                            {renderExtras()}
                           </div>
 
                           <p className={`shrink-0 sm:ml-4 ${experienceDateSize} font-medium uppercase tracking-[0.16em] ${metaTextClasses}`}>
@@ -566,6 +593,7 @@ function CVPreview({
                               {item.description}
                             </p>
                           ) : null}
+                          {renderExtras()}
                         </div>
 
                         <p className={`shrink-0 ${experienceDateSize} font-medium uppercase tracking-[0.16em] ${metaTextClasses}`}>
@@ -927,6 +955,14 @@ function CVPreview({
               {projects.length > 0 ? (
                 projects.map((item, index) => (
                   <div key={`${item.name}-${index}`} data-export-card="true">
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt=""
+                        className="mb-2 w-full max-w-xs rounded object-cover"
+                        style={{ maxHeight: '9rem' }}
+                      />
+                    ) : null}
                     {item.name ? (
                       <p className={`text-sm font-semibold tracking-tight ${accentTextClasses}`}>{item.name}</p>
                     ) : null}

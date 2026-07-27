@@ -1,10 +1,30 @@
 import { useRef, useState } from 'react'
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { Sparkles } from 'lucide-react'
 
 import AutoGrowTextarea from './AutoGrowTextarea'
 import EntryBadge from './EntryBadge'
 import Field from './Field'
 import InlineTipList from './InlineTipList'
 import PanelSection from './PanelSection'
+import SortableItemCard from './SortableItemCard'
+import DragDropUpload from './fields/DragDropUpload'
+import FloatingField from './fields/FloatingField'
+import ReorderableListInput from './fields/ReorderableListInput'
+import TagsInput from './fields/TagsInput'
+import ToggleSwitch from './fields/ToggleSwitch'
 import { getUiTheme } from '../utils/designSystem'
 import { getCvTemplate } from '../utils/cvTemplates'
 import {
@@ -14,6 +34,7 @@ import {
   isPhotoVisibleForTemplate,
   getLinkFields,
   getSectionVisibilityFields,
+  EMPLOYMENT_TYPE_OPTIONS,
 } from '../utils/cvForm'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 
@@ -94,6 +115,23 @@ function isSectionItemVisible(sectionItemVisibility, section, itemKey) {
   return sectionItemVisibility?.[section]?.[String(itemKey)] !== false
 }
 
+function SectionEmptyState({ title, body, actionLabel, onAction }) {
+  return (
+    <div className="empty-state">
+      <span className="empty-state__icon">
+        <Sparkles size={18} strokeWidth={2} aria-hidden="true" />
+      </span>
+      <p className="empty-state__title">{title}</p>
+      <p className="empty-state__body">{body}</p>
+      {actionLabel ? (
+        <button type="button" className="empty-state__action" onClick={onAction}>
+          {actionLabel}
+        </button>
+      ) : null}
+    </div>
+  )
+}
+
 function CVForm({
   formData,
   dispatchFormData,
@@ -107,9 +145,13 @@ function CVForm({
   selectedTemplate = '',
   selectedTemplateLabel = 'Current template',
 }) {
-  const [skillInput, setSkillInput] = useState('')
   const [draggedSectionKey, setDraggedSectionKey] = useState('')
+  const [collapsedItems, setCollapsedItems] = useState(() => new Set())
   const photoInputRef = useRef(null)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
   const ui = getUiTheme(theme)
   const isFinnish = locale === 'fi'
   const sectionVisibilityFields = getSectionVisibilityFields(locale)
@@ -151,11 +193,6 @@ function CVForm({
   const improveButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
   const sectionDragHandleClasses = `inline-flex cursor-grab select-none items-center gap-2 border px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em] ${ui.button}`
   const sectionDragDotClasses = `h-1 w-1 ${ui.isDark ? 'bg-gray-300' : 'bg-gray-500'}`
-  const tagClasses = `inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold ${
-    ui.isDark
-      ? 'bg-[var(--accent-soft)] text-[var(--accent-text)]'
-      : 'bg-[var(--accent-soft)] text-[var(--accent-text-strong)]'
-  }`
   const fieldLabelClassName = `${ui.textSoft} uppercase tracking-[0.06em] text-xs font-semibold`
   const itemCardClasses = `border p-4 ${ui.surfaceMuted}`
   const itemHeadingClasses = `${ui.textPrimary} uppercase tracking-[0.04em] text-xs font-bold`
@@ -201,6 +238,21 @@ function CVForm({
     }
   }
 
+  const handleProjectImageUpload = async (index, file) => {
+    try {
+      const imageDataUrl = await buildProfilePhotoDataUrl(file)
+      updateArrayItem('projects', index, 'image', imageDataUrl)
+    } catch (error) {
+      if (onPhotoError) {
+        onPhotoError(
+          error instanceof Error
+            ? localizePhotoErrorMessage(error.message, locale)
+            : isFinnish ? 'Kuvan lataus epäonnistui.' : 'Could not upload image.',
+        )
+      }
+    }
+  }
+
   const updateLinkField = (field, value) => {
     dispatchFormData({ type: FORM_ACTION.SET_LINK_FIELD, field, value })
   }
@@ -221,27 +273,6 @@ function CVForm({
     dispatchFormData({ type: FORM_ACTION.TOGGLE_PHOTO_VISIBILITY, template: selectedTemplate })
   }
 
-  const addSkill = (value) => {
-    if (!value.trim()) {
-      return
-    }
-
-    dispatchFormData({ type: FORM_ACTION.ADD_SKILL, skill: value })
-    setSkillInput('')
-  }
-
-  const removeSkill = (index) => {
-    dispatchFormData({ type: FORM_ACTION.REMOVE_SKILL, index })
-  }
-
-  const duplicateSkill = (index) => {
-    dispatchFormData({ type: FORM_ACTION.DUPLICATE_SKILL, index })
-  }
-
-  const moveSkill = (index, direction) => {
-    dispatchFormData({ type: FORM_ACTION.MOVE_SKILL, index, direction })
-  }
-
   const updateArrayItem = (section, index, field, value) => {
     dispatchFormData({ type: FORM_ACTION.UPDATE_ARRAY_ITEM, section, index, field, value })
   }
@@ -260,6 +291,39 @@ function CVForm({
 
   const moveArrayItem = (section, index, direction) => {
     dispatchFormData({ type: FORM_ACTION.MOVE_ARRAY_ITEM, section, index, direction })
+  }
+
+  const moveArrayItemToIndex = (section, fromIndex, toIndex) => {
+    dispatchFormData({ type: FORM_ACTION.MOVE_ARRAY_ITEM_TO_INDEX, section, fromIndex, toIndex })
+  }
+
+  const makeArrayDragEndHandler = (section) => (event) => {
+    const { active, over } = event
+
+    if (!over || active.id === over.id) {
+      return
+    }
+
+    const fromIndex = Number(String(active.id).split(':').pop())
+    const toIndex = Number(String(over.id).split(':').pop())
+
+    if (Number.isInteger(fromIndex) && Number.isInteger(toIndex)) {
+      moveArrayItemToIndex(section, fromIndex, toIndex)
+    }
+  }
+
+  const toggleItemCollapsed = (itemKey) => {
+    setCollapsedItems((previous) => {
+      const next = new Set(previous)
+
+      if (next.has(itemKey)) {
+        next.delete(itemKey)
+      } else {
+        next.add(itemKey)
+      }
+
+      return next
+    })
   }
 
   const moveSectionOrder = (fromSection, toSection) => {
@@ -304,17 +368,6 @@ function CVForm({
 
   const handleSectionDragEnd = () => {
     setDraggedSectionKey('')
-  }
-
-  const handleSkillKeyDown = (event) => {
-    if (event.key === 'Enter' || event.key === ',') {
-      event.preventDefault()
-      addSkill(skillInput)
-    }
-
-    if (event.key === 'Backspace' && !skillInput && formData.skills.length > 0) {
-      removeSkill(formData.skills.length - 1)
-    }
   }
 
   return (
@@ -578,72 +631,17 @@ function CVForm({
         badge={feedback.sectionBadges.skills}
       >
         <div className="space-y-3">
-          <Field label={isFinnish ? 'Taitotagit' : 'Skill tags'} labelClassName={fieldLabelClassName}>
-            <div className={`mt-2 border px-3 py-3 ${ui.inputShell}`}>
-              <div className="flex flex-wrap gap-2">
-                {formData.skills.map((skill, index) => (
-                  <span key={`${skill}-${index}`} className={tagClasses}>
-                    {skill}
-                    <button
-                      type="button"
-                      className="border px-2 py-0.5 text-[10px] font-bold text-current/80 transition hover:text-current"
-                      onClick={() => toggleSectionItemVisibility('skills', index)}
-                      aria-label={`${isSectionItemVisible(sectionItemVisibility, 'skills', index) ? copy.hide : copy.show} ${skill}`}
-                    >
-                      {isSectionItemVisible(sectionItemVisibility, 'skills', index) ? copy.hide : copy.show}
-                    </button>
-                    <button
-                      type="button"
-                      className="border px-2 py-0.5 text-[10px] font-bold text-current/80 transition hover:text-current"
-                      onClick={() => moveSkill(index, -1)}
-                      disabled={index === 0}
-                      aria-label={`Move ${skill} ${copy.up.toLowerCase()}`}
-                    >
-                      {copy.up}
-                    </button>
-                    <button
-                      type="button"
-                      className="border px-2 py-0.5 text-[10px] font-bold text-current/80 transition hover:text-current"
-                      onClick={() => moveSkill(index, 1)}
-                      disabled={index === formData.skills.length - 1}
-                      aria-label={`Move ${skill} ${copy.down.toLowerCase()}`}
-                    >
-                      {copy.down}
-                    </button>
-                    <button
-                      type="button"
-                      className="border px-2 py-0.5 text-[10px] font-bold text-current/80 transition hover:text-current"
-                      onClick={() => duplicateSkill(index)}
-                      aria-label={`${copy.duplicate} ${skill}`}
-                    >
-                      {copy.duplicateShort}
-                    </button>
-                    <button
-                      type="button"
-                      className="border px-2 py-0.5 text-[10px] font-bold text-current/80 transition hover:text-current"
-                      onClick={() => removeSkill(index)}
-                      aria-label={`${copy.remove} ${skill}`}
-                    >
-                      X
-                    </button>
-                  </span>
-                ))}
-                <input
-                  className={`min-w-[140px] flex-1 border-0 bg-transparent py-1 text-sm outline-none ${
-                    ui.isDark
-                      ? 'text-white placeholder:text-gray-500'
-                      : 'text-black placeholder:text-gray-400'
-                  }`}
-                  type="text"
-                  value={skillInput}
-                  onChange={(event) => setSkillInput(event.target.value)}
-                  onKeyDown={handleSkillKeyDown}
-                  onBlur={() => addSkill(skillInput)}
-                  placeholder={isFinnish ? 'Lisää taito' : 'Add a skill'}
-                />
-              </div>
-            </div>
-          </Field>
+          <p className={`mb-2 text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}>
+            {isFinnish ? 'Taitotagit' : 'Skill tags'}
+          </p>
+          <TagsInput
+            value={formData.skills}
+            onChange={(nextSkills) =>
+              dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'skills', value: nextSkills })
+            }
+            placeholder={isFinnish ? 'Lisää taito' : 'Add a skill'}
+            ariaLabel={isFinnish ? 'Taitotagit' : 'Skill tags'}
+          />
           <p className={`text-xs ${helperTextClasses}`}>
             {isFinnish
               ? 'Vinkki: Backspace poistaa viimeisen tagin, kun kenttä on tyhjä.'
@@ -667,163 +665,189 @@ function CVForm({
       >
         <div className="space-y-4">
           <InlineTipList items={feedback.inlineTips.experience} theme={theme} locale={locale} />
-          {formData.experience.map((item, index) => (
-            <div key={`experience-${index}`} className={itemCardClasses}>
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                    {isFinnish ? 'Kokemus' : 'Experience'} #{index + 1}
-                  </p>
-                  <EntryBadge
-                    count={feedback.inlineTips.experienceItems[index]?.length ?? 0}
-                    theme={theme}
-                    locale={locale}
-                  />
+          {formData.experience.length === 0 ? (
+            <SectionEmptyState
+              title={isFinnish ? 'Lisää ensimmäinen kokemuksesi' : 'Add your first experience'}
+              body={isFinnish
+                ? 'Yksikin vahva rooli tulosfokusoidulla kuvauksella tekee CV:stä uskottavamman.'
+                : 'Even one strong role with a result-focused description makes the CV more credible.'}
+              actionLabel={isFinnish ? 'Lisää kokemus' : 'Add experience'}
+              onAction={() => addArrayItem('experience')}
+            />
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={makeArrayDragEndHandler('experience')}
+            >
+              <SortableContext
+                items={formData.experience.map((_, index) => `experience:${index}`)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {formData.experience.map((item, index) => {
+                    const itemKey = `experience:${index}`
+
+                    return (
+                      <SortableItemCard
+                        key={itemKey}
+                        id={itemKey}
+                        title={`${isFinnish ? 'Kokemus' : 'Experience'} #${index + 1}${item.role ? ` — ${item.role}` : ''}`}
+                        badge={(
+                          <EntryBadge
+                            count={feedback.inlineTips.experienceItems[index]?.length ?? 0}
+                            theme={theme}
+                            locale={locale}
+                          />
+                        )}
+                        isCollapsed={collapsedItems.has(itemKey)}
+                        onToggleCollapse={() => toggleItemCollapsed(itemKey)}
+                        isHidden={!isSectionItemVisible(sectionItemVisibility, 'experience', index)}
+                        onToggleVisibility={() => toggleSectionItemVisibility('experience', index)}
+                        onDuplicate={() => duplicateArrayItem('experience', index)}
+                        onRemove={() => removeArrayItem('experience', index)}
+                        canRemove={formData.experience.length > 1}
+                        hideLabel={copy.hide}
+                        showLabel={copy.show}
+                        duplicateLabel={copy.duplicate}
+                        removeLabel={copy.remove}
+                        dragLabel={copy.drag}
+                      >
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
+                            <input
+                              type="text"
+                              value={item.role}
+                              onChange={(event) =>
+                                updateArrayItem('experience', index, 'role', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Yritys' : 'Company'}>
+                            <input
+                              type="text"
+                              value={item.company}
+                              onChange={(event) =>
+                                updateArrayItem('experience', index, 'company', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Sijainti' : 'Location'}>
+                            <input
+                              type="text"
+                              value={item.location}
+                              onChange={(event) =>
+                                updateArrayItem('experience', index, 'location', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Työsuhteen tyyppi' : 'Employment type'} alwaysFloat>
+                            <select
+                              value={item.employmentType}
+                              onChange={(event) =>
+                                updateArrayItem('experience', index, 'employmentType', event.target.value)
+                              }
+                            >
+                              <option value="">{isFinnish ? 'Valitse...' : 'Select...'}</option>
+                              {EMPLOYMENT_TYPE_OPTIONS.map((option) => (
+                                <option key={option} value={option}>{option}</option>
+                              ))}
+                            </select>
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Aloituspäivä' : 'Start date'}>
+                            <input
+                              type="text"
+                              value={item.startDate}
+                              onChange={(event) =>
+                                updateArrayItem('experience', index, 'startDate', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Lopetuspäivä' : 'End date'}>
+                            <input
+                              type="text"
+                              value={item.isCurrent ? '' : item.endDate}
+                              disabled={item.isCurrent}
+                              placeholder={item.isCurrent ? (isFinnish ? 'Nykyinen' : 'Present') : ' '}
+                              onChange={(event) =>
+                                updateArrayItem('experience', index, 'endDate', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                        </div>
+                        <div className="mt-4">
+                          <ToggleSwitch
+                            checked={item.isCurrent}
+                            label={isFinnish ? 'Työskentelen täällä tällä hetkellä' : 'I currently work here'}
+                            onChange={(checked) => {
+                              updateArrayItem('experience', index, 'isCurrent', checked)
+                              if (checked) {
+                                updateArrayItem('experience', index, 'endDate', '')
+                              }
+                            }}
+                          />
+                        </div>
+                        <div className="mt-4">
+                          <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
+                            <AutoGrowTextarea
+                              value={item.description}
+                              onChange={(event) =>
+                                updateArrayItem('experience', index, 'description', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                        </div>
+                        <div className="mt-4">
+                          <p className={`mb-2 text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}>
+                            {isFinnish ? 'Saavutukset' : 'Achievements'}
+                          </p>
+                          <ReorderableListInput
+                            items={item.achievements}
+                            onChange={(next) => updateArrayItem('experience', index, 'achievements', next)}
+                            placeholder={isFinnish ? 'Kuvaile mitattava tulos' : 'Describe a measurable result'}
+                            addLabel={isFinnish ? 'Lisää saavutus' : 'Add achievement'}
+                            itemAriaLabel={isFinnish ? 'Saavutus' : 'Achievement'}
+                          />
+                        </div>
+                        <div className="mt-4">
+                          <p className={`mb-2 text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}>
+                            {isFinnish ? 'Teknologiat' : 'Technologies'}
+                          </p>
+                          <TagsInput
+                            value={item.technologies}
+                            onChange={(next) => updateArrayItem('experience', index, 'technologies', next)}
+                            placeholder={isFinnish ? 'Lisää teknologia' : 'Add a technology'}
+                            ariaLabel={isFinnish ? 'Teknologiat' : 'Technologies'}
+                          />
+                        </div>
+                        <div className="mt-4 flex flex-wrap items-center gap-3">
+                          <button
+                            type="button"
+                            className={improveButtonClasses}
+                            onClick={() => onImproveExperienceText(index)}
+                          >
+                            {copy.improveText}
+                          </button>
+                          <p className={`text-xs ${helperTextClasses}`}>
+                            {isFinnish
+                              ? 'Pidä jokainen kohta lyhyenä, toimintakeskeisenä ja helposti silmäiltävänä.'
+                              : 'Keep each entry short, action-oriented, and easy to scan.'}
+                          </p>
+                        </div>
+                        <InlineTipList
+                          items={feedback.inlineTips.experienceItems[index]}
+                          theme={theme}
+                          locale={locale}
+                          actionLabel={copy.improveText}
+                          onAction={() => onImproveExperienceText(index)}
+                        />
+                      </SortableItemCard>
+                    )
+                  })}
                 </div>
-                <div className="flex flex-wrap justify-end gap-2">
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => toggleSectionItemVisibility('experience', index)}
-                    aria-label={`${isSectionItemVisible(sectionItemVisibility, 'experience', index) ? copy.hide : copy.show} ${isFinnish ? 'kokemus' : 'experience'} ${index + 1}`}
-                  >
-                    {isSectionItemVisible(sectionItemVisibility, 'experience', index) ? copy.hide : copy.show}
-                  </button>
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => moveArrayItem('experience', index, -1)}
-                    disabled={index === 0}
-                    aria-label={`${copy.move} ${isFinnish ? 'kokemus' : 'experience'} ${index + 1} ${copy.up.toLowerCase()}`}
-                  >
-                    {copy.up}
-                  </button>
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => moveArrayItem('experience', index, 1)}
-                    disabled={index === formData.experience.length - 1}
-                    aria-label={`${copy.move} ${isFinnish ? 'kokemus' : 'experience'} ${index + 1} ${copy.down.toLowerCase()}`}
-                  >
-                    {copy.down}
-                  </button>
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => duplicateArrayItem('experience', index)}
-                    aria-label={`${copy.duplicate} ${isFinnish ? 'kokemus' : 'experience'} ${index + 1}`}
-                  >
-                    {copy.duplicate}
-                  </button>
-                  <button
-                    type="button"
-                    className={removeButtonClasses}
-                    onClick={() => removeArrayItem('experience', index)}
-                    aria-label={`${copy.remove} ${isFinnish ? 'kokemus' : 'experience'} ${index + 1}`}
-                  >
-                    {copy.remove}
-                  </button>
-                </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={isFinnish ? 'Rooli' : 'Role'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.role}
-                    onChange={(event) =>
-                      updateArrayItem('experience', index, 'role', event.target.value)
-                    }
-                    placeholder={isFinnish ? 'Senior Product Designer' : 'Senior Product Designer'}
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Yritys' : 'Company'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.company}
-                    onChange={(event) =>
-                      updateArrayItem('experience', index, 'company', event.target.value)
-                    }
-                    placeholder={isFinnish ? 'Studio North' : 'Studio North'}
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Sijainti' : 'Location'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.location}
-                    onChange={(event) =>
-                      updateArrayItem('experience', index, 'location', event.target.value)
-                    }
-                    placeholder={isFinnish ? 'Helsinki, Suomi' : 'Helsinki, Finland'}
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Aloituspäivä' : 'Start date'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.startDate}
-                    onChange={(event) =>
-                      updateArrayItem('experience', index, 'startDate', event.target.value)
-                    }
-                    placeholder={isFinnish ? 'Tammi 2022' : 'Jan 2022'}
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Lopetuspäivä' : 'End date'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.endDate}
-                    onChange={(event) =>
-                      updateArrayItem('experience', index, 'endDate', event.target.value)
-                    }
-                    placeholder={isFinnish ? 'Nykyinen' : 'Present'}
-                  />
-                </Field>
-                <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
-                    <AutoGrowTextarea
-                      className={textareaClasses}
-                      value={item.description}
-                      onChange={(event) =>
-                        updateArrayItem(
-                          'experience',
-                          index,
-                          'description',
-                          event.target.value,
-                        )
-                      }
-                      placeholder={isFinnish
-                        ? 'Kuvaa työ, saavutukset ja vaikutus.'
-                        : 'Describe the work, achievements, and impact.'}
-                    />
-                  </Field>
-                </div>
-              </div>
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  className={improveButtonClasses}
-                  onClick={() => onImproveExperienceText(index)}
-                >
-                  {copy.improveText}
-                </button>
-                <p className={`text-xs ${helperTextClasses}`}>
-                  {isFinnish
-                    ? 'Pidä jokainen kohta lyhyenä, toimintakeskeisenä ja helposti silmäiltävänä.'
-                    : 'Keep each entry short, action-oriented, and easy to scan.'}
-                </p>
-              </div>
-              <InlineTipList
-                items={feedback.inlineTips.experienceItems[index]}
-                theme={theme}
-                locale={locale}
-                actionLabel={copy.improveText}
-                onAction={() => onImproveExperienceText(index)}
-              />
-            </div>
-          ))}
+              </SortableContext>
+            </DndContext>
+          )}
           <button
             type="button"
             className={actionButtonClasses}
@@ -846,155 +870,132 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
-          {formData.education.map((item, index) => (
-            <div key={`education-${index}`} className={itemCardClasses}>
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Koulutus' : 'Education'} #{index + 1}
-                </p>
-                <div className="flex flex-wrap justify-end gap-2">
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => toggleSectionItemVisibility('education', index)}
-                    aria-label={`${isSectionItemVisible(sectionItemVisibility, 'education', index) ? copy.hide : copy.show} ${isFinnish ? 'koulutus' : 'education'} ${index + 1}`}
-                  >
-                    {isSectionItemVisible(sectionItemVisibility, 'education', index) ? copy.hide : copy.show}
-                  </button>
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => moveArrayItem('education', index, -1)}
-                    disabled={index === 0}
-                    aria-label={`${copy.move} ${isFinnish ? 'koulutus' : 'education'} ${index + 1} ${copy.up.toLowerCase()}`}
-                  >
-                    {copy.up}
-                  </button>
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => moveArrayItem('education', index, 1)}
-                    disabled={index === formData.education.length - 1}
-                    aria-label={`${copy.move} ${isFinnish ? 'koulutus' : 'education'} ${index + 1} ${copy.down.toLowerCase()}`}
-                  >
-                    {copy.down}
-                  </button>
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => duplicateArrayItem('education', index)}
-                    aria-label={`${copy.duplicate} ${isFinnish ? 'koulutus' : 'education'} ${index + 1}`}
-                  >
-                    {copy.duplicate}
-                  </button>
-                  <button
-                    type="button"
-                    className={removeButtonClasses}
-                    onClick={() => removeArrayItem('education', index)}
-                    aria-label={`${copy.remove} ${isFinnish ? 'koulutus' : 'education'} ${index + 1}`}
-                  >
-                    {copy.remove}
-                  </button>
+          {formData.education.length === 0 ? (
+            <SectionEmptyState
+              title={isFinnish ? 'Lisää ensimmäinen koulutuksesi' : 'Add your first education'}
+              body={isFinnish
+                ? 'Tutkinto, oppilaitos ja ajanjakso riittävät hyvään alkuun.'
+                : 'A degree, institution, and timeline is a great place to start.'}
+              actionLabel={isFinnish ? 'Lisää koulutus' : 'Add education'}
+              onAction={() => addArrayItem('education')}
+            />
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={makeArrayDragEndHandler('education')}
+            >
+              <SortableContext
+                items={formData.education.map((_, index) => `education:${index}`)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {formData.education.map((item, index) => {
+                    const itemKey = `education:${index}`
+
+                    return (
+                      <SortableItemCard
+                        key={itemKey}
+                        id={itemKey}
+                        title={`${isFinnish ? 'Koulutus' : 'Education'} #${index + 1}${item.school ? ` — ${item.school}` : ''}`}
+                        isCollapsed={collapsedItems.has(itemKey)}
+                        onToggleCollapse={() => toggleItemCollapsed(itemKey)}
+                        isHidden={!isSectionItemVisible(sectionItemVisibility, 'education', index)}
+                        onToggleVisibility={() => toggleSectionItemVisibility('education', index)}
+                        onDuplicate={() => duplicateArrayItem('education', index)}
+                        onRemove={() => removeArrayItem('education', index)}
+                        canRemove={formData.education.length > 1}
+                        hideLabel={copy.hide}
+                        showLabel={copy.show}
+                        duplicateLabel={copy.duplicate}
+                        removeLabel={copy.remove}
+                        dragLabel={copy.drag}
+                      >
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <FloatingField label={isFinnish ? 'Oppilaitos' : 'School'}>
+                            <input
+                              type="text"
+                              value={item.school}
+                              onChange={(event) =>
+                                updateArrayItem('education', index, 'school', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Tutkinto' : 'Degree'}>
+                            <input
+                              type="text"
+                              value={item.degree}
+                              onChange={(event) =>
+                                updateArrayItem('education', index, 'degree', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Sijainti' : 'Location'}>
+                            <input
+                              type="text"
+                              value={item.location}
+                              onChange={(event) =>
+                                updateArrayItem('education', index, 'location', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Arvosana (valinnainen)' : 'Grade (optional)'}>
+                            <input
+                              type="text"
+                              value={item.grade}
+                              onChange={(event) =>
+                                updateArrayItem('education', index, 'grade', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Aloituspäivä' : 'Start date'}>
+                            <input
+                              type="text"
+                              value={item.startDate}
+                              onChange={(event) =>
+                                updateArrayItem('education', index, 'startDate', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Lopetuspäivä' : 'End date'}>
+                            <input
+                              type="text"
+                              value={item.endDate}
+                              onChange={(event) =>
+                                updateArrayItem('education', index, 'endDate', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <div className="sm:col-span-2">
+                            <FloatingField label={isFinnish ? 'Kunniamaininta (valinnainen)' : 'Honors (optional)'}>
+                              <input
+                                type="text"
+                                value={item.honors}
+                                onChange={(event) =>
+                                  updateArrayItem('education', index, 'honors', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                          </div>
+                          <div className="sm:col-span-2">
+                            <FloatingField label={isFinnish ? 'Kurssit (valinnainen)' : 'Relevant coursework (optional)'}>
+                              <input
+                                type="text"
+                                value={item.coursework}
+                                onChange={(event) =>
+                                  updateArrayItem('education', index, 'coursework', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                          </div>
+                        </div>
+                      </SortableItemCard>
+                    )
+                  })}
                 </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={isFinnish ? 'Oppilaitos' : 'School'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.school}
-                    onChange={(event) =>
-                      updateArrayItem('education', index, 'school', event.target.value)
-                    }
-                    placeholder={isFinnish ? 'Taideyliopisto' : 'University of the Arts'}
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Tutkinto' : 'Degree'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.degree}
-                    onChange={(event) =>
-                      updateArrayItem('education', index, 'degree', event.target.value)
-                    }
-                    placeholder={isFinnish ? 'BA Graafinen suunnittelu' : 'B.A. Graphic Design'}
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Sijainti' : 'Location'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.location}
-                    onChange={(event) =>
-                      updateArrayItem('education', index, 'location', event.target.value)
-                    }
-                    placeholder={isFinnish ? 'Helsinki, Suomi' : 'Helsinki, Finland'}
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Aloituspäivä' : 'Start date'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.startDate}
-                    onChange={(event) =>
-                      updateArrayItem('education', index, 'startDate', event.target.value)
-                    }
-                    placeholder="2016"
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Lopetuspäivä' : 'End date'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.endDate}
-                    onChange={(event) =>
-                      updateArrayItem('education', index, 'endDate', event.target.value)
-                    }
-                    placeholder="2020"
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Arvosana (valinnainen)' : 'Grade (optional)'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.grade}
-                    onChange={(event) =>
-                      updateArrayItem('education', index, 'grade', event.target.value)
-                    }
-                    placeholder={isFinnish ? 'Erinomainen (1. luokka)' : 'First Class Honours'}
-                  />
-                </Field>
-                <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Kunniamaininta (valinnainen)' : 'Honors (optional)'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="text"
-                      value={item.honors}
-                      onChange={(event) =>
-                        updateArrayItem('education', index, 'honors', event.target.value)
-                      }
-                      placeholder={isFinnish ? 'Valmistui erinomaisin arvosanoin' : 'Graduated with Distinction'}
-                    />
-                  </Field>
-                </div>
-                <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Kurssit (valinnainen)' : 'Relevant coursework (optional)'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="text"
-                      value={item.coursework}
-                      onChange={(event) =>
-                        updateArrayItem('education', index, 'coursework', event.target.value)
-                      }
-                      placeholder={isFinnish
-                        ? 'Algoritmit, Tietokannat, Ohjelmistotekniikka'
-                        : 'Algorithms, Databases, Software Engineering'}
-                    />
-                  </Field>
-                </div>
-              </div>
-            </div>
-          ))}
+              </SortableContext>
+            </DndContext>
+          )}
           <button
             type="button"
             className={actionButtonClasses}
@@ -1111,108 +1112,103 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
-          {formData.certificates.map((item, index) => (
-            <div key={`certificate-${index}`} className={itemCardClasses}>
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Sertifikaatti' : 'Certificate'} #{index + 1}
-                </p>
-                <div className="flex flex-wrap justify-end gap-2">
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => toggleSectionItemVisibility('certificates', index)}
-                  >
-                    {isSectionItemVisible(sectionItemVisibility, 'certificates', index) ? copy.hide : copy.show}
-                  </button>
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => moveArrayItem('certificates', index, -1)}
-                    disabled={index === 0}
-                  >
-                    {copy.up}
-                  </button>
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => moveArrayItem('certificates', index, 1)}
-                    disabled={index === formData.certificates.length - 1}
-                  >
-                    {copy.down}
-                  </button>
-                  <button
-                    type="button"
-                    className={removeButtonClasses}
-                    onClick={() => removeArrayItem('certificates', index)}
-                  >
-                    {copy.remove}
-                  </button>
+          {formData.certificates.length === 0 ? (
+            <SectionEmptyState
+              title={isFinnish ? 'Lisää ensimmäinen sertifikaattisi' : 'Add your first certificate'}
+              body={isFinnish
+                ? 'Ammattisertifikaatit lisäävät uskottavuutta erikoisosaamiseesi.'
+                : 'Professional certifications add credibility to your specialization.'}
+              actionLabel={isFinnish ? 'Lisää sertifikaatti' : 'Add certificate'}
+              onAction={() => addArrayItem('certificates')}
+            />
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={makeArrayDragEndHandler('certificates')}
+            >
+              <SortableContext
+                items={formData.certificates.map((_, index) => `certificates:${index}`)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {formData.certificates.map((item, index) => {
+                    const itemKey = `certificates:${index}`
+
+                    return (
+                      <SortableItemCard
+                        key={itemKey}
+                        id={itemKey}
+                        title={`${isFinnish ? 'Sertifikaatti' : 'Certificate'} #${index + 1}${item.name ? ` — ${item.name}` : ''}`}
+                        isCollapsed={collapsedItems.has(itemKey)}
+                        onToggleCollapse={() => toggleItemCollapsed(itemKey)}
+                        isHidden={!isSectionItemVisible(sectionItemVisibility, 'certificates', index)}
+                        onToggleVisibility={() => toggleSectionItemVisibility('certificates', index)}
+                        onRemove={() => removeArrayItem('certificates', index)}
+                        canRemove={formData.certificates.length > 1}
+                        hideLabel={copy.hide}
+                        showLabel={copy.show}
+                        removeLabel={copy.remove}
+                        dragLabel={copy.drag}
+                      >
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="sm:col-span-2">
+                            <FloatingField label={isFinnish ? 'Nimi' : 'Name'}>
+                              <input
+                                type="text"
+                                value={item.name}
+                                onChange={(event) =>
+                                  updateArrayItem('certificates', index, 'name', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                          </div>
+                          <FloatingField label={isFinnish ? 'Myöntäjä' : 'Issuer'}>
+                            <input
+                              type="text"
+                              value={item.issuer}
+                              onChange={(event) =>
+                                updateArrayItem('certificates', index, 'issuer', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Vuosi' : 'Year'}>
+                            <input
+                              type="text"
+                              value={item.year}
+                              onChange={(event) =>
+                                updateArrayItem('certificates', index, 'year', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Vanhenee (valinnainen)' : 'Expiry (optional)'}>
+                            <input
+                              type="text"
+                              value={item.expiry}
+                              onChange={(event) =>
+                                updateArrayItem('certificates', index, 'expiry', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <div className="sm:col-span-2">
+                            <FloatingField label={isFinnish ? 'Todennuslinkki (valinnainen)' : 'Credential URL (optional)'}>
+                              <input
+                                type="url"
+                                value={item.credentialUrl}
+                                onChange={(event) =>
+                                  updateArrayItem('certificates', index, 'credentialUrl', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                          </div>
+                        </div>
+                      </SortableItemCard>
+                    )
+                  })}
                 </div>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Nimi' : 'Name'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="text"
-                      value={item.name}
-                      onChange={(event) =>
-                        updateArrayItem('certificates', index, 'name', event.target.value)
-                      }
-                      placeholder="AWS Certified Solutions Architect"
-                    />
-                  </Field>
-                </div>
-                <Field label={isFinnish ? 'Myöntäjä' : 'Issuer'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.issuer}
-                    onChange={(event) =>
-                      updateArrayItem('certificates', index, 'issuer', event.target.value)
-                    }
-                    placeholder="Amazon Web Services"
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Vuosi' : 'Year'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.year}
-                    onChange={(event) =>
-                      updateArrayItem('certificates', index, 'year', event.target.value)
-                    }
-                    placeholder="2024"
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Vanhenee (valinnainen)' : 'Expiry (optional)'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.expiry}
-                    onChange={(event) =>
-                      updateArrayItem('certificates', index, 'expiry', event.target.value)
-                    }
-                    placeholder="2027"
-                  />
-                </Field>
-                <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Todennuslinkki (valinnainen)' : 'Credential URL (optional)'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="url"
-                      value={item.credentialUrl}
-                      onChange={(event) =>
-                        updateArrayItem('certificates', index, 'credentialUrl', event.target.value)
-                      }
-                      placeholder="https://credly.com/badges/..."
-                    />
-                  </Field>
-                </div>
-              </div>
-            </div>
-          ))}
+              </SortableContext>
+            </DndContext>
+          )}
           <button
             type="button"
             className={actionButtonClasses}
@@ -1235,175 +1231,165 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
-          {formData.projects.map((item, index) => (
-            <div key={`project-${index}`} className={itemCardClasses}>
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Projekti' : 'Project'} #{index + 1}
-                </p>
-                <div className="flex flex-wrap justify-end gap-2">
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => toggleSectionItemVisibility('projects', index)}
-                  >
-                    {isSectionItemVisible(sectionItemVisibility, 'projects', index) ? copy.hide : copy.show}
-                  </button>
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => moveArrayItem('projects', index, -1)}
-                    disabled={index === 0}
-                  >
-                    {copy.up}
-                  </button>
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => moveArrayItem('projects', index, 1)}
-                    disabled={index === formData.projects.length - 1}
-                  >
-                    {copy.down}
-                  </button>
-                  <button
-                    type="button"
-                    className={utilityButtonClasses}
-                    onClick={() => duplicateArrayItem('projects', index)}
-                  >
-                    {copy.duplicate}
-                  </button>
-                  <button
-                    type="button"
-                    className={removeButtonClasses}
-                    onClick={() => removeArrayItem('projects', index)}
-                  >
-                    {copy.remove}
-                  </button>
+          {formData.projects.length === 0 ? (
+            <SectionEmptyState
+              title={isFinnish ? 'Lisää ensimmäinen projektisi' : 'Add your first project'}
+              body={isFinnish
+                ? 'Yksi hyvin kuvattu projekti riittää näyttämään osaamisesi käytännössä.'
+                : 'One well-described project is enough to show your skills in practice.'}
+              actionLabel={isFinnish ? 'Lisää projekti' : 'Add project'}
+              onAction={() => addArrayItem('projects')}
+            />
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={makeArrayDragEndHandler('projects')}
+            >
+              <SortableContext
+                items={formData.projects.map((_, index) => `projects:${index}`)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {formData.projects.map((item, index) => {
+                    const itemKey = `projects:${index}`
+
+                    return (
+                      <SortableItemCard
+                        key={itemKey}
+                        id={itemKey}
+                        title={`${isFinnish ? 'Projekti' : 'Project'} #${index + 1}${item.name ? ` — ${item.name}` : ''}`}
+                        isCollapsed={collapsedItems.has(itemKey)}
+                        onToggleCollapse={() => toggleItemCollapsed(itemKey)}
+                        isHidden={!isSectionItemVisible(sectionItemVisibility, 'projects', index)}
+                        onToggleVisibility={() => toggleSectionItemVisibility('projects', index)}
+                        onDuplicate={() => duplicateArrayItem('projects', index)}
+                        onRemove={() => removeArrayItem('projects', index)}
+                        canRemove={formData.projects.length > 1}
+                        hideLabel={copy.hide}
+                        showLabel={copy.show}
+                        duplicateLabel={copy.duplicate}
+                        removeLabel={copy.remove}
+                        dragLabel={copy.drag}
+                      >
+                        <div className="space-y-4">
+                          <div>
+                            <p className={`mb-2 text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}>
+                              {isFinnish ? 'Kuva (valinnainen)' : 'Image (optional)'}
+                            </p>
+                            <DragDropUpload
+                              label={isFinnish ? 'Lisää projektikuva' : 'Add a project image'}
+                              hint={isFinnish ? 'JPG tai PNG, enintään 2 Mt' : 'JPG or PNG, up to 2MB'}
+                              previewUrl={item.image}
+                              onFileSelected={(file) => handleProjectImageUpload(index, file)}
+                              onRemove={() => updateArrayItem('projects', index, 'image', '')}
+                            />
+                          </div>
+                          <FloatingField label={isFinnish ? 'Nimi' : 'Name'}>
+                            <input
+                              type="text"
+                              value={item.name}
+                              onChange={(event) =>
+                                updateArrayItem('projects', index, 'name', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
+                            <AutoGrowTextarea
+                              value={item.description}
+                              onChange={(event) =>
+                                updateArrayItem('projects', index, 'description', event.target.value)
+                              }
+                            />
+                          </FloatingField>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <FloatingField label={isFinnish ? 'Teknologiat (valinnainen)' : 'Tech stack (optional)'}>
+                              <input
+                                type="text"
+                                value={item.stack}
+                                onChange={(event) =>
+                                  updateArrayItem('projects', index, 'stack', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                            <FloatingField label={isFinnish ? 'Päivämäärä (valinnainen)' : 'Date (optional)'}>
+                              <input
+                                type="text"
+                                value={item.date}
+                                onChange={(event) =>
+                                  updateArrayItem('projects', index, 'date', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                          </div>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <FloatingField label={isFinnish ? 'Organisaatio (valinnainen)' : 'Organization (optional)'}>
+                              <input
+                                type="text"
+                                value={item.organization}
+                                onChange={(event) =>
+                                  updateArrayItem('projects', index, 'organization', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                            <FloatingField label={isFinnish ? 'Liiketoiminnallinen vaikutus (valinnainen)' : 'Business impact (optional)'}>
+                              <input
+                                type="text"
+                                value={item.impact}
+                                onChange={(event) =>
+                                  updateArrayItem('projects', index, 'impact', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                          </div>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <FloatingField label={isFinnish ? 'Tiimin koko (valinnainen)' : 'Team size (optional)'}>
+                              <input
+                                type="text"
+                                value={item.teamSize}
+                                onChange={(event) =>
+                                  updateArrayItem('projects', index, 'teamSize', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                            <FloatingField label={isFinnish ? 'Oma panos (valinnainen)' : 'Personal contribution (optional)'}>
+                              <input
+                                type="text"
+                                value={item.contribution}
+                                onChange={(event) =>
+                                  updateArrayItem('projects', index, 'contribution', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                          </div>
+                          <div className="grid gap-4 sm:grid-cols-2">
+                            <FloatingField label={isFinnish ? 'GitHub-linkki (valinnainen)' : 'GitHub URL (optional)'}>
+                              <input
+                                type="url"
+                                value={item.githubUrl}
+                                onChange={(event) =>
+                                  updateArrayItem('projects', index, 'githubUrl', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                            <FloatingField label={isFinnish ? 'Demo-linkki (valinnainen)' : 'Demo URL (optional)'}>
+                              <input
+                                type="url"
+                                value={item.demoUrl}
+                                onChange={(event) =>
+                                  updateArrayItem('projects', index, 'demoUrl', event.target.value)
+                                }
+                              />
+                            </FloatingField>
+                          </div>
+                        </div>
+                      </SortableItemCard>
+                    )
+                  })}
                 </div>
-              </div>
-              <div className="space-y-4">
-                <Field label={isFinnish ? 'Nimi' : 'Name'} labelClassName={fieldLabelClassName}>
-                  <input
-                    className={inputClasses}
-                    type="text"
-                    value={item.name}
-                    onChange={(event) =>
-                      updateArrayItem('projects', index, 'name', event.target.value)
-                    }
-                    placeholder={isFinnish ? 'Sisäinen uhkien tunnistusalusta' : 'Threat Detection Platform'}
-                  />
-                </Field>
-                <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
-                  <AutoGrowTextarea
-                    className={textareaClasses}
-                    value={item.description}
-                    onChange={(event) =>
-                      updateArrayItem('projects', index, 'description', event.target.value)
-                    }
-                    placeholder={isFinnish
-                      ? 'Yhden lauseen kuvaus projektista ja sen vaikutuksesta.'
-                      : 'One sentence describing the project and its impact.'}
-                  />
-                </Field>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label={isFinnish ? 'Teknologiat (valinnainen)' : 'Tech stack (optional)'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="text"
-                      value={item.stack}
-                      onChange={(event) =>
-                        updateArrayItem('projects', index, 'stack', event.target.value)
-                      }
-                      placeholder="Python, Kafka, AWS"
-                    />
-                  </Field>
-                  <Field label={isFinnish ? 'Päivämäärä (valinnainen)' : 'Date (optional)'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="text"
-                      value={item.date}
-                      onChange={(event) =>
-                        updateArrayItem('projects', index, 'date', event.target.value)
-                      }
-                      placeholder="2023"
-                    />
-                  </Field>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label={isFinnish ? 'Organisaatio (valinnainen)' : 'Organization (optional)'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="text"
-                      value={item.organization}
-                      onChange={(event) =>
-                        updateArrayItem('projects', index, 'organization', event.target.value)
-                      }
-                      placeholder={isFinnish ? 'ABC Corporation' : 'ABC Corporation'}
-                    />
-                  </Field>
-                  <Field label={isFinnish ? 'Liiketoiminnallinen vaikutus (valinnainen)' : 'Business impact (optional)'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="text"
-                      value={item.impact}
-                      onChange={(event) =>
-                        updateArrayItem('projects', index, 'impact', event.target.value)
-                      }
-                      placeholder={isFinnish ? 'Vähensi kustannuksia 30 %.' : 'Cut operating costs by 30%.'}
-                    />
-                  </Field>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label={isFinnish ? 'Tiimin koko (valinnainen)' : 'Team size (optional)'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="text"
-                      value={item.teamSize}
-                      onChange={(event) =>
-                        updateArrayItem('projects', index, 'teamSize', event.target.value)
-                      }
-                      placeholder={isFinnish ? 'Tiimi, 4 henkeä' : 'Team of 4'}
-                    />
-                  </Field>
-                  <Field label={isFinnish ? 'Oma panos (valinnainen)' : 'Personal contribution (optional)'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="text"
-                      value={item.contribution}
-                      onChange={(event) =>
-                        updateArrayItem('projects', index, 'contribution', event.target.value)
-                      }
-                      placeholder={isFinnish ? 'Vastasin backend-rajapinnasta' : 'Led the backend API design'}
-                    />
-                  </Field>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label={isFinnish ? 'GitHub-linkki (valinnainen)' : 'GitHub URL (optional)'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="url"
-                      value={item.githubUrl}
-                      onChange={(event) =>
-                        updateArrayItem('projects', index, 'githubUrl', event.target.value)
-                      }
-                      placeholder="https://github.com/username/project"
-                    />
-                  </Field>
-                  <Field label={isFinnish ? 'Demo-linkki (valinnainen)' : 'Demo URL (optional)'} labelClassName={fieldLabelClassName}>
-                    <input
-                      className={inputClasses}
-                      type="url"
-                      value={item.demoUrl}
-                      onChange={(event) =>
-                        updateArrayItem('projects', index, 'demoUrl', event.target.value)
-                      }
-                      placeholder="https://project-demo.dev"
-                    />
-                  </Field>
-                </div>
-              </div>
-            </div>
-          ))}
+              </SortableContext>
+            </DndContext>
+          )}
           <button
             type="button"
             className={actionButtonClasses}

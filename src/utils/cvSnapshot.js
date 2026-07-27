@@ -66,9 +66,17 @@ export function createCvSnapshot(formData) {
         role: trimValue(item.role),
         company: trimValue(item.company),
         location: trimValue(item.location),
+        employmentType: trimValue(item.employmentType),
         startDate: trimValue(item.startDate),
         endDate: trimValue(item.endDate),
+        isCurrent: Boolean(item.isCurrent),
         description: trimValue(item.description),
+        achievements: Array.isArray(item.achievements)
+          ? item.achievements.map(trimValue).filter(Boolean)
+          : [],
+        technologies: Array.isArray(item.technologies)
+          ? item.technologies.map(trimValue).filter(Boolean)
+          : [],
       }
 
       if (
@@ -77,7 +85,10 @@ export function createCvSnapshot(formData) {
         normalizedItem.location ||
         normalizedItem.startDate ||
         normalizedItem.endDate ||
-        normalizedItem.description
+        normalizedItem.isCurrent ||
+        normalizedItem.description ||
+        normalizedItem.achievements.length > 0 ||
+        normalizedItem.technologies.length > 0
       ) {
         next.push(normalizedItem)
       }
@@ -177,6 +188,7 @@ export function createCvSnapshot(formData) {
         date: trimValue(item.date),
         teamSize: trimValue(item.teamSize),
         contribution: trimValue(item.contribution),
+        image: getPhotoDataUrl(item.image),
       }
 
       if (
@@ -189,7 +201,8 @@ export function createCvSnapshot(formData) {
         normalizedItem.impact ||
         normalizedItem.date ||
         normalizedItem.teamSize ||
-        normalizedItem.contribution
+        normalizedItem.contribution ||
+        normalizedItem.image
       ) {
         next.push(normalizedItem)
       }
