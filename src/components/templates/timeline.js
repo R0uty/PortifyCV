@@ -71,8 +71,9 @@ export default {
   // Color class for link icons and labels — cyan
   linkIconColor: 'text-cyan-400',
 
-  // Header contact line mode — 'icons' with cyan accent
-  headerContactMode: 'icons',
+  // Header contact line mode — 'personal' (email/phone/location) with cyan accent.
+  // GitHub/LinkedIn/Portfolio/website stay out of the header; they live in Links only.
+  headerContactMode: 'personal',
 
   // Gap between contact items in header
   headerContactGap: 'gap-x-3',
@@ -85,4 +86,12 @@ export default {
 
   // Icon color class for contact icons — cyan
   headerContactIconColor: 'text-cyan-500',
+
+  // ── Timeline Showcase config (non-ATS "career storytelling" mode) ──
+  // Read by TimelineShowcase.jsx via CVPreview's `showcaseConfig={t}` prop.
+  // Each flag defaults to true inside the component, so omitting one here
+  // still renders a fully-featured showcase.
+  showPhoto: true,
+  showSidebar: true,
+  printOptimized: true,
 }

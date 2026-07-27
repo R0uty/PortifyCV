@@ -100,12 +100,8 @@ function App() {
           locale={headerProps.locale}
           activeExport={headerProps.activeExport}
           isActionBusy={headerProps.isActionBusy}
-          canUndo={headerProps.canUndo}
-          canRedo={headerProps.canRedo}
           onReturn={goToLanding}
           onLocaleChange={headerProps.onLocaleChange}
-          onUndo={headerProps.onUndo}
-          onRedo={headerProps.onRedo}
           onExport={headerProps.onExport}
         />
       )}

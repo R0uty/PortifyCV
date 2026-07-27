@@ -71,8 +71,9 @@ export default {
   // Color class for link icons and labels — violet
   linkIconColor: 'text-violet-400',
 
-  // Header contact line mode — 'icons' with violet accent
-  headerContactMode: 'icons',
+  // Header contact line mode — 'personal' (email/phone/location) with violet accent.
+  // GitHub/LinkedIn/Portfolio/website stay out of the header; they live in Links only.
+  headerContactMode: 'personal',
 
   // Gap between contact items in header
   headerContactGap: 'gap-x-3',

@@ -93,4 +93,13 @@ export default {
   headerContactTextSize: null,
   headerContactTextColor: null,
   headerContactIconColor: null,
+
+  // ── Modern Showcase config (non-ATS "premium executive" mode) ──
+  // Read by ModernShowcase.jsx via CVPreview's `showcaseConfig={t}` prop.
+  // Each flag defaults to true inside the component, so omitting one here
+  // still renders a fully-featured showcase.
+  showPhoto: true,
+  showTimeline: true,
+  showSidebar: true,
+  printOptimized: true,
 }

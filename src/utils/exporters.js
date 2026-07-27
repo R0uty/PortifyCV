@@ -130,6 +130,26 @@ function createExportCopy(locale = 'en') {
     education: isFinnish ? 'Koulutus' : 'Education',
     skills: isFinnish ? 'Taidot' : 'Skills',
     links: isFinnish ? 'Linkit' : 'Links',
+    coreStrengths: isFinnish ? 'Vahvuudet' : 'Core Strengths',
+    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
+    projects: isFinnish ? 'Projektit' : 'Projects',
+    languages: isFinnish ? 'Kielet' : 'Languages',
+    interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
+    achievements: isFinnish ? 'Saavutukset' : 'Achievements',
+    openSource: isFinnish ? 'Avoin lähdekoodi' : 'Open Source',
+    publications: isFinnish ? 'Julkaisut' : 'Publications',
+    leadership: isFinnish ? 'Johtamiskokemus' : 'Leadership Experience',
+    memberships: isFinnish ? 'Ammattijäsenyydet' : 'Professional Memberships',
+    speaking: isFinnish ? 'Esiintymiset' : 'Speaking',
+    volunteering: isFinnish ? 'Vapaaehtoistyö' : 'Volunteering',
+    internships: isFinnish ? 'Harjoittelut' : 'Internships',
+    caseStudies: isFinnish ? 'Tapaustutkimukset' : 'Case Studies',
+    testimonials: isFinnish ? 'Suositukset' : 'Testimonials',
+    problem: isFinnish ? 'Ongelma' : 'Problem',
+    solution: isFinnish ? 'Ratkaisu' : 'Solution',
+    technologies: isFinnish ? 'Teknologiat' : 'Technologies',
+    outcome: isFinnish ? 'Tulos' : 'Outcome',
+    lessonsLearned: isFinnish ? 'Opitut asiat' : 'Lessons Learned',
     addSummary: isFinnish ? 'Lisää ammatillinen yhteenveto.' : 'Add a professional summary.',
     addSkills: isFinnish ? 'Lisää taitoja' : 'Add skills',
     noExperience: isFinnish ? 'Työkokemusta ei ole vielä lisätty.' : 'No experience added yet.',
@@ -205,8 +225,10 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
         [item.degree, item.school].filter(Boolean).join(', ') || copy.educationEntry
       const dateRange = formatDateRange(item.startDate, item.endDate)
 
+      const gradeLine = [item.grade, item.coursework].filter(Boolean).join(' · ')
+
       return `  <div class="edu-item">
-    <p class="edu-degree">${esc(heading)}</p>${dateRange ? `<p class="edu-date">${esc(dateRange)}</p>` : ''}
+    <p class="edu-degree">${esc(heading)}</p>${dateRange ? `<p class="edu-date">${esc(dateRange)}</p>` : ''}${item.honors ? `<p class="edu-honors">${esc(item.honors)}</p>` : ''}${gradeLine ? `<p class="edu-honors">${esc(gradeLine)}</p>` : ''}
   </div>`
     })
     .join('\n')
@@ -220,6 +242,125 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
       ([key, value]) =>
         `  <div class="link-item"><p class="link-label">${esc(formatLinkLabel(key))}</p><p class="link-url">${esc(value)}</p></div>`,
     )
+    .join('\n')
+
+  const coreStrengthItems = snapshot.coreStrengths
+    .map(
+      (item) =>
+        `  <div class="strength-item">${item.title ? `<p class="strength-title">${esc(item.title)}</p>` : ''}${item.description ? `<p class="strength-desc">${esc(item.description)}</p>` : ''}</div>`,
+    )
+    .join('\n')
+
+  const certificateItems = snapshot.certificates
+    .map((item) => {
+      const meta = [item.issuer, item.year].filter(Boolean).join(', ')
+      const expiry = item.expiry ? ` (expires ${item.expiry})` : ''
+      return `<li>${esc(item.name)}${meta ? ` — ${esc(meta)}` : ''}${esc(expiry)}</li>`
+    })
+    .join('\n    ')
+
+  const projectItems = snapshot.projects
+    .map((item) => {
+      const linkLine = [item.githubUrl, item.demoUrl].filter(Boolean).join('  ·  ')
+      const contributionLine = [item.teamSize, item.contribution].filter(Boolean).join(' · ')
+      return `  <div class="project-item">${item.name ? `<p class="project-name">${esc(item.name)}</p>` : ''}${item.description ? `<p class="project-desc">${esc(item.description)}</p>` : ''}${item.stack ? `<p class="project-stack">${esc(item.stack)}</p>` : ''}${contributionLine ? `<p class="project-stack">${esc(contributionLine)}</p>` : ''}${linkLine ? `<p class="project-links">${esc(linkLine)}</p>` : ''}</div>`
+    })
+    .join('\n')
+
+  const languageItems = snapshot.languages
+    .map(
+      (item) =>
+        `  <p class="language-item">${esc(item.language)}${item.level ? ` — ${esc(item.level)}` : ''}</p>`,
+    )
+    .join('\n')
+
+  const interestItems = snapshot.interests
+    .map((item) => `<span class="interest-chip">${esc(item.name)}</span>`)
+    .join('\n    ')
+
+  const achievementItems = snapshot.achievements
+    .map(
+      (item) =>
+        `  <div class="achievement-item">${item.title ? `<p class="achievement-title">${esc(item.title)}${item.year ? ` <span class="achievement-year">${esc(item.year)}</span>` : ''}</p>` : ''}${item.description ? `<p class="achievement-desc">${esc(item.description)}</p>` : ''}</div>`,
+    )
+    .join('\n')
+
+  const openSourceItems = snapshot.openSource
+    .map((item) => {
+      const meta = [item.language, item.stars ? `★ ${item.stars}` : '', item.forks ? `⑂ ${item.forks}` : '']
+        .filter(Boolean)
+        .join('   ')
+      return `  <div class="opensource-item">${item.name ? `<p class="opensource-name">${esc(item.name)}</p>` : ''}${meta ? `<p class="opensource-meta">${esc(meta)}</p>` : ''}${item.description ? `<p class="opensource-desc">${esc(item.description)}</p>` : ''}${item.url ? `<p class="opensource-url">${esc(item.url)}</p>` : ''}</div>`
+    })
+    .join('\n')
+
+  const publicationItems = snapshot.publications
+    .map((item) => {
+      const meta = [item.publisher, item.year].filter(Boolean).join(' · ')
+      return `  <div class="publication-item">${item.title ? `<p class="publication-title">${esc(item.title)}</p>` : ''}${meta ? `<p class="publication-meta">${esc(meta)}</p>` : ''}${item.url ? `<p class="publication-url">${esc(item.url)}</p>` : ''}</div>`
+    })
+    .join('\n')
+
+  const leadershipItems = snapshot.leadership
+    .map((item) => {
+      const heading = [item.role, item.organization].filter(Boolean).join(' — ')
+      const dateRange = formatDateRange(item.startDate, item.endDate)
+      return `  <div class="leadership-item">${heading ? `<p class="leadership-role">${esc(heading)}</p>` : ''}${dateRange ? `<p class="leadership-date">${esc(dateRange)}</p>` : ''}${item.description ? `<p class="leadership-desc">${esc(item.description)}</p>` : ''}</div>`
+    })
+    .join('\n')
+
+  const membershipItems = snapshot.memberships
+    .map((item) => {
+      const meta = [item.role, item.year].filter(Boolean).join(', ')
+      return `<li>${esc(item.organization)}${meta ? ` — ${esc(meta)}` : ''}</li>`
+    })
+    .join('\n    ')
+
+  const speakingItems = snapshot.speaking
+    .map((item) => {
+      const meta = [item.conference, item.date].filter(Boolean).join(' · ')
+      return `  <div class="speaking-item">${item.topic ? `<p class="speaking-topic">${esc(item.topic)}</p>` : ''}${meta ? `<p class="speaking-meta">${esc(meta)}</p>` : ''}${item.audience ? `<p class="speaking-audience">${esc(item.audience)}</p>` : ''}</div>`
+    })
+    .join('\n')
+
+  const volunteeringItems = snapshot.volunteering
+    .map((item) => {
+      const heading = [item.role, item.organization].filter(Boolean).join(' — ')
+      return `  <div class="volunteer-item">${heading ? `<p class="volunteer-role">${esc(heading)}</p>` : ''}${item.description ? `<p class="volunteer-desc">${esc(item.description)}</p>` : ''}</div>`
+    })
+    .join('\n')
+
+  const internshipItems = snapshot.internships
+    .map((item) => {
+      const heading = [item.role, item.company].filter(Boolean).join(' at ') || copy.untitledRole
+      const dateRange = formatDateRange(item.startDate, item.endDate)
+
+      return `  <div class="xp-item">
+    <div class="xp-head"><p class="xp-role">${esc(heading)}</p>${dateRange ? `<p class="xp-date">${esc(dateRange)}</p>` : ''}</div>
+    ${item.description ? `<p class="xp-desc">${esc(item.description)}</p>` : ''}${item.technologies ? `<p class="project-stack">${esc(item.technologies)}</p>` : ''}
+  </div>`
+    })
+    .join('\n')
+
+  const caseStudyItems = snapshot.caseStudies
+    .map((item) => {
+      const rows = [
+        [copy.problem, item.problem],
+        [copy.solution, item.solution],
+        [copy.technologies, item.technologies],
+        [copy.outcome, item.outcome],
+        [copy.lessonsLearned, item.lessons],
+      ].filter(([, value]) => value)
+
+      return `  <div class="project-item">${item.title ? `<p class="project-name">${esc(item.title)}</p>` : ''}${rows.map(([label, value]) => `<p class="project-desc"><strong>${esc(label)}:</strong> ${esc(value)}</p>`).join('')}</div>`
+    })
+    .join('\n')
+
+  const testimonialItems = snapshot.testimonials
+    .map((item) => {
+      const meta = [item.author, item.role].filter(Boolean).join(', ')
+      return `  <div class="strength-item">${item.quote ? `<p class="strength-desc">“${esc(item.quote)}”</p>` : ''}${meta ? `<p class="strength-title">${esc(meta)}</p>` : ''}</div>`
+    })
     .join('\n')
 
   const isVisible = (section) => sectionVisibility[section] !== false
@@ -244,6 +385,66 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
       Object.keys(snapshot.links).length > 0
       && isVisible('links')
       && `<section>\n  <h2 class="section-heading">${copy.links}</h2>\n${linkItems}\n</section>`,
+    coreStrengths: () =>
+      snapshot.coreStrengths.length > 0
+      && isVisible('coreStrengths')
+      && `<section>\n  <h2 class="section-heading">${copy.coreStrengths}</h2>\n${coreStrengthItems}\n</section>`,
+    certificates: () =>
+      snapshot.certificates.length > 0
+      && isVisible('certificates')
+      && `<section>\n  <h2 class="section-heading">${copy.certificates}</h2>\n  <ul class="certificate-list">\n    ${certificateItems}\n  </ul>\n</section>`,
+    projects: () =>
+      snapshot.projects.length > 0
+      && isVisible('projects')
+      && `<section>\n  <h2 class="section-heading">${copy.projects}</h2>\n${projectItems}\n</section>`,
+    languages: () =>
+      snapshot.languages.length > 0
+      && isVisible('languages')
+      && `<section>\n  <h2 class="section-heading">${copy.languages}</h2>\n${languageItems}\n</section>`,
+    interests: () =>
+      snapshot.interests.length > 0
+      && isVisible('interests')
+      && `<section>\n  <h2 class="section-heading">${copy.interests}</h2>\n  <div class="interests">\n    ${interestItems}\n  </div>\n</section>`,
+    achievements: () =>
+      snapshot.achievements.length > 0
+      && isVisible('achievements')
+      && `<section>\n  <h2 class="section-heading">${copy.achievements}</h2>\n${achievementItems}\n</section>`,
+    openSource: () =>
+      snapshot.openSource.length > 0
+      && isVisible('openSource')
+      && `<section>\n  <h2 class="section-heading">${copy.openSource}</h2>\n${openSourceItems}\n</section>`,
+    publications: () =>
+      snapshot.publications.length > 0
+      && isVisible('publications')
+      && `<section>\n  <h2 class="section-heading">${copy.publications}</h2>\n${publicationItems}\n</section>`,
+    leadership: () =>
+      snapshot.leadership.length > 0
+      && isVisible('leadership')
+      && `<section>\n  <h2 class="section-heading">${copy.leadership}</h2>\n${leadershipItems}\n</section>`,
+    memberships: () =>
+      snapshot.memberships.length > 0
+      && isVisible('memberships')
+      && `<section>\n  <h2 class="section-heading">${copy.memberships}</h2>\n  <ul class="membership-list">\n    ${membershipItems}\n  </ul>\n</section>`,
+    speaking: () =>
+      snapshot.speaking.length > 0
+      && isVisible('speaking')
+      && `<section>\n  <h2 class="section-heading">${copy.speaking}</h2>\n${speakingItems}\n</section>`,
+    volunteering: () =>
+      snapshot.volunteering.length > 0
+      && isVisible('volunteering')
+      && `<section>\n  <h2 class="section-heading">${copy.volunteering}</h2>\n${volunteeringItems}\n</section>`,
+    internships: () =>
+      snapshot.internships.length > 0
+      && isVisible('internships')
+      && `<section>\n  <h2 class="section-heading">${copy.internships}</h2>\n${internshipItems}\n</section>`,
+    caseStudies: () =>
+      snapshot.caseStudies.length > 0
+      && isVisible('caseStudies')
+      && `<section>\n  <h2 class="section-heading">${copy.caseStudies}</h2>\n${caseStudyItems}\n</section>`,
+    testimonials: () =>
+      snapshot.testimonials.length > 0
+      && isVisible('testimonials')
+      && `<section>\n  <h2 class="section-heading">${copy.testimonials}</h2>\n${testimonialItems}\n</section>`,
   }
 
   const sections = sectionOrder
@@ -279,6 +480,47 @@ section { margin-bottom: 2.5rem; }
 .link-item { margin-bottom: 0.875rem; }
 .link-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: #94a3b8; margin-bottom: 0.25rem; }
 .link-url { font-size: 0.9rem; color: #0284c7; word-break: break-all; }
+.strength-item { margin-bottom: 1.125rem; }
+.strength-title { font-weight: 600; font-size: 0.95rem; }
+.strength-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; }
+.certificate-list { padding-left: 1.125rem; }
+.certificate-list li { font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem; }
+.project-item { margin-bottom: 1.25rem; }
+.project-name { font-weight: 600; font-size: 0.975rem; color: #0284c7; }
+.project-desc { margin-top: 0.25rem; font-size: 0.875rem; color: #334155; line-height: 1.6; }
+.project-stack { margin-top: 0.25rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; }
+.language-item { font-size: 0.9rem; color: #334155; margin-bottom: 0.4rem; }
+.interests { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.interest-chip { font-size: 0.85rem; color: #334155; }
+.interest-chip:not(:last-child)::after { content: '·'; margin-left: 0.5rem; color: #cbd5e1; }
+.achievement-item { margin-bottom: 1.125rem; }
+.achievement-title { font-weight: 600; font-size: 0.95rem; }
+.achievement-year { font-weight: 400; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; }
+.achievement-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; }
+.opensource-item { margin-bottom: 1.25rem; }
+.opensource-name { font-weight: 600; font-size: 0.975rem; color: #0284c7; }
+.opensource-meta { margin-top: 0.15rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; }
+.opensource-desc { margin-top: 0.25rem; font-size: 0.875rem; color: #334155; line-height: 1.6; }
+.opensource-url { margin-top: 0.25rem; font-size: 0.8rem; color: #334155; word-break: break-all; }
+.publication-item { margin-bottom: 1.125rem; }
+.publication-title { font-weight: 600; font-size: 0.95rem; }
+.publication-meta { margin-top: 0.15rem; font-size: 0.78rem; color: #94a3b8; }
+.publication-url { margin-top: 0.25rem; font-size: 0.8rem; color: #334155; word-break: break-all; }
+.project-links { margin-top: 0.25rem; font-size: 0.8rem; color: #334155; word-break: break-all; }
+.leadership-item { margin-bottom: 1.125rem; }
+.leadership-role { font-weight: 600; font-size: 0.95rem; }
+.leadership-date { margin-top: 0.15rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; }
+.leadership-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; }
+.membership-list { padding-left: 1.125rem; }
+.membership-list li { font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem; }
+.edu-honors { margin-top: 0.15rem; font-size: 0.8rem; color: #334155; font-style: italic; }
+.speaking-item { margin-bottom: 1.125rem; }
+.speaking-topic { font-weight: 600; font-size: 0.95rem; }
+.speaking-meta { margin-top: 0.15rem; font-size: 0.78rem; color: #94a3b8; }
+.speaking-audience { margin-top: 0.15rem; font-size: 0.8rem; color: #334155; }
+.volunteer-item { margin-bottom: 1.125rem; }
+.volunteer-role { font-weight: 600; font-size: 0.95rem; }
+.volunteer-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; }
 @media print { body { padding: 0; max-width: none; } }
 </style>
 </head>
@@ -1109,6 +1351,21 @@ async function exportCvAsPdfTextFallback(
     education: true,
     skills: true,
     links: true,
+    coreStrengths: true,
+    certificates: true,
+    projects: true,
+    languages: true,
+    interests: true,
+    achievements: true,
+    openSource: true,
+    publications: true,
+    leadership: true,
+    memberships: true,
+    speaking: true,
+    volunteering: true,
+    internships: true,
+    caseStudies: true,
+    testimonials: true,
     ...(formData.sectionVisibility ?? {}),
   }
   const templateSectionOrder = [
@@ -1193,11 +1450,29 @@ async function exportCvAsPdfTextFallback(
         drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
           bold: true,
           size: 10.5,
-          after: dateRange ? 0.5 : 1.3,
+          after: dateRange ? 0.5 : (item.honors ? 0.5 : 1.3),
         })
 
         if (dateRange) {
           drawFallbackParagraph(pdf, dateRange, cursor, pdfMode.marginMm, palette, {
+            subtle: true,
+            size: 9.8,
+            after: item.honors ? 0.5 : 1.3,
+          })
+        }
+
+        const gradeLine = [item.grade, item.coursework].filter(Boolean).join(' · ')
+
+        if (item.honors) {
+          drawFallbackParagraph(pdf, item.honors, cursor, pdfMode.marginMm, palette, {
+            subtle: true,
+            size: 9.8,
+            after: gradeLine ? 0.5 : 1.3,
+          })
+        }
+
+        if (gradeLine) {
+          drawFallbackParagraph(pdf, gradeLine, cursor, pdfMode.marginMm, palette, {
             subtle: true,
             size: 9.8,
             after: 1.3,
@@ -1228,12 +1503,397 @@ async function exportCvAsPdfTextFallback(
     }
   }
 
+  const renderCoreStrengths = () => {
+    drawFallbackSectionHeading(pdf, copy.coreStrengths, cursor, pdfMode.marginMm, palette)
+    if (snapshot.coreStrengths.length > 0) {
+      snapshot.coreStrengths.forEach((item) => {
+        if (item.title) {
+          drawFallbackParagraph(pdf, item.title, cursor, pdfMode.marginMm, palette, {
+            bold: true,
+            size: 10.5,
+            after: item.description ? 0.5 : 1.3,
+          })
+        }
+        if (item.description) {
+          drawFallbackParagraph(pdf, item.description, cursor, pdfMode.marginMm, palette, {
+            size: 10,
+            lineHeight: 4.7,
+            after: 1.3,
+          })
+        }
+      })
+    }
+  }
+
+  const renderCertificates = () => {
+    drawFallbackSectionHeading(pdf, copy.certificates, cursor, pdfMode.marginMm, palette)
+    if (snapshot.certificates.length > 0) {
+      drawFallbackBullets(
+        pdf,
+        snapshot.certificates.map((item) => {
+          const meta = [item.issuer, item.year].filter(Boolean).join(', ')
+          const expiry = item.expiry ? ` (expires ${item.expiry})` : ''
+          return (meta ? `${item.name} — ${meta}` : item.name) + expiry
+        }),
+        cursor,
+        pdfMode.marginMm,
+        palette,
+      )
+    }
+  }
+
+  const renderProjects = () => {
+    drawFallbackSectionHeading(pdf, copy.projects, cursor, pdfMode.marginMm, palette)
+    snapshot.projects.forEach((item) => {
+      if (item.name) {
+        drawFallbackParagraph(pdf, item.name, cursor, pdfMode.marginMm, palette, {
+          bold: true,
+          size: 10.5,
+          after: 0.5,
+        })
+      }
+      if (item.organization) {
+        drawFallbackParagraph(pdf, item.organization, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.8,
+          after: 0.5,
+        })
+      }
+      if (item.description) {
+        drawFallbackParagraph(pdf, item.description, cursor, pdfMode.marginMm, palette, {
+          size: 10,
+          lineHeight: 4.7,
+          after: 0.5,
+        })
+      }
+      if (item.impact) {
+        drawFallbackParagraph(pdf, item.impact, cursor, pdfMode.marginMm, palette, {
+          bold: true,
+          size: 9.8,
+          after: 0.5,
+        })
+      }
+      const contributionLine = [item.teamSize, item.contribution].filter(Boolean).join(' · ')
+      if (contributionLine) {
+        drawFallbackParagraph(pdf, contributionLine, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.2,
+          after: 0.5,
+        })
+      }
+      if (item.stack) {
+        drawFallbackParagraph(pdf, item.stack, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.2,
+          after: item.githubUrl || item.demoUrl ? 0.5 : 1.3,
+        })
+      }
+      const linkLine = [item.githubUrl, item.demoUrl].filter(Boolean).join('  ·  ')
+      if (linkLine) {
+        drawFallbackParagraph(pdf, linkLine, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.2,
+          after: 1.3,
+        })
+      }
+    })
+  }
+
+  const renderLanguages = () => {
+    drawFallbackSectionHeading(pdf, copy.languages, cursor, pdfMode.marginMm, palette)
+    snapshot.languages.forEach((item) => {
+      const line = item.level ? `${item.language} — ${item.level}` : item.language
+      drawFallbackParagraph(pdf, line, cursor, pdfMode.marginMm, palette, { size: 10.2, after: 1.1 })
+    })
+  }
+
+  const renderInterests = () => {
+    drawFallbackSectionHeading(pdf, copy.interests, cursor, pdfMode.marginMm, palette)
+    if (snapshot.interests.length > 0) {
+      drawFallbackParagraph(
+        pdf,
+        snapshot.interests.map((item) => item.name).join('  ·  '),
+        cursor,
+        pdfMode.marginMm,
+        palette,
+        { size: 10.2, after: 1.1 },
+      )
+    }
+  }
+
+  const renderAchievements = () => {
+    drawFallbackSectionHeading(pdf, copy.achievements, cursor, pdfMode.marginMm, palette)
+    snapshot.achievements.forEach((item) => {
+      const heading = item.year ? `${item.title}  —  ${item.year}` : item.title
+      if (heading) {
+        drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
+          bold: true,
+          size: 10.5,
+          after: item.description ? 0.5 : 1.3,
+        })
+      }
+      if (item.description) {
+        drawFallbackParagraph(pdf, item.description, cursor, pdfMode.marginMm, palette, {
+          size: 10,
+          lineHeight: 4.7,
+          after: 1.3,
+        })
+      }
+    })
+  }
+
+  const renderOpenSource = () => {
+    drawFallbackSectionHeading(pdf, copy.openSource, cursor, pdfMode.marginMm, palette)
+    snapshot.openSource.forEach((item) => {
+      if (item.name) {
+        drawFallbackParagraph(pdf, item.name, cursor, pdfMode.marginMm, palette, {
+          bold: true,
+          size: 10.5,
+          after: 0.5,
+        })
+      }
+      const meta = [item.language, item.stars ? `★ ${item.stars}` : '', item.forks ? `⑂ ${item.forks}` : '']
+        .filter(Boolean)
+        .join('   ')
+      if (meta) {
+        drawFallbackParagraph(pdf, meta, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.2,
+          after: 0.5,
+        })
+      }
+      if (item.description) {
+        drawFallbackParagraph(pdf, item.description, cursor, pdfMode.marginMm, palette, {
+          size: 10,
+          lineHeight: 4.7,
+          after: 1.3,
+        })
+      }
+    })
+  }
+
+  const renderPublications = () => {
+    drawFallbackSectionHeading(pdf, copy.publications, cursor, pdfMode.marginMm, palette)
+    snapshot.publications.forEach((item) => {
+      if (item.title) {
+        drawFallbackParagraph(pdf, item.title, cursor, pdfMode.marginMm, palette, {
+          bold: true,
+          size: 10.5,
+          after: 0.5,
+        })
+      }
+      const meta = [item.publisher, item.year].filter(Boolean).join(' · ')
+      if (meta) {
+        drawFallbackParagraph(pdf, meta, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.8,
+          after: 1.3,
+        })
+      }
+    })
+  }
+
+  const renderLeadership = () => {
+    drawFallbackSectionHeading(pdf, copy.leadership, cursor, pdfMode.marginMm, palette)
+    snapshot.leadership.forEach((item) => {
+      const heading = [item.role, item.organization].filter(Boolean).join(' — ')
+      if (heading) {
+        drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
+          bold: true,
+          size: 10.5,
+          after: 0.5,
+        })
+      }
+      const dateRange = formatDateRange(item.startDate, item.endDate)
+      if (dateRange) {
+        drawFallbackParagraph(pdf, dateRange, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.8,
+          after: 0.5,
+        })
+      }
+      if (item.description) {
+        drawFallbackParagraph(pdf, item.description, cursor, pdfMode.marginMm, palette, {
+          size: 10,
+          lineHeight: 4.7,
+          after: 1.3,
+        })
+      }
+    })
+  }
+
+  const renderMemberships = () => {
+    drawFallbackSectionHeading(pdf, copy.memberships, cursor, pdfMode.marginMm, palette)
+    if (snapshot.memberships.length > 0) {
+      drawFallbackBullets(
+        pdf,
+        snapshot.memberships.map((item) => {
+          const meta = [item.role, item.year].filter(Boolean).join(', ')
+          return meta ? `${item.organization} — ${meta}` : item.organization
+        }),
+        cursor,
+        pdfMode.marginMm,
+        palette,
+      )
+    }
+  }
+
+  const renderSpeaking = () => {
+    drawFallbackSectionHeading(pdf, copy.speaking, cursor, pdfMode.marginMm, palette)
+    snapshot.speaking.forEach((item) => {
+      if (item.topic) {
+        drawFallbackParagraph(pdf, item.topic, cursor, pdfMode.marginMm, palette, {
+          bold: true,
+          size: 10.5,
+          after: 0.5,
+        })
+      }
+      const meta = [item.conference, item.date].filter(Boolean).join(' · ')
+      if (meta) {
+        drawFallbackParagraph(pdf, meta, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.8,
+          after: item.audience ? 0.5 : 1.3,
+        })
+      }
+      if (item.audience) {
+        drawFallbackParagraph(pdf, item.audience, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.8,
+          after: 1.3,
+        })
+      }
+    })
+  }
+
+  const renderVolunteering = () => {
+    drawFallbackSectionHeading(pdf, copy.volunteering, cursor, pdfMode.marginMm, palette)
+    snapshot.volunteering.forEach((item) => {
+      const heading = [item.role, item.organization].filter(Boolean).join(' — ')
+      if (heading) {
+        drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
+          bold: true,
+          size: 10.5,
+          after: item.description ? 0.5 : 1.3,
+        })
+      }
+      if (item.description) {
+        drawFallbackParagraph(pdf, item.description, cursor, pdfMode.marginMm, palette, {
+          size: 10,
+          lineHeight: 4.7,
+          after: 1.3,
+        })
+      }
+    })
+  }
+
+  const renderInternships = () => {
+    drawFallbackSectionHeading(pdf, copy.internships, cursor, pdfMode.marginMm, palette)
+    snapshot.internships.forEach((item) => {
+      const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
+      drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
+        bold: true,
+        size: 10.7,
+        after: 0.6,
+      })
+
+      const dateRange = formatDateRange(item.startDate, item.endDate)
+      if (dateRange) {
+        drawFallbackParagraph(pdf, dateRange, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.8,
+          after: 0.8,
+        })
+      }
+
+      if (item.description) {
+        drawFallbackParagraph(pdf, item.description, cursor, pdfMode.marginMm, palette, {
+          size: 10.3,
+          lineHeight: 4.85,
+          after: item.technologies ? 0.5 : 1.5,
+        })
+      }
+
+      if (item.technologies) {
+        drawFallbackParagraph(pdf, item.technologies, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.2,
+          after: 1.3,
+        })
+      }
+    })
+  }
+
+  const renderCaseStudies = () => {
+    drawFallbackSectionHeading(pdf, copy.caseStudies, cursor, pdfMode.marginMm, palette)
+    snapshot.caseStudies.forEach((item) => {
+      if (item.title) {
+        drawFallbackParagraph(pdf, item.title, cursor, pdfMode.marginMm, palette, {
+          bold: true,
+          size: 10.5,
+          after: 0.6,
+        })
+      }
+      const rows = [
+        [copy.problem, item.problem],
+        [copy.solution, item.solution],
+        [copy.technologies, item.technologies],
+        [copy.outcome, item.outcome],
+        [copy.lessonsLearned, item.lessons],
+      ].filter(([, value]) => value)
+
+      rows.forEach(([label, value], rowIndex) => {
+        drawFallbackParagraph(pdf, `${label}: ${value}`, cursor, pdfMode.marginMm, palette, {
+          size: 10,
+          lineHeight: 4.7,
+          after: rowIndex === rows.length - 1 ? 1.3 : 0.5,
+        })
+      })
+    })
+  }
+
+  const renderTestimonials = () => {
+    drawFallbackSectionHeading(pdf, copy.testimonials, cursor, pdfMode.marginMm, palette)
+    snapshot.testimonials.forEach((item) => {
+      if (item.quote) {
+        drawFallbackParagraph(pdf, `“${item.quote}”`, cursor, pdfMode.marginMm, palette, {
+          size: 10.3,
+          lineHeight: 4.85,
+          after: 0.5,
+        })
+      }
+      const meta = [item.author, item.role].filter(Boolean).join(', ')
+      if (meta) {
+        drawFallbackParagraph(pdf, meta, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.8,
+          after: 1.3,
+        })
+      }
+    })
+  }
+
   const sectionRenderers = {
     about: renderAbout,
     experience: renderExperience,
     education: renderEducation,
     skills: renderSkills,
     links: renderLinks,
+    coreStrengths: renderCoreStrengths,
+    certificates: renderCertificates,
+    projects: renderProjects,
+    languages: renderLanguages,
+    interests: renderInterests,
+    achievements: renderAchievements,
+    openSource: renderOpenSource,
+    publications: renderPublications,
+    leadership: renderLeadership,
+    memberships: renderMemberships,
+    speaking: renderSpeaking,
+    volunteering: renderVolunteering,
+    internships: renderInternships,
+    caseStudies: renderCaseStudies,
+    testimonials: renderTestimonials,
   }
 
   const renderedSections = new Set()

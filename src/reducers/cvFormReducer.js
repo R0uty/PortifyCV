@@ -6,7 +6,42 @@ import {
   createInitialCvData,
   createEmptyExperience,
   createEmptyEducation,
+  createEmptyCoreStrength,
+  createEmptyCertificate,
+  createEmptyProject,
+  createEmptyLanguage,
+  createEmptyInterest,
+  createEmptyAchievement,
+  createEmptyOpenSource,
+  createEmptyPublication,
+  createEmptyLeadership,
+  createEmptyMembership,
+  createEmptySpeaking,
+  createEmptyVolunteer,
+  createEmptyInternship,
+  createEmptyCaseStudy,
+  createEmptyTestimonial,
 } from '../utils/cvForm'
+
+const ARRAY_ITEM_FACTORIES = {
+  experience: createEmptyExperience,
+  education: createEmptyEducation,
+  coreStrengths: createEmptyCoreStrength,
+  certificates: createEmptyCertificate,
+  projects: createEmptyProject,
+  languages: createEmptyLanguage,
+  achievements: createEmptyAchievement,
+  openSource: createEmptyOpenSource,
+  publications: createEmptyPublication,
+  interests: createEmptyInterest,
+  leadership: createEmptyLeadership,
+  memberships: createEmptyMembership,
+  speaking: createEmptySpeaking,
+  volunteering: createEmptyVolunteer,
+  internships: createEmptyInternship,
+  caseStudies: createEmptyCaseStudy,
+  testimonials: createEmptyTestimonial,
+}
 
 export const FORM_ACTION = {
   SET_ROOT_FIELD: 'SET_ROOT_FIELD',
@@ -297,7 +332,7 @@ export function cvFormReducer(state, action) {
         return state
       }
 
-      const factory = action.section === 'experience' ? createEmptyExperience : createEmptyEducation
+      const factory = ARRAY_ITEM_FACTORIES[action.section] ?? createEmptyEducation
 
       return {
         ...state,

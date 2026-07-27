@@ -3,12 +3,8 @@ function ProjectHeader({
   activeExport = '',
   isActionBusy = false,
   locale = 'en',
-  canUndo = false,
-  canRedo = false,
   onReturn = () => {},
   onLocaleChange = () => {},
-  onUndo = () => {},
-  onRedo = () => {},
   onExport = () => {},
 }) {
   const isFinnish = locale === 'fi'
@@ -26,22 +22,6 @@ function ProjectHeader({
               onClick={onReturn}
             >
               {isFinnish ? 'Takaisin' : 'Return'}
-            </button>
-            <button
-              type="button"
-              className="action-button action-button--secondary border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
-              onClick={onUndo}
-              disabled={!canUndo}
-            >
-              {isFinnish ? 'Kumoa' : 'Undo'}
-            </button>
-            <button
-              type="button"
-              className="action-button action-button--secondary border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
-              onClick={onRedo}
-              disabled={!canRedo}
-            >
-              {isFinnish ? 'Tee uudelleen' : 'Redo'}
             </button>
           </div>
           <div className="project-header__actions">

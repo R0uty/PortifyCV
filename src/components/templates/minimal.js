@@ -3,7 +3,7 @@ export default {
   preview: () => 'border border-black/10 bg-white shadow-sm',
 
   // Header
-  headerColor: () => 'bg-white text-gray-900 border-b border-gray-200',
+  headerColor: () => 'bg-amber-50/60 text-gray-900 border-b border-amber-100',
 
   headerTitle: () =>
     'text-4xl font-bold tracking-tight text-gray-900 lg:text-5xl',
@@ -61,14 +61,12 @@ export default {
   categoryLabelColor: 'text-amber-700',
   linkIconColor: '',
 
-  // Header contact (email • phone • location only)
+  // Header contact — plain pipe-separated email/phone/location, no icons (matches
+  // the minimalist "no decorative elements" philosophy). GitHub/LinkedIn/Portfolio/
+  // website never appear here; they live exclusively in the dedicated Links section.
   headerContactMode: 'piped',
   headerContactGap: 'gap-x-3',
   headerContactTextSize: 'text-xs',
   headerContactTextColor: 'text-gray-500',
   headerContactIconColor: null,
-
-  // Don't display portfolio/GitHub/LinkedIn in the header
-  showHeaderLinks: false,
-  showHeaderSocials: false,
 }

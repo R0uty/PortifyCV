@@ -93,4 +93,10 @@ export default {
   headerContactTextSize: null,
   headerContactTextColor: null,
   headerContactIconColor: null,
+
+  // ── Portfolio Showcase config (non-ATS "portfolio website" mode) ──
+  // Read by PortfolioShowcase.jsx via CVPreview's `showcaseConfig={t}` prop.
+  showPhoto: true,
+  showSidebar: true,
+  printOptimized: true,
 }

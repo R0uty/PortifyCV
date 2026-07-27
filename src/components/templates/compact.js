@@ -96,4 +96,10 @@ export default {
 
   // Marks this as the compact variant — triggers smaller sizes and tighter spacing
   isCompact: true,
+
+  // ── Compact Showcase config (non-ATS "ultra-efficient one-pager" mode) ──
+  // Read by CompactShowcase.jsx via CVPreview's `showcaseConfig={t}` prop.
+  showPhoto: true,
+  compactTwoColumn: false,
+  printOptimized: true,
 }

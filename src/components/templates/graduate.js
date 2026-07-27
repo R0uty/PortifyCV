@@ -93,4 +93,12 @@ export default {
   headerContactTextSize: null,
   headerContactTextColor: null,
   headerContactIconColor: null,
+
+  // ── Graduate Showcase config (non-ATS "future potential" mode) ──
+  // Read by GraduateShowcase.jsx via CVPreview's `showcaseConfig={t}` prop.
+  // Each flag defaults to true inside the component, so omitting one here
+  // still renders a fully-featured showcase.
+  showPhoto: true,
+  showSidebar: true,
+  printOptimized: true,
 }

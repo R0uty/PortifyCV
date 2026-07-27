@@ -11,6 +11,7 @@ import modern from './modern'
 import graduate from './graduate'
 import compact from './compact'
 import portfolio from './portfolio'
+import techExec from './techExec'
 
 // Map of variant name → template config object
 const templates = {
@@ -23,6 +24,7 @@ const templates = {
   graduate,
   compact,
   portfolio,
+  techExec,
 }
 
 // Returns the template config for a given variant string.

@@ -1,0 +1,480 @@
+// Modern Professional Showcase — the non-ATS "Showcase" visual mode for the
+// Modern Professional template. Rendered by CVPreview.jsx instead of the
+// shared generic renderer whenever variant === 'modern' && !atsFriendlyMode.
+// Shares the exact same CvData shape as every other template — this file
+// only differs in presentation. ATS mode (the app's existing global toggle)
+// bypasses this component entirely and falls back to the shared flat
+// renderer (modern.js).
+//
+// Design language: premium executive consulting-firm resume. Navy / royal
+// blue / sky blue palette, thin 1px borders, uppercase section titles with
+// wide tracking, no gradients, no decorative boxes, no colored section
+// backgrounds — restraint over ornamentation (see DeveloperShowcase /
+// CreativeShowcase for the more colorful counterexamples).
+
+import { useMemo } from 'react'
+
+import { createCvSnapshot } from '../../utils/cvSnapshot'
+import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import {
+  devIcons,
+  contactIcons,
+  sectionIcons,
+  parseSkillCategories,
+  formatDateRange,
+  formatLinkLabel,
+} from './shared'
+
+// Small outline glyph for interest chips — a single shared glyph rather than
+// per-interest icon matching, consistent with the Creative template's choice.
+function InterestGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3l2.2 5.6L20 10l-4.4 3.8L17 20l-5-3.2L7 20l1.4-6.2L4 10l5.8-1.4L12 3z" />
+    </svg>
+  )
+}
+
+function splitToBullets(text) {
+  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+}
+
+// Bolds simple metric-shaped tokens (percentages, multipliers, counts,
+// currency amounts) inside bullet text so quantified impact stands out,
+// per the spec's "metrics stand out" requirement — without per-item manual
+// tagging.
+const METRIC_PATTERN = /(\$[\d,.]+[MKB]?\+?|\d+(?:[.,]\d+)?%|\d+x\b|\d+\+|\b\d{2,}(?:,\d{3})+\b)/gi
+
+function highlightMetrics(text) {
+  const parts = text.split(METRIC_PATTERN)
+  if (parts.length === 1) return text
+  return parts.map((part, index) => (
+    METRIC_PATTERN.test(part) && part
+      ? <strong key={index} className="modern-showcase__metric">{part}</strong>
+      : part
+  ))
+}
+
+function SectionHead({ icon, title }) {
+  return (
+    <div className="modern-showcase__section-head">
+      <span className="modern-showcase__section-icon" aria-hidden="true">
+        {sectionIcons[icon]}
+      </span>
+      <p className="modern-showcase__section-title">{title}</p>
+    </div>
+  )
+}
+
+function Section({ id, placement, icon, title, children }) {
+  return (
+    <section className="modern-showcase__section" data-export-section={id} data-export-placement={placement}>
+      <SectionHead icon={icon} title={title} />
+      <div className="modern-showcase__section-divider" aria-hidden="true" />
+      {children}
+    </section>
+  )
+}
+
+export default function ModernShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {} }) {
+  const isFinnish = locale === 'fi'
+  const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
+
+  const showTimeline = showcaseConfig.showTimeline !== false
+  const showSidebar = showcaseConfig.showSidebar !== false
+  const configShowPhoto = showcaseConfig.showPhoto !== false
+
+  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
+  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Senior Professional')
+  const photo = snapshot.photo
+  const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
+    formData.photoVisibilityByTemplate,
+    templateConfig.id,
+  )
+  const about = snapshot.about
+    || (isFinnish
+      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+      : 'Your professional summary will appear here as you fill out the CV form.')
+
+  const personalContactItems = [
+    ['email', snapshot.email],
+    ['phone', snapshot.phone],
+    ['location', snapshot.location],
+  ].filter(([, value]) => value)
+
+  const linkEntries = Object.entries(snapshot.links)
+  const skillCategories = useMemo(
+    () => parseSkillCategories(snapshot.skills, isFinnish),
+    [snapshot.skills, isFinnish],
+  )
+
+  const sectionVisibility = {
+    ...createSectionVisibility(),
+    ...(formData.sectionVisibility ?? {}),
+  }
+  const templateSectionOrder = [
+    ...templateConfig.primarySections,
+    ...templateConfig.secondarySections,
+  ]
+  const orderedSections = normalizeSectionOrder(formData.sectionOrder, templateSectionOrder)
+  const primarySet = new Set(templateConfig.primarySections)
+  const secondarySet = new Set(templateConfig.secondarySections)
+  const mainSectionKeys = orderedSections.filter((key) => primarySet.has(key) && sectionVisibility[key])
+  const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
+
+  const copy = {
+    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
+    viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
+    summary: isFinnish ? 'Yhteenveto' : 'Professional Summary',
+    experience: isFinnish ? 'Kokemus' : 'Experience',
+    education: isFinnish ? 'Koulutus' : 'Education',
+    projects: isFinnish ? 'Projektit' : 'Projects',
+    achievements: isFinnish ? 'Saavutukset' : 'Achievements',
+    skills: isFinnish ? 'Taidot' : 'Skills',
+    languages: isFinnish ? 'Kielet' : 'Languages',
+    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
+    links: isFinnish ? 'Linkit' : 'Links',
+    interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
+  }
+
+  const renderMainSection = (key) => {
+    if (key === 'about') {
+      return (
+        <Section key={key} id="about" placement="main" icon="about" title={copy.summary}>
+          <p className="modern-showcase__summary">{about}</p>
+        </Section>
+      )
+    }
+
+    if (key === 'experience') {
+      return (
+        <Section key={key} id="experience" placement="main" icon="experience" title={copy.experience}>
+          <div className="modern-showcase__timeline">
+            {snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) => {
+                const dateRange = formatDateRange(item.startDate, item.endDate)
+                const bullets = item.description ? splitToBullets(item.description) : []
+
+                return (
+                  <div key={`${item.role}-${item.company}-${index}`} className="modern-showcase__timeline-item" data-export-card="true">
+                    {showTimeline ? (
+                      <div className="modern-showcase__timeline-rail">
+                        <span className="modern-showcase__timeline-marker" aria-hidden="true" />
+                        <span className="modern-showcase__timeline-line" aria-hidden="true" />
+                      </div>
+                    ) : null}
+                    <div className="modern-showcase__timeline-card">
+                      <div className="modern-showcase__role-row">
+                        <div className="min-w-0">
+                          <p className="modern-showcase__role-title">{item.role || copy.untitledRole}</p>
+                          {item.company || item.location ? (
+                            <p className="modern-showcase__company">
+                              {[item.company, item.location].filter(Boolean).join(' · ')}
+                            </p>
+                          ) : null}
+                        </div>
+                        <p className="modern-showcase__dates">{dateRange || copy.datesPending}</p>
+                      </div>
+                      {bullets.length > 0 ? (
+                        <ul className="modern-showcase__bullets">
+                          {bullets.map((line, lineIndex) => (
+                            <li key={lineIndex}>{highlightMetrics(line)}</li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <p className="modern-showcase__empty">
+                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+              </p>
+            )}
+          </div>
+        </Section>
+      )
+    }
+
+    if (key === 'education') {
+      return (
+        <Section key={key} id="education" placement="main" icon="education" title={copy.education}>
+          <div className="modern-showcase__edu-grid">
+            {snapshot.education.length > 0 ? (
+              snapshot.education.map((item, index) => (
+                <div key={`${item.school}-${index}`} className="modern-showcase__edu-card" data-export-card="true">
+                  {item.degree ? <p className="modern-showcase__edu-degree">{item.degree}</p> : null}
+                  {item.school || item.location ? (
+                    <p className="modern-showcase__edu-meta">
+                      {[item.school, item.location].filter(Boolean).join(' · ')}
+                    </p>
+                  ) : null}
+                  {formatDateRange(item.startDate, item.endDate) ? (
+                    <p className="modern-showcase__edu-dates">{formatDateRange(item.startDate, item.endDate)}</p>
+                  ) : null}
+                </div>
+              ))
+            ) : (
+              <p className="modern-showcase__empty">
+                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+              </p>
+            )}
+          </div>
+        </Section>
+      )
+    }
+
+    if (key === 'projects') {
+      return (
+        <Section key={key} id="projects" placement="main" icon="projects" title={copy.projects}>
+          <div className="modern-showcase__project-grid">
+            {snapshot.projects.length > 0 ? (
+              snapshot.projects.map((item, index) => {
+                const stackTags = item.stack
+                  ? item.stack.split(',').map((chip) => chip.trim()).filter(Boolean)
+                  : []
+
+                return (
+                  <div key={`${item.name}-${index}`} className="modern-showcase__project-card" data-export-card="true">
+                    {item.name ? <p className="modern-showcase__project-name">{item.name}</p> : null}
+                    {item.description ? <p className="modern-showcase__project-desc">{item.description}</p> : null}
+                    {stackTags.length > 0 ? (
+                      <div className="modern-showcase__tag-row">
+                        {stackTags.map((chip) => (
+                          <span key={chip} className="modern-showcase__tag">{chip}</span>
+                        ))}
+                      </div>
+                    ) : null}
+                    {item.demoUrl || item.githubUrl ? (
+                      <p className="modern-showcase__project-link">{item.demoUrl || item.githubUrl}</p>
+                    ) : null}
+                  </div>
+                )
+              })
+            ) : (
+              <p className="modern-showcase__empty">
+                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+              </p>
+            )}
+          </div>
+        </Section>
+      )
+    }
+
+    if (key === 'achievements') {
+      return (
+        <Section key={key} id="achievements" placement="main" icon="achievements" title={copy.achievements}>
+          <ul className="modern-showcase__achievement-list">
+            {snapshot.achievements.length > 0 ? (
+              snapshot.achievements.map((item, index) => (
+                <li key={`${item.title}-${index}`} className="modern-showcase__achievement-item">
+                  <span className="modern-showcase__achievement-dot" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <div className="modern-showcase__achievement-row">
+                      {item.title ? <p className="modern-showcase__achievement-title">{item.title}</p> : null}
+                      {item.year ? <p className="modern-showcase__achievement-year">{item.year}</p> : null}
+                    </div>
+                    {item.description ? <p className="modern-showcase__achievement-desc">{item.description}</p> : null}
+                  </div>
+                </li>
+              ))
+            ) : (
+              <p className="modern-showcase__empty">
+                {isFinnish ? 'Saavutukset näkyvät tässä.' : 'Achievements will appear here.'}
+              </p>
+            )}
+          </ul>
+        </Section>
+      )
+    }
+
+    return null
+  }
+
+  const renderSidebarSection = (key) => {
+    if (key === 'skills') {
+      return (
+        <Section key={key} id="skills" placement="side" icon="skills" title={copy.skills}>
+          {skillCategories.length > 0 ? (
+            skillCategories.map((cat) => (
+              <div key={cat.key} className="modern-showcase__skill-group">
+                <p className="modern-showcase__skill-group-label">{cat.label}</p>
+                <div className="modern-showcase__tag-row">
+                  {cat.items.map((skill) => (
+                    <span key={skill} data-export-skill="true" className="modern-showcase__tag">{skill}</span>
+                  ))}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="modern-showcase__empty">
+              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+            </p>
+          )}
+        </Section>
+      )
+    }
+
+    if (key === 'languages') {
+      return (
+        <Section key={key} id="languages" placement="side" icon="languages" title={copy.languages}>
+          <div className="modern-showcase__lang-list">
+            {snapshot.languages.length > 0 ? (
+              snapshot.languages.map((item, index) => (
+                <div key={`${item.language}-${index}`} className="modern-showcase__lang-item">
+                  <span>{item.language}</span>
+                  {item.level ? <span className="modern-showcase__lang-level">{item.level}</span> : null}
+                </div>
+              ))
+            ) : (
+              <p className="modern-showcase__empty">
+                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+              </p>
+            )}
+          </div>
+        </Section>
+      )
+    }
+
+    if (key === 'certificates') {
+      return (
+        <Section key={key} id="certificates" placement="side" icon="certificates" title={copy.certificates}>
+          <div className="modern-showcase__cert-list">
+            {snapshot.certificates.length > 0 ? (
+              snapshot.certificates.map((item, index) => (
+                <div key={`${item.name}-${index}`} className="modern-showcase__cert-item">
+                  {item.name ? <p className="modern-showcase__cert-name">{item.name}</p> : null}
+                  {item.issuer || item.year ? (
+                    <p className="modern-showcase__cert-meta">
+                      {[item.issuer, item.year].filter(Boolean).join(' · ')}
+                    </p>
+                  ) : null}
+                  {item.credentialUrl ? (
+                    <a href={item.credentialUrl} target="_blank" rel="noreferrer" className="modern-showcase__cert-link">
+                      {copy.viewCredential}
+                    </a>
+                  ) : null}
+                </div>
+              ))
+            ) : (
+              <p className="modern-showcase__empty">
+                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+              </p>
+            )}
+          </div>
+        </Section>
+      )
+    }
+
+    if (key === 'links') {
+      return (
+        <Section key={key} id="links" placement="side" icon="links" title={copy.links}>
+          <div className="modern-showcase__link-list">
+            {linkEntries.length > 0 ? (
+              linkEntries.map(([linkKey, value]) => (
+                <div key={linkKey} data-export-card="true" className="modern-showcase__link-card">
+                  <span className="modern-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
+                  <div className="min-w-0">
+                    <p className="modern-showcase__link-label">{formatLinkLabel(linkKey)}</p>
+                    <p className="modern-showcase__link-value">{value}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="modern-showcase__empty">
+                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+              </p>
+            )}
+          </div>
+        </Section>
+      )
+    }
+
+    if (key === 'interests') {
+      return (
+        <Section key={key} id="interests" placement="side" icon="interests" title={copy.interests}>
+          <div className="modern-showcase__interest-row">
+            {snapshot.interests.length > 0 ? (
+              snapshot.interests.map((item, index) => (
+                <span key={`${item.name}-${index}`} className="modern-showcase__interest-chip">
+                  <InterestGlyph />
+                  {item.name}
+                </span>
+              ))
+            ) : (
+              <p className="modern-showcase__empty">
+                {isFinnish ? 'Kiinnostuksen kohteet näkyvät tässä.' : 'Interests will appear here.'}
+              </p>
+            )}
+          </div>
+        </Section>
+      )
+    }
+
+    return null
+  }
+
+  return (
+    <article
+      ref={previewRef}
+      data-export-root="true"
+      data-export-variant="modern"
+      // "preview-document--designer" is a pure marker class (no styling rules
+      // of its own — see index.css) that ResumeBuilderPage's export handler
+      // polls for via waitForPreviewModeSync before starting a PDF export.
+      // ModernShowcase only ever renders in non-ATS mode, so it's always
+      // "designer", never "ats". Without this class the export handler polls
+      // forever waiting for a class that can never appear, hanging the export.
+      className="modern-showcase preview-document--designer"
+    >
+      <header data-export-header="true" className="modern-showcase__header">
+        <div className="min-w-0">
+          <p className="modern-showcase__kicker" data-export-ignore="true">
+            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+          </p>
+          <h1 className="modern-showcase__name">{fullName}</h1>
+          <p className="modern-showcase__role">{title}</p>
+          {personalContactItems.length > 0 ? (
+            <div className="modern-showcase__contact">
+              {personalContactItems.map(([key, value]) => (
+                <span key={key} className="modern-showcase__contact-item">
+                  <span className="modern-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
+                  {value}
+                </span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        {showPhoto ? (
+          <div className="modern-showcase__photo-wrap">
+            <img
+              src={photo}
+              alt={`${fullName} profile`}
+              data-export-photo="true"
+              className="modern-showcase__photo"
+            />
+          </div>
+        ) : null}
+      </header>
+
+      <div className="modern-showcase__header-divider" aria-hidden="true" />
+
+      <div
+        className="modern-showcase__body"
+        data-export-content="true"
+        style={!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
+      >
+        <main className="modern-showcase__main" data-export-primary="true">
+          {mainSectionKeys.map((key) => renderMainSection(key))}
+        </main>
+        {showSidebar ? (
+          <aside className="modern-showcase__sidebar" data-export-secondary="true">
+            {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+          </aside>
+        ) : null}
+      </div>
+    </article>
+  )
+}

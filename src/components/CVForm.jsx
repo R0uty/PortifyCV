@@ -125,9 +125,11 @@ function CVForm({
   const sectionFieldByKey = Object.fromEntries(
     sectionVisibilityFields.map((field) => [field.key, field]),
   )
+  const templateSectionKeySet = new Set(templateSectionOrder)
   const orderedSectionFields = sectionOrderKeys
     .map((sectionKey) => sectionFieldByKey[sectionKey])
     .filter(Boolean)
+    .filter((field) => templateSectionKeySet.has(field.key))
   const linkFields = getLinkFields(locale)
   const sectionVisibility = {
     ...createSectionVisibility(),
@@ -452,6 +454,45 @@ function CVForm({
             />
           </Field>
 
+          <Field label={isFinnish ? 'Iskulause (valinnainen)' : 'Tagline (optional)'} labelClassName={fieldLabelClassName}>
+            <input
+              className={inputClasses}
+              type="text"
+              value={formData.tagline}
+              onChange={(event) => updateRootField('tagline', event.target.value)}
+              placeholder={isFinnish ? 'Autan ideoita toteutumaan.' : 'Helping ideas become reality.'}
+            />
+          </Field>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Field label={isFinnish ? 'Sähköposti' : 'Email'} labelClassName={fieldLabelClassName}>
+              <input
+                className={inputClasses}
+                type="email"
+                value={formData.email}
+                onChange={(event) => updateRootField('email', event.target.value)}
+                placeholder="alex@email.com"
+              />
+            </Field>
+            <Field label={isFinnish ? 'Puhelin' : 'Phone'} labelClassName={fieldLabelClassName}>
+              <input
+                className={inputClasses}
+                type="tel"
+                value={formData.phone}
+                onChange={(event) => updateRootField('phone', event.target.value)}
+                placeholder="+358 40 123 4567"
+              />
+            </Field>
+            <Field label={isFinnish ? 'Sijainti' : 'Location'} labelClassName={fieldLabelClassName}>
+              <input
+                className={inputClasses}
+                type="text"
+                value={formData.location}
+                onChange={(event) => updateRootField('location', event.target.value)}
+                placeholder={isFinnish ? 'Helsinki, Suomi' : 'Helsinki, Finland'}
+              />
+            </Field>
+          </div>
           <Field label={isFinnish ? 'Esittely' : 'About'} labelClassName={fieldLabelClassName}>
             <AutoGrowTextarea
               className={textareaClasses}
@@ -701,6 +742,17 @@ function CVForm({
                     placeholder={isFinnish ? 'Studio North' : 'Studio North'}
                   />
                 </Field>
+                <Field label={isFinnish ? 'Sijainti' : 'Location'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.location}
+                    onChange={(event) =>
+                      updateArrayItem('experience', index, 'location', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Helsinki, Suomi' : 'Helsinki, Finland'}
+                  />
+                </Field>
                 <Field label={isFinnish ? 'Aloituspäivä' : 'Start date'} labelClassName={fieldLabelClassName}>
                   <input
                     className={inputClasses}
@@ -861,6 +913,17 @@ function CVForm({
                     placeholder={isFinnish ? 'BA Graafinen suunnittelu' : 'B.A. Graphic Design'}
                   />
                 </Field>
+                <Field label={isFinnish ? 'Sijainti' : 'Location'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.location}
+                    onChange={(event) =>
+                      updateArrayItem('education', index, 'location', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Helsinki, Suomi' : 'Helsinki, Finland'}
+                  />
+                </Field>
                 <Field label={isFinnish ? 'Aloituspäivä' : 'Start date'} labelClassName={fieldLabelClassName}>
                   <input
                     className={inputClasses}
@@ -883,6 +946,45 @@ function CVForm({
                     placeholder="2020"
                   />
                 </Field>
+                <Field label={isFinnish ? 'Arvosana (valinnainen)' : 'Grade (optional)'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.grade}
+                    onChange={(event) =>
+                      updateArrayItem('education', index, 'grade', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Erinomainen (1. luokka)' : 'First Class Honours'}
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Kunniamaininta (valinnainen)' : 'Honors (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.honors}
+                      onChange={(event) =>
+                        updateArrayItem('education', index, 'honors', event.target.value)
+                      }
+                      placeholder={isFinnish ? 'Valmistui erinomaisin arvosanoin' : 'Graduated with Distinction'}
+                    />
+                  </Field>
+                </div>
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Kurssit (valinnainen)' : 'Relevant coursework (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.coursework}
+                      onChange={(event) =>
+                        updateArrayItem('education', index, 'coursework', event.target.value)
+                      }
+                      placeholder={isFinnish
+                        ? 'Algoritmit, Tietokannat, Ohjelmistotekniikka'
+                        : 'Algorithms, Databases, Software Engineering'}
+                    />
+                  </Field>
+                </div>
               </div>
             </div>
           ))}
@@ -897,7 +999,872 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 05"
+        eyebrow="Section 06"
+        title={isFinnish ? 'Vahvuudet' : 'Core Strengths'}
+        description={
+          isFinnish
+            ? 'Nosta esiin 2-4 ydinvahvuutta lyhyellä kuvauksella.'
+            : 'Highlight 2-4 core strengths with a short supporting line.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.coreStrengths.map((item, index) => (
+            <div key={`core-strength-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Vahvuus' : 'Strength'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('coreStrengths', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'coreStrengths', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('coreStrengths', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('coreStrengths', index, 1)}
+                    disabled={index === formData.coreStrengths.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => duplicateArrayItem('coreStrengths', index)}
+                  >
+                    {copy.duplicate}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('coreStrengths', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <Field label={isFinnish ? 'Otsikko' : 'Title'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.title}
+                    onChange={(event) =>
+                      updateArrayItem('coreStrengths', index, 'title', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Turvallisuusajattelu' : 'Security Mindset'}
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                  <AutoGrowTextarea
+                    className={textareaClasses}
+                    value={item.description}
+                    onChange={(event) =>
+                      updateArrayItem('coreStrengths', index, 'description', event.target.value)
+                    }
+                    placeholder={isFinnish
+                      ? 'Ajattele kuin hyökkääjä. Rakenna kuin puolustaja.'
+                      : 'Think like an attacker. Build like a defender.'}
+                  />
+                </Field>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('coreStrengths')}
+          >
+            {isFinnish ? 'Lisää vahvuus' : 'Add strength'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 07"
+        title={isFinnish ? 'Sertifikaatit' : 'Certificates'}
+        description={
+          isFinnish
+            ? 'Lisää alan sertifikaatit yksinkertaisena listana.'
+            : 'List your professional certifications as a simple bullet list.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.certificates.map((item, index) => (
+            <div key={`certificate-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Sertifikaatti' : 'Certificate'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('certificates', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'certificates', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('certificates', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('certificates', index, 1)}
+                    disabled={index === formData.certificates.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('certificates', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Nimi' : 'Name'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.name}
+                      onChange={(event) =>
+                        updateArrayItem('certificates', index, 'name', event.target.value)
+                      }
+                      placeholder="AWS Certified Solutions Architect"
+                    />
+                  </Field>
+                </div>
+                <Field label={isFinnish ? 'Myöntäjä' : 'Issuer'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.issuer}
+                    onChange={(event) =>
+                      updateArrayItem('certificates', index, 'issuer', event.target.value)
+                    }
+                    placeholder="Amazon Web Services"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Vuosi' : 'Year'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.year}
+                    onChange={(event) =>
+                      updateArrayItem('certificates', index, 'year', event.target.value)
+                    }
+                    placeholder="2024"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Vanhenee (valinnainen)' : 'Expiry (optional)'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.expiry}
+                    onChange={(event) =>
+                      updateArrayItem('certificates', index, 'expiry', event.target.value)
+                    }
+                    placeholder="2027"
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Todennuslinkki (valinnainen)' : 'Credential URL (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="url"
+                      value={item.credentialUrl}
+                      onChange={(event) =>
+                        updateArrayItem('certificates', index, 'credentialUrl', event.target.value)
+                      }
+                      placeholder="https://credly.com/badges/..."
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('certificates')}
+          >
+            {isFinnish ? 'Lisää sertifikaatti' : 'Add certificate'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 08"
+        title={isFinnish ? 'Projektit' : 'Projects'}
+        description={
+          isFinnish
+            ? 'Esittele projekteja yhden lauseen kuvauksella ja valinnaisella teknologiapinolla.'
+            : 'Showcase projects with a one-sentence description and an optional tech stack.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.projects.map((item, index) => (
+            <div key={`project-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Projekti' : 'Project'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('projects', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'projects', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('projects', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('projects', index, 1)}
+                    disabled={index === formData.projects.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => duplicateArrayItem('projects', index)}
+                  >
+                    {copy.duplicate}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('projects', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <Field label={isFinnish ? 'Nimi' : 'Name'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.name}
+                    onChange={(event) =>
+                      updateArrayItem('projects', index, 'name', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Sisäinen uhkien tunnistusalusta' : 'Threat Detection Platform'}
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                  <AutoGrowTextarea
+                    className={textareaClasses}
+                    value={item.description}
+                    onChange={(event) =>
+                      updateArrayItem('projects', index, 'description', event.target.value)
+                    }
+                    placeholder={isFinnish
+                      ? 'Yhden lauseen kuvaus projektista ja sen vaikutuksesta.'
+                      : 'One sentence describing the project and its impact.'}
+                  />
+                </Field>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label={isFinnish ? 'Teknologiat (valinnainen)' : 'Tech stack (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.stack}
+                      onChange={(event) =>
+                        updateArrayItem('projects', index, 'stack', event.target.value)
+                      }
+                      placeholder="Python, Kafka, AWS"
+                    />
+                  </Field>
+                  <Field label={isFinnish ? 'Päivämäärä (valinnainen)' : 'Date (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.date}
+                      onChange={(event) =>
+                        updateArrayItem('projects', index, 'date', event.target.value)
+                      }
+                      placeholder="2023"
+                    />
+                  </Field>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label={isFinnish ? 'Organisaatio (valinnainen)' : 'Organization (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.organization}
+                      onChange={(event) =>
+                        updateArrayItem('projects', index, 'organization', event.target.value)
+                      }
+                      placeholder={isFinnish ? 'ABC Corporation' : 'ABC Corporation'}
+                    />
+                  </Field>
+                  <Field label={isFinnish ? 'Liiketoiminnallinen vaikutus (valinnainen)' : 'Business impact (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.impact}
+                      onChange={(event) =>
+                        updateArrayItem('projects', index, 'impact', event.target.value)
+                      }
+                      placeholder={isFinnish ? 'Vähensi kustannuksia 30 %.' : 'Cut operating costs by 30%.'}
+                    />
+                  </Field>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label={isFinnish ? 'Tiimin koko (valinnainen)' : 'Team size (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.teamSize}
+                      onChange={(event) =>
+                        updateArrayItem('projects', index, 'teamSize', event.target.value)
+                      }
+                      placeholder={isFinnish ? 'Tiimi, 4 henkeä' : 'Team of 4'}
+                    />
+                  </Field>
+                  <Field label={isFinnish ? 'Oma panos (valinnainen)' : 'Personal contribution (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.contribution}
+                      onChange={(event) =>
+                        updateArrayItem('projects', index, 'contribution', event.target.value)
+                      }
+                      placeholder={isFinnish ? 'Vastasin backend-rajapinnasta' : 'Led the backend API design'}
+                    />
+                  </Field>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label={isFinnish ? 'GitHub-linkki (valinnainen)' : 'GitHub URL (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="url"
+                      value={item.githubUrl}
+                      onChange={(event) =>
+                        updateArrayItem('projects', index, 'githubUrl', event.target.value)
+                      }
+                      placeholder="https://github.com/username/project"
+                    />
+                  </Field>
+                  <Field label={isFinnish ? 'Demo-linkki (valinnainen)' : 'Demo URL (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="url"
+                      value={item.demoUrl}
+                      onChange={(event) =>
+                        updateArrayItem('projects', index, 'demoUrl', event.target.value)
+                      }
+                      placeholder="https://project-demo.dev"
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('projects')}
+          >
+            {isFinnish ? 'Lisää projekti' : 'Add project'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 09"
+        title={isFinnish ? 'Kielet' : 'Languages'}
+        description={
+          isFinnish
+            ? 'Lisää kielitaitosi ja niiden taso.'
+            : 'List the languages you speak and your fluency level.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-3">
+          {formData.languages.map((item, index) => (
+            <div key={`language-${index}`} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
+              <Field label={isFinnish ? 'Kieli' : 'Language'} labelClassName={fieldLabelClassName}>
+                <input
+                  className={inputClasses}
+                  type="text"
+                  value={item.language}
+                  onChange={(event) =>
+                    updateArrayItem('languages', index, 'language', event.target.value)
+                  }
+                  placeholder={isFinnish ? 'Englanti' : 'English'}
+                />
+              </Field>
+              <Field label={isFinnish ? 'Taso' : 'Level'} labelClassName={fieldLabelClassName}>
+                <input
+                  className={inputClasses}
+                  type="text"
+                  value={item.level}
+                  onChange={(event) =>
+                    updateArrayItem('languages', index, 'level', event.target.value)
+                  }
+                  placeholder={isFinnish ? 'Sujuva' : 'Fluent'}
+                />
+              </Field>
+              <button
+                type="button"
+                className={utilityButtonClasses}
+                onClick={() => toggleSectionItemVisibility('languages', index)}
+              >
+                {isSectionItemVisible(sectionItemVisibility, 'languages', index) ? copy.hide : copy.show}
+              </button>
+              <button
+                type="button"
+                className={removeButtonClasses}
+                onClick={() => removeArrayItem('languages', index)}
+              >
+                {copy.remove}
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('languages')}
+          >
+            {isFinnish ? 'Lisää kieli' : 'Add language'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 10"
+        title={isFinnish ? 'Kiinnostuksen kohteet' : 'Interests'}
+        description={
+          isFinnish
+            ? 'Muutama lyhyt kiinnostuksen kohde riittää.'
+            : 'A handful of short interests is enough to add personality.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-3">
+          {formData.interests.map((item, index) => (
+            <div key={`interest-${index}`} className="flex items-center gap-2">
+              <input
+                className={inputClasses.replace('mt-2 ', '')}
+                type="text"
+                value={item.name}
+                onChange={(event) =>
+                  updateArrayItem('interests', index, 'name', event.target.value)
+                }
+                placeholder={isFinnish ? 'Valokuvaus' : 'Photography'}
+              />
+              <button
+                type="button"
+                className={utilityButtonClasses}
+                onClick={() => toggleSectionItemVisibility('interests', index)}
+              >
+                {isSectionItemVisible(sectionItemVisibility, 'interests', index) ? copy.hide : copy.show}
+              </button>
+              <button
+                type="button"
+                className={removeButtonClasses}
+                onClick={() => removeArrayItem('interests', index)}
+              >
+                {copy.remove}
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('interests')}
+          >
+            {isFinnish ? 'Lisää kiinnostuksen kohde' : 'Add interest'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 11"
+        title={isFinnish ? 'Saavutukset' : 'Achievements'}
+        description={
+          isFinnish
+            ? 'Hackathonit, palkinnot, patentit ja puheenvuorot.'
+            : 'Hackathons, awards, patents, and speaking engagements.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.achievements.map((item, index) => (
+            <div key={`achievement-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Saavutus' : 'Achievement'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('achievements', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'achievements', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('achievements', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('achievements', index, 1)}
+                    disabled={index === formData.achievements.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('achievements', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label={isFinnish ? 'Otsikko' : 'Title'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.title}
+                    onChange={(event) =>
+                      updateArrayItem('achievements', index, 'title', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Voitti sisäisen hackathonin' : 'Won internal hackathon'}
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Vuosi' : 'Year'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.year}
+                    onChange={(event) =>
+                      updateArrayItem('achievements', index, 'year', event.target.value)
+                    }
+                    placeholder="2024"
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                    <AutoGrowTextarea
+                      className={textareaClasses}
+                      value={item.description}
+                      onChange={(event) =>
+                        updateArrayItem('achievements', index, 'description', event.target.value)
+                      }
+                      placeholder={isFinnish
+                        ? 'Lyhyt kuvaus saavutuksesta ja sen vaikutuksesta.'
+                        : 'Short description of the achievement and its impact.'}
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('achievements')}
+          >
+            {isFinnish ? 'Lisää saavutus' : 'Add achievement'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 12"
+        title={isFinnish ? 'Avoin lähdekoodi' : 'Open Source'}
+        description={
+          isFinnish
+            ? 'Nosta esiin omat avoimen lähdekoodin projektisi.'
+            : 'Highlight your open-source repositories and contributions.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.openSource.map((item, index) => (
+            <div key={`open-source-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Repositorio' : 'Repository'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('openSource', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'openSource', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('openSource', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('openSource', index, 1)}
+                    disabled={index === formData.openSource.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('openSource', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Nimi' : 'Repository name'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.name}
+                      onChange={(event) =>
+                        updateArrayItem('openSource', index, 'name', event.target.value)
+                      }
+                      placeholder="storybook-a11y-kit"
+                    />
+                  </Field>
+                </div>
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                    <AutoGrowTextarea
+                      className={textareaClasses}
+                      value={item.description}
+                      onChange={(event) =>
+                        updateArrayItem('openSource', index, 'description', event.target.value)
+                      }
+                      placeholder={isFinnish
+                        ? 'Lyhyt kuvaus repositoriosta.'
+                        : 'A short description of the repository.'}
+                    />
+                  </Field>
+                </div>
+                <Field label={isFinnish ? 'Kieli' : 'Language'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.language}
+                    onChange={(event) =>
+                      updateArrayItem('openSource', index, 'language', event.target.value)
+                    }
+                    placeholder="TypeScript"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Linkki' : 'URL'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="url"
+                    value={item.url}
+                    onChange={(event) =>
+                      updateArrayItem('openSource', index, 'url', event.target.value)
+                    }
+                    placeholder="https://github.com/username/repo"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Tähdet' : 'Stars'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.stars}
+                    onChange={(event) =>
+                      updateArrayItem('openSource', index, 'stars', event.target.value)
+                    }
+                    placeholder="412"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Haarautumat' : 'Forks'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.forks}
+                    onChange={(event) =>
+                      updateArrayItem('openSource', index, 'forks', event.target.value)
+                    }
+                    placeholder="38"
+                  />
+                </Field>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('openSource')}
+          >
+            {isFinnish ? 'Lisää repositorio' : 'Add repository'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 13"
+        title={isFinnish ? 'Julkaisut' : 'Publications'}
+        description={
+          isFinnish
+            ? 'Artikkelit, blogikirjoitukset tai akateemiset julkaisut.'
+            : 'Articles, blog posts, or academic publications.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.publications.map((item, index) => (
+            <div key={`publication-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Julkaisu' : 'Publication'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('publications', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'publications', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('publications', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('publications', index, 1)}
+                    disabled={index === formData.publications.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('publications', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Otsikko' : 'Title'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.title}
+                      onChange={(event) =>
+                        updateArrayItem('publications', index, 'title', event.target.value)
+                      }
+                      placeholder={isFinnish
+                        ? 'Miten skaalata suunnittelujärjestelmiä'
+                        : 'Designing Systems That Scale'}
+                    />
+                  </Field>
+                </div>
+                <Field label={isFinnish ? 'Julkaisija' : 'Publisher'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.publisher}
+                    onChange={(event) =>
+                      updateArrayItem('publications', index, 'publisher', event.target.value)
+                    }
+                    placeholder="UX Collective"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Vuosi' : 'Year'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.year}
+                    onChange={(event) =>
+                      updateArrayItem('publications', index, 'year', event.target.value)
+                    }
+                    placeholder="2024"
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Linkki (valinnainen)' : 'URL (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="url"
+                      value={item.url}
+                      onChange={(event) =>
+                        updateArrayItem('publications', index, 'url', event.target.value)
+                      }
+                      placeholder="https://uxdesign.cc/..."
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('publications')}
+          >
+            {isFinnish ? 'Lisää julkaisu' : 'Add publication'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 14"
         title={isFinnish ? 'Linkit' : 'Links'}
         description={
           isFinnish
@@ -933,6 +1900,819 @@ function CVForm({
               />
             </Field>
           ))}
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 15"
+        title={isFinnish ? 'Johtamiskokemus' : 'Leadership Experience'}
+        description={
+          isFinnish
+            ? 'Hallitusjäsenyydet, valiokunnat, mentorointi ja strategiset aloitteet.'
+            : 'Board memberships, committee participation, mentoring, and strategic initiatives.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.leadership.map((item, index) => (
+            <div key={`leadership-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Rooli' : 'Role'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('leadership', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'leadership', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('leadership', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('leadership', index, 1)}
+                    disabled={index === formData.leadership.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('leadership', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label={isFinnish ? 'Rooli' : 'Role'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.role}
+                      onChange={(event) =>
+                        updateArrayItem('leadership', index, 'role', event.target.value)
+                      }
+                      placeholder={isFinnish ? 'Hallituksen jäsen' : 'Board Member'}
+                    />
+                  </Field>
+                  <Field label={isFinnish ? 'Organisaatio' : 'Organization'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.organization}
+                      onChange={(event) =>
+                        updateArrayItem('leadership', index, 'organization', event.target.value)
+                      }
+                      placeholder={isFinnish ? 'Teknologianeuvosto' : 'Technology Advisory Board'}
+                    />
+                  </Field>
+                </div>
+                <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                  <AutoGrowTextarea
+                    className={textareaClasses}
+                    value={item.description}
+                    onChange={(event) =>
+                      updateArrayItem('leadership', index, 'description', event.target.value)
+                    }
+                    placeholder={isFinnish
+                      ? 'Kuvaile vastuualueita ja vaikutusta.'
+                      : 'Describe the responsibilities and impact.'}
+                  />
+                </Field>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label={isFinnish ? 'Alkoi' : 'Start date'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.startDate}
+                      onChange={(event) =>
+                        updateArrayItem('leadership', index, 'startDate', event.target.value)
+                      }
+                      placeholder="2022"
+                    />
+                  </Field>
+                  <Field label={isFinnish ? 'Päättyi' : 'End date'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.endDate}
+                      onChange={(event) =>
+                        updateArrayItem('leadership', index, 'endDate', event.target.value)
+                      }
+                      placeholder={isFinnish ? 'Nykyinen' : 'Present'}
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('leadership')}
+          >
+            {isFinnish ? 'Lisää johtamiskokemus' : 'Add leadership role'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 16"
+        title={isFinnish ? 'Ammattijäsenyydet' : 'Professional Memberships'}
+        description={
+          isFinnish
+            ? 'Esimerkiksi ISACA, ISC², IEEE, ACM tai OWASP.'
+            : 'For example ISACA, ISC², IEEE, ACM, or OWASP.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.memberships.map((item, index) => (
+            <div key={`membership-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Jäsenyys' : 'Membership'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('memberships', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'memberships', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('memberships', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('memberships', index, 1)}
+                    disabled={index === formData.memberships.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('memberships', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Organisaatio' : 'Organization'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.organization}
+                      onChange={(event) =>
+                        updateArrayItem('memberships', index, 'organization', event.target.value)
+                      }
+                      placeholder="ISACA"
+                    />
+                  </Field>
+                </div>
+                <Field label={isFinnish ? 'Rooli (valinnainen)' : 'Role (optional)'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.role}
+                    onChange={(event) =>
+                      updateArrayItem('memberships', index, 'role', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Jäsen' : 'Member'}
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Vuosi (valinnainen)' : 'Year (optional)'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.year}
+                    onChange={(event) =>
+                      updateArrayItem('memberships', index, 'year', event.target.value)
+                    }
+                    placeholder="2020"
+                  />
+                </Field>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('memberships')}
+          >
+            {isFinnish ? 'Lisää jäsenyys' : 'Add membership'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 17"
+        title={isFinnish ? 'Esiintymiset' : 'Speaking'}
+        description={
+          isFinnish
+            ? 'Konferenssit, puhetilaisuudet ja esitykset.'
+            : 'Conferences, talks, and speaking engagements.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.speaking.map((item, index) => (
+            <div key={`speaking-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Esiintyminen' : 'Speaking engagement'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('speaking', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'speaking', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('speaking', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('speaking', index, 1)}
+                    disabled={index === formData.speaking.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('speaking', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label={isFinnish ? 'Konferenssi' : 'Conference'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.conference}
+                    onChange={(event) =>
+                      updateArrayItem('speaking', index, 'conference', event.target.value)
+                    }
+                    placeholder="Config"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Päivämäärä' : 'Date'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.date}
+                    onChange={(event) =>
+                      updateArrayItem('speaking', index, 'date', event.target.value)
+                    }
+                    placeholder="2024"
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Aihe' : 'Topic'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.topic}
+                      onChange={(event) =>
+                        updateArrayItem('speaking', index, 'topic', event.target.value)
+                      }
+                      placeholder={isFinnish ? 'Suunnittelujärjestelmät laajassa mittakaavassa' : 'Design Systems at Scale'}
+                    />
+                  </Field>
+                </div>
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Yleisö (valinnainen)' : 'Audience (optional)'} labelClassName={fieldLabelClassName}>
+                    <input
+                      className={inputClasses}
+                      type="text"
+                      value={item.audience}
+                      onChange={(event) =>
+                        updateArrayItem('speaking', index, 'audience', event.target.value)
+                      }
+                      placeholder={isFinnish ? '400+ tuotesuunnittelijaa' : '400+ product designers'}
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('speaking')}
+          >
+            {isFinnish ? 'Lisää esiintyminen' : 'Add speaking engagement'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 18"
+        title={isFinnish ? 'Vapaaehtoistyö' : 'Volunteering'}
+        description={
+          isFinnish
+            ? 'Organisaatiot, roolit ja saavutukset vapaaehtoistyössä.'
+            : 'Organizations, roles, and achievements from volunteer work.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.volunteering.map((item, index) => (
+            <div key={`volunteering-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Vapaaehtoistyö' : 'Volunteer role'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('volunteering', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'volunteering', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('volunteering', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('volunteering', index, 1)}
+                    disabled={index === formData.volunteering.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('volunteering', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label={isFinnish ? 'Organisaatio' : 'Organization'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.organization}
+                    onChange={(event) =>
+                      updateArrayItem('volunteering', index, 'organization', event.target.value)
+                    }
+                    placeholder="Design for Good"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Rooli' : 'Role'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.role}
+                    onChange={(event) =>
+                      updateArrayItem('volunteering', index, 'role', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Vapaaehtoinen mentori' : 'Volunteer Mentor'}
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                    <AutoGrowTextarea
+                      className={textareaClasses}
+                      value={item.description}
+                      onChange={(event) =>
+                        updateArrayItem('volunteering', index, 'description', event.target.value)
+                      }
+                      placeholder={isFinnish
+                        ? 'Kuvaile vastuualueita ja saavutuksia.'
+                        : 'Describe the responsibilities and achievements.'}
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('volunteering')}
+          >
+            {isFinnish ? 'Lisää vapaaehtoistyö' : 'Add volunteer role'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 19"
+        title={isFinnish ? 'Harjoittelut' : 'Internships'}
+        description={
+          isFinnish
+            ? 'Yritys, rooli, kesto, saavutukset ja käytetyt teknologiat.'
+            : 'Company, role, duration, achievements, and technologies used.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.internships.map((item, index) => (
+            <div key={`internship-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Harjoittelu' : 'Internship'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('internships', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'internships', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('internships', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('internships', index, 1)}
+                    disabled={index === formData.internships.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('internships', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label={isFinnish ? 'Rooli' : 'Role'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.role}
+                    onChange={(event) =>
+                      updateArrayItem('internships', index, 'role', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Suunnitteluharjoittelija' : 'Design Intern'}
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Yritys' : 'Company'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.company}
+                    onChange={(event) =>
+                      updateArrayItem('internships', index, 'company', event.target.value)
+                    }
+                    placeholder="Atlas Labs"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Sijainti' : 'Location'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.location}
+                    onChange={(event) =>
+                      updateArrayItem('internships', index, 'location', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Etätyö' : 'Remote'}
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.technologies}
+                    onChange={(event) =>
+                      updateArrayItem('internships', index, 'technologies', event.target.value)
+                    }
+                    placeholder="Figma, Sketch, InVision"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Alkoi' : 'Start date'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.startDate}
+                    onChange={(event) =>
+                      updateArrayItem('internships', index, 'startDate', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Kesä 2018' : 'Jun 2018'}
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Päättyi' : 'End date'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.endDate}
+                    onChange={(event) =>
+                      updateArrayItem('internships', index, 'endDate', event.target.value)
+                    }
+                    placeholder="Aug 2018"
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                    <AutoGrowTextarea
+                      className={textareaClasses}
+                      value={item.description}
+                      onChange={(event) =>
+                        updateArrayItem('internships', index, 'description', event.target.value)
+                      }
+                      placeholder={isFinnish
+                        ? 'Kuvaile vastuualueita, saavutuksia ja opittua.'
+                        : 'Describe responsibilities, achievements, and learning outcomes.'}
+                    />
+                  </Field>
+                </div>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('internships')}
+          >
+            {isFinnish ? 'Lisää harjoittelu' : 'Add internship'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 20"
+        title={isFinnish ? 'Tapaustutkimukset' : 'Case Studies'}
+        description={
+          isFinnish
+            ? 'Ongelma, ratkaisu, teknologiat, tulos ja opitut asiat yhdestä projektista.'
+            : 'Problem, solution, technologies, outcome, and lessons learned from one project.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.caseStudies.map((item, index) => (
+            <div key={`case-study-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Tapaustutkimus' : 'Case Study'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('caseStudies', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'caseStudies', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('caseStudies', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('caseStudies', index, 1)}
+                    disabled={index === formData.caseStudies.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('caseStudies', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <Field label={isFinnish ? 'Otsikko' : 'Title'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.title}
+                    onChange={(event) =>
+                      updateArrayItem('caseStudies', index, 'title', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Atlas-suunnittelujärjestelmän skaalaus' : 'Scaling Atlas Design System'}
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Ongelma' : 'Problem'} labelClassName={fieldLabelClassName}>
+                  <AutoGrowTextarea
+                    className={textareaClasses}
+                    value={item.problem}
+                    onChange={(event) =>
+                      updateArrayItem('caseStudies', index, 'problem', event.target.value)
+                    }
+                    placeholder={isFinnish
+                      ? 'Kuvaile ongelma tai haaste.'
+                      : 'Describe the problem or challenge.'}
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Ratkaisu' : 'Solution'} labelClassName={fieldLabelClassName}>
+                  <AutoGrowTextarea
+                    className={textareaClasses}
+                    value={item.solution}
+                    onChange={(event) =>
+                      updateArrayItem('caseStudies', index, 'solution', event.target.value)
+                    }
+                    placeholder={isFinnish
+                      ? 'Kuvaile ratkaisu ja lähestymistapa.'
+                      : 'Describe the solution and approach.'}
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.technologies}
+                    onChange={(event) =>
+                      updateArrayItem('caseStudies', index, 'technologies', event.target.value)
+                    }
+                    placeholder="Figma, React, Storybook"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Tulos' : 'Outcome'} labelClassName={fieldLabelClassName}>
+                  <AutoGrowTextarea
+                    className={textareaClasses}
+                    value={item.outcome}
+                    onChange={(event) =>
+                      updateArrayItem('caseStudies', index, 'outcome', event.target.value)
+                    }
+                    placeholder={isFinnish
+                      ? 'Mitattava tulos tai vaikutus.'
+                      : 'Measurable outcome or impact.'}
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Opitut asiat (valinnainen)' : 'Lessons learned (optional)'} labelClassName={fieldLabelClassName}>
+                  <AutoGrowTextarea
+                    className={textareaClasses}
+                    value={item.lessons}
+                    onChange={(event) =>
+                      updateArrayItem('caseStudies', index, 'lessons', event.target.value)
+                    }
+                    placeholder={isFinnish
+                      ? 'Mitä oppisit tai tekisit toisin.'
+                      : 'What you learned or would do differently.'}
+                  />
+                </Field>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('caseStudies')}
+          >
+            {isFinnish ? 'Lisää tapaustutkimus' : 'Add case study'}
+          </button>
+        </div>
+      </PanelSection>
+
+      <PanelSection
+        eyebrow="Section 21"
+        title={isFinnish ? 'Suositukset' : 'Testimonials'}
+        description={
+          isFinnish
+            ? 'Yksi tai kaksi lyhyttä suositusta asiakkaalta, esimieheltä tai mentorilta.'
+            : 'One or two short recommendations from a client, manager, or mentor.'
+        }
+        theme={theme}
+      >
+        <div className="space-y-4">
+          {formData.testimonials.map((item, index) => (
+            <div key={`testimonial-${index}`} className={itemCardClasses}>
+              <div className="mb-4 flex items-center justify-between gap-4">
+                <p className={`text-sm font-medium ${itemHeadingClasses}`}>
+                  {isFinnish ? 'Suositus' : 'Testimonial'} #{index + 1}
+                </p>
+                <div className="flex flex-wrap justify-end gap-2">
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => toggleSectionItemVisibility('testimonials', index)}
+                  >
+                    {isSectionItemVisible(sectionItemVisibility, 'testimonials', index) ? copy.hide : copy.show}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('testimonials', index, -1)}
+                    disabled={index === 0}
+                  >
+                    {copy.up}
+                  </button>
+                  <button
+                    type="button"
+                    className={utilityButtonClasses}
+                    onClick={() => moveArrayItem('testimonials', index, 1)}
+                    disabled={index === formData.testimonials.length - 1}
+                  >
+                    {copy.down}
+                  </button>
+                  <button
+                    type="button"
+                    className={removeButtonClasses}
+                    onClick={() => removeArrayItem('testimonials', index)}
+                  >
+                    {copy.remove}
+                  </button>
+                </div>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <Field label={isFinnish ? 'Lainaus' : 'Quote'} labelClassName={fieldLabelClassName}>
+                    <AutoGrowTextarea
+                      className={textareaClasses}
+                      value={item.quote}
+                      onChange={(event) =>
+                        updateArrayItem('testimonials', index, 'quote', event.target.value)
+                      }
+                      placeholder={isFinnish
+                        ? 'Lyhyt suositus tai kommentti.'
+                        : 'A short recommendation or quote.'}
+                    />
+                  </Field>
+                </div>
+                <Field label={isFinnish ? 'Nimi' : 'Author'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.author}
+                    onChange={(event) =>
+                      updateArrayItem('testimonials', index, 'author', event.target.value)
+                    }
+                    placeholder="Jordan Lee"
+                  />
+                </Field>
+                <Field label={isFinnish ? 'Rooli' : 'Role'} labelClassName={fieldLabelClassName}>
+                  <input
+                    className={inputClasses}
+                    type="text"
+                    value={item.role}
+                    onChange={(event) =>
+                      updateArrayItem('testimonials', index, 'role', event.target.value)
+                    }
+                    placeholder={isFinnish ? 'Esimies, Studio North' : 'Engineering Manager, Studio North'}
+                  />
+                </Field>
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            className={actionButtonClasses}
+            onClick={() => addArrayItem('testimonials')}
+          >
+            {isFinnish ? 'Lisää suositus' : 'Add testimonial'}
+          </button>
         </div>
       </PanelSection>
     </form>

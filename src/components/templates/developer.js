@@ -71,8 +71,9 @@ export default {
   // Color class for link icons and labels
   linkIconColor: '',
 
-  // Header contact line mode — 'icons' renders icon + value pairs
-  headerContactMode: 'icons',
+  // Header contact line mode — 'personal' renders email/phone/location with icons.
+  // GitHub/LinkedIn/Portfolio/website stay out of the header; they live in Links only.
+  headerContactMode: 'personal',
 
   // Header top-row layout (name/details block + optional photo block)
   headerLayoutClass: 'flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between',
@@ -103,4 +104,28 @@ export default {
 
   // Sidebar renders first (order-1) so it appears on the left
   sidebarFirst: true,
+
+  // ── Developer Showcase config (read by DeveloperShowcase.jsx) ──────────
+  // Everything below only applies to the non-ATS "Developer Showcase" mode.
+  // Mode 1 (ATS) is the app's existing global ATS-friendly toggle, which
+  // always falls back to the generic flat renderer above and ignores these.
+  themeMode: 'developer',
+  showDecorations: true,
+  showSidebar: true,
+  showTimeline: true,
+  showProjectCards: true,
+  showAchievements: true,
+  showOpenSource: true,
+  showCertificates: true,
+  showLanguages: true,
+  showPhoto: true,
+  // Note: distinct from the `accentColor()` function above (used by the ATS
+  // accent-tinting mechanism) — this is the Showcase-mode accent name.
+  showcaseAccentColor: 'teal',
+  gradientEnabled: true,
+  sidebarStyle: 'dark',
+  cardStyle: 'rounded',
+  iconStyle: 'gradient',
+  animationEnabled: true,
+  printOptimized: true,
 }

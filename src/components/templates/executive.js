@@ -71,8 +71,9 @@ export default {
   // Color class for link icons and labels — indigo
   linkIconColor: 'text-indigo-400',
 
-  // Header contact line mode — 'icons' with slate accent, wider gap
-  headerContactMode: 'icons',
+  // Header contact line mode — 'personal' (email/phone/location) with slate accent,
+  // wider gap. GitHub/LinkedIn/Portfolio/website stay out of the header; Links only.
+  headerContactMode: 'personal',
 
   // Gap between contact items in header — wider than other templates
   headerContactGap: 'gap-x-4',
@@ -85,4 +86,14 @@ export default {
 
   // Icon color class for contact icons — indigo
   headerContactIconColor: 'text-indigo-400',
+
+  // ── Executive Showcase config (non-ATS "boardroom" mode) ──
+  // Read by ExecutiveShowcase.jsx via CVPreview's `showcaseConfig={t}` prop.
+  // Each flag defaults to true inside the component, so omitting one here
+  // still renders a fully-featured showcase.
+  showPhoto: true,
+  showSidebar: true,
+  showExecutiveTagline: true,
+  showMetrics: true,
+  printOptimized: true,
 }

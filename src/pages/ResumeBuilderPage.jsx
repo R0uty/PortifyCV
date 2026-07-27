@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
 
 import AppShell from '../components/AppShell'
 import AppErrorBoundary from '../components/AppErrorBoundary'
@@ -49,7 +49,6 @@ import {
 } from '../utils/cvFeedback'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
-const MAX_UNDO_HISTORY = 80
 
 function createToast(message, type = 'success') {
   return {
@@ -236,31 +235,7 @@ function ResumeBuilderPage({
   onHeaderChange,
 }) {
   const initialSession = useMemo(() => loadInitialCvSession(), [])
-  const [formHistory, setFormHistory] = useState(() => ({
-    past: [],
-    present: initialSession.formData,
-    future: [],
-  }))
-  const formData = formHistory.present
-  const canUndo = formHistory.past.length > 0
-  const canRedo = formHistory.future.length > 0
-  const dispatchFormData = useCallback((action) => {
-    setFormHistory((currentHistory) => {
-      const nextPresent = cvFormReducer(currentHistory.present, action)
-
-      if (nextPresent === currentHistory.present) {
-        return currentHistory
-      }
-
-      const nextPast = [...currentHistory.past, currentHistory.present].slice(-MAX_UNDO_HISTORY)
-
-      return {
-        past: nextPast,
-        present: nextPresent,
-        future: [],
-      }
-    })
-  }, [])
+  const [formData, dispatchFormData] = useReducer(cvFormReducer, initialSession.formData)
   const [uiState, dispatchUi] = useReducer(
     uiReducer,
     initialSession,
@@ -650,38 +625,6 @@ function ResumeBuilderPage({
     }
   }, [formData, locale])
 
-  const handleUndo = useCallback(() => {
-    setFormHistory((currentHistory) => {
-      if (currentHistory.past.length === 0) {
-        return currentHistory
-      }
-
-      const previousPresent = currentHistory.past[currentHistory.past.length - 1]
-
-      return {
-        past: currentHistory.past.slice(0, -1),
-        present: previousPresent,
-        future: [currentHistory.present, ...currentHistory.future].slice(0, MAX_UNDO_HISTORY),
-      }
-    })
-  }, [])
-
-  const handleRedo = useCallback(() => {
-    setFormHistory((currentHistory) => {
-      if (currentHistory.future.length === 0) {
-        return currentHistory
-      }
-
-      const [nextPresent, ...remainingFuture] = currentHistory.future
-
-      return {
-        past: [...currentHistory.past, currentHistory.present].slice(-MAX_UNDO_HISTORY),
-        present: nextPresent,
-        future: remainingFuture,
-      }
-    })
-  }, [])
-
   const handleImproveAboutText = useCallback(() => {
     const nextAbout = improveAboutText(formData, { locale })
 
@@ -749,16 +692,12 @@ function ResumeBuilderPage({
       activeExport,
       isActionBusy,
       locale,
-      canUndo,
-      canRedo,
-      onUndo: handleUndo,
-      onRedo: handleRedo,
       onExport: handleExport,
       onLocaleChange: handleLocaleChange,
     })
   }, [
-    activeExport, isActionBusy, locale, canUndo, canRedo,
-    handleUndo, handleRedo, handleExport, handleLocaleChange,
+    activeExport, isActionBusy, locale,
+    handleExport, handleLocaleChange,
     onHeaderChange,
   ])
 
@@ -1015,7 +954,7 @@ function ResumeBuilderPage({
 
   const previewContent = useMemo(() => (
     <div className="preview-panel pb-28 sm:pb-6 print:p-0">
-      <div className="preview-scroll px-3 pb-6 pt-4 sm:px-5 lg:px-6 print:px-0">
+      <div className="preview-scroll px-4 pb-6 pt-4 sm:px-6 lg:px-8 print:px-0">
         <div className="mb-4 lg:hidden print:hidden">
           <div className={`p-4 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
             <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Esikatselupaneeli' : 'Preview panel'}</p>
@@ -1108,22 +1047,6 @@ function ResumeBuilderPage({
         </button>
         <button
           type="button"
-          className={compactButtonClassName}
-          disabled={!canUndo}
-          onClick={handleUndo}
-        >
-          {locale === 'fi' ? 'Kumoa' : 'Undo'}
-        </button>
-        <button
-          type="button"
-          className={compactButtonClassName}
-          disabled={!canRedo}
-          onClick={handleRedo}
-        >
-          {locale === 'fi' ? 'Uudelleen' : 'Redo'}
-        </button>
-        <button
-          type="button"
           className={`shrink-0 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
             mobilePreviewVisible ? ui.buttonActive : ui.button
           }`}
@@ -1137,14 +1060,10 @@ function ResumeBuilderPage({
     </div>
   ), [
     activeExport,
-    canRedo,
-    canUndo,
     compactButtonClassName,
     handleCopyShareLink,
     handleExport,
-    handleRedo,
     handleToggleMobilePreview,
-    handleUndo,
     isActionBusy,
     locale,
     mobilePreviewVisible,
@@ -1161,7 +1080,7 @@ function ResumeBuilderPage({
           borderBottom: '1px solid var(--app-border)',
         }}
       >
-        <div style={{ maxWidth: '90rem', margin: '0 auto', padding: '0 var(--space-5)' }}>
+        <div className="builder-template-selector__inner">
           <div
             className="mx-auto flex justify-center gap-2"
             style={{ width: 'fit-content', minWidth: '100%' }}
