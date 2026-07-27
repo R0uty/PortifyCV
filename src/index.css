@@ -72,6 +72,7 @@
   --editor-width: clamp(23rem, 34vw, 32rem);
   --preview-paper-width: min(100%, 220mm);
   --preview-paper-min-height: 297mm;
+  --preview-zoom: 1;
   --preview-divider: var(--app-border);
   --preview-paper-shadow: var(--shadow-lg);
   --preview-panel-bg: var(--app-surface-strong);
@@ -1389,6 +1390,72 @@ select.floating-field__control {
   min-width: 0;
 }
 
+.preview-zoom-wrapper {
+  zoom: var(--preview-zoom, 1);
+}
+
+.preview-zoom-bar {
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: var(--space-3);
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--app-bg-elevated) 92%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.preview-zoom-bar__group {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.preview-zoom-bar__button {
+  padding: 0.35rem 0.6rem;
+  border-radius: var(--radius-sm);
+  color: var(--app-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  transition: background-color 120ms ease, color 120ms ease;
+  white-space: nowrap;
+}
+
+.preview-zoom-bar__button:hover {
+  background: var(--app-surface-strong);
+  color: var(--app-text);
+}
+
+.preview-zoom-bar__button--active {
+  background: var(--accent-soft);
+  color: var(--accent-text-strong);
+}
+
+.preview-zoom-bar__divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 0 0.2rem;
+  background: var(--app-border);
+}
+
+.preview-zoom-bar__spacer {
+  flex: 1 1 auto;
+}
+
+.preview-zoom-bar__value {
+  min-width: 3.2rem;
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
 .preview-document {
   width: min(100%, var(--preview-paper-width));
   align-self: center;
@@ -2348,6 +2415,24 @@ select.floating-field__control {
     overflow-y: scroll;
   }
 
+  .app-shell__preview {
+    max-height: calc(100dvh - 4rem);
+    overflow: hidden;
+  }
+
+  .preview-panel {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
+  .preview-panel--fullscreen {
+    height: auto;
+  }
+
   .preview-action-bar { padding: var(--space-4) var(--space-4) var(--space-1); }
 
   .preview-stage { padding-top: var(--space-3); }
@@ -2380,6 +2465,10 @@ select.floating-field__control {
   .app-shell__editor,
   .app-shell__preview {
     overflow: visible;
+  }
+
+  .preview-zoom-bar {
+    display: none;
   }
 
   .preview-action-bar { padding: var(--space-4) var(--space-4) 0; }

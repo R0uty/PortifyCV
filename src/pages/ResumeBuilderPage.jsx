@@ -9,9 +9,14 @@ import {
   Heart,
   Languages as LanguagesIcon,
   Link2,
+  Minus,
+  Plus,
   Settings as SettingsIcon,
   Sparkles,
+  StretchHorizontal,
+  StretchVertical,
   User,
+  X,
   LayoutTemplate,
 } from 'lucide-react'
 
@@ -309,12 +314,14 @@ function ResumeBuilderPage({
   const shareWarningShownRef = useRef(false)
   const editorScrollRef = useRef(null)
   const templateSelectRef = useRef(null)
+  const previewViewportRef = useRef(null)
 
   const [activeSectionId, setActiveSectionId] = useState('personal')
   const [themePreference, setThemePreferenceState] = useState(() => getThemePreference())
   const [searchQuery, setSearchQuery] = useState('')
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false)
   const [isResponsivePreview, setIsResponsivePreview] = useState(false)
+  const [zoomPercent, setZoomPercent] = useState(100)
 
   const [historyPast, setHistoryPast] = useState([])
   const [historyFuture, setHistoryFuture] = useState([])
@@ -538,6 +545,13 @@ function ResumeBuilderPage({
 
     showToast(toastLabel, 'info')
 
+    const zoomPercentBeforeExport = type === 'pdf-designer' ? zoomPercent : null
+
+    if (zoomPercentBeforeExport !== null && zoomPercentBeforeExport !== 100) {
+      setZoomPercent(100)
+      await waitForPreviewRefresh()
+    }
+
     try {
       const {
         exportCvAsJson,
@@ -616,9 +630,12 @@ function ResumeBuilderPage({
         'error',
       )
     } finally {
+      if (zoomPercentBeforeExport !== null && zoomPercentBeforeExport !== 100) {
+        setZoomPercent(zoomPercentBeforeExport)
+      }
       dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
     }
-  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate])
+  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate, zoomPercent])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()
@@ -835,6 +852,82 @@ function ResumeBuilderPage({
   const handleToggleResponsivePreview = useCallback(() => {
     setIsResponsivePreview((value) => !value)
   }, [])
+
+  const clampZoomPercent = useCallback((value) => Math.round(Math.min(200, Math.max(40, value))), [])
+
+  const handleSetZoomPercent = useCallback((value) => {
+    setZoomPercent(clampZoomPercent(value))
+  }, [clampZoomPercent])
+
+  const handleZoomBy = useCallback((delta) => {
+    setZoomPercent((value) => clampZoomPercent(value + delta))
+  }, [clampZoomPercent])
+
+  const handleFitWidth = useCallback(() => {
+    setZoomPercent(100)
+  }, [])
+
+  const handleFitPage = useCallback(() => {
+    const viewport = previewViewportRef.current
+    const content = previewRef.current
+
+    if (!viewport || !content) {
+      setZoomPercent(100)
+      return
+    }
+
+    const currentZoom = zoomPercent / 100
+    const naturalHeight = content.offsetHeight / currentZoom
+    const availableHeight = viewport.clientHeight - 48
+
+    if (naturalHeight <= 0 || availableHeight <= 0) {
+      setZoomPercent(100)
+      return
+    }
+
+    setZoomPercent(clampZoomPercent((availableHeight / naturalHeight) * 100))
+  }, [clampZoomPercent, zoomPercent])
+
+  useEffect(() => {
+    const viewport = previewViewportRef.current
+
+    if (!viewport) {
+      return undefined
+    }
+
+    const handleWheel = (event) => {
+      if (!event.ctrlKey && !event.metaKey) {
+        return
+      }
+
+      event.preventDefault()
+      setZoomPercent((value) => clampZoomPercent(value - Math.sign(event.deltaY) * 5))
+    }
+
+    viewport.addEventListener('wheel', handleWheel, { passive: false })
+
+    return () => {
+      viewport.removeEventListener('wheel', handleWheel)
+    }
+  }, [clampZoomPercent])
+
+  useEffect(() => {
+    if (!isFullscreenPreview) {
+      return undefined
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsFullscreenPreview(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isFullscreenPreview])
 
   useEffect(() => {
     const container = editorScrollRef.current
@@ -1203,6 +1296,7 @@ function ResumeBuilderPage({
 
   const previewContent = useMemo(() => (
     <div
+      ref={previewViewportRef}
       className={`preview-panel pb-28 sm:pb-6 print:p-0${isFullscreenPreview ? ' preview-panel--fullscreen' : ''}${isResponsivePreview ? ' preview-panel--responsive' : ''}`}
     >
       <div className="preview-scroll px-4 pb-6 pt-4 sm:px-6 lg:px-8 print:px-0">
@@ -1220,6 +1314,86 @@ function ResumeBuilderPage({
           </div>
         </div>
 
+        <div className="preview-zoom-bar print:hidden">
+          <div className="preview-zoom-bar__group">
+            <button
+              type="button"
+              className="preview-zoom-bar__button"
+              onClick={handleFitWidth}
+              aria-label={locale === 'fi' ? 'Sovita leveyteen' : 'Fit width'}
+              title={locale === 'fi' ? 'Sovita leveyteen' : 'Fit width'}
+            >
+              <StretchHorizontal size={13} strokeWidth={2} aria-hidden="true" style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: '-2px' }} />
+              {locale === 'fi' ? 'Leveys' : 'Fit Width'}
+            </button>
+            <button
+              type="button"
+              className="preview-zoom-bar__button"
+              onClick={handleFitPage}
+              aria-label={locale === 'fi' ? 'Sovita sivuun' : 'Fit page'}
+              title={locale === 'fi' ? 'Sovita sivuun' : 'Fit page'}
+            >
+              <StretchVertical size={13} strokeWidth={2} aria-hidden="true" style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: '-2px' }} />
+              {locale === 'fi' ? 'Sivu' : 'Fit Page'}
+            </button>
+          </div>
+
+          <div className="preview-zoom-bar__divider" />
+
+          <div className="preview-zoom-bar__group">
+            {[100, 125, 150, 200].map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                className={`preview-zoom-bar__button${zoomPercent === preset ? ' preview-zoom-bar__button--active' : ''}`}
+                onClick={() => handleSetZoomPercent(preset)}
+                aria-pressed={zoomPercent === preset}
+              >
+                {preset}%
+              </button>
+            ))}
+          </div>
+
+          <div className="preview-zoom-bar__spacer" />
+
+          <div className="preview-zoom-bar__group">
+            <button
+              type="button"
+              className="preview-zoom-bar__button"
+              onClick={() => handleZoomBy(-10)}
+              aria-label={locale === 'fi' ? 'Loitonna' : 'Zoom out'}
+            >
+              <Minus size={13} strokeWidth={2.5} aria-hidden="true" />
+            </button>
+            <span className="preview-zoom-bar__value">{Math.round(zoomPercent)}%</span>
+            <button
+              type="button"
+              className="preview-zoom-bar__button"
+              onClick={() => handleZoomBy(10)}
+              aria-label={locale === 'fi' ? 'Lähennä' : 'Zoom in'}
+            >
+              <Plus size={13} strokeWidth={2.5} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+
+        {isFullscreenPreview ? (
+          <button
+            type="button"
+            className="preview-zoom-bar__button print:hidden"
+            style={{
+              position: 'fixed', top: '1rem', right: '1rem', zIndex: 61,
+              border: '1px solid var(--app-border)', borderRadius: 'var(--radius-sm)',
+              background: 'var(--app-surface)', boxShadow: 'var(--shadow-md)',
+            }}
+            onClick={handleToggleFullscreenPreview}
+            aria-label={locale === 'fi' ? 'Poistu koko näytöstä' : 'Exit fullscreen'}
+          >
+            <X size={14} strokeWidth={2} aria-hidden="true" style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: '-2px' }} />
+            {locale === 'fi' ? 'Poistu' : 'Exit fullscreen'}
+          </button>
+        ) : null}
+
         <div className="preview-stage">
           <button
             type="button"
@@ -1230,18 +1404,20 @@ function ResumeBuilderPage({
           >
             {locale === 'fi' ? 'Takaisin editoriin' : 'Back to editor'}
           </button>
-          <AppErrorBoundary
-            panelTitle={locale === 'fi' ? 'CV-esikatselu' : 'CV preview'}
-            locale={locale}
-          >
-            <CVPreview
-              formData={formData}
-              previewRef={previewRef}
-              template={selectedTemplate}
+          <div className="preview-zoom-wrapper" style={{ '--preview-zoom': zoomPercent / 100 }}>
+            <AppErrorBoundary
+              panelTitle={locale === 'fi' ? 'CV-esikatselu' : 'CV preview'}
               locale={locale}
-              atsFriendlyMode={atsFriendlyMode}
-            />
-          </AppErrorBoundary>
+            >
+              <CVPreview
+                formData={formData}
+                previewRef={previewRef}
+                template={selectedTemplate}
+                locale={locale}
+                atsFriendlyMode={atsFriendlyMode}
+              />
+            </AppErrorBoundary>
+          </div>
         </div>
 
       </div>
@@ -1249,11 +1425,17 @@ function ResumeBuilderPage({
   ), [
     atsFriendlyMode,
     formData,
+    handleFitPage,
+    handleFitWidth,
+    handleSetZoomPercent,
+    handleToggleFullscreenPreview,
     handleToggleMobilePreview,
+    handleZoomBy,
     isFullscreenPreview,
     isResponsivePreview,
     locale,
     selectedTemplate,
+    zoomPercent,
     ui.button,
     ui.surface,
     ui.textMuted,
