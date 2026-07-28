@@ -35,8 +35,6 @@ import {
   UI_LOCALE_STORAGE_KEY,
 } from '../utils/designSystem'
 import {
-  CV_DRAFT_PHOTO_STORAGE_KEY,
-  CV_DRAFT_STORAGE_KEY,
   CV_ONBOARDING_SEEN_STORAGE_KEY,
   createInitialCvData,
   demoCvData,
@@ -44,7 +42,6 @@ import {
   parsePastedCvText,
   parseImportedCvData,
   safeStorageGet,
-  safeStorageRemove,
   safeStorageSet,
 } from '../utils/cvForm'
 import {
@@ -175,110 +172,55 @@ function loadInitialCvSession() {
     }
   }
 
+  const onboardingState = safeStorageGet(CV_ONBOARDING_SEEN_STORAGE_KEY, 'false')
+  const hasSeenOnboarding = onboardingState.value === 'true'
+  const hasStorageIssue = !onboardingState.ok
+  const markOnboardingSeen = () => {
+    safeStorageSet(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+  }
+
   try {
-    const storedDraftState = safeStorageGet(CV_DRAFT_STORAGE_KEY)
-    const storedDraftPhotoState = safeStorageGet(CV_DRAFT_PHOTO_STORAGE_KEY, '')
-    const onboardingState = safeStorageGet(CV_ONBOARDING_SEEN_STORAGE_KEY, 'false')
-    const storedDraft = storedDraftState.value
-    const storedDraftPhoto = typeof storedDraftPhotoState.value === 'string'
-      ? storedDraftPhotoState.value
-      : ''
-    const hasSeenOnboarding = onboardingState.value === 'true'
-    const hasStorageIssue =
-      !storedDraftState.ok ||
-      !onboardingState.ok ||
-      !storedDraftPhotoState.ok
-    const markOnboardingSeen = () => {
-      safeStorageSet(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
-    }
+    const sharedFormData = readCvStateFromLocation()
 
-    try {
-      const sharedFormData = readCvStateFromLocation()
-
-      if (sharedFormData) {
-        markOnboardingSeen()
-        return {
-          formData: sharedFormData,
-          initialToast: createToast('Loaded CV from share link.', 'success'),
-          clearShareParam: false,
-          storageIssue: hasStorageIssue,
-        }
-      }
-    } catch (error) {
-      const fallbackFormData = storedDraft
-        ? parseImportedCvData(JSON.parse(storedDraft))
-        : createInitialCvData()
-      const restoredFormData = storedDraftPhoto
-        ? { ...fallbackFormData, photo: storedDraftPhoto }
-        : fallbackFormData
-
+    if (sharedFormData) {
       markOnboardingSeen()
-
       return {
-        formData: restoredFormData,
-        initialToast: createToast(
-          storedDraft
-            ? `${error instanceof Error ? error.message : 'Shared CV link could not be loaded.'} Restored your saved draft instead.`
-            : error instanceof Error
-              ? error.message
-              : 'Shared CV link could not be loaded.',
-          'error',
-        ),
-        clearShareParam: true,
-        storageIssue: hasStorageIssue,
-      }
-    }
-
-    if (!storedDraft) {
-      markOnboardingSeen()
-
-      if (!hasSeenOnboarding) {
-        return {
-          formData: structuredClone(demoCvData),
-          initialToast: createToast('Loaded a sample CV to help you get started.', 'success'),
-          clearShareParam: false,
-          storageIssue: hasStorageIssue,
-        }
-      }
-
-      return {
-        formData: initialCvData,
-        initialToast: null,
+        formData: sharedFormData,
+        initialToast: createToast('Loaded CV from share link.', 'success'),
         clearShareParam: false,
         storageIssue: hasStorageIssue,
       }
     }
-
-    markOnboardingSeen()
-    const restoredDraft = parseImportedCvData(JSON.parse(storedDraft))
-
-    return {
-      formData: storedDraftPhoto
-        ? { ...restoredDraft, photo: storedDraftPhoto }
-        : restoredDraft,
-      initialToast: createToast('Restored your saved draft.', 'success'),
-      clearShareParam: false,
-      storageIssue: hasStorageIssue,
-    }
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : 'Saved draft was invalid and has been cleared.'
-    const shouldClearShareParam =
-      error instanceof Error && error.message.startsWith('Shared CV link')
-
-    if (!shouldClearShareParam) {
-      safeStorageRemove(CV_DRAFT_STORAGE_KEY)
-      safeStorageRemove(CV_DRAFT_PHOTO_STORAGE_KEY)
-    }
+    markOnboardingSeen()
 
     return {
       formData: createInitialCvData(),
-      initialToast: createToast(message, 'error'),
-      clearShareParam: shouldClearShareParam,
-      storageIssue: true,
+      initialToast: createToast(
+        error instanceof Error ? error.message : 'Shared CV link could not be loaded.',
+        'error',
+      ),
+      clearShareParam: true,
+      storageIssue: hasStorageIssue,
     }
+  }
+
+  markOnboardingSeen()
+
+  if (!hasSeenOnboarding) {
+    return {
+      formData: structuredClone(demoCvData),
+      initialToast: createToast('Loaded a sample CV to help you get started.', 'success'),
+      clearShareParam: false,
+      storageIssue: hasStorageIssue,
+    }
+  }
+
+  return {
+    formData: initialCvData,
+    initialToast: null,
+    clearShareParam: false,
+    storageIssue: hasStorageIssue,
   }
 }
 
@@ -397,39 +339,7 @@ function ResumeBuilderPage({
     return result
   }, [reportStorageIssue])
 
-  const removeStorageValue = useCallback((key) => {
-    const result = safeStorageRemove(key)
-
-    if (!result.ok) {
-      reportStorageIssue()
-    }
-
-    return result
-  }, [reportStorageIssue])
-
   const isActionBusy = Boolean(activeExport) || isImporting
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      const draftWithoutPhoto = { ...formData, photo: '' }
-
-      setStorageValue(CV_DRAFT_STORAGE_KEY, JSON.stringify(draftWithoutPhoto))
-    }, 520)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [formData, setStorageValue])
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setStorageValue(CV_DRAFT_PHOTO_STORAGE_KEY, formData.photo || '')
-    }, 1200)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-    }
-  }, [formData.photo, setStorageValue])
 
   useEffect(() => {
     if (historySkipNextCommitRef.current) {
@@ -701,10 +611,8 @@ function ResumeBuilderPage({
 
   const handleResetForm = useCallback(() => {
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
-    removeStorageValue(CV_DRAFT_STORAGE_KEY)
-    removeStorageValue(CV_DRAFT_PHOTO_STORAGE_KEY)
     showToast(locale === 'fi' ? 'Lomake nollattu tyhjäksi CV:ksi.' : 'Form reset to a blank CV.')
-  }, [dispatchFormData, locale, removeStorageValue])
+  }, [dispatchFormData, locale])
 
   const handleLoadDemo = useCallback(() => {
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: structuredClone(demoCvData) })
@@ -1107,7 +1015,7 @@ function ResumeBuilderPage({
           <div
             className={`inline-flex items-center px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] ${ui.surfaceMuted} ${ui.textMuted}`}
           >
-            {locale === 'fi' ? 'Automaattitallennus käytössä' : 'Autosave enabled'}
+            {locale === 'fi' ? 'Ei tallenneta minnekään' : 'Nothing saved anywhere'}
           </div>
         </div>
 

@@ -1,8 +1,6 @@
 /** @typedef {import('../types/cv').CvData} CvData */
 /** @typedef {import('../types/cv').Locale} Locale */
 
-export const CV_DRAFT_STORAGE_KEY = 'portifycv-draft'
-export const CV_DRAFT_PHOTO_STORAGE_KEY = 'portifycv-draft-photo'
 export const CV_ONBOARDING_SEEN_STORAGE_KEY = 'portifycv-onboarding-seen'
 
 export const EMPLOYMENT_TYPE_OPTIONS = [
@@ -761,29 +759,6 @@ export function safeStorageSet(key, value) {
 
   try {
     window.localStorage.setItem(key, value)
-
-    return {
-      ok: true,
-      error: null,
-    }
-  } catch (error) {
-    return {
-      ok: false,
-      error: createStorageError(error),
-    }
-  }
-}
-
-export function safeStorageRemove(key) {
-  if (typeof window === 'undefined') {
-    return {
-      ok: false,
-      error: new Error('Window is unavailable.'),
-    }
-  }
-
-  try {
-    window.localStorage.removeItem(key)
 
     return {
       ok: true,
