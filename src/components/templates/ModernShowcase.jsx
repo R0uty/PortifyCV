@@ -23,6 +23,7 @@ import {
   parseSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  getSafeHref,
 } from './shared'
 
 // Small outline glyph for interest chips — a single shared glyph rather than
@@ -351,7 +352,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
                     </p>
                   ) : null}
                   {item.credentialUrl ? (
-                    <a href={item.credentialUrl} target="_blank" rel="noreferrer" className="modern-showcase__cert-link">
+                    <a href={getSafeHref(item.credentialUrl)} target="_blank" rel="noreferrer" className="modern-showcase__cert-link">
                       {copy.viewCredential}
                     </a>
                   ) : null}

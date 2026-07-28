@@ -24,6 +24,7 @@ import {
   parseSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  getSafeHref,
 } from './shared'
 
 function splitToBullets(text) {
@@ -332,7 +333,7 @@ export default function ExecutiveShowcase({ formData, locale = 'en', previewRef,
                     </p>
                   ) : null}
                   {item.credentialUrl ? (
-                    <a href={item.credentialUrl} target="_blank" rel="noreferrer" className="executive-showcase__list-link">
+                    <a href={getSafeHref(item.credentialUrl)} target="_blank" rel="noreferrer" className="executive-showcase__list-link">
                       {copy.viewCredential}
                     </a>
                   ) : null}

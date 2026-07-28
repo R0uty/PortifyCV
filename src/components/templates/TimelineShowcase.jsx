@@ -24,6 +24,7 @@ import {
   parseSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  getSafeHref,
 } from './shared'
 
 // Per-type node color + icon + label, in the exact order the spec lists them.
@@ -175,7 +176,7 @@ export default function TimelineShowcase({ formData, locale = 'en', previewRef, 
             </p>
           ) : null}
           {item.credentialUrl ? (
-            <a href={item.credentialUrl} target="_blank" rel="noreferrer" className="timeline-showcase__entry-link">
+            <a href={getSafeHref(item.credentialUrl)} target="_blank" rel="noreferrer" className="timeline-showcase__entry-link">
               {copy.viewCredential}
             </a>
           ) : null}

@@ -24,6 +24,7 @@ import {
   parseSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  getSafeHref,
 } from './shared'
 
 function splitToBullets(text) {
@@ -203,12 +204,12 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
                     {item.githubUrl || item.demoUrl ? (
                       <div className="graduate-showcase__link-row">
                         {item.githubUrl ? (
-                          <a href={item.githubUrl} target="_blank" rel="noreferrer" className="graduate-showcase__link-btn">
+                          <a href={getSafeHref(item.githubUrl)} target="_blank" rel="noreferrer" className="graduate-showcase__link-btn">
                             GitHub
                           </a>
                         ) : null}
                         {item.demoUrl ? (
-                          <a href={item.demoUrl} target="_blank" rel="noreferrer" className="graduate-showcase__link-btn graduate-showcase__link-btn--primary">
+                          <a href={getSafeHref(item.demoUrl)} target="_blank" rel="noreferrer" className="graduate-showcase__link-btn graduate-showcase__link-btn--primary">
                             {isFinnish ? 'Demo' : 'Live Demo'}
                           </a>
                         ) : null}
@@ -432,7 +433,7 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
                     </p>
                   ) : null}
                   {item.credentialUrl ? (
-                    <a href={item.credentialUrl} target="_blank" rel="noreferrer" className="graduate-showcase__list-link">
+                    <a href={getSafeHref(item.credentialUrl)} target="_blank" rel="noreferrer" className="graduate-showcase__list-link">
                       {copy.viewCredential}
                     </a>
                   ) : null}

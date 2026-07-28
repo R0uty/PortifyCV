@@ -26,6 +26,7 @@ import {
   parseSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  getSafeHref,
 } from './shared'
 
 // Category → tag color mapping, matching DeveloperShowcase's palette so
@@ -195,13 +196,13 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                     {item.githubUrl || item.demoUrl ? (
                       <div className="portfolio-showcase__link-row">
                         {item.githubUrl ? (
-                          <a href={item.githubUrl} target="_blank" rel="noreferrer" className="portfolio-showcase__link-btn">
+                          <a href={getSafeHref(item.githubUrl)} target="_blank" rel="noreferrer" className="portfolio-showcase__link-btn">
                             GitHub
                           </a>
                         ) : null}
                         {item.demoUrl ? (
                           <a
-                            href={item.demoUrl}
+                            href={getSafeHref(item.demoUrl)}
                             target="_blank"
                             rel="noreferrer"
                             className="portfolio-showcase__link-btn portfolio-showcase__link-btn--primary"
@@ -441,7 +442,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                     </p>
                   ) : null}
                   {item.credentialUrl ? (
-                    <a href={item.credentialUrl} target="_blank" rel="noreferrer" className="portfolio-showcase__list-link">
+                    <a href={getSafeHref(item.credentialUrl)} target="_blank" rel="noreferrer" className="portfolio-showcase__list-link">
                       {copy.viewCredential}
                     </a>
                   ) : null}

@@ -16,6 +16,7 @@ import {
   parseSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  getSafeHref,
 } from './shared'
 
 // Category → tag color mapping (spec calls for colorful grouped skills rather
@@ -221,7 +222,7 @@ export default function DeveloperShowcase({
                 ) : null}
                 {item.credentialUrl ? (
                   <a
-                    href={item.credentialUrl}
+                    href={getSafeHref(item.credentialUrl)}
                     target="_blank"
                     rel="noreferrer"
                     className="dev-showcase__cert-link"
@@ -386,13 +387,13 @@ export default function DeveloperShowcase({
                     {item.githubUrl || item.demoUrl ? (
                       <div className="dev-showcase__link-row">
                         {item.githubUrl ? (
-                          <a href={item.githubUrl} target="_blank" rel="noreferrer" className="dev-showcase__link-btn">
+                          <a href={getSafeHref(item.githubUrl)} target="_blank" rel="noreferrer" className="dev-showcase__link-btn">
                             GitHub
                           </a>
                         ) : null}
                         {item.demoUrl ? (
                           <a
-                            href={item.demoUrl}
+                            href={getSafeHref(item.demoUrl)}
                             target="_blank"
                             rel="noreferrer"
                             className="dev-showcase__link-btn dev-showcase__link-btn--primary"
