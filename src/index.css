@@ -840,6 +840,9 @@ select.floating-field__control {
 .sortable-card__body-inner {
   overflow: hidden;
   min-height: 0;
+}
+
+.sortable-card__body-content {
   padding: 1rem;
 }
 

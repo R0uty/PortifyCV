@@ -99,7 +99,9 @@ function SortableItemCard({
         </div>
       </div>
       <div className={`sortable-card__body${isCollapsed ? ' sortable-card__body--collapsed' : ''}`}>
-        <div className="sortable-card__body-inner">{children}</div>
+        <div className="sortable-card__body-inner">
+          <div className="sortable-card__body-content">{children}</div>
+        </div>
       </div>
     </div>
   )
