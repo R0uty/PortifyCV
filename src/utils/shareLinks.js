@@ -1,61 +1,308 @@
 import { parseImportedCvData } from './cvForm'
 
 export const SHARE_QUERY_PARAM = 'data'
-export const MAX_SHARE_DATA_LENGTH = 6000
-export const MAX_SHARE_URL_LENGTH = 8000
-const SHARE_PAYLOAD_VERSION = 2
+export const MAX_SHARE_DATA_LENGTH = 16000
+export const MAX_SHARE_URL_LENGTH = 18000
+const SHARE_PAYLOAD_VERSION = 3
 
-function compressCvData(formData) {
-  return {
-    v: SHARE_PAYLOAD_VERSION,
-    d: {
-      f: formData.fullName,
-      t: formData.title,
-      a: formData.about,
-      p: formData.photo,
-      pv: formData.photoVisibilityByTemplate,
-      s: formData.skills,
-      x: formData.experience.map((item) => ({
-        r: item.role,
-        c: item.company,
-        s: item.startDate,
-        e: item.endDate,
-        d: item.description,
-      })),
-      e: formData.education.map((item) => ({
-        s: item.school,
-        d: item.degree,
-        a: item.startDate,
-        b: item.endDate,
-      })),
-      l: formData.links,
-      so: formData.sectionOrder,
-      sv: formData.sectionVisibility,
-      siv: formData.sectionItemVisibility,
-    },
-  }
+// Short keys keep share URLs as small as possible. Never repurpose a key that is
+// already in use: links generated earlier decode against these exact tables.
+const ROOT_STRING_KEYS = {
+  fullName: 'f',
+  title: 't',
+  about: 'a',
+  tagline: 'tg',
+  email: 'em',
+  phone: 'ph',
+  location: 'lo',
+  photo: 'p',
 }
 
-function expandCvData(value) {
-  if (!value || typeof value !== 'object') {
-    return value
+// Uploaded images are data URLs that run to tens of kilobytes each — a single
+// 20KB photo already pushes the payload several times past MAX_SHARE_DATA_LENGTH,
+// so a link carrying one could never be built. They are dropped on the way out
+// and the caller tells the user. The keys stay in the tables above and below so
+// that a link which somehow does contain one still decodes.
+const IMAGE_ROOT_FIELDS = ['photo']
+const IMAGE_ITEM_FIELDS = { projects: ['image'] }
+
+const LIST_KEYS = {
+  experience: 'x',
+  education: 'e',
+  coreStrengths: 'cs',
+  certificates: 'ct',
+  projects: 'pr',
+  languages: 'lg',
+  interests: 'in',
+  achievements: 'ah',
+  openSource: 'os',
+  publications: 'pb',
+  leadership: 'ld',
+  memberships: 'mb',
+  speaking: 'sp',
+  volunteering: 'vl',
+  internships: 'it',
+  caseStudies: 'cst',
+  testimonials: 'ts',
+}
+
+const ITEM_FIELD_KEYS = {
+  experience: {
+    role: 'r',
+    company: 'c',
+    location: 'l',
+    employmentType: 'et',
+    startDate: 's',
+    endDate: 'e',
+    isCurrent: 'ic',
+    description: 'd',
+    achievements: 'ac',
+    technologies: 'tc',
+  },
+  education: {
+    school: 's',
+    degree: 'd',
+    location: 'l',
+    startDate: 'a',
+    endDate: 'b',
+    honors: 'h',
+    coursework: 'cw',
+    grade: 'g',
+  },
+  coreStrengths: { title: 't', description: 'd' },
+  certificates: { name: 'n', issuer: 'i', year: 'y', credentialUrl: 'u', expiry: 'x' },
+  projects: {
+    name: 'n',
+    description: 'd',
+    stack: 's',
+    githubUrl: 'g',
+    demoUrl: 'm',
+    organization: 'o',
+    impact: 'i',
+    date: 'dt',
+    teamSize: 'z',
+    contribution: 'c',
+    image: 'im',
+  },
+  languages: { language: 'l', level: 'v' },
+  interests: { name: 'n' },
+  achievements: { title: 't', description: 'd', year: 'y' },
+  openSource: { name: 'n', description: 'd', language: 'l', stars: 's', forks: 'f', url: 'u' },
+  publications: { title: 't', publisher: 'p', year: 'y', url: 'u' },
+  leadership: { role: 'r', organization: 'o', description: 'd', startDate: 's', endDate: 'e' },
+  memberships: { organization: 'o', role: 'r', year: 'y' },
+  speaking: { conference: 'c', topic: 't', audience: 'a', date: 'd' },
+  volunteering: { organization: 'o', role: 'r', description: 'd' },
+  internships: {
+    role: 'r',
+    company: 'c',
+    location: 'l',
+    startDate: 's',
+    endDate: 'e',
+    description: 'd',
+    technologies: 'tc',
+  },
+  caseStudies: {
+    title: 't',
+    problem: 'p',
+    solution: 's',
+    technologies: 'tc',
+    outcome: 'o',
+    lessons: 'l',
+  },
+  testimonials: { quote: 'q', author: 'a', role: 'r' },
+}
+
+function isPlainObject(value) {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+// Empty values are dropped on the way out and restored to the schema default on
+// the way in, so blank fields cost nothing in the URL.
+function isEmptyValue(value) {
+  if (value === undefined || value === null || value === '' || value === false) {
+    return true
   }
 
-  const payload = value
+  return Array.isArray(value) && value.length === 0
+}
 
-  if (payload.v !== SHARE_PAYLOAD_VERSION || !payload.d) {
-    return value
+function compressItem(item, fieldKeys, skippedFields = []) {
+  if (!isPlainObject(item)) {
+    return {}
   }
 
+  return Object.entries(fieldKeys).reduce((next, [field, shortKey]) => {
+    const value = item[field]
+
+    if (!isEmptyValue(value) && !skippedFields.includes(field)) {
+      next[shortKey] = value
+    }
+
+    return next
+  }, {})
+}
+
+function expandItem(item, fieldKeys) {
+  if (!isPlainObject(item)) {
+    return {}
+  }
+
+  return Object.entries(fieldKeys).reduce((next, [field, shortKey]) => {
+    if (item[shortKey] !== undefined) {
+      next[field] = item[shortKey]
+    }
+
+    return next
+  }, {})
+}
+
+function compressCvData(formData) {
+  const data = {}
+
+  Object.entries(ROOT_STRING_KEYS).forEach(([field, shortKey]) => {
+    if (!isEmptyValue(formData[field]) && !IMAGE_ROOT_FIELDS.includes(field)) {
+      data[shortKey] = formData[field]
+    }
+  })
+
+  if (!isEmptyValue(formData.skills)) {
+    data.s = formData.skills
+  }
+
+  Object.entries(LIST_KEYS).forEach(([section, shortKey]) => {
+    const items = Array.isArray(formData[section]) ? formData[section] : []
+    const compressed = items.map((item) =>
+      compressItem(item, ITEM_FIELD_KEYS[section], IMAGE_ITEM_FIELDS[section]),
+    )
+
+    // Blank rows are kept so item indexes (and the per-item visibility map that
+    // is keyed by them) survive the round trip. A list that is blank throughout
+    // carries nothing at all.
+    if (compressed.some((item) => Object.keys(item).length > 0)) {
+      data[shortKey] = compressed
+    }
+  })
+
+  if (isPlainObject(formData.links)) {
+    const links = Object.fromEntries(
+      Object.entries(formData.links).filter(([, value]) => !isEmptyValue(value)),
+    )
+
+    if (Object.keys(links).length > 0) {
+      data.l = links
+    }
+  }
+
+  if (!isEmptyValue(formData.sectionOrder)) {
+    data.so = formData.sectionOrder
+  }
+
+  if (isPlainObject(formData.sectionVisibility)) {
+    // Only hidden sections are worth carrying; everything else defaults to visible.
+    const hidden = Object.fromEntries(
+      Object.entries(formData.sectionVisibility).filter(([, value]) => value === false),
+    )
+
+    if (Object.keys(hidden).length > 0) {
+      data.sv = hidden
+    }
+  }
+
+  if (isPlainObject(formData.sectionItemVisibility)) {
+    const hiddenItems = Object.entries(formData.sectionItemVisibility).reduce(
+      (next, [section, itemMap]) => {
+        if (!isPlainObject(itemMap)) {
+          return next
+        }
+
+        const hidden = Object.fromEntries(
+          Object.entries(itemMap).filter(([, value]) => value === false),
+        )
+
+        if (Object.keys(hidden).length > 0) {
+          next[section] = hidden
+        }
+
+        return next
+      },
+      {},
+    )
+
+    if (Object.keys(hiddenItems).length > 0) {
+      data.siv = hiddenItems
+    }
+  }
+
+  if (isPlainObject(formData.photoVisibilityByTemplate)) {
+    const hiddenPhotos = Object.fromEntries(
+      Object.entries(formData.photoVisibilityByTemplate).filter(([, value]) => value === false),
+    )
+
+    if (Object.keys(hiddenPhotos).length > 0) {
+      data.pv = hiddenPhotos
+    }
+  }
+
+  return { v: SHARE_PAYLOAD_VERSION, d: data }
+}
+
+function expandCurrentPayload(data) {
+  const formData = {}
+
+  Object.entries(ROOT_STRING_KEYS).forEach(([field, shortKey]) => {
+    if (data[shortKey] !== undefined) {
+      formData[field] = data[shortKey]
+    }
+  })
+
+  if (data.s !== undefined) {
+    formData.skills = data.s
+  }
+
+  Object.entries(LIST_KEYS).forEach(([section, shortKey]) => {
+    if (Array.isArray(data[shortKey])) {
+      formData[section] = data[shortKey].map((item) =>
+        expandItem(item, ITEM_FIELD_KEYS[section]),
+      )
+    }
+  })
+
+  if (data.l !== undefined) {
+    formData.links = data.l
+  }
+
+  if (data.so !== undefined) {
+    formData.sectionOrder = data.so
+  }
+
+  if (data.sv !== undefined) {
+    formData.sectionVisibility = data.sv
+  }
+
+  if (data.siv !== undefined) {
+    formData.sectionItemVisibility = data.siv
+  }
+
+  if (data.pv !== undefined) {
+    formData.photoVisibilityByTemplate = data.pv
+  }
+
+  return formData
+}
+
+// Version 2 links only carried a subset of the CV. They are still readable so
+// previously shared URLs keep working.
+function expandLegacyV2Payload(data) {
   return {
-    fullName: payload.d.f,
-    title: payload.d.t,
-    about: payload.d.a,
-    photo: payload.d.p,
-    photoVisibilityByTemplate: payload.d.pv,
-    skills: payload.d.s,
-    experience: Array.isArray(payload.d.x)
-      ? payload.d.x.map((item) => ({
+    fullName: data.f,
+    title: data.t,
+    about: data.a,
+    photo: data.p,
+    photoVisibilityByTemplate: data.pv,
+    skills: data.s,
+    experience: Array.isArray(data.x)
+      ? data.x.map((item) => ({
           role: item.r,
           company: item.c,
           startDate: item.s,
@@ -63,19 +310,35 @@ function expandCvData(value) {
           description: item.d,
         }))
       : [],
-    education: Array.isArray(payload.d.e)
-      ? payload.d.e.map((item) => ({
+    education: Array.isArray(data.e)
+      ? data.e.map((item) => ({
           school: item.s,
           degree: item.d,
           startDate: item.a,
           endDate: item.b,
         }))
       : [],
-    links: payload.d.l,
-    sectionOrder: payload.d.so,
-    sectionVisibility: payload.d.sv,
-    sectionItemVisibility: payload.d.siv,
+    links: data.l,
+    sectionOrder: data.so,
+    sectionVisibility: data.sv,
+    sectionItemVisibility: data.siv,
   }
+}
+
+function expandCvData(value) {
+  if (!isPlainObject(value) || !isPlainObject(value.d)) {
+    return value
+  }
+
+  if (value.v === SHARE_PAYLOAD_VERSION) {
+    return expandCurrentPayload(value.d)
+  }
+
+  if (value.v === 2) {
+    return expandLegacyV2Payload(value.d)
+  }
+
+  return value
 }
 
 function encodeBase64Url(bytes) {
@@ -124,6 +387,24 @@ export function decodeCvStateFromUrl(encodedValue) {
   } catch {
     throw new Error('Shared CV link is invalid or corrupted.')
   }
+}
+
+// True when the CV holds an image that a share link cannot carry, so the caller
+// can tell the recipient's copy will arrive without it.
+export function shareLinkOmitsImages(formData) {
+  if (!isPlainObject(formData)) {
+    return false
+  }
+
+  if (IMAGE_ROOT_FIELDS.some((field) => !isEmptyValue(formData[field]))) {
+    return true
+  }
+
+  return Object.entries(IMAGE_ITEM_FIELDS).some(([section, fields]) => {
+    const items = Array.isArray(formData[section]) ? formData[section] : []
+
+    return items.some((item) => isPlainObject(item) && fields.some((field) => !isEmptyValue(item[field])))
+  })
 }
 
 export function buildShareUrl(formData, currentHref = window.location.href) {

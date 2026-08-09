@@ -57,6 +57,7 @@ import {
   buildShareUrl,
   readCvStateFromLocation,
   removeShareDataParamFromCurrentUrl,
+  shareLinkOmitsImages,
 } from '../utils/shareLinks'
 import {
   analyzeJobDescription,
@@ -106,6 +107,33 @@ function getScrollBehavior() {
   }
 
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+}
+
+// Scroll the editor panel itself rather than using scrollIntoView, which walks
+// every scrollable ancestor and drags the whole page along with it.
+function scrollSectionIntoView(container, target) {
+  const top = Math.max(
+    0,
+    target.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop,
+  )
+  const behavior = getScrollBehavior()
+  const startTop = container.scrollTop
+
+  container.scrollTo({ top, behavior })
+
+  if (behavior !== 'smooth' || Math.round(top) === Math.round(startTop)) {
+    return
+  }
+
+  // Some browser configurations accept a smooth scroll and then never animate
+  // it, which would leave every nav-rail entry dead. A real smooth scroll has
+  // always moved well before this point, so a position that has not budged
+  // means the animation is never coming — jump there instead.
+  window.setTimeout(() => {
+    if (container.scrollTop === startTop) {
+      container.scrollTo({ top, behavior: 'auto' })
+    }
+  }, 100)
 }
 
 function waitForFrame() {
@@ -436,6 +464,10 @@ function ResumeBuilderPage({
       timeouts.forEach((timeoutId) => {
         window.clearTimeout(timeoutId)
       })
+      // The map has to be emptied too. Leaving cleared ids behind makes the
+      // effect above think those toasts are still scheduled, so they would
+      // never be dismissed after a remount.
+      timeouts.clear()
     }
   }, [])
 
@@ -639,20 +671,10 @@ function ResumeBuilderPage({
   }, [dispatchFormData, locale, pastedCvText, setStorageValue])
 
   const handleCopyShareLink = useCallback(async () => {
-    try {
-      const shareUrl = buildShareUrl(formData)
+    let shareUrl
 
-      await window.navigator.clipboard.writeText(shareUrl)
-      if (!shareWarningShownRef.current) {
-        shareWarningShownRef.current = true
-        showToast(
-          locale === 'fi'
-            ? 'Huom: jakolinkki sisältää CV-tietosi URL:ssa. Jaa vain luotetuille vastaanottajille.'
-            : 'Note: the share link embeds your CV data in the URL. Share it only with trusted recipients.',
-          'info',
-        )
-      }
-      showToast(locale === 'fi' ? 'Jakolinkki kopioitu leikepöydälle.' : 'Share link copied to clipboard.')
+    try {
+      shareUrl = buildShareUrl(formData)
     } catch (error) {
       showToast(
         error instanceof Error
@@ -662,7 +684,45 @@ function ResumeBuilderPage({
             : 'Failed to create a shareable link for this CV.',
         'error',
       )
+      return
     }
+
+    // The Clipboard API is unavailable outside a secure context and can be
+    // blocked by permissions, so a failure here is about copying, not about the
+    // link itself.
+    try {
+      await window.navigator.clipboard.writeText(shareUrl)
+    } catch {
+      showToast(
+        locale === 'fi'
+          ? 'Leikepöydälle kopiointi epäonnistui. Kopioi linkki selaimen osoiterivilta.'
+          : 'Could not copy to the clipboard. Copy the link from your browser address bar instead.',
+        'error',
+      )
+      return
+    }
+
+    if (!shareWarningShownRef.current) {
+      shareWarningShownRef.current = true
+      showToast(
+        locale === 'fi'
+          ? 'Huom: jakolinkki sisältää CV-tietosi URL:ssa. Jaa vain luotetuille vastaanottajille.'
+          : 'Note: the share link embeds your CV data in the URL. Share it only with trusted recipients.',
+        'info',
+      )
+    }
+
+    if (shareLinkOmitsImages(formData)) {
+      showToast(
+        locale === 'fi'
+          ? 'Jakolinkki kopioitu. Kuvat jäävät linkin ulkopuolelle — jaa JSON, jos ne tarvitaan.'
+          : 'Share link copied. Images are left out of the link — share the JSON export if they are needed.',
+        'info',
+      )
+      return
+    }
+
+    showToast(locale === 'fi' ? 'Jakolinkki kopioitu leikepöydälle.' : 'Share link copied to clipboard.')
   }, [formData, locale])
 
   const handleImproveAboutText = useCallback(() => {
@@ -741,8 +801,8 @@ function ResumeBuilderPage({
     const container = editorScrollRef.current
     const target = container?.querySelector(`#${item.anchor}`)
 
-    if (target) {
-      target.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' })
+    if (container && target) {
+      scrollSectionIntoView(container, target)
       setActiveSectionId(item.id)
     }
   }, [handleExport])
@@ -753,15 +813,23 @@ function ResumeBuilderPage({
     const container = editorScrollRef.current
     const target = container?.querySelector('#section-settings')
 
-    if (target) {
+    if (container && target) {
       window.requestAnimationFrame(() => {
-        target.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' })
+        scrollSectionIntoView(container, target)
       })
     }
   }, [])
 
   const handlePrint = useCallback(() => {
     window.print()
+  }, [])
+
+  const handleCloseTemplateGallery = useCallback(() => {
+    setIsTemplateGalleryOpen(false)
+  }, [])
+
+  const handleCloseSettings = useCallback(() => {
+    setIsSettingsOpen(false)
   }, [])
 
   const handleToggleFullscreenPreview = useCallback(() => {
@@ -856,14 +924,24 @@ function ResumeBuilderPage({
     }
 
     const idToNavId = new Map(ALL_SCROLL_NAV_ITEMS.map((item) => [item.anchor, item.id]))
+    // A callback only receives the sections whose intersection changed, so the
+    // set of currently visible ones has to be tracked across callbacks —
+    // otherwise scrolling a section out of view leaves the old item highlighted.
+    const visibleTops = new Map()
     const observer = new IntersectionObserver(
       (entries) => {
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            visibleTops.set(entry.target.id, entry.boundingClientRect.top)
+          } else {
+            visibleTops.delete(entry.target.id)
+          }
+        })
 
-        if (visibleEntries.length > 0) {
-          const navId = idToNavId.get(visibleEntries[0].target.id)
+        const topmost = [...visibleTops.entries()].sort((a, b) => a[1] - b[1])[0]
+
+        if (topmost) {
+          const navId = idToNavId.get(topmost[0])
 
           if (navId) {
             setActiveSectionId(navId)
@@ -893,6 +971,7 @@ function ResumeBuilderPage({
       isActionBusy,
       locale,
       onExport: handleExport,
+      onCopyShareLink: handleCopyShareLink,
       onLocaleChange: handleLocaleChange,
       canUndo,
       canRedo,
@@ -912,7 +991,7 @@ function ResumeBuilderPage({
     })
   }, [
     activeExport, isActionBusy, locale,
-    handleExport, handleLocaleChange,
+    handleExport, handleCopyShareLink, handleLocaleChange,
     canUndo, canRedo, handleUndo, handleRedo,
     templates, selectedTemplate, handleSelectTemplate,
     searchQuery, handlePrint,
@@ -1031,6 +1110,7 @@ function ResumeBuilderPage({
             value={pastedCvText}
             disabled={isActionBusy}
             onChange={handlePastedCvTextChange}
+            aria-label={locale === 'fi' ? 'Liitetty CV-teksti' : 'Pasted CV text'}
             placeholder={locale === 'fi'
               ? `Matti Meikäläinen\nSenior Product Designer\nTaidot: Figma, käyttäjätutkimus, design systemit`
               : `Alex Morgan\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
@@ -1199,7 +1279,7 @@ function ResumeBuilderPage({
       activeSectionId={activeSectionId}
       onNavigate={handleNavigate}
       locale={locale}
-      version="0.2"
+      version="1.0.0"
     />
   ), [
     filteredNavSections,
@@ -1466,7 +1546,7 @@ function ResumeBuilderPage({
 
       <TemplateGalleryModal
         isOpen={isTemplateGalleryOpen}
-        onClose={() => setIsTemplateGalleryOpen(false)}
+        onClose={handleCloseTemplateGallery}
         templates={templates}
         selectedTemplateId={selectedTemplate}
         onSelectTemplate={handleSelectTemplate}
@@ -1476,7 +1556,7 @@ function ResumeBuilderPage({
 
       <SettingsModal
         isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
+        onClose={handleCloseSettings}
         locale={locale}
         atsFriendlyMode={atsFriendlyMode}
         onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}

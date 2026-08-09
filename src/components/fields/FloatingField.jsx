@@ -9,10 +9,17 @@ function FloatingField({
   alwaysFloat = false,
 }) {
   const errorId = useId()
+  const generatedControlId = useId()
   const child = isValidElement(children) ? children : null
+  // The label is a sibling of the control (the float effect keys off
+  // :placeholder-shown + label), so it cannot label it implicitly. Pairing an id
+  // with htmlFor is what gives the control its accessible name and makes a click
+  // on the label focus it.
+  const controlId = child?.props.id ?? generatedControlId
 
   const enhancedChild = child
     ? cloneElement(child, {
+      id: controlId,
       placeholder: child.props.placeholder ?? ' ',
       'aria-describedby': error ? errorId : child.props['aria-describedby'],
       'aria-invalid': error ? true : child.props['aria-invalid'],
@@ -25,7 +32,7 @@ function FloatingField({
       className={`floating-field${error ? ' floating-field--error' : ''}${alwaysFloat ? ' floating-field--always-float' : ''} ${className}`.trim()}
     >
       {enhancedChild}
-      <label className="floating-field__label">
+      <label className="floating-field__label" htmlFor={controlId}>
         {label}
         {required ? <span className="floating-field__required">*</span> : null}
       </label>

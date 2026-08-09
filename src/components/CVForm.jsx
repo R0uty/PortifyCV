@@ -277,24 +277,93 @@ function CVForm({
     dispatchFormData({ type: FORM_ACTION.UPDATE_ARRAY_ITEM, section, index, field, value })
   }
 
+  // Collapsed cards are tracked as "<section>:<index>". Every structural change
+  // to a list has to remap those indexes, otherwise the collapsed state stays
+  // behind on a position and silently transfers to a different entry.
+  const remapCollapsedItems = (section, mapIndex) => {
+    setCollapsedItems((previous) => {
+      const next = new Set()
+
+      previous.forEach((itemKey) => {
+        const separatorIndex = itemKey.lastIndexOf(':')
+        const itemSection = itemKey.slice(0, separatorIndex)
+
+        if (itemSection !== section) {
+          next.add(itemKey)
+          return
+        }
+
+        const nextIndex = mapIndex(Number(itemKey.slice(separatorIndex + 1)))
+
+        if (nextIndex !== null) {
+          next.add(`${section}:${nextIndex}`)
+        }
+      })
+
+      return next
+    })
+  }
+
   const addArrayItem = (section) => {
     dispatchFormData({ type: FORM_ACTION.ADD_ARRAY_ITEM, section })
   }
 
   const removeArrayItem = (section, index) => {
     dispatchFormData({ type: FORM_ACTION.REMOVE_ARRAY_ITEM, section, index })
+    remapCollapsedItems(section, (itemIndex) => {
+      if (itemIndex === index) {
+        return null
+      }
+
+      return itemIndex > index ? itemIndex - 1 : itemIndex
+    })
   }
 
   const duplicateArrayItem = (section, index) => {
     dispatchFormData({ type: FORM_ACTION.DUPLICATE_ARRAY_ITEM, section, index })
+    remapCollapsedItems(section, (itemIndex) => (itemIndex > index ? itemIndex + 1 : itemIndex))
   }
 
   const moveArrayItem = (section, index, direction) => {
+    const targetIndex = index + direction
+
+    if (targetIndex < 0 || targetIndex >= (formData[section]?.length ?? 0)) {
+      return
+    }
+
     dispatchFormData({ type: FORM_ACTION.MOVE_ARRAY_ITEM, section, index, direction })
+    remapCollapsedItems(section, (itemIndex) => {
+      if (itemIndex === index) {
+        return targetIndex
+      }
+
+      return itemIndex === targetIndex ? index : itemIndex
+    })
   }
 
   const moveArrayItemToIndex = (section, fromIndex, toIndex) => {
+    const itemCount = formData[section]?.length ?? 0
+
+    if (fromIndex === toIndex || fromIndex < 0 || fromIndex >= itemCount || toIndex < 0 || toIndex >= itemCount) {
+      return
+    }
+
     dispatchFormData({ type: FORM_ACTION.MOVE_ARRAY_ITEM_TO_INDEX, section, fromIndex, toIndex })
+    remapCollapsedItems(section, (itemIndex) => {
+      if (itemIndex === fromIndex) {
+        return toIndex
+      }
+
+      if (fromIndex < toIndex && itemIndex > fromIndex && itemIndex <= toIndex) {
+        return itemIndex - 1
+      }
+
+      if (fromIndex > toIndex && itemIndex >= toIndex && itemIndex < fromIndex) {
+        return itemIndex + 1
+      }
+
+      return itemIndex
+    })
   }
 
   const makeArrayDragEndHandler = (section) => (event) => {
@@ -560,12 +629,19 @@ function CVForm({
               />
             </Field>
           </div>
-          <Field label={isFinnish ? 'Profiilikuva (valinnainen)' : 'Profile image (optional)'} labelClassName={fieldLabelClassName}>
+          {/* Deliberately not a <Field>: that renders a <label>, and a label
+              wrapping the hidden file input turns every click on the hint text
+              or the preview image into a file-picker dialog. */}
+          <div className="block">
+            <span className={`text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}>
+              {isFinnish ? 'Profiilikuva (valinnainen)' : 'Profile image (optional)'}
+            </span>
             <input
               ref={photoInputRef}
               className="hidden"
               type="file"
               accept="image/png,image/jpeg,image/jpg"
+              aria-label={isFinnish ? 'Profiilikuva (valinnainen)' : 'Profile image (optional)'}
               onChange={handlePhotoUpload}
             />
             <button
@@ -597,7 +673,7 @@ function CVForm({
                 </button>
               </div>
             ) : null}
-          </Field>
+          </div>
           <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
@@ -1007,7 +1083,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 06"
+        eyebrow="Section 05"
         title={isFinnish ? 'Vahvuudet' : 'Core Strengths'}
         description={
           isFinnish
@@ -1102,7 +1178,7 @@ function CVForm({
 
       <PanelSection
         id="section-certificates"
-        eyebrow="Section 07"
+        eyebrow="Section 06"
         title={isFinnish ? 'Sertifikaatit' : 'Certificates'}
         description={
           isFinnish
@@ -1221,7 +1297,7 @@ function CVForm({
 
       <PanelSection
         id="section-projects"
-        eyebrow="Section 08"
+        eyebrow="Section 07"
         title={isFinnish ? 'Projektit' : 'Projects'}
         description={
           isFinnish
@@ -1402,7 +1478,7 @@ function CVForm({
 
       <PanelSection
         id="section-languages"
-        eyebrow="Section 09"
+        eyebrow="Section 08"
         title={isFinnish ? 'Kielet' : 'Languages'}
         description={
           isFinnish
@@ -1464,7 +1540,7 @@ function CVForm({
 
       <PanelSection
         id="section-interests"
-        eyebrow="Section 10"
+        eyebrow="Section 09"
         title={isFinnish ? 'Kiinnostuksen kohteet' : 'Interests'}
         description={
           isFinnish
@@ -1483,6 +1559,7 @@ function CVForm({
                 onChange={(event) =>
                   updateArrayItem('interests', index, 'name', event.target.value)
                 }
+                aria-label={`${isFinnish ? 'Kiinnostuksen kohde' : 'Interest'} ${index + 1}`}
                 placeholder={isFinnish ? 'Valokuvaus' : 'Photography'}
               />
               <button
@@ -1512,7 +1589,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 11"
+        eyebrow="Section 10"
         title={isFinnish ? 'Saavutukset' : 'Achievements'}
         description={
           isFinnish
@@ -1612,7 +1689,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 12"
+        eyebrow="Section 11"
         title={isFinnish ? 'Avoin lähdekoodi' : 'Open Source'}
         description={
           isFinnish
@@ -1747,7 +1824,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 13"
+        eyebrow="Section 12"
         title={isFinnish ? 'Julkaisut' : 'Publications'}
         description={
           isFinnish
@@ -1862,7 +1939,7 @@ function CVForm({
 
       <PanelSection
         id="section-links"
-        eyebrow="Section 14"
+        eyebrow="Section 13"
         title={isFinnish ? 'Linkit' : 'Links'}
         description={
           isFinnish
@@ -1872,37 +1949,41 @@ function CVForm({
         theme={theme}
       >
         <div className="grid gap-4 sm:grid-cols-2">
+          {/* The hide/show button is kept outside the <label>: nesting a button
+              inside one is invalid markup and folds the button text into the
+              input's accessible name. */}
           {linkFields.map(({ key, label, placeholder }) => (
-            <Field
-              key={key}
-              label={
-                <span className="inline-flex items-center gap-2">
-                  <span>{label}</span>
-                  <button
-                    type="button"
-                    className="border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] transition"
-                    onClick={() => toggleSectionItemVisibility('links', key)}
-                  >
-                    {isSectionItemVisible(sectionItemVisibility, 'links', key) ? copy.hide : copy.show}
-                  </button>
-                </span>
-              }
-              labelClassName={fieldLabelClassName}
-            >
+            <div key={key}>
+              <div className="flex items-center justify-between gap-2">
+                <label
+                  htmlFor={`link-field-${key}`}
+                  className={`text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}
+                >
+                  {label}
+                </label>
+                <button
+                  type="button"
+                  className="border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] transition"
+                  onClick={() => toggleSectionItemVisibility('links', key)}
+                >
+                  {isSectionItemVisible(sectionItemVisibility, 'links', key) ? copy.hide : copy.show}
+                </button>
+              </div>
               <input
+                id={`link-field-${key}`}
                 className={inputClasses}
                 type="url"
                 value={formData.links[key]}
                 onChange={(event) => updateLinkField(key, event.target.value)}
                 placeholder={placeholder}
               />
-            </Field>
+            </div>
           ))}
         </div>
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 15"
+        eyebrow="Section 14"
         title={isFinnish ? 'Johtamiskokemus' : 'Leadership Experience'}
         description={
           isFinnish
@@ -2026,7 +2107,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 16"
+        eyebrow="Section 15"
         title={isFinnish ? 'Ammattijäsenyydet' : 'Professional Memberships'}
         description={
           isFinnish
@@ -2125,7 +2206,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 17"
+        eyebrow="Section 16"
         title={isFinnish ? 'Esiintymiset' : 'Speaking'}
         description={
           isFinnish
@@ -2237,7 +2318,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 18"
+        eyebrow="Section 17"
         title={isFinnish ? 'Vapaaehtoistyö' : 'Volunteering'}
         description={
           isFinnish
@@ -2337,7 +2418,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 19"
+        eyebrow="Section 18"
         title={isFinnish ? 'Harjoittelut' : 'Internships'}
         description={
           isFinnish
@@ -2481,7 +2562,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 20"
+        eyebrow="Section 19"
         title={isFinnish ? 'Tapaustutkimukset' : 'Case Studies'}
         description={
           isFinnish
@@ -2615,7 +2696,7 @@ function CVForm({
       </PanelSection>
 
       <PanelSection
-        eyebrow="Section 21"
+        eyebrow="Section 20"
         title={isFinnish ? 'Suositukset' : 'Testimonials'}
         description={
           isFinnish

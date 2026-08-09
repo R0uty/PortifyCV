@@ -5,21 +5,27 @@ A modern, minimal CV builder for creating and exporting professional resumes in 
 ## Features
 
 - **Live Preview**: See your CV update instantly as you edit
-- **Multiple Templates**: Choose from four unified minimal design variants (A-D)
-- **Theme System**: 7 accent color themes with dark/light mode support
-- **Smart Export**: PDF (with design fallback) and JSON export
-- **ATS Optimization**: Feedback and dedicated ATS-friendly mode
-- **CV Suggestions**: Smart feedback on clarity, impact, and completeness
-- **Share & Import**: Generate shareable links and import JSON backups
-- **Local Storage**: All changes auto-save to browser storage
+- **10 Templates**: Minimalist, Developer, Creative, Modern Professional, Executive,
+  Timeline, Graduate, Compact, Portfolio Hybrid, and Tech Executive
+- **ATS Optimization**: Parser-readiness score, job-description keyword matching, and a
+  dedicated ATS-friendly mode that flattens any template for applicant tracking systems
+- **CV Suggestions**: Rule-based feedback on clarity, impact, and completeness
+- **Export**: PDF (rendered, with a text-based fallback), standalone HTML, and JSON
+- **Share & Import**: Generate a shareable link that carries the CV text in the URL,
+  or import a JSON backup / paste raw resume text
+- **Bilingual UI**: English and Finnish
+- **No persistence**: No CV data is saved to a server or to browser storage; the CV lives
+  in the page for as long as the tab is open. Only the UI language preference and a flag
+  recording that onboarding was dismissed are remembered.
 
 ## Tech Stack
 
-- **React 19.2.6**: UI framework with hooks
-- **Vite 8.0.13**: Build tool with HMR
-- **Tailwind CSS 4.3.0**: Utility-first styling
-- **html2canvas 1.4.1**: PDF design rendering
-- **jsPDF 4.2.1**: PDF generation
+- **React 19**: UI framework with hooks
+- **Vite 8**: Build tool with HMR
+- **Tailwind CSS 4**: Utility-first styling
+- **html2canvas**: PDF design rendering
+- **jsPDF**: PDF generation (page assembly runs in a Web Worker)
+- **@dnd-kit**: Drag-and-drop reordering of CV entries
 - **ESLint**: Code quality checks
 
 ## Development
@@ -39,7 +45,15 @@ npm run preview
 
 # Run linter
 npm run lint
+
+# Verify the share-link codec (no browser needed)
+npm run check:share
 ```
+
+`check:share` round-trips a full CV through the share-link encoder and decoder.
+Run it after touching `src/utils/shareLinks.js` or the CV schema in
+`src/utils/cvForm.js` — a mistyped short key silently drops a field from every
+link the app generates.
 
 ## Production Build
 
@@ -86,15 +100,32 @@ If your live domain is not `https://portifycv.app`, update canonical/OG URLs in 
 
 ## Performance
 
-- Bundle size: ~860KB (html2canvas + jsPDF are large dependencies)
-- Gzipped CSS: ~10KB
-- Gzipped JS (after chunking): ~48KB + 257KB
+- The PDF dependencies (html2canvas + jsPDF) dominate the bundle and are loaded lazily,
+  only when an export is triggered
+- Gzipped CSS: ~21KB; initial gzipped JS: ~75KB
 - Page-sliced PDF rendering for large multi-page CVs
 - Adaptive rendering scale to prevent memory overflow
+
+## Routes
+
+- `/` — landing page
+- `/cv` — opens the builder directly
+- `#data=<payload>` — restores a CV from a share link (works on either route)
+
+Share links carry the CV in the URL fragment, so it is never sent to a server. Uploaded
+images (profile photo, project images) are left out of the link — a single photo is many
+times larger than a URL can hold — so the recipient sees the CV without them. Export JSON
+when the images need to travel too.
 
 ## Browser Support
 
 Modern browsers (Chrome, Firefox, Safari, Edge) with ES2020+ support.
+
+## Project Documentation
+
+- [`CHANGELOG.md`](CHANGELOG.md) — release history
+- [`docs/audit-1.0.0.md`](docs/audit-1.0.0.md) — the 1.0.0 pre-release audit: what
+  was checked, what was fixed, and which behaviours are deliberate
 
 ## License
 

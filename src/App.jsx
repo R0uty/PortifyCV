@@ -118,6 +118,7 @@ function App() {
           activeExport={headerProps.activeExport}
           isActionBusy={headerProps.isActionBusy}
           onExport={headerProps.onExport}
+          onCopyShareLink={headerProps.onCopyShareLink}
         />
       )}
 

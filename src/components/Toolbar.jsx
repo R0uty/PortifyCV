@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  Link2,
   Maximize2,
   Minimize2,
   Printer,
@@ -33,6 +34,7 @@ function Toolbar({
   activeExport = '',
   isActionBusy = false,
   onExport = () => {},
+  onCopyShareLink = () => {},
 }) {
   const isFinnish = locale === 'fi'
 
@@ -110,7 +112,7 @@ function Toolbar({
 
           <button
             type="button"
-            className="app-toolbar__icon-button"
+            className="app-toolbar__icon-button app-toolbar__icon-button--text"
             onClick={() => onLocaleChange(isFinnish ? 'en' : 'fi')}
             aria-label={isFinnish ? 'Vaihda kieli' : 'Switch language'}
             title={isFinnish ? 'Vaihda kieli' : 'Switch language'}
@@ -152,6 +154,39 @@ function Toolbar({
             ) : (
               <Maximize2 size={16} strokeWidth={2} aria-hidden="true" />
             )}
+          </button>
+
+          <button
+            type="button"
+            className="app-toolbar__icon-button app-toolbar__icon-button--text"
+            disabled={isActionBusy}
+            onClick={() => onExport('html')}
+            aria-label={isFinnish ? 'Vie HTML' : 'Export HTML'}
+            title={isFinnish ? 'Vie HTML' : 'Export HTML'}
+          >
+            {activeExport === 'html' ? '...' : 'HTML'}
+          </button>
+
+          <button
+            type="button"
+            className="app-toolbar__icon-button app-toolbar__icon-button--text"
+            disabled={isActionBusy}
+            onClick={() => onExport('json')}
+            aria-label={isFinnish ? 'Vie JSON' : 'Export JSON'}
+            title={isFinnish ? 'Vie JSON' : 'Export JSON'}
+          >
+            {activeExport === 'json' ? '...' : 'JSON'}
+          </button>
+
+          <button
+            type="button"
+            className="app-toolbar__icon-button"
+            disabled={isActionBusy}
+            onClick={onCopyShareLink}
+            aria-label={isFinnish ? 'Kopioi jakolinkki' : 'Copy share link'}
+            title={isFinnish ? 'Kopioi jakolinkki' : 'Copy share link'}
+          >
+            <Link2 size={16} strokeWidth={2} aria-hidden="true" />
           </button>
 
           <button

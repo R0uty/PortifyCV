@@ -6,6 +6,14 @@ const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled
 function Modal({ isOpen, onClose, title, description, children, size = 'md' }) {
   const panelRef = useRef(null)
   const previouslyFocusedRef = useRef(null)
+  // Callers commonly pass an inline arrow for onClose. Reading it through a ref
+  // keeps the effect below tied to `isOpen` alone, so a parent re-render cannot
+  // tear down the focus trap and bounce focus out of the open dialog.
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     if (!isOpen) {
@@ -20,7 +28,7 @@ function Modal({ isOpen, onClose, title, description, children, size = 'md' }) {
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
-        onClose()
+        onCloseRef.current()
         return
       }
 
@@ -53,7 +61,7 @@ function Modal({ isOpen, onClose, title, description, children, size = 'md' }) {
       window.removeEventListener('keydown', handleKeyDown)
       previouslyFocusedRef.current?.focus?.()
     }
-  }, [isOpen, onClose])
+  }, [isOpen])
 
   if (!isOpen) {
     return null

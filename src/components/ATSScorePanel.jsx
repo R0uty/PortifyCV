@@ -132,6 +132,7 @@ function ATSScorePanel({
           className={`mt-3 min-h-28 w-full border px-4 py-3 text-sm transition ${ui.input}`}
           value={jobDescription}
           onChange={(event) => onJobDescriptionChange(event.target.value)}
+          aria-label={isFinnish ? 'Työpaikkailmoituksen kuvaus' : 'Job description'}
           placeholder={isFinnish
             ? 'Liitä tähän työpaikkakuvaus avainsanojen kattavuuden analysointia varten.'
             : 'Paste a job description here to analyze keyword coverage.'}

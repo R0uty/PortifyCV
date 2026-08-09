@@ -363,6 +363,11 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
     })
     .join('\n')
 
+  const contactLine = [snapshot.email, snapshot.phone, snapshot.location]
+    .filter(Boolean)
+    .map((value) => `<span>${esc(value)}</span>`)
+    .join('')
+
   const isVisible = (section) => sectionVisibility[section] !== false
   const sectionMarkupByKey = {
     about: () =>
@@ -464,6 +469,8 @@ body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sa
 header { padding-bottom: 1.75rem; margin-bottom: 2.5rem; border-bottom: 2px solid #0f172a; }
 .cv-name { font-size: 2.75rem; font-weight: 700; line-height: 1; letter-spacing: -0.04em; }
 .cv-job-title { margin-top: 0.625rem; font-size: 1.1rem; color: #475569; }
+.cv-tagline { margin-top: 0.375rem; font-size: 0.9rem; color: #64748b; font-style: italic; }
+.cv-contact { margin-top: 0.875rem; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; font-size: 0.85rem; color: #475569; }
 section { margin-bottom: 2.5rem; }
 .section-heading { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; color: #64748b; padding-bottom: 0.625rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 1.5rem; }
 .about-text { color: #334155; font-size: 0.975rem; line-height: 1.8; }
@@ -527,7 +534,7 @@ section { margin-bottom: 2.5rem; }
 <body>
 <header>
   <p class="cv-name">${esc(snapshot.fullName || copy.yourName)}</p>
-  <p class="cv-job-title">${esc(snapshot.title || copy.professionalTitle)}</p>
+  <p class="cv-job-title">${esc(snapshot.title || copy.professionalTitle)}</p>${snapshot.tagline ? `\n  <p class="cv-tagline">${esc(snapshot.tagline)}</p>` : ''}${contactLine ? `\n  <div class="cv-contact">${contactLine}</div>` : ''}
 </header>
 
 ${sections}

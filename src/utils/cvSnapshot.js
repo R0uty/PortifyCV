@@ -469,9 +469,16 @@ export function createCvSnapshot(formData) {
  */
 export function createExportFileName(formData) {
   const baseName = trimValue(formData.fullName) || 'cv'
-
-  return baseName
+  // Accented letters are folded to their base form so "Ääkkös" stays readable
+  // rather than losing characters outright.
+  const slug = baseName
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
+
+  // A name written entirely in a non-Latin script slugs down to nothing, which
+  // would otherwise produce a file named ".pdf".
+  return slug || 'cv'
 }
