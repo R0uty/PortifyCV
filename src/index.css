@@ -1055,30 +1055,26 @@ select.floating-field__control {
 }
 
 .template-gallery__thumb-frame {
+  position: relative;
   overflow: hidden;
   border: 1px solid var(--app-border);
   border-radius: var(--radius-sm);
-  background: var(--app-bg-elevated);
+  background: #ffffff;
+  /* Roughly A4 proportions, so the crop matches what the export produces. */
+  aspect-ratio: 1 / 1.16;
 }
 
-.template-gallery__thumb-accent {
-  height: 0.5rem;
-  width: 100%;
-  background: var(--accent-solid);
-}
-
-.template-gallery__thumb-body {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 0.55rem;
-}
-
-.template-gallery__thumb-line {
-  height: 0.3rem;
-  border-radius: 999px;
-  background: var(--app-border-strong);
-  opacity: 0.5;
+/* The preview renders at its natural document width and is scaled down into the
+   frame. Scaling rather than reflowing is what keeps each template's real
+   proportions — a narrow sidebar stays narrow instead of wrapping. */
+.template-gallery__thumb-page {
+  position: absolute;
+  inset: 0;
+  width: 780px;
+  transform: scale(0.29);
+  transform-origin: top left;
+  pointer-events: none;
+  user-select: none;
 }
 
 .template-gallery__meta {

@@ -1551,6 +1551,7 @@ function ResumeBuilderPage({
         selectedTemplateId={selectedTemplate}
         onSelectTemplate={handleSelectTemplate}
         atsScore={atsScore}
+        formData={formData}
         locale={locale}
       />
 
