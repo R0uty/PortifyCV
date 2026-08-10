@@ -1098,6 +1098,30 @@ function ResumeBuilderPage({
           </div>
         </div>
 
+        {/* Collapsed by default: these four panels are about the CV rather than part
+            of it, and expanded they pushed the first form field more than two screens
+            down. The summary keeps the ATS score and suggestion count visible so
+            nothing is hidden, only folded. */}
+        <details className="editor-tools">
+          <summary className="editor-tools__summary">
+            <span className="editor-tools__label">
+              {locale === 'fi' ? 'Tuonti ja vientitila' : 'Import & export mode'}
+            </span>
+            <span className="editor-tools__stats">
+              {atsScore ? (
+                <span className="editor-tools__stat">
+                  {locale === 'fi' ? 'ATS' : 'ATS'} {atsScore.score}
+                </span>
+              ) : null}
+              {feedback?.length ? (
+                <span className="editor-tools__stat">
+                  {feedback.length} {locale === 'fi' ? 'ehdotusta' : 'suggestions'}
+                </span>
+              ) : null}
+            </span>
+          </summary>
+
+          <div className="editor-tools__body stack-5">
         <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
           <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Pikatuonti' : 'Quick import'}</p>
           <p className={`mt-3 text-sm ${ui.textSecondary}`}>
@@ -1185,6 +1209,8 @@ function ResumeBuilderPage({
           onImproveAboutText={handleImproveAboutText}
           onImproveExperienceText={handleImproveExperienceText}
         />
+          </div>
+        </details>
 
         <p className={`ds-kicker lg:hidden ${ui.textMuted}`}>
           {locale === 'fi'

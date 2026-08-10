@@ -19,7 +19,14 @@ from reading code.
       layouts for `CVPreview`. Render each scaled down as its own thumbnail, then cut the
       descriptions to one line each.
 
-- [ ] **2. The editor buries the form under 2,751px of preamble.**
+- [x] **2. The editor buries the form under 2,751px of preamble.** — done 2026-08-10.
+      Quick import, Export mode, ATS score, and Smart suggestions now sit in a collapsed
+      `<details>` whose summary keeps the ATS score and suggestion count visible.
+      Preamble 2,751px → 779px (0.79 viewport), so the first form field is on the opening
+      screen. Nav-rail scrolling still lands at offset 0 with the disclosure collapsed.
+      Not done: "Section 00 — Visible sections" still precedes Section 01. Collapsing it
+      too would cut the preamble to roughly 200px, but it is genuinely part of the form,
+      so that is a judgement call left open.
       2.6 viewport heights of Quick import → Export mode → ATS score → Smart suggestions →
       Section 00 sit above `#section-personal`, while the nav rail highlights "Personal
       Information" as active. A first run opens on import tooling and an ATS score for a
