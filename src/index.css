@@ -1934,10 +1934,10 @@ select.floating-field__control {
 
 .landing-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 22rem;
+  grid-template-columns: minmax(0, 1fr) 28rem;
   align-items: center;
   gap: clamp(2rem, 5vw, 4.5rem);
-  width: min(100%, 78rem);
+  width: min(100%, 82rem);
   margin: 0 auto;
 }
 
@@ -2020,49 +2020,30 @@ select.floating-field__control {
   color: #111111;
 }
 
-/* A real, scaled-down CVPreview — the strongest conversion element for a
-   visual product is a picture of the result, not another paragraph. Same
-   render-at-natural-width-then-scale technique as the template gallery
-   thumbnails (`.template-gallery__thumb-page`), sized up for hero use. */
+/* A real picture of the result is the strongest conversion element for a
+   visual product. PortifyCV2.jpg is a pre-built marketing shot (logo,
+   wordmark, and a styled CV mockup), so it's just a plain image here — no
+   render-and-scale trick needed, unlike the template gallery thumbnails
+   (`.template-gallery__thumb-page`), which scale a live CVPreview instead. */
 .landing-preview {
   display: flex;
   justify-content: center;
 }
 
-.landing-preview__frame {
-  position: relative;
-  overflow: hidden;
-  width: 22rem;
-  aspect-ratio: 1 / 1.28;
-  border: 1px solid var(--app-border);
+.landing-preview__image {
+  width: 100%;
+  height: auto;
   border-radius: var(--radius-sm);
-  background: #ffffff;
   box-shadow: 0 32px 64px -32px rgba(0, 0, 0, 0.3);
-}
-
-.landing-preview__page {
-  position: absolute;
-  inset: 0;
-  width: 780px;
-  transform: scale(0.4513);
-  transform-origin: top left;
-  pointer-events: none;
-  user-select: none;
 }
 
 @media (max-width: 1023px) {
   .landing-grid {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 560px) {
-  .landing-preview__frame {
-    width: 16rem;
-  }
-
-  .landing-preview__page {
-    transform: scale(0.3282);
+  .landing-preview__image {
+    max-width: 28rem;
   }
 }
 

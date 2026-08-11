@@ -1,13 +1,3 @@
-import { lazy, Suspense } from 'react'
-
-import { demoCvData } from '../utils/cvForm'
-
-// Lazy so the heavy CVPreview + template-showcase bundle loads as a
-// non-blocking chunk behind the headline/CTA, instead of adding its weight
-// to the landing page's critical path (mirrors the ResumeBuilderPage split
-// in App.jsx).
-const CVPreview = lazy(() => import('../components/CVPreview'))
-
 function getLandingCopy(locale) {
   if (locale === 'fi') {
     return {
@@ -15,6 +5,7 @@ function getLandingCopy(locale) {
       startButton: 'Aloita rakentaminen',
       title: 'Rakenna CV',
       subtitle: 'Selkeä CV-rakentaja, joka toimii kokonaan selaimessasi.',
+      previewAlt: 'Esimerkki PortifyCV:llä rakennetusta CV:stä',
       highlights: [
         '10 pohjaa — vaihda milloin vain sisältöä menettämättä',
         'Live-esikatselu kirjoittaessasi',
@@ -29,6 +20,7 @@ function getLandingCopy(locale) {
     startButton: 'Start building',
     title: 'Build a CV',
     subtitle: 'A focused CV builder that runs entirely in your browser.',
+    previewAlt: 'Example CV built with PortifyCV',
     highlights: [
       '10 templates — swap anytime without losing your content',
       'Live preview as you type',
@@ -61,14 +53,12 @@ function LandingPage({
           </button>
         </div>
 
-        <div className="landing-preview" aria-hidden="true">
-          <div className="landing-preview__frame">
-            <Suspense fallback={null}>
-              <div className="landing-preview__page">
-                <CVPreview formData={demoCvData} template="minimal" locale={locale} />
-              </div>
-            </Suspense>
-          </div>
+        <div className="landing-preview">
+          <img
+            src="/PortifyCV2.jpg"
+            alt={copy.previewAlt}
+            className="landing-preview__image"
+          />
         </div>
       </div>
     </section>
