@@ -52,6 +52,40 @@ function loadJsPdf() {
   return jsPdfLoader
 }
 
+let pdfAssetsPrefetched = false
+
+/**
+ * Warms the html2canvas/jsPDF bundle and the PDF export worker chunk so the
+ * first real export doesn't pay for ~1.4MB of lazy-loaded code on top of the
+ * render work. Safe to call speculatively: it only downloads and evaluates
+ * the modules, it never captures the DOM or produces a file.
+ */
+export function prefetchPdfExportAssets() {
+  if (pdfAssetsPrefetched) {
+    return
+  }
+
+  pdfAssetsPrefetched = true
+
+  loadHtml2Canvas().catch(() => {})
+  loadJsPdf().catch(() => {})
+
+  if (typeof Worker === 'undefined') {
+    return
+  }
+
+  try {
+    // Deliberately never terminated: the worker's own script fetch (and its
+    // nested `import { jsPDF } from 'jspdf'`) needs to run to completion for
+    // the cache to actually warm, and it never receives a message so it does
+    // no work while idle. A real export still spins up its own worker.
+    new Worker(new URL('../workers/pdfExportWorker.js', import.meta.url), { type: 'module' })
+  } catch {
+    // Worker construction can fail (e.g. blocked by a restrictive CSP) -
+    // prefetching is a pure optimization, so failures here are silent.
+  }
+}
+
 function resolveExportRoot(previewElement) {
   if (!previewElement) {
     return null

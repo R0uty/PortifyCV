@@ -54,14 +54,42 @@ from reading code.
 
 ## Non-visual
 
-- [ ] **8. First export stalls on a large download.** `vendor-pdf` is 602KB (~177KB gz)
-      and `pdfExportWorker` 794KB. Both lazy-load correctly so first paint is unaffected,
-      but the first export pays the cost. Prefetch on builder idle.
-- [ ] **9. Self-host Inter.** Google Fonts is the app's only third-party request — no CV
-      data involved, but it's the one thing contradicting "everything runs in your
-      browser". Removes a network round-trip too.
-- [ ] **10. Add tests for the reducers.** `cvFormReducer` and `uiReducer` are pure
-      functions and cheap to cover. The share codec already has `npm run check:share`.
+- [x] **8. First export stalls on a large download.** — done 2026-08-10.
+      `ResumeBuilderPage` now warms the PDF export bundle on a `requestIdleCallback`
+      (falling back to a 2s `setTimeout` where unsupported) shortly after mount:
+      `prefetchPdfExportAssets()` in `src/utils/exporters.js` triggers the existing
+      `html2canvas`/`jsPDF` dynamic imports and spins up (and deliberately never
+      terminates) a throwaway instance of the PDF export worker, so its script fetch —
+      including its own nested `import { jsPDF } from 'jspdf'` — runs to completion in
+      the background. Verified in a built preview: `vendor-pdf` and `pdfExportWorker`
+      both finish downloading (174KB / 238KB gz) within ~4s of the builder mounting,
+      well before any export click, with no change to first paint.
+      `vendor-pdf` is 602KB (~177KB gz) and `pdfExportWorker` 794KB. Both lazy-load
+      correctly so first paint is unaffected, but the first export pays the cost.
+      Prefetch on builder idle.
+- [x] **9. Self-host Inter.** — done 2026-08-10. Replaced the Google Fonts `<link>`/
+      preconnect tags in `index.html` with the `@fontsource-variable/inter` package,
+      imported once in `src/main.jsx`. Vite bundles the variable-font `woff2` files
+      (split by unicode range, same as Google's own subsetting) as hashed same-origin
+      assets, so only the subset the active locale actually uses downloads. Verified
+      via network capture on a built preview: zero requests to `fonts.googleapis.com`
+      or `fonts.gstatic.com`, only `inter-latin-wght-normal-*.woff2` from `/assets/`.
+      Google Fonts was the app's only third-party request — no CV data involved, but
+      it's the one thing contradicting "everything runs in your browser". Removes a
+      network round-trip too.
+- [x] **10. Add tests for the reducers.** — done 2026-08-10. Added
+      `scripts/check-reducers.mjs` (`npm run check:reducers`), covering every action
+      in `cvFormReducer` and `uiReducer` — field updates, skill/array-item add/remove/
+      duplicate/move with visibility-map bookkeeping, section reordering, merge/reset/
+      import, and unknown-action no-ops — plus `createInitialUiState`. Framework-free,
+      matching the existing `check-share-links.mjs` pattern. Along the way it pinned
+      down (rather than "fixed", since it wasn't asked for) a pre-existing quirk in
+      `TOGGLE_SECTION_VISIBILITY`: toggling a section whose `sectionVisibility` map is
+      completely missing negates the raw (absent) value instead of the merged default,
+      so it always lands on `true` regardless of that section's real default —
+      harmless today only because every section defaults to visible.
+      `cvFormReducer` and `uiReducer` are pure functions and cheap to cover. The share
+      codec already has `npm run check:share`.
 - [ ] **11. `src/index.css` is 7,879 lines / 135KB** (21KB gz) of hand-written
       Tailwind-alike utilities. Works today; most likely file to rot. Low priority.
 

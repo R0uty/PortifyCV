@@ -443,6 +443,27 @@ function ResumeBuilderPage({
   }, [initialSession])
 
   useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined
+    }
+
+    // The PDF export bundle (html2canvas + jsPDF + the export worker) is
+    // ~1.4MB and only loads on the first export, so that click pays for the
+    // download on top of the render work. Warm it once the browser is idle
+    // so it's already cached by the time the user reaches for it.
+    const requestIdle = window.requestIdleCallback ?? ((callback) => window.setTimeout(callback, 2000))
+    const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout
+
+    const idleId = requestIdle(() => {
+      import('../utils/exporters').then(({ prefetchPdfExportAssets }) => {
+        prefetchPdfExportAssets()
+      })
+    })
+
+    return () => cancelIdle(idleId)
+  }, [])
+
+  useEffect(() => {
     toasts.forEach((toast) => {
       if (toastTimeoutsRef.current.has(toast.id)) {
         return
