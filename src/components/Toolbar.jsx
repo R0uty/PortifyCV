@@ -1,5 +1,7 @@
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft,
+  ChevronDown,
   Link2,
   Maximize2,
   Minimize2,
@@ -37,6 +39,38 @@ function Toolbar({
   onCopyShareLink = () => {},
 }) {
   const isFinnish = locale === 'fi'
+  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false)
+  const exportMenuRef = useRef(null)
+
+  useEffect(() => {
+    if (!isExportMenuOpen) {
+      return undefined
+    }
+
+    function handlePointerDown(event) {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
+        setIsExportMenuOpen(false)
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setIsExportMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isExportMenuOpen])
+
+  function handleExportSelect(format) {
+    setIsExportMenuOpen(false)
+    onExport(format)
+  }
 
   return (
     <header className="app-toolbar print:hidden">
@@ -158,28 +192,6 @@ function Toolbar({
 
           <button
             type="button"
-            className="app-toolbar__icon-button app-toolbar__icon-button--text"
-            disabled={isActionBusy}
-            onClick={() => onExport('html')}
-            aria-label={isFinnish ? 'Vie HTML' : 'Export HTML'}
-            title={isFinnish ? 'Vie HTML' : 'Export HTML'}
-          >
-            {activeExport === 'html' ? '...' : 'HTML'}
-          </button>
-
-          <button
-            type="button"
-            className="app-toolbar__icon-button app-toolbar__icon-button--text"
-            disabled={isActionBusy}
-            onClick={() => onExport('json')}
-            aria-label={isFinnish ? 'Vie JSON' : 'Export JSON'}
-            title={isFinnish ? 'Vie JSON' : 'Export JSON'}
-          >
-            {activeExport === 'json' ? '...' : 'JSON'}
-          </button>
-
-          <button
-            type="button"
             className="app-toolbar__icon-button"
             disabled={isActionBusy}
             onClick={onCopyShareLink}
@@ -189,16 +201,53 @@ function Toolbar({
             <Link2 size={16} strokeWidth={2} aria-hidden="true" />
           </button>
 
-          <button
-            type="button"
-            className="app-toolbar__primary"
-            disabled={isActionBusy}
-            onClick={() => onExport('pdf-designer')}
-          >
-            {activeExport === 'pdf-designer'
-              ? isFinnish ? 'Viedään...' : 'Exporting...'
-              : isFinnish ? 'Vie PDF' : 'Export PDF'}
-          </button>
+          <div className="app-toolbar__export" ref={exportMenuRef}>
+            <button
+              type="button"
+              className="app-toolbar__primary"
+              disabled={isActionBusy}
+              aria-haspopup="menu"
+              aria-expanded={isExportMenuOpen}
+              onClick={() => setIsExportMenuOpen((open) => !open)}
+            >
+              {activeExport
+                ? isFinnish ? 'Viedään...' : 'Exporting...'
+                : isFinnish ? 'Vie' : 'Export'}
+              <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
+            </button>
+
+            {isExportMenuOpen ? (
+              <div className="app-toolbar__export-menu" role="menu">
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-toolbar__export-item"
+                  disabled={isActionBusy}
+                  onClick={() => handleExportSelect('pdf-designer')}
+                >
+                  PDF
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-toolbar__export-item"
+                  disabled={isActionBusy}
+                  onClick={() => handleExportSelect('html')}
+                >
+                  HTML
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-toolbar__export-item"
+                  disabled={isActionBusy}
+                  onClick={() => handleExportSelect('json')}
+                >
+                  JSON
+                </button>
+              </div>
+            ) : null}
+          </div>
         </div>
       </div>
     </header>

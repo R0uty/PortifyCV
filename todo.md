@@ -33,24 +33,42 @@ from reading code.
       CV the user hasn't written. Move the utility panels behind a collapsed
       "Import & tools" disclosure (or into the Settings modal) and open on Section 01.
 
-- [ ] **3. Landing page is a wireframe.**
-      Headline, two lines, one button, ~half the viewport empty. Names none of the ten
-      templates, the ATS scoring, the live preview, or the export formats, and shows no
-      image of the output. For a visual product the strongest conversion element is a
-      picture of the result.
+- [x] **3. Landing page is a wireframe.** — done 2026-08-11. Rebuilt as a two-column
+      hero: headline/subtitle/CTA on the left, a real scaled `CVPreview` (Minimalist
+      template, demo data) on the right — an actual picture of the output, not a
+      mockup. Added a four-line highlight list naming the ten templates, live
+      preview, ATS scoring, and PDF/HTML/JSON export, closing the "names none of
+      the features" gap. Stacks to one column under 1023px (existing breakpoint).
+      `CVPreview` is lazy-loaded (`React.lazy` + `Suspense`) so the landing page's
+      critical-path bundle stays at its original ~14KB gzip; the preview's ~29KB gzip
+      chunk loads async and is shared with the builder view, so it isn't
+      re-downloaded on "Start building". Also deleted dead CSS (`.landing-controls`,
+      `.landing-logo`, the empty `.landing-features { display: none; }`) left over
+      from an earlier design, and repurposed the already-unused `.landing-kicker`
+      class for the new eyebrow label instead of adding a new one.
 
 ## Smaller visual fixes
 
-- [ ] **4. "NO LOGIN. NO DATA SAVED." appears three times** — landing body, landing
-      footer, builder footer. Good differentiator, but three repeats read as filler.
-      Keep one, prominently.
-- [ ] **5. "NOTHING SAVED ANYWHERE" is styled like a button** but is a status pill, and
-      sits beside two real buttons (`LOAD DEMO CV`, `RESET FORM`). Give it a
-      non-clickable treatment.
-- [ ] **6. "Load demo CV" appears twice on one screen** — the top action row and inside
-      the Quick Import card.
-- [ ] **7. `HTML` / `JSON` are bare text buttons in an icon toolbar** (the seam from the
-      1.0.0 audit fix). Group PDF/HTML/JSON under a single "Export" menu.
+- [x] **4. "NO LOGIN. NO DATA SAVED." appears three times** — done 2026-08-11.
+      Removed the landing hero's inline trust line (`LandingPage.jsx`); the sticky
+      `SiteFooter` (`App.jsx`) already renders the same line on every view — landing
+      and builder alike — so it stays as the one, persistently-visible copy instead of
+      three.
+- [x] **5. "NOTHING SAVED ANYWHERE" is styled like a button** — done 2026-08-11.
+      Was a plain `<div>` sharing the buttons' bold/uppercase/tracked text styling and
+      box padding, so it read as a third action beside `LOAD DEMO CV` / `RESET FORM`.
+      Added `.editor-status-pill` (rounded, normal-case, a `currentColor` dot prefix,
+      `role="status"`) so it now reads as a status indicator, not a clickable control.
+- [x] **6. "Load demo CV" appears twice on one screen** — done 2026-08-11. Removed the
+      duplicate button inside the (collapsed-by-default) Quick Import card; the
+      always-visible top action row keeps the one instance.
+- [x] **7. `HTML` / `JSON` are bare text buttons in an icon toolbar** — done 2026-08-11.
+      Collapsed the desktop toolbar's separate PDF/HTML/JSON buttons into a single
+      "Export" button (`app-toolbar__primary` + chevron) that opens a small dropdown
+      menu listing PDF / HTML / JSON, closing on outside click or Escape. The mobile
+      bottom action bar (`ResumeBuilderPage.jsx`, `lg:hidden`) already renders all four
+      export/share actions with uniform text-button styling — no icon-vs-text seam
+      there — so it was left as-is.
 
 ## Non-visual
 

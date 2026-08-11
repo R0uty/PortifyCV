@@ -1113,7 +1113,8 @@ function ResumeBuilderPage({
             {locale === 'fi' ? 'Nollaa lomake' : 'Reset form'}
           </button>
           <div
-            className={`inline-flex items-center px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] ${ui.surfaceMuted} ${ui.textMuted}`}
+            className={`editor-status-pill ${ui.surfaceMuted} ${ui.textMuted}`}
+            role="status"
           >
             {locale === 'fi' ? 'Ei tallenneta minnekään' : 'Nothing saved anywhere'}
           </div>
@@ -1178,14 +1179,6 @@ function ResumeBuilderPage({
               {isImporting
                 ? locale === 'fi' ? 'Tuodaan JSON...' : 'Importing JSON...'
                 : locale === 'fi' ? 'Tuo JSON' : 'Import JSON'}
-            </button>
-            <button
-              type="button"
-              className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
-              disabled={isActionBusy}
-              onClick={handleLoadDemo}
-            >
-              {locale === 'fi' ? 'Lataa demo-CV' : 'Load demo CV'}
             </button>
           </div>
         </section>
