@@ -19,19 +19,19 @@ from reading code.
       layouts for `CVPreview`. Render each scaled down as its own thumbnail, then cut the
       descriptions to one line each.
 
-- [x] **2. The editor buries the form under 2,751px of preamble.** — done 2026-08-10.
-      Quick import, Export mode, ATS score, and Smart suggestions now sit in a collapsed
-      `<details>` whose summary keeps the ATS score and suggestion count visible.
-      Preamble 2,751px → 779px (0.79 viewport), so the first form field is on the opening
-      screen. Nav-rail scrolling still lands at offset 0 with the disclosure collapsed.
-      Not done: "Section 00 — Visible sections" still precedes Section 01. Collapsing it
-      too would cut the preamble to roughly 200px, but it is genuinely part of the form,
-      so that is a judgement call left open.
-      2.6 viewport heights of Quick import → Export mode → ATS score → Smart suggestions →
-      Section 00 sit above `#section-personal`, while the nav rail highlights "Personal
-      Information" as active. A first run opens on import tooling and an ATS score for a
-      CV the user hasn't written. Move the utility panels behind a collapsed
-      "Import & tools" disclosure (or into the Settings modal) and open on Section 01.
+- [x] **2. The editor buries the form under 2,751px of preamble.** — done 2026-08-10,
+      completed 2026-08-11. Quick import, Export mode, ATS score, and Smart suggestions
+      sit in a collapsed `<details>` whose summary keeps the ATS score and suggestion
+      count visible. `PanelSection` (`src/components/PanelSection.jsx`) — the wrapper
+      every numbered CV section (00 through 20) is built on — now owns its own
+      collapse/expand toggle (a chevron button, self-contained `useState`, same
+      grid-row collapse animation as `SortableItemCard`'s per-entry collapse), so every
+      section is individually foldable, not just the utility panels. "Section 00 —
+      Visible sections" defaults collapsed (`defaultCollapsed` prop) with its X/Y
+      visible count moved into the existing `badge` slot; every other section defaults
+      open, matching prior behavior. Preamble 2,751px → 779px, so the first form field
+      (Section 01) is on the opening screen. Nav-rail scrolling still lands correctly
+      whether the target section is expanded or collapsed.
 
 - [x] **3. Landing page is a wireframe.** — done 2026-08-11. Rebuilt as a two-column
       hero: headline/subtitle/CTA on the left, a real scaled `CVPreview` (Minimalist

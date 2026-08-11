@@ -395,6 +395,57 @@ select:focus {
   box-shadow: var(--shadow-card);
 }
 
+/* Collapse toggle for a top-level form section (PanelSection). Same
+   grid-row animation as .sortable-card__body, one level up: every numbered
+   section (Section 01, 02, 03, ...) can now be folded, not just the entries
+   inside Experience/Education. */
+.panel-section__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  color: var(--app-text-muted);
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.panel-section__toggle:hover {
+  color: var(--app-text);
+  border-color: var(--app-border-strong);
+}
+
+.panel-section__chevron {
+  transition: transform 160ms ease;
+}
+
+.panel-section__chevron--collapsed {
+  transform: rotate(-90deg);
+}
+
+.panel-section__body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 220ms ease;
+}
+
+.panel-section__body--collapsed {
+  grid-template-rows: 0fr;
+}
+
+.panel-section__body-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-section__body {
+    transition: none;
+  }
+}
+
 /* ── Floating-label field ── */
 
 .floating-field {

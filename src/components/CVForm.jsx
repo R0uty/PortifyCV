@@ -439,12 +439,16 @@ function CVForm({
     setDraggedSectionKey('')
   }
 
+  const visibleSectionCount = orderedSectionFields.filter((field) => sectionVisibility[field.key]).length
+
   return (
     <form className="mt-8 space-y-4 sm:space-y-5">
       <PanelSection
         id="section-settings"
         eyebrow="Section 00"
         title={isFinnish ? 'Näkyvät osiot' : 'Visible sections'}
+        badge={{ label: `${visibleSectionCount}/${orderedSectionFields.length} ${isFinnish ? 'näkyvissä' : 'visible'}` }}
+        defaultCollapsed
         description={
           isFinnish
             ? 'Kytke osioita tai yksittäisiä kohtia pois ilman tietojen poistamista.'
