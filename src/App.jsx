@@ -1,7 +1,6 @@
 import { lazy, Suspense, useCallback, useRef, useState } from 'react'
 
 import LandingPage from './pages/LandingPage'
-import Logo from './components/Logo'
 import Toolbar from './components/Toolbar'
 import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
 import { safeStorageGet } from './utils/cvForm'
@@ -71,7 +70,11 @@ function App() {
         <header className="project-header print:hidden">
           <div className="project-header__container">
             <div className="project-header__content">
-              <Logo size={24} />
+              <img
+                src="/PortifyCV.png"
+                alt="PortifyCV"
+                className="project-header__logo"
+              />
               <button
                 type="button"
                 className="action-button action-button--secondary border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"

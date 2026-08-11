@@ -1404,11 +1404,19 @@ select.floating-field__control {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-4);
+  padding: var(--space-2) var(--space-4);
 }
 
 @media (min-width: 640px) {
-  .project-header__content { padding: var(--space-4) var(--space-6); }
+  .project-header__content { padding: var(--space-2) var(--space-6); }
+}
+
+/* Full PortifyCV.png lockup (icon + wordmark), shown at a size where the
+   wordmark text is actually legible — unlike the compact icon-only mark used
+   in the builder toolbar and nav rail, this header has room for it. */
+.project-header__logo {
+  height: 3.75rem;
+  width: auto;
 }
 
 .project-header__heading {
@@ -2910,7 +2918,7 @@ select.floating-field__control {
 
   .project-header__container { padding-bottom: var(--space-3); }
 
-  .project-header__content { padding: var(--space-4) var(--space-8); gap: var(--space-4); }
+  .project-header__content { padding: var(--space-2) var(--space-8); gap: var(--space-4); }
 
   .project-header__actions { gap: var(--space-3); }
 }
