@@ -702,6 +702,7 @@ function CVForm({
         </div>
       </PanelSection>
 
+      {templateSectionKeySet.has('skills') ? (
       <PanelSection
         id="section-skills"
         eyebrow="Section 02"
@@ -730,7 +731,9 @@ function CVForm({
           <InlineTipList items={feedback.inlineTips.skills} theme={theme} locale={locale} />
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('experience') ? (
       <PanelSection
         id="section-experience"
         eyebrow="Section 03"
@@ -937,7 +940,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('education') ? (
       <PanelSection
         id="section-education"
         eyebrow="Section 04"
@@ -1085,7 +1090,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('coreStrengths') ? (
       <PanelSection
         eyebrow="Section 05"
         title={isFinnish ? 'Vahvuudet' : 'Core Strengths'}
@@ -1179,7 +1186,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('certificates') ? (
       <PanelSection
         id="section-certificates"
         eyebrow="Section 06"
@@ -1298,7 +1307,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('projects') ? (
       <PanelSection
         id="section-projects"
         eyebrow="Section 07"
@@ -1479,7 +1490,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('languages') ? (
       <PanelSection
         id="section-languages"
         eyebrow="Section 08"
@@ -1541,7 +1554,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('interests') ? (
       <PanelSection
         id="section-interests"
         eyebrow="Section 09"
@@ -1591,7 +1606,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('achievements') ? (
       <PanelSection
         eyebrow="Section 10"
         title={isFinnish ? 'Saavutukset' : 'Achievements'}
@@ -1691,7 +1708,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('openSource') ? (
       <PanelSection
         eyebrow="Section 11"
         title={isFinnish ? 'Avoin lähdekoodi' : 'Open Source'}
@@ -1826,7 +1845,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('publications') ? (
       <PanelSection
         eyebrow="Section 12"
         title={isFinnish ? 'Julkaisut' : 'Publications'}
@@ -1940,7 +1961,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('links') ? (
       <PanelSection
         id="section-links"
         eyebrow="Section 13"
@@ -1985,7 +2008,9 @@ function CVForm({
           ))}
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('leadership') ? (
       <PanelSection
         eyebrow="Section 14"
         title={isFinnish ? 'Johtamiskokemus' : 'Leadership Experience'}
@@ -2109,7 +2134,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('memberships') ? (
       <PanelSection
         eyebrow="Section 15"
         title={isFinnish ? 'Ammattijäsenyydet' : 'Professional Memberships'}
@@ -2208,7 +2235,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('speaking') ? (
       <PanelSection
         eyebrow="Section 16"
         title={isFinnish ? 'Esiintymiset' : 'Speaking'}
@@ -2320,7 +2349,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('volunteering') ? (
       <PanelSection
         eyebrow="Section 17"
         title={isFinnish ? 'Vapaaehtoistyö' : 'Volunteering'}
@@ -2420,7 +2451,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('internships') ? (
       <PanelSection
         eyebrow="Section 18"
         title={isFinnish ? 'Harjoittelut' : 'Internships'}
@@ -2564,7 +2597,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('caseStudies') ? (
       <PanelSection
         eyebrow="Section 19"
         title={isFinnish ? 'Tapaustutkimukset' : 'Case Studies'}
@@ -2698,7 +2733,9 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
 
+      {templateSectionKeySet.has('testimonials') ? (
       <PanelSection
         eyebrow="Section 20"
         title={isFinnish ? 'Suositukset' : 'Testimonials'}
@@ -2798,6 +2835,7 @@ function CVForm({
           </button>
         </div>
       </PanelSection>
+      ) : null}
     </form>
   )
 }

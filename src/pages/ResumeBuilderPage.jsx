@@ -72,17 +72,25 @@ import {
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
 
+// Order must match the section cards' actual JSX order in CVForm.jsx (personal,
+// summary, skills, experience, education, certificates, projects, languages,
+// interests, links) — this list is a separate hardcoded array, not derived from
+// that layout, so it drifts silently if one changes without the other.
+// sectionKey maps each nav item to the CV_SECTION_ORDER_KEYS entry that
+// gates whether CVForm actually renders that section for the selected
+// template — null means always rendered (not template-gated). Keep this in
+// sync with the section-key checks CVForm.jsx wraps each PanelSection in.
 const NAV_SECTIONS = [
-  { id: 'personal', anchor: 'section-personal', icon: User, kind: 'scroll', label: { en: 'Personal Information', fi: 'Henkilötiedot' } },
-  { id: 'summary', anchor: 'section-summary', icon: FileText, kind: 'scroll', label: { en: 'Summary', fi: 'Yhteenveto' } },
-  { id: 'experience', anchor: 'section-experience', icon: Briefcase, kind: 'scroll', label: { en: 'Experience', fi: 'Kokemus' } },
-  { id: 'education', anchor: 'section-education', icon: GraduationCap, kind: 'scroll', label: { en: 'Education', fi: 'Koulutus' } },
-  { id: 'projects', anchor: 'section-projects', icon: FolderKanban, kind: 'scroll', label: { en: 'Projects', fi: 'Projektit' } },
-  { id: 'skills', anchor: 'section-skills', icon: Sparkles, kind: 'scroll', label: { en: 'Skills', fi: 'Taidot' } },
-  { id: 'certificates', anchor: 'section-certificates', icon: Award, kind: 'scroll', label: { en: 'Certificates', fi: 'Sertifikaatit' } },
-  { id: 'languages', anchor: 'section-languages', icon: LanguagesIcon, kind: 'scroll', label: { en: 'Languages', fi: 'Kielet' } },
-  { id: 'links', anchor: 'section-links', icon: Link2, kind: 'scroll', label: { en: 'Links', fi: 'Linkit' } },
-  { id: 'interests', anchor: 'section-interests', icon: Heart, kind: 'scroll', label: { en: 'Interests', fi: 'Kiinnostuksen kohteet' } },
+  { id: 'personal', anchor: 'section-personal', icon: User, kind: 'scroll', sectionKey: null, label: { en: 'Personal Information', fi: 'Henkilötiedot' } },
+  { id: 'summary', anchor: 'section-summary', icon: FileText, kind: 'scroll', sectionKey: 'about', label: { en: 'Summary', fi: 'Yhteenveto' } },
+  { id: 'skills', anchor: 'section-skills', icon: Sparkles, kind: 'scroll', sectionKey: 'skills', label: { en: 'Skills', fi: 'Taidot' } },
+  { id: 'experience', anchor: 'section-experience', icon: Briefcase, kind: 'scroll', sectionKey: 'experience', label: { en: 'Experience', fi: 'Kokemus' } },
+  { id: 'education', anchor: 'section-education', icon: GraduationCap, kind: 'scroll', sectionKey: 'education', label: { en: 'Education', fi: 'Koulutus' } },
+  { id: 'certificates', anchor: 'section-certificates', icon: Award, kind: 'scroll', sectionKey: 'certificates', label: { en: 'Certificates', fi: 'Sertifikaatit' } },
+  { id: 'projects', anchor: 'section-projects', icon: FolderKanban, kind: 'scroll', sectionKey: 'projects', label: { en: 'Projects', fi: 'Projektit' } },
+  { id: 'languages', anchor: 'section-languages', icon: LanguagesIcon, kind: 'scroll', sectionKey: 'languages', label: { en: 'Languages', fi: 'Kielet' } },
+  { id: 'interests', anchor: 'section-interests', icon: Heart, kind: 'scroll', sectionKey: 'interests', label: { en: 'Interests', fi: 'Kiinnostuksen kohteet' } },
+  { id: 'links', anchor: 'section-links', icon: Link2, kind: 'scroll', sectionKey: 'links', label: { en: 'Links', fi: 'Linkit' } },
 ]
 
 const NAV_UTILITY_ITEMS = [
@@ -983,7 +991,10 @@ function ResumeBuilderPage({
     return () => {
       observer.disconnect()
     }
-  }, [])
+    // Re-query on template switches: a section's anchor can appear/disappear
+    // from the DOM (CVForm only renders sections the template supports), so a
+    // mount-only observer would miss anchors that show up after a later switch.
+  }, [selectedTemplate])
 
   useEffect(() => {
     if (!onHeaderChange) return
@@ -1292,15 +1303,23 @@ function ResumeBuilderPage({
     ui.textSecondary,
   ])
 
+  const templateSectionKeySet = useMemo(
+    () => new Set([...currentTemplate.primarySections, ...currentTemplate.secondarySections]),
+    [currentTemplate],
+  )
+
   const filteredNavSections = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
+    const supportedByTemplate = NAV_SECTIONS.filter(
+      (item) => item.sectionKey === null || templateSectionKeySet.has(item.sectionKey),
+    )
 
     if (!query) {
-      return NAV_SECTIONS
+      return supportedByTemplate
     }
 
-    return NAV_SECTIONS.filter((item) => (item.label[locale] ?? item.label.en).toLowerCase().includes(query))
-  }, [searchQuery, locale])
+    return supportedByTemplate.filter((item) => (item.label[locale] ?? item.label.en).toLowerCase().includes(query))
+  }, [searchQuery, locale, templateSectionKeySet])
 
   const filteredNavUtilityItems = useMemo(() => {
     const query = searchQuery.trim().toLowerCase()
