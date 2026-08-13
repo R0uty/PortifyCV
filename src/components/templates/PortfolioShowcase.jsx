@@ -26,6 +26,7 @@ import {
   parseSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  formatLinkDisplayValue,
   getSafeHref,
 } from './shared'
 
@@ -468,7 +469,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                   <span className="portfolio-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="portfolio-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="portfolio-showcase__link-value">{value}</p>
+                    <p className="portfolio-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))

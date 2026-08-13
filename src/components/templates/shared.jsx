@@ -1,7 +1,7 @@
 // Shared utilities, icons, and helpers used by all CV templates.
 // Re-exports formatDateRange and formatLinkLabel from the project-wide shared utils.
 
-import { formatDateRange, formatLinkLabel, getSafeHref } from '../../utils/shared'
+import { formatDateRange, formatLinkLabel, formatLinkDisplayValue, getSafeHref } from '../../utils/shared'
 
 // Base CSS classes for section title text — tiny, uppercase, wide letter-spacing.
 // Individual templates override the color via their sectionTitle() config method.
@@ -333,5 +333,6 @@ export {
   renderSectionCard,   // Section wrapper component
   formatDateRange,     // Re-exported from utils/shared
   formatLinkLabel,     // Re-exported from utils/shared
+  formatLinkDisplayValue, // Re-exported from utils/shared
   getSafeHref,         // Re-exported from utils/shared
 }

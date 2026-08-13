@@ -83,8 +83,8 @@ const templateMap = {
     description: 'Restrained boardroom layout, gold-accented awards, no timeline. For CEOs, CTOs, VPs, and directors.',
     variant: 'executive',
     layout: 'split',
-    primarySections: ['about', 'experience', 'leadership', 'projects', 'education'],
-    secondarySections: ['coreStrengths', 'skills', 'certificates', 'languages', 'memberships', 'achievements', 'links'],
+    primarySections: ['about', 'experience', 'leadership', 'projects', 'achievements', 'education'],
+    secondarySections: ['coreStrengths', 'skills', 'certificates', 'languages', 'memberships', 'links'],
     summaryBadgeLabel: 'Executive Profile',
     thumbnail: {
       accentClassName: 'bg-gray-900',

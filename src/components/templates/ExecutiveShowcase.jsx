@@ -24,6 +24,7 @@ import {
   parseSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  formatLinkDisplayValue,
   getSafeHref,
 } from './shared'
 
@@ -241,6 +242,33 @@ export default function ExecutiveShowcase({ formData, locale = 'en', previewRef,
       )
     }
 
+    if (key === 'achievements') {
+      return (
+        <Section key={key} id="achievements" placement="main" icon="achievements" title={copy.achievements} tone="gold">
+          <ul className="executive-showcase__award-list">
+            {snapshot.achievements.length > 0 ? (
+              snapshot.achievements.map((item, index) => (
+                <li key={`${item.title}-${index}`} className="executive-showcase__award-item">
+                  <span className="executive-showcase__award-dot" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <div className="executive-showcase__award-row">
+                      {item.title ? <p className="executive-showcase__award-title">{item.title}</p> : null}
+                      {item.year ? <p className="executive-showcase__award-year">{item.year}</p> : null}
+                    </div>
+                    {item.description ? <p className="executive-showcase__award-desc">{item.description}</p> : null}
+                  </div>
+                </li>
+              ))
+            ) : (
+              <p className="executive-showcase__empty">
+                {isFinnish ? 'Tunnustukset näkyvät tässä.' : 'Awards will appear here.'}
+              </p>
+            )}
+          </ul>
+        </Section>
+      )
+    }
+
     if (key === 'education') {
       return (
         <Section key={key} id="education" placement="main" icon="education" title={copy.education}>
@@ -395,33 +423,6 @@ export default function ExecutiveShowcase({ formData, locale = 'en', previewRef,
       )
     }
 
-    if (key === 'achievements') {
-      return (
-        <Section key={key} id="achievements" placement="side" icon="achievements" title={copy.achievements} tone="gold">
-          <ul className="executive-showcase__award-list">
-            {snapshot.achievements.length > 0 ? (
-              snapshot.achievements.map((item, index) => (
-                <li key={`${item.title}-${index}`} className="executive-showcase__award-item">
-                  <span className="executive-showcase__award-dot" aria-hidden="true" />
-                  <div className="min-w-0">
-                    <div className="executive-showcase__award-row">
-                      {item.title ? <p className="executive-showcase__award-title">{item.title}</p> : null}
-                      {item.year ? <p className="executive-showcase__award-year">{item.year}</p> : null}
-                    </div>
-                    {item.description ? <p className="executive-showcase__award-desc">{item.description}</p> : null}
-                  </div>
-                </li>
-              ))
-            ) : (
-              <p className="executive-showcase__empty">
-                {isFinnish ? 'Tunnustukset näkyvät tässä.' : 'Awards will appear here.'}
-              </p>
-            )}
-          </ul>
-        </Section>
-      )
-    }
-
     if (key === 'links') {
       return (
         <Section key={key} id="links" placement="side" icon="links" title={copy.links}>
@@ -432,7 +433,7 @@ export default function ExecutiveShowcase({ formData, locale = 'en', previewRef,
                   <span className="executive-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="executive-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="executive-showcase__link-value">{value}</p>
+                    <p className="executive-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))

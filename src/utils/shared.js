@@ -16,6 +16,20 @@ export function formatLinkLabel(key) {
   return key.charAt(0).toUpperCase() + key.slice(1)
 }
 
+/**
+ * Shortens a URL for display in narrow sidebar link cards — strips the
+ * scheme and a trailing slash so "https://github.com/alexmorgan/" reads as
+ * "github.com/alexmorgan" instead of wrapping across 2-3 lines in a ~250px
+ * column. The full original value is still used for the actual href.
+ */
+export function formatLinkDisplayValue(value) {
+  if (typeof value !== 'string') {
+    return ''
+  }
+
+  return value.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '')
+}
+
 const SAFE_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'tel:'])
 
 /**

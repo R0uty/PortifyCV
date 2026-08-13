@@ -22,6 +22,7 @@ import {
   parseSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  formatLinkDisplayValue,
 } from './shared'
 
 // Rotating tints of the single accent color for project accent-strips —
@@ -332,7 +333,7 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
                   <span className="creative-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="creative-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="creative-showcase__link-value">{value}</p>
+                    <p className="creative-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))

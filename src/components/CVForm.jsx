@@ -1075,6 +1075,7 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
+          <div className="space-y-3">
           {formData.coreStrengths.map((item, index) => (
             <div key={`core-strength-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
@@ -1148,6 +1149,7 @@ function CVForm({
               </div>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -1475,7 +1477,8 @@ function CVForm({
         }
         theme={theme}
       >
-        <div className="space-y-3">
+        <div className="space-y-4">
+          <div className="space-y-3">
           {formData.languages.map((item, index) => (
             <div key={`language-${index}`} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
               <Field label={isFinnish ? 'Kieli' : 'Language'} labelClassName={fieldLabelClassName}>
@@ -1516,6 +1519,7 @@ function CVForm({
               </button>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -1539,7 +1543,8 @@ function CVForm({
         }
         theme={theme}
       >
-        <div className="space-y-3">
+        <div className="space-y-4">
+          <div className="space-y-3">
           {formData.interests.map((item, index) => (
             <div key={`interest-${index}`} className="flex items-center gap-2">
               <input
@@ -1568,6 +1573,7 @@ function CVForm({
               </button>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -1591,6 +1597,7 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
+          <div className="space-y-3">
           {formData.achievements.map((item, index) => (
             <div key={`achievement-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
@@ -1670,6 +1677,7 @@ function CVForm({
               </div>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -1693,6 +1701,7 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
+          <div className="space-y-3">
           {formData.openSource.map((item, index) => (
             <div key={`open-source-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
@@ -1807,6 +1816,7 @@ function CVForm({
               </div>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -1830,6 +1840,7 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
+          <div className="space-y-3">
           {formData.publications.map((item, index) => (
             <div key={`publication-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
@@ -1923,6 +1934,7 @@ function CVForm({
               </div>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -1993,6 +2005,7 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
+          <div className="space-y-3">
           {formData.leadership.map((item, index) => (
             <div key={`leadership-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
@@ -2096,6 +2109,7 @@ function CVForm({
               </div>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -2119,6 +2133,7 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
+          <div className="space-y-3">
           {formData.memberships.map((item, index) => (
             <div key={`membership-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
@@ -2197,6 +2212,7 @@ function CVForm({
               </div>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -2220,6 +2236,7 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
+          <div className="space-y-3">
           {formData.speaking.map((item, index) => (
             <div key={`speaking-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
@@ -2311,6 +2328,7 @@ function CVForm({
               </div>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -2334,6 +2352,7 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
+          <div className="space-y-3">
           {formData.volunteering.map((item, index) => (
             <div key={`volunteering-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
@@ -2413,6 +2432,7 @@ function CVForm({
               </div>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -2436,6 +2456,7 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
+          <div className="space-y-3">
           {formData.internships.map((item, index) => (
             <div key={`internship-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
@@ -2559,6 +2580,7 @@ function CVForm({
               </div>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -2582,6 +2604,7 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
+          <div className="space-y-3">
           {formData.caseStudies.map((item, index) => (
             <div key={`case-study-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
@@ -2695,6 +2718,7 @@ function CVForm({
               </div>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}
@@ -2718,6 +2742,7 @@ function CVForm({
         theme={theme}
       >
         <div className="space-y-4">
+          <div className="space-y-3">
           {formData.testimonials.map((item, index) => (
             <div key={`testimonial-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
@@ -2797,6 +2822,7 @@ function CVForm({
               </div>
             </div>
           ))}
+          </div>
           <button
             type="button"
             className={actionButtonClasses}

@@ -24,6 +24,7 @@ import {
   parseSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  formatLinkDisplayValue,
   getSafeHref,
 } from './shared'
 
@@ -99,6 +100,7 @@ export default function TimelineShowcase({ formData, locale = 'en', previewRef, 
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
 
   const copy = {
+    about: isFinnish ? 'Esittely' : 'About',
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
@@ -202,11 +204,11 @@ export default function TimelineShowcase({ formData, locale = 'en', previewRef, 
 
     if (kind === 'achievements') {
       return (
-        <div className="timeline-showcase__milestone">
+        <>
           {item.year ? <p className="timeline-showcase__year">{item.year}</p> : null}
           <p className="timeline-showcase__entry-title">{item.title}</p>
           {item.description ? <p className="timeline-showcase__entry-desc">{item.description}</p> : null}
-        </div>
+        </>
       )
     }
 
@@ -280,7 +282,7 @@ export default function TimelineShowcase({ formData, locale = 'en', previewRef, 
                   <span className="timeline-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="timeline-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="timeline-showcase__link-value">{value}</p>
+                    <p className="timeline-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))
@@ -392,7 +394,10 @@ export default function TimelineShowcase({ formData, locale = 'en', previewRef, 
       >
         <main className="timeline-showcase__main" data-export-primary="true">
           {about ? (
-            <p className="timeline-showcase__intro" data-export-section="about">{about}</p>
+            <div data-export-section="about">
+              <p className="timeline-showcase__group-label timeline-showcase__intro-label">{copy.about}</p>
+              <p className="timeline-showcase__intro">{about}</p>
+            </div>
           ) : null}
 
           <div className="timeline-showcase__rail">
