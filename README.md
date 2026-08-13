@@ -117,6 +117,42 @@ npm run build
 scp -r dist/* user@server:/var/www/portifycv/
 ```
 
+### Security response headers
+
+`X-Frame-Options` and `X-Content-Type-Options` only take effect as real HTTP
+response headers — browsers ignore them entirely when set via a `<meta>` tag
+(Chrome logs a console error and drops it), so they can't live in
+`index.html`. This repo ships the equivalent for hosts that support custom
+headers:
+
+- **Netlify** reads [`public/_headers`](public/_headers) automatically.
+- **Vercel** reads [`vercel.json`](vercel.json) automatically.
+- **GitHub Pages** has no custom-header mechanism at all — this protection
+  isn't available on that host.
+- **Traditional server**: add the same three headers (see either file above)
+  in your nginx/Apache/Caddy config.
+
+`vite.config.js`'s `server.headers`/`preview.headers` set the same headers
+for `npm run dev` and `npm run preview`, but that's local-only — it doesn't
+reach a real deployment.
+
+### SPA routing fallback
+
+PortifyCV has no server, so client-side routes like `/cv` and `/privacy`
+only resolve if the host serves `index.html` for any path that isn't a real
+static file. Without this, a direct visit, a page refresh, or a crawler
+fetching one of those URLs gets a 404 instead of the app.
+
+- **Netlify** reads [`public/_redirects`](public/_redirects) automatically.
+- **Vercel** reads the `rewrites` block in [`vercel.json`](vercel.json)
+  automatically.
+- **GitHub Pages** has no rewrite mechanism, but `npm run build` already
+  copies `dist/index.html` to `dist/404.html` — GitHub Pages serves
+  `404.html` for any unmatched path, so `/cv` and `/privacy` resolve there
+  too without extra setup.
+- **Traditional server**: add an equivalent try-files/fallback rule in your
+  nginx/Apache/Caddy config.
+
 ## Google SEO Setup
 
 After deployment, complete Google indexing and performance monitoring:

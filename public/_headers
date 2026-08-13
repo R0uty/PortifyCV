@@ -1,0 +1,10 @@
+# Netlify reads this file at deploy time and applies these as real HTTP
+# response headers. There is no meta-tag equivalent for X-Frame-Options or
+# X-Content-Type-Options — both are ignored by browsers unless set here (see
+# docs/audit-1.0.2.md, finding on this). Vercel uses vercel.json instead;
+# GitHub Pages supports neither, since it serves static files with no custom
+# response-header mechanism.
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
