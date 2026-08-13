@@ -12,6 +12,48 @@ function getLandingCopy(locale) {
         'ATS-pisteytys ja avainsanaehdotukset',
         'Vie PDF-, HTML- tai JSON-muodossa',
       ],
+      whyTitle: 'Miksi PortifyCV',
+      why: [
+        {
+          heading: 'Ei tiliä eikä kirjautumista',
+          body: 'Aloita kirjoittaminen heti — CV rakentuu live-esikatselussa ilman rekisteröitymistä tai sähköpostivahvistusta.',
+        },
+        {
+          heading: 'Rakennettu rekrytointijärjestelmiä varten',
+          body: 'ATS-tila muotoilee CV:n järjestelmien luettavaksi ilman sarakkeita tai grafiikkaa, ja avainsanapisteytys näyttää mitä puuttuu.',
+        },
+        {
+          heading: 'Data pysyy sinulla',
+          body: 'Jokainen vienti (PDF, HTML, JSON) ja jakolinkki muodostetaan kokonaan selaimessasi — CV-sisältöäsi ei koskaan lähetetä palvelimelle.',
+        },
+      ],
+      faqTitle: 'Usein kysytyt kysymykset',
+      faq: [
+        {
+          q: 'Onko PortifyCV oikeasti ilmainen?',
+          a: 'Kyllä. Ei tilausmaksua, ei vesileimaa, ei piilotettuja rajoituksia — kaikki 10 pohjaa ja kaikki vientimuodot ovat käytössä ilmaiseksi.',
+        },
+        {
+          q: 'Tarvitsenko tilin?',
+          a: 'Ei. Avaa sivu ja aloita kirjoittaminen — kirjautumista tai sähköpostia ei kysytä.',
+        },
+        {
+          q: 'Läpäiseekö CV:ni hakijaseurantajärjestelmät (ATS)?',
+          a: 'ATS-tila poistaa asettelut, joita jäsentäjät eivät osaa lukea (sarakkeet, kuvakkeet, taulukot) ja avainsanapisteytys ehdottaa työpaikkailmoituksesta puuttuvia termejä.',
+        },
+        {
+          q: 'Mihin muotoihin voin viedä CV:ni?',
+          a: 'PDF, HTML tai JSON — PDF tulostukseen ja hakemuksiin, HTML jaettavaksi verkossa, JSON varmuuskopioksi tai myöhempää muokkausta varten.',
+        },
+        {
+          q: 'Voinko jakaa CV:ni ilman tiedoston lähettämistä?',
+          a: 'Kyllä — jakolinkki koodaa koko CV:n URL-osoitteen fragmenttiin, jota ei koskaan lähetetä palvelimelle. Kuvat eivät mahdu linkkiin, joten vie JSON, jos kuvien pitää säilyä.',
+        },
+        {
+          q: 'Mitä tietoja PortifyCV tallentaa selaimeeni?',
+          a: 'Vain kolme pientä asetusta (kielivalinta, oletko nähnyt opastuksen ja mainosevästevalintasi) tallennetaan paikallisesti. CV-sisältöäsi ei tallenneta eikä lähetetä minnekään. Katso tietosuojaseloste.',
+        },
+      ],
     }
   }
 
@@ -26,6 +68,48 @@ function getLandingCopy(locale) {
       'Live preview as you type',
       'ATS scoring with keyword suggestions',
       'Export to PDF, HTML, or JSON',
+    ],
+    whyTitle: 'Why use PortifyCV',
+    why: [
+      {
+        heading: 'No account required',
+        body: 'Skip the sign-up. Start typing and your CV takes shape in the live preview — no registration, no email confirmation.',
+      },
+      {
+        heading: 'Built for applicant tracking systems',
+        body: 'Toggle ATS mode for a layout parsers can actually read — no columns, icons, or tables to trip them up — plus keyword scoring that shows what your CV is missing.',
+      },
+      {
+        heading: 'Your data stays yours',
+        body: 'Every export (PDF, HTML, JSON) and every share link is generated entirely in your browser — your CV content is never sent to a server.',
+      },
+    ],
+    faqTitle: 'Frequently asked questions',
+    faq: [
+      {
+        q: 'Is PortifyCV really free?',
+        a: 'Yes. No subscription, no watermark, no hidden limits — all 10 templates and every export format are free to use.',
+      },
+      {
+        q: 'Do I need to create an account?',
+        a: 'No. Open the page and start typing — there is no login and no email required.',
+      },
+      {
+        q: 'Will my CV pass applicant tracking systems (ATS)?',
+        a: 'ATS mode strips out layouts that parsers struggle with (columns, icons, tables), and keyword scoring suggests terms missing from the job description.',
+      },
+      {
+        q: 'What formats can I export to?',
+        a: 'PDF, HTML, or JSON — PDF for printing and applications, HTML for sharing online, JSON as a backup or to keep editing later.',
+      },
+      {
+        q: 'Can I share my CV without sending a file?',
+        a: 'Yes — a share link encodes the whole CV in the URL fragment, which is never sent to a server. Images do not fit in the link, so export JSON if images need to travel too.',
+      },
+      {
+        q: 'What data does PortifyCV store in my browser?',
+        a: 'Only three small preferences (your language choice, whether you have seen the onboarding tip, and your advertising-cookie choice) are stored locally. Your CV content itself is never saved or transmitted. See the privacy policy for details.',
+      },
     ],
   }
 }
@@ -60,6 +144,30 @@ function LandingPage({
             className="landing-preview__image"
           />
         </div>
+      </div>
+
+      <div className="landing-section">
+        <h2 className="landing-section__title">{copy.whyTitle}</h2>
+        <div className="landing-why-grid">
+          {copy.why.map((item) => (
+            <div className="landing-why-card" key={item.heading}>
+              <h3 className="landing-why-card__heading">{item.heading}</h3>
+              <p className="landing-why-card__body">{item.body}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="landing-section">
+        <h2 className="landing-section__title">{copy.faqTitle}</h2>
+        <dl className="landing-faq">
+          {copy.faq.map((item) => (
+            <div className="landing-faq__item" key={item.q}>
+              <dt className="landing-faq__question">{item.q}</dt>
+              <dd className="landing-faq__answer">{item.a}</dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   )

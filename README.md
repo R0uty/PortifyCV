@@ -162,7 +162,16 @@ After deployment, complete Google indexing and performance monitoring:
 3. Submit `https://your-domain/sitemap.xml`.
 4. Use Search Console "Page indexing" and "Core Web Vitals" reports to track visibility and performance.
 
-If your live domain is not `https://portifycv.app`, update canonical/OG URLs in `index.html` and the domain in `public/sitemap.xml` and `public/robots.txt`.
+If your live domain is not `https://portifycv.app`, update canonical/OG URLs in `index.html`, the `SITE_ORIGIN` constant in `src/App.jsx`, and the domain in `public/sitemap.xml` and `public/robots.txt`.
+
+### AdSense readiness
+
+The site is prepared for a Google AdSense application (privacy policy,
+consent-gated ad loader, per-route canonical/title/description, working
+`/cv` and `/privacy` on a direct visit) but ships with no publisher ID and
+loads no ads until one is configured — see
+[`docs/adsense-indexing-readiness.md`](docs/adsense-indexing-readiness.md)
+for exactly what's done versus what still requires your own Google account.
 
 ## Performance
 
@@ -176,6 +185,7 @@ If your live domain is not `https://portifycv.app`, update canonical/OG URLs in 
 
 - `/` — landing page
 - `/cv` — opens the builder directly
+- `/privacy` — privacy policy
 - `#data=<payload>` — restores a CV from a share link (works on either route)
 
 Share links carry the CV in the URL fragment, so it is never sent to a server. Uploaded
@@ -197,6 +207,9 @@ Modern browsers (Chrome, Firefox, Safari, Edge) with ES2020+ support.
 - [`docs/audit-1.0.2.md`](docs/audit-1.0.2.md) — a fresh audit pass: a mobile
   toolbar overflow bug, Export menu keyboard accessibility, and non-functional
   security meta tags
+- [`docs/adsense-indexing-readiness.md`](docs/adsense-indexing-readiness.md) —
+  what's done for Google AdSense approval and indexing versus what still
+  needs a real Google account and production domain
 
 ## License
 
