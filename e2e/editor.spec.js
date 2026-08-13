@@ -1,0 +1,32 @@
+import { test, expect } from '@playwright/test'
+
+test.describe('CV editor', () => {
+  test('typing a name updates the live preview', async ({ page }) => {
+    await page.goto('/cv')
+
+    await page.getByRole('textbox', { name: /Full name/ }).fill('Ada Lovelace')
+
+    await expect(page.locator('.preview-panel')).toContainText('Ada Lovelace')
+  })
+
+  test('Load demo CV fills the form and the preview', async ({ page }) => {
+    await page.goto('/cv')
+
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+
+    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Alex Morgan')
+    await expect(page.locator('.preview-panel')).toContainText('Alex Morgan')
+    await expect(page.locator('.preview-panel')).toContainText('Senior Product Designer')
+  })
+
+  test('Reset form clears a filled-in field', async ({ page }) => {
+    await page.goto('/cv')
+
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Alex Morgan')
+
+    await page.getByRole('button', { name: 'Reset form' }).click()
+
+    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('')
+  })
+})

@@ -12,6 +12,15 @@ dist
 dist-ssr
 *.local
 
+# Playwright
+test-results
+playwright-report
+blob-report
+playwright/.cache
+
+# graphify skill output (local knowledge-graph cache, not project source)
+graphify-out
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -1,5 +1,7 @@
 # PortifyCV
 
+[![CI](https://github.com/R0uty/PortifyCV/actions/workflows/ci.yml/badge.svg)](https://github.com/R0uty/PortifyCV/actions/workflows/ci.yml)
+
 A modern, minimal CV builder for creating and exporting professional resumes in real-time.
 
 ## Features
@@ -48,12 +50,22 @@ npm run lint
 
 # Verify the share-link codec (no browser needed)
 npm run check:share
+
+# Run the end-to-end smoke suite against a production build
+npm run test:e2e
 ```
 
 `check:share` round-trips a full CV through the share-link encoder and decoder.
 Run it after touching `src/utils/shareLinks.js` or the CV schema in
 `src/utils/cvForm.js` — a mistyped short key silently drops a field from every
 link the app generates.
+
+`test:e2e` runs the Playwright suite in `e2e/` (landing page, live preview,
+template-gated sections, the Export menu) against `npm run build` +
+`npm run preview`, not the dev server, so it exercises the app the way a real
+user gets it — lazy chunks, manual vendor chunking, and all. Downloads and
+installs a Chromium build the first time it runs
+(`npx playwright install chromium`).
 
 ## Production Build
 
