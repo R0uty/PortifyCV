@@ -1466,6 +1466,7 @@ select.floating-field__control {
 
 .app-toolbar__group {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
 }

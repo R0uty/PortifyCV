@@ -41,11 +41,25 @@ function Toolbar({
   const isFinnish = locale === 'fi'
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false)
   const exportMenuRef = useRef(null)
+  const exportTriggerRef = useRef(null)
+
+  function focusExportMenuItem(index) {
+    const items = exportMenuRef.current?.querySelectorAll('[role="menuitem"]')
+    if (!items?.length) {
+      return
+    }
+    const clamped = ((index % items.length) + items.length) % items.length
+    items[clamped].focus()
+  }
 
   useEffect(() => {
     if (!isExportMenuOpen) {
       return undefined
     }
+
+    // ARIA menu-button pattern: opening moves focus into the menu instead of
+    // leaving it on the trigger, so keyboard users don't have to Tab past it.
+    focusExportMenuItem(0)
 
     function handlePointerDown(event) {
       if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
@@ -56,6 +70,7 @@ function Toolbar({
     function handleKeyDown(event) {
       if (event.key === 'Escape') {
         setIsExportMenuOpen(false)
+        exportTriggerRef.current?.focus()
       }
     }
 
@@ -67,8 +82,41 @@ function Toolbar({
     }
   }, [isExportMenuOpen])
 
+  function handleExportMenuKeyDown(event) {
+    const items = exportMenuRef.current?.querySelectorAll('[role="menuitem"]')
+    if (!items?.length) {
+      return
+    }
+    const currentIndex = Array.prototype.indexOf.call(items, document.activeElement)
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      focusExportMenuItem(currentIndex + 1)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      focusExportMenuItem(currentIndex - 1)
+    } else if (event.key === 'Home') {
+      event.preventDefault()
+      focusExportMenuItem(0)
+    } else if (event.key === 'End') {
+      event.preventDefault()
+      focusExportMenuItem(items.length - 1)
+    }
+  }
+
+  // Tabbing out (not just Escape or an outside click) should also close the
+  // menu — checked via the blur target rather than intercepting Tab itself,
+  // since the DOM the browser computes default Tab order from is a frame
+  // ahead of whatever this component's state update would remove from it.
+  function handleExportBlur(event) {
+    if (exportMenuRef.current && !exportMenuRef.current.contains(event.relatedTarget)) {
+      setIsExportMenuOpen(false)
+    }
+  }
+
   function handleExportSelect(format) {
     setIsExportMenuOpen(false)
+    exportTriggerRef.current?.focus()
     onExport(format)
   }
 
@@ -201,9 +249,10 @@ function Toolbar({
             <Link2 size={16} strokeWidth={2} aria-hidden="true" />
           </button>
 
-          <div className="app-toolbar__export" ref={exportMenuRef}>
+          <div className="app-toolbar__export" ref={exportMenuRef} onBlur={handleExportBlur}>
             <button
               type="button"
+              ref={exportTriggerRef}
               className="app-toolbar__primary"
               disabled={isActionBusy}
               aria-haspopup="menu"
@@ -217,7 +266,7 @@ function Toolbar({
             </button>
 
             {isExportMenuOpen ? (
-              <div className="app-toolbar__export-menu" role="menu">
+              <div className="app-toolbar__export-menu" role="menu" onKeyDown={handleExportMenuKeyDown}>
                 <button
                   type="button"
                   role="menuitem"

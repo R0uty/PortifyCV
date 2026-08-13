@@ -15,6 +15,49 @@ test.describe('Export menu', () => {
     await expect(menu).toBeHidden()
   })
 
+  test('opens with focus on the first item and supports arrow-key navigation', async ({ page }) => {
+    await page.goto('/cv')
+
+    const trigger = page.getByRole('banner').getByRole('button', { name: 'Export', exact: true })
+    await trigger.click()
+
+    const menu = page.getByRole('menu')
+    const items = menu.getByRole('menuitem')
+    await expect(items.nth(0)).toBeFocused()
+
+    await page.keyboard.press('ArrowDown')
+    await expect(items.nth(1)).toBeFocused()
+
+    await page.keyboard.press('ArrowDown')
+    await expect(items.nth(2)).toBeFocused()
+
+    // Wraps back to the first item.
+    await page.keyboard.press('ArrowDown')
+    await expect(items.nth(0)).toBeFocused()
+
+    await page.keyboard.press('ArrowUp')
+    await expect(items.nth(2)).toBeFocused()
+
+    await page.keyboard.press('Home')
+    await expect(items.nth(0)).toBeFocused()
+
+    await page.keyboard.press('End')
+    await expect(items.nth(2)).toBeFocused()
+  })
+
+  test('Escape closes the menu and returns focus to the trigger', async ({ page }) => {
+    await page.goto('/cv')
+
+    const trigger = page.getByRole('banner').getByRole('button', { name: 'Export', exact: true })
+    await trigger.click()
+    await expect(page.getByRole('menu')).toBeVisible()
+
+    await page.keyboard.press('Escape')
+
+    await expect(page.getByRole('menu')).toBeHidden()
+    await expect(trigger).toBeFocused()
+  })
+
   test('JSON export downloads a .json file', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()

@@ -158,6 +158,9 @@ Modern browsers (Chrome, Firefox, Safari, Edge) with ES2020+ support.
   was checked, what was fixed, and which behaviours are deliberate
 - [`docs/audit-1.0.1.md`](docs/audit-1.0.1.md) — the 1.0.1 pass: template-gated
   sections, the nav rail sync fix, and the release-readiness verdict
+- [`docs/audit-1.0.2.md`](docs/audit-1.0.2.md) — a fresh audit pass: a mobile
+  toolbar overflow bug, Export menu keyboard accessibility, and non-functional
+  security meta tags
 
 ## License
 
