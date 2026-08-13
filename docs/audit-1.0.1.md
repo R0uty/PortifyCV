@@ -3,7 +3,10 @@
 **Date:** 2026-08-11
 **Scope:** Fixes for the post-1.0.0 UI review (`../todo.md`, findings dated
 2026-08-10), plus additional bugs found and fixed during the same pass that
-were not on that list. No changes to the share-link codec or the CV data
+were not on that list. Extended the same day with a release-readiness
+follow-up pass (findings 11, the "Follow-up" section, and CI/e2e tooling) —
+see the "Release readiness" section at the bottom for how the verdict moved
+across both passes. No changes to the share-link codec or the CV data
 schema.
 
 This document records what was checked, what was found, how each fix was
@@ -25,6 +28,9 @@ written yet.
 | Reducer/state logic | `npm run check:reducers` (54 assertions) run after every state-touching change |
 | Share-link codec | `npm run check:share` (15 assertions) — untouched by this pass, run to confirm no regression |
 | Build health | `npm run lint`, `npm run build`, `npm run dev` + manual smoke test |
+| Dead-code verification | Script cross-referencing every top-level CSS class selector against all `.jsx`/`.js` source before removing anything, then a visual pass over the templates most affected |
+| End-to-end coverage | `npm run test:e2e` (Playwright, 10 assertions across 4 spec files), added this pass and now part of the regression suite |
+| Dependency audit | `npm audit` / `npm audit fix` (finding 11) |
 
 ---
 
@@ -250,6 +256,32 @@ because every section defaults to visible.
 
 ---
 
+### 11. Three dependency vulnerabilities, one of them in the PDF export path
+
+**Severity:** high — `dompurify` (patched to `<=3.4.12`, then vulnerable) is
+not a direct dependency but ships inside the production PDF export bundle:
+`jspdf` → `canvg` → `dompurify`, sanitizing SVG content during `html2canvas`
+rendering. The disclosed issue lets an `IN_PLACE` hook removal leave a
+detached subtree executable, causing XSS
+([GHSA-55q2-fjhq-7xh7](https://github.com/advisories/GHSA-55q2-fjhq-7xh7)).
+The other two (`brace-expansion`, a DoS via unbounded intermediate arrays;
+`nanoid`, an infinite loop on a zero-size custom generator) are dev-tooling
+transitive dependencies (ESLint/Vite chain), not shipped to users, but still
+worth clearing.
+
+Found incidentally while adding `@playwright/test` (finding below) — `npm
+install` surfaces `npm audit` results, and these three were already present
+before that install, not introduced by it.
+
+**Fix:** `npm audit fix`. All three resolved to non-vulnerable versions with
+no dependency-tree changes requiring a breaking-version bump; `dompurify`
+landed on `3.4.13`.
+
+**Verified:** `npm audit` reports 0 vulnerabilities; `npm run lint`, `npm run
+build`, and both regression-check scripts still pass after the update.
+
+---
+
 ## Enhancements added beyond the original findings
 
 Not defects — functionality added while addressing the findings above.
@@ -286,6 +318,11 @@ regression of the earlier fix.
 - `npm run check:reducers` — 54/54 pass.
 - `npm run check:share` — 15/15 pass (untouched by this pass; run to confirm
   no regression).
+- `npm run test:e2e` — 10/10 pass, twice in a row (checked for flakiness).
+  Runs against `npm run build` + `npm run preview`, not the dev server, so
+  the lazy-loaded `CVPreview` chunk, the manual vendor chunking, and the idle
+  PDF-bundle prefetch are exercised the way a real user hits them.
+- `npm audit` — 0 vulnerabilities (was 3; see finding 11).
 - Live behaviour, confirmed interactively in Chrome: template gallery shows
   10 distinct real previews; the editor opens on Section 01 with all utility
   panels collapsed; nav-rail order matches the form's actual scroll order for
@@ -294,47 +331,87 @@ regression of the earlier fix.
   matching sections in the nav rail, the form, and the preview in the same
   pass; the landing page renders correctly in English and Finnish with a real
   CV preview image; the Export dropdown opens, lists PDF/HTML/JSON, and closes
-  on outside click.
+  on outside click; the Creative and Developer templates — the two showcases
+  most affected by the `index.css` dead-rule removal below — render fully
+  populated demo data with no missing styling.
 
 ---
 
-## Known limitations carried into 1.0.1
+## Follow-up: the four limitations above, now closed
 
-- **`src/index.css` is 8,097 lines** (up from 7,879 at 1.0.0), hand-written
-  Tailwind-alike utilities. Works today; still the most likely file to rot.
-  Flagged low-priority in `../todo.md` (#11), not addressed this pass.
-- **`public/PortifyCV.png` ships at 772KB** for a mark displayed at 60–80px
-  tall in the app. Not yet compressed or pre-downsized.
-- **No CI pipeline.** `.github/` is empty — `lint`/`build`/`check:*` only run
-  when invoked locally, nothing gates a bad commit automatically.
-- **No automated UI/e2e coverage.** `check:reducers` and `check:share` cover
-  state logic and the share codec; template rendering across all 10 layouts,
-  ATS scoring, and PDF/HTML/JSON export correctness are verified manually
-  each pass, not by a test suite.
+All four items this document previously carried as open limitations were
+addressed in a second pass the same day, as part of getting 1.0.1 ready to
+tag. Recorded here rather than silently deleted, so the "known limitations"
+pattern this document (and `audit-1.0.0.md` before it) uses stays honest
+about what was actually outstanding at each point in time.
+
+- **`src/index.css` dead-code cleanup.** 8,097 → 7,876 lines (221 removed).
+  Not a rewrite — a verified-unused pass: every top-level class selector was
+  checked against all `.jsx`/`.js` source with a script, filtering out false
+  positives from dynamically built class names (e.g.
+  `` `dev-showcase__chip--${color}` ``) before removing anything. Confirmed
+  dead: `.preview-action-bar*` (superseded by `.preview-zoom-bar*`, never
+  updated when that rename happened), `.project-header__heading/__left`
+  (from a pre-logo header layout), `.site-footer__link/__sep` (from a
+  multi-segment footer since simplified to one line), `.brand-mark*`,
+  `.ds-title`, `.ds-display`, `.ds-caption`, `.stack-4`, `.stack-6`,
+  `.surface-shadow`, `.page-shadow`, `.action-button--primary`,
+  `.dev-showcase__tagline`, and the `.creative-showcase__quickfact*`/
+  `__edu-desc` cluster — plus 3 CSS custom properties left orphaned once
+  their only consumer rules were gone. Verified with a full build and a
+  visual pass over the Creative and Developer templates (the two showcases
+  the removed rules mostly belonged to).
+- **`public/PortifyCV.png` optimization.** Same treatment `PortifyCV2.jpg`
+  already got: re-encoded to an 85%-quality JPEG, renamed to
+  `PortifyCV.jpg`. 772KB → 76KB (90% smaller), no visible quality loss at
+  the sizes it's actually displayed (a 60px header mark, a social-preview
+  card). All references updated: `index.html` (`og:image`/`twitter:image`),
+  `App.jsx`, `README.md`.
+- **CI pipeline added.** `.github/workflows/ci.yml`, two jobs on push to
+  `main` and on every PR: `checks` (lint, build, both regression scripts)
+  and `e2e` (Playwright, see below), with the HTML report uploaded as an
+  artifact on failure.
+- **Automated UI/e2e smoke coverage added.** `@playwright/test`, 10 tests
+  across 4 spec files in `e2e/`, run with `npm run test:e2e` against a real
+  production build: the landing page's hero and CTA; typing into a field
+  live-updating the preview; loading/resetting the demo CV; the Export menu
+  listing PDF/HTML/JSON, closing on outside click, and actually downloading
+  a `.json`/`.html` file; and — the highest-value case, since it's a direct
+  regression guard for finding 5 — switching templates showing and hiding
+  the matching nav-rail entries and form sections. This does not replace
+  manual verification for template *rendering* correctness (all 10 visual
+  layouts, ATS scoring nuance) or PDF export specifically (skipped as
+  higher-risk/slower for a smoke suite — canvas rendering plus a Web
+  Worker); it closes the gap for the app's core interaction paths breaking
+  silently.
 
 ---
 
 ## Release readiness
 
-**8.5/10 — functionally ready and now actually committed.**
+**9.5/10 — every finding closed, verified, and covered going forward; the
+only thing left is to commit it.**
 
-Every finding above ordered high or medium severity is fixed and verified.
-The product itself — templates, live preview, ATS scoring, exports, share
-links, the privacy story (no login, no server calls, no analytics, no
-third-party font requests) — is in good shape to point a user at.
+This score has moved twice in one document, which is worth being explicit
+about rather than just editing the number in place:
 
-An earlier draft of this section scored this 7.5/10 and held it back on
-release mechanics rather than the product: an uncommitted working tree, two
-unexplained deletions, an untracked directory that had to stay out of any
-release commit. All of that is now resolved — the fixes landed as five
-commits on `improve/ui-backlog` (one per finding-cluster: collapsible
-sections, template-gated sections + nav rail sync, the logo/favicon
-replacement, the landing hero image, and this document), the
-`public/favicon.svg`/`icons.svg` deletions are folded into the logo/favicon
-commit as an intentional part of that fix (finding 9), and `graphify-out/`
-stayed untracked and out of every commit.
+- **7.5/10** (first draft): the product was fixed and verified, but the
+  fixes existed only in a dirty working tree — uncommitted, with two
+  unexplained file deletions and an untracked directory that had to stay out
+  of any release commit.
+- **8.5/10** (second draft): release mechanics resolved — five commits on
+  `improve/ui-backlog`, one per finding-cluster, `graphify-out/` correctly
+  never staged — but the "Known limitations" section above still listed four
+  open items: `index.css`'s size, an unoptimized logo asset, no CI, no
+  automated UI coverage.
+- **9.5/10** (this pass): all four of those are closed — see "Follow-up"
+  above — plus one more finding (11) neither draft anticipated: three
+  dependency vulnerabilities, one of them (`dompurify`) in the actual PDF
+  export path, found incidentally and fixed with `npm audit fix`.
 
-What's left is exactly the "Known limitations" above — `index.css`'s size,
-the unoptimized `PortifyCV.png` header asset, no CI, and no automated UI/e2e
-coverage. None of those block a tag; they're the reasonable next-iteration
-list.
+The half-point held back is procedural, not a defect: this pass's fixes
+(the PortifyCV.png swap, the `index.css` cleanup, `.github/workflows/ci.yml`,
+`e2e/`, and the `npm audit fix`) are verified in the working tree but not
+yet committed. Once they land as commits the same way the previous round
+did, there is nothing left on this document's list, known or found, blocking
+a 1.0.1 tag.

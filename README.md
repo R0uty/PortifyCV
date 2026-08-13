@@ -2,13 +2,17 @@
 
 [![CI](https://github.com/R0uty/PortifyCV/actions/workflows/ci.yml/badge.svg)](https://github.com/R0uty/PortifyCV/actions/workflows/ci.yml)
 
+![PortifyCV — build your CV, land your dream job](public/PortifyCV2.jpg)
+
 A modern, minimal CV builder for creating and exporting professional resumes in real-time.
 
 ## Features
 
 - **Live Preview**: See your CV update instantly as you edit
 - **10 Templates**: Minimalist, Developer, Creative, Modern Professional, Executive,
-  Timeline, Graduate, Compact, Portfolio Hybrid, and Tech Executive
+  Timeline, Graduate, Compact, Portfolio Hybrid, and Tech Executive — each template
+  supports its own set of CV sections (e.g. Minimalist covers 5, Developer 11), and
+  the editor and nav rail only show what the selected template actually renders
 - **ATS Optimization**: Parser-readiness score, job-description keyword matching, and a
   dedicated ATS-friendly mode that flattens any template for applicant tracking systems
 - **CV Suggestions**: Rule-based feedback on clarity, impact, and completeness
@@ -24,7 +28,12 @@ A modern, minimal CV builder for creating and exporting professional resumes in 
 
 - **React 19**: UI framework with hooks
 - **Vite 8**: Build tool with HMR
-- **Tailwind CSS 4**: Utility-first styling
+- **Hand-written utility CSS**: `src/index.css` is a Tailwind-alike utility layer
+  (`px-4`, `flex`, `text-xs`, ...) written by hand — there is no Tailwind build step
+  or dependency in this project
+- **@fontsource-variable/inter**: Self-hosted variable-weight Inter, so the only
+  network requests the app makes are for its own same-origin assets
+- **lucide-react**: Icon set used throughout the toolbar, nav rail, and editor
 - **html2canvas**: PDF design rendering
 - **jsPDF**: PDF generation (page assembly runs in a Web Worker)
 - **@dnd-kit**: Drag-and-drop reordering of CV entries
@@ -51,6 +60,9 @@ npm run lint
 # Verify the share-link codec (no browser needed)
 npm run check:share
 
+# Verify the form/UI reducers (no browser needed)
+npm run check:reducers
+
 # Run the end-to-end smoke suite against a production build
 npm run test:e2e
 ```
@@ -59,6 +71,11 @@ npm run test:e2e
 Run it after touching `src/utils/shareLinks.js` or the CV schema in
 `src/utils/cvForm.js` — a mistyped short key silently drops a field from every
 link the app generates.
+
+`check:reducers` covers every action `cvFormReducer` and `uiReducer` handle —
+field updates, array-item add/remove/duplicate/move, section reordering,
+merge/reset/import, and unknown-action no-ops. Both scripts are framework-free
+Node harnesses, no test runner required.
 
 `test:e2e` runs the Playwright suite in `e2e/` (landing page, live preview,
 template-gated sections, the Export menu) against `npm run build` +
@@ -78,8 +95,9 @@ npm run build
 Static files are ready to be served:
 - `dist/index.html` - Main entry point
 - `dist/assets/` - JS and CSS bundles
-- `dist/favicon.svg` - Site icon
-- `dist/icons.svg` - Icon sprite
+- `dist/logo-mark.png` - Site icon (favicon and apple-touch-icon)
+- `dist/PortifyCV.jpg` / `dist/PortifyCV2.jpg` - Brand and marketing images
+  (landing page header, `og:image`/`twitter:image`, this README)
 
 ## Deployment
 
@@ -114,7 +132,7 @@ If your live domain is not `https://portifycv.app`, update canonical/OG URLs in 
 
 - The PDF dependencies (html2canvas + jsPDF) dominate the bundle and are loaded lazily,
   only when an export is triggered
-- Gzipped CSS: ~21KB; initial gzipped JS: ~75KB
+- Gzipped CSS: ~23KB; initial gzipped JS: ~75KB
 - Page-sliced PDF rendering for large multi-page CVs
 - Adaptive rendering scale to prevent memory overflow
 
@@ -138,6 +156,8 @@ Modern browsers (Chrome, Firefox, Safari, Edge) with ES2020+ support.
 - [`CHANGELOG.md`](CHANGELOG.md) — release history
 - [`docs/audit-1.0.0.md`](docs/audit-1.0.0.md) — the 1.0.0 pre-release audit: what
   was checked, what was fixed, and which behaviours are deliberate
+- [`docs/audit-1.0.1.md`](docs/audit-1.0.1.md) — the 1.0.1 pass: template-gated
+  sections, the nav rail sync fix, and the release-readiness verdict
 
 ## License
 
