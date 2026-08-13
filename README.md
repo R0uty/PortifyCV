@@ -207,6 +207,10 @@ Modern browsers (Chrome, Firefox, Safari, Edge) with ES2020+ support.
 - [`docs/audit-1.0.2.md`](docs/audit-1.0.2.md) — a fresh audit pass: a mobile
   toolbar overflow bug, Export menu keyboard accessibility, and non-functional
   security meta tags
+- [`docs/security-audit-1.0.md`](docs/security-audit-1.0.md) — an adversarial
+  penetration-test pass: XSS, prototype pollution, share-link tampering,
+  URI-scheme injection, ReDoS, and the privacy claim, each tested with real
+  payloads against the running app
 - [`docs/adsense-indexing-readiness.md`](docs/adsense-indexing-readiness.md) —
   what's done for Google AdSense approval and indexing versus what still
   needs a real Google account and production domain
