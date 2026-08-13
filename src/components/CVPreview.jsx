@@ -419,7 +419,7 @@ function CVPreview({
                 </div>
               ) : null}
             </div>
-            <p className={`mt-4 ${aboutTextSize} ${bodyTextClasses}`}>
+            <p className={`mt-4 whitespace-pre-line ${aboutTextSize} ${bodyTextClasses}`}>
               {about}
             </p>
           </>
@@ -521,7 +521,13 @@ function CVPreview({
                             {renderExtras()}
                           </div>
 
-                          <p className={`shrink-0 sm:ml-4 ${experienceDateSize} font-medium uppercase tracking-[0.16em] ${metaTextClasses}`}>
+                          {/* Capped width + tighter tracking than the shared "clean" date
+                              treatment: this layout's extra left border/padding narrows the
+                              main column further, so a spelled-out date range ("Jan 2022 -
+                              Present") at full width was eating ~45% of the row and forcing
+                              the description into a cramped single column. Wrapping the date
+                              onto two lines instead gives the description most of the row. */}
+                          <p className={`shrink-0 sm:ml-4 sm:max-w-[5.5rem] sm:text-right ${experienceDateSize} font-medium uppercase tracking-[0.06em] ${metaTextClasses}`}>
                             {dateRange || (isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending')}
                           </p>
                         </div>
@@ -550,7 +556,7 @@ function CVPreview({
                               </p>
                             ) : null}
                             {item.description.trim() ? (
-                              <p className={`mt-2 ${experienceDescSize} ${bodyTextClasses}`}>
+                              <p className={`mt-2 whitespace-pre-line ${experienceDescSize} ${bodyTextClasses}`}>
                                 {item.description}
                               </p>
                             ) : null}
@@ -589,7 +595,7 @@ function CVPreview({
                             {heading || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')}
                           </p>
                           {item.description.trim() ? (
-                            <p className={`mt-2 ${experienceDescSize} ${bodyTextClasses}`}>
+                            <p className={`mt-2 whitespace-pre-line ${experienceDescSize} ${bodyTextClasses}`}>
                               {item.description}
                             </p>
                           ) : null}
@@ -878,7 +884,7 @@ function CVPreview({
                         <p className="text-sm font-semibold tracking-tight text-gray-900">{item.title}</p>
                       ) : null}
                       {item.description ? (
-                        <p className={`mt-0.5 text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
+                        <p className={`mt-0.5 whitespace-pre-line text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
                       ) : null}
                     </div>
                   </div>
@@ -967,7 +973,7 @@ function CVPreview({
                       <p className={`text-sm font-semibold tracking-tight ${accentTextClasses}`}>{item.name}</p>
                     ) : null}
                     {item.description ? (
-                      <p className={`mt-1 text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
+                      <p className={`mt-1 whitespace-pre-line text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
                     ) : null}
                     {item.teamSize || item.contribution ? (
                       <p className={`mt-1 text-xs ${metaTextClasses}`}>
@@ -1086,7 +1092,7 @@ function CVPreview({
                       ) : null}
                     </div>
                     {item.description ? (
-                      <p className={`mt-1 text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
+                      <p className={`mt-1 whitespace-pre-line text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
                     ) : null}
                   </div>
                 ))
@@ -1131,7 +1137,7 @@ function CVPreview({
                         </p>
                       ) : null}
                       {item.description ? (
-                        <p className={`mt-1 text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
+                        <p className={`mt-1 whitespace-pre-line text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
                       ) : null}
                       {item.url ? (
                         <p className={`mt-1 text-xs ${supportingTextClasses}`}>{item.url}</p>
@@ -1215,7 +1221,7 @@ function CVPreview({
                         ) : null}
                       </div>
                       {item.description ? (
-                        <p className={`mt-1 text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
+                        <p className={`mt-1 whitespace-pre-line text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
                       ) : null}
                     </div>
                   )
@@ -1325,7 +1331,7 @@ function CVPreview({
                         <p className="text-sm font-semibold tracking-tight text-gray-900">{heading}</p>
                       ) : null}
                       {item.description ? (
-                        <p className={`mt-1 text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
+                        <p className={`mt-1 whitespace-pre-line text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
                       ) : null}
                     </div>
                   )
@@ -1372,7 +1378,7 @@ function CVPreview({
                         </p>
                       ) : null}
                       {item.description ? (
-                        <p className={`mt-1 text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
+                        <p className={`mt-1 whitespace-pre-line text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
                       ) : null}
                       {item.technologies ? (
                         <p className={`mt-1 text-[0.68rem] uppercase tracking-[0.1em] ${metaTextClasses}`}>{item.technologies}</p>
@@ -1420,7 +1426,7 @@ function CVPreview({
                       ) : null}
                       <div className="mt-1 space-y-1">
                         {rows.map(([label, value]) => (
-                          <p key={label} className={`text-xs leading-6 ${bodyTextClasses}`}>
+                          <p key={label} className={`whitespace-pre-line text-xs leading-6 ${bodyTextClasses}`}>
                             <span className={`font-semibold ${metaTextClasses}`}>{label}: </span>
                             {value}
                           </p>
@@ -1458,7 +1464,7 @@ function CVPreview({
                   return (
                     <div key={`${item.author}-${index}`} data-export-card="true">
                       {item.quote ? (
-                        <p className={`text-xs italic leading-6 ${bodyTextClasses}`}>&ldquo;{item.quote}&rdquo;</p>
+                        <p className={`whitespace-pre-line text-xs italic leading-6 ${bodyTextClasses}`}>&ldquo;{item.quote}&rdquo;</p>
                       ) : null}
                       {meta ? (
                         <p className={`mt-1 text-xs ${metaTextClasses}`}>{meta}</p>

@@ -19,6 +19,12 @@ const A4_HEIGHT_MM = 297
 const PX_PER_INCH = 96
 const MM_PER_INCH = 25.4
 const MAX_CAPTURE_PIXEL_AREA = 12_000_000
+// The capture canvas always has an opaque white background (see renderCaptureCanvas),
+// so JPEG's lack of an alpha channel costs nothing here — and it shrinks a multi-page
+// resume PDF from tens of MB (lossless PNG) down to a fraction of that.
+const PDF_PAGE_IMAGE_FORMAT = 'JPEG'
+const PDF_PAGE_IMAGE_MIME = 'image/jpeg'
+const PDF_PAGE_IMAGE_QUALITY = 0.85
 const PAGE_BREAK_SELECTOR = '[data-export-header], [data-export-section], [data-export-card], [data-export-skill="true"]'
 const COLOR_STYLE_PROPS = [
   'color',
@@ -507,12 +513,12 @@ header { padding-bottom: 1.75rem; margin-bottom: 2.5rem; border-bottom: 2px soli
 .cv-contact { margin-top: 0.875rem; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; font-size: 0.85rem; color: #475569; }
 section { margin-bottom: 2.5rem; }
 .section-heading { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.26em; text-transform: uppercase; color: #64748b; padding-bottom: 0.625rem; border-bottom: 1px solid #e2e8f0; margin-bottom: 1.5rem; }
-.about-text { color: #334155; font-size: 0.975rem; line-height: 1.8; }
+.about-text { color: #334155; font-size: 0.975rem; line-height: 1.8; white-space: pre-line; }
 .xp-item { margin-bottom: 1.75rem; padding-left: 1.375rem; border-left: 2px solid #cbd5e1; }
 .xp-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: baseline; }
 .xp-role { font-weight: 600; font-size: 1.05rem; }
 .xp-date { font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.12em; white-space: nowrap; }
-.xp-desc { margin-top: 0.625rem; font-size: 0.9rem; color: #334155; line-height: 1.75; }
+.xp-desc { margin-top: 0.625rem; font-size: 0.9rem; color: #334155; line-height: 1.75; white-space: pre-line; }
 .edu-item { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: baseline; padding: 0.875rem 1rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; margin-bottom: 0.75rem; }
 .edu-degree { font-weight: 600; font-size: 0.975rem; }
 .edu-date { font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.12em; }
@@ -523,12 +529,12 @@ section { margin-bottom: 2.5rem; }
 .link-url { font-size: 0.9rem; color: #0284c7; word-break: break-all; }
 .strength-item { margin-bottom: 1.125rem; }
 .strength-title { font-weight: 600; font-size: 0.95rem; }
-.strength-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; }
+.strength-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; white-space: pre-line; }
 .certificate-list { padding-left: 1.125rem; }
 .certificate-list li { font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem; }
 .project-item { margin-bottom: 1.25rem; }
 .project-name { font-weight: 600; font-size: 0.975rem; color: #0284c7; }
-.project-desc { margin-top: 0.25rem; font-size: 0.875rem; color: #334155; line-height: 1.6; }
+.project-desc { margin-top: 0.25rem; font-size: 0.875rem; color: #334155; line-height: 1.6; white-space: pre-line; }
 .project-stack { margin-top: 0.25rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; }
 .language-item { font-size: 0.9rem; color: #334155; margin-bottom: 0.4rem; }
 .interests { display: flex; flex-wrap: wrap; gap: 0.5rem; }
@@ -537,11 +543,11 @@ section { margin-bottom: 2.5rem; }
 .achievement-item { margin-bottom: 1.125rem; }
 .achievement-title { font-weight: 600; font-size: 0.95rem; }
 .achievement-year { font-weight: 400; font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; }
-.achievement-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; }
+.achievement-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; white-space: pre-line; }
 .opensource-item { margin-bottom: 1.25rem; }
 .opensource-name { font-weight: 600; font-size: 0.975rem; color: #0284c7; }
 .opensource-meta { margin-top: 0.15rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; }
-.opensource-desc { margin-top: 0.25rem; font-size: 0.875rem; color: #334155; line-height: 1.6; }
+.opensource-desc { margin-top: 0.25rem; font-size: 0.875rem; color: #334155; line-height: 1.6; white-space: pre-line; }
 .opensource-url { margin-top: 0.25rem; font-size: 0.8rem; color: #334155; word-break: break-all; }
 .publication-item { margin-bottom: 1.125rem; }
 .publication-title { font-weight: 600; font-size: 0.95rem; }
@@ -551,7 +557,7 @@ section { margin-bottom: 2.5rem; }
 .leadership-item { margin-bottom: 1.125rem; }
 .leadership-role { font-weight: 600; font-size: 0.95rem; }
 .leadership-date { margin-top: 0.15rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; }
-.leadership-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; }
+.leadership-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; white-space: pre-line; }
 .membership-list { padding-left: 1.125rem; }
 .membership-list li { font-size: 0.9rem; color: #334155; margin-bottom: 0.5rem; }
 .edu-honors { margin-top: 0.15rem; font-size: 0.8rem; color: #334155; font-style: italic; }
@@ -561,7 +567,7 @@ section { margin-bottom: 2.5rem; }
 .speaking-audience { margin-top: 0.15rem; font-size: 0.8rem; color: #334155; }
 .volunteer-item { margin-bottom: 1.125rem; }
 .volunteer-role { font-weight: 600; font-size: 0.95rem; }
-.volunteer-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; }
+.volunteer-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; white-space: pre-line; }
 @media print { body { padding: 0; max-width: none; } }
 </style>
 </head>
@@ -914,6 +920,27 @@ function splitRangeIntoSlices(rangeTop, rangeBottom, pageHeightPx, breakpoints =
   return slices
 }
 
+function findFillBreakpoint(breakpoints, blockTop, blockBottom, limitY) {
+  let snapY = 0
+
+  for (let index = breakpoints.length - 1; index >= 0; index -= 1) {
+    const breakpoint = breakpoints[index]
+
+    if (breakpoint <= blockTop) {
+      break
+    }
+
+    if (breakpoint > limitY || breakpoint > blockBottom) {
+      continue
+    }
+
+    snapY = breakpoint
+    break
+  }
+
+  return snapY
+}
+
 function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []) {
   if (!contentBlocks.length) {
     return []
@@ -932,6 +959,24 @@ function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []
     }
   }
 
+  // Commits every slice but the last as a finished page, and leaves the
+  // last slice as the in-progress page — so a short remainder (e.g. one
+  // job entry left over after a snap-fill split) can still be topped up
+  // by whatever content block comes next, instead of stranding it alone
+  // on an otherwise-empty page.
+  const commitSlices = (slices) => {
+    if (!slices.length) {
+      return
+    }
+
+    const lastSlice = slices[slices.length - 1]
+
+    slices.slice(0, -1).forEach((slice) => pages.push(slice))
+    currentPageTop = lastSlice.top
+    currentPageBottom = lastSlice.bottom
+    currentPageHeight = lastSlice.bottom - lastSlice.top
+  }
+
   contentBlocks.forEach((block) => {
     const blockHeight = block.bottom - block.top
 
@@ -947,6 +992,30 @@ function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []
       const projectedHeight = projectedBottom - currentPageTop
 
       if (projectedHeight > pageHeightPx) {
+        // The whole block (e.g. an Experience section with several entries)
+        // doesn't fit in the space left on the current page. Rather than
+        // deferring it wholesale — which can strand most of the page blank —
+        // snap-fill using an inner breakpoint (e.g. a single job entry) when
+        // one exists, then carry the remainder onto later pages.
+        const remainingPx = pageHeightPx - currentPageHeight
+        const minFillDepth = Math.max(50, Math.floor(pageHeightPx * 0.05))
+
+        if (remainingPx >= minFillDepth) {
+          const naturalEnd = currentPageBottom + remainingPx
+          const snapY = findFillBreakpoint(breakpoints, block.top, block.bottom, naturalEnd)
+
+          if (snapY >= block.top + minFillDepth) {
+            currentPageBottom = snapY
+            currentPageHeight = currentPageBottom - currentPageTop
+            pushCurrentPage()
+
+            if (currentPageTop < block.bottom) {
+              commitSlices(splitRangeIntoSlices(currentPageTop, block.bottom, pageHeightPx, breakpoints))
+            }
+            return
+          }
+        }
+
         if (block.top > currentPageBottom) {
           currentPageBottom = block.top
           currentPageHeight = currentPageBottom - currentPageTop
@@ -967,27 +1036,20 @@ function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []
       const remainingPx = pageHeightPx - currentPageHeight
       const naturalEnd = block.top + remainingPx
       const minFillDepth = Math.max(50, Math.floor(pageHeightPx * 0.05))
-      let snapY = 0
-      for (let index = breakpoints.length - 1; index >= 0; index -= 1) {
-        if (breakpoints[index] <= block.top) break
-        if (breakpoints[index] > naturalEnd) continue
-        snapY = breakpoints[index]
-        break
-      }
+      const snapY = findFillBreakpoint(breakpoints, block.top, block.bottom, naturalEnd)
+
       if (snapY >= block.top + minFillDepth) {
         currentPageBottom = Math.max(currentPageBottom, Math.min(snapY, block.bottom))
         currentPageHeight = currentPageBottom - currentPageTop
         pushCurrentPage()
         if (currentPageTop < block.bottom) {
-          const slices = splitRangeIntoSlices(currentPageTop, block.bottom, pageHeightPx, breakpoints)
-          slices.forEach((slice) => pages.push(slice))
+          commitSlices(splitRangeIntoSlices(currentPageTop, block.bottom, pageHeightPx, breakpoints))
         }
         return
       }
     }
     pushCurrentPage()
-    const slices = splitRangeIntoSlices(block.top, block.bottom, pageHeightPx, breakpoints)
-    slices.forEach((slice) => pages.push(slice))
+    commitSlices(splitRangeIntoSlices(block.top, block.bottom, pageHeightPx, breakpoints))
   })
 
   pushCurrentPage()
@@ -1074,8 +1136,8 @@ function addCanvasPagesToPdf(
     const sliceHeightMm = (sliceHeight * renderedWidth) / canvas.width
 
     pdf.addImage(
-      pageCanvas,
-      'PNG',
+      pageCanvas.toDataURL(PDF_PAGE_IMAGE_MIME, PDF_PAGE_IMAGE_QUALITY),
+      PDF_PAGE_IMAGE_FORMAT,
       pdfMode.marginMm.left,
       pdfMode.marginMm.top,
       renderedWidth,
@@ -1198,7 +1260,7 @@ function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks
     }
 
     return {
-      imageDataUrl: pageCanvas.toDataURL('image/png'),
+      imageDataUrl: pageCanvas.toDataURL(PDF_PAGE_IMAGE_MIME, PDF_PAGE_IMAGE_QUALITY),
       sliceHeightMm,
       separatorLineSegments,
     }
@@ -1238,6 +1300,7 @@ async function exportPdfInWorker(pages, pdfMode) {
       type: 'export-pdf',
       pages,
       pdfMode,
+      imageFormat: PDF_PAGE_IMAGE_FORMAT,
       renderedWidth: A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right,
     })
   })

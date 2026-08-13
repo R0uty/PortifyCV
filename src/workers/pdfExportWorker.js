@@ -11,6 +11,7 @@ self.onmessage = (event) => {
     pages = [],
     pdfMode,
     renderedWidth,
+    imageFormat = 'JPEG',
   } = payload
 
   try {
@@ -27,7 +28,7 @@ self.onmessage = (event) => {
 
       pdf.addImage(
         page.imageDataUrl,
-        'PNG',
+        imageFormat,
         pdfMode.marginMm.left,
         pdfMode.marginMm.top,
         renderedWidth,
