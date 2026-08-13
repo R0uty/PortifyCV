@@ -424,11 +424,20 @@ export function buildShareUrl(formData, currentHref = window.location.href) {
   return shareUrl
 }
 
+// Reads share data from the URL fragment ONLY. Unlike the fragment, a query
+// string is part of the request line — browsers send it to whatever server
+// hosts this page and it can end up in access/CDN logs. buildShareUrl has
+// always used the fragment, but this used to also accept `?data=` for
+// backward compatibility with pre-1.0 links; that meant opening one of those
+// old links would leak the whole CV to server-side logs, contradicting the
+// "never sent to a server" privacy promise. Query-string data is no longer
+// read — only cleaned out of the visible URL (see below) — so an old link
+// just opens an empty builder instead of silently leaking its payload again
+// on every subsequent open.
 export function readCvStateFromLocation(currentHref = window.location.href) {
   const currentUrl = new URL(currentHref)
   const hashParams = new URLSearchParams(currentUrl.hash.replace(/^#/, ''))
-  const encodedValue = currentUrl.searchParams.get(SHARE_QUERY_PARAM)
-    || hashParams.get(SHARE_QUERY_PARAM)
+  const encodedValue = hashParams.get(SHARE_QUERY_PARAM)
 
   if (!encodedValue) {
     return null
