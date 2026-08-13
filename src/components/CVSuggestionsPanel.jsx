@@ -28,25 +28,9 @@ function CVSuggestionsPanel({
   feedback,
   theme = 'dark',
   locale = 'en',
-  onImproveAboutText,
-  onImproveExperienceText,
 }) {
   const ui = useMemo(() => getUiTheme(theme), [theme])
   const isFinnish = locale === 'fi'
-
-  const runAction = (action) => {
-    if (!action) {
-      return
-    }
-
-    if (action.type === 'about') {
-      onImproveAboutText()
-    }
-
-    if (action.type === 'experience') {
-      onImproveExperienceText(action.index)
-    }
-  }
 
   return (
     <section
@@ -98,20 +82,9 @@ function CVSuggestionsPanel({
                 className={`p-4 ${typeClasses(ui, item.type)}`}
                 style={{ border: '1px solid var(--app-border)' }}
               >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <p className="text-sm font-bold uppercase tracking-[0.04em]">{item.title}</p>
-                    <p className="mt-2 text-sm/6 opacity-90">{item.message}</p>
-                  </div>
-                  {item.action ? (
-                    <button
-                      type="button"
-                      className={`shrink-0 border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
-                      onClick={() => runAction(item.action)}
-                    >
-                      {isFinnish ? 'Paranna tekstiä' : 'Improve text'}
-                    </button>
-                  ) : null}
+                <div>
+                  <p className="text-sm font-bold uppercase tracking-[0.04em]">{item.title}</p>
+                  <p className="mt-2 text-sm/6 opacity-90">{item.message}</p>
                 </div>
               </article>
             ))}

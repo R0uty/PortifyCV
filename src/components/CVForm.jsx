@@ -139,8 +139,6 @@ function CVForm({
   theme = 'dark',
   locale = 'en',
   feedback,
-  onImproveAboutText,
-  onImproveExperienceText,
   onPhotoError,
   selectedTemplate = '',
   selectedTemplateLabel = 'Current template',
@@ -190,7 +188,6 @@ function CVForm({
   const actionButtonClasses = `border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
   const removeButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonDanger}`
   const utilityButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
-  const improveButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
   const sectionDragHandleClasses = `inline-flex cursor-grab select-none items-center gap-2 border px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em] ${ui.button}`
   const sectionDragDotClasses = `h-1 w-1 ${ui.isDark ? 'bg-gray-300' : 'bg-gray-500'}`
   const fieldLabelClassName = `${ui.textSoft} uppercase tracking-[0.06em] text-xs font-semibold`
@@ -198,7 +195,6 @@ function CVForm({
   const itemHeadingClasses = `${ui.textPrimary} uppercase tracking-[0.04em] text-xs font-bold`
   const helperTextClasses = ui.textMuted
   const copy = {
-    improveText: isFinnish ? 'Paranna tekstiä' : 'Improve text',
     hide: isFinnish ? 'Piilota' : 'Hide',
     show: isFinnish ? 'Näytä' : 'Show',
     up: isFinnish ? 'Ylös' : 'Up',
@@ -678,26 +674,10 @@ function CVForm({
               </div>
             ) : null}
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              className={improveButtonClasses}
-              onClick={onImproveAboutText}
-            >
-              {copy.improveText}
-            </button>
-            <p className={`text-xs ${helperTextClasses}`}>
-              {isFinnish
-                ? 'Sääntöpohjainen siivous lyhentää pitkää tekstiä ja pitää yhteenvedon fokusoituna.'
-                : 'Rule-based cleanup shortens long copy and keeps the summary focused.'}
-            </p>
-          </div>
           <InlineTipList
             items={feedback.inlineTips.profile}
             theme={theme}
             locale={locale}
-            actionLabel={copy.improveText}
-            onAction={onImproveAboutText}
           />
         </div>
       </PanelSection>
@@ -903,14 +883,7 @@ function CVForm({
                             ariaLabel={isFinnish ? 'Teknologiat' : 'Technologies'}
                           />
                         </div>
-                        <div className="mt-4 flex flex-wrap items-center gap-3">
-                          <button
-                            type="button"
-                            className={improveButtonClasses}
-                            onClick={() => onImproveExperienceText(index)}
-                          >
-                            {copy.improveText}
-                          </button>
+                        <div className="mt-4">
                           <p className={`text-xs ${helperTextClasses}`}>
                             {isFinnish
                               ? 'Pidä jokainen kohta lyhyenä, toimintakeskeisenä ja helposti silmäiltävänä.'
@@ -921,8 +894,6 @@ function CVForm({
                           items={feedback.inlineTips.experienceItems[index]}
                           theme={theme}
                           locale={locale}
-                          actionLabel={copy.improveText}
-                          onAction={() => onImproveExperienceText(index)}
                         />
                       </SortableItemCard>
                     )

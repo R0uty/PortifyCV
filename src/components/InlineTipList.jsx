@@ -3,12 +3,8 @@ import { getUiTheme } from '../utils/designSystem'
 export default function InlineTipList({
   items = [],
   theme = 'dark',
-  locale = 'en',
-  actionLabel = '',
-  onAction = null,
 }) {
   const ui = getUiTheme(theme)
-  const isFinnish = locale === 'fi'
 
   if (items.length === 0) {
     return null
@@ -28,21 +24,8 @@ export default function InlineTipList({
           }`}
           style={{ border: '1px solid var(--app-border)' }}
         >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.04em]">{item.title}</p>
-              <p className="mt-1 text-sm/6 opacity-90">{item.message}</p>
-            </div>
-            {item.action && onAction ? (
-              <button
-                type="button"
-                className={`shrink-0 border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
-                onClick={onAction}
-              >
-                {actionLabel || (isFinnish ? 'Paranna tekstiä' : 'Improve text')}
-              </button>
-            ) : null}
-          </div>
+          <p className="text-sm font-bold uppercase tracking-[0.04em]">{item.title}</p>
+          <p className="mt-1 text-sm/6 opacity-90">{item.message}</p>
         </div>
       ))}
     </div>

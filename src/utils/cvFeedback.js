@@ -30,41 +30,15 @@ function hasMetric(text) {
   return METRIC_PATTERN.test(text)
 }
 
-function ensureSentence(text) {
-  const normalizedText = normalizeText(text)
-
-  if (!normalizedText) {
-    return ''
-  }
-
-  const withCapitalizedStart =
-    normalizedText.charAt(0).toUpperCase() + normalizedText.slice(1)
-
-  return /[.!?]$/.test(withCapitalizedStart)
-    ? withCapitalizedStart
-    : `${withCapitalizedStart}.`
-}
-
-function limitWordCount(text, maxWords) {
-  const words = normalizeText(text).split(/\s+/)
-
-  if (words.length <= maxWords) {
-    return normalizeText(text)
-  }
-
-  return `${words.slice(0, maxWords).join(' ')}...`
-}
-
 function createFeedbackItem({
   id,
   type,
   section,
   title,
   message,
-  action = null,
   category = 'quality',
 }) {
-  return { id, type, section, title, message, action, category }
+  return { id, type, section, title, message, category }
 }
 
 function createSectionBadge(items, locale = 'en') {
@@ -111,7 +85,6 @@ export function evaluateCvFeedback(formData, options = {}) {
         message: isFinnish
           ? 'Kirjoita 2-3 riviä vahvuuksistasi, painotuksestasi ja tuottamastasi arvosta.'
           : 'Write 2-3 lines about your strengths, focus, and the kind of value you deliver.',
-        action: { type: 'about' },
       }),
     )
   }
@@ -126,7 +99,6 @@ export function evaluateCvFeedback(formData, options = {}) {
         message: isFinnish
           ? 'Pidä esittelyosio tiiviinä, jotta rekrytoija pystyy silmäilemään sen nopeasti.'
           : 'Keep the About section concise so recruiters can scan it quickly.',
-        action: { type: 'about' },
       }),
     )
   }
@@ -211,7 +183,6 @@ export function evaluateCvFeedback(formData, options = {}) {
           message: isFinnish
             ? 'Kuvaa mitä toimitit, paransit tai omistit, jotta rooli näkyy aidosti kokemuksena.'
             : 'Describe what you shipped, improved, or owned so this role reads as real experience.',
-          action: { type: 'experience', index },
         }),
       )
 
@@ -228,7 +199,6 @@ export function evaluateCvFeedback(formData, options = {}) {
           message: isFinnish
             ? 'Lyhyet saavutuksia kuvaavat lauseet ovat helpommin silmäiltäviä kuin pitkät kappaleet.'
             : 'Shorter accomplishment statements are easier to scan than long paragraphs.',
-          action: { type: 'experience', index },
         }),
       )
     }
@@ -270,59 +240,4 @@ export function evaluateCvFeedback(formData, options = {}) {
     experience: createSectionBadge([...experienceItems, ...flattenedExperienceItems], locale),
     },
   }
-}
-
-export function improveAboutText(formData, options = {}) {
-  const locale = options.locale === 'fi' ? 'fi' : 'en'
-  const isFinnish = locale === 'fi'
-  const snapshot = createCvSnapshot(formData)
-  const title = snapshot.title || (isFinnish ? 'Ammattilainen' : 'Professional')
-  const skillsText =
-  snapshot.skills.length > 0
-    ? snapshot.skills.slice(0, 3).join(', ')
-    : isFinnish ? 'strategia, toteutus ja yhteistyö' : 'strategy, execution, and collaboration'
-
-  if (!snapshot.about) {
-  return isFinnish
-    ? `${title}, painotus ${skillsText}, monialainen yhteistyö ja mitattava liiketoimintavaikutus.`
-    : `${title} focused on ${skillsText}, cross-functional delivery, and measurable business impact.`
-  }
-
-  const shortenedText = limitWordCount(snapshot.about, 38)
-
-  return ensureSentence(shortenedText)
-}
-
-export function improveExperienceText(item, options = {}) {
-  const locale = options.locale === 'fi' ? 'fi' : 'en'
-  const isFinnish = locale === 'fi'
-  const role = trimValue(item.role)
-  const company = trimValue(item.company)
-  const description = trimValue(item.description)
-
-  if (!description) {
-    if (role && company) {
-      return isFinnish
-        ? `Johdin ${role.toLowerCase()}-työtä yrityksessä ${company}, yhteistyössä eri tiimien kanssa selkeän liiketoimintavaikutuksen saavuttamiseksi.`
-        : `Led ${role.toLowerCase()} work at ${company}, partnering across teams to ship improvements with clear business impact.`
-    }
-
-    if (role) {
-      return isFinnish
-        ? `Toteutin ${role.toLowerCase()}-työtä suunnittelusta toteutukseen ja mitattaviin tuloksiin asti.`
-        : `Delivered ${role.toLowerCase()} work across planning, execution, and measurable outcome tracking.`
-    }
-
-    if (company) {
-      return isFinnish
-        ? `Tuin keskeisiä hankkeita yrityksessä ${company} ja autoin tiimiä saavuttamaan parempia tuloksia sujuvammin.`
-        : `Supported key initiatives at ${company}, helping the team deliver stronger results and smoother execution.`
-    }
-
-    return isFinnish
-      ? 'Johdin monialaista työtä, paransin toteutusta ja saavutimme tiiminä parempia tuloksia.'
-      : 'Led cross-functional work, improved execution, and delivered stronger outcomes for the team.'
-  }
-
-  return ensureSentence(limitWordCount(description, 30))
 }

@@ -63,11 +63,7 @@ import {
   analyzeJobDescription,
   evaluateAtsScore,
 } from '../utils/atsScore'
-import {
-  evaluateCvFeedback,
-  improveAboutText,
-  improveExperienceText,
-} from '../utils/cvFeedback'
+import { evaluateCvFeedback } from '../utils/cvFeedback'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
@@ -754,51 +750,6 @@ function ResumeBuilderPage({
     showToast(locale === 'fi' ? 'Jakolinkki kopioitu leikepöydälle.' : 'Share link copied to clipboard.')
   }, [formData, locale])
 
-  const handleImproveAboutText = useCallback(() => {
-    const nextAbout = improveAboutText(formData, { locale })
-
-    if (nextAbout === formData.about.trim()) {
-      showToast(locale === 'fi' ? 'Esittelyteksti on jo tiivis.' : 'About text already looks concise.', 'success')
-      return
-    }
-
-    dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'about', value: nextAbout })
-    showToast(locale === 'fi' ? 'Esittelytekstiä parannettu.' : 'About text improved.')
-  }, [dispatchFormData, formData, locale])
-
-  const handleImproveExperienceText = useCallback((index) => {
-    const currentItem = formData.experience[index]
-
-    if (!currentItem) {
-      return
-    }
-
-    const nextDescription = improveExperienceText(currentItem, { locale })
-
-    if (nextDescription === currentItem.description.trim()) {
-      showToast(
-        locale === 'fi'
-          ? `Kokemus ${index + 1} on jo riittävän tiivis.`
-          : `Experience ${index + 1} already looks concise.`,
-        'success',
-      )
-      return
-    }
-
-    dispatchFormData({
-      type: FORM_ACTION.UPDATE_ARRAY_ITEM,
-      section: 'experience',
-      index,
-      field: 'description',
-      value: nextDescription,
-    })
-    showToast(
-      locale === 'fi'
-        ? `Kokemus ${index + 1} -tekstiä parannettu.`
-        : `Experience ${index + 1} text improved.`,
-    )
-  }, [dispatchFormData, formData.experience, locale])
-
   const handleToggleAtsFriendlyMode = useCallback(() => {
     dispatchUi({ type: UI_ACTION.TOGGLE_ATS_MODE })
   }, [])
@@ -1231,8 +1182,6 @@ function ResumeBuilderPage({
         <CVSuggestionsPanel
           feedback={feedback}
           locale={locale}
-          onImproveAboutText={handleImproveAboutText}
-          onImproveExperienceText={handleImproveExperienceText}
         />
           </div>
         </details>
@@ -1253,8 +1202,6 @@ function ResumeBuilderPage({
           dispatchFormData={dispatchFormData}
           errors={errors}
           feedback={feedback}
-          onImproveAboutText={handleImproveAboutText}
-          onImproveExperienceText={handleImproveExperienceText}
           onPhotoError={(message) => showToast(message, 'error')}
           selectedTemplate={selectedTemplate}
           selectedTemplateLabel={currentTemplate.label}
@@ -1274,8 +1221,6 @@ function ResumeBuilderPage({
     handleCopyMissingKeywords,
     handleImportClick,
     handleImportFile,
-    handleImproveAboutText,
-    handleImproveExperienceText,
     handleJobDescriptionChange,
     handleLoadDemo,
     handlePasteCvImport,
