@@ -71,7 +71,7 @@ function App() {
           <div className="project-header__container">
             <div className="project-header__content">
               <img
-                src="/PortifyCV.png"
+                src="/PortifyCV.jpg"
                 alt="PortifyCV"
                 className="project-header__logo"
               />
