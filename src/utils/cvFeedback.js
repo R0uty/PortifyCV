@@ -8,6 +8,42 @@ const ABOUT_WORD_LIMIT = 60
 const EXPERIENCE_WORD_LIMIT = 42
 const METRIC_PATTERN = /\b\d+(?:[.,]\d+)?\s?(?:%|x|k|m)?\b/i
 
+// Classic passive/vague resume openers. Matched as a substring anywhere in the
+// text (not just the start) since "duties included..." and similar phrases as
+// often show up mid-sentence as they do at the front of a bullet.
+const WEAK_PHRASES = [
+  'responsible for',
+  'was responsible',
+  'duties included',
+  'duties include',
+  'in charge of',
+  'tasked with',
+  'worked on',
+  'helped with',
+  'helped to',
+  'assisted with',
+  'assisted in',
+]
+
+// Common strong resume action verbs, past tense. Used to check the opening
+// word of a description or bullet — not exhaustive, just enough to catch the
+// common weak openers ("Was...", "Did...", "Worked...") without flagging
+// reasonable phrasing this list doesn't happen to include.
+const STRONG_ACTION_VERBS = new Set([
+  'led', 'built', 'launched', 'reduced', 'increased', 'grew', 'improved', 'designed',
+  'shipped', 'delivered', 'managed', 'created', 'implemented', 'streamlined',
+  'architected', 'automated', 'negotiated', 'mentored', 'spearheaded', 'optimized',
+  'established', 'drove', 'directed', 'coordinated', 'developed', 'engineered',
+  'executed', 'achieved', 'accelerated', 'boosted', 'cut', 'decreased', 'doubled',
+  'expanded', 'founded', 'generated', 'headed', 'initiated', 'introduced',
+  'overhauled', 'pioneered', 'redesigned', 'refactored', 'resolved', 'restructured',
+  'revamped', 'scaled', 'secured', 'simplified', 'standardized', 'strengthened',
+  'transformed', 'upgraded', 'won', 'authored', 'analyzed', 'consolidated',
+  'deployed', 'enhanced', 'facilitated', 'owned', 'partnered', 'presented',
+  'trained', 'unified', 'migrated', 'centralized', 'modernized', 'devised',
+  'championed', 'orchestrated', 'formulated', 'cultivated', 'defined', 'planned',
+])
+
 function trimValue(value) {
   return value.trim()
 }
@@ -28,6 +64,19 @@ function countWords(text) {
 
 function hasMetric(text) {
   return METRIC_PATTERN.test(text)
+}
+
+function findWeakPhrase(text) {
+  const lowerText = text.toLowerCase()
+
+  return WEAK_PHRASES.find((phrase) => lowerText.includes(phrase)) ?? null
+}
+
+function startsWithActionVerb(text) {
+  const firstWord = text.trim().replace(/^[-•*\d.)\s]+/, '').split(/\s+/)[0] ?? ''
+  const normalizedWord = firstWord.toLowerCase().replace(/[^a-zäöå]/g, '')
+
+  return STRONG_ACTION_VERBS.has(normalizedWord)
 }
 
 function createFeedbackItem({
@@ -214,6 +263,39 @@ export function evaluateCvFeedback(formData, options = {}) {
             ? 'Lisää mittari, kuten käyttöönotto, liikevaihto, säästetty aika tai kasvu, osoittamaan mitattava vaikutus.'
             : 'Include a metric like adoption, revenue, time saved, or growth to show measurable impact.',
           category: 'metrics',
+        }),
+      )
+    }
+
+    const bulletTexts = [description, ...item.achievements.map(trimValue)].filter(Boolean)
+    const weakPhrase = bulletTexts.map(findWeakPhrase).find(Boolean)
+
+    if (weakPhrase) {
+      experienceItemTips[index].push(
+        createFeedbackItem({
+          id: `experience-weak-phrase-${index}`,
+          type: 'tip',
+          section: 'experience',
+          title: isFinnish ? `Vahvista sanamuotoa roolissa ${index + 1}` : `Strengthen the wording in role ${index + 1}`,
+          message: isFinnish
+            ? `Korvaa passiivinen ilmaisu kuten "${weakPhrase}" konkreettisella tuloksella, esim. "Paransin..." tai "Toteutin...".`
+            : `Swap passive phrasing like "${weakPhrase}" for a specific outcome, e.g. "Reduced...", "Led...", or "Built...".`,
+          category: 'phrasing',
+        }),
+      )
+    }
+
+    if (bulletTexts.length > 0 && bulletTexts.every((text) => !startsWithActionVerb(text))) {
+      experienceItemTips[index].push(
+        createFeedbackItem({
+          id: `experience-action-verb-${index}`,
+          type: 'tip',
+          section: 'experience',
+          title: isFinnish ? `Aloita toimintaverbillä roolissa ${index + 1}` : `Open with an action verb in role ${index + 1}`,
+          message: isFinnish
+            ? 'Aloita kuvaus tai luetelmakohta vahvalla verbillä, kuten "Johdin", "Rakensin" tai "Paransin", passiivisen kielen sijaan.'
+            : 'Start the description or bullet with a strong verb like "Led," "Built," or "Improved" instead of a passive opener.',
+          category: 'phrasing',
         }),
       )
     }

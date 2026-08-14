@@ -66,6 +66,9 @@ npm run check:share
 # Verify the form/UI reducers (no browser needed)
 npm run check:reducers
 
+# Verify the rule-based CV feedback engine (no browser needed)
+npm run check:feedback
+
 # Run the end-to-end smoke suite against a production build
 npm run test:e2e
 ```
@@ -77,8 +80,13 @@ link the app generates.
 
 `check:reducers` covers every action `cvFormReducer` and `uiReducer` handle —
 field updates, array-item add/remove/duplicate/move, section reordering,
-merge/reset/import, and unknown-action no-ops. Both scripts are framework-free
-Node harnesses, no test runner required.
+merge/reset/import, and unknown-action no-ops.
+
+`check:feedback` covers `evaluateCvFeedback` (`src/utils/cvFeedback.js`) —
+missing/thin sections, over-length copy, weak-phrase detection ("responsible
+for", "in charge of", ...), and action-verb-opener detection across an
+experience entry's description and achievement bullets. All three scripts are
+framework-free Node harnesses, no test runner required.
 
 `test:e2e` runs the Playwright suite in `e2e/` (landing page, live preview,
 template-gated sections, the Export menu) against `npm run build` +

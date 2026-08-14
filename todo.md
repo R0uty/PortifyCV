@@ -394,10 +394,57 @@ rename pass.
 
 ### Other ideas (lower priority than the above)
 
-- [ ] **18. Extend `cvFeedback.js`'s rule-based suggestions** — action-verb
-      detection, weak-phrase flagging ("responsible for" → suggest
-      impact-framing), a single per-template readiness % instead of scattered
-      tips.
+- [x] **18. Extend `cvFeedback.js`'s rule-based suggestions.** — the
+      action-verb and weak-phrase pieces landed 2026-08-14; the "readiness
+      %" piece was deliberately not built (see below).
+      **Weak-phrase flagging:** a small substring list ("responsible for",
+      "was responsible", "duties included/include", "in charge of", "tasked
+      with", "worked on", "helped with/to", "assisted with/in") is checked
+      across each experience entry's description and every achievement
+      bullet. A hit produces one inline tip naming the offending phrase and
+      suggesting a swap for a specific outcome ("Reduced...", "Led...",
+      "Built...").
+      **Action-verb detection:** checks whether the opening word of each
+      bullet is on a ~70-word list of common strong resume verbs (Led,
+      Built, Reduced, Shipped, ...). The tip only fires when *every* bullet
+      in the entry opens weakly — if even one of several bullets already
+      opens strongly, the entry isn't flagged, so a single deliberately
+      plain description line doesn't get dinged when the achievement list
+      right below it is already doing the job.
+      Both checks feed into the existing `experienceItemTips[index]` array
+      (same place `experience-description-missing` and
+      `experience-too-long` already live), so they show up exactly where
+      the existing tips do — inline next to the entry in the form, in its
+      tip-count badge, and in the "Smart suggestions" panel's priority
+      list — with no changes needed to `CVSuggestionsPanel.jsx` or
+      `CVForm.jsx`. Verified against the demo CV first (its own copy
+      already opens with "Led"/"Partnered"-style verbs and has no weak
+      phrases, so it correctly produces zero new tips — confirmed in
+      `check:feedback` and by loading it in a real browser), then verified
+      the tip actually renders live by typing a deliberately weak
+      description into the form and watching the inline tip and badge
+      appear.
+      Added `scripts/check-cv-feedback.mjs` (`npm run check:feedback`),
+      matching the existing `check:share`/`check:reducers` pattern (16
+      checks: existing profile/skills/experience rules plus the two new
+      ones, including the "at least one strong bullet suppresses the tip"
+      case and the "weak phrase and weak opener can both fire on the same
+      bullet" case).
+      **"A single per-template readiness % instead of scattered tips" —
+      deliberately not built.** The app already ships a prominent 0-100
+      "ATS Score" ("Parser-readiness overview") in the same collapsed
+      panel as these suggestions. A second, differently-computed score
+      sitting right next to it risks reading as redundant or contradictory
+      ("ATS 78" next to, say, "Readiness 64" — same CV, different numbers,
+      no explanation of why) rather than clarifying anything, and replacing
+      the detailed per-entry tips with just a score would throw away the
+      inline you-are-here pointers) that make the existing panel
+      actionable. Whether to add a second score, what it should weigh
+      differently from the ATS score, and whether it replaces or
+      supplements the tip list are product calls, not implementation
+      details — flagging for a real product decision rather than guessing.
+      `npm run lint`, `npm run build`, `check:share`, `check:reducers`, and
+      the new `check:feedback` all pass.
 - [ ] **19. ATS keyword match breakdown** — show matched/missing keywords
       explicitly instead of just a score.
 - [ ] **20. Cover letter generator** reusing the same CV data, keeping the

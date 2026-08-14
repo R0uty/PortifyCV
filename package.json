@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "check:share": "node scripts/check-share-links.mjs",
     "check:reducers": "node scripts/check-reducers.mjs",
+    "check:feedback": "node scripts/check-cv-feedback.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test"
   },
