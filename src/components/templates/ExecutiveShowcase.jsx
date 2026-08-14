@@ -5,9 +5,11 @@
 // presentation. ATS mode (the app's existing global toggle) bypasses this
 // component entirely and falls back to the shared flat renderer (executive.js).
 //
-// Design language: luxury boardroom resume — deep navy / indigo / royal blue,
-// with a single restrained gold accent reserved for the Awards section only
-// (per spec: "Gold should only be used for subtle highlights"). No decorative
+// Design language: luxury boardroom resume — deep navy with a single gold
+// accent (was indigo everywhere but the Awards section, which made this
+// template visually indistinguishable from the Graduate showcase's own
+// indigo accent; gold — the template's actual identity per its own
+// description — is now used throughout instead). No decorative
 // timeline, no boxed section containers — whitespace and thin 1px dividers
 // separate content instead (see DeveloperShowcase / CreativeShowcase / index.css
 // for the more heavily-carded counterexamples). Only Projects and Links use a
@@ -48,10 +50,10 @@ function highlightMetrics(text, showMetrics) {
   ))
 }
 
-function SectionHead({ icon, title, tone }) {
+function SectionHead({ icon, title }) {
   return (
     <div className="executive-showcase__section-head">
-      <span className={`executive-showcase__section-icon${tone === 'gold' ? ' executive-showcase__section-icon--gold' : ''}`} aria-hidden="true">
+      <span className="executive-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
       <p className="executive-showcase__section-title">{title}</p>
@@ -59,10 +61,10 @@ function SectionHead({ icon, title, tone }) {
   )
 }
 
-function Section({ id, placement, icon, title, tone, children }) {
+function Section({ id, placement, icon, title, children }) {
   return (
     <section className="executive-showcase__section" data-export-section={id} data-export-placement={placement}>
-      <SectionHead icon={icon} title={title} tone={tone} />
+      <SectionHead icon={icon} title={title} />
       {children}
     </section>
   )
@@ -244,7 +246,7 @@ export default function ExecutiveShowcase({ formData, locale = 'en', previewRef,
 
     if (key === 'achievements') {
       return (
-        <Section key={key} id="achievements" placement="main" icon="achievements" title={copy.achievements} tone="gold">
+        <Section key={key} id="achievements" placement="main" icon="achievements" title={copy.achievements}>
           <ul className="executive-showcase__award-list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (

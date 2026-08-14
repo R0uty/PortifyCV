@@ -111,6 +111,173 @@ from reading code.
 - [ ] **11. `src/index.css` is 7,879 lines / 135KB** (21KB gz) of hand-written
       Tailwind-alike utilities. Works today; most likely file to rot. Low priority.
 
+## Backlog — 2026-08-14
+
+Brainstormed candidates for the next pass, not yet verified against the running
+app (unlike the numbered findings above, which came from an interactive
+walkthrough — these are ideas to investigate, not confirmed defects). Priority
+call from the same session: **templates visual polish first**, everything else
+after.
+
+### Priority: templates visual polish
+
+- [x] **12. Audit how visually distinct the 10 templates actually are
+      side-by-side.** — audited 2026-08-14 against the running dev server with
+      the demo CV loaded; Executive/Graduate part fixed same day.
+      **Confirmed real:** Modern Professional, Executive, Timeline, and
+      Graduate all read as pale-blue-on-white at a glance in the gallery. Root
+      cause, found by reading `ExecutiveShowcase.jsx`'s CSS (`.executive-showcase__*`
+      in `index.css`), not just its JSX (an earlier pass of this same audit
+      wrongly concluded the component was "grayscale except a gold Awards
+      icon" — that was a false negative from grepping the JSX file only;
+      colors there are pulled from CSS custom properties, not literal
+      Tailwind-alike classes, so the grep found nothing): `--ex-indigo:
+      #4338ca` was used for the role text, section icons, contact icons,
+      metrics, tags, project text, and link icons — i.e. Executive's *entire*
+      accent system, not just a stray value — and that indigo is the same hue
+      family Graduate uses for its own accent. Gold (`--ex-gold`) really was
+      real but confined to one trophy icon and one bullet dot in Awards, per
+      an explicit design spec quoted in the file's own header comment ("Gold
+      should only be used for subtle highlights").
+      **Fixed:** retired `--ex-indigo` entirely, replaced its 10 usages with
+      `--ex-gold` (recolored from `#c9a227` to `#b45309` — the original value
+      was ~2.4:1 contrast on white, failing WCAG AA for text; `#b45309` clears
+      ~5:1). `executive.js`'s ATS-mode config (`accentColor`, `sectionTitle`,
+      `skillTag`, etc.) swapped from `indigo` to `amber` Tailwind classes to
+      match. Removed the now-redundant `tone="gold"` prop plumbing in
+      `ExecutiveShowcase.jsx` (every section icon is gold now, not just
+      Awards, so the conditional class was dead code). Verified in-browser:
+      Executive's tags/icons/metrics now read warm gold/bronze, clearly
+      distinct from Graduate's indigo/purple, confirmed side-by-side in the
+      template gallery thumbnails. `npm run lint` and `npm run build` both
+      pass.
+      **Still open, not addressed this pass:** `modern` and `techExec` both
+      key off blue (`#2563eb`) — lower-priority than the Executive/Graduate
+      pair since techExec also carries a distinct deep-navy identity
+      (heading, footer band) that Modern doesn't have, so they may already
+      read as distinct enough; wasn't verified in-browser. Also unaddressed:
+      Modern's and Timeline's header *name* text both render in a plain dark
+      neutral (`--ms-navy` / `--tl-slate`) regardless of the template's accent
+      hue — only the smaller role/subtitle text picks up color — which is a
+      more structural, cross-template pattern than the Executive/Graduate fix
+      and would need its own follow-up if the gallery still feels
+      insufficiently distinct after this fix.
+- [x] **13. `creative` template's description promises "one accent colour you
+      can change"** — checked 2026-08-14: false, no such control exists. The
+      Settings modal (`ResumeBuilderPage.jsx`) has exactly two controls —
+      "ATS-friendly mode" toggle and "Section order & visibility" — no color
+      picker anywhere in Settings, the template gallery, or per-template. Each
+      template's `accentColor()` (in its own `src/components/templates/*.js`
+      config, e.g. `creative.js`: `{ light: 'violet', dark: 'violet' }`) is a
+      hardcoded single value, consumed by `CVPreview.jsx` for ATS-friendly
+      mode's flattened rendering — not exposed to the user at all. **Fixed
+      2026-08-14**, alongside the item 12b description rewrite below: the
+      copy now names the actual fixed color ("a violet accent") instead of
+      claiming it's changeable.
+
+Separately, 2026-08-14: rewrote all 10 templates' descriptions (EN + FI,
+`cvTemplates.js`) to drop "For CEOs/CTOs/VPs", "For software engineers,
+DevOps...", "For students, graduates..." style job-title gatekeeping — user
+feedback was that PortifyCV is for everyone, no template should read as
+off-limits based on job title. Descriptions now describe layout/content fit
+("a strong fit if your work is naturally project-based") instead of
+profession. Template *names* (Developer, Tech Executive, etc.) were
+deliberately left unchanged — user chose description-only scope over a full
+rename pass.
+- [x] **14. Typography variety across templates.** — audited and fixed
+      2026-08-14, verified in-browser with Playwright against the running
+      dev server (demo CV, all 10 templates screenshotted and diffed).
+      **Found a real bug, not just a style gap:** 8 of the 10 templates'
+      `*Showcase.jsx` components (Compact, Creative, Developer, Executive,
+      Graduate, Modern, Portfolio, Timeline) had their showcase-root CSS
+      rule (`.dev-showcase`, `.creative-showcase`, etc. in `index.css`)
+      hardcoded to `font-family: ui-sans-serif, system-ui, -apple-system,
+      "Segoe UI", sans-serif` — a generic system-font stack with no mention
+      of Inter at all. This predates item 9 (self-hosting Inter): it was
+      written when the Showcase components were first added, and never
+      updated afterward. Confirmed via `getComputedStyle(...).fontFamily`
+      in a headless browser: `Minimalist` and `Tech Executive` (the two
+      templates that render through the generic `CVPreview` path, not a
+      bespoke Showcase) correctly resolved to `"Inter Variable", "Inter
+      var", Inter, ...`; `Executive` and `Modern Professional` resolved to
+      the bare system stack with no Inter reference whatsoever. So 8 of 10
+      templates were silently never using the self-hosted font item 9
+      shipped — falling back to whatever sans the OS provides (San
+      Francisco, Segoe UI, Roboto, DejaVu Sans on this Linux box), varying
+      by platform in a way the app's "everything is self-contained" story
+      doesn't intend. **Fixed:** all 8 rules changed to `font-family:
+      var(--font-sans)`, matching the one other template family and the
+      rest of the app. Verified post-fix: all 10 templates now resolve to
+      the same Inter Variable stack.
+      **Then addressed the actual "same voice" question:** with the font
+      bug fixed, compared each template's section-title and name-heading
+      CSS. Two families of literal duplication turned up:
+      Executive/Graduate/Modern shared byte-for-byte identical
+      section-title styling (`0.6875rem / 700 / uppercase / 0.16em`
+      tracking) despite stated personas of "restrained boardroom"
+      (executive) vs. approachable/energetic (graduate) vs. plain
+      professional (modern); Graduate and Modern also shared an identical
+      name-heading (`2.875rem / 700 / -0.01em`). Differentiated within the
+      existing single-typeface constraint (Inter only, per item 9 — no new
+      font files):
+      Executive's section-title now `600 / 0.22em` tracking (quieter,
+      more formally spaced — restraint over volume); Graduate's now
+      `700 / 0.7rem / 0.09em` (tighter, less severe) and its name heading
+      `800 / letter-spacing 0` (open, warmer, more confident than tight
+      negative tracking); Modern kept as the unchanged baseline
+      (`700 / 0.16em`, name `700 / -0.01em`) since nothing in its brief
+      calls for a strong voice. Creative and Portfolio also share a
+      typographic pattern (sentence-case section titles + small italic
+      subtitle line) but were left alone — their layouts, card treatments,
+      and color systems already read as clearly distinct in the gallery,
+      unlike the Executive/Graduate/Modern trio which looked like the same
+      template recolored. Developer, Timeline, and Compact were confirmed
+      already structurally distinct (dark sidebar + gradient name; literal
+      timeline with dots; dense single-column) and untouched.
+      `npm run lint` and `npm run build` both pass.
+- [ ] **15. Photo/avatar treatment.** Check shape, size, and border/frame
+      consistency for templates that support a profile photo (`modern`'s
+      "circular photo" per its description) — is it handled well across
+      light backgrounds, dense sidebars, and the PDF export path specifically
+      (rendering can differ from on-screen)?
+- [ ] **16. Two-column (`split`) template balance.** 7 of 10 templates use
+      `layout: 'split'` with a `primarySections`/`secondarySections` divide —
+      worth a pass checking sidebar-vs-main visual weight doesn't look
+      lopsided when a user fills in only a few of the secondary sections
+      (sparse sidebar next to a dense main column), similar in spirit to the
+      Executive Achievements-placement bug already fixed this session
+      (commit `d496499`).
+- [ ] **17. PDF export fidelity vs on-screen preview**, template by template —
+      spacing, color, and font-weight can drift between the live `CVPreview`
+      render and the `html2canvas`-captured PDF; worth a visual diff pass now
+      that PDF export quality work just landed (commit `0ddc644`).
+
+### Other ideas (lower priority than the above)
+
+- [ ] **18. Extend `cvFeedback.js`'s rule-based suggestions** — action-verb
+      detection, weak-phrase flagging ("responsible for" → suggest
+      impact-framing), a single per-template readiness % instead of scattered
+      tips.
+- [ ] **19. ATS keyword match breakdown** — show matched/missing keywords
+      explicitly instead of just a score.
+- [ ] **20. Cover letter generator** reusing the same CV data, keeping the
+      no-server privacy story intact.
+- [ ] **21. Lean harder into the privacy differentiator on the landing page**
+      ("nothing ever touches a server" vs. account-required competitors) —
+      currently a footer trust line, could be a stronger primary hook.
+- [ ] **22. Shareable/embeddable "made with PortifyCV" badge** off the
+      template gallery, for organic growth.
+- [ ] **23. Lock the new Playwright e2e suite into branch protection** now
+      that it's in CI (`.github/workflows/ci.yml`), so it actually gates
+      merges rather than just running.
+- [ ] **24. Optional session-only "restore last session" via `sessionStorage`**
+      — reduces accidental-refresh data loss without breaking the "nothing
+      persists once the tab closes" promise (would need explicit opt-in
+      copy so it doesn't quietly contradict that claim).
+- [ ] **25. Per-template code-splitting** — only one template renders at a
+      time; lazy-loading each `*Showcase.jsx` could trim the initial bundle
+      further now that the PDF libs are already lazy.
+
 ## Checked and fine — don't re-investigate
 
 - Responsive layout is handled (breakpoints at 1023 / 860 / 560px).

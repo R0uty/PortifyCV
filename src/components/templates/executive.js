@@ -5,8 +5,8 @@ export default {
   // Outer document border — slate-tinted, white bg
   preview: () => 'border-slate-300 bg-white shadow-none',
 
-  // Header strip — white bg, indigo accent border
-  headerColor: () => 'bg-white text-gray-900 border-b border-indigo-200',
+  // Header strip — white bg, amber accent border
+  headerColor: () => 'bg-white text-gray-900 border-b border-amber-200',
 
   // Full name heading — extrabold, large, dark
   headerTitle: () => 'mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-[3.4rem]',
@@ -14,8 +14,8 @@ export default {
   // Professional title — medium weight, muted gray
   headerSubtitle: () => 'mt-2 text-base font-medium leading-7 sm:text-lg text-gray-500',
 
-  // Section headings — tiny uppercase, wide tracking, indigo accent
-  sectionTitle: () => 'text-[0.7rem] font-bold uppercase tracking-[0.28em] text-indigo-600',
+  // Section headings — tiny uppercase, wide tracking, amber accent
+  sectionTitle: () => 'text-[0.7rem] font-bold uppercase tracking-[0.28em] text-amber-600',
 
   // Main content section wrapper — slate-tinted bottom border, extra padding
   mainSection: () => 'border-b border-slate-200 pb-7',
@@ -26,14 +26,14 @@ export default {
   // Individual sidebar section — clean spacing, no card wrapper
   sideSection: () => 'py-4 first:pt-0',
 
-  // Skill tag pill — small, indigo-tinted background
-  skillTag: () => 'rounded-sm border border-indigo-200 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700',
+  // Skill tag pill — small, amber-tinted background
+  skillTag: () => 'rounded-sm border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700',
 
-  // Timeline left-border color — indigo
-  timelineBorder: () => 'border-indigo-300',
+  // Timeline left-border color — amber
+  timelineBorder: () => 'border-amber-300',
 
-  // Timeline dot circle color — indigo fill
-  timelineDot: () => 'border-white bg-indigo-600',
+  // Timeline dot circle color — amber fill
+  timelineDot: () => 'border-white bg-amber-600',
 
   // Education card — bottom border separator, no background
   educationCard: () => 'border-b border-slate-100 py-3',
@@ -44,17 +44,17 @@ export default {
   // Split-column grid — standard ratios (same as default)
   splitColumns: () => 'grid gap-5 sm:gap-6 md:grid-cols-[minmax(0,1.62fr)_minmax(200px,0.88fr)] md:gap-8 print:grid-cols-1',
 
-  // Accent color — indigo for ATS badge tinting
-  accentColor: () => ({ light: 'indigo', dark: 'indigo' }),
+  // Accent color — amber for ATS badge tinting
+  accentColor: () => ({ light: 'amber', dark: 'amber' }),
 
-  // Summary badge — indigo border and fill
-  summaryBadge: () => 'border border-indigo-200 bg-indigo-50 text-indigo-700',
+  // Summary badge — amber border and fill
+  summaryBadge: () => 'border border-amber-200 bg-amber-50 text-amber-700',
 
   // Profile photo border — slate-tinted with background
   photoBorder: (isDark) => isDark ? 'border border-slate-200 bg-slate-50 text-slate-700' : 'border border-slate-200 bg-slate-50 text-slate-700',
 
-  // About section header bottom-border color — indigo
-  aboutBorder: () => 'border-indigo-100',
+  // About section header bottom-border color — amber
+  aboutBorder: () => 'border-amber-100',
 
   // Experience rendering — role and company separately, no timeline dots
   experienceLayout: 'clean',
@@ -65,11 +65,11 @@ export default {
   // Links rendering — icon + label + value
   linksLayout: 'icon-list',
 
-  // Color class for categorized skill group headings — indigo
-  categoryLabelColor: 'text-indigo-400',
+  // Color class for categorized skill group headings — amber
+  categoryLabelColor: 'text-amber-400',
 
-  // Color class for link icons and labels — indigo
-  linkIconColor: 'text-indigo-400',
+  // Color class for link icons and labels — amber
+  linkIconColor: 'text-amber-400',
 
   // Header contact line mode — 'personal' (email/phone/location) with slate accent,
   // wider gap. GitHub/LinkedIn/Portfolio/website stay out of the header; Links only.
@@ -81,11 +81,11 @@ export default {
   // Text size for contact items in header
   headerContactTextSize: 'text-[0.72rem]',
 
-  // Text color for contact items in header — indigo
-  headerContactTextColor: 'text-indigo-500',
+  // Text color for contact items in header — amber
+  headerContactTextColor: 'text-amber-500',
 
-  // Icon color class for contact icons — indigo
-  headerContactIconColor: 'text-indigo-400',
+  // Icon color class for contact icons — amber
+  headerContactIconColor: 'text-amber-400',
 
   // ── Executive Showcase config (non-ATS "boardroom" mode) ──
   // Read by ExecutiveShowcase.jsx via CVPreview's `showcaseConfig={t}` prop.

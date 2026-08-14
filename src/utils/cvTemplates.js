@@ -4,7 +4,7 @@ const templateMap = {
   minimal: {
     id: 'minimal',
     label: 'Minimalist',
-    description: 'Typography only, thin dividers, contact details in the header. Best for marketing, HR, and business roles.',
+    description: 'Typography only, thin dividers, contact details in the header — a clean, no-frills layout that works for any role.',
     variant: 'minimal',
     layout: 'stacked',
     primarySections: ['about', 'experience', 'education', 'skills', 'links'],
@@ -23,7 +23,7 @@ const templateMap = {
   developer: {
     id: 'developer',
     label: 'Developer',
-    description: 'Dark sidebar with project and achievement cards. For software engineers, DevOps, and cloud professionals.',
+    description: 'Dark sidebar with project and achievement cards — a strong fit if your work is naturally project-based.',
     variant: 'developer',
     layout: 'split',
     primarySections: ['about', 'experience', 'projects', 'achievements', 'openSource', 'publications'],
@@ -42,7 +42,7 @@ const templateMap = {
   creative: {
     id: 'creative',
     label: 'Creative',
-    description: 'Editorial profile with a quick-facts sidebar and one accent colour you can change. Suits any profession.',
+    description: 'Editorial profile with a quick-facts sidebar and a violet accent. Suits any profession.',
     variant: 'creative',
     layout: 'split',
     primarySections: ['about', 'experience', 'projects', 'education'],
@@ -61,7 +61,7 @@ const templateMap = {
   modern: {
     id: 'modern',
     label: 'Modern Professional',
-    description: 'Consulting-style layout with a blue timeline and circular photo. For senior engineers, architects, and consultants.',
+    description: 'Consulting-style layout with a blue timeline and circular photo — built for a clear, step-by-step career story.',
     variant: 'modern',
     layout: 'split',
     primarySections: ['about', 'experience', 'education', 'projects', 'achievements'],
@@ -80,7 +80,7 @@ const templateMap = {
   executive: {
     id: 'executive',
     label: 'Executive',
-    description: 'Restrained boardroom layout, gold-accented awards, no timeline. For CEOs, CTOs, VPs, and directors.',
+    description: 'Restrained boardroom layout with a gold accent, no timeline — suits a CV that leads with outcomes over a chronological story.',
     variant: 'executive',
     layout: 'split',
     primarySections: ['about', 'experience', 'leadership', 'projects', 'achievements', 'education'],
@@ -99,7 +99,7 @@ const templateMap = {
   timeline: {
     id: 'timeline',
     label: 'Timeline',
-    description: 'One continuous vertical timeline threading career, education, projects, and awards. For long careers worth walking through.',
+    description: 'One continuous vertical timeline threading career, education, projects, and awards — a strong fit for a long, varied history worth walking through.',
     variant: 'timeline',
     layout: 'split',
     primarySections: ['about', 'experience', 'education', 'certificates', 'projects', 'achievements', 'speaking', 'publications', 'volunteering'],
@@ -118,7 +118,7 @@ const templateMap = {
   graduate: {
     id: 'graduate',
     label: 'Graduate',
-    description: 'Bright indigo layout leading with education, academic projects, and internships. For students, graduates, and career changers.',
+    description: 'Bright indigo layout leading with education, academic projects, and internships — a strong fit when those are the strongest part of your story.',
     variant: 'graduate',
     layout: 'split',
     primarySections: ['about', 'education', 'projects', 'internships', 'experience', 'publications', 'volunteering'],
@@ -137,7 +137,7 @@ const templateMap = {
   compact: {
     id: 'compact',
     label: 'Compact',
-    description: 'Tightens spacing automatically until everything fits one page. For 10–30 year careers that need maximum density.',
+    description: 'Tightens spacing automatically until everything fits one page — built for a long, detailed history that needs to stay to one page.',
     variant: 'compact',
     layout: 'stacked',
     primarySections: ['about', 'skills', 'experience', 'projects', 'education', 'certificates', 'languages', 'links', 'interests'],
@@ -156,7 +156,7 @@ const templateMap = {
   portfolio: {
     id: 'portfolio',
     label: 'Portfolio Hybrid',
-    description: 'Featured project cards, case studies, and tech-stack badges. For developers, designers, and creators.',
+    description: 'Featured project cards, case studies, and tech-stack badges — a strong fit when your work speaks for itself through projects.',
     variant: 'portfolio',
     layout: 'split',
     primarySections: ['about', 'projects', 'experience', 'caseStudies', 'openSource', 'education', 'testimonials'],
@@ -175,7 +175,7 @@ const templateMap = {
   techExec: {
     id: 'techExec',
     label: 'Tech Executive',
-    description: 'Annual-report layout with a timeline and a core-strengths sidebar. For engineering, security, AI, and cloud leaders.',
+    description: 'Annual-report layout with a timeline and a core-strengths sidebar, built for leadership-style narratives.',
     variant: 'techExec',
     layout: 'split',
     primarySections: ['about', 'experience', 'education', 'skills'],
@@ -197,61 +197,61 @@ const templateLocalization = {
   fi: {
     minimal: {
       label: 'Minimalisti',
-      description: 'Pelkkää typografiaa, ohuet erottimet, yhteystiedot otsikossa. Sopii markkinointiin, HR:ään ja liiketoimintaan.',
+      description: 'Pelkkää typografiaa, ohuet erottimet, yhteystiedot otsikossa — selkeä, koruton asettelu joka sopii mihin tahansa rooliin.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Esittely', 'Taidot'],
     },
     developer: {
       label: 'Kehittäjä',
-      description: 'Tumma sivupalkki sekä projekti- ja saavutuskortit. Ohjelmistokehittäjille, DevOps- ja pilviammattilaisille.',
+      description: 'Tumma sivupalkki sekä projekti- ja saavutuskortit — toimii hyvin, jos työsi rakentuu luontevasti projektien ympärille.',
       summaryBadgeLabel: 'Painotus',
       chips: ['Kokemus', 'Stack'],
     },
     creative: {
       label: 'Luova',
-      description: 'Lehtiprofiili, pikatietojen sivupalkki ja yksi vaihdettava aksenttiväri. Sopii mille tahansa ammatille.',
+      description: 'Lehtiprofiili, pikatietojen sivupalkki ja violetti aksenttiväri. Sopii mille tahansa ammatille.',
       summaryBadgeLabel: 'Huomiot',
       chips: ['Tarina', 'Linkit'],
     },
     modern: {
       label: 'Moderni ammattilainen',
-      description: 'Konsulttityylinen asettelu, sininen aikajana ja pyöreä profiilikuva. Vanhemmille insinööreille, arkkitehdeille ja konsulteille.',
+      description: 'Konsulttityylinen asettelu, sininen aikajana ja pyöreä profiilikuva — selkeä, vaihe vaiheelta etenevä uratarina.',
       summaryBadgeLabel: 'Yhteenveto',
       chips: ['Kokemus', 'Taidot'],
     },
     executive: {
       label: 'Johtaja',
-      description: 'Hillitty hallitushuoneasettelu, kultareunaiset tunnustukset, ei aikajanaa. Ylimmälle johdolle.',
+      description: 'Hillitty hallitushuoneasettelu kulta-aksentilla, ei aikajanaa — sopii, kun CV:si nostaa tulokset kronologian edelle.',
       summaryBadgeLabel: 'Johtajaprofiili',
       chips: ['Yhteenveto', 'Johtavuus'],
     },
     timeline: {
       label: 'Aikajana',
-      description: 'Yhtenäinen pystyaikajana yhdistää uran, koulutuksen, projektit ja tunnustukset. Pitkille urille.',
+      description: 'Yhtenäinen pystyaikajana yhdistää uran, koulutuksen, projektit ja tunnustukset — sopii pitkälle, monipuoliselle uralle.',
       summaryBadgeLabel: 'Yleiskatsaus',
       chips: ['Ura', 'Virstanpylväät'],
     },
     graduate: {
       label: 'Tutkinto',
-      description: 'Kirkas indigoasettelu nostaa koulutuksen, akateemiset projektit ja harjoittelut etusijalle. Opiskelijoille ja vastavalmistuneille.',
+      description: 'Kirkas indigoasettelu nostaa koulutuksen, akateemiset projektit ja harjoittelut etusijalle — sopii, kun ne ovat tarinasi vahvin osa.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Koulutus', 'Taidot'],
     },
     compact: {
       label: 'Tiivis',
-      description: 'Tiivistää välit automaattisesti, kunnes sisältö mahtuu yhdelle sivulle. 10–30 vuoden kokemukselle.',
+      description: 'Tiivistää välit automaattisesti, kunnes sisältö mahtuu yhdelle sivulle — pitkälle, yksityiskohtaiselle uralle joka pitää saada yhdelle sivulle.',
       summaryBadgeLabel: 'Profiili',
       chips: ['CV', '1-sivu'],
     },
     portfolio: {
       label: 'Portfoliohybridi',
-      description: 'Esittelyprojektit, tapaustutkimukset ja teknologiamerkit. Kehittäjille, suunnittelijoille ja luoville tekijöille.',
+      description: 'Esittelyprojektit, tapaustutkimukset ja teknologiamerkit — sopii, kun työsi puhuu puolestaan projektien kautta.',
       summaryBadgeLabel: 'Esittely',
       chips: ['Portfolio', 'Linkit'],
     },
     techExec: {
       label: 'Tekninen johtaja',
-      description: 'Vuosikertomustyylinen asettelu, aikajana ja ydinvahvuuksien sivupalkki. Tekniikan, tietoturvan, tekoälyn ja pilven johtajille.',
+      description: 'Vuosikertomustyylinen asettelu, aikajana ja ydinvahvuuksien sivupalkki — rakennettu johtajuustarinoille.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Vahvuudet', 'Projektit'],
     },

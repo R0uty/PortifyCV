@@ -3053,7 +3053,7 @@ select.floating-field__control {
   overflow: hidden;
   background: var(--dev-bg);
   color: var(--dev-text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 
   /* Match the app's shared A4-ish paper sizing (same variables every other
      template's `.preview-document` uses) without inheriting that class's
@@ -3970,7 +3970,7 @@ select.floating-field__control {
   overflow: hidden;
   background: var(--cs-card);
   color: var(--cs-text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   border-radius: 28px;
   box-shadow: 0 24px 60px -32px rgba(30, 41, 59, 0.22);
 
@@ -4611,7 +4611,7 @@ select.floating-field__control {
   position: relative;
   background: var(--ms-bg);
   color: var(--ms-text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   border-radius: 20px;
   box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.22);
 
@@ -5246,12 +5246,19 @@ select.floating-field__control {
 
 .executive-showcase {
   --ex-navy: #0f172a;
-  --ex-indigo: #4338ca;
-  --ex-blue: #2563eb;
+  /* Was indigo (#4338ca) — the same hue family the Graduate showcase uses
+     for its own accent, so the two templates read as near-identical at a
+     glance despite unrelated descriptions ("restrained boardroom" vs
+     "bright indigo layout"). Gold is this template's actual identity per
+     its own description; it used to appear only on the Awards icon/dot,
+     everywhere else was this indigo. Now gold is the one accent, used
+     everywhere indigo was — #b45309 (not the lighter #c9a227 the Awards
+     dot used) so body-text-weight usages (role, tags, metrics) clear
+     4.5:1 contrast on white/var(--ex-card), not just decorative icons. */
+  --ex-gold: #b45309;
   --ex-gray: #64748b;
   --ex-light-gray: #f1f5f9;
   --ex-border: #cbd5e1;
-  --ex-gold: #c9a227;
   --ex-text: #1e293b;
   /* Deliberately NOT pure #ffffff — same blank-canvas PDF export guard used
      by the Creative/Modern Showcases (see those blocks' comments above):
@@ -5265,7 +5272,7 @@ select.floating-field__control {
   position: relative;
   background: var(--ex-bg);
   color: var(--ex-text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   border-radius: 16px;
   box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.2);
 
@@ -5318,7 +5325,7 @@ select.floating-field__control {
   margin-top: 0.5rem;
   font-size: 1.125rem;
   font-weight: 500;
-  color: var(--ex-indigo);
+  color: var(--ex-gold);
 }
 
 .executive-showcase__tagline {
@@ -5348,7 +5355,7 @@ select.floating-field__control {
 
 .executive-showcase__contact-icon {
   display: inline-flex;
-  color: var(--ex-indigo);
+  color: var(--ex-gold);
 }
 
 .executive-showcase__photo-wrap {
@@ -5405,10 +5412,6 @@ select.floating-field__control {
 .executive-showcase__section-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--ex-indigo);
-}
-
-.executive-showcase__section-icon--gold {
   color: var(--ex-gold);
 }
 
@@ -5419,9 +5422,9 @@ select.floating-field__control {
 
 .executive-showcase__section-title {
   font-size: 0.6875rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.22em;
   color: var(--ex-navy);
 }
 
@@ -5505,11 +5508,11 @@ select.floating-field__control {
 }
 
 .executive-showcase__bullets li::marker {
-  color: var(--ex-indigo);
+  color: var(--ex-gold);
 }
 
 .executive-showcase__metric {
-  color: var(--ex-indigo);
+  color: var(--ex-gold);
   font-weight: 700;
 }
 
@@ -5539,7 +5542,7 @@ select.floating-field__control {
   margin-top: 0.15rem;
   font-size: 0.74rem;
   font-weight: 600;
-  color: var(--ex-indigo);
+  color: var(--ex-gold);
 }
 
 .executive-showcase__project-desc {
@@ -5554,7 +5557,7 @@ select.floating-field__control {
   margin-top: 0.5rem;
   font-size: 0.78rem;
   font-weight: 700;
-  color: var(--ex-indigo);
+  color: var(--ex-gold);
 }
 
 /* ── Sidebar: plain lists — no card wrapper, thin dividers only ── */
@@ -5605,7 +5608,7 @@ select.floating-field__control {
   margin-top: 0.3rem;
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--ex-indigo);
+  color: var(--ex-gold);
 }
 
 /* ── Core Competencies ── */
@@ -5675,11 +5678,11 @@ select.floating-field__control {
   padding: 0.28rem 0.6rem;
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--ex-indigo);
+  color: var(--ex-gold);
   background: transparent;
 }
 
-/* ── Awards (the one place gold is used) ── */
+/* ── Awards ── */
 
 .executive-showcase__award-list {
   margin-top: 0.9rem;
@@ -5752,7 +5755,7 @@ select.floating-field__control {
 .executive-showcase__link-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--ex-indigo);
+  color: var(--ex-gold);
 }
 
 .executive-showcase__link-label {
@@ -5857,7 +5860,7 @@ select.floating-field__control {
   position: relative;
   background: var(--tl-bg);
   color: var(--tl-text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   border-radius: 18px;
   box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.2);
 
@@ -6406,7 +6409,7 @@ select.floating-field__control {
   position: relative;
   background: var(--gr-bg);
   color: var(--gr-text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   border-radius: 20px;
   box-shadow: 0 24px 60px -32px rgba(79, 70, 229, 0.18);
 
@@ -6449,8 +6452,8 @@ select.floating-field__control {
 .graduate-showcase__name {
   margin-top: 0.5rem;
   font-size: 2.875rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  letter-spacing: 0;
   line-height: 1.05;
   color: var(--gr-indigo);
 }
@@ -6568,10 +6571,10 @@ select.floating-field__control {
 }
 
 .graduate-showcase__section-title {
-  font-size: 0.6875rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.09em;
   color: var(--gr-indigo);
 }
 
@@ -7042,7 +7045,7 @@ select.floating-field__control {
   position: relative;
   background: var(--cp-bg);
   color: var(--cp-text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   border-radius: 8px;
   box-shadow: 0 20px 50px -30px rgba(15, 23, 42, 0.25);
 
@@ -7480,7 +7483,7 @@ select.floating-field__control {
   position: relative;
   background: var(--pf-bg);
   color: var(--pf-text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
   border-radius: 22px;
   box-shadow: 0 24px 60px -32px rgba(5, 150, 105, 0.2);
 
