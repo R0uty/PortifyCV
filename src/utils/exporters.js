@@ -213,6 +213,59 @@ function getPhotoDataUrl(value) {
   return trimmedValue
 }
 
+function loadImageFromDataUrl(dataUrl) {
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+    image.onload = () => resolve(image)
+    image.onerror = () => reject(new Error('Could not load photo for PDF export.'))
+    image.src = dataUrl
+  })
+}
+
+// Every other rendering surface (on-screen preview, HTML export, the
+// html2canvas-based PDF) crops the profile photo with CSS `object-fit:
+// cover`, centering on the shorter edge. This text-based fallback instead
+// draws straight into jsPDF's `addImage`, which stretches the source image
+// to fill the given width/height rather than cropping it — a non-square
+// upload (the common case; there is no crop step on upload) would come out
+// visibly squished. Center-cropping to a square here first keeps the
+// fallback's proportions consistent with every other export path.
+async function cropPhotoDataUrlToSquare(dataUrl) {
+  try {
+    const image = await loadImageFromDataUrl(dataUrl)
+    const side = Math.min(image.naturalWidth, image.naturalHeight)
+
+    if (!side) {
+      return dataUrl
+    }
+
+    const canvas = document.createElement('canvas')
+    canvas.width = side
+    canvas.height = side
+    const context = canvas.getContext('2d')
+
+    if (!context) {
+      return dataUrl
+    }
+
+    context.drawImage(
+      image,
+      (image.naturalWidth - side) / 2,
+      (image.naturalHeight - side) / 2,
+      side,
+      side,
+      0,
+      0,
+      side,
+      side,
+    )
+
+    return canvas.toDataURL('image/jpeg', 0.92)
+  } catch {
+    return dataUrl
+  }
+}
+
 function getImageFormatFromDataUrl(dataUrl) {
   if (/^data:image\/png;base64,/i.test(dataUrl)) {
     return 'PNG'
@@ -1333,7 +1386,8 @@ async function drawFallbackHeader(pdf, snapshot, marginMm, palette, includePhoto
   const headerY = marginMm.top
   const title = snapshot.fullName || copy.yourName
   const subtitle = snapshot.title || copy.professionalTitle
-  const photoDataUrl = getPhotoDataUrl(snapshot.photo)
+  const rawPhotoDataUrl = getPhotoDataUrl(snapshot.photo)
+  const photoDataUrl = rawPhotoDataUrl ? await cropPhotoDataUrlToSquare(rawPhotoDataUrl) : ''
   const photoSize = 21
   const photoGap = 6
   const hasPhoto = includePhoto && Boolean(photoDataUrl)

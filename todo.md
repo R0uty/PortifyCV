@@ -252,11 +252,48 @@ rename pass.
       already structurally distinct (dark sidebar + gradient name; literal
       timeline with dots; dense single-column) and untouched.
       `npm run lint` and `npm run build` both pass.
-- [ ] **15. Photo/avatar treatment.** Check shape, size, and border/frame
-      consistency for templates that support a profile photo (`modern`'s
-      "circular photo" per its description) — is it handled well across
-      light backgrounds, dense sidebars, and the PDF export path specifically
-      (rendering can differ from on-screen)?
+- [x] **15. Photo/avatar treatment.** — audited 2026-08-14. Checked all 10
+      templates' photo configs (`src/components/templates/*.js`) and their
+      rendered CSS in `src/styles/`.
+      **Confirmed real, fixed:** the PDF export's text-based fallback
+      (`drawFallbackHeader` in `exporters.js`, used when `html2canvas`
+      produces a blank canvas or hits an unsupported-color error) drew the
+      profile photo straight into `jsPDF`'s `addImage(data, format, x, y,
+      21, 21)`. `addImage` stretches the source to exactly fill the given
+      box — it does not crop. Every other rendering surface (on-screen
+      preview, HTML export, the normal `html2canvas`-based PDF) instead uses
+      CSS `object-fit: cover`, which center-crops. There is no crop step on
+      upload (`buildProfilePhotoDataUrl` in `CVForm.jsx` only downscales,
+      preserving the original aspect ratio), so any non-square photo — the
+      common case — would render visibly squished specifically in this one
+      fallback path, while looking correct everywhere else. **Fixed:** added
+      `cropPhotoDataUrlToSquare()`, which center-crops the photo to a square
+      on an offscreen canvas (matching `object-fit: cover`'s crop
+      geometry) before it reaches `addImage`, falling back to the
+      uncropped image if cropping fails for any reason (this is already a
+      last-resort fallback path — it should degrade, not throw). Verified
+      the crop math directly in a real browser: a synthetic 400×200 image
+      with red/lime strips outside the center 200×200 window cropped to
+      exactly that 200×200 center region, confirming a true center-crop
+      rather than a full-image squish.
+      **Checked and left alone:** sizes vary by template (5.75rem Compact up
+      to 8.75rem Executive/Creative) and border treatments vary (thin
+      accent-color rings, gradient rings, glow shadows) — read as
+      intentional per-template variety, not inconsistency, and every
+      description that specifically names the photo shape (`modern`'s
+      "circular photo") matches what's actually rendered. `creative`'s photo
+      is a rounded square (`border-radius: 28px`) while every other
+      template with a bespoke Showcase renders a full circle (`9999px`) —
+      flagged but *not* changed: Creative's own CSS deliberately uses
+      moderate rounded corners everywhere (cards, tags, sidebar) as part of
+      its "magazine-style" identity, unlike the app's normal sharp-corner
+      utility layer, so the squarer photo reads as consistent with that
+      template's own visual language rather than a copy-paste miss — same
+      judgment call as leaving Creative/Portfolio's shared typographic
+      pattern alone in item 14. Worth a second look only if the gallery
+      still feels like Creative doesn't fit once other items land.
+      `npm run lint`, `npm run build`, `check:share`, and `check:reducers`
+      all pass.
 - [ ] **16. Two-column (`split`) template balance.** 7 of 10 templates use
       `layout: 'split'` with a `primarySections`/`secondarySections` divide —
       worth a pass checking sidebar-vs-main visual weight doesn't look
