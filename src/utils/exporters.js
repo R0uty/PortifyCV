@@ -734,8 +734,19 @@ async function renderCaptureCanvas(captureRoot, captureOptions = {}) {
     backgroundColor: '#ffffff',
     width: captureWidth,
     height: captureHeight,
-    windowWidth: captureWidth,
-    windowHeight: captureHeight,
+    // html2canvas lays the clone out in its own virtual window before
+    // cropping to width/height, and that virtual window is what sm:/md:/lg:
+    // utility classes evaluate their @media queries against. The clone
+    // itself is only as wide as the live preview pane (captureWidth — often
+    // well under common breakpoints, e.g. ~615px at 100% zoom in the
+    // split-pane layout), but on screen those same classes evaluate against
+    // the real browser window, which is almost always wider. Without this,
+    // a template can visibly reflow between the live preview and the
+    // exported PDF (an experience entry's date column dropping onto its
+    // own line, etc.) purely because the capture's virtual window is
+    // narrower than the real one was.
+    windowWidth: Math.max(captureWidth, window.innerWidth),
+    windowHeight: Math.max(captureHeight, window.innerHeight),
     scrollX: 0,
     scrollY: 0,
     imageTimeout: 0,

@@ -345,10 +345,52 @@ rename pass.
       `npm run lint`, `npm run build`, `check:share`, and `check:reducers`
       all pass; the fix was verified by re-screenshotting Tech Executive
       before/after.
-- [ ] **17. PDF export fidelity vs on-screen preview**, template by template —
-      spacing, color, and font-weight can drift between the live `CVPreview`
-      render and the `html2canvas`-captured PDF; worth a visual diff pass now
-      that PDF export quality work just landed (commit `0ddc644`).
+- [x] **17. PDF export fidelity vs on-screen preview.** — audited and fixed
+      2026-08-14. Loaded the demo CV, exported real PDFs (`html2canvas` →
+      `jsPDF`, not the text fallback) for Minimalist, Developer, Executive,
+      and Modern Professional, rendered the PDF pages back to images with
+      PyMuPDF, and diffed them against screenshots of the live preview for
+      the same templates.
+      **Found and fixed a real, structural bug, not just a style nit:** the
+      Minimalist export dropped the "JAN 2022 - PRESENT" date from its
+      on-screen position (top-right, inline with the job title) onto its
+      own line below the skill tags — a genuine layout reflow, not a minor
+      spacing drift. Root cause: `createExportSandbox` sizes the capture
+      clone to the live preview pane's actual width (`previewWidthPx` —
+      only ~616px at 100% zoom in the split-pane layout, since the pane is
+      much narrower than the full browser window), and
+      `renderCaptureCanvas` passed that same narrow width as `html2canvas`'s
+      `windowWidth`. `html2canvas` uses `windowWidth` as the virtual
+      browser-window size it evaluates `@media` queries against before
+      cropping to the requested `width`/`height` — so every `sm:`/`md:`/
+      `lg:` responsive utility class used across the CV templates (this one
+      was `sm:flex-row` on the experience-entry header, `src/components/
+      CVPreview.jsx:502`) evaluated against ~616px in the export and
+      silently fell back to its mobile/stacked layout, while on screen the
+      exact same classes evaluate against the real browser window (almost
+      always well over any breakpoint), so the desktop layout held. Same
+      root cause would affect any other `sm:`/`md:`/`lg:` usage in any
+      template whenever the live preview pane is narrower than that
+      breakpoint — this wasn't a one-off, it was systemic.
+      **Fixed** by decoupling the two: `windowWidth`/`windowHeight` now use
+      `Math.max(captureWidth, window.innerWidth)` (and the height
+      equivalent) instead of reusing `captureWidth`/`captureHeight`, so
+      `@media` queries evaluate against a window at least as wide as the
+      real one the user was looking at, while the crop region
+      (`width`/`height`, unchanged) still captures only the clone's actual
+      content — this is a standard, documented `html2canvas` pattern for
+      exactly this class of problem. Verified in a real browser:
+      re-exported all 4 templates post-fix — Minimalist's date is back
+      inline; Developer, Executive, and Modern Professional (which weren't
+      visibly broken, since their info rows aren't as tight against the
+      `sm:` breakpoint) still match the live preview with no regressions.
+      Also spot-checked that an ATS-mode export still renders correctly
+      (loads, paginates, no blank/corrupted output) — the fix only widens
+      the virtual capture window, it doesn't touch `width`/`height` (the
+      actual crop dimensions), which ATS mode depends on for its fixed A4
+      content width.
+      `npm run lint`, `npm run build`, `check:share`, and `check:reducers`
+      all pass.
 
 ### Other ideas (lower priority than the above)
 
