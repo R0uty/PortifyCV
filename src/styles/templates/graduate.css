@@ -1,0 +1,625 @@
+/* ==========================================================================
+   Graduate Showcase — hand-authored component styles for the Graduate
+   template's non-ATS "future potential" mode. Scoped entirely under
+   `.graduate-showcase`. Bright, optimistic indigo/blue/sky palette with
+   soft rounded indigo-tinted section cards in the main column (a friendlier
+   surface treatment than Executive/Timeline's deliberately austere "no
+   heavy containers" style — Graduate leans into "modern, fresh, welcoming"
+   per the brief). Sidebar sections stay plain/bordered so the page doesn't
+   read as overly colourful. Education renders first and biggest, since it's
+   the strongest asset for a candidate with limited work history.
+   ========================================================================== */
+
+.graduate-showcase {
+  --gr-indigo: #4f46e5;
+  --gr-blue: #3b82f6;
+  --gr-sky: #60a5fa;
+  --gr-green: #22c55e;
+  --gr-purple: #8b5cf6;
+  --gr-gray: #64748b;
+  --gr-border: #e2e8f0;
+  --gr-text: #1e293b;
+  --gr-surface: #eef2ff;
+  --gr-card: #ffffff;
+  /* Deliberately NOT pure #ffffff — same blank-canvas PDF export guard used
+     by the other Showcases (see their blocks' comments above). */
+  --gr-bg: #f7f7fa;
+
+  position: relative;
+  background: var(--gr-bg);
+  color: var(--gr-text);
+  font-family: var(--font-sans);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px -32px rgba(79, 70, 229, 0.18);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.graduate-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.pdf-export-root.graduate-showcase .graduate-showcase__header {
+  border-radius: 0 !important;
+}
+
+/* ── Header ── */
+
+.graduate-showcase__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.75rem;
+  padding: 2.5rem 2.75rem 1.75rem;
+  background: var(--gr-surface);
+  border-radius: 20px 20px 0 0;
+}
+
+.graduate-showcase__kicker {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--gr-gray);
+}
+
+.graduate-showcase__name {
+  margin-top: 0.5rem;
+  font-size: 2.875rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.05;
+  color: var(--gr-indigo);
+}
+
+.graduate-showcase__role {
+  margin-top: 0.5rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--gr-blue);
+}
+
+.graduate-showcase__tagline {
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--gr-gray);
+  max-width: 48ch;
+}
+
+.graduate-showcase__contact {
+  margin-top: 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem 1.2rem;
+}
+
+.graduate-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--gr-gray);
+  white-space: nowrap;
+}
+
+.graduate-showcase__contact-icon {
+  display: inline-flex;
+  color: var(--gr-indigo);
+}
+
+.graduate-showcase__photo-wrap {
+  flex-shrink: 0;
+}
+
+.graduate-showcase__photo {
+  display: block;
+  width: 7.25rem;
+  height: 7.25rem;
+  object-fit: cover;
+  border-radius: 9999px;
+  border: 3px solid var(--gr-indigo);
+}
+
+/* ── Body layout: main (65%) + sidebar (35%) ── */
+
+.graduate-showcase__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.86fr) minmax(0, 1fr);
+  gap: 2rem;
+  padding: 0.5rem 2.75rem 2.75rem;
+}
+
+.graduate-showcase__main {
+  min-width: 0;
+}
+
+.graduate-showcase__sidebar {
+  min-width: 0;
+}
+
+/* ── Sections — soft indigo card in main, plain bordered card in sidebar ── */
+
+.graduate-showcase__section {
+  border-radius: 20px;
+  background: var(--gr-surface);
+  padding: 1.25rem 1.4rem 1.5rem;
+}
+
+.graduate-showcase__section--plain {
+  background: transparent;
+  border: 1px solid var(--gr-border);
+  border-radius: 16px;
+  padding: 1.1rem 1.25rem 1.35rem;
+}
+
+.graduate-showcase__section + .graduate-showcase__section {
+  margin-top: 1.875rem;
+}
+
+.graduate-showcase__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.graduate-showcase__section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 10px;
+  background: rgba(79, 70, 229, 0.12);
+  color: var(--gr-indigo);
+}
+
+.graduate-showcase__section--plain .graduate-showcase__section-icon {
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.graduate-showcase__section-icon svg {
+  height: 0.9rem;
+  width: 0.9rem;
+}
+
+.graduate-showcase__section-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--gr-indigo);
+}
+
+.graduate-showcase__empty {
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  color: var(--gr-gray);
+}
+
+/* ── Career Objective ── */
+
+.graduate-showcase__summary {
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  line-height: 1.8;
+  color: var(--gr-text);
+  white-space: pre-line;
+}
+
+/* ── Education — the most important section: bigger, richer cards ── */
+
+.graduate-showcase__edu-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.graduate-showcase__edu-card {
+  border-radius: 14px;
+  border: 1px solid var(--gr-border);
+  border-left: 3px solid var(--gr-indigo);
+  background: var(--gr-card);
+  padding: 0.95rem 1.1rem;
+}
+
+.graduate-showcase__edu-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.graduate-showcase__edu-degree {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e1b4b;
+}
+
+.graduate-showcase__edu-meta {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  color: var(--gr-gray);
+}
+
+.graduate-showcase__edu-dates-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.graduate-showcase__edu-dates {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--gr-gray);
+  white-space: nowrap;
+}
+
+.graduate-showcase__badge {
+  display: inline-flex;
+  border-radius: 9999px;
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.graduate-showcase__edu-honors {
+  margin-top: 0.5rem;
+  font-size: 0.76rem;
+  font-style: italic;
+  color: var(--gr-indigo);
+}
+
+.graduate-showcase__bullets {
+  margin-top: 0.5rem;
+  padding-left: 1.05rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.graduate-showcase__bullets li {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--gr-text);
+}
+
+.graduate-showcase__bullets li::marker {
+  color: var(--gr-blue);
+}
+
+/* ── Academic Projects ── */
+
+.graduate-showcase__project-grid {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.graduate-showcase__project-card {
+  border-radius: 14px;
+  border: 1px solid var(--gr-border);
+  background: var(--gr-card);
+  padding: 0.95rem 1.1rem;
+}
+
+.graduate-showcase__project-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1e1b4b;
+}
+
+.graduate-showcase__project-desc {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--gr-text);
+  white-space: pre-line;
+}
+
+.graduate-showcase__project-meta {
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--gr-gray);
+}
+
+.graduate-showcase__project-impact {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--gr-indigo);
+}
+
+.graduate-showcase__tag-row {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.graduate-showcase__tag {
+  border-radius: 8px;
+  border: 1px solid rgba(79, 70, 229, 0.25);
+  background: rgba(79, 70, 229, 0.06);
+  padding: 0.28rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--gr-indigo);
+}
+
+.graduate-showcase__link-row {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.graduate-showcase__link-btn {
+  border-radius: 8px;
+  border: 1px solid var(--gr-border);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--gr-text);
+}
+
+.graduate-showcase__link-btn--primary {
+  border-color: var(--gr-indigo);
+  background: var(--gr-indigo);
+  color: #fff;
+}
+
+/* ── Internships — small dedicated timeline treatment ── */
+
+.graduate-showcase__timeline {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.graduate-showcase__timeline-item {
+  display: flex;
+  gap: 0.85rem;
+}
+
+.graduate-showcase__timeline-item + .graduate-showcase__timeline-item {
+  margin-top: 1.1rem;
+}
+
+.graduate-showcase__timeline-rail {
+  position: relative;
+  width: 0.75rem;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.graduate-showcase__timeline-marker {
+  position: absolute;
+  top: 0.35rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  background: var(--gr-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16);
+  z-index: 1;
+}
+
+.graduate-showcase__timeline-line {
+  position: absolute;
+  top: 0.35rem;
+  bottom: -1.45rem;
+  width: 1px;
+  background: rgba(59, 130, 246, 0.3);
+}
+
+.graduate-showcase__timeline-item:last-child .graduate-showcase__timeline-line {
+  display: none;
+}
+
+.graduate-showcase__timeline-card {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Sidebar: plain lists ── */
+
+.graduate-showcase__list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.graduate-showcase__list-item {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--gr-border);
+}
+
+.graduate-showcase__list-item:first-child {
+  padding-top: 0;
+}
+
+.graduate-showcase__list-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.graduate-showcase__list-item--row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--gr-text);
+}
+
+.graduate-showcase__list-item-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+}
+
+.graduate-showcase__list-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e1b4b;
+}
+
+.graduate-showcase__list-meta {
+  font-size: 0.72rem;
+  color: var(--gr-gray);
+}
+
+.graduate-showcase__list-desc {
+  margin-top: 0.2rem;
+  font-size: 0.76rem;
+  line-height: 1.55;
+  color: var(--gr-text);
+  white-space: pre-line;
+}
+
+.graduate-showcase__list-link {
+  display: inline-block;
+  margin-top: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--gr-indigo);
+}
+
+.graduate-showcase__skill-group {
+  margin-top: 1rem;
+}
+
+.graduate-showcase__skill-group:first-of-type {
+  margin-top: 0.9rem;
+}
+
+.graduate-showcase__skill-group-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gr-gray);
+  margin-bottom: 0.5rem;
+}
+
+.graduate-showcase__link-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.graduate-showcase__link-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 12px;
+  border: 1px solid var(--gr-border);
+  padding: 0.55rem 0.7rem;
+}
+
+.graduate-showcase__link-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--gr-indigo);
+}
+
+.graduate-showcase__link-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gr-gray);
+}
+
+.graduate-showcase__link-value {
+  display: block;
+  overflow: hidden;
+  margin-top: 0.1rem;
+  font-size: 0.76rem;
+  color: var(--gr-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.graduate-showcase__interest-row {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.graduate-showcase__interest-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid var(--gr-border);
+  padding: 0.32rem 0.75rem;
+  font-size: 0.74rem;
+  color: var(--gr-text);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 860px) {
+  .graduate-showcase__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .graduate-showcase__header {
+    padding: 1.75rem 1.25rem 1.25rem;
+  }
+
+  .graduate-showcase__body {
+    padding: 0.5rem 1.25rem 1.75rem;
+  }
+
+  .graduate-showcase__name {
+    font-size: 2.15rem;
+  }
+
+  .graduate-showcase__photo {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .graduate-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .graduate-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
+  .graduate-showcase__timeline-marker {
+    box-shadow: none !important;
+  }
+}
+

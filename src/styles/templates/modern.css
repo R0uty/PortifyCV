@@ -1,0 +1,651 @@
+/* ==========================================================================
+   Modern Showcase — hand-authored component styles for the Modern
+   Professional template's non-ATS "premium executive" mode. Scoped entirely
+   under `.modern-showcase`. Navy / royal-blue / sky-blue palette. No
+   gradients, no decorative shapes, no colored section backgrounds — thin
+   1px borders and generous whitespace only, per the "Not flashy. Not
+   creative. Premium." brief. Section cards use plain white/off-white fills
+   with a border, never a tinted background.
+   ========================================================================== */
+
+.modern-showcase {
+  --ms-navy: #0f172a;
+  --ms-blue: #2563eb;
+  --ms-sky: #60a5fa;
+  --ms-gray: #64748b;
+  --ms-border: #e2e8f0;
+  --ms-text: #1e293b;
+  --ms-muted: #64748b;
+  /* Deliberately NOT pure #ffffff — same blank-canvas PDF export guard used
+     by the Creative Showcase (see that block's comment above): this design
+     is mostly whitespace with thin 1px borders, so an all-#ffffff page
+     background can make every sampled point register as near-white and
+     silently fall back to a plain-text PDF render. */
+  --ms-bg: #f7f7fa;
+  --ms-card: #ffffff;
+  --ms-header-bg: #eff6ff;
+
+  position: relative;
+  background: var(--ms-bg);
+  color: var(--ms-text);
+  font-family: var(--font-sans);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.22);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.modern-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.pdf-export-root.modern-showcase .modern-showcase__header {
+  border-radius: 0 !important;
+}
+
+/* ── Header ── */
+
+.modern-showcase__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.75rem;
+  padding: 2.5rem 2.75rem 1.75rem;
+  background: var(--ms-header-bg);
+  border-radius: 20px 20px 0 0;
+}
+
+.modern-showcase__kicker {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ms-muted);
+}
+
+.modern-showcase__name {
+  margin-top: 0.5rem;
+  font-size: 2.875rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  color: var(--ms-navy);
+}
+
+.modern-showcase__role {
+  margin-top: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ms-blue);
+}
+
+.modern-showcase__contact {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem 1.2rem;
+}
+
+.modern-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--ms-muted);
+  white-space: nowrap;
+}
+
+.modern-showcase__contact-icon {
+  display: inline-flex;
+  color: var(--ms-blue);
+}
+
+.modern-showcase__photo-wrap {
+  flex-shrink: 0;
+}
+
+.modern-showcase__photo {
+  display: block;
+  width: 7.5rem;
+  height: 7.5rem;
+  object-fit: cover;
+  border-radius: 9999px;
+  border: 3px solid var(--ms-navy);
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.25);
+}
+
+.modern-showcase__header-divider {
+  height: 1px;
+  margin: 0 2.75rem;
+  background: var(--ms-blue);
+}
+
+/* ── Body layout: main (65%) + sidebar (35%) ── */
+
+.modern-showcase__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+  gap: 2rem;
+  padding: 1.75rem 2.75rem 2.5rem;
+}
+
+.modern-showcase__main {
+  min-width: 0;
+}
+
+.modern-showcase__sidebar {
+  min-width: 0;
+}
+
+/* ── Sections — thin border card, no tinted background, uppercase title ── */
+
+.modern-showcase__section {
+  border-radius: 12px;
+  border: 1px solid var(--ms-border);
+  background: var(--ms-card);
+  padding: 1.1rem 1.25rem 1.35rem;
+}
+
+.modern-showcase__section + .modern-showcase__section {
+  margin-top: 1.875rem;
+}
+
+.modern-showcase__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modern-showcase__section-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--ms-blue);
+}
+
+.modern-showcase__section-icon svg {
+  height: 0.85rem;
+  width: 0.85rem;
+}
+
+.modern-showcase__section-title {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ms-navy);
+}
+
+.modern-showcase__section-divider {
+  margin-top: 0.6rem;
+  height: 1px;
+  background: var(--ms-border);
+}
+
+.modern-showcase__empty {
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  color: var(--ms-muted);
+}
+
+/* ── Professional Summary ── */
+
+.modern-showcase__summary {
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  line-height: 1.75;
+  color: var(--ms-text);
+  white-space: pre-line;
+}
+
+/* ── Experience (blue timeline, small circles) ── */
+
+.modern-showcase__timeline {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.modern-showcase__timeline-item {
+  display: flex;
+  gap: 0.9rem;
+}
+
+.modern-showcase__timeline-rail {
+  position: relative;
+  width: 0.75rem;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.modern-showcase__timeline-marker {
+  position: absolute;
+  top: 0.3rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--ms-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  z-index: 1;
+}
+
+.modern-showcase__timeline-line {
+  position: absolute;
+  top: 0.3rem;
+  bottom: -1.125rem;
+  width: 1px;
+  background: var(--ms-border);
+}
+
+.modern-showcase__timeline-item:last-child .modern-showcase__timeline-line {
+  display: none;
+}
+
+.modern-showcase__timeline-card {
+  flex: 1;
+  min-width: 0;
+}
+
+.modern-showcase__role-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.modern-showcase__role-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ms-navy);
+}
+
+.modern-showcase__company {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  color: var(--ms-muted);
+}
+
+.modern-showcase__dates {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ms-muted);
+  white-space: nowrap;
+}
+
+.modern-showcase__bullets {
+  margin-top: 0.5rem;
+  padding-left: 1.05rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.modern-showcase__bullets li {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--ms-text);
+}
+
+.modern-showcase__bullets li::marker {
+  color: var(--ms-sky);
+}
+
+.modern-showcase__metric {
+  color: var(--ms-blue);
+  font-weight: 700;
+}
+
+/* ── Education (modern clean cards) ── */
+
+.modern-showcase__edu-grid {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.modern-showcase__edu-card {
+  border-radius: 12px;
+  border: 1px solid var(--ms-border);
+  padding: 0.85rem 1rem;
+}
+
+.modern-showcase__edu-degree {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--ms-navy);
+}
+
+.modern-showcase__edu-meta {
+  margin-top: 0.2rem;
+  font-size: 0.76rem;
+  color: var(--ms-muted);
+}
+
+.modern-showcase__edu-dates {
+  margin-top: 0.15rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ms-muted);
+}
+
+/* ── Projects (simple cards, accent border only) ── */
+
+.modern-showcase__project-grid {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.modern-showcase__project-card {
+  border-radius: 12px;
+  border: 1px solid var(--ms-border);
+  border-left: 3px solid var(--ms-blue);
+  background: var(--ms-card);
+  padding: 0.85rem 1rem;
+}
+
+.modern-showcase__project-name {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--ms-navy);
+}
+
+.modern-showcase__project-desc {
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--ms-text);
+  white-space: pre-line;
+}
+
+.modern-showcase__project-link {
+  margin-top: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--ms-blue);
+  word-break: break-all;
+}
+
+.modern-showcase__tag-row {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.modern-showcase__tag {
+  border-radius: 6px;
+  border: 1px solid var(--ms-border);
+  padding: 0.28rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ms-text);
+  background: transparent;
+}
+
+/* ── Achievements (professional list) ── */
+
+.modern-showcase__achievement-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.modern-showcase__achievement-item {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.modern-showcase__achievement-dot {
+  flex-shrink: 0;
+  margin-top: 0.4rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: var(--ms-blue);
+}
+
+.modern-showcase__achievement-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+}
+
+.modern-showcase__achievement-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ms-navy);
+}
+
+.modern-showcase__achievement-year {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--ms-muted);
+}
+
+.modern-showcase__achievement-desc {
+  margin-top: 0.2rem;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--ms-text);
+  white-space: pre-line;
+}
+
+/* ── Skills (flat grouped tags, no bars/stars) ── */
+
+.modern-showcase__skill-group {
+  margin-top: 1rem;
+}
+
+.modern-showcase__skill-group:first-of-type {
+  margin-top: 0.9rem;
+}
+
+.modern-showcase__skill-group-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ms-muted);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Languages ── */
+
+.modern-showcase__lang-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.modern-showcase__lang-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--ms-text);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ms-border);
+}
+
+.modern-showcase__lang-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.modern-showcase__lang-level {
+  font-size: 0.7rem;
+  color: var(--ms-muted);
+}
+
+/* ── Certificates ── */
+
+.modern-showcase__cert-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.modern-showcase__cert-item {
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--ms-border);
+}
+
+.modern-showcase__cert-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.modern-showcase__cert-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ms-navy);
+}
+
+.modern-showcase__cert-meta {
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--ms-muted);
+}
+
+.modern-showcase__cert-link {
+  display: inline-block;
+  margin-top: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ms-blue);
+}
+
+/* ── Links (minimal cards) ── */
+
+.modern-showcase__link-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.modern-showcase__link-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 10px;
+  border: 1px solid var(--ms-border);
+  padding: 0.55rem 0.7rem;
+}
+
+.modern-showcase__link-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--ms-blue);
+}
+
+.modern-showcase__link-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ms-muted);
+}
+
+.modern-showcase__link-value {
+  display: block;
+  overflow: hidden;
+  margin-top: 0.1rem;
+  font-size: 0.76rem;
+  color: var(--ms-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Interests (simple outline icons) ── */
+
+.modern-showcase__interest-row {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.modern-showcase__interest-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 9999px;
+  border: 1px solid var(--ms-border);
+  padding: 0.32rem 0.7rem;
+  font-size: 0.74rem;
+  color: var(--ms-text);
+}
+
+.modern-showcase__interest-chip svg {
+  height: 0.85rem;
+  width: 0.85rem;
+  color: var(--ms-blue);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 860px) {
+  .modern-showcase__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .modern-showcase__header {
+    padding: 1.75rem 1.25rem 1.25rem;
+  }
+
+  .modern-showcase__header-divider {
+    margin: 0 1.25rem;
+  }
+
+  .modern-showcase__body {
+    padding: 1.25rem 1.25rem 1.75rem;
+  }
+
+  .modern-showcase__name {
+    font-size: 2.1rem;
+  }
+
+  .modern-showcase__photo {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .modern-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .modern-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
+  .modern-showcase__photo {
+    box-shadow: none !important;
+  }
+}
+

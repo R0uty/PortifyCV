@@ -1,0 +1,450 @@
+/* ==========================================================================
+   Compact Showcase — hand-authored component styles for the Compact
+   template's non-ATS "ultra-efficient one-pager" mode. Scoped entirely
+   under `.compact-showcase`. Slate / sky-blue / blue palette. Unlike every
+   other Showcase in this app there is no main/sidebar split — sections
+   render as one flat ordered list, matching the spec's single SECTION
+   ORDER list. Spacing/typography are all driven by CSS custom properties
+   so the three density tiers (cozy/snug/tight, toggled by
+   CompactShowcase.jsx via a class swap) can override them in one place.
+   See that component's "smart space optimisation" useLayoutEffect for how
+   density is chosen.
+   ========================================================================== */
+
+.compact-showcase {
+  --cp-slate: #0f172a;
+  --cp-sky: #0284c7;
+  --cp-blue: #2563eb;
+  --cp-gray: #64748b;
+  --cp-border: #cbd5e1;
+  --cp-text: #1e293b;
+  --cp-card: #ffffff;
+  /* Deliberately NOT pure #ffffff — same blank-canvas PDF export guard used
+     by the other Showcases (see their blocks' comments above). */
+  --cp-bg: #f7f7fa;
+  --cp-header-bg: #f0f9ff;
+
+  /* Cozy density (default) — spacing values match the spec's numbers
+     exactly: 24px top margin, 18px section spacing, 8px element spacing,
+     4px bullet spacing. Snug/tight tiers below scale these down. */
+  --cp-header-pad-top: 1.5rem;
+  --cp-section-gap: 1.125rem;
+  --cp-element-gap: 0.5rem;
+  --cp-bullet-gap: 0.25rem;
+  --cp-tag-gap: 0.375rem;
+  --cp-name-size: 2.25rem;
+  --cp-body-size: 0.68rem;
+  --cp-meta-size: 0.5625rem;
+
+  position: relative;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font-family: var(--font-sans);
+  border-radius: 8px;
+  box-shadow: 0 20px 50px -30px rgba(15, 23, 42, 0.25);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.compact-showcase--snug {
+  --cp-header-pad-top: 1.15rem;
+  --cp-section-gap: 0.85rem;
+  --cp-element-gap: 0.4rem;
+  --cp-bullet-gap: 0.2rem;
+  --cp-tag-gap: 0.3rem;
+  --cp-name-size: 2rem;
+  --cp-body-size: 0.64rem;
+  --cp-meta-size: 0.55rem;
+}
+
+.compact-showcase--tight {
+  --cp-header-pad-top: 0.9rem;
+  --cp-section-gap: 0.65rem;
+  --cp-element-gap: 0.3rem;
+  --cp-bullet-gap: 0.15rem;
+  --cp-tag-gap: 0.25rem;
+  --cp-name-size: 1.85rem;
+  --cp-body-size: 0.6rem;
+  --cp-meta-size: 0.54rem;
+}
+
+.pdf-export-root.compact-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.pdf-export-root.compact-showcase .compact-showcase__header {
+  border-radius: 0 !important;
+}
+
+/* ── Header ── */
+
+.compact-showcase__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: var(--cp-header-pad-top) 1.75rem 0.75rem;
+  background: var(--cp-header-bg);
+  border-radius: 8px 8px 0 0;
+}
+
+.compact-showcase__kicker {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--cp-gray);
+}
+
+.compact-showcase__name {
+  margin-top: 0.2rem;
+  font-size: var(--cp-name-size);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  color: var(--cp-slate);
+}
+
+.compact-showcase__role {
+  margin-top: 0.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--cp-sky);
+}
+
+.compact-showcase__contact {
+  margin-top: 0.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.1rem 0.6rem;
+  font-size: 0.7rem;
+  color: var(--cp-gray);
+}
+
+.compact-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.compact-showcase__contact-sep {
+  margin-right: 0.6rem;
+  color: var(--cp-border);
+}
+
+.compact-showcase__contact-icon {
+  display: inline-flex;
+  color: var(--cp-sky);
+}
+
+.compact-showcase__contact-icon svg {
+  height: 0.7rem;
+  width: 0.7rem;
+}
+
+.compact-showcase__photo-wrap {
+  flex-shrink: 0;
+}
+
+.compact-showcase__photo {
+  display: block;
+  width: 5.75rem;
+  height: 5.75rem;
+  object-fit: cover;
+  border-radius: 9999px;
+  border: 2px solid var(--cp-sky);
+}
+
+/* ── Body: flat section list (no main/sidebar split) ── */
+
+.compact-showcase__body {
+  padding: 0 1.75rem 1.5rem;
+}
+
+.compact-showcase--two-column .compact-showcase__body {
+  column-count: 2;
+  column-gap: 1.5rem;
+}
+
+.compact-showcase__section {
+  break-inside: avoid;
+}
+
+.compact-showcase__section--summary {
+  margin: 0 1.75rem;
+  padding: 0;
+}
+
+.compact-showcase__body > .compact-showcase__section {
+  margin-top: var(--cp-section-gap);
+}
+
+.compact-showcase__section-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--cp-sky);
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--cp-border);
+}
+
+.compact-showcase__empty {
+  margin-top: var(--cp-element-gap);
+  font-size: var(--cp-body-size);
+  color: var(--cp-gray);
+}
+
+/* ── Summary ── */
+
+.compact-showcase__summary {
+  margin-top: var(--cp-element-gap);
+  font-size: var(--cp-body-size);
+  line-height: 1.55;
+  color: var(--cp-text);
+  white-space: pre-line;
+}
+
+/* ── Experience / Education / Certificates rows ── */
+
+.compact-showcase__entry-list {
+  margin-top: var(--cp-element-gap);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-element-gap);
+}
+
+.compact-showcase__entry-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.3rem 0.75rem;
+  font-size: var(--cp-body-size);
+}
+
+.compact-showcase__entry-role {
+  font-weight: 700;
+  color: var(--cp-slate);
+  font-size: var(--cp-body-size);
+}
+
+.compact-showcase__entry-company,
+.compact-showcase__entry-location {
+  color: var(--cp-gray);
+  font-size: var(--cp-body-size);
+}
+
+.compact-showcase__entry-dates {
+  flex-shrink: 0;
+  font-size: var(--cp-meta-size);
+  font-weight: 600;
+  color: var(--cp-gray);
+  white-space: nowrap;
+}
+
+.compact-showcase__bullets {
+  margin-top: var(--cp-bullet-gap);
+  padding-left: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-bullet-gap);
+}
+
+.compact-showcase__bullets li {
+  font-size: var(--cp-body-size);
+  line-height: 1.45;
+  color: var(--cp-text);
+}
+
+.compact-showcase__bullets li::marker {
+  color: var(--cp-sky);
+}
+
+.compact-showcase__metric {
+  color: var(--cp-blue);
+  font-weight: 700;
+}
+
+/* ── Projects ── */
+
+.compact-showcase__project {
+  font-size: var(--cp-body-size);
+}
+
+.compact-showcase__project-desc {
+  color: var(--cp-text);
+  white-space: pre-line;
+}
+
+.compact-showcase__project-stack {
+  margin-top: 0.1rem;
+  font-size: var(--cp-meta-size);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cp-gray);
+}
+
+.compact-showcase__project-links {
+  margin-top: 0.1rem;
+  font-size: var(--cp-meta-size);
+  color: var(--cp-sky);
+  word-break: break-all;
+}
+
+/* ── Skills ── */
+
+.compact-showcase__skill-groups {
+  margin-top: var(--cp-element-gap);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cp-bullet-gap);
+}
+
+.compact-showcase__skill-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.compact-showcase__skill-group-label {
+  flex-shrink: 0;
+  font-size: var(--cp-meta-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cp-gray);
+}
+
+.compact-showcase__tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cp-tag-gap);
+}
+
+.compact-showcase__tag {
+  border-radius: 4px;
+  border: 1px solid var(--cp-border);
+  padding: 0.1rem 0.4rem;
+  font-size: var(--cp-meta-size);
+  font-weight: 600;
+  color: var(--cp-slate);
+  background: transparent;
+}
+
+/* ── Languages / Interests inline lists ── */
+
+.compact-showcase__inline-list {
+  margin-top: var(--cp-element-gap);
+  font-size: var(--cp-body-size);
+  color: var(--cp-text);
+}
+
+/* ── Links ── */
+
+.compact-showcase__link-row {
+  margin-top: var(--cp-element-gap);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 1rem;
+}
+
+.compact-showcase__link-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: var(--cp-body-size);
+}
+
+.compact-showcase__link-icon {
+  display: inline-flex;
+  color: var(--cp-sky);
+}
+
+.compact-showcase__link-icon svg {
+  height: 0.68rem;
+  width: 0.68rem;
+}
+
+.compact-showcase__link-label {
+  font-weight: 700;
+  color: var(--cp-gray);
+  font-size: var(--cp-meta-size);
+  text-transform: uppercase;
+}
+
+.compact-showcase__link-value {
+  color: var(--cp-text);
+}
+
+/* ── Overflow warning (builder-only; data-export-ignore keeps it out of
+   the exported PDF and print output) ── */
+
+.compact-showcase__overflow-warning {
+  margin: 0 1.75rem 1rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.68rem;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 860px) {
+  .compact-showcase--two-column .compact-showcase__body {
+    column-count: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .compact-showcase__header {
+    padding: 1.15rem 1.1rem 0.6rem;
+  }
+
+  .compact-showcase__section--summary {
+    margin: 0 1.1rem;
+  }
+
+  .compact-showcase__body {
+    padding: 0 1.1rem 1.25rem;
+  }
+
+  .compact-showcase__name {
+    font-size: 1.75rem;
+  }
+
+  .compact-showcase__photo {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .compact-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .compact-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
+  .compact-showcase__overflow-warning {
+    display: none !important;
+  }
+}
+

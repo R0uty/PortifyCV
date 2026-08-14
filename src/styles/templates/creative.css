@@ -1,0 +1,645 @@
+/* ==========================================================================
+   Creative Showcase — hand-authored component styles for the Creative
+   template's non-ATS "showcase" mode. Scoped entirely under
+   `.creative-showcase`. Single-accent-color system throughout — accent is
+   used only for text/icons/borders/chip-tints, never as a full section
+   background fill. Every section (main or sidebar) shares the exact same
+   white card treatment, so no section reads as visually distinct.
+   No CSS `filter: blur()` anywhere (a blurred decorative element hung
+   html2canvas during PDF export in the Developer template — see that fix);
+   soft shapes here use radial-gradient fades instead.
+   ========================================================================== */
+
+.creative-showcase {
+  --cs-accent: #7c3aed;
+  --cs-accent-strong: #6d28d9;
+  --cs-accent-soft: #f5f3ff;
+  --cs-accent-soft-2: #ede9fe;
+  --cs-accent-border: #ddd6fe;
+  --cs-text: #1e293b;
+  --cs-muted: #64748b;
+  --cs-border: #e5e7eb;
+  /* Deliberately NOT pure #ffffff: the PDF exporter samples ~80 points across
+     the canvas to detect a "blank" capture (r,g,b all > 248 counts as
+     near-white). This design is mostly whitespace with only thin accent
+     borders/text, so an all-#ffffff page+card background made every sample
+     point register as blank and silently fell back to a plain-text PDF
+     render. A barely-perceptible off-white keeps every sampled pixel just
+     under that threshold so the real card-based render always gets used. */
+  --cs-card: #f7f7fa;
+
+  position: relative;
+  overflow: hidden;
+  background: var(--cs-card);
+  color: var(--cs-text);
+  font-family: var(--font-sans);
+  border-radius: 28px;
+  box-shadow: 0 24px 60px -32px rgba(30, 41, 59, 0.22);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+/* No shadow/rounding for PDF export or real browser printing — matches the
+   spec's "rounded corners in preview mode only / no shadow in PDF". */
+.pdf-export-root.creative-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── Decorative background (soft radial-gradient shapes, no filter/blur) ── */
+
+.creative-showcase__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.creative-showcase__blob {
+  position: absolute;
+  border-radius: 9999px;
+}
+
+.creative-showcase__blob--one {
+  top: -120px;
+  right: -100px;
+  width: 340px;
+  height: 340px;
+  background: radial-gradient(circle, var(--cs-accent-soft-2) 0%, rgba(237, 233, 254, 0) 70%);
+}
+
+.creative-showcase__blob--two {
+  top: 160px;
+  right: 120px;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, var(--cs-accent-soft) 0%, rgba(245, 243, 255, 0) 70%);
+}
+
+.creative-showcase__dots {
+  position: absolute;
+  top: 40px;
+  right: 260px;
+  width: 90px;
+  height: 90px;
+  opacity: 0.35;
+  background-image: radial-gradient(var(--cs-accent-border) 1.4px, transparent 1.4px);
+  background-size: 14px 14px;
+}
+
+/* ── Header (hero) ── */
+
+.creative-showcase__header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.75rem;
+  padding: 2.25rem 2.5rem 1.5rem;
+  background: var(--cs-accent-soft-2);
+  border-bottom: 1px solid var(--cs-accent-border);
+}
+
+.creative-showcase__kicker {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--cs-muted);
+}
+
+.creative-showcase__name {
+  margin-top: 0.5rem;
+  font-size: 2.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--cs-text);
+}
+
+.creative-showcase__role {
+  margin-top: 0.55rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--cs-accent);
+}
+
+.creative-showcase__tagline {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--cs-muted);
+}
+
+.creative-showcase__contact {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem 1.2rem;
+}
+
+.creative-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--cs-muted);
+  white-space: nowrap;
+}
+
+.creative-showcase__contact-icon {
+  display: inline-flex;
+  color: var(--cs-accent);
+}
+
+.creative-showcase__photo-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.creative-showcase__photo {
+  display: block;
+  width: 8.75rem;
+  height: 8.75rem;
+  object-fit: cover;
+  border-radius: 28px;
+  border: 3px solid var(--cs-accent-border);
+}
+
+/* ── Body layout: main (70%) + sidebar profile panel (30%) ── */
+
+.creative-showcase__body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 2.3fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  padding: 0.5rem 2.5rem 2.25rem;
+}
+
+.creative-showcase__main {
+  min-width: 0;
+}
+
+.creative-showcase__sidebar {
+  min-width: 0;
+}
+
+/* ── Sections — every section (main or sidebar) shares this one card
+   treatment, so no single section ever reads as visually distinct. ── */
+
+.creative-showcase__section {
+  animation: cs-fade-up 320ms ease-out both;
+  border-radius: 20px;
+  border: 1px solid var(--cs-border);
+  background: var(--cs-card);
+  box-shadow: 0 12px 28px -22px rgba(30, 41, 59, 0.18);
+  padding: 1.25rem 1.4rem 1.4rem;
+}
+
+.creative-showcase__section + .creative-showcase__section {
+  margin-top: 1.25rem;
+}
+
+.creative-showcase__section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.creative-showcase__section-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--cs-accent);
+}
+
+.creative-showcase__section-icon svg {
+  height: 1.65rem;
+  width: 1.65rem;
+}
+
+.creative-showcase__section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--cs-text);
+}
+
+.creative-showcase__section-subtitle {
+  margin-top: 0.1rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--cs-muted);
+}
+
+.creative-showcase__empty {
+  margin-top: 0.9rem;
+  font-size: 0.82rem;
+  color: var(--cs-muted);
+}
+
+/* ── About Me (editorial intro + personality badges) ── */
+
+.creative-showcase__intro {
+  margin-top: 0.9rem;
+  font-size: 0.92rem;
+  line-height: 1.75;
+  color: #334155;
+  white-space: pre-line;
+}
+
+.creative-showcase__badge-row {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.creative-showcase__badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: var(--cs-accent-soft);
+  border: 1px solid var(--cs-accent-border);
+  color: var(--cs-accent-strong);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+/* ── Experience (floating cards) ── */
+
+.creative-showcase__exp-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.creative-showcase__exp-card {
+  border-radius: 16px;
+  border: 1px solid var(--cs-border);
+  border-left: 4px solid var(--cs-accent);
+  padding: 0.9rem 1.1rem;
+}
+
+.creative-showcase__exp-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.creative-showcase__exp-role {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--cs-text);
+}
+
+.creative-showcase__exp-company {
+  margin-top: 0.1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--cs-accent);
+}
+
+.creative-showcase__exp-dates {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cs-muted);
+}
+
+.creative-showcase__exp-desc {
+  margin-top: 0.5rem;
+  padding-left: 1.1rem;
+}
+
+.creative-showcase__exp-desc li {
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: #334155;
+}
+
+.creative-showcase__exp-desc li::marker {
+  color: var(--cs-accent);
+}
+
+/* ── Projects (showcase cards with accent-strip tints) ── */
+
+.creative-showcase__project-grid {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.creative-showcase__project-card {
+  border-radius: 16px;
+  border: 1px solid var(--cs-border);
+  border-left: 4px solid var(--cs-strip, var(--cs-accent));
+  padding: 0.95rem 1.1rem;
+}
+
+.creative-showcase__project-name {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--cs-text);
+}
+
+.creative-showcase__project-desc {
+  margin-top: 0.35rem;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: #334155;
+  white-space: pre-line;
+}
+
+.creative-showcase__project-meta {
+  margin-top: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cs-muted);
+}
+
+.creative-showcase__project-outcome {
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--cs-accent-strong);
+}
+
+/* ── Education (simple timeline with rounded markers) ── */
+
+.creative-showcase__edu-list {
+  position: relative;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.creative-showcase__edu-item {
+  position: relative;
+  padding-left: 1.4rem;
+}
+
+.creative-showcase__edu-marker {
+  position: absolute;
+  left: 0;
+  top: 0.3rem;
+  height: 0.7rem;
+  width: 0.7rem;
+  border-radius: 9999px;
+  background: var(--cs-accent);
+}
+
+.creative-showcase__edu-line {
+  position: absolute;
+  left: 0.32rem;
+  top: 1.1rem;
+  bottom: -1.1rem;
+  width: 2px;
+  background: var(--cs-accent-border);
+}
+
+.creative-showcase__edu-item:last-child .creative-showcase__edu-line {
+  display: none;
+}
+
+.creative-showcase__edu-degree {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--cs-text);
+}
+
+.creative-showcase__edu-meta {
+  margin-top: 0.15rem;
+  font-size: 0.76rem;
+  color: var(--cs-muted);
+}
+
+.creative-showcase__lang-chip-row {
+  margin-top: 0.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* ── Skills (categorized chip groups) ── */
+
+.creative-showcase__skill-group {
+  margin-top: 1rem;
+}
+
+.creative-showcase__skill-group:first-of-type {
+  margin-top: 0.9rem;
+}
+
+.creative-showcase__skill-group-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cs-muted);
+  margin-bottom: 0.45rem;
+}
+
+.creative-showcase__skill-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.creative-showcase__chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid var(--cs-accent-border);
+  background: var(--cs-accent-soft);
+  color: var(--cs-accent-strong);
+  padding: 0.28rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* ── Certificates (horizontal cards) ── */
+
+.creative-showcase__cert-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.creative-showcase__cert-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  border-radius: 14px;
+  border: 1px solid var(--cs-border);
+  padding: 0.6rem 0.75rem;
+}
+
+.creative-showcase__cert-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--cs-accent);
+  margin-top: 0.1rem;
+}
+
+.creative-showcase__cert-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--cs-text);
+}
+
+.creative-showcase__cert-meta {
+  margin-top: 0.1rem;
+  font-size: 0.7rem;
+  color: var(--cs-muted);
+}
+
+/* ── Links (icon cards) ── */
+
+.creative-showcase__link-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.creative-showcase__link-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 14px;
+  border: 1px solid var(--cs-border);
+  padding: 0.55rem 0.7rem;
+}
+
+.creative-showcase__link-icon {
+  display: inline-flex;
+  height: 1.7rem;
+  width: 1.7rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--cs-accent-soft);
+  color: var(--cs-accent);
+}
+
+.creative-showcase__link-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cs-muted);
+}
+
+.creative-showcase__link-value {
+  display: block;
+  overflow: hidden;
+  font-size: 0.74rem;
+  color: var(--cs-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Interests (icon chips) ── */
+
+.creative-showcase__interest-row {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.creative-showcase__interest-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 9999px;
+  border: 1px solid var(--cs-border);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.76rem;
+  color: var(--cs-text);
+}
+
+.creative-showcase__interest-chip svg {
+  height: 0.9rem;
+  width: 0.9rem;
+  color: var(--cs-accent);
+}
+
+/* ── Animations ── */
+
+@keyframes cs-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ── Responsive: sidebar below header on tablet, single column on mobile ── */
+
+@media (max-width: 860px) {
+  .creative-showcase__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .creative-showcase__header {
+    padding: 1.5rem 1.25rem 1.1rem;
+  }
+
+  .creative-showcase__body {
+    padding: 0.5rem 1.25rem 1.5rem;
+  }
+
+  .creative-showcase__name {
+    font-size: 2.1rem;
+  }
+
+  .creative-showcase__photo {
+    width: 6rem;
+    height: 6rem;
+  }
+}
+
+/* ── Reduced motion / print ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .creative-showcase__section {
+    animation: none !important;
+  }
+}
+
+@media print {
+  .creative-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .creative-showcase__bg {
+    display: none !important;
+  }
+
+  .creative-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+}
+

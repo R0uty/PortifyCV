@@ -1,0 +1,557 @@
+/* ==========================================================================
+   Timeline Showcase — hand-authored component styles for the Timeline
+   template's non-ATS "career storytelling" mode. Scoped entirely under
+   `.timeline-showcase`. Deep cyan / sky-blue / teal palette. The defining
+   element is `.timeline-showcase__line` — a single absolutely-positioned
+   vertical line running behind every entry across Career, Education,
+   Certifications, Projects, Awards, Speaking, Publications, and
+   Volunteering, which are rendered as one flat, type-colored node list
+   rather than separate boxed sections (see TimelineShowcase.jsx). The
+   gradient on the line is intentionally faint — never competing with
+   content, per the brief.
+   ========================================================================== */
+
+.timeline-showcase {
+  --tl-cyan: #0891b2;
+  --tl-sky: #38bdf8;
+  --tl-teal: #14b8a6;
+  --tl-slate: #0f172a;
+  --tl-gray: #64748b;
+  --tl-border: #e2e8f0;
+  --tl-text: #1e293b;
+  --tl-node-career: #3b82f6;
+  --tl-node-education: #8b5cf6;
+  --tl-node-projects: #22c55e;
+  --tl-node-awards: #f97316;
+  --tl-node-certificates: #06b6d4;
+  --tl-node-speaking: #14b8a6;
+  --tl-node-publications: #475569;
+  --tl-node-volunteering: #f43f5e;
+  /* Deliberately NOT pure #ffffff — same blank-canvas PDF export guard used
+     by the other Showcases (see their blocks' comments above). */
+  --tl-bg: #f7f7fa;
+  --tl-card: #ffffff;
+  --tl-header-bg: #ecfeff;
+
+  position: relative;
+  background: var(--tl-bg);
+  color: var(--tl-text);
+  font-family: var(--font-sans);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.2);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.timeline-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.pdf-export-root.timeline-showcase .timeline-showcase__header {
+  border-radius: 0 !important;
+}
+
+/* ── Header ── */
+
+.timeline-showcase__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.75rem;
+  padding: 2.5rem 2.75rem 1.5rem;
+  background: var(--tl-header-bg);
+  border-radius: 18px 18px 0 0;
+}
+
+.timeline-showcase__kicker {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--tl-gray);
+}
+
+.timeline-showcase__name {
+  margin-top: 0.5rem;
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  color: var(--tl-slate);
+}
+
+.timeline-showcase__role {
+  margin-top: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--tl-cyan);
+}
+
+.timeline-showcase__tagline {
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--tl-gray);
+  max-width: 46ch;
+}
+
+.timeline-showcase__contact {
+  margin-top: 1.1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem 1.2rem;
+}
+
+.timeline-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--tl-gray);
+  white-space: nowrap;
+}
+
+.timeline-showcase__contact-icon {
+  display: inline-flex;
+  color: var(--tl-cyan);
+}
+
+.timeline-showcase__photo-wrap {
+  flex-shrink: 0;
+}
+
+.timeline-showcase__photo {
+  display: block;
+  width: 7.5rem;
+  height: 7.5rem;
+  object-fit: cover;
+  border-radius: 9999px;
+  border: 3px solid var(--tl-cyan);
+}
+
+/* ── Body layout ── */
+
+.timeline-showcase__body {
+  display: grid;
+  grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr);
+  gap: 2.25rem;
+  padding: 0.5rem 2.75rem 2.75rem;
+}
+
+.timeline-showcase__main {
+  min-width: 0;
+}
+
+.timeline-showcase__sidebar {
+  min-width: 0;
+}
+
+.timeline-showcase__intro-label {
+  margin-bottom: 0.9rem;
+}
+
+.timeline-showcase__intro {
+  margin-bottom: 1.75rem;
+  font-size: 0.85rem;
+  line-height: 1.8;
+  color: var(--tl-text);
+  white-space: pre-line;
+}
+
+/* ── The timeline itself ── */
+
+.timeline-showcase__rail {
+  position: relative;
+}
+
+.timeline-showcase__line {
+  position: absolute;
+  left: 1.25rem;
+  top: 0.4rem;
+  bottom: 0.4rem;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--tl-cyan), var(--tl-teal) 45%, var(--tl-sky) 100%);
+  opacity: 0.28;
+}
+
+.timeline-showcase__group + .timeline-showcase__group {
+  margin-top: 2.5rem;
+}
+
+.timeline-showcase__group-label-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.timeline-showcase__group-spacer {
+  flex-shrink: 0;
+  width: 2.5rem;
+}
+
+.timeline-showcase__group-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--tl-gray);
+  background: var(--tl-bg);
+}
+
+.timeline-showcase__entry {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 1rem;
+}
+
+.timeline-showcase__entry + .timeline-showcase__entry {
+  margin-top: 1.5rem;
+}
+
+.timeline-showcase__node-col {
+  flex-shrink: 0;
+  width: 2.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.timeline-showcase__node {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 9999px;
+  color: #fff;
+  box-shadow: 0 0 0 4px var(--tl-bg);
+}
+
+.timeline-showcase__node svg {
+  height: 0.68rem;
+  width: 0.68rem;
+}
+
+.timeline-showcase__node--career { background: var(--tl-node-career); }
+.timeline-showcase__node--education { background: var(--tl-node-education); }
+.timeline-showcase__node--projects { background: var(--tl-node-projects); }
+.timeline-showcase__node--awards { background: var(--tl-node-awards); }
+.timeline-showcase__node--certificates { background: var(--tl-node-certificates); }
+.timeline-showcase__node--speaking { background: var(--tl-node-speaking); }
+.timeline-showcase__node--publications { background: var(--tl-node-publications); }
+.timeline-showcase__node--volunteering { background: var(--tl-node-volunteering); }
+
+.timeline-showcase__entry-content {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 0.1rem;
+}
+
+.timeline-showcase__year {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--tl-cyan);
+}
+
+.timeline-showcase__entry-title {
+  margin-top: 0.15rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--tl-slate);
+}
+
+.timeline-showcase__entry-meta {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  color: var(--tl-gray);
+}
+
+.timeline-showcase__entry-honors {
+  margin-top: 0.3rem;
+  font-size: 0.76rem;
+  font-style: italic;
+  color: var(--tl-gray);
+}
+
+.timeline-showcase__entry-desc {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--tl-text);
+  white-space: pre-line;
+}
+
+.timeline-showcase__entry-impact {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--tl-cyan);
+}
+
+.timeline-showcase__entry-stack {
+  margin-top: 0.35rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tl-gray);
+}
+
+.timeline-showcase__entry-link {
+  display: inline-block;
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: var(--tl-cyan);
+  word-break: break-all;
+}
+
+.timeline-showcase__bullets {
+  margin-top: 0.5rem;
+  padding-left: 1.05rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.timeline-showcase__bullets li {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--tl-text);
+}
+
+.timeline-showcase__bullets li::marker {
+  color: var(--tl-teal);
+}
+
+/* Awards read as the storyline's highlighted "milestone" beats — a subtle
+   tinted card, distinct from the plain career/education/project entries. */
+/* ── Sidebar ── */
+
+.timeline-showcase__side-section + .timeline-showcase__side-section {
+  margin-top: 1.875rem;
+}
+
+.timeline-showcase__side-title {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--tl-slate);
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--tl-border);
+}
+
+.timeline-showcase__empty {
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  color: var(--tl-gray);
+}
+
+.timeline-showcase__skill-group {
+  margin-top: 1rem;
+}
+
+.timeline-showcase__skill-group:first-of-type {
+  margin-top: 0.9rem;
+}
+
+.timeline-showcase__skill-group-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tl-gray);
+  margin-bottom: 0.5rem;
+}
+
+.timeline-showcase__tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.timeline-showcase__tag {
+  border-radius: 6px;
+  border: 1px solid var(--tl-border);
+  padding: 0.28rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--tl-cyan);
+  background: transparent;
+}
+
+.timeline-showcase__list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-showcase__list-item {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--tl-border);
+}
+
+.timeline-showcase__list-item:first-child {
+  padding-top: 0;
+}
+
+.timeline-showcase__list-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.timeline-showcase__list-item--row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--tl-text);
+}
+
+.timeline-showcase__list-meta {
+  font-size: 0.72rem;
+  color: var(--tl-gray);
+}
+
+.timeline-showcase__link-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.timeline-showcase__link-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 10px;
+  border: 1px solid var(--tl-border);
+  padding: 0.55rem 0.7rem;
+}
+
+.timeline-showcase__link-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--tl-cyan);
+}
+
+.timeline-showcase__link-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tl-gray);
+}
+
+.timeline-showcase__link-value {
+  display: block;
+  overflow: hidden;
+  margin-top: 0.1rem;
+  font-size: 0.76rem;
+  color: var(--tl-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timeline-showcase__interest-row {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.timeline-showcase__interest-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid var(--tl-border);
+  padding: 0.32rem 0.7rem;
+  font-size: 0.74rem;
+  color: var(--tl-text);
+}
+
+/* ── Responsive: timeline collapses to a left border on small screens ── */
+
+@media (max-width: 860px) {
+  .timeline-showcase__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .timeline-showcase__header {
+    padding: 1.75rem 1.25rem 1.25rem;
+  }
+
+  .timeline-showcase__body {
+    padding: 0.5rem 1.25rem 1.75rem;
+  }
+
+  .timeline-showcase__name {
+    font-size: 2.15rem;
+  }
+
+  .timeline-showcase__photo {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+
+  .timeline-showcase__line {
+    left: 0.5rem;
+  }
+
+  .timeline-showcase__node-col,
+  .timeline-showcase__group-spacer {
+    width: 1.25rem;
+  }
+
+  .timeline-showcase__node {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .timeline-showcase__node svg {
+    display: none;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .timeline-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .timeline-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
+  .timeline-showcase__line {
+    opacity: 0.5;
+  }
+
+  /* Node colours are a screen/web flourish — print collapses them to a
+     single ink colour per the spec's "print version becomes monochrome". */
+  .timeline-showcase__node--career,
+  .timeline-showcase__node--education,
+  .timeline-showcase__node--projects,
+  .timeline-showcase__node--awards,
+  .timeline-showcase__node--certificates,
+  .timeline-showcase__node--speaking,
+  .timeline-showcase__node--publications,
+  .timeline-showcase__node--volunteering {
+    background: var(--tl-slate) !important;
+  }
+}
+

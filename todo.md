@@ -108,8 +108,25 @@ from reading code.
       harmless today only because every section defaults to visible.
       `cvFormReducer` and `uiReducer` are pure functions and cheap to cover. The share
       codec already has `npm run check:share`.
-- [ ] **11. `src/index.css` is 7,879 lines / 135KB** (21KB gz) of hand-written
+- [x] **11. `src/index.css` is 7,879 lines / 135KB** (21KB gz) of hand-written
       Tailwind-alike utilities. Works today; most likely file to rot. Low priority.
+      — done 2026-08-14. Pure reorganization, no behavior change: split into
+      `src/styles/tokens.css` (`:root` vars + base element reset),
+      `src/styles/app-shell.css` (shared chrome — form fields, modals,
+      toolbar, nav rail, landing page, etc.), `src/styles/utilities.css`
+      (the Tailwind-alike atomic class layer, used by the app shell and by
+      the Minimalist/Tech Executive templates, which render through the
+      generic `CVPreview` path rather than a bespoke Showcase), and one file
+      per bespoke template under `src/styles/templates/` (developer,
+      creative, modern, executive, timeline, graduate, compact, portfolio —
+      the 8 templates with their own `*Showcase.jsx`). `src/index.css` is now
+      an 18-line list of `@import`s in the original cascade order. Verified
+      byte-for-byte identical output: building from the pre-split file and
+      the post-split files produced the exact same content hash
+      (`index-CJ4KOjpo.css`) for the bundled CSS. `npm run lint`,
+      `check:share`, `check:reducers`, and `npm run build` all pass;
+      spot-checked the landing page, builder (Minimalist), and Developer
+      Showcase in a real browser post-split.
 
 ## Backlog — 2026-08-14
 

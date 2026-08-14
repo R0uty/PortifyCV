@@ -28,9 +28,12 @@ A modern, minimal CV builder for creating and exporting professional resumes in 
 
 - **React 19**: UI framework with hooks
 - **Vite 8**: Build tool with HMR
-- **Hand-written utility CSS**: `src/index.css` is a Tailwind-alike utility layer
-  (`px-4`, `flex`, `text-xs`, ...) written by hand — there is no Tailwind build step
-  or dependency in this project
+- **Hand-written utility CSS**: `src/index.css` imports a Tailwind-alike utility
+  layer (`px-4`, `flex`, `text-xs`, ...) written by hand — there is no Tailwind
+  build step or dependency in this project. The styles live in `src/styles/`:
+  `tokens.css` (design tokens + reset), `app-shell.css` (shared chrome),
+  `utilities.css` (the atomic class layer), and `templates/*.css` (one file per
+  bespoke template Showcase)
 - **@fontsource-variable/inter**: Self-hosted variable-weight Inter, so the only
   network requests the app makes are for its own same-origin assets
 - **lucide-react**: Icon set used throughout the toolbar, nav rail, and editor

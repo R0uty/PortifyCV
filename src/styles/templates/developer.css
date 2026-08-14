@@ -1,0 +1,920 @@
+/* ==========================================================================
+   Developer Showcase — hand-authored component styles for the Developer
+   template's non-ATS "showcase" mode. Scoped entirely under `.dev-showcase`
+   so it can't leak into (or be affected by) any other template.
+
+   These are real CSS rules, not entries in the atomic-utility layer above —
+   the visual vocabulary here (gradients, blobs, glow, colored tag variants)
+   is bespoke to this one template and doesn't belong in the shared utility
+   simulation. Colors are plain hex/rgba throughout (no oklch/color-mix) so
+   html2canvas-based PDF export renders them reliably.
+   ========================================================================== */
+
+.dev-showcase {
+  --dev-primary: #0f172a;
+  --dev-teal: #14b8a6;
+  --dev-blue: #3b82f6;
+  --dev-purple: #8b5cf6;
+  --dev-orange: #f97316;
+  --dev-green: #22c55e;
+  --dev-pink: #ec4899;
+  --dev-gray: #64748b;
+  --dev-border: #e2e8f0;
+  --dev-bg: #ffffff;
+  --dev-surface: #f8fafc;
+  --dev-header-bg: #f0fdfa;
+  --dev-header-border: #99f6e4;
+  --dev-sidebar: #0f172a;
+  --dev-text: #0f172a;
+  --dev-muted: #64748b;
+  --dev-success: #22c55e;
+  --dev-warning: #f97316;
+  --dev-error: #ec4899;
+
+  position: relative;
+  overflow: hidden;
+  background: var(--dev-bg);
+  color: var(--dev-text);
+  font-family: var(--font-sans);
+
+  /* Match the app's shared A4-ish paper sizing (same variables every other
+     template's `.preview-document` uses) without inheriting that class's
+     other rules — several of which would conflict with this component's
+     own card/skill-tag styling (e.g. forcing border-radius: 0). */
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+  border: 1px solid var(--app-border);
+}
+
+/* ── Decorative background (opacity kept under 5%, excluded from exports) ── */
+
+.dev-showcase__bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dev-showcase__blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(40px);
+  opacity: 0.05;
+}
+
+.dev-showcase__blob--teal {
+  top: -60px;
+  right: -60px;
+  width: 260px;
+  height: 260px;
+  background: var(--dev-teal);
+}
+
+.dev-showcase__blob--purple {
+  top: 40%;
+  left: -80px;
+  width: 220px;
+  height: 220px;
+  background: var(--dev-purple);
+}
+
+.dev-showcase__blob--blue {
+  bottom: -80px;
+  right: 15%;
+  width: 300px;
+  height: 300px;
+  background: var(--dev-blue);
+}
+
+.dev-showcase__grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image:
+    linear-gradient(var(--dev-primary) 1px, transparent 1px),
+    linear-gradient(90deg, var(--dev-primary) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ── Header ── */
+
+.dev-showcase__header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 2rem 2.25rem 1.75rem;
+  background: var(--dev-header-bg);
+  border-bottom: 1px solid var(--dev-header-border);
+}
+
+.dev-showcase__kicker {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--dev-muted);
+}
+
+.dev-showcase__name {
+  margin-top: 0.4rem;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  background: linear-gradient(90deg, var(--dev-teal), var(--dev-blue), var(--dev-purple));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: dev-gradient-shift 6s ease-in-out infinite;
+}
+
+.dev-showcase__role {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--dev-primary);
+}
+
+.dev-showcase__contact {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.25rem;
+}
+
+.dev-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--dev-muted);
+  white-space: nowrap;
+}
+
+.dev-showcase__contact-icon {
+  display: inline-flex;
+  height: 1.1rem;
+  width: 1.1rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--dev-surface);
+  color: var(--dev-blue);
+}
+
+.dev-showcase__photo-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 6.5rem;
+  height: 6.5rem;
+}
+
+.dev-showcase__photo-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--dev-teal), var(--dev-blue), var(--dev-purple));
+  padding: 3px;
+}
+
+.dev-showcase__photo-ring-inner {
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  background: var(--dev-bg);
+  padding: 3px;
+}
+
+.dev-showcase__photo {
+  height: 100%;
+  width: 100%;
+  border-radius: 9999px;
+  object-fit: cover;
+  display: block;
+}
+
+.dev-showcase__photo-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  height: 1.1rem;
+  width: 1.1rem;
+  border-radius: 9999px;
+  background: var(--dev-green);
+  border: 3px solid var(--dev-bg);
+}
+
+/* ── Body layout: sidebar (30%) + main (70%) ── */
+
+.dev-showcase__body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 2fr);
+  gap: 1.5rem;
+  padding: 1.75rem 2.25rem 2.25rem;
+}
+
+.dev-showcase__sidebar {
+  background: var(--dev-sidebar);
+  color: #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem 1.35rem;
+  align-self: start;
+}
+
+.dev-showcase__main {
+  min-width: 0;
+}
+
+/* ── Sections (shared by sidebar + main) ── */
+
+.dev-showcase__section {
+  animation: dev-fade-up 320ms ease-out both;
+  border-radius: 14px;
+  padding: 1.1rem 1.25rem 1.3rem;
+}
+
+.dev-showcase__section + .dev-showcase__section {
+  margin-top: 1.25rem;
+}
+
+.dev-showcase__sidebar .dev-showcase__section + .dev-showcase__section {
+  margin-top: 1.1rem;
+}
+
+/* Every section — main column or sidebar — carries the same background
+   treatment (just a different tint per surface) so no single section reads
+   as visually distinct from the rest. */
+.dev-showcase__section--main {
+  border: 1px solid var(--dev-border);
+  background: var(--dev-surface);
+}
+
+.dev-showcase__section--sidebar {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dev-showcase__section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.dev-showcase__section-icon {
+  display: inline-flex;
+  height: 1.5rem;
+  width: 1.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: #ffffff;
+}
+
+.dev-showcase__section-divider {
+  margin-top: 0.6rem;
+  height: 3px;
+  width: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--dev-teal), var(--dev-blue), var(--dev-purple));
+  opacity: 0.55;
+}
+
+.dev-showcase__empty {
+  font-size: 0.82rem;
+  color: var(--dev-muted);
+}
+
+.dev-showcase__summary {
+  margin-top: 0.9rem;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: #334155;
+  white-space: pre-line;
+}
+
+/* ── Skills ── */
+
+.dev-showcase__skill-group {
+  margin-top: 1rem;
+}
+
+.dev-showcase__skill-group:first-of-type {
+  margin-top: 0.9rem;
+}
+
+.dev-showcase__skill-group-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #94a3b8;
+  margin-bottom: 0.45rem;
+}
+
+.dev-showcase__skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.dev-showcase__skill-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  border: 1px solid;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.dev-showcase__skill-tag--blue { background: rgba(59, 130, 246, 0.14); border-color: rgba(96, 165, 250, 0.4); color: #93c5fd; }
+.dev-showcase__skill-tag--teal { background: rgba(20, 184, 166, 0.14); border-color: rgba(45, 212, 191, 0.4); color: #5eead4; }
+.dev-showcase__skill-tag--purple { background: rgba(139, 92, 246, 0.14); border-color: rgba(167, 139, 250, 0.4); color: #c4b5fd; }
+.dev-showcase__skill-tag--orange { background: rgba(249, 115, 22, 0.14); border-color: rgba(251, 146, 60, 0.4); color: #fdba74; }
+.dev-showcase__skill-tag--green { background: rgba(34, 197, 94, 0.14); border-color: rgba(74, 222, 128, 0.4); color: #86efac; }
+.dev-showcase__skill-tag--pink { background: rgba(236, 72, 153, 0.14); border-color: rgba(244, 114, 182, 0.4); color: #f9a8d4; }
+.dev-showcase__skill-tag--gray { background: rgba(148, 163, 184, 0.14); border-color: rgba(148, 163, 184, 0.4); color: #cbd5e1; }
+
+/* Skill tags rendered on a white surface (main column) need darker text */
+.dev-showcase__main .dev-showcase__skill-tag--blue { color: #1d4ed8; }
+.dev-showcase__main .dev-showcase__skill-tag--teal { color: #0f766e; }
+.dev-showcase__main .dev-showcase__skill-tag--purple { color: #6d28d9; }
+.dev-showcase__main .dev-showcase__skill-tag--orange { color: #c2410c; }
+.dev-showcase__main .dev-showcase__skill-tag--green { color: #15803d; }
+.dev-showcase__main .dev-showcase__skill-tag--pink { color: #be185d; }
+.dev-showcase__main .dev-showcase__skill-tag--gray { color: #334155; }
+
+/* ── Links (sidebar icon-cards) ── */
+
+.dev-showcase__link-card {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.55rem 0.7rem;
+}
+
+.dev-showcase__link-card + .dev-showcase__link-card {
+  margin-top: 0.5rem;
+}
+
+.dev-showcase__link-icon {
+  display: inline-flex;
+  height: 1.6rem;
+  width: 1.6rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+}
+
+.dev-showcase__link-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #94a3b8;
+}
+
+.dev-showcase__link-value {
+  display: block;
+  overflow: hidden;
+  font-size: 0.74rem;
+  color: #e2e8f0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Certificates (sidebar cards) ── */
+
+.dev-showcase__cert-card {
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.65rem 0.75rem;
+}
+
+.dev-showcase__cert-card + .dev-showcase__cert-card {
+  margin-top: 0.6rem;
+}
+
+.dev-showcase__cert-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.dev-showcase__cert-meta {
+  margin-top: 0.15rem;
+  font-size: 0.68rem;
+  color: #94a3b8;
+}
+
+.dev-showcase__cert-link {
+  margin-top: 0.3rem;
+  display: inline-block;
+  font-size: 0.68rem;
+  color: #5eead4;
+  word-break: break-all;
+}
+
+/* ── Education (sidebar timeline) ── */
+
+.dev-showcase__edu-item {
+  border-left: 3px solid var(--dev-teal);
+  padding: 0.65rem 0.75rem;
+}
+
+.dev-showcase__edu-item + .dev-showcase__edu-item {
+  margin-top: 0.75rem;
+}
+
+.dev-showcase__edu-degree {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.dev-showcase__edu-meta {
+  margin-top: 0.15rem;
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+/* ── Languages (sidebar list) ── */
+
+.dev-showcase__lang-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: #e2e8f0;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0.5rem 0.7rem;
+}
+
+.dev-showcase__lang-item + .dev-showcase__lang-item {
+  margin-top: 0.5rem;
+}
+
+.dev-showcase__lang-dot {
+  height: 0.45rem;
+  width: 0.45rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--dev-teal);
+}
+
+.dev-showcase__lang-level {
+  color: #94a3b8;
+}
+
+/* ── Experience timeline (main column) ── */
+
+.dev-showcase__timeline {
+  position: relative;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dev-showcase__timeline-item {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 0.9rem;
+}
+
+.dev-showcase__timeline-rail {
+  position: relative;
+  width: 0.75rem;
+  flex-shrink: 0;
+}
+
+.dev-showcase__timeline-line {
+  position: absolute;
+  left: 50%;
+  top: 0.3rem;
+  bottom: -1.75rem;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, var(--dev-blue), var(--dev-border));
+}
+
+.dev-showcase__timeline-item:last-child .dev-showcase__timeline-line {
+  display: none;
+}
+
+.dev-showcase__timeline-marker {
+  position: absolute;
+  left: 50%;
+  top: 0.3rem;
+  transform: translateX(-50%);
+  height: 0.75rem;
+  width: 0.75rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--dev-teal), var(--dev-blue));
+  box-shadow: 0 0 0 3px var(--dev-bg);
+}
+
+/* Every experience entry is a card — consistent with Projects/Achievements/
+   Open Source — whether or not the timeline rail (marker + line) is shown. */
+.dev-showcase__timeline-card {
+  flex: 1;
+  min-width: 0;
+  border-radius: 12px;
+  border: 1px solid var(--dev-border);
+  padding: 0.9rem 1.1rem;
+}
+
+.dev-showcase__role-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dev-showcase__role-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: var(--dev-primary);
+}
+
+.dev-showcase__company {
+  margin-top: 0.1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--dev-blue);
+}
+
+.dev-showcase__dates {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--dev-muted);
+}
+
+.dev-showcase__bullets {
+  margin-top: 0.5rem;
+  padding-left: 1.1rem;
+}
+
+.dev-showcase__bullets li {
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: #334155;
+}
+
+.dev-showcase__bullets li::marker {
+  color: var(--dev-teal);
+}
+
+/* ── Cards shared by Projects / Achievements / Open Source (main column) ── */
+
+.dev-showcase__card-grid {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.dev-showcase__project-card {
+  position: relative;
+  border-radius: 12px;
+  border: 1px solid var(--dev-border);
+  border-left: 4px solid var(--dev-blue);
+  padding: 1rem 1.15rem;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.dev-showcase__project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -16px rgba(15, 23, 42, 0.35);
+}
+
+.dev-showcase__project-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--dev-primary);
+}
+
+.dev-showcase__project-desc {
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #334155;
+  white-space: pre-line;
+}
+
+.dev-showcase__chip-row {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.dev-showcase__chip {
+  border-radius: 6px;
+  border: 1px solid;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.66rem;
+  font-weight: 600;
+}
+
+.dev-showcase__chip--blue { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.35); color: #1d4ed8; }
+.dev-showcase__chip--teal { background: rgba(20, 184, 166, 0.1); border-color: rgba(20, 184, 166, 0.35); color: #0f766e; }
+.dev-showcase__chip--purple { background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.35); color: #6d28d9; }
+.dev-showcase__chip--orange { background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.35); color: #c2410c; }
+.dev-showcase__chip--green { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.35); color: #15803d; }
+.dev-showcase__chip--pink { background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.35); color: #be185d; }
+.dev-showcase__chip--gray { background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.35); color: #334155; }
+
+.dev-showcase__link-row {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dev-showcase__link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 8px;
+  border: 1px solid var(--dev-border);
+  background: var(--dev-bg);
+  padding: 0.3rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--dev-primary);
+  text-decoration: none;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.dev-showcase__link-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px -10px rgba(15, 23, 42, 0.4);
+}
+
+.dev-showcase__link-btn--primary {
+  background: var(--dev-primary);
+  border-color: var(--dev-primary);
+  color: #ffffff;
+}
+
+/* ── Achievements (trophy cards) ── */
+
+.dev-showcase__achievement-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--dev-border);
+  padding: 0.85rem 1rem;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.dev-showcase__achievement-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -16px rgba(15, 23, 42, 0.35);
+}
+
+.dev-showcase__trophy-icon {
+  display: inline-flex;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, var(--dev-orange), var(--dev-pink));
+  color: #ffffff;
+}
+
+.dev-showcase__achievement-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dev-showcase__achievement-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--dev-primary);
+}
+
+.dev-showcase__achievement-year {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--dev-muted);
+}
+
+.dev-showcase__achievement-desc {
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: #334155;
+  white-space: pre-line;
+}
+
+/* ── Open Source (repo cards) ── */
+
+.dev-showcase__opensource-card {
+  border-radius: 12px;
+  border: 1px solid var(--dev-border);
+  border-left: 4px solid var(--dev-teal);
+  padding: 1rem 1.15rem;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.dev-showcase__opensource-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -16px rgba(15, 23, 42, 0.35);
+}
+
+.dev-showcase__opensource-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--dev-teal);
+}
+
+.dev-showcase__opensource-meta {
+  margin-top: 0.3rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--dev-muted);
+}
+
+.dev-showcase__opensource-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.dev-showcase__opensource-desc {
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #334155;
+  white-space: pre-line;
+}
+
+/* ── Publications (main column list) ── */
+
+.dev-showcase__publication-item {
+  border-radius: 12px;
+  border: 1px solid var(--dev-border);
+  padding: 0.85rem 1.1rem;
+}
+
+.dev-showcase__publication-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--dev-primary);
+}
+
+.dev-showcase__publication-meta {
+  margin-top: 0.2rem;
+  font-size: 0.74rem;
+  color: var(--dev-muted);
+}
+
+/* ── Animations ── */
+
+@keyframes dev-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes dev-gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Used when the "animationEnabled" config flag is disabled. */
+.dev-showcase--no-animation .dev-showcase__section,
+.dev-showcase--no-animation .dev-showcase__name {
+  animation: none !important;
+}
+
+/* Used when the "gradientEnabled" config flag is disabled — plain solid
+   text instead of the animated gradient title. */
+.dev-showcase__name--solid {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: var(--dev-primary);
+  animation: none !important;
+}
+
+/* ── Responsive: sidebar moves above main on tablet, single column on mobile ── */
+
+@media (max-width: 860px) {
+  .dev-showcase__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dev-showcase__sidebar {
+    order: -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .dev-showcase__header {
+    padding: 1.5rem 1.25rem 1.25rem;
+  }
+
+  .dev-showcase__body {
+    padding: 1.25rem 1.25rem 1.75rem;
+  }
+
+  .dev-showcase__name {
+    font-size: 2rem;
+  }
+}
+
+/* ── Reduced motion / print: strip glow, gradients-as-motion, and decorations ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .dev-showcase__section,
+  .dev-showcase__name {
+    animation: none !important;
+  }
+}
+
+@media print {
+  .dev-showcase__bg {
+    display: none !important;
+  }
+
+  .dev-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
+  .dev-showcase__name {
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+    color: var(--dev-primary) !important;
+  }
+
+  .dev-showcase__sidebar {
+    background: #ffffff !important;
+    color: var(--dev-primary) !important;
+    border: 1px solid var(--dev-border) !important;
+  }
+
+  .dev-showcase__section--main,
+  .dev-showcase__section--sidebar,
+  .dev-showcase__link-card,
+  .dev-showcase__cert-card,
+  .dev-showcase__edu-item,
+  .dev-showcase__lang-item {
+    background: #ffffff !important;
+    border: 1px solid var(--dev-border) !important;
+  }
+
+  .dev-showcase__link-label,
+  .dev-showcase__link-value,
+  .dev-showcase__cert-name,
+  .dev-showcase__cert-meta,
+  .dev-showcase__edu-degree,
+  .dev-showcase__edu-meta,
+  .dev-showcase__lang-item,
+  .dev-showcase__lang-level {
+    color: var(--dev-primary) !important;
+  }
+}
+
