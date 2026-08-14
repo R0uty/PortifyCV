@@ -294,13 +294,57 @@ rename pass.
       still feels like Creative doesn't fit once other items land.
       `npm run lint`, `npm run build`, `check:share`, and `check:reducers`
       all pass.
-- [ ] **16. Two-column (`split`) template balance.** 7 of 10 templates use
-      `layout: 'split'` with a `primarySections`/`secondarySections` divide —
-      worth a pass checking sidebar-vs-main visual weight doesn't look
-      lopsided when a user fills in only a few of the secondary sections
-      (sparse sidebar next to a dense main column), similar in spirit to the
-      Executive Achievements-placement bug already fixed this session
-      (commit `d496499`).
+- [x] **16. Two-column (`split`) template balance.** — audited 2026-08-14.
+      8 of 10 templates use `layout: 'split'` (not 7 — recount while
+      auditing: developer, creative, modern, executive, timeline, graduate,
+      portfolio, techExec). Built a synthetic CV via a hand-encoded share
+      link — dense main-column content (3 experience entries, 2 education,
+      3 projects, plus achievements/leadership/openSource/publications/
+      volunteering/internships/caseStudies/testimonials/speaking so every
+      template's primary-section mix is exercised) paired with deliberately
+      sparse secondary sections (2-8 skills, 0 certificates, 1 language, 1
+      link, 0 interests) — and screenshotted all 8 in a real browser.
+      **Confirmed real, not fixed (inherent to design, no safe fix
+      identified):** every split template's sidebar is visibly shorter than
+      its main column under sparse-secondary conditions, ranging from
+      Tech Executive (~1.25x, best balanced — its primary list is only 4
+      sections) to Timeline (~4x, worst — sidebar ends after ~600px while
+      the single continuous main timeline, which absorbs 9 possible section
+      types, runs to ~2460px, leaving a long bare-page gutter beside it).
+      This tracks section-count ratio between each template's
+      `primarySections`/`secondarySections`, not a rendering defect: no
+      sidebar is stretched, clipped, or given an empty styled box — it
+      simply ends where its content ends, which is the more honest choice
+      versus padding a section with nothing in it. Timeline is the standout
+      case worth a second look if real user CVs show the same gap, but
+      there's no fix here that doesn't fight the template's own concept (a
+      long unified timeline paired with a compact reference sidebar).
+      Checked for a repeat of the Executive Achievements bug (a section
+      hardcoded into the wrong column, commit `d496499`) specifically:
+      confirmed clean across all 7 bespoke split Showcases — each derives
+      `mainSectionKeys`/`sidebarSectionKeys` from
+      `templateConfig.primarySections`/`secondarySections` via `Set`
+      membership, no hardcoded lists remain anywhere.
+      **Found and fixed a real, unrelated bug along the way:** Tech
+      Executive's sparse sidebar surfaced a stray bullet point in front of
+      the Certificates section's empty-state text ("• Certificates will
+      appear here.") that doesn't appear on any of the other 14 empty-state
+      placeholders in `CVPreview.jsx` (the generic path used by Minimalist,
+      Tech Executive, and every template in ATS mode). Root cause:
+      certificates was the only section whose empty-state placeholder was
+      still a bare `<li className="text-sm text-gray-500">` nested in a
+      `<ul>`, left over from being adapted from the populated-item markup —
+      every other section's placeholder is a plain `<p>`. Populated
+      `<li>` rows suppress the browser's native list marker because their
+      class sets `display: flex`; this one bare `<li>` doesn't, so the UA
+      stylesheet's default disc marker rendered for just that one row.
+      Fixed by only rendering the `<ul>` when `certificates.length > 0` and
+      rendering the placeholder as a sibling `<p>`, matching every other
+      section's pattern (and better accessibility too — assistive tech no
+      longer announces "list, 1 item" for an empty section).
+      `npm run lint`, `npm run build`, `check:share`, and `check:reducers`
+      all pass; the fix was verified by re-screenshotting Tech Executive
+      before/after.
 - [ ] **17. PDF export fidelity vs on-screen preview**, template by template —
       spacing, color, and font-weight can drift between the live `CVPreview`
       render and the `html2canvas`-captured PDF; worth a visual diff pass now

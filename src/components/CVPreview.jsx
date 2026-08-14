@@ -910,9 +910,9 @@ function CVPreview({
         children: (
           <>
             {renderSectionHeading('certificates', isFinnish ? 'Sertifikaatit' : 'Certificates')}
-            <ul className="mt-4 space-y-2">
-              {certificates.length > 0 ? (
-                certificates.map((item, index) => (
+            {certificates.length > 0 ? (
+              <ul className="mt-4 space-y-2">
+                {certificates.map((item, index) => (
                   <li
                     key={`${item.name}-${index}`}
                     className={`flex items-start gap-2 text-sm ${supportingTextClasses}`}
@@ -935,13 +935,13 @@ function CVPreview({
                       ) : null}
                     </span>
                   </li>
-                ))
-              ) : (
-                <li className="text-sm text-gray-500">
-                  {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
-                </li>
-              )}
-            </ul>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-4 text-sm text-gray-500">
+                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+              </p>
+            )}
           </>
         ),
       })
