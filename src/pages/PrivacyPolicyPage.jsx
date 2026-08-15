@@ -1,6 +1,6 @@
 const EFFECTIVE_DATE = {
-  en: '11 August 2026',
-  fi: '11. elokuuta 2026',
+  en: '15 August 2026',
+  fi: '15. elokuuta 2026',
 }
 
 function getPrivacyCopy(locale) {
@@ -43,18 +43,36 @@ function getPrivacyCopy(locale) {
           heading: 'Mitä PortifyCV tallentaa paikallisesti',
           paragraphs: [
             'PortifyCV tallentaa selaimesi paikalliseen tallennustilaan '
-            + '(local storage) kolme pientä asetusta, jotta ne säilyvät '
+            + '(local storage) neljä pientä asetusta, jotta ne säilyvät '
             + 'käyntikertojen välillä:',
           ],
           list: [
             'minkä käyttöliittymän kielen valitsit viimeksi (englanti vai suomi)',
             'oletko jo nähnyt kertaluonteisen opastusvinkin',
             'valintasi mainosevästeistä, kun mainonta joskus otetaan käyttöön (katso alla)',
+            'onko valinnainen "Palauta viimeisin istunto" -toiminto käytössä (katso alla)',
           ],
           paragraphsAfterList: [
-            'Mikään näistä ei sisällä mitään osaa CV:stäsi. Kaikki kolme voi '
+            'Mikään näistä ei sisällä mitään osaa CV:stäsi. Kaikki neljä voi '
             + 'tyhjentää milloin tahansa poistamalla selaimesi sivustokohtaiset '
             + 'tiedot tälle verkkotunnukselle.',
+          ],
+        },
+        {
+          heading: 'Palauta viimeisin istunto (valinnainen)',
+          paragraphs: [
+            'Asetukset-valikossa on valinnainen, oletuksena pois päältä oleva '
+            + 'toiminto: "Palauta viimeisin istunto". Kun otat sen käyttöön, '
+            + 'CV:stäsi pidetään työkopiota selaimesi istuntokohtaisessa '
+            + 'tallennustilassa (session storage) — ei paikallisessa '
+            + 'tallennustilassa — jotta vahinkopäivitys tai välilehden '
+            + 'kaatuminen ei tuhoa työtäsi.',
+            'Istuntotallennustila eroaa yllä mainitusta paikallisesta '
+            + 'tallennustilasta siten, että selain tyhjentää sen pysyvästi '
+            + 'heti, kun suljet välilehden — se ei säily edes saman '
+            + 'selaimen seuraavaan istuntoon, saati lähetä mitään '
+            + 'minnekään. Toiminnon kytkeminen takaisin pois päältä '
+            + 'tyhjentää tallennetun kopion välittömästi.',
           ],
         },
         {
@@ -178,18 +196,35 @@ function getPrivacyCopy(locale) {
       {
         heading: 'What PortifyCV stores locally',
         paragraphs: [
-          "PortifyCV stores three small preferences in your browser's local "
+          "PortifyCV stores four small preferences in your browser's local "
           + 'storage, so they persist between visits:',
         ],
         list: [
           'which interface language you last selected (English or Finnish)',
           'whether you have already seen the one-time onboarding tip',
           'your choice about advertising cookies, once advertising is enabled (see below)',
+          'whether the optional "Restore last session" feature is turned on (see below)',
         ],
         paragraphsAfterList: [
-          "None of these contain any part of your CV. All three can be "
+          "None of these contain any part of your CV. All four can be "
           + "cleared at any time by clearing your browser's site data for "
           + 'this domain.',
+        ],
+      },
+      {
+        heading: 'Restore last session (optional)',
+        paragraphs: [
+          'Settings includes an optional, off-by-default feature: "Restore '
+          + 'last session." When you turn it on, a working copy of your CV '
+          + "is kept in your browser tab's session storage — not local "
+          + 'storage — so an accidental refresh or tab crash does not lose '
+          + 'your work.',
+          'Session storage differs from the local storage described above '
+          + 'in one important way: your browser permanently clears it the '
+          + 'moment you close the tab. It does not carry over to your next '
+          + 'visit, even in the same browser, and it is never sent '
+          + 'anywhere. Turning the feature back off clears the saved copy '
+          + 'immediately.',
         ],
       },
       {

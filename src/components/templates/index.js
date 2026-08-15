@@ -33,5 +33,35 @@ export function getTemplateConfig(variant) {
   return templates[variant] || templates.minimal
 }
 
+let showcasesPrefetched = false
+
+/**
+ * Warms every bespoke *Showcase.jsx chunk (CVPreview.jsx lazy-loads them
+ * per template) so switching templates or opening the gallery — which
+ * renders all 10 at once as thumbnails — doesn't pay for 8 dynamic imports
+ * at that moment. Safe to call speculatively: it only downloads and
+ * evaluates the modules, same pattern as prefetchPdfExportAssets in
+ * exporters.js.
+ */
+export function prefetchTemplateShowcases() {
+  if (showcasesPrefetched) {
+    return
+  }
+
+  showcasesPrefetched = true
+
+  // Literal specifiers (not a templated/looped path) so bundlers can
+  // statically analyze each one and reuse the same chunk React.lazy()
+  // requests in CVPreview.jsx, instead of a separate duplicate chunk.
+  import('./DeveloperShowcase')
+  import('./CreativeShowcase')
+  import('./ModernShowcase')
+  import('./ExecutiveShowcase')
+  import('./TimelineShowcase')
+  import('./GraduateShowcase')
+  import('./CompactShowcase')
+  import('./PortfolioShowcase')
+}
+
 // Export the full map for cases where iteration over all templates is needed
 export default templates

@@ -170,11 +170,14 @@ function scoreKeywordDensity(snapshot, copy) {
     return {
       score: 8,
       summary: copy.keywordMissing,
+      matchedKeywords: [],
+      missingKeywords: [],
     }
   }
 
-  const matchedKeywordCount = keywords.filter((keyword) => content.includes(keyword)).length
-  const coverage = matchedKeywordCount / keywords.length
+  const matchedKeywords = keywords.filter((keyword) => content.includes(keyword))
+  const missingKeywords = keywords.filter((keyword) => !content.includes(keyword))
+  const coverage = matchedKeywords.length / keywords.length
   const score = Math.round(coverage * 25)
 
   return {
@@ -183,6 +186,8 @@ function scoreKeywordDensity(snapshot, copy) {
       coverage >= 0.7
         ? copy.keywordGood
         : copy.keywordImprove,
+    matchedKeywords,
+    missingKeywords,
   }
 }
 

@@ -65,6 +65,7 @@ function TemplateGalleryModal({
   atsScore,
   formData = null,
   locale = 'en',
+  onOpenBadge = null,
 }) {
   const isFinnish = locale === 'fi'
   const thumbnailCv = useMemo(() => buildThumbnailCv(formData), [formData])
@@ -129,6 +130,19 @@ function TemplateGalleryModal({
           )
         })}
       </div>
+
+      {onOpenBadge ? (
+        <div className="template-gallery__badge-cta">
+          <p>
+            {isFinnish
+              ? 'Jaatko CV:si muualla? Nappaa "Tehty PortifyCV:llä" -tunnus omalle sivustollesi.'
+              : 'Sharing your CV elsewhere? Grab a "Made with PortifyCV" badge for your own site.'}
+          </p>
+          <button type="button" className="template-gallery__badge-link" onClick={onOpenBadge}>
+            {isFinnish ? 'Hae tunnus' : 'Get the badge'}
+          </button>
+        </div>
+      ) : null}
     </Modal>
   )
 }

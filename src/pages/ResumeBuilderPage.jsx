@@ -9,6 +9,7 @@ import {
   Heart,
   Languages as LanguagesIcon,
   Link2,
+  Mail,
   Minus,
   Plus,
   Settings as SettingsIcon,
@@ -23,6 +24,8 @@ import {
 import AppShell from '../components/AppShell'
 import AppErrorBoundary from '../components/AppErrorBoundary'
 import ATSScorePanel from '../components/ATSScorePanel'
+import BadgeModal from '../components/BadgeModal'
+import CoverLetterModal from '../components/CoverLetterModal'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
 import CVSuggestionsPanel from '../components/CVSuggestionsPanel'
@@ -36,11 +39,16 @@ import {
 } from '../utils/designSystem'
 import {
   CV_ONBOARDING_SEEN_STORAGE_KEY,
+  CV_SESSION_RESTORE_ENABLED_STORAGE_KEY,
+  CV_SESSION_SNAPSHOT_STORAGE_KEY,
   createInitialCvData,
   demoCvData,
   initialCvData,
   parsePastedCvText,
   parseImportedCvData,
+  safeSessionStorageGet,
+  safeSessionStorageRemove,
+  safeSessionStorageSet,
   safeStorageGet,
   safeStorageSet,
 } from '../utils/cvForm'
@@ -48,6 +56,7 @@ import {
   getCvTemplates,
   getCvTemplate,
 } from '../utils/cvTemplates'
+import { prefetchTemplateShowcases } from '../components/templates'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
 import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
 import {
@@ -64,6 +73,7 @@ import {
   evaluateAtsScore,
 } from '../utils/atsScore'
 import { evaluateCvFeedback } from '../utils/cvFeedback'
+import { generateCoverLetterDraft } from '../utils/coverLetter'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
@@ -92,6 +102,7 @@ const NAV_SECTIONS = [
 const NAV_UTILITY_ITEMS = [
   { id: 'settings', icon: SettingsIcon, kind: 'action', label: { en: 'Settings', fi: 'Asetukset' } },
   { id: 'templates', icon: LayoutTemplate, kind: 'action', label: { en: 'Templates', fi: 'Pohjat' } },
+  { id: 'coverLetter', icon: Mail, kind: 'action', label: { en: 'Cover letter', fi: 'Hakemuskirje' } },
   { id: 'export', icon: Download, kind: 'action', label: { en: 'Export', fi: 'Vie' } },
 ]
 
@@ -239,6 +250,30 @@ function loadInitialCvSession() {
 
   markOnboardingSeen()
 
+  const sessionRestoreEnabled = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value === 'true'
+
+  if (sessionRestoreEnabled) {
+    const snapshotState = safeSessionStorageGet(CV_SESSION_SNAPSHOT_STORAGE_KEY)
+
+    if (snapshotState.value) {
+      try {
+        const restoredFormData = parseImportedCvData(JSON.parse(snapshotState.value))
+
+        return {
+          formData: restoredFormData,
+          initialToast: createToast('Restored your last session.', 'success'),
+          clearShareParam: false,
+          storageIssue: hasStorageIssue,
+        }
+      } catch {
+        // Snapshot is corrupted or from an incompatible app version — fall
+        // through to the normal demo/blank behavior below rather than
+        // surface a scary error for a background convenience feature.
+        safeSessionStorageRemove(CV_SESSION_SNAPSHOT_STORAGE_KEY)
+      }
+    }
+  }
+
   if (!hasSeenOnboarding) {
     return {
       formData: structuredClone(demoCvData),
@@ -285,6 +320,11 @@ function ResumeBuilderPage({
     isImporting,
     pastedCvText,
     jobDescription,
+    coverLetterCompany,
+    coverLetterRole,
+    coverLetterHiringManager,
+    coverLetterBody,
+    sessionRestoreEnabled,
     toasts,
   } = uiState
   const ui = getUiTheme()
@@ -292,6 +332,7 @@ function ResumeBuilderPage({
   const importInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
   const storageWarningShownRef = useRef(false)
+  const sessionRestoreWarningShownRef = useRef(false)
   const shareWarningShownRef = useRef(false)
   const editorScrollRef = useRef(null)
   const templateSelectRef = useRef(null)
@@ -304,6 +345,8 @@ function ResumeBuilderPage({
   const [zoomPercent, setZoomPercent] = useState(100)
   const [isTemplateGalleryOpen, setIsTemplateGalleryOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
+  const [isBadgeOpen, setIsBadgeOpen] = useState(false)
 
   const [historyPast, setHistoryPast] = useState([])
   const [historyFuture, setHistoryFuture] = useState([])
@@ -435,6 +478,40 @@ function ResumeBuilderPage({
   }, [locale, onLocaleChange, setStorageValue])
 
   useEffect(() => {
+    setStorageValue(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, sessionRestoreEnabled ? 'true' : 'false')
+
+    // Turning the feature off clears any saved copy immediately, rather than
+    // waiting for the tab to close — an explicit "stop and forget" action.
+    if (!sessionRestoreEnabled) {
+      safeSessionStorageRemove(CV_SESSION_SNAPSHOT_STORAGE_KEY)
+    }
+  }, [sessionRestoreEnabled, setStorageValue])
+
+  useEffect(() => {
+    if (!sessionRestoreEnabled) {
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      const result = safeSessionStorageSet(CV_SESSION_SNAPSHOT_STORAGE_KEY, JSON.stringify(formData))
+
+      if (!result.ok && !sessionRestoreWarningShownRef.current) {
+        sessionRestoreWarningShownRef.current = true
+        showToast(
+          locale === 'fi'
+            ? 'Istunnon palautusta ei voitu tallentaa (tila on täynnä tai estetty). CV on silti tallella tässä välilehdessä.'
+            : 'Could not save a session-restore copy (storage full or blocked). Your CV is still fine in this tab.',
+          'error',
+        )
+      }
+    }, HISTORY_COMMIT_DELAY_MS)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [formData, locale, sessionRestoreEnabled])
+
+  useEffect(() => {
     if (initialSession.storageIssue) {
       reportStorageIssue()
     }
@@ -462,6 +539,26 @@ function ResumeBuilderPage({
       import('../utils/exporters').then(({ prefetchPdfExportAssets }) => {
         prefetchPdfExportAssets()
       })
+    })
+
+    return () => cancelIdle(idleId)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined
+    }
+
+    // Each bespoke template's Showcase component (CVPreview.jsx) is now
+    // lazy-loaded so the initial builder bundle only carries the one the
+    // user actually has selected. Warm the rest on idle so switching
+    // templates, or opening the gallery (which renders all 10 as
+    // thumbnails at once), rarely hits the loading fallback.
+    const requestIdle = window.requestIdleCallback ?? ((callback) => window.setTimeout(callback, 2000))
+    const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout
+
+    const idleId = requestIdle(() => {
+      prefetchTemplateShowcases()
     })
 
     return () => cancelIdle(idleId)
@@ -754,6 +851,10 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.TOGGLE_ATS_MODE })
   }, [])
 
+  const handleToggleSessionRestore = useCallback(() => {
+    dispatchUi({ type: UI_ACTION.TOGGLE_SESSION_RESTORE })
+  }, [])
+
   const handleToggleMobilePreview = useCallback(() => {
     dispatchUi({ type: UI_ACTION.TOGGLE_MOBILE_PREVIEW })
   }, [])
@@ -772,6 +873,8 @@ function ResumeBuilderPage({
         setIsTemplateGalleryOpen(true)
       } else if (item.id === 'settings') {
         setIsSettingsOpen(true)
+      } else if (item.id === 'coverLetter') {
+        setIsCoverLetterOpen(true)
       } else if (item.id === 'export') {
         handleExport('pdf-designer')
       }
@@ -811,6 +914,33 @@ function ResumeBuilderPage({
   const handleCloseSettings = useCallback(() => {
     setIsSettingsOpen(false)
   }, [])
+
+  const handleCloseCoverLetter = useCallback(() => {
+    setIsCoverLetterOpen(false)
+  }, [])
+
+  const handleOpenBadge = useCallback(() => {
+    setIsTemplateGalleryOpen(false)
+    setIsBadgeOpen(true)
+  }, [])
+
+  const handleCloseBadge = useCallback(() => {
+    setIsBadgeOpen(false)
+  }, [])
+
+  const handleCopyBadgeSnippet = useCallback(async (snippet) => {
+    try {
+      await window.navigator.clipboard.writeText(snippet)
+      showToast(locale === 'fi' ? 'Tunnuksen HTML kopioitu leikepöydälle.' : 'Badge HTML copied to clipboard.')
+    } catch {
+      showToast(
+        locale === 'fi'
+          ? 'Kopiointi epäonnistui. Kopioi HTML manuaalisesti.'
+          : 'Could not copy to the clipboard. Copy the HTML manually instead.',
+        'error',
+      )
+    }
+  }, [locale])
 
   const handleToggleFullscreenPreview = useCallback(() => {
     setIsFullscreenPreview((value) => !value)
@@ -1035,6 +1165,79 @@ function ResumeBuilderPage({
   const handleClearJobDescription = useCallback(() => {
     dispatchUi({ type: UI_ACTION.SET_JOB_DESCRIPTION, value: '' })
   }, [])
+
+  const handleCoverLetterCompanyChange = useCallback((value) => {
+    dispatchUi({ type: UI_ACTION.SET_COVER_LETTER_COMPANY, value })
+  }, [])
+
+  const handleCoverLetterRoleChange = useCallback((value) => {
+    dispatchUi({ type: UI_ACTION.SET_COVER_LETTER_ROLE, value })
+  }, [])
+
+  const handleCoverLetterHiringManagerChange = useCallback((value) => {
+    dispatchUi({ type: UI_ACTION.SET_COVER_LETTER_HIRING_MANAGER, value })
+  }, [])
+
+  const handleCoverLetterBodyChange = useCallback((value) => {
+    dispatchUi({ type: UI_ACTION.SET_COVER_LETTER_BODY, value })
+  }, [])
+
+  const handleGenerateCoverLetter = useCallback(() => {
+    const draft = generateCoverLetterDraft(formData, {
+      locale,
+      companyName: coverLetterCompany,
+      roleTitle: coverLetterRole,
+      hiringManagerName: coverLetterHiringManager,
+    })
+    dispatchUi({ type: UI_ACTION.SET_COVER_LETTER_BODY, value: draft })
+  }, [coverLetterCompany, coverLetterHiringManager, coverLetterRole, formData, locale])
+
+  const handleCopyCoverLetter = useCallback(async () => {
+    if (!coverLetterBody.trim()) {
+      return
+    }
+
+    try {
+      await window.navigator.clipboard.writeText(coverLetterBody)
+      showToast(locale === 'fi' ? 'Hakemuskirje kopioitu leikepöydälle.' : 'Cover letter copied to clipboard.')
+    } catch {
+      showToast(
+        locale === 'fi'
+          ? 'Kopiointi epäonnistui. Kopioi teksti manuaalisesti.'
+          : 'Could not copy to the clipboard. Copy the text manually instead.',
+        'error',
+      )
+    }
+  }, [coverLetterBody, locale])
+
+  const handleDownloadCoverLetterText = useCallback(async () => {
+    if (!coverLetterBody.trim()) {
+      return
+    }
+
+    const { exportCoverLetterAsText } = await import('../utils/exporters')
+    exportCoverLetterAsText(coverLetterBody, `${exportFileName}-cover-letter`)
+  }, [coverLetterBody, exportFileName])
+
+  const handleDownloadCoverLetterPdf = useCallback(async () => {
+    if (!coverLetterBody.trim()) {
+      return
+    }
+
+    try {
+      const { exportCoverLetterAsPdf } = await import('../utils/exporters')
+      await exportCoverLetterAsPdf(coverLetterBody, `${exportFileName}-cover-letter`)
+    } catch (error) {
+      showToast(
+        error instanceof Error
+          ? error.message
+          : locale === 'fi'
+            ? 'PDF-vienti epäonnistui.'
+            : 'PDF export failed.',
+        'error',
+      )
+    }
+  }, [coverLetterBody, exportFileName, locale])
 
   const sidebarContent = useMemo(() => (
     <div className="editor-panel p-4 sm:p-6 lg:p-8" ref={editorScrollRef}>
@@ -1520,6 +1723,13 @@ function ResumeBuilderPage({
         >
           {locale === 'fi' ? 'Linkki' : 'Link'}
         </button>
+        <button
+          type="button"
+          className={compactButtonClassName}
+          onClick={() => setIsCoverLetterOpen(true)}
+        >
+          {locale === 'fi' ? 'Hakemuskirje' : 'Cover letter'}
+        </button>
       </div>
     </div>
   ), [
@@ -1557,6 +1767,7 @@ function ResumeBuilderPage({
         atsScore={atsScore}
         formData={formData}
         locale={locale}
+        onOpenBadge={handleOpenBadge}
       />
 
       <SettingsModal
@@ -1566,6 +1777,34 @@ function ResumeBuilderPage({
         atsFriendlyMode={atsFriendlyMode}
         onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
         onManageSections={handleManageSections}
+        sessionRestoreEnabled={sessionRestoreEnabled}
+        onToggleSessionRestore={handleToggleSessionRestore}
+      />
+
+      <BadgeModal
+        isOpen={isBadgeOpen}
+        onClose={handleCloseBadge}
+        locale={locale}
+        onCopy={handleCopyBadgeSnippet}
+      />
+
+      <CoverLetterModal
+        isOpen={isCoverLetterOpen}
+        onClose={handleCloseCoverLetter}
+        locale={locale}
+        fullName={formData.fullName}
+        companyName={coverLetterCompany}
+        roleTitle={coverLetterRole}
+        hiringManagerName={coverLetterHiringManager}
+        letterBody={coverLetterBody}
+        onCompanyNameChange={handleCoverLetterCompanyChange}
+        onRoleTitleChange={handleCoverLetterRoleChange}
+        onHiringManagerNameChange={handleCoverLetterHiringManagerChange}
+        onLetterBodyChange={handleCoverLetterBodyChange}
+        onGenerate={handleGenerateCoverLetter}
+        onCopy={handleCopyCoverLetter}
+        onDownloadText={handleDownloadCoverLetterText}
+        onDownloadPdf={handleDownloadCoverLetterPdf}
       />
 
       <ToastStack toasts={toasts} />

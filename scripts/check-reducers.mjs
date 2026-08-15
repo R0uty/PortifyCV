@@ -298,6 +298,7 @@ console.log('\nuiReducer\n')
   check('createInitialUiState starts with no toasts', state.toasts.length === 0)
   const withToast = createInitialUiState({ initialToast: { id: 't1', message: 'hi' } })
   check('createInitialUiState seeds an initial toast when given one', withToast.toasts.length === 1)
+  check('createInitialUiState defaults session restore to off', state.sessionRestoreEnabled === false)
 }
 
 {
@@ -356,6 +357,38 @@ console.log('\nuiReducer\n')
   const state = createInitialUiState({})
   const next = uiReducer(state, { type: UI_ACTION.SET_JOB_DESCRIPTION, value: 'job text' })
   check('SET_JOB_DESCRIPTION stores the job description', next.jobDescription === 'job text')
+}
+
+{
+  const state = createInitialUiState({})
+  const next = uiReducer(state, { type: UI_ACTION.SET_COVER_LETTER_COMPANY, value: 'Acme Inc' })
+  check('SET_COVER_LETTER_COMPANY stores the company name', next.coverLetterCompany === 'Acme Inc')
+}
+
+{
+  const state = createInitialUiState({})
+  const next = uiReducer(state, { type: UI_ACTION.SET_COVER_LETTER_ROLE, value: 'Product Designer' })
+  check('SET_COVER_LETTER_ROLE stores the target role', next.coverLetterRole === 'Product Designer')
+}
+
+{
+  const state = createInitialUiState({})
+  const next = uiReducer(state, { type: UI_ACTION.SET_COVER_LETTER_HIRING_MANAGER, value: 'Jane Doe' })
+  check('SET_COVER_LETTER_HIRING_MANAGER stores the hiring manager name', next.coverLetterHiringManager === 'Jane Doe')
+}
+
+{
+  const state = createInitialUiState({})
+  const next = uiReducer(state, { type: UI_ACTION.SET_COVER_LETTER_BODY, value: 'Dear Hiring Manager,' })
+  check('SET_COVER_LETTER_BODY stores the letter draft', next.coverLetterBody === 'Dear Hiring Manager,')
+}
+
+{
+  const state = createInitialUiState({})
+  const next = uiReducer(state, { type: UI_ACTION.TOGGLE_SESSION_RESTORE })
+  check('TOGGLE_SESSION_RESTORE flips session restore on', next.sessionRestoreEnabled === true)
+  const backAgain = uiReducer(next, { type: UI_ACTION.TOGGLE_SESSION_RESTORE })
+  check('TOGGLE_SESSION_RESTORE is reversible', backAgain.sessionRestoreEnabled === false)
 }
 
 {

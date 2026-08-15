@@ -32,6 +32,9 @@ jobs:
       - name: Share-link codec regression checks
         run: npm run check:share
 
+      - name: CV feedback regression checks
+        run: npm run check:feedback
+
   e2e:
     name: End-to-end smoke tests
     runs-on: ubuntu-latest

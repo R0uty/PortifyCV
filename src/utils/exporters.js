@@ -282,6 +282,52 @@ export function exportCvAsJson(formData, fileName) {
   saveAs(blob, `${fileName}.json`)
 }
 
+export function exportCoverLetterAsText(letterText, fileName) {
+  const blob = new Blob([`${letterText.trim()}\n`], { type: 'text/plain;charset=utf-8' })
+
+  saveAs(blob, `${fileName}.txt`)
+}
+
+/**
+ * Renders the letter as plain wrapped paragraphs on A4 pages — no header,
+ * palette, or layout machinery, since a cover letter is body text meant to
+ * be dropped into any letterhead, not a styled document like the CV export.
+ */
+export async function exportCoverLetterAsPdf(letterText, fileName) {
+  const jsPDF = await loadJsPdf()
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
+  const marginMm = { top: 22, right: 22, bottom: 22, left: 22 }
+  const maxWidth = A4_WIDTH_MM - marginMm.left - marginMm.right
+  const lineHeight = 6
+  const cursor = { y: marginMm.top }
+
+  pdf.setFont('helvetica', 'normal')
+  pdf.setFontSize(11)
+  pdf.setTextColor(20, 20, 20)
+
+  const paragraphs = letterText.trim().split(/\n{2,}/)
+
+  paragraphs.forEach((paragraph, index) => {
+    const paragraphLines = paragraph.split('\n').flatMap((line) => pdf.splitTextToSize(line, maxWidth))
+
+    paragraphLines.forEach((line) => {
+      if (cursor.y + lineHeight > A4_HEIGHT_MM - marginMm.bottom) {
+        pdf.addPage()
+        cursor.y = marginMm.top
+      }
+
+      pdf.text(line, marginMm.left, cursor.y)
+      cursor.y += lineHeight
+    })
+
+    if (index < paragraphs.length - 1) {
+      cursor.y += lineHeight
+    }
+  })
+
+  saveAs(pdf.output('blob'), `${fileName}.pdf`)
+}
+
 export function exportCvAsHtml(formData, fileName, options = {}) {
   const locale = options.locale === 'fi' ? 'fi' : 'en'
   const copy = createExportCopy(locale)

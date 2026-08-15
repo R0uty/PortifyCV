@@ -7,6 +7,7 @@ function getLandingCopy(locale) {
       subtitle: 'Selkeä CV-rakentaja, joka toimii kokonaan selaimessasi.',
       previewAlt: 'Esimerkki PortifyCV:llä rakennetusta CV:stä',
       highlights: [
+        'Ei tiliä, ei palvelinta — mitään kirjoittamastasi ei koskaan lähetetä selaimestasi',
         '10 pohjaa — vaihda milloin vain sisältöä menettämättä',
         'Live-esikatselu kirjoittaessasi',
         'ATS-pisteytys ja avainsanaehdotukset',
@@ -15,16 +16,16 @@ function getLandingCopy(locale) {
       whyTitle: 'Miksi PortifyCV',
       why: [
         {
+          heading: 'Mikään ei koskaan päädy palvelimelle',
+          body: 'Jokainen vienti (PDF, HTML, JSON) ja jakolinkki muodostetaan kokonaan selaimessasi. Toisin kuin tiliä vaativat CV-työkalut, tietojasi ei koskaan ladata, tallenneta tai näe kukaan muu — koska ne eivät koskaan poistu laitteeltasi.',
+        },
+        {
           heading: 'Ei tiliä eikä kirjautumista',
           body: 'Aloita kirjoittaminen heti — CV rakentuu live-esikatselussa ilman rekisteröitymistä tai sähköpostivahvistusta.',
         },
         {
           heading: 'Rakennettu rekrytointijärjestelmiä varten',
           body: 'ATS-tila muotoilee CV:n järjestelmien luettavaksi ilman sarakkeita tai grafiikkaa, ja avainsanapisteytys näyttää mitä puuttuu.',
-        },
-        {
-          heading: 'Data pysyy sinulla',
-          body: 'Jokainen vienti (PDF, HTML, JSON) ja jakolinkki muodostetaan kokonaan selaimessasi — CV-sisältöäsi ei koskaan lähetetä palvelimelle.',
         },
       ],
       faqTitle: 'Usein kysytyt kysymykset',
@@ -51,7 +52,7 @@ function getLandingCopy(locale) {
         },
         {
           q: 'Mitä tietoja PortifyCV tallentaa selaimeeni?',
-          a: 'Vain kolme pientä asetusta (kielivalinta, oletko nähnyt opastuksen ja mainosevästevalintasi) tallennetaan paikallisesti. CV-sisältöäsi ei tallenneta eikä lähetetä minnekään. Katso tietosuojaseloste.',
+          a: 'Oletuksena vain neljä pientä asetusta (kielivalinta, oletko nähnyt opastuksen, mainosevästevalintasi ja onko istunnon palautus päällä) tallennetaan paikallisesti — mikään niistä ei sisällä osaa CV:stäsi. Jos otat käyttöön valinnaisen "Palauta viimeisin istunto" -toiminnon Asetuksista, CV:stäsi pidetään työkopiota vain kyseisessä selainvälilehdessä, jotta vahinkopäivitys ei tuhoa työtäsi — kopio poistuu automaattisesti heti kun suljet välilehden, eikä sitä koskaan lähetetä minnekään. Katso tietosuojaseloste.',
         },
       ],
     }
@@ -64,6 +65,7 @@ function getLandingCopy(locale) {
     subtitle: 'A focused CV builder that runs entirely in your browser.',
     previewAlt: 'Example CV built with PortifyCV',
     highlights: [
+      'No account, no server — nothing you type ever leaves your browser',
       '10 templates — swap anytime without losing your content',
       'Live preview as you type',
       'ATS scoring with keyword suggestions',
@@ -72,16 +74,16 @@ function getLandingCopy(locale) {
     whyTitle: 'Why use PortifyCV',
     why: [
       {
+        heading: 'Nothing ever touches a server',
+        body: 'Every export (PDF, HTML, JSON) and every share link is generated entirely in your browser. Unlike CV builders that require an account, your data is never uploaded, stored, or seen by anyone — because it never leaves your device.',
+      },
+      {
         heading: 'No account required',
         body: 'Skip the sign-up. Start typing and your CV takes shape in the live preview — no registration, no email confirmation.',
       },
       {
         heading: 'Built for applicant tracking systems',
         body: 'Toggle ATS mode for a layout parsers can actually read — no columns, icons, or tables to trip them up — plus keyword scoring that shows what your CV is missing.',
-      },
-      {
-        heading: 'Your data stays yours',
-        body: 'Every export (PDF, HTML, JSON) and every share link is generated entirely in your browser — your CV content is never sent to a server.',
       },
     ],
     faqTitle: 'Frequently asked questions',
@@ -108,7 +110,7 @@ function getLandingCopy(locale) {
       },
       {
         q: 'What data does PortifyCV store in my browser?',
-        a: 'Only three small preferences (your language choice, whether you have seen the onboarding tip, and your advertising-cookie choice) are stored locally. Your CV content itself is never saved or transmitted. See the privacy policy for details.',
+        a: "By default, only four small preferences (your language choice, whether you have seen the onboarding tip, your advertising-cookie choice, and whether session restore is on) are stored locally — none of them contain any part of your CV. If you turn on the optional \"Restore last session\" feature in Settings, a working copy of your CV is kept in that browser tab only, so an accidental refresh doesn't lose your work — it's cleared automatically the moment you close the tab and is never sent anywhere. See the privacy policy for details.",
       },
     ],
   }

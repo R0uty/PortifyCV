@@ -2,6 +2,8 @@
 /** @typedef {import('../types/cv').Locale} Locale */
 
 export const CV_ONBOARDING_SEEN_STORAGE_KEY = 'portifycv-onboarding-seen'
+export const CV_SESSION_RESTORE_ENABLED_STORAGE_KEY = 'portifycv-session-restore-enabled'
+export const CV_SESSION_SNAPSHOT_STORAGE_KEY = 'portifycv-session-snapshot'
 
 export const EMPLOYMENT_TYPE_OPTIONS = [
   'Full-time',
@@ -759,6 +761,82 @@ export function safeStorageSet(key, value) {
 
   try {
     window.localStorage.setItem(key, value)
+
+    return {
+      ok: true,
+      error: null,
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      error: createStorageError(error),
+    }
+  }
+}
+
+// Session storage (not local storage) is used for the opt-in "restore last
+// session" feature specifically because it's cleared when the tab closes —
+// that's what keeps the feature from contradicting the app's "nothing
+// persists once you close the tab" promise.
+export function safeSessionStorageGet(key, fallback = null) {
+  if (typeof window === 'undefined') {
+    return {
+      ok: false,
+      value: fallback,
+      error: new Error('Window is unavailable.'),
+    }
+  }
+
+  try {
+    const value = window.sessionStorage.getItem(key)
+
+    return {
+      ok: true,
+      value: value === null ? fallback : value,
+      error: null,
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      value: fallback,
+      error: createStorageError(error),
+    }
+  }
+}
+
+export function safeSessionStorageSet(key, value) {
+  if (typeof window === 'undefined') {
+    return {
+      ok: false,
+      error: new Error('Window is unavailable.'),
+    }
+  }
+
+  try {
+    window.sessionStorage.setItem(key, value)
+
+    return {
+      ok: true,
+      error: null,
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      error: createStorageError(error),
+    }
+  }
+}
+
+export function safeSessionStorageRemove(key) {
+  if (typeof window === 'undefined') {
+    return {
+      ok: false,
+      error: new Error('Window is unavailable.'),
+    }
+  }
+
+  try {
+    window.sessionStorage.removeItem(key)
 
     return {
       ok: true,

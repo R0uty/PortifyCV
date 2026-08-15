@@ -8,6 +8,8 @@ function SettingsModal({
   atsFriendlyMode,
   onToggleAtsFriendlyMode,
   onManageSections,
+  sessionRestoreEnabled,
+  onToggleSessionRestore,
 }) {
   const isFinnish = locale === 'fi'
 
@@ -44,6 +46,18 @@ function SettingsModal({
         <button type="button" className="settings-link" onClick={onManageSections}>
           {isFinnish ? 'Hallinnoi' : 'Manage'}
         </button>
+      </div>
+
+      <div className="settings-row">
+        <div>
+          <p className="settings-row__label">{isFinnish ? 'Palauta viimeisin istunto' : 'Restore last session'}</p>
+          <p className="settings-row__hint">
+            {isFinnish
+              ? 'Pois päältä oletuksena. Päällä ollessaan CV:stäsi pidetään työkopiota vain tässä selainvälilehdessä, jotta vahinkopäivitys ei tuhoa työtäsi — kopio poistuu automaattisesti heti kun suljet välilehden, eikä sitä koskaan lähetetä minnekään.'
+              : "Off by default. When on, keeps a working copy of your CV in this browser tab only, so an accidental refresh doesn't lose your work — it's cleared automatically the moment you close the tab and is never sent anywhere."}
+          </p>
+        </div>
+        <ToggleSwitch checked={sessionRestoreEnabled} onChange={onToggleSessionRestore} />
       </div>
     </Modal>
   )

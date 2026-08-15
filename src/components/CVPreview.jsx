@@ -3,7 +3,7 @@
 // Handles data preparation, ATS mode overrides, section visibility, and layout rendering.
 // Each template config (from ./templates/) provides CSS class getters and layout flags.
 
-import { memo, useMemo } from 'react'
+import { lazy, memo, Suspense, useMemo } from 'react'
 
 import { createCvSnapshot } from '../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../utils/cvForm'
@@ -20,14 +20,23 @@ import {
   formatLinkLabel,
 } from './templates/shared'
 import { getTemplateConfig } from './templates'
-import DeveloperShowcase from './templates/DeveloperShowcase'
-import CreativeShowcase from './templates/CreativeShowcase'
-import ModernShowcase from './templates/ModernShowcase'
-import ExecutiveShowcase from './templates/ExecutiveShowcase'
-import TimelineShowcase from './templates/TimelineShowcase'
-import GraduateShowcase from './templates/GraduateShowcase'
-import CompactShowcase from './templates/CompactShowcase'
-import PortfolioShowcase from './templates/PortfolioShowcase'
+
+// Only one of these renders at a time (CVPreview picks by `variant`), but
+// the gallery thumbnails render all 10 templates at once, so lazy-loading
+// still pays off for the common case: the builder's initial bundle no
+// longer carries code for the 7 bespoke templates the user hasn't opened
+// yet. `prefetchTemplateShowcases()` (called on idle from
+// ResumeBuilderPage, same pattern as the PDF export prefetch) warms these
+// in the background so switching templates or opening the gallery rarely
+// hits the Suspense fallback in practice.
+const DeveloperShowcase = lazy(() => import('./templates/DeveloperShowcase'))
+const CreativeShowcase = lazy(() => import('./templates/CreativeShowcase'))
+const ModernShowcase = lazy(() => import('./templates/ModernShowcase'))
+const ExecutiveShowcase = lazy(() => import('./templates/ExecutiveShowcase'))
+const TimelineShowcase = lazy(() => import('./templates/TimelineShowcase'))
+const GraduateShowcase = lazy(() => import('./templates/GraduateShowcase'))
+const CompactShowcase = lazy(() => import('./templates/CompactShowcase'))
+const PortfolioShowcase = lazy(() => import('./templates/PortfolioShowcase'))
 
 function CVPreview({
   formData,
@@ -60,13 +69,15 @@ function CVPreview({
   // never move it earlier without checking no hook follows it.
   if (variant === 'developer' && !atsFriendlyMode) {
     return (
-      <DeveloperShowcase
-        formData={formData}
-        locale={locale}
-        previewRef={previewRef}
-        templateConfig={templateConfig}
-        showcaseConfig={t}
-      />
+      <Suspense fallback={null}>
+        <DeveloperShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+        />
+      </Suspense>
     )
   }
 
@@ -75,12 +86,14 @@ function CVPreview({
   // system that ATS mode bypasses entirely.
   if (variant === 'creative' && !atsFriendlyMode) {
     return (
-      <CreativeShowcase
-        formData={formData}
-        locale={locale}
-        previewRef={previewRef}
-        templateConfig={templateConfig}
-      />
+      <Suspense fallback={null}>
+        <CreativeShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+        />
+      </Suspense>
     )
   }
 
@@ -89,13 +102,15 @@ function CVPreview({
   // "premium executive" visual system that ATS mode bypasses entirely.
   if (variant === 'modern' && !atsFriendlyMode) {
     return (
-      <ModernShowcase
-        formData={formData}
-        locale={locale}
-        previewRef={previewRef}
-        templateConfig={templateConfig}
-        showcaseConfig={t}
-      />
+      <Suspense fallback={null}>
+        <ModernShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+        />
+      </Suspense>
     )
   }
 
@@ -104,13 +119,15 @@ function CVPreview({
   // bespoke "boardroom" visual system that ATS mode bypasses entirely.
   if (variant === 'executive' && !atsFriendlyMode) {
     return (
-      <ExecutiveShowcase
-        formData={formData}
-        locale={locale}
-        previewRef={previewRef}
-        templateConfig={templateConfig}
-        showcaseConfig={t}
-      />
+      <Suspense fallback={null}>
+        <ExecutiveShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+        />
+      </Suspense>
     )
   }
 
@@ -120,13 +137,15 @@ function CVPreview({
   // bypasses entirely.
   if (variant === 'timeline' && !atsFriendlyMode) {
     return (
-      <TimelineShowcase
-        formData={formData}
-        locale={locale}
-        previewRef={previewRef}
-        templateConfig={templateConfig}
-        showcaseConfig={t}
-      />
+      <Suspense fallback={null}>
+        <TimelineShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+        />
+      </Suspense>
     )
   }
 
@@ -136,13 +155,15 @@ function CVPreview({
   // bypasses entirely.
   if (variant === 'graduate' && !atsFriendlyMode) {
     return (
-      <GraduateShowcase
-        formData={formData}
-        locale={locale}
-        previewRef={previewRef}
-        templateConfig={templateConfig}
-        showcaseConfig={t}
-      />
+      <Suspense fallback={null}>
+        <GraduateShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+        />
+      </Suspense>
     )
   }
 
@@ -152,13 +173,15 @@ function CVPreview({
   // system that ATS mode bypasses entirely.
   if (variant === 'compact' && !atsFriendlyMode) {
     return (
-      <CompactShowcase
-        formData={formData}
-        locale={locale}
-        previewRef={previewRef}
-        templateConfig={templateConfig}
-        showcaseConfig={t}
-      />
+      <Suspense fallback={null}>
+        <CompactShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+        />
+      </Suspense>
     )
   }
 
@@ -168,13 +191,15 @@ function CVPreview({
   // condensed into a résumé" visual system that ATS mode bypasses entirely.
   if (variant === 'portfolio' && !atsFriendlyMode) {
     return (
-      <PortfolioShowcase
-        formData={formData}
-        locale={locale}
-        previewRef={previewRef}
-        templateConfig={templateConfig}
-        showcaseConfig={t}
-      />
+      <Suspense fallback={null}>
+        <PortfolioShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+        />
+      </Suspense>
     )
   }
   const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')

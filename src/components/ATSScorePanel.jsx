@@ -93,17 +93,65 @@ function ATSScorePanel({
       </div>
 
       <div className="mt-5 grid gap-3">
-        {breakdownItems.map((item) => (
-          <article key={item.label} className={`p-4 ${ui.surfaceMuted}`} style={{ border: '1px solid var(--app-border)' }}>
-            <div className="flex items-center justify-between gap-3">
-              <p className={`text-sm font-bold uppercase tracking-[0.04em] ${ui.textPrimary}`}>{item.label}</p>
-              <span className="px-3 py-1 text-xs font-bold" style={{ ...scoreTone(ui, item.score), border: '1px solid var(--app-border)' }}>
-                {item.score}/{item.maxScore}
-              </span>
-            </div>
-            <p className={`mt-2 text-sm leading-6 ${ui.textSecondary}`}>{item.summary}</p>
-          </article>
-        ))}
+        {breakdownItems.map((item) => {
+          const hasKeywordBreakdown = Array.isArray(item.matchedKeywords) || Array.isArray(item.missingKeywords)
+          const matchedKeywords = item.matchedKeywords ?? []
+          const missingKeywords = item.missingKeywords ?? []
+
+          return (
+            <article key={item.label} className={`p-4 ${ui.surfaceMuted}`} style={{ border: '1px solid var(--app-border)' }}>
+              <div className="flex items-center justify-between gap-3">
+                <p className={`text-sm font-bold uppercase tracking-[0.04em] ${ui.textPrimary}`}>{item.label}</p>
+                <span className="px-3 py-1 text-xs font-bold" style={{ ...scoreTone(ui, item.score), border: '1px solid var(--app-border)' }}>
+                  {item.score}/{item.maxScore}
+                </span>
+              </div>
+              <p className={`mt-2 text-sm leading-6 ${ui.textSecondary}`}>{item.summary}</p>
+
+              {hasKeywordBreakdown && (matchedKeywords.length > 0 || missingKeywords.length > 0) ? (
+                <div className="mt-3 space-y-2">
+                  {matchedKeywords.length > 0 ? (
+                    <div>
+                      <p className={`text-xs font-bold uppercase tracking-[0.14em] ${ui.textMuted}`}>
+                        {isFinnish ? 'Osuneet avainsanat' : 'Matched keywords'}
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {matchedKeywords.slice(0, 12).map((keyword) => (
+                          <span
+                            key={`matched-${keyword}`}
+                            className="border px-3 py-1 text-xs font-semibold"
+                            style={{ borderColor: 'rgba(0,0,0,0.15)', backgroundColor: 'rgba(0,0,0,0.02)', color: '#111111' }}
+                          >
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {missingKeywords.length > 0 ? (
+                    <div>
+                      <p className={`text-xs font-bold uppercase tracking-[0.14em] ${ui.textMuted}`}>
+                        {isFinnish ? 'Puuttuvat avainsanat' : 'Missing keywords'}
+                      </p>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {missingKeywords.slice(0, 12).map((keyword) => (
+                          <span
+                            key={`missing-${keyword}`}
+                            className="border px-3 py-1 text-xs font-semibold"
+                            style={{ borderColor: 'rgba(0,0,0,0.2)', backgroundColor: 'rgba(0,0,0,0.04)', color: '#374151' }}
+                          >
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </article>
+          )
+        })}
       </div>
 
       <div className="mt-5">
