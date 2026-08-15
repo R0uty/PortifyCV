@@ -22,9 +22,9 @@ import {
 import { getTemplateConfig } from './templates'
 
 // Only one of these renders at a time (CVPreview picks by `variant`), but
-// the gallery thumbnails render all 10 templates at once, so lazy-loading
+// the gallery thumbnails render all 12 templates at once, so lazy-loading
 // still pays off for the common case: the builder's initial bundle no
-// longer carries code for the 7 bespoke templates the user hasn't opened
+// longer carries code for the 9 bespoke templates the user hasn't opened
 // yet. `prefetchTemplateShowcases()` (called on idle from
 // ResumeBuilderPage, same pattern as the PDF export prefetch) warms these
 // in the background so switching templates or opening the gallery rarely
@@ -37,6 +37,8 @@ const TimelineShowcase = lazy(() => import('./templates/TimelineShowcase'))
 const GraduateShowcase = lazy(() => import('./templates/GraduateShowcase'))
 const CompactShowcase = lazy(() => import('./templates/CompactShowcase'))
 const PortfolioShowcase = lazy(() => import('./templates/PortfolioShowcase'))
+const ClassicProfessionalShowcase = lazy(() => import('./templates/ClassicProfessionalShowcase'))
+const NavyProfessionalShowcase = lazy(() => import('./templates/NavyProfessionalShowcase'))
 
 function CVPreview({
   formData,
@@ -45,6 +47,7 @@ function CVPreview({
   template = 'minimal',
   locale = 'en',
   atsFriendlyMode = false,
+  timelineAccentColor,
 }) {
   // ── Theme and template resolution ──────────────────────────────────
   // Resolve the UI theme (dark/light) and the template config (variant, layout, etc.)
@@ -132,10 +135,14 @@ function CVPreview({
   }
 
   // ── Timeline Showcase delegation ────────────────────────────────────
-  // Same reasoning as Developer/Creative/Modern/Executive Showcase above —
-  // a fully bespoke "career storytelling" visual system that ATS mode
-  // bypasses entirely.
-  if (variant === 'timeline' && !atsFriendlyMode) {
+  // Unlike every other bespoke Showcase, this one does NOT bypass itself in
+  // ATS mode — it's already single-column with no columns to un-tangle, so
+  // there's nothing "necessary" to strip beyond color. TimelineShowcase.jsx
+  // renders its own simplified pass internally (see its `atsFriendlyMode`
+  // prop) instead of handing off to the generic renderer below, so toggling
+  // ATS mode reads as "this template, decluttered" rather than "swapped for
+  // a different template."
+  if (variant === 'timeline') {
     return (
       <Suspense fallback={null}>
         <TimelineShowcase
@@ -144,6 +151,8 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          accentColor={timelineAccentColor}
+          atsFriendlyMode={atsFriendlyMode}
         />
       </Suspense>
     )
@@ -198,6 +207,49 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+        />
+      </Suspense>
+    )
+  }
+
+  // ── Classic Professional Showcase delegation ─────────────────────────
+  // A traditional single-column "no sidebar, no color" visual system that
+  // ATS mode bypasses entirely (though this template's ATS fallback and
+  // Showcase mode look nearly identical anyway, since it's monochrome by
+  // design — the fallback just swaps the serif name for the app's Inter).
+  if (variant === 'classicProfessional' && !atsFriendlyMode) {
+    return (
+      <Suspense fallback={null}>
+        <ClassicProfessionalShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+        />
+      </Suspense>
+    )
+  }
+
+  // ── Navy Professional Showcase delegation ─────────────────────────────
+  // Also does not bypass itself in ATS mode (see the Timeline comment
+  // above for why). NavyProfessionalShowcase.jsx collapses its own
+  // sidebar+main grid to a single column and strips the dark background
+  // internally when atsFriendlyMode is on — the one genuinely "necessary"
+  // structural change for this template, since a side-by-side column is
+  // the one thing this app's own ATS claims ("no columns") specifically
+  // promise to remove — while keeping every section in the same relative
+  // order and everything else about the layout intact.
+  if (variant === 'navyProfessional') {
+    return (
+      <Suspense fallback={null}>
+        <NavyProfessionalShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+          atsFriendlyMode={atsFriendlyMode}
         />
       </Suspense>
     )

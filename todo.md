@@ -687,6 +687,256 @@ rename pass.
       letter button opens the modal (already verified once via DOM query
       during the audit, but not locked in as a regression test).
 
+## New templates — 2026-08-15
+
+- [x] **27. Two new templates: Classic Professional and Navy Professional**
+      — done 2026-08-15, requested with a reference image
+      (`docs/Classical Professional.png`) showing both layouts side by
+      side. Brings the template count from 10 to 12 (landing page hero
+      highlights and FAQ copy, EN+FI, updated to match; `todo.md`/comment
+      references to "10 templates" elsewhere left as historical text where
+      they describe past states, only live-copy counts were bumped).
+      **Naming collision caught before writing any code:** the request's
+      exact name for the sidebar template, "Modern Professional," is
+      already the label of the existing `modern` template
+      (`src/utils/cvTemplates.js`) — a different-looking layout (top
+      header with photo, light-blue right sidebar) but an identical name,
+      which would have shipped as two gallery cards both reading "Modern
+      Professional." Asked the user; they chose to keep the existing
+      template's name and rename the new one — landed as **Navy
+      Professional**.
+      Both are full bespoke Showcase components (`ClassicProfessionalShowcase.jsx`,
+      `NavyProfessionalShowcase.jsx`), not the generic config-only path —
+      matching the precedent of 8 of the prior 10 templates, since neither
+      design fit the generic renderer's existing option surface (a
+      centered serif header; a full-height sidebar with identity baked in,
+      rather than the shared top-header-then-two-columns shape every other
+      bespoke Showcase uses). Both go through the standard
+      `variant && !atsFriendlyMode` Suspense-delegated lazy-load added in
+      item 25, so they don't add to the initial bundle, and both got added
+      to `prefetchTemplateShowcases()`.
+      **Classic Professional:** single column, `layout: 'stacked'` (no
+      secondary sections), white background, no photo, no accent color —
+      the entire design pulls from grayscale plus one deliberate exception:
+      the name renders in a system serif stack (`Georgia, 'Times New
+      Roman', Times, serif`) rather than the app's self-hosted Inter, since
+      the reference image's traditional look depends on it and a system
+      font costs nothing (no new font file, no network request) unlike
+      adding a webfont would. Contact row (phone/email/location/LinkedIn)
+      uses the same icon set every other template's header already uses.
+      Languages render as an inline "English – Fluent | Finnish –
+      Advanced" row (a one-off format not shared with any existing
+      template) rather than a stacked list, matching the reference image.
+      **Navy Professional:** `layout: 'split'`, full-height dark-navy
+      (`#16233a`) left sidebar carrying photo + name + title + contact +
+      skills + languages, white main column with filled-blue-circle
+      section-icon badges (Profile/Experience/Education/Certifications) —
+      structurally different from every other bespoke Showcase in this
+      app, which put identity in a shared top header above a two-column
+      body; here the sidebar *is* the header, so there's no separate
+      `<header>` element, just `<aside>` before `<main>` inside the
+      article (same DOM-order trick `DeveloperShowcase.jsx` already uses
+      to put its sidebar on the left).
+      Both configs (`classicProfessional.js`, `navyProfessional.js`)
+      supply a full generic-path fallback (used whenever ATS-friendly mode
+      is on, bypassing both Showcases) so ATS mode doesn't break for
+      either — verified live, not assumed: toggled ATS mode on and off for
+      both templates in a real browser with no console errors or crashes.
+      **Navy Professional's ATS behavior changed in item 30:** it no
+      longer bypasses to the generic renderer in ATS mode — it keeps its
+      own layout, single-columned and recolored. Classic Professional is
+      unaffected and still bypasses to the generic fallback as described
+      above.
+      Verified end-to-end: both render correctly in the template gallery
+      (12 thumbnails, no blank Suspense gaps), in the live preview
+      (Finnish and English), in ATS-mode fallback, and export cleanly to
+      PDF (`html2canvas` → `jsPDF` path, not the text fallback — confirmed
+      via `preview-document--designer` sync and a completed export with no
+      hung "exporting…" button state) with zero console errors throughout.
+      `npm run lint`, `npm run build`, `check:share`, `check:reducers`,
+      `check:feedback`, and `test:e2e` (14/14) all pass.
+- [x] **28. Visible template preview on the landing page, next to the FAQ**
+      — done 2026-08-16, requested after item 27 shipped. A new "See the
+      templates" section (`src/components/LandingTemplatesPreview.jsx`)
+      sits between "Why use PortifyCV" and the FAQ, showing all 12
+      templates as small real thumbnails with their names — not an
+      abstract mockup, the same live-`CVPreview`-scaled-down approach the
+      in-builder template gallery already uses (item 1), filled with the
+      demo CV since the landing page has no in-progress CV of its own to
+      show.
+      **Refactor along the way:** the thumbnail-rendering logic
+      (`TemplateThumbnail` component, `buildThumbnailCv` trimming
+      function) lived only inside `TemplateGalleryModal.jsx` before this;
+      extracted into `src/components/TemplateThumbnail.jsx` and
+      `src/utils/thumbnailCv.js` respectively so both the modal and the
+      new landing section share one implementation instead of duplicating
+      it. (The split into two files, not one, is a lint requirement, not a
+      style choice — `react-refresh/only-export-components` rejects a file
+      that exports both a component and a plain function.)
+      **Lazy-loaded**, matching this app's established bundle-hygiene
+      pattern (items 8, 25): `LandingPage.jsx` only `React.lazy()`-imports
+      `LandingTemplatesPreview`, so a first-time visitor's critical-path
+      bundle doesn't carry `CVPreview` + the template registry just for a
+      below-the-fold section. Confirmed via `npm run build` output: a new
+      standalone `LandingTemplatesPreview` chunk (0.64 KB) plus a shared
+      `thumbnailCv` chunk (83 KB / 16.6 KB gzip, containing `CVPreview` and
+      the template registry) that both the landing page and
+      `ResumeBuilderPage` now depend on — confirmed by `ResumeBuilderPage`'s
+      own chunk shrinking by roughly that same amount, meaning a visitor
+      who previews templates and then clicks "Start building" isn't
+      re-downloading that code.
+      Verified in a real browser, both locales: all 12 thumbnails
+      (including the two from item 27) render with correct real layouts
+      and correctly localized names, the section sits directly before the
+      FAQ, the in-builder template gallery modal still works unchanged
+      after the extraction, and there are zero console errors. `npm run
+      lint`, `npm run build`, `check:share`, `check:reducers`,
+      `check:feedback`, and `test:e2e` (14/14) all pass.
+- [x] **29. Reworked the Timeline template into Modern Timeline** — done
+      2026-08-16, requested with a reference image
+      (`docs/MODERN-TIMELINE.png`). A full redesign in place, not a new
+      13th template: `id`/`variant` stay `'timeline'` (existing share
+      links or exported JSON encoding `template: 'timeline'` still resolve
+      correctly), only the label ("Timeline" → "Modern Timeline"),
+      description, layout, and every visual file changed.
+      **Structural change:** was `layout: 'split'` with a sidebar (skills/
+      links/languages/interests) and a merged single timeline mixing
+      *every* section type (experience, education, certificates, projects,
+      achievements, speaking, publications, volunteering) into one
+      continuous chronological list. Now `layout: 'stacked'` — no sidebar
+      at all — with 7 fixed, separately-headed sections (Profile,
+      Experience, Education, Projects, Skills, Languages, Certifications),
+      matching the reference image exactly. This also happens to close the
+      sidebar/main imbalance flagged against the old Timeline design in
+      item 16's audit (worst case of the 8 split-layout templates, ~4x) —
+      not the point of this pass, but a side effect of removing the
+      sidebar entirely.
+      Only Experience and Education use the actual timeline visual (date
+      in its own left column, hollow accent-ringed dot, connecting line to
+      the next entry — reused the same absolutely-positioned-line-in-a-flex-rail
+      technique `ModernShowcase.jsx` already established for its own
+      timeline, adapted to put the date in a third column instead of
+      inline with the content). Projects render as clean bordered cards
+      (icon badge, name, description, comma-split `stack` tags matching
+      `PortfolioShowcase.jsx`'s existing parsing, an optional "View
+      project" link). Languages get a small proficiency-dot row (1-5 dots)
+      via a best-effort keyword heuristic on the free-text level field
+      (EN+FI: native/fluent/c2→5 ... beginner/a1→1, unrecognized text
+      defaults to a neutral 3 rather than guessing high or low, since it's
+      a stylized flourish, not a claim about the CV's real content). The
+      name is two-tone (first name dark, rest of the name in the accent
+      color) via a naive first-space split — a deliberate, disclosed
+      simplification, not a real name-parser.
+      **New capability, not present anywhere else in the app: a real,
+      working user-customizable accent color** — the spec asked for this
+      explicitly. Checked first whether this already existed in any form:
+      it doesn't (`getAccentOption()`/`getAccentThemeStyles()` in
+      `designSystem.js` are vestigial stubs from a removed feature, and
+      item 13 already found and corrected a template description that
+      falsely claimed "changeable accent colour"). Built it real rather
+      than faking the claim a second time: `timelineAccentColor` lives in
+      `uiReducer.js` (ephemeral UI state, same tier as `selectedTemplate`
+      and `atsFriendlyMode` — not part of `CvData`, so not persisted
+      through share links, consistent with how template selection itself
+      already isn't). A conditional "Timeline accent color" row appears in
+      Settings *only* when Modern Timeline is the active template — 6
+      preset swatches (violet default, blue, teal, emerald, amber, rose),
+      not a free-form picker, so every choice stays "subtle" per the
+      template's own brief. Applied via one CSS custom property
+      (`--tl-accent`) set inline on the Showcase's root element from the
+      `accentColor` prop threaded through `CVPreview.jsx`; the stylesheet
+      never hardcodes the color, so PDF export (which screenshots the live
+      DOM) picks up the chosen color automatically with no export-pipeline
+      changes needed. Deliberately did not thread the custom color into
+      the template gallery or landing-page thumbnails (both keep the
+      default violet) — a defensible, disclosed scope cut, consistent with
+      those thumbnails already using the demo CV instead of live form data.
+      **A real near-circular-import bug caught before it shipped:** the
+      accent color's default value needed to be readable from
+      `uiReducer.js` (for `createInitialUiState`) without pulling
+      `TimelineShowcase.jsx` — a `React.lazy()`-loaded component (item
+      25's code-splitting) — into the eagerly-bundled reducer. Moved the
+      constant into `timeline.js` (the plain, always-eager config object)
+      instead, imported from both sides. Confirmed via `npm run build`
+      that `TimelineShowcase` still gets its own lazy chunk (9.78 KB)
+      rather than being absorbed into the main bundle.
+      Verified end-to-end in a real browser: matches the reference image's
+      structure closely in both locales (two-tone name, contact rows,
+      timeline dots/line, project cards, language dots, certifications);
+      the accent-color swatches restyle the entire live preview instantly;
+      ATS-mode fallback renders correctly (flat, monochrome, no crash);
+      PDF export completes with no hung "Exporting…" state and zero
+      console errors; the template gallery and landing-page preview both
+      still render all 12 templates including the reworked one with no
+      layout breaks. Added 2 new `check:reducers` cases. `npm run lint`,
+      `npm run build`, `check:share`, `check:reducers`, `check:feedback`,
+      and `test:e2e` (14/14) all pass.
+      **Superseded by item 30 below:** the "ATS-mode fallback" described
+      here meant bypassing to the app's generic renderer, which no longer
+      happens for this template — see item 30.
+- [x] **30. Modern Timeline and Navy Professional keep their own layout in
+      ATS mode instead of bypassing to the generic renderer** — done
+      2026-08-16, requested as a refinement to items 27 and 29: "modern
+      timeline and navy profession should keep placement of a template
+      after ats enabled only removing necessary stuff." Before this, every
+      template except `minimal`/`techExec` rendered its bespoke Showcase
+      normally and only fell back to the app's shared generic renderer
+      when ATS mode was on — including these two, despite their Showcases
+      already being ATS-safe in spirit. That meant enabling ATS mode swapped
+      Modern Timeline or Navy Professional out for a visually unrelated
+      generic layout, rather than the same template minus what a parser
+      actually needs stripped.
+      `CVPreview.jsx`'s `variant === 'timeline'` and
+      `variant === 'navyProfessional'` branches no longer gate on
+      `!atsFriendlyMode` — both now always render their own Showcase, which
+      each received a new `atsFriendlyMode` prop to react to internally.
+      **Modern Timeline:** ATS mode only recolors the user's chosen accent
+      down to a fixed neutral gray (`TIMELINE_ATS_ACCENT_COLOR = '#374151'`,
+      overriding `--tl-accent`) — the layout itself (single column, no
+      sidebar) was already ATS-flat from item 29's rework, so there was
+      nothing structural left to remove.
+      **Navy Professional:** two necessary changes, both because this
+      template's non-ATS layout is exactly what this app's own ATS
+      messaging promises to strip. (1) The 2-column
+      `grid-template-columns` (navy sidebar beside white main column)
+      collapses to one column (`.navy-professional-showcase--ats`) — a
+      side-by-side column can scramble a parser's left-to-right text
+      extraction, which is precisely the "no columns" claim the app's ATS
+      copy already makes elsewhere. (2) ~15 CSS rules recolor the sidebar
+      background, text, tags, icons, and bullet markers from navy/blue to
+      the same neutral grayscale every other template's ATS mode already
+      uses. Everything else — section order, icon badges, pill tags,
+      language markers, entry structure — stays in the same relative place.
+      Both Showcases' root `<article>` className now computes the
+      `preview-document--ats`/`--designer` marker dynamically off the live
+      `atsFriendlyMode` prop (previously hardcoded to `--designer`), which
+      the export pipeline's `waitForPreviewModeSync` polls via
+      `classList.contains(...)` before capture — verified correct via a
+      direct DOM query in a real browser (right class, right computed
+      colors, right `grid-template-columns`) for both templates.
+      **A PDF-export "hang" investigated and ruled out as a real bug:**
+      triggering Navy Professional's ATS PDF export through the actual UI
+      button in this session's browser-automation environment took
+      70-100+ seconds and looked stuck. Root-caused with the browser tab's
+      own `document.hidden`/`document.visibilityState` — the automation
+      tab runs backgrounded, and Chrome throttles `requestAnimationFrame`
+      to near-zero for hidden tabs. `ResumeBuilderPage.jsx`'s
+      `waitForPreviewModeSync`/`waitForPreviewVariantSync` each poll for
+      up to 60 rAF frames *before* the actual `html2canvas` capture runs,
+      so a throttled tab stalls there for a long time — confirmed
+      directly: `window.__rafLog` only grew by a handful of frames per
+      minute while `document.hidden === true`, and once the capture itself
+      finally ran it completed in ~1 second (`isCanvasLikelyBlank` false on
+      the first pass). Calling `exportCvAsPdf()` directly (bypassing the
+      two rAF-gated pre-checks, which are UI sync guards, not the export
+      itself) completed in ~3 seconds for both Navy Professional and Modern
+      Timeline in ATS mode. This is the same class of environment quirk as
+      the already-documented Chrome `resize_window`/smooth-scroll no-ops
+      in this project's memory, not an application defect — a
+      foregrounded, real user's tab does not experience rAF throttling.
+      `npm run lint`, `npm run build`, `check:share`, `check:reducers`,
+      `check:feedback`, and `test:e2e` (14/14) all pass.
+
 ## Checked and fine — don't re-investigate
 
 - Responsive layout is handled (breakpoints at 1023 / 860 / 560px).

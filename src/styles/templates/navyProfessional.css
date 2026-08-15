@@ -1,0 +1,473 @@
+/* ==========================================================================
+   Navy Professional Showcase — hand-authored component styles for the Navy
+   Professional template's non-ATS mode. Scoped entirely under
+   `.navy-professional-showcase`. Full-height dark navy left sidebar (photo,
+   identity, contact, skills, languages) beside a white main column (blue
+   section-icon badges, no timeline). Unlike every other bespoke Showcase in
+   this app, there is no shared top header — the sidebar IS the identity
+   block, matching the reference design's full-height rail.
+   ========================================================================== */
+
+.navy-professional-showcase {
+  --np-navy: #16233a;
+  --np-navy-line: rgba(255, 255, 255, 0.14);
+  --np-blue: #2563eb;
+  --np-blue-light: #93c5fd;
+  --np-text: #1f2937;
+  --np-muted: #6b7280;
+  --np-border: #e5e7eb;
+  /* Deliberately not pure #ffffff for the main column — same blank-canvas
+     PDF export guard used by the Creative/Modern/Executive Showcases. */
+  --np-bg: #fdfdfd;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(180px, 0.31fr) minmax(0, 0.69fr);
+  background: var(--np-bg);
+  color: var(--np-text);
+  font-family: var(--font-sans);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.2);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.navy-professional-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── Sidebar ── */
+
+.navy-professional-showcase__sidebar {
+  background: var(--np-navy);
+  color: #ffffff;
+  padding: 2.5rem 1.75rem;
+  min-width: 0;
+}
+
+.navy-professional-showcase__identity {
+  text-align: center;
+}
+
+.navy-professional-showcase__photo-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.navy-professional-showcase__photo {
+  display: block;
+  width: 7.5rem;
+  height: 7.5rem;
+  object-fit: cover;
+  border-radius: 9999px;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+}
+
+.navy-professional-showcase__kicker {
+  margin-top: 1rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.navy-professional-showcase__name {
+  margin-top: 0.35rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+}
+
+.navy-professional-showcase__role {
+  margin-top: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--np-blue-light);
+}
+
+.navy-professional-showcase__sidebar-divider {
+  height: 1px;
+  margin: 1.75rem 0;
+  background: var(--np-navy-line);
+}
+
+.navy-professional-showcase__sidebar-block {
+  margin-top: 1.75rem;
+}
+
+.navy-professional-showcase__sidebar-block:first-of-type {
+  margin-top: 0;
+}
+
+.navy-professional-showcase__sidebar-heading {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--np-blue-light);
+  margin-bottom: 0.75rem;
+}
+
+.navy-professional-showcase__empty {
+  font-size: 0.78rem;
+  color: var(--np-muted);
+}
+
+.navy-professional-showcase__empty--sidebar {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ── Sidebar: contact ── */
+
+.navy-professional-showcase__contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.navy-professional-showcase__contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.85);
+  overflow-wrap: anywhere;
+}
+
+.navy-professional-showcase__contact-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--np-blue-light);
+}
+
+/* ── Sidebar: skills (outlined pills) ── */
+
+.navy-professional-showcase__tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.navy-professional-showcase__tag {
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  padding: 0.3rem 0.65rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Sidebar: languages ── */
+
+.navy-professional-showcase__language-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.navy-professional-showcase__language-item {
+  position: relative;
+  padding-left: 0.9rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.navy-professional-showcase__language-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 9999px;
+  background: var(--np-blue-light);
+}
+
+.navy-professional-showcase__language-level {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* ── Main column ── */
+
+.navy-professional-showcase__main {
+  min-width: 0;
+  padding: 2.5rem 2.5rem 2.5rem 2.25rem;
+}
+
+.navy-professional-showcase__section + .navy-professional-showcase__section {
+  margin-top: 2rem;
+}
+
+.navy-professional-showcase__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.navy-professional-showcase__section-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 9999px;
+  background: var(--np-blue);
+  color: #ffffff;
+}
+
+.navy-professional-showcase__section-icon svg {
+  height: 0.8rem;
+  width: 0.8rem;
+}
+
+.navy-professional-showcase__section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--np-blue);
+}
+
+/* ── Profile ── */
+
+.navy-professional-showcase__summary {
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1.75;
+  color: var(--np-text);
+  white-space: pre-line;
+}
+
+/* ── Experience / Education ── */
+
+.navy-professional-showcase__entry-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.navy-professional-showcase__entry {
+  padding: 0 0 1.2rem;
+  border-bottom: 1px solid var(--np-border);
+}
+
+.navy-professional-showcase__entry:not(:first-child) {
+  padding-top: 1.2rem;
+}
+
+.navy-professional-showcase__entry:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.navy-professional-showcase__entry-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+}
+
+.navy-professional-showcase__entry-role {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--np-text);
+}
+
+.navy-professional-showcase__entry-dates {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--np-muted);
+  white-space: nowrap;
+}
+
+.navy-professional-showcase__entry-meta {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--np-muted);
+}
+
+.navy-professional-showcase__bullets {
+  margin-top: 0.5rem;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+}
+
+.navy-professional-showcase__bullets li {
+  font-size: 0.79rem;
+  line-height: 1.6;
+  color: var(--np-text);
+}
+
+.navy-professional-showcase__bullets li::marker {
+  color: var(--np-blue);
+}
+
+/* ── Certifications ── */
+
+.navy-professional-showcase__cert-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+.navy-professional-showcase__cert-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--np-text);
+}
+
+.navy-professional-showcase__cert-dot {
+  flex-shrink: 0;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 9999px;
+  background: var(--np-blue);
+}
+
+/* ── ATS mode: same layout, one column instead of two, no color ──
+   The "necessary" change: a side-by-side column is exactly what this
+   app's own ATS claims ("no columns") promise to remove, since it can
+   scramble reading order for parsers that extract text left-to-right
+   across the full page width. Everything else — section order, the icon
+   badges, the pill tags, the language markers — stays in the same
+   relative place, just recolored to the same monochrome every other
+   template's ATS pass already uses. */
+
+.navy-professional-showcase--ats {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__sidebar {
+  background: transparent;
+  color: var(--np-text);
+  border-bottom: 1px solid var(--np-border);
+  padding-bottom: 1.75rem;
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__kicker {
+  color: var(--np-muted);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__name {
+  color: #111827;
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__role {
+  color: var(--np-muted);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__sidebar-divider {
+  background: var(--np-border);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__sidebar-heading {
+  color: var(--np-muted);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__empty--sidebar {
+  color: var(--np-muted);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__contact-item {
+  color: var(--np-text);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__contact-icon {
+  color: var(--np-muted);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__tag {
+  border-color: var(--np-border);
+  background: transparent;
+  color: var(--np-text);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__language-item {
+  color: var(--np-text);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__language-item::before {
+  background: var(--np-muted);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__language-level {
+  color: var(--np-muted);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__section-icon {
+  background: var(--np-muted);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__section-title {
+  color: #111827;
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__bullets li::marker {
+  color: var(--np-muted);
+}
+
+.navy-professional-showcase--ats .navy-professional-showcase__cert-dot {
+  background: var(--np-muted);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 860px) {
+  .navy-professional-showcase {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .navy-professional-showcase__sidebar {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .navy-professional-showcase__main {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .navy-professional-showcase__photo {
+    width: 6rem;
+    height: 6rem;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .navy-professional-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .navy-professional-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+}

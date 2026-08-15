@@ -1,0 +1,284 @@
+/* ==========================================================================
+   Classic Professional Showcase — hand-authored component styles for the
+   Classic Professional template's non-ATS mode. Scoped entirely under
+   `.classic-professional-showcase`. Pure black/white/gray — no accent
+   color anywhere, no sidebar, no photo, no decorative cards. A large
+   centered name (the one place this template uses a system serif font,
+   rather than the app's self-hosted Inter — see classicProfessional.js's
+   headerTitle comment) and thin 1px dividers are the only visual
+   flourishes, per the "traditional and universally safe" brief.
+   ========================================================================== */
+
+.classic-professional-showcase {
+  --cp-text: #111111;
+  --cp-muted: #52525b;
+  --cp-border: #d4d4d8;
+  /* Deliberately not pure #ffffff — same blank-canvas PDF export guard used
+     by the Creative/Modern/Executive Showcases (see those files' CSS):
+     an all-#ffffff page with only thin 1px dividers for structure risks a
+     capture sampling point landing on pure white and, in the pathological
+     case, contributing to a false "blank canvas" read. */
+  --cp-bg: #fdfdfd;
+  --cp-serif: Georgia, 'Times New Roman', Times, serif;
+
+  position: relative;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font-family: var(--font-sans);
+  border-radius: 4px;
+  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.15);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.classic-professional-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── Header ── */
+
+.classic-professional-showcase__header {
+  padding: 3rem 3rem 1.5rem;
+  text-align: center;
+}
+
+.classic-professional-showcase__kicker {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--cp-muted);
+}
+
+.classic-professional-showcase__name {
+  margin-top: 0.5rem;
+  font-family: var(--cp-serif);
+  font-size: 2.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: var(--cp-text);
+}
+
+.classic-professional-showcase__role {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--cp-muted);
+}
+
+.classic-professional-showcase__contact {
+  margin-top: 1.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem 1.5rem;
+}
+
+.classic-professional-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--cp-muted);
+  white-space: nowrap;
+}
+
+.classic-professional-showcase__contact-icon {
+  display: inline-flex;
+  color: var(--cp-text);
+}
+
+.classic-professional-showcase__header-divider {
+  height: 1px;
+  margin: 0 3rem;
+  background: var(--cp-border);
+}
+
+/* ── Body: one column, sections stacked with thin dividers ── */
+
+.classic-professional-showcase__body {
+  padding: 1.75rem 3rem 3rem;
+}
+
+.classic-professional-showcase__section + .classic-professional-showcase__section {
+  margin-top: 1.75rem;
+}
+
+.classic-professional-showcase__heading {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--cp-border);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--cp-text);
+}
+
+.classic-professional-showcase__empty {
+  margin-top: 0.8rem;
+  font-size: 0.8rem;
+  color: var(--cp-muted);
+}
+
+/* ── Professional Summary ── */
+
+.classic-professional-showcase__summary {
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+  line-height: 1.75;
+  color: var(--cp-text);
+  white-space: pre-line;
+}
+
+/* ── Experience / Education entries ── */
+
+.classic-professional-showcase__entry-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.classic-professional-showcase__entry-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+}
+
+.classic-professional-showcase__entry-role {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--cp-text);
+}
+
+.classic-professional-showcase__entry-dates {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cp-muted);
+  white-space: nowrap;
+}
+
+.classic-professional-showcase__entry-meta {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--cp-muted);
+}
+
+.classic-professional-showcase__bullets {
+  margin-top: 0.5rem;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.classic-professional-showcase__bullets li {
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--cp-text);
+}
+
+.classic-professional-showcase__bullets li::marker {
+  color: var(--cp-muted);
+}
+
+/* ── Skills ── */
+
+.classic-professional-showcase__tag-row {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.classic-professional-showcase__tag {
+  border-radius: 4px;
+  border: 1px solid var(--cp-border);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--cp-text);
+  background: transparent;
+}
+
+/* ── Languages: inline row separated by a thin pipe ── */
+
+.classic-professional-showcase__language-row {
+  margin-top: 0.9rem;
+  font-size: 0.82rem;
+  color: var(--cp-text);
+}
+
+.classic-professional-showcase__language-item {
+  white-space: nowrap;
+}
+
+.classic-professional-showcase__language-sep {
+  display: inline-block;
+  margin: 0 0.75rem;
+  color: var(--cp-border);
+}
+
+/* ── Certifications: plain stacked lines ── */
+
+.classic-professional-showcase__cert-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.classic-professional-showcase__cert-item {
+  font-size: 0.82rem;
+  color: var(--cp-text);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 560px) {
+  .classic-professional-showcase__header {
+    padding: 2rem 1.25rem 1.25rem;
+  }
+
+  .classic-professional-showcase__header-divider {
+    margin: 0 1.25rem;
+  }
+
+  .classic-professional-showcase__body {
+    padding: 1.25rem 1.25rem 1.75rem;
+  }
+
+  .classic-professional-showcase__name {
+    font-size: 2rem;
+  }
+
+  .classic-professional-showcase__contact {
+    justify-content: flex-start;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .classic-professional-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .classic-professional-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+}

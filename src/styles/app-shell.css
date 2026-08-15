@@ -1117,6 +1117,31 @@ select.floating-field__control {
   color: var(--accent-text);
 }
 
+.settings-swatch-row {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.5rem;
+}
+
+.settings-swatch {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  box-shadow: 0 0 0 1px var(--app-border);
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.settings-swatch:hover {
+  transform: scale(1.1);
+}
+
+.settings-swatch--active {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px var(--app-text);
+}
+
 .preview-panel {
   display: flex;
   flex-direction: column;
@@ -1777,6 +1802,40 @@ select.floating-field__control {
   font-weight: 800;
   color: var(--app-text);
   margin-bottom: var(--space-8);
+}
+
+/* Pulls up into the title's own bottom margin, then re-establishes the
+   usual gap below itself — so a titled section with a subtitle keeps the
+   same title-to-content rhythm as one without. */
+.landing-section__subtitle {
+  margin-top: calc(var(--space-3) - var(--space-8));
+  margin-bottom: var(--space-8);
+  max-width: 44ch;
+  font-size: var(--text-body);
+  line-height: 1.6;
+  color: var(--app-text-muted);
+}
+
+.landing-templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--space-5) var(--space-4);
+}
+
+/* Wraps TemplateThumbnail's own `.template-gallery__thumb-frame` (border,
+   radius, and background already come from that) — this just adds the
+   drop shadow, with a matching radius so the shadow's corners line up. */
+.landing-templates-card__thumb {
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.landing-templates-card__name {
+  margin-top: var(--space-2);
+  text-align: center;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--app-text-muted);
 }
 
 .landing-why-grid {

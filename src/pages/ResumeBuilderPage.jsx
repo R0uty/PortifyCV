@@ -325,6 +325,7 @@ function ResumeBuilderPage({
     coverLetterHiringManager,
     coverLetterBody,
     sessionRestoreEnabled,
+    timelineAccentColor,
     toasts,
   } = uiState
   const ui = getUiTheme()
@@ -552,7 +553,7 @@ function ResumeBuilderPage({
     // Each bespoke template's Showcase component (CVPreview.jsx) is now
     // lazy-loaded so the initial builder bundle only carries the one the
     // user actually has selected. Warm the rest on idle so switching
-    // templates, or opening the gallery (which renders all 10 as
+    // templates, or opening the gallery (which renders all 12 as
     // thumbnails at once), rarely hits the loading fallback.
     const requestIdle = window.requestIdleCallback ?? ((callback) => window.setTimeout(callback, 2000))
     const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout
@@ -853,6 +854,10 @@ function ResumeBuilderPage({
 
   const handleToggleSessionRestore = useCallback(() => {
     dispatchUi({ type: UI_ACTION.TOGGLE_SESSION_RESTORE })
+  }, [])
+
+  const handleTimelineAccentColorChange = useCallback((color) => {
+    dispatchUi({ type: UI_ACTION.SET_TIMELINE_ACCENT_COLOR, color })
   }, [])
 
   const handleToggleMobilePreview = useCallback(() => {
@@ -1617,6 +1622,7 @@ function ResumeBuilderPage({
                 template={selectedTemplate}
                 locale={locale}
                 atsFriendlyMode={atsFriendlyMode}
+                timelineAccentColor={timelineAccentColor}
               />
             </AppErrorBoundary>
           </div>
@@ -1637,6 +1643,7 @@ function ResumeBuilderPage({
     isResponsivePreview,
     locale,
     selectedTemplate,
+    timelineAccentColor,
     zoomPercent,
     ui.button,
     ui.surface,
@@ -1779,6 +1786,9 @@ function ResumeBuilderPage({
         onManageSections={handleManageSections}
         sessionRestoreEnabled={sessionRestoreEnabled}
         onToggleSessionRestore={handleToggleSessionRestore}
+        selectedTemplate={selectedTemplate}
+        timelineAccentColor={timelineAccentColor}
+        onTimelineAccentColorChange={handleTimelineAccentColorChange}
       />
 
       <BadgeModal

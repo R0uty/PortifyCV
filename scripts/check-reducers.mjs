@@ -393,6 +393,13 @@ console.log('\nuiReducer\n')
 
 {
   const state = createInitialUiState({})
+  check('createInitialUiState defaults the timeline accent color', typeof state.timelineAccentColor === 'string' && state.timelineAccentColor.length > 0)
+  const next = uiReducer(state, { type: UI_ACTION.SET_TIMELINE_ACCENT_COLOR, color: '#2563eb' })
+  check('SET_TIMELINE_ACCENT_COLOR stores the chosen color', next.timelineAccentColor === '#2563eb')
+}
+
+{
+  const state = createInitialUiState({})
   const next = uiReducer(state, { type: 'NOT_A_REAL_ACTION' })
   check('An unknown action type returns the same state reference', next === state)
 }

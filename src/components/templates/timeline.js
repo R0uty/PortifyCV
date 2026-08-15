@@ -1,97 +1,97 @@
-// Timeline template config — chronological storytelling with a bold vertical timeline.
-// Cyan accent color throughout. Categorized skills, icon-list links.
-// Clean white header, bold name, colored nodes marking sections.
+// Modern Timeline template config — single-column, restrained modern layout
+// built around a vertical timeline for Experience and Education. One
+// customizable accent color (violet by default) — see
+// TimelineShowcase.jsx's `accentColor` prop for how the user's swatch
+// choice overrides this config's static violet. The generic-path fields
+// below are the ATS-mode fallback (CVPreview.jsx falls back to them
+// whenever atsFriendlyMode is on, bypassing TimelineShowcase.jsx entirely,
+// and ATS mode always renders monochrome regardless of accent — so the
+// user's custom color choice never needs to reach this file).
+
+// Lives here (a plain config object, always eagerly bundled — see
+// components/templates/index.js) rather than in TimelineShowcase.jsx
+// itself, since that component is React.lazy()-loaded and non-component
+// callers (uiReducer.js's default state) need this constant without
+// pulling the lazy chunk into the eager bundle.
+export const TIMELINE_DEFAULT_ACCENT_COLOR = '#6d28d9'
+
 export default {
-  // Outer document border — cyan-tinted, white bg
-  preview: () => 'border-cyan-200 bg-white shadow-none',
+  // Outer document border — plain white, no shadow
+  preview: () => 'border-gray-200 bg-white shadow-none',
 
-  // Header strip — white bg, transparent bottom border (gradient applied via CSS)
-  headerColor: () => 'bg-white text-gray-900 border-b-2 border-transparent',
+  // Header strip — white bg, thin bottom border
+  headerColor: () => 'bg-white text-gray-900 border-b border-gray-300',
 
-  // Full name heading — extrabold, large, commanding
-  headerTitle: () => 'mt-2 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-[3.4rem]',
+  // Full name heading — bold, large
+  headerTitle: () => 'mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl',
 
-  // Professional title — medium weight, muted gray
-  headerSubtitle: () => 'mt-2 text-base font-medium leading-7 sm:text-lg text-gray-500',
+  // Professional title — violet accent, uppercase
+  headerSubtitle: () => 'mt-2 text-sm font-semibold uppercase tracking-[0.16em] text-violet-600',
 
-  // Section headings — tiny uppercase, cyan color
-  sectionTitle: () => 'text-[0.7rem] font-bold uppercase tracking-[0.22em] text-cyan-600',
+  // Section headings — violet accent
+  sectionTitle: () => 'text-xs font-bold uppercase tracking-[0.2em] text-violet-600',
 
-  // Main content section wrapper — cyan-tinted bottom border
-  mainSection: () => 'border-b border-cyan-100 pb-6',
+  // Main content section wrapper — thin bottom border
+  mainSection: () => 'border-b border-gray-200 pb-6',
 
-  // Sidebar container — cyan-tinted background with rounded corners
-  sideContainer: () => 'space-y-5 rounded-xl border border-cyan-100 bg-cyan-50/40 p-5 sm:space-y-5 sm:p-6 print:rounded-none print:bg-transparent print:p-0',
+  // Sidebar container — unused (single-column layout, no secondary sections)
+  sideContainer: () => 'space-y-5',
 
-  // Individual sidebar section — white card with cyan border
-  sideSection: () => 'rounded-lg border border-cyan-100 bg-white p-4 print:border-0 print:px-0',
+  // Individual sidebar section — unused
+  sideSection: () => 'py-4 first:pt-0',
 
-  // Skill tag pill — rounded-full, cyan fill, cyan text
-  skillTag: () => 'rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1.5 text-xs font-semibold text-cyan-700',
+  // Skill tag pill — small outlined pill, violet
+  skillTag: () => 'rounded-md border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700',
 
-  // Timeline left-border color — vibrant cyan
-  timelineBorder: () => 'border-cyan-300',
+  // Timeline left-border and dot — violet
+  timelineBorder: () => 'border-violet-300',
+  timelineDot: () => 'border-white bg-violet-600',
 
-  // Timeline dot circle color — vibrant cyan fill
-  timelineDot: () => 'border-white bg-cyan-500',
+  // Education card — plain, no background
+  educationCard: () => 'py-2',
 
-  // Education card — cyan-tinted background with rounded corners
-  educationCard: () => 'rounded-lg border border-cyan-100 bg-cyan-50/40 px-4 py-3',
+  // Link card — plain, no background
+  linkCard: () => 'py-1.5',
 
-  // Link card — cyan-tinted background with rounded corners
-  linkCard: () => 'rounded-lg border border-cyan-100 bg-cyan-50/40 px-4 py-3',
+  // Split-column grid — unused (single column), kept for shape consistency
+  splitColumns: () => 'grid gap-5 md:grid-cols-1',
 
-  // Split-column grid — standard ratios
-  splitColumns: () => 'grid gap-5 sm:gap-6 md:grid-cols-[minmax(0,1.62fr)_minmax(200px,0.88fr)] md:gap-8 print:grid-cols-1',
+  // Accent color — violet for ATS badge tinting
+  accentColor: () => ({ light: 'violet', dark: 'violet' }),
 
-  // Accent color — cyan for ATS mode badge tinting
-  accentColor: () => ({ light: 'cyan', dark: 'cyan' }),
+  // Summary badge — violet tint
+  summaryBadge: () => 'border border-violet-200 bg-violet-50 text-violet-700',
 
-  // Summary badge — cyan border and fill
-  summaryBadge: () => 'border border-cyan-200 bg-cyan-50 text-cyan-700',
-
-  // Profile photo border — cyan
-  photoBorder: () => 'border-cyan-200',
+  // Profile photo border — violet
+  photoBorder: () => 'border-violet-200',
 
   // About section header bottom-border color
-  aboutBorder: () => 'border-slate-100',
+  aboutBorder: () => 'border-violet-100',
 
-  // Experience rendering — role and company shown separately
+  // Experience rendering — clean entries, no timeline dots (the generic ATS
+  // fallback keeps its own simple styling; the real timeline visual only
+  // exists in TimelineShowcase.jsx's non-ATS mode)
   experienceLayout: 'clean',
 
-  // Skills rendering — grouped by category with cyan labels
-  skillsLayout: 'categorized',
+  // Skills rendering — flat row of outlined pills
+  skillsLayout: 'flat',
 
-  // Links rendering — icon + label + value
+  // Links rendering — plain text list
   linksLayout: 'icon-list',
 
-  // Color class for categorized skill group headings — cyan
-  categoryLabelColor: 'text-cyan-400',
+  // Color classes for the generic-path fallback
+  categoryLabelColor: 'text-violet-400',
+  linkIconColor: 'text-violet-400',
 
-  // Color class for link icons and labels — cyan
-  linkIconColor: 'text-cyan-400',
-
-  // Header contact line mode — 'personal' (email/phone/location) with cyan accent.
-  // GitHub/LinkedIn/Portfolio/website stay out of the header; they live in Links only.
+  // Header contact line — personal (email/phone/location) with icons
   headerContactMode: 'personal',
-
-  // Gap between contact items in header
-  headerContactGap: 'gap-x-3',
-
-  // Text size for contact items in header
+  headerContactGap: 'gap-x-4',
   headerContactTextSize: 'text-[0.72rem]',
+  headerContactTextColor: 'text-gray-600',
+  headerContactIconColor: 'text-violet-500',
 
-  // Text color for contact items in header
-  headerContactTextColor: 'text-gray-500',
-
-  // Icon color class for contact icons — cyan
-  headerContactIconColor: 'text-cyan-500',
-
-  // ── Timeline Showcase config (non-ATS "career storytelling" mode) ──
+  // ── Timeline Showcase config (non-ATS mode) ──
   // Read by TimelineShowcase.jsx via CVPreview's `showcaseConfig={t}` prop.
-  // Each flag defaults to true inside the component, so omitting one here
-  // still renders a fully-featured showcase.
   showPhoto: true,
-  showSidebar: true,
   printOptimized: true,
 }

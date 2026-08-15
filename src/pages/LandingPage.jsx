@@ -1,3 +1,14 @@
+import { lazy, Suspense } from 'react'
+
+// Lazy-loaded so the landing page's critical-path bundle doesn't carry
+// CVPreview + the template registry just for this one below-the-fold
+// section — same reasoning as ResumeBuilderPage's own lazy-loading (see
+// App.jsx and CVPreview.jsx). It imports the same TemplateThumbnail the
+// builder's template gallery uses, so the bundler hoists that shared code
+// (and CVPreview beneath it) into a common chunk — a visitor who goes on
+// to "Start building" isn't re-downloading it from scratch.
+const LandingTemplatesPreview = lazy(() => import('../components/LandingTemplatesPreview'))
+
 function getLandingCopy(locale) {
   if (locale === 'fi') {
     return {
@@ -8,7 +19,7 @@ function getLandingCopy(locale) {
       previewAlt: 'Esimerkki PortifyCV:llä rakennetusta CV:stä',
       highlights: [
         'Ei tiliä, ei palvelinta — mitään kirjoittamastasi ei koskaan lähetetä selaimestasi',
-        '10 pohjaa — vaihda milloin vain sisältöä menettämättä',
+        '12 pohjaa — vaihda milloin vain sisältöä menettämättä',
         'Live-esikatselu kirjoittaessasi',
         'ATS-pisteytys ja avainsanaehdotukset',
         'Vie PDF-, HTML- tai JSON-muodossa',
@@ -28,11 +39,13 @@ function getLandingCopy(locale) {
           body: 'ATS-tila muotoilee CV:n järjestelmien luettavaksi ilman sarakkeita tai grafiikkaa, ja avainsanapisteytys näyttää mitä puuttuu.',
         },
       ],
+      templatesTitle: 'Katso pohjat',
+      templatesSubtitle: 'Kaikki 12 asettelua yhdellä silmäyksellä — vaihda milloin tahansa rakentaessasi, ilman että sisältösi katoaa.',
       faqTitle: 'Usein kysytyt kysymykset',
       faq: [
         {
           q: 'Onko PortifyCV oikeasti ilmainen?',
-          a: 'Kyllä. Ei tilausmaksua, ei vesileimaa, ei piilotettuja rajoituksia — kaikki 10 pohjaa ja kaikki vientimuodot ovat käytössä ilmaiseksi.',
+          a: 'Kyllä. Ei tilausmaksua, ei vesileimaa, ei piilotettuja rajoituksia — kaikki 12 pohjaa ja kaikki vientimuodot ovat käytössä ilmaiseksi.',
         },
         {
           q: 'Tarvitsenko tilin?',
@@ -66,7 +79,7 @@ function getLandingCopy(locale) {
     previewAlt: 'Example CV built with PortifyCV',
     highlights: [
       'No account, no server — nothing you type ever leaves your browser',
-      '10 templates — swap anytime without losing your content',
+      '12 templates — swap anytime without losing your content',
       'Live preview as you type',
       'ATS scoring with keyword suggestions',
       'Export to PDF, HTML, or JSON',
@@ -86,11 +99,13 @@ function getLandingCopy(locale) {
         body: 'Toggle ATS mode for a layout parsers can actually read — no columns, icons, or tables to trip them up — plus keyword scoring that shows what your CV is missing.',
       },
     ],
+    templatesTitle: 'See the templates',
+    templatesSubtitle: 'All 12 layouts at a glance — swap between them any time while you build, without losing your content.',
     faqTitle: 'Frequently asked questions',
     faq: [
       {
         q: 'Is PortifyCV really free?',
-        a: 'Yes. No subscription, no watermark, no hidden limits — all 10 templates and every export format are free to use.',
+        a: 'Yes. No subscription, no watermark, no hidden limits — all 12 templates and every export format are free to use.',
       },
       {
         q: 'Do I need to create an account?',
@@ -158,6 +173,14 @@ function LandingPage({
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="landing-section">
+        <h2 className="landing-section__title">{copy.templatesTitle}</h2>
+        <p className="landing-section__subtitle">{copy.templatesSubtitle}</p>
+        <Suspense fallback={null}>
+          <LandingTemplatesPreview locale={locale} />
+        </Suspense>
       </div>
 
       <div className="landing-section">

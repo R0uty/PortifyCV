@@ -1,6 +1,18 @@
 import Modal from './Modal'
 import ToggleSwitch from './fields/ToggleSwitch'
 
+// Preset swatches for the Modern Timeline template's customizable accent
+// color — a small curated set rather than a free-form color input, so
+// every choice stays "subtle" per that template's own design brief.
+const TIMELINE_ACCENT_SWATCHES = [
+  { color: '#6d28d9', label: { en: 'Violet', fi: 'Violetti' } },
+  { color: '#2563eb', label: { en: 'Blue', fi: 'Sininen' } },
+  { color: '#0d9488', label: { en: 'Teal', fi: 'Sinivihreä' } },
+  { color: '#059669', label: { en: 'Emerald', fi: 'Smaragdi' } },
+  { color: '#b45309', label: { en: 'Amber', fi: 'Meripihka' } },
+  { color: '#be123c', label: { en: 'Rose', fi: 'Ruusu' } },
+]
+
 function SettingsModal({
   isOpen,
   onClose,
@@ -10,6 +22,9 @@ function SettingsModal({
   onManageSections,
   sessionRestoreEnabled,
   onToggleSessionRestore,
+  selectedTemplate,
+  timelineAccentColor,
+  onTimelineAccentColorChange,
 }) {
   const isFinnish = locale === 'fi'
 
@@ -59,6 +74,33 @@ function SettingsModal({
         </div>
         <ToggleSwitch checked={sessionRestoreEnabled} onChange={onToggleSessionRestore} />
       </div>
+
+      {selectedTemplate === 'timeline' ? (
+        <div className="settings-row">
+          <div>
+            <p className="settings-row__label">{isFinnish ? 'Aikajanan aksenttiväri' : 'Timeline accent color'}</p>
+            <p className="settings-row__hint">
+              {isFinnish
+                ? 'Vain Moderni aikajana -pohjassa. Väri näkyy nimessä, otsikoissa, aikajanassa ja tunnisteissa.'
+                : 'Only for the Modern Timeline template. Colors the name, headings, timeline, and tags.'}
+            </p>
+          </div>
+          <div className="settings-swatch-row" role="group" aria-label={isFinnish ? 'Aikajanan aksenttiväri' : 'Timeline accent color'}>
+            {TIMELINE_ACCENT_SWATCHES.map((swatch) => (
+              <button
+                key={swatch.color}
+                type="button"
+                className={`settings-swatch${swatch.color === timelineAccentColor ? ' settings-swatch--active' : ''}`}
+                style={{ backgroundColor: swatch.color }}
+                aria-pressed={swatch.color === timelineAccentColor}
+                aria-label={swatch.label[locale] ?? swatch.label.en}
+                title={swatch.label[locale] ?? swatch.label.en}
+                onClick={() => onTimelineAccentColorChange(swatch.color)}
+              />
+            ))}
+          </div>
+        </div>
+      ) : null}
     </Modal>
   )
 }
