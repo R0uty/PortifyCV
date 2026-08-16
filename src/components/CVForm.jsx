@@ -16,7 +16,6 @@ import { Sparkles } from 'lucide-react'
 
 import AutoGrowTextarea from './AutoGrowTextarea'
 import EntryBadge from './EntryBadge'
-import Field from './Field'
 import InlineTipList from './InlineTipList'
 import PanelSection from './PanelSection'
 import SortableItemCard from './SortableItemCard'
@@ -184,12 +183,11 @@ function CVForm({
     selectedTemplate,
   )
   const inputClasses = `mt-2 w-full border px-4 py-3 text-sm transition ${ui.input}`
-  const textareaClasses = `${inputClasses} resize-none overflow-hidden`
   const actionButtonClasses = `border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
   const removeButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonDanger}`
   const utilityButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
   const sectionDragHandleClasses = `inline-flex cursor-grab select-none items-center gap-2 border px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em] ${ui.button}`
-  const sectionDragDotClasses = `h-1 w-1 ${ui.isDark ? 'bg-gray-300' : 'bg-gray-500'}`
+  const sectionDragDotClasses = 'h-1 w-1 bg-gray-500'
   const fieldLabelClassName = `${ui.textSoft} uppercase tracking-[0.06em] text-xs font-semibold`
   const itemCardClasses = `border p-4 ${ui.surfaceMuted}`
   const itemHeadingClasses = `${ui.textPrimary} uppercase tracking-[0.04em] text-xs font-bold`
@@ -546,92 +544,79 @@ function CVForm({
         badge={feedback.sectionBadges.profile}
       >
         <div className="space-y-4">
-          <Field
-            label={isFinnish ? 'Koko nimi' : 'Full name'}
-            error={errors.fullName}
-            required
-            labelClassName={fieldLabelClassName}
-          >
+          <FloatingField label={isFinnish ? 'Koko nimi' : 'Full name'} error={errors.fullName} required>
             <input
-              className={inputClasses}
               type="text"
+              autoComplete="name"
               value={formData.fullName}
               onChange={(event) => updateRootField('fullName', event.target.value)}
               placeholder={isFinnish ? 'Matti Meikäläinen' : 'Alex Morgan'}
               aria-invalid={Boolean(errors.fullName)}
             />
-          </Field>
+          </FloatingField>
 
-          <Field
-            label={isFinnish ? 'Ammattinimike' : 'Professional title'}
-            error={errors.title}
-            required
-            labelClassName={fieldLabelClassName}
-          >
+          <FloatingField label={isFinnish ? 'Ammattinimike' : 'Professional title'} error={errors.title} required>
             <input
-              className={inputClasses}
               type="text"
               value={formData.title}
               onChange={(event) => updateRootField('title', event.target.value)}
               placeholder={isFinnish ? 'Tuotesuunnittelija' : 'Product Designer'}
               aria-invalid={Boolean(errors.title)}
             />
-          </Field>
+          </FloatingField>
 
-          <Field label={isFinnish ? 'Iskulause (valinnainen)' : 'Tagline (optional)'} labelClassName={fieldLabelClassName}>
+          <FloatingField label={isFinnish ? 'Iskulause (valinnainen)' : 'Tagline (optional)'}>
             <input
-              className={inputClasses}
               type="text"
               value={formData.tagline}
               onChange={(event) => updateRootField('tagline', event.target.value)}
               placeholder={isFinnish ? 'Autan ideoita toteutumaan.' : 'Helping ideas become reality.'}
             />
-          </Field>
+          </FloatingField>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            <Field label={isFinnish ? 'Sähköposti' : 'Email'} labelClassName={fieldLabelClassName}>
+            <FloatingField label={isFinnish ? 'Sähköposti' : 'Email'}>
               <input
-                className={inputClasses}
                 type="email"
+                autoComplete="email"
                 value={formData.email}
                 onChange={(event) => updateRootField('email', event.target.value)}
                 placeholder="alex@email.com"
               />
-            </Field>
-            <Field label={isFinnish ? 'Puhelin' : 'Phone'} labelClassName={fieldLabelClassName}>
+            </FloatingField>
+            <FloatingField label={isFinnish ? 'Puhelin' : 'Phone'}>
               <input
-                className={inputClasses}
                 type="tel"
+                autoComplete="tel"
                 value={formData.phone}
                 onChange={(event) => updateRootField('phone', event.target.value)}
                 placeholder="+358 40 123 4567"
               />
-            </Field>
-            <Field label={isFinnish ? 'Sijainti' : 'Location'} labelClassName={fieldLabelClassName}>
+            </FloatingField>
+            <FloatingField label={isFinnish ? 'Sijainti' : 'Location'}>
               <input
-                className={inputClasses}
                 type="text"
+                autoComplete="address-level2"
                 value={formData.location}
                 onChange={(event) => updateRootField('location', event.target.value)}
                 placeholder={isFinnish ? 'Helsinki, Suomi' : 'Helsinki, Finland'}
               />
-            </Field>
+            </FloatingField>
           </div>
           <div id="section-summary">
-            <Field label={isFinnish ? 'Esittely' : 'About'} labelClassName={fieldLabelClassName}>
+            <FloatingField label={isFinnish ? 'Esittely' : 'About'}>
               <AutoGrowTextarea
-                className={textareaClasses}
                 value={formData.about}
                 onChange={(event) => updateRootField('about', event.target.value)}
                 placeholder={isFinnish
                   ? 'Tiivistä kokemuksesi, vahvuutesi ja tavoittelemasi roolit.'
                   : 'Summarize your experience, strengths, and the kind of roles you want.'}
               />
-            </Field>
+            </FloatingField>
           </div>
-          {/* Deliberately not a <Field>: that renders a <label>, and a label
-              wrapping the hidden file input turns every click on the hint text
-              or the preview image into a file-picker dialog. */}
+          {/* Deliberately not a <FloatingField>: that renders a <label>, and a
+              label wrapping the hidden file input turns every click on the
+              hint text or the preview image into a file-picker dialog. */}
           <div className="block">
             <span className={`text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}>
               {isFinnish ? 'Profiilikuva (valinnainen)' : 'Profile image (optional)'}
@@ -661,7 +646,7 @@ function CVForm({
                 <img
                   src={formData.photo}
                   alt={isFinnish ? 'Profiilin esikatselu' : 'Profile preview'}
-                  className={`border ${ui.isDark ? 'border-gray-700' : 'border-gray-300'}`}
+                  className="border border-gray-300"
                   style={{ width: '5.75rem', height: '5.75rem', objectFit: 'cover' }}
                 />
                 <button
@@ -1123,9 +1108,8 @@ function CVForm({
                 </div>
               </div>
               <div className="space-y-4">
-                <Field label={isFinnish ? 'Otsikko' : 'Title'} labelClassName={fieldLabelClassName}>
+                <FloatingField label={isFinnish ? 'Otsikko' : 'Title'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.title}
                     onChange={(event) =>
@@ -1133,10 +1117,9 @@ function CVForm({
                     }
                     placeholder={isFinnish ? 'Turvallisuusajattelu' : 'Security Mindset'}
                   />
-                </Field>
-                <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
                   <AutoGrowTextarea
-                    className={textareaClasses}
                     value={item.description}
                     onChange={(event) =>
                       updateArrayItem('coreStrengths', index, 'description', event.target.value)
@@ -1145,7 +1128,7 @@ function CVForm({
                       ? 'Ajattele kuin hyökkääjä. Rakenna kuin puolustaja.'
                       : 'Think like an attacker. Build like a defender.'}
                   />
-                </Field>
+                </FloatingField>
               </div>
             </div>
           ))}
@@ -1481,9 +1464,8 @@ function CVForm({
           <div className="space-y-3">
           {formData.languages.map((item, index) => (
             <div key={`language-${index}`} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
-              <Field label={isFinnish ? 'Kieli' : 'Language'} labelClassName={fieldLabelClassName}>
+              <FloatingField label={isFinnish ? 'Kieli' : 'Language'}>
                 <input
-                  className={inputClasses}
                   type="text"
                   value={item.language}
                   onChange={(event) =>
@@ -1491,10 +1473,9 @@ function CVForm({
                   }
                   placeholder={isFinnish ? 'Englanti' : 'English'}
                 />
-              </Field>
-              <Field label={isFinnish ? 'Taso' : 'Level'} labelClassName={fieldLabelClassName}>
+              </FloatingField>
+              <FloatingField label={isFinnish ? 'Taso' : 'Level'}>
                 <input
-                  className={inputClasses}
                   type="text"
                   value={item.level}
                   onChange={(event) =>
@@ -1502,7 +1483,7 @@ function CVForm({
                   }
                   placeholder={isFinnish ? 'Sujuva' : 'Fluent'}
                 />
-              </Field>
+              </FloatingField>
               <button
                 type="button"
                 className={utilityButtonClasses}
@@ -1638,9 +1619,8 @@ function CVForm({
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={isFinnish ? 'Otsikko' : 'Title'} labelClassName={fieldLabelClassName}>
+                <FloatingField label={isFinnish ? 'Otsikko' : 'Title'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.title}
                     onChange={(event) =>
@@ -1648,10 +1628,9 @@ function CVForm({
                     }
                     placeholder={isFinnish ? 'Voitti sisäisen hackathonin' : 'Won internal hackathon'}
                   />
-                </Field>
-                <Field label={isFinnish ? 'Vuosi' : 'Year'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Vuosi' : 'Year'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.year}
                     onChange={(event) =>
@@ -1659,11 +1638,10 @@ function CVForm({
                     }
                     placeholder="2024"
                   />
-                </Field>
+                </FloatingField>
                 <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
                     <AutoGrowTextarea
-                      className={textareaClasses}
                       value={item.description}
                       onChange={(event) =>
                         updateArrayItem('achievements', index, 'description', event.target.value)
@@ -1672,7 +1650,7 @@ function CVForm({
                         ? 'Lyhyt kuvaus saavutuksesta ja sen vaikutuksesta.'
                         : 'Short description of the achievement and its impact.'}
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
               </div>
             </div>
@@ -1743,9 +1721,8 @@ function CVForm({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Nimi' : 'Repository name'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Nimi' : 'Repository name'}>
                     <input
-                      className={inputClasses}
                       type="text"
                       value={item.name}
                       onChange={(event) =>
@@ -1753,12 +1730,11 @@ function CVForm({
                       }
                       placeholder="storybook-a11y-kit"
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
                 <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
                     <AutoGrowTextarea
-                      className={textareaClasses}
                       value={item.description}
                       onChange={(event) =>
                         updateArrayItem('openSource', index, 'description', event.target.value)
@@ -1767,11 +1743,10 @@ function CVForm({
                         ? 'Lyhyt kuvaus repositoriosta.'
                         : 'A short description of the repository.'}
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
-                <Field label={isFinnish ? 'Kieli' : 'Language'} labelClassName={fieldLabelClassName}>
+                <FloatingField label={isFinnish ? 'Kieli' : 'Language'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.language}
                     onChange={(event) =>
@@ -1779,10 +1754,9 @@ function CVForm({
                     }
                     placeholder="TypeScript"
                   />
-                </Field>
-                <Field label={isFinnish ? 'Linkki' : 'URL'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Linkki' : 'URL'}>
                   <input
-                    className={inputClasses}
                     type="url"
                     value={item.url}
                     onChange={(event) =>
@@ -1790,10 +1764,9 @@ function CVForm({
                     }
                     placeholder="https://github.com/username/repo"
                   />
-                </Field>
-                <Field label={isFinnish ? 'Tähdet' : 'Stars'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Tähdet' : 'Stars'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.stars}
                     onChange={(event) =>
@@ -1801,10 +1774,9 @@ function CVForm({
                     }
                     placeholder="412"
                   />
-                </Field>
-                <Field label={isFinnish ? 'Haarautumat' : 'Forks'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Haarautumat' : 'Forks'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.forks}
                     onChange={(event) =>
@@ -1812,7 +1784,7 @@ function CVForm({
                     }
                     placeholder="38"
                   />
-                </Field>
+                </FloatingField>
               </div>
             </div>
           ))}
@@ -1882,9 +1854,8 @@ function CVForm({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Otsikko' : 'Title'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Otsikko' : 'Title'}>
                     <input
-                      className={inputClasses}
                       type="text"
                       value={item.title}
                       onChange={(event) =>
@@ -1894,11 +1865,10 @@ function CVForm({
                         ? 'Miten skaalata suunnittelujärjestelmiä'
                         : 'Designing Systems That Scale'}
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
-                <Field label={isFinnish ? 'Julkaisija' : 'Publisher'} labelClassName={fieldLabelClassName}>
+                <FloatingField label={isFinnish ? 'Julkaisija' : 'Publisher'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.publisher}
                     onChange={(event) =>
@@ -1906,10 +1876,9 @@ function CVForm({
                     }
                     placeholder="UX Collective"
                   />
-                </Field>
-                <Field label={isFinnish ? 'Vuosi' : 'Year'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Vuosi' : 'Year'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.year}
                     onChange={(event) =>
@@ -1917,11 +1886,10 @@ function CVForm({
                     }
                     placeholder="2024"
                   />
-                </Field>
+                </FloatingField>
                 <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Linkki (valinnainen)' : 'URL (optional)'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Linkki (valinnainen)' : 'URL (optional)'}>
                     <input
-                      className={inputClasses}
                       type="url"
                       value={item.url}
                       onChange={(event) =>
@@ -1929,7 +1897,7 @@ function CVForm({
                       }
                       placeholder="https://uxdesign.cc/..."
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
               </div>
             </div>
@@ -2047,9 +2015,8 @@ function CVForm({
               </div>
               <div className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label={isFinnish ? 'Rooli' : 'Role'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
                     <input
-                      className={inputClasses}
                       type="text"
                       value={item.role}
                       onChange={(event) =>
@@ -2057,10 +2024,9 @@ function CVForm({
                       }
                       placeholder={isFinnish ? 'Hallituksen jäsen' : 'Board Member'}
                     />
-                  </Field>
-                  <Field label={isFinnish ? 'Organisaatio' : 'Organization'} labelClassName={fieldLabelClassName}>
+                  </FloatingField>
+                  <FloatingField label={isFinnish ? 'Organisaatio' : 'Organization'}>
                     <input
-                      className={inputClasses}
                       type="text"
                       value={item.organization}
                       onChange={(event) =>
@@ -2068,11 +2034,10 @@ function CVForm({
                       }
                       placeholder={isFinnish ? 'Teknologianeuvosto' : 'Technology Advisory Board'}
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
-                <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
                   <AutoGrowTextarea
-                    className={textareaClasses}
                     value={item.description}
                     onChange={(event) =>
                       updateArrayItem('leadership', index, 'description', event.target.value)
@@ -2081,11 +2046,10 @@ function CVForm({
                       ? 'Kuvaile vastuualueita ja vaikutusta.'
                       : 'Describe the responsibilities and impact.'}
                   />
-                </Field>
+                </FloatingField>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Field label={isFinnish ? 'Alkoi' : 'Start date'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Alkoi' : 'Start date'}>
                     <input
-                      className={inputClasses}
                       type="text"
                       value={item.startDate}
                       onChange={(event) =>
@@ -2093,10 +2057,9 @@ function CVForm({
                       }
                       placeholder="2022"
                     />
-                  </Field>
-                  <Field label={isFinnish ? 'Päättyi' : 'End date'} labelClassName={fieldLabelClassName}>
+                  </FloatingField>
+                  <FloatingField label={isFinnish ? 'Päättyi' : 'End date'}>
                     <input
-                      className={inputClasses}
                       type="text"
                       value={item.endDate}
                       onChange={(event) =>
@@ -2104,7 +2067,7 @@ function CVForm({
                       }
                       placeholder={isFinnish ? 'Nykyinen' : 'Present'}
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
               </div>
             </div>
@@ -2175,9 +2138,8 @@ function CVForm({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Organisaatio' : 'Organization'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Organisaatio' : 'Organization'}>
                     <input
-                      className={inputClasses}
                       type="text"
                       value={item.organization}
                       onChange={(event) =>
@@ -2185,11 +2147,10 @@ function CVForm({
                       }
                       placeholder="ISACA"
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
-                <Field label={isFinnish ? 'Rooli (valinnainen)' : 'Role (optional)'} labelClassName={fieldLabelClassName}>
+                <FloatingField label={isFinnish ? 'Rooli (valinnainen)' : 'Role (optional)'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.role}
                     onChange={(event) =>
@@ -2197,10 +2158,9 @@ function CVForm({
                     }
                     placeholder={isFinnish ? 'Jäsen' : 'Member'}
                   />
-                </Field>
-                <Field label={isFinnish ? 'Vuosi (valinnainen)' : 'Year (optional)'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Vuosi (valinnainen)' : 'Year (optional)'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.year}
                     onChange={(event) =>
@@ -2208,7 +2168,7 @@ function CVForm({
                     }
                     placeholder="2020"
                   />
-                </Field>
+                </FloatingField>
               </div>
             </div>
           ))}
@@ -2277,9 +2237,8 @@ function CVForm({
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={isFinnish ? 'Konferenssi' : 'Conference'} labelClassName={fieldLabelClassName}>
+                <FloatingField label={isFinnish ? 'Konferenssi' : 'Conference'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.conference}
                     onChange={(event) =>
@@ -2287,10 +2246,9 @@ function CVForm({
                     }
                     placeholder="Config"
                   />
-                </Field>
-                <Field label={isFinnish ? 'Päivämäärä' : 'Date'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Päivämäärä' : 'Date'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.date}
                     onChange={(event) =>
@@ -2298,11 +2256,10 @@ function CVForm({
                     }
                     placeholder="2024"
                   />
-                </Field>
+                </FloatingField>
                 <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Aihe' : 'Topic'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Aihe' : 'Topic'}>
                     <input
-                      className={inputClasses}
                       type="text"
                       value={item.topic}
                       onChange={(event) =>
@@ -2310,12 +2267,11 @@ function CVForm({
                       }
                       placeholder={isFinnish ? 'Suunnittelujärjestelmät laajassa mittakaavassa' : 'Design Systems at Scale'}
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
                 <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Yleisö (valinnainen)' : 'Audience (optional)'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Yleisö (valinnainen)' : 'Audience (optional)'}>
                     <input
-                      className={inputClasses}
                       type="text"
                       value={item.audience}
                       onChange={(event) =>
@@ -2323,7 +2279,7 @@ function CVForm({
                       }
                       placeholder={isFinnish ? '400+ tuotesuunnittelijaa' : '400+ product designers'}
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
               </div>
             </div>
@@ -2393,9 +2349,8 @@ function CVForm({
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={isFinnish ? 'Organisaatio' : 'Organization'} labelClassName={fieldLabelClassName}>
+                <FloatingField label={isFinnish ? 'Organisaatio' : 'Organization'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.organization}
                     onChange={(event) =>
@@ -2403,10 +2358,9 @@ function CVForm({
                     }
                     placeholder="Design for Good"
                   />
-                </Field>
-                <Field label={isFinnish ? 'Rooli' : 'Role'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.role}
                     onChange={(event) =>
@@ -2414,11 +2368,10 @@ function CVForm({
                     }
                     placeholder={isFinnish ? 'Vapaaehtoinen mentori' : 'Volunteer Mentor'}
                   />
-                </Field>
+                </FloatingField>
                 <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
                     <AutoGrowTextarea
-                      className={textareaClasses}
                       value={item.description}
                       onChange={(event) =>
                         updateArrayItem('volunteering', index, 'description', event.target.value)
@@ -2427,7 +2380,7 @@ function CVForm({
                         ? 'Kuvaile vastuualueita ja saavutuksia.'
                         : 'Describe the responsibilities and achievements.'}
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
               </div>
             </div>
@@ -2497,9 +2450,8 @@ function CVForm({
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={isFinnish ? 'Rooli' : 'Role'} labelClassName={fieldLabelClassName}>
+                <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.role}
                     onChange={(event) =>
@@ -2507,10 +2459,9 @@ function CVForm({
                     }
                     placeholder={isFinnish ? 'Suunnitteluharjoittelija' : 'Design Intern'}
                   />
-                </Field>
-                <Field label={isFinnish ? 'Yritys' : 'Company'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Yritys' : 'Company'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.company}
                     onChange={(event) =>
@@ -2518,10 +2469,9 @@ function CVForm({
                     }
                     placeholder="Atlas Labs"
                   />
-                </Field>
-                <Field label={isFinnish ? 'Sijainti' : 'Location'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Sijainti' : 'Location'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.location}
                     onChange={(event) =>
@@ -2529,10 +2479,9 @@ function CVForm({
                     }
                     placeholder={isFinnish ? 'Etätyö' : 'Remote'}
                   />
-                </Field>
-                <Field label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.technologies}
                     onChange={(event) =>
@@ -2540,10 +2489,9 @@ function CVForm({
                     }
                     placeholder="Figma, Sketch, InVision"
                   />
-                </Field>
-                <Field label={isFinnish ? 'Alkoi' : 'Start date'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Alkoi' : 'Start date'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.startDate}
                     onChange={(event) =>
@@ -2551,10 +2499,9 @@ function CVForm({
                     }
                     placeholder={isFinnish ? 'Kesä 2018' : 'Jun 2018'}
                   />
-                </Field>
-                <Field label={isFinnish ? 'Päättyi' : 'End date'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Päättyi' : 'End date'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.endDate}
                     onChange={(event) =>
@@ -2562,11 +2509,10 @@ function CVForm({
                     }
                     placeholder="Aug 2018"
                   />
-                </Field>
+                </FloatingField>
                 <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Kuvaus' : 'Description'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
                     <AutoGrowTextarea
-                      className={textareaClasses}
                       value={item.description}
                       onChange={(event) =>
                         updateArrayItem('internships', index, 'description', event.target.value)
@@ -2575,7 +2521,7 @@ function CVForm({
                         ? 'Kuvaile vastuualueita, saavutuksia ja opittua.'
                         : 'Describe responsibilities, achievements, and learning outcomes.'}
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
               </div>
             </div>
@@ -2645,9 +2591,8 @@ function CVForm({
                 </div>
               </div>
               <div className="space-y-4">
-                <Field label={isFinnish ? 'Otsikko' : 'Title'} labelClassName={fieldLabelClassName}>
+                <FloatingField label={isFinnish ? 'Otsikko' : 'Title'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.title}
                     onChange={(event) =>
@@ -2655,10 +2600,9 @@ function CVForm({
                     }
                     placeholder={isFinnish ? 'Atlas-suunnittelujärjestelmän skaalaus' : 'Scaling Atlas Design System'}
                   />
-                </Field>
-                <Field label={isFinnish ? 'Ongelma' : 'Problem'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Ongelma' : 'Problem'}>
                   <AutoGrowTextarea
-                    className={textareaClasses}
                     value={item.problem}
                     onChange={(event) =>
                       updateArrayItem('caseStudies', index, 'problem', event.target.value)
@@ -2667,10 +2611,9 @@ function CVForm({
                       ? 'Kuvaile ongelma tai haaste.'
                       : 'Describe the problem or challenge.'}
                   />
-                </Field>
-                <Field label={isFinnish ? 'Ratkaisu' : 'Solution'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Ratkaisu' : 'Solution'}>
                   <AutoGrowTextarea
-                    className={textareaClasses}
                     value={item.solution}
                     onChange={(event) =>
                       updateArrayItem('caseStudies', index, 'solution', event.target.value)
@@ -2679,10 +2622,9 @@ function CVForm({
                       ? 'Kuvaile ratkaisu ja lähestymistapa.'
                       : 'Describe the solution and approach.'}
                   />
-                </Field>
-                <Field label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.technologies}
                     onChange={(event) =>
@@ -2690,10 +2632,9 @@ function CVForm({
                     }
                     placeholder="Figma, React, Storybook"
                   />
-                </Field>
-                <Field label={isFinnish ? 'Tulos' : 'Outcome'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Tulos' : 'Outcome'}>
                   <AutoGrowTextarea
-                    className={textareaClasses}
                     value={item.outcome}
                     onChange={(event) =>
                       updateArrayItem('caseStudies', index, 'outcome', event.target.value)
@@ -2702,10 +2643,9 @@ function CVForm({
                       ? 'Mitattava tulos tai vaikutus.'
                       : 'Measurable outcome or impact.'}
                   />
-                </Field>
-                <Field label={isFinnish ? 'Opitut asiat (valinnainen)' : 'Lessons learned (optional)'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Opitut asiat (valinnainen)' : 'Lessons learned (optional)'}>
                   <AutoGrowTextarea
-                    className={textareaClasses}
                     value={item.lessons}
                     onChange={(event) =>
                       updateArrayItem('caseStudies', index, 'lessons', event.target.value)
@@ -2714,7 +2654,7 @@ function CVForm({
                       ? 'Mitä oppisit tai tekisit toisin.'
                       : 'What you learned or would do differently.'}
                   />
-                </Field>
+                </FloatingField>
               </div>
             </div>
           ))}
@@ -2784,9 +2724,8 @@ function CVForm({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <Field label={isFinnish ? 'Lainaus' : 'Quote'} labelClassName={fieldLabelClassName}>
+                  <FloatingField label={isFinnish ? 'Lainaus' : 'Quote'}>
                     <AutoGrowTextarea
-                      className={textareaClasses}
                       value={item.quote}
                       onChange={(event) =>
                         updateArrayItem('testimonials', index, 'quote', event.target.value)
@@ -2795,11 +2734,10 @@ function CVForm({
                         ? 'Lyhyt suositus tai kommentti.'
                         : 'A short recommendation or quote.'}
                     />
-                  </Field>
+                  </FloatingField>
                 </div>
-                <Field label={isFinnish ? 'Nimi' : 'Author'} labelClassName={fieldLabelClassName}>
+                <FloatingField label={isFinnish ? 'Nimi' : 'Author'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.author}
                     onChange={(event) =>
@@ -2807,10 +2745,9 @@ function CVForm({
                     }
                     placeholder="Jordan Lee"
                   />
-                </Field>
-                <Field label={isFinnish ? 'Rooli' : 'Role'} labelClassName={fieldLabelClassName}>
+                </FloatingField>
+                <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
                   <input
-                    className={inputClasses}
                     type="text"
                     value={item.role}
                     onChange={(event) =>
@@ -2818,7 +2755,7 @@ function CVForm({
                     }
                     placeholder={isFinnish ? 'Esimies, Studio North' : 'Engineering Manager, Studio North'}
                   />
-                </Field>
+                </FloatingField>
               </div>
             </div>
           ))}

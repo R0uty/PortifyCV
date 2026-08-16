@@ -17,9 +17,7 @@ export default function InlineTipList({
           key={item.id}
           className={`px-4 py-3 ${
             item.type === 'warning'
-              ? ui.isDark
-                ? 'bg-red-500/8 text-red-400'
-                : 'bg-gray-50 text-gray-800'
+              ? 'bg-gray-50 text-gray-800'
               : `${ui.surfaceMuted} ${ui.textSecondary}`
           }`}
           style={{ border: '1px solid var(--app-border)' }}

@@ -12,12 +12,35 @@ function DragDropUpload({
   const inputRef = useRef(null)
   const [isDragActive, setIsDragActive] = useState(false)
 
+  // The click-to-browse path gets this filtering for free from the native
+  // file picker's `accept` attribute; a drop bypasses that picker entirely,
+  // so it needs the same check applied by hand.
+  const matchesAccept = (file) => {
+    const patterns = accept.split(',').map((pattern) => pattern.trim()).filter(Boolean)
+
+    if (patterns.length === 0) {
+      return true
+    }
+
+    return patterns.some((pattern) => {
+      if (pattern.endsWith('/*')) {
+        return file.type.startsWith(pattern.slice(0, -1))
+      }
+
+      if (pattern.startsWith('.')) {
+        return file.name.toLowerCase().endsWith(pattern.toLowerCase())
+      }
+
+      return file.type === pattern
+    })
+  }
+
   const handleDrop = (event) => {
     event.preventDefault()
     setIsDragActive(false)
     const file = event.dataTransfer.files?.[0]
 
-    if (file) {
+    if (file && matchesAccept(file)) {
       onFileSelected(file)
     }
   }

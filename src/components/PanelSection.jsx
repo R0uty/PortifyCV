@@ -17,9 +17,7 @@ function PanelSection({
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed)
   const badgeClasses =
     badge?.tone === 'warning'
-      ? ui.isDark
-        ? 'bg-gray-400/15 text-gray-100'
-        : 'bg-gray-100 text-gray-700'
+      ? 'bg-gray-100 text-gray-700'
       : 'accent-surface accent-text-strong'
 
   return (

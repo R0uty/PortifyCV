@@ -2,23 +2,17 @@ import { memo, useMemo } from 'react'
 
 import { getUiTheme } from '../utils/designSystem'
 
-function typeClasses(ui, type) {
+function typeClasses(type) {
   if (type === 'warning') {
-    return ui.isDark
-      ? 'bg-red-500/8 text-red-400'
-      : 'bg-gray-50 text-gray-800'
+    return 'bg-gray-50 text-gray-800'
   }
 
-  return ui.isDark
-    ? 'bg-white/5 text-gray-100'
-    : 'bg-gray-50 text-gray-700'
+  return 'bg-gray-50 text-gray-700'
 }
 
-function badgeClasses(ui, type) {
+function badgeClasses(type) {
   if (type === 'warning') {
-    return ui.isDark
-      ? 'bg-red-500/15 text-red-400'
-      : 'bg-gray-100 text-gray-700'
+    return 'bg-gray-100 text-gray-700'
   }
 
   return 'accent-surface accent-text-strong'
@@ -52,12 +46,12 @@ function CVSuggestionsPanel({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <span className={`px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] ${badgeClasses(ui, 'warning')}`} style={{ border: '1px solid var(--app-border)' }}>
+          <span className={`px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] ${badgeClasses('warning')}`} style={{ border: '1px solid var(--app-border)' }}>
             {isFinnish
               ? `${feedback.warningCount} varoitus${feedback.warningCount === 1 ? '' : 'ta'}`
               : `${feedback.warningCount} warning${feedback.warningCount === 1 ? '' : 's'}`}
           </span>
-          <span className={`px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] ${badgeClasses(ui, 'tip')}`} style={{ border: '1px solid var(--app-border)' }}>
+          <span className={`px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] ${badgeClasses('tip')}`} style={{ border: '1px solid var(--app-border)' }}>
             {isFinnish
               ? `${feedback.metricsCount} mittarivinkki${feedback.metricsCount === 1 ? '' : 'ä'}`
               : `${feedback.metricsCount} metrics hint${feedback.metricsCount === 1 ? '' : 's'}`}
@@ -79,7 +73,7 @@ function CVSuggestionsPanel({
             {feedback.priorityItems.map((item) => (
               <article
                 key={item.id}
-                className={`p-4 ${typeClasses(ui, item.type)}`}
+                className={`p-4 ${typeClasses(item.type)}`}
                 style={{ border: '1px solid var(--app-border)' }}
               >
                 <div>

@@ -1816,10 +1816,58 @@ select.floating-field__control {
   color: var(--app-text-muted);
 }
 
-.landing-templates-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
-  gap: var(--space-5) var(--space-4);
+/* Stays within the same column as the section title/subtitle above it —
+   only the track inside scrolls, clipped at these same left/right edges. */
+.landing-templates-marquee {
+  width: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black var(--space-8),
+    black calc(100% - var(--space-8)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black var(--space-8),
+    black calc(100% - var(--space-8)),
+    transparent 100%
+  );
+}
+
+.landing-templates-track {
+  display: flex;
+  width: max-content;
+  gap: var(--space-4);
+  animation: landing-templates-scroll 40s linear infinite;
+}
+
+.landing-templates-marquee:hover .landing-templates-track {
+  animation-play-state: paused;
+}
+
+@keyframes landing-templates-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* Track holds two identical copies of the template list back to
+       back, so scrolling exactly half its width loops seamlessly. */
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-templates-track {
+    animation: none;
+  }
+}
+
+.landing-templates-card {
+  flex: 0 0 8.5rem;
+  width: 8.5rem;
 }
 
 /* Wraps TemplateThumbnail's own `.template-gallery__thumb-frame` (border,

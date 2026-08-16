@@ -42,6 +42,38 @@ function TagsInput({
     onChange(value.filter((_, itemIndex) => itemIndex !== index))
   }
 
+  // Pasting a comma- or newline-separated list (e.g. copied from a job post)
+  // should split into separate tags instead of landing as one tag with
+  // commas in it. A single pasted word falls through to the default paste
+  // behavior and just fills the draft as normal.
+  const handlePaste = (event) => {
+    const text = event.clipboardData.getData('text')
+
+    if (!/[,\n]/.test(text)) {
+      return
+    }
+
+    event.preventDefault()
+
+    const seen = new Set(value.map((existing) => existing.toLowerCase()))
+    const additions = []
+
+    for (const part of text.split(/[,\n]/).map((piece) => piece.trim()).filter(Boolean)) {
+      const key = part.toLowerCase()
+
+      if (!seen.has(key)) {
+        seen.add(key)
+        additions.push(part)
+      }
+    }
+
+    if (additions.length > 0) {
+      onChange([...value, ...additions])
+    }
+
+    setDraft('')
+  }
+
   return (
     <div className="tags-input">
       {value.map((tag, index) => (
@@ -63,6 +95,7 @@ function TagsInput({
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
         onKeyDown={handleKeyDown}
+        onPaste={handlePaste}
         onBlur={() => commit(draft)}
         placeholder={value.length === 0 ? placeholder : ''}
         aria-label={ariaLabel}

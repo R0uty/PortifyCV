@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react'
 
 function ReorderableListInput({
@@ -7,11 +8,43 @@ function ReorderableListInput({
   addLabel = 'Add',
   itemAriaLabel = 'Item',
 }) {
+  // Items are plain strings with no identity of their own, but reordering
+  // needs a key that follows the moved value (not its slot) so keyboard
+  // focus stays on the row the user just moved. `ids` mirrors every
+  // add/remove/move below in lockstep, so ids track values across renders
+  // instead of being re-derived from position.
+  const [ids, setIds] = useState(() => items.map((_, index) => index))
+  const [prevItems, setPrevItems] = useState(items)
+  const [nextId, setNextId] = useState(items.length)
+
+  // Reconcile when `items` changes for a reason other than the handlers
+  // below (e.g. the parent resets the whole list) — our own handlers
+  // already keep `ids` the same length as `items`, so this only fires on
+  // an external replacement.
+  if (items !== prevItems) {
+    setPrevItems(items)
+
+    if (items.length !== ids.length) {
+      let allocated = nextId
+      const reconciled = items.map((_, index) => {
+        if (index < ids.length) {
+          return ids[index]
+        }
+
+        return allocated++
+      })
+
+      setIds(reconciled)
+      setNextId(allocated)
+    }
+  }
+
   const updateAt = (index, nextValue) => {
     onChange(items.map((item, itemIndex) => (itemIndex === index ? nextValue : item)))
   }
 
   const removeAt = (index) => {
+    setIds(ids.filter((_, itemIndex) => itemIndex !== index))
     onChange(items.filter((_, itemIndex) => itemIndex !== index))
   }
 
@@ -22,21 +55,28 @@ function ReorderableListInput({
       return
     }
 
-    const next = [...items]
-    const [moved] = next.splice(index, 1)
+    const nextItems = [...items]
+    const [movedItem] = nextItems.splice(index, 1)
+    nextItems.splice(targetIndex, 0, movedItem)
 
-    next.splice(targetIndex, 0, moved)
-    onChange(next)
+    const nextIds = [...ids]
+    const [movedId] = nextIds.splice(index, 1)
+    nextIds.splice(targetIndex, 0, movedId)
+
+    setIds(nextIds)
+    onChange(nextItems)
   }
 
   const addItem = () => {
+    setIds([...ids, nextId])
+    setNextId(nextId + 1)
     onChange([...items, ''])
   }
 
   return (
     <div className="reorderable-list">
       {items.map((item, index) => (
-        <div className="reorderable-list__row" key={index}>
+        <div className="reorderable-list__row" key={ids[index] ?? index}>
           <input
             type="text"
             className="reorderable-list__input"
