@@ -550,7 +550,6 @@ function CVForm({
               autoComplete="name"
               value={formData.fullName}
               onChange={(event) => updateRootField('fullName', event.target.value)}
-              placeholder={isFinnish ? 'Matti Meikäläinen' : 'Alex Morgan'}
               aria-invalid={Boolean(errors.fullName)}
             />
           </FloatingField>
@@ -560,7 +559,6 @@ function CVForm({
               type="text"
               value={formData.title}
               onChange={(event) => updateRootField('title', event.target.value)}
-              placeholder={isFinnish ? 'Tuotesuunnittelija' : 'Product Designer'}
               aria-invalid={Boolean(errors.title)}
             />
           </FloatingField>
@@ -570,7 +568,6 @@ function CVForm({
               type="text"
               value={formData.tagline}
               onChange={(event) => updateRootField('tagline', event.target.value)}
-              placeholder={isFinnish ? 'Autan ideoita toteutumaan.' : 'Helping ideas become reality.'}
             />
           </FloatingField>
 
@@ -581,7 +578,6 @@ function CVForm({
                 autoComplete="email"
                 value={formData.email}
                 onChange={(event) => updateRootField('email', event.target.value)}
-                placeholder="alex@email.com"
               />
             </FloatingField>
             <FloatingField label={isFinnish ? 'Puhelin' : 'Phone'}>
@@ -590,7 +586,6 @@ function CVForm({
                 autoComplete="tel"
                 value={formData.phone}
                 onChange={(event) => updateRootField('phone', event.target.value)}
-                placeholder="+358 40 123 4567"
               />
             </FloatingField>
             <FloatingField label={isFinnish ? 'Sijainti' : 'Location'}>
@@ -599,7 +594,6 @@ function CVForm({
                 autoComplete="address-level2"
                 value={formData.location}
                 onChange={(event) => updateRootField('location', event.target.value)}
-                placeholder={isFinnish ? 'Helsinki, Suomi' : 'Helsinki, Finland'}
               />
             </FloatingField>
           </div>
@@ -608,9 +602,6 @@ function CVForm({
               <AutoGrowTextarea
                 value={formData.about}
                 onChange={(event) => updateRootField('about', event.target.value)}
-                placeholder={isFinnish
-                  ? 'Tiivistä kokemuksesi, vahvuutesi ja tavoittelemasi roolit.'
-                  : 'Summarize your experience, strengths, and the kind of roles you want.'}
               />
             </FloatingField>
           </div>
@@ -685,7 +676,6 @@ function CVForm({
             onChange={(nextSkills) =>
               dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'skills', value: nextSkills })
             }
-            placeholder={isFinnish ? 'Lisää taito' : 'Add a skill'}
             ariaLabel={isFinnish ? 'Taitotagit' : 'Skill tags'}
           />
           <p className={`text-xs ${helperTextClasses}`}>
@@ -1115,7 +1105,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('coreStrengths', index, 'title', event.target.value)
                     }
-                    placeholder={isFinnish ? 'Turvallisuusajattelu' : 'Security Mindset'}
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
@@ -1124,9 +1113,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('coreStrengths', index, 'description', event.target.value)
                     }
-                    placeholder={isFinnish
-                      ? 'Ajattele kuin hyökkääjä. Rakenna kuin puolustaja.'
-                      : 'Think like an attacker. Build like a defender.'}
                   />
                 </FloatingField>
               </div>
@@ -1471,7 +1457,6 @@ function CVForm({
                   onChange={(event) =>
                     updateArrayItem('languages', index, 'language', event.target.value)
                   }
-                  placeholder={isFinnish ? 'Englanti' : 'English'}
                 />
               </FloatingField>
               <FloatingField label={isFinnish ? 'Taso' : 'Level'}>
@@ -1481,7 +1466,6 @@ function CVForm({
                   onChange={(event) =>
                     updateArrayItem('languages', index, 'level', event.target.value)
                   }
-                  placeholder={isFinnish ? 'Sujuva' : 'Fluent'}
                 />
               </FloatingField>
               <button
@@ -1626,7 +1610,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('achievements', index, 'title', event.target.value)
                     }
-                    placeholder={isFinnish ? 'Voitti sisäisen hackathonin' : 'Won internal hackathon'}
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Vuosi' : 'Year'}>
@@ -1636,7 +1619,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('achievements', index, 'year', event.target.value)
                     }
-                    placeholder="2024"
                   />
                 </FloatingField>
                 <div className="sm:col-span-2">
@@ -1646,9 +1628,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('achievements', index, 'description', event.target.value)
                       }
-                      placeholder={isFinnish
-                        ? 'Lyhyt kuvaus saavutuksesta ja sen vaikutuksesta.'
-                        : 'Short description of the achievement and its impact.'}
                     />
                   </FloatingField>
                 </div>
@@ -1728,7 +1707,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('openSource', index, 'name', event.target.value)
                       }
-                      placeholder="storybook-a11y-kit"
                     />
                   </FloatingField>
                 </div>
@@ -1739,9 +1717,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('openSource', index, 'description', event.target.value)
                       }
-                      placeholder={isFinnish
-                        ? 'Lyhyt kuvaus repositoriosta.'
-                        : 'A short description of the repository.'}
                     />
                   </FloatingField>
                 </div>
@@ -1752,7 +1727,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('openSource', index, 'language', event.target.value)
                     }
-                    placeholder="TypeScript"
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Linkki' : 'URL'}>
@@ -1762,7 +1736,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('openSource', index, 'url', event.target.value)
                     }
-                    placeholder="https://github.com/username/repo"
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Tähdet' : 'Stars'}>
@@ -1772,7 +1745,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('openSource', index, 'stars', event.target.value)
                     }
-                    placeholder="412"
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Haarautumat' : 'Forks'}>
@@ -1782,7 +1754,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('openSource', index, 'forks', event.target.value)
                     }
-                    placeholder="38"
                   />
                 </FloatingField>
               </div>
@@ -1861,9 +1832,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('publications', index, 'title', event.target.value)
                       }
-                      placeholder={isFinnish
-                        ? 'Miten skaalata suunnittelujärjestelmiä'
-                        : 'Designing Systems That Scale'}
                     />
                   </FloatingField>
                 </div>
@@ -1874,7 +1842,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('publications', index, 'publisher', event.target.value)
                     }
-                    placeholder="UX Collective"
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Vuosi' : 'Year'}>
@@ -1884,7 +1851,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('publications', index, 'year', event.target.value)
                     }
-                    placeholder="2024"
                   />
                 </FloatingField>
                 <div className="sm:col-span-2">
@@ -1895,7 +1861,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('publications', index, 'url', event.target.value)
                       }
-                      placeholder="https://uxdesign.cc/..."
                     />
                   </FloatingField>
                 </div>
@@ -2022,7 +1987,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('leadership', index, 'role', event.target.value)
                       }
-                      placeholder={isFinnish ? 'Hallituksen jäsen' : 'Board Member'}
                     />
                   </FloatingField>
                   <FloatingField label={isFinnish ? 'Organisaatio' : 'Organization'}>
@@ -2032,7 +1996,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('leadership', index, 'organization', event.target.value)
                       }
-                      placeholder={isFinnish ? 'Teknologianeuvosto' : 'Technology Advisory Board'}
                     />
                   </FloatingField>
                 </div>
@@ -2042,9 +2005,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('leadership', index, 'description', event.target.value)
                     }
-                    placeholder={isFinnish
-                      ? 'Kuvaile vastuualueita ja vaikutusta.'
-                      : 'Describe the responsibilities and impact.'}
                   />
                 </FloatingField>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -2055,7 +2015,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('leadership', index, 'startDate', event.target.value)
                       }
-                      placeholder="2022"
                     />
                   </FloatingField>
                   <FloatingField label={isFinnish ? 'Päättyi' : 'End date'}>
@@ -2065,7 +2024,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('leadership', index, 'endDate', event.target.value)
                       }
-                      placeholder={isFinnish ? 'Nykyinen' : 'Present'}
                     />
                   </FloatingField>
                 </div>
@@ -2145,7 +2103,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('memberships', index, 'organization', event.target.value)
                       }
-                      placeholder="ISACA"
                     />
                   </FloatingField>
                 </div>
@@ -2156,7 +2113,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('memberships', index, 'role', event.target.value)
                     }
-                    placeholder={isFinnish ? 'Jäsen' : 'Member'}
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Vuosi (valinnainen)' : 'Year (optional)'}>
@@ -2166,7 +2122,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('memberships', index, 'year', event.target.value)
                     }
-                    placeholder="2020"
                   />
                 </FloatingField>
               </div>
@@ -2244,7 +2199,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('speaking', index, 'conference', event.target.value)
                     }
-                    placeholder="Config"
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Päivämäärä' : 'Date'}>
@@ -2254,7 +2208,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('speaking', index, 'date', event.target.value)
                     }
-                    placeholder="2024"
                   />
                 </FloatingField>
                 <div className="sm:col-span-2">
@@ -2265,7 +2218,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('speaking', index, 'topic', event.target.value)
                       }
-                      placeholder={isFinnish ? 'Suunnittelujärjestelmät laajassa mittakaavassa' : 'Design Systems at Scale'}
                     />
                   </FloatingField>
                 </div>
@@ -2277,7 +2229,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('speaking', index, 'audience', event.target.value)
                       }
-                      placeholder={isFinnish ? '400+ tuotesuunnittelijaa' : '400+ product designers'}
                     />
                   </FloatingField>
                 </div>
@@ -2356,7 +2307,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('volunteering', index, 'organization', event.target.value)
                     }
-                    placeholder="Design for Good"
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
@@ -2366,7 +2316,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('volunteering', index, 'role', event.target.value)
                     }
-                    placeholder={isFinnish ? 'Vapaaehtoinen mentori' : 'Volunteer Mentor'}
                   />
                 </FloatingField>
                 <div className="sm:col-span-2">
@@ -2376,9 +2325,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('volunteering', index, 'description', event.target.value)
                       }
-                      placeholder={isFinnish
-                        ? 'Kuvaile vastuualueita ja saavutuksia.'
-                        : 'Describe the responsibilities and achievements.'}
                     />
                   </FloatingField>
                 </div>
@@ -2457,7 +2403,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('internships', index, 'role', event.target.value)
                     }
-                    placeholder={isFinnish ? 'Suunnitteluharjoittelija' : 'Design Intern'}
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Yritys' : 'Company'}>
@@ -2467,7 +2412,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('internships', index, 'company', event.target.value)
                     }
-                    placeholder="Atlas Labs"
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Sijainti' : 'Location'}>
@@ -2477,7 +2421,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('internships', index, 'location', event.target.value)
                     }
-                    placeholder={isFinnish ? 'Etätyö' : 'Remote'}
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'}>
@@ -2487,7 +2430,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('internships', index, 'technologies', event.target.value)
                     }
-                    placeholder="Figma, Sketch, InVision"
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Alkoi' : 'Start date'}>
@@ -2497,7 +2439,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('internships', index, 'startDate', event.target.value)
                     }
-                    placeholder={isFinnish ? 'Kesä 2018' : 'Jun 2018'}
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Päättyi' : 'End date'}>
@@ -2507,7 +2448,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('internships', index, 'endDate', event.target.value)
                     }
-                    placeholder="Aug 2018"
                   />
                 </FloatingField>
                 <div className="sm:col-span-2">
@@ -2517,9 +2457,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('internships', index, 'description', event.target.value)
                       }
-                      placeholder={isFinnish
-                        ? 'Kuvaile vastuualueita, saavutuksia ja opittua.'
-                        : 'Describe responsibilities, achievements, and learning outcomes.'}
                     />
                   </FloatingField>
                 </div>
@@ -2598,7 +2535,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('caseStudies', index, 'title', event.target.value)
                     }
-                    placeholder={isFinnish ? 'Atlas-suunnittelujärjestelmän skaalaus' : 'Scaling Atlas Design System'}
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Ongelma' : 'Problem'}>
@@ -2607,9 +2543,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('caseStudies', index, 'problem', event.target.value)
                     }
-                    placeholder={isFinnish
-                      ? 'Kuvaile ongelma tai haaste.'
-                      : 'Describe the problem or challenge.'}
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Ratkaisu' : 'Solution'}>
@@ -2618,9 +2551,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('caseStudies', index, 'solution', event.target.value)
                     }
-                    placeholder={isFinnish
-                      ? 'Kuvaile ratkaisu ja lähestymistapa.'
-                      : 'Describe the solution and approach.'}
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'}>
@@ -2630,7 +2560,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('caseStudies', index, 'technologies', event.target.value)
                     }
-                    placeholder="Figma, React, Storybook"
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Tulos' : 'Outcome'}>
@@ -2639,9 +2568,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('caseStudies', index, 'outcome', event.target.value)
                     }
-                    placeholder={isFinnish
-                      ? 'Mitattava tulos tai vaikutus.'
-                      : 'Measurable outcome or impact.'}
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Opitut asiat (valinnainen)' : 'Lessons learned (optional)'}>
@@ -2650,9 +2576,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('caseStudies', index, 'lessons', event.target.value)
                     }
-                    placeholder={isFinnish
-                      ? 'Mitä oppisit tai tekisit toisin.'
-                      : 'What you learned or would do differently.'}
                   />
                 </FloatingField>
               </div>
@@ -2730,9 +2653,6 @@ function CVForm({
                       onChange={(event) =>
                         updateArrayItem('testimonials', index, 'quote', event.target.value)
                       }
-                      placeholder={isFinnish
-                        ? 'Lyhyt suositus tai kommentti.'
-                        : 'A short recommendation or quote.'}
                     />
                   </FloatingField>
                 </div>
@@ -2743,7 +2663,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('testimonials', index, 'author', event.target.value)
                     }
-                    placeholder="Jordan Lee"
                   />
                 </FloatingField>
                 <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
@@ -2753,7 +2672,6 @@ function CVForm({
                     onChange={(event) =>
                       updateArrayItem('testimonials', index, 'role', event.target.value)
                     }
-                    placeholder={isFinnish ? 'Esimies, Studio North' : 'Engineering Manager, Studio North'}
                   />
                 </FloatingField>
               </div>
