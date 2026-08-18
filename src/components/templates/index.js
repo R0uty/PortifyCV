@@ -14,6 +14,7 @@ import portfolio from './portfolio'
 import techExec from './techExec'
 import classicProfessional from './classicProfessional'
 import navyProfessional from './navyProfessional'
+import modernOrange from './modernOrange'
 
 // Map of variant name → template config object
 const templates = {
@@ -29,6 +30,7 @@ const templates = {
   techExec,
   classicProfessional,
   navyProfessional,
+  modernOrange,
 }
 
 // Returns the template config for a given variant string.
@@ -42,7 +44,7 @@ let showcasesPrefetched = false
 /**
  * Warms every bespoke *Showcase.jsx chunk (CVPreview.jsx lazy-loads them
  * per template) so switching templates or opening the gallery — which
- * renders all 12 at once as thumbnails — doesn't pay for 10 dynamic imports
+ * renders all 13 at once as thumbnails — doesn't pay for 11 dynamic imports
  * at that moment. Safe to call speculatively: it only downloads and
  * evaluates the modules, same pattern as prefetchPdfExportAssets in
  * exporters.js.
@@ -67,6 +69,7 @@ export function prefetchTemplateShowcases() {
   import('./PortfolioShowcase')
   import('./ClassicProfessionalShowcase')
   import('./NavyProfessionalShowcase')
+  import('./ModernOrangeShowcase')
 }
 
 // Export the full map for cases where iteration over all templates is needed

@@ -8,6 +8,11 @@
    spec's explicit "Professional cards" call-out. A single gold accent is
    reserved for the Awards section only ("gold should only be used for
    subtle highlights").
+
+   Layout: a full-height left rail (identity + secondary sections) beside a
+   white main column (primary sections) — same two-column shape as the
+   Navy Professional / Modern Orange Showcases, rather than the template's
+   older horizontal top-header band.
    ========================================================================== */
 
 .executive-showcase {
@@ -36,10 +41,13 @@
   --ex-header-bg: #eef2ff;
 
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(200px, 0.32fr) minmax(0, 0.68fr);
   background: var(--ex-bg);
   color: var(--ex-text);
   font-family: var(--font-sans);
   border-radius: 16px;
+  overflow: hidden;
   box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.2);
 
   width: min(100%, var(--preview-paper-width));
@@ -53,111 +61,96 @@
   box-shadow: none !important;
 }
 
-.pdf-export-root.executive-showcase .executive-showcase__header {
-  border-radius: 0 !important;
-}
+/* ── Left rail: identity + secondary sections, full height ── */
 
-/* ── Header ── */
-
-.executive-showcase__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1.75rem;
-  padding: 2.75rem 2.75rem 1.75rem;
+.executive-showcase__sidebar {
+  min-width: 0;
   background: var(--ex-header-bg);
-  border-radius: 16px 16px 0 0;
+  padding: 2.5rem 1.75rem;
 }
 
-.executive-showcase__kicker {
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--ex-gray);
-}
-
-.executive-showcase__name {
-  margin-top: 0.5rem;
-  font-size: 3.25rem;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  line-height: 1.03;
-  color: var(--ex-navy);
-}
-
-.executive-showcase__role {
-  margin-top: 0.5rem;
-  font-size: 1.125rem;
-  font-weight: 500;
-  color: var(--ex-gold);
-}
-
-.executive-showcase__tagline {
-  margin-top: 0.4rem;
-  font-size: 0.82rem;
-  font-style: italic;
-  color: var(--ex-gray);
-  max-width: 42ch;
-}
-
-.executive-showcase__contact {
-  margin-top: 1.1rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.9rem 1.2rem;
-}
-
-.executive-showcase__contact-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.78rem;
-  color: var(--ex-gray);
-  white-space: nowrap;
-}
-
-.executive-showcase__contact-icon {
-  display: inline-flex;
-  color: var(--ex-gold);
+.executive-showcase__identity {
+  min-width: 0;
 }
 
 .executive-showcase__photo-wrap {
-  flex-shrink: 0;
+  margin-bottom: 1.25rem;
 }
 
 .executive-showcase__photo {
   display: block;
-  width: 8.75rem;
-  height: 8.75rem;
+  width: 6.5rem;
+  height: 6.5rem;
   object-fit: cover;
   border-radius: 9999px;
   border: 3px solid var(--ex-navy);
 }
 
-.executive-showcase__header-divider {
+.executive-showcase__kicker {
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ex-gray);
+}
+
+.executive-showcase__name {
+  margin-top: 0.4rem;
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
+  color: var(--ex-navy);
+  overflow-wrap: anywhere;
+}
+
+.executive-showcase__role {
+  margin-top: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ex-gold);
+}
+
+.executive-showcase__tagline {
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--ex-gray);
+}
+
+.executive-showcase__contact {
+  margin-top: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.executive-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.74rem;
+  color: var(--ex-gray);
+  overflow-wrap: anywhere;
+}
+
+.executive-showcase__contact-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--ex-gold);
+}
+
+.executive-showcase__sidebar-divider {
   height: 1px;
-  margin: 0 2.75rem;
-  background: var(--ex-navy);
+  margin: 1.75rem 0;
+  background: var(--ex-border);
 }
 
-/* ── Body layout: main (68%) + sidebar (32%) ── */
-
-.executive-showcase__body {
-  display: grid;
-  grid-template-columns: minmax(0, 2.125fr) minmax(0, 1fr);
-  gap: 2.25rem;
-  padding: 2rem 2.75rem 2.75rem;
-}
+/* ── Main column ── */
 
 .executive-showcase__main {
   min-width: 0;
-}
-
-.executive-showcase__sidebar {
-  min-width: 0;
+  padding: 2.5rem 2.5rem 2.5rem 2.25rem;
 }
 
 /* ── Sections — no boxed container; whitespace + thin dividers separate
@@ -545,31 +538,27 @@
 /* ── Responsive ── */
 
 @media (max-width: 860px) {
-  .executive-showcase__body {
+  .executive-showcase {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 560px) {
-  .executive-showcase__header {
-    padding: 1.75rem 1.25rem 1.25rem;
+  .executive-showcase__sidebar {
+    padding: 1.75rem 1.25rem;
   }
 
-  .executive-showcase__header-divider {
-    margin: 0 1.25rem;
-  }
-
-  .executive-showcase__body {
-    padding: 1.25rem 1.25rem 1.75rem;
+  .executive-showcase__main {
+    padding: 1.75rem 1.25rem;
   }
 
   .executive-showcase__name {
-    font-size: 2.35rem;
+    font-size: 1.6rem;
   }
 
   .executive-showcase__photo {
-    width: 6rem;
-    height: 6rem;
+    width: 5.5rem;
+    height: 5.5rem;
   }
 }
 

@@ -10,6 +10,14 @@
 // section has its own distinct background — every section (main or sidebar)
 // shares the same white card treatment, a lesson carried over from the
 // Developer template's iteration.
+//
+// Layout: the identity block (photo, name, title, tagline, contact) runs
+// full-height down the right rail together with the secondary sections
+// (skills, certificates, languages, interests) — same "identity lives in
+// the sidebar" structure as Navy Professional / Executive, just mirrored to
+// the right instead of the left. Primary sections (about, experience,
+// projects, education, links) fill the main column on the left — links
+// specifically ordered right after education per explicit request.
 
 import { useMemo } from 'react'
 
@@ -268,6 +276,30 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
       )
     }
 
+    if (key === 'links') {
+      return (
+        <Section key={key} id="links" placement="main" icon="links" title={copy.links.title} subtitle={copy.links.subtitle}>
+          <div className="creative-showcase__link-list">
+            {linkEntries.length > 0 ? (
+              linkEntries.map(([linkKey, value]) => (
+                <div key={linkKey} className="creative-showcase__link-card" data-export-card="true">
+                  <span className="creative-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
+                  <div className="min-w-0">
+                    <p className="creative-showcase__link-label">{formatLinkLabel(linkKey)}</p>
+                    <p className="creative-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="creative-showcase__empty">
+                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+              </p>
+            )}
+          </div>
+        </Section>
+      )
+    }
+
     return null
   }
 
@@ -316,30 +348,6 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
             ) : (
               <p className="creative-showcase__empty">
                 {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
-              </p>
-            )}
-          </div>
-        </Section>
-      )
-    }
-
-    if (key === 'links') {
-      return (
-        <Section key={key} id="links" placement="side" icon="links" title={copy.links.title} subtitle={copy.links.subtitle}>
-          <div className="creative-showcase__link-list">
-            {linkEntries.length > 0 ? (
-              linkEntries.map(([linkKey, value]) => (
-                <div key={linkKey} className="creative-showcase__link-card" data-export-card="true">
-                  <span className="creative-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
-                  <div className="min-w-0">
-                    <p className="creative-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="creative-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="creative-showcase__empty">
-                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
               </p>
             )}
           </div>
@@ -396,16 +404,32 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
       ref={previewRef}
       data-export-root="true"
       data-export-variant="creative"
+      data-export-content="true"
       className="creative-showcase preview-document--designer"
     >
-      <div className="creative-showcase__bg" data-export-ignore="true" aria-hidden="true">
-        <span className="creative-showcase__blob creative-showcase__blob--one" />
-        <span className="creative-showcase__blob creative-showcase__blob--two" />
-        <span className="creative-showcase__dots" />
-      </div>
+      <main className="creative-showcase__main" data-export-primary="true">
+        {mainSectionKeys.map((key) => renderMainSection(key))}
+      </main>
 
-      <header data-export-header="true" className="creative-showcase__header">
-        <div className="min-w-0">
+      <aside className="creative-showcase__sidebar" data-export-secondary="true">
+        <div className="creative-showcase__bg" data-export-ignore="true" aria-hidden="true">
+          <span className="creative-showcase__blob creative-showcase__blob--one" />
+          <span className="creative-showcase__blob creative-showcase__blob--two" />
+          <span className="creative-showcase__dots" />
+        </div>
+
+        <div className="creative-showcase__identity" data-export-header="true">
+          {showPhoto ? (
+            <div className="creative-showcase__photo-wrap">
+              <img
+                src={photo}
+                alt={`${fullName} profile`}
+                data-export-photo="true"
+                className="creative-showcase__photo"
+              />
+            </div>
+          ) : null}
+
           <p className="creative-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
@@ -424,26 +448,10 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
           ) : null}
         </div>
 
-        {showPhoto ? (
-          <div className="creative-showcase__photo-wrap">
-            <img
-              src={photo}
-              alt={`${fullName} profile`}
-              data-export-photo="true"
-              className="creative-showcase__photo"
-            />
-          </div>
-        ) : null}
-      </header>
+        <div className="creative-showcase__sidebar-divider" aria-hidden="true" />
 
-      <div className="creative-showcase__body" data-export-content="true">
-        <main className="creative-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key) => renderMainSection(key))}
-        </main>
-        <aside className="creative-showcase__sidebar" data-export-secondary="true">
-          {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
-        </aside>
-      </div>
+        {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+      </aside>
     </article>
   )
 }

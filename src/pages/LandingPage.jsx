@@ -19,7 +19,7 @@ function getLandingCopy(locale) {
       previewAlt: 'Esimerkki PortifyCV:llä rakennetusta CV:stä',
       highlights: [
         'Ei tiliä, ei palvelinta — mitään kirjoittamastasi ei koskaan lähetetä selaimestasi',
-        '12 pohjaa — vaihda milloin vain sisältöä menettämättä',
+        '13 pohjaa — vaihda milloin vain sisältöä menettämättä',
         'Live-esikatselu kirjoittaessasi',
         'ATS-pisteytys ja avainsanaehdotukset',
         'Vie PDF-, HTML- tai JSON-muodossa',
@@ -40,12 +40,12 @@ function getLandingCopy(locale) {
         },
       ],
       templatesTitle: 'Katso pohjat',
-      templatesSubtitle: 'Kaikki 12 asettelua yhdellä silmäyksellä — vaihda milloin tahansa rakentaessasi, ilman että sisältösi katoaa.',
+      templatesSubtitle: 'Kaikki 13 asettelua yhdellä silmäyksellä — vaihda milloin tahansa rakentaessasi, ilman että sisältösi katoaa.',
       faqTitle: 'Usein kysytyt kysymykset',
       faq: [
         {
           q: 'Onko PortifyCV oikeasti ilmainen?',
-          a: 'Kyllä. Ei tilausmaksua, ei vesileimaa, ei piilotettuja rajoituksia — kaikki 12 pohjaa ja kaikki vientimuodot ovat käytössä ilmaiseksi.',
+          a: 'Kyllä. Ei tilausmaksua, ei vesileimaa, ei piilotettuja rajoituksia — kaikki 13 pohjaa ja kaikki vientimuodot ovat käytössä ilmaiseksi.',
         },
         {
           q: 'Tarvitsenko tilin?',
@@ -79,7 +79,7 @@ function getLandingCopy(locale) {
     previewAlt: 'Example CV built with PortifyCV',
     highlights: [
       'No account, no server — nothing you type ever leaves your browser',
-      '12 templates — swap anytime without losing your content',
+      '13 templates — swap anytime without losing your content',
       'Live preview as you type',
       'ATS scoring with keyword suggestions',
       'Export to PDF, HTML, or JSON',
@@ -100,12 +100,12 @@ function getLandingCopy(locale) {
       },
     ],
     templatesTitle: 'See the templates',
-    templatesSubtitle: 'All 12 layouts at a glance — swap between them any time while you build, without losing your content.',
+    templatesSubtitle: 'All 13 layouts at a glance — swap between them any time while you build, without losing your content.',
     faqTitle: 'Frequently asked questions',
     faq: [
       {
         q: 'Is PortifyCV really free?',
-        a: 'Yes. No subscription, no watermark, no hidden limits — all 12 templates and every export format are free to use.',
+        a: 'Yes. No subscription, no watermark, no hidden limits — all 13 templates and every export format are free to use.',
       },
       {
         q: 'Do I need to create an account?',

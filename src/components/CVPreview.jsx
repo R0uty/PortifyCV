@@ -22,7 +22,7 @@ import {
 import { getTemplateConfig } from './templates'
 
 // Only one of these renders at a time (CVPreview picks by `variant`), but
-// the gallery thumbnails render all 12 templates at once, so lazy-loading
+// the gallery thumbnails render all 13 templates at once, so lazy-loading
 // still pays off for the common case: the builder's initial bundle no
 // longer carries code for the 9 bespoke templates the user hasn't opened
 // yet. `prefetchTemplateShowcases()` (called on idle from
@@ -39,6 +39,7 @@ const CompactShowcase = lazy(() => import('./templates/CompactShowcase'))
 const PortfolioShowcase = lazy(() => import('./templates/PortfolioShowcase'))
 const ClassicProfessionalShowcase = lazy(() => import('./templates/ClassicProfessionalShowcase'))
 const NavyProfessionalShowcase = lazy(() => import('./templates/NavyProfessionalShowcase'))
+const ModernOrangeShowcase = lazy(() => import('./templates/ModernOrangeShowcase'))
 
 function CVPreview({
   formData,
@@ -48,6 +49,7 @@ function CVPreview({
   locale = 'en',
   atsFriendlyMode = false,
   timelineAccentColor,
+  modernOrangeAccentColor,
 }) {
   // ── Theme and template resolution ──────────────────────────────────
   // Resolve the UI theme (dark/light) and the template config (variant, layout, etc.)
@@ -249,6 +251,28 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          atsFriendlyMode={atsFriendlyMode}
+        />
+      </Suspense>
+    )
+  }
+  // ── Modern Orange Showcase delegation ─────────────────────────────────
+  // Also does not bypass itself in ATS mode (see the Navy Professional
+  // comment above for why). ModernOrangeShowcase.jsx collapses its own
+  // sidebar+main grid to a single column and strips the cream background
+  // internally when atsFriendlyMode is on — the one genuinely "necessary"
+  // structural change for this template, same reasoning as Navy
+  // Professional. Its accent color is user-customizable, same as Timeline.
+  if (variant === 'modernOrange') {
+    return (
+      <Suspense fallback={null}>
+        <ModernOrangeShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+          accentColor={modernOrangeAccentColor}
           atsFriendlyMode={atsFriendlyMode}
         />
       </Suspense>

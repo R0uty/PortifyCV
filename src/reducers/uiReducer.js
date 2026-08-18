@@ -7,6 +7,7 @@ import { UI_LOCALE_STORAGE_KEY } from '../utils/designSystem'
 // the eager bundle, defeating the split. timeline.js is cheap and already
 // imported eagerly everywhere via components/templates/index.js.
 import { TIMELINE_DEFAULT_ACCENT_COLOR } from '../components/templates/timeline'
+import { MODERN_ORANGE_DEFAULT_ACCENT_COLOR } from '../components/templates/modernOrange'
 
 export const UI_ACTION = {
   ADD_TOAST: 'ADD_TOAST',
@@ -25,6 +26,7 @@ export const UI_ACTION = {
   SET_COVER_LETTER_BODY: 'SET_COVER_LETTER_BODY',
   TOGGLE_SESSION_RESTORE: 'TOGGLE_SESSION_RESTORE',
   SET_TIMELINE_ACCENT_COLOR: 'SET_TIMELINE_ACCENT_COLOR',
+  SET_MODERN_ORANGE_ACCENT_COLOR: 'SET_MODERN_ORANGE_ACCENT_COLOR',
 }
 
 export function createInitialUiState(initialSession) {
@@ -46,6 +48,7 @@ export function createInitialUiState(initialSession) {
     coverLetterBody: '',
     sessionRestoreEnabled: storedSessionRestore === 'true',
     timelineAccentColor: TIMELINE_DEFAULT_ACCENT_COLOR,
+    modernOrangeAccentColor: MODERN_ORANGE_DEFAULT_ACCENT_COLOR,
     toasts: initialSession.initialToast ? [initialSession.initialToast] : [],
   }
 }
@@ -99,6 +102,9 @@ export function uiReducer(state, action) {
 
     case UI_ACTION.SET_TIMELINE_ACCENT_COLOR:
       return { ...state, timelineAccentColor: action.color }
+
+    case UI_ACTION.SET_MODERN_ORANGE_ACCENT_COLOR:
+      return { ...state, modernOrangeAccentColor: action.color }
 
     default:
       return state

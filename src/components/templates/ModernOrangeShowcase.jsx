@@ -1,0 +1,496 @@
+// Modern Orange Showcase — the non-ATS visual mode for the Modern Orange
+// template. Rendered by CVPreview.jsx instead of the shared generic
+// renderer whenever variant === 'modernOrange'. Shares the exact same
+// CvData shape as every other template — this file only differs in
+// presentation.
+//
+// Design language: premium two-column CV — a light warm cream/orange left
+// sidebar (photo, personal info, skills, languages, education timeline)
+// beside a white main column (large name header with a solid-orange title
+// badge, profile, an orange vertical timeline for experience, compact
+// project cards, and a certifications list). Like Navy Professional, this
+// Showcase does not bypass itself in ATS mode — it collapses its own
+// sidebar+main grid to a single column and strips the cream background
+// internally (see the stylesheet's `--ats` variant), the one genuinely
+// "necessary" structural change for ATS mode. Like Modern Timeline, the one
+// accent color is user-customizable (see the `accentColor` prop, wired from
+// a swatch picker in Settings) rather than hardcoded — applied via a single
+// CSS custom property on the document root so the rest of the stylesheet
+// never needs to know the actual color.
+
+import { useMemo } from 'react'
+
+import { createCvSnapshot } from '../../utils/cvSnapshot'
+import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import {
+  contactIcons,
+  devIcons,
+  sectionIcons,
+  formatDateRange,
+  formatLinkDisplayValue,
+  getSafeHref,
+} from './shared'
+import { MODERN_ORANGE_DEFAULT_ACCENT_COLOR } from './modernOrange'
+
+// ATS mode is monochrome for every template in this app (see
+// CVPreview.jsx's generic-path comments) — this template is no exception,
+// even though it otherwise keeps rendering itself (rather than bypassing
+// to the generic renderer) in ATS mode.
+const MODERN_ORANGE_ATS_ACCENT_COLOR = '#374151'
+
+function splitToBullets(text) {
+  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+}
+
+// Best-effort mapping from free-text proficiency ("Fluent", "B2",
+// "Edistynyt", ...) to a 1-5 dot count. Falls back to a neutral middle
+// value for anything unrecognized rather than guessing high or low — this
+// is a stylized visual flourish, not a claim about the CV's actual
+// content, so an approximate dot count for unusual input is fine as long
+// as it never looks like a strong claim either way. Same heuristic as the
+// Modern Timeline Showcase.
+function levelToDotCount(level) {
+  const normalized = (level || '').toLowerCase()
+
+  if (/native|fluent|c2|äidinkiel|sujuva/.test(normalized)) return 5
+  if (/advanced|c1|edistynyt/.test(normalized)) return 4
+  if (/intermediate|b1|b2|keskitaso/.test(normalized)) return 3
+  if (/basic|elementary|a2|perus/.test(normalized)) return 2
+  if (/beginner|a1|alkeet/.test(normalized)) return 1
+
+  return 3
+}
+
+// Skills in this app are a flat list of strings with no per-skill
+// proficiency field (unlike languages, which at least carry a free-text
+// level). Rather than fabricate a number that isn't backed by any real
+// input, the dot rating here reads list order as emphasis — the CV form
+// already invites "your strongest skills first" the same way most resume
+// tools do — and tapers evenly from 5 dots down to a 3-dot floor across
+// the list. It's a stylized visual flourish, exactly like the language
+// dots above, not a claim about actual proficiency.
+function skillOrderDotCount(index, total) {
+  if (total <= 1) return 5
+
+  const ratio = index / (total - 1)
+  return 5 - Math.round(ratio * 2)
+}
+
+function DotRow({ count }) {
+  return (
+    <span className="modern-orange-showcase__dots" aria-hidden="true">
+      {Array.from({ length: 5 }, (_, dotIndex) => (
+        <span
+          key={dotIndex}
+          className={`modern-orange-showcase__dot${dotIndex < count ? ' modern-orange-showcase__dot--filled' : ''}`}
+        />
+      ))}
+    </span>
+  )
+}
+
+function SectionHead({ icon, title }) {
+  return (
+    <div className="modern-orange-showcase__section-head">
+      <span className="modern-orange-showcase__section-icon" aria-hidden="true">
+        {sectionIcons[icon]}
+      </span>
+      <p className="modern-orange-showcase__section-title">{title}</p>
+    </div>
+  )
+}
+
+function Section({ id, icon, title, children }) {
+  return (
+    <section className="modern-orange-showcase__section" data-export-section={id} data-export-placement="main">
+      <SectionHead icon={icon} title={title} />
+      {children}
+    </section>
+  )
+}
+
+function SidebarBlock({ title, children }) {
+  return (
+    <div className="modern-orange-showcase__sidebar-block">
+      <p className="modern-orange-showcase__sidebar-heading">{title}</p>
+      {children}
+    </div>
+  )
+}
+
+function ExperienceRow({ date, isLast, children }) {
+  return (
+    <div className="modern-orange-showcase__exp-row" data-export-card="true">
+      <p className="modern-orange-showcase__exp-date">{date}</p>
+      <div className="modern-orange-showcase__exp-rail">
+        <span className="modern-orange-showcase__exp-marker" aria-hidden="true" />
+        {!isLast ? <span className="modern-orange-showcase__exp-line" aria-hidden="true" /> : null}
+      </div>
+      <div className="modern-orange-showcase__exp-content">{children}</div>
+    </div>
+  )
+}
+
+function EducationRow({ isLast, children }) {
+  return (
+    <div className="modern-orange-showcase__edu-row" data-export-card="true">
+      <div className="modern-orange-showcase__edu-rail">
+        <span className="modern-orange-showcase__edu-marker" aria-hidden="true" />
+        {!isLast ? <span className="modern-orange-showcase__edu-line" aria-hidden="true" /> : null}
+      </div>
+      <div className="modern-orange-showcase__edu-content">{children}</div>
+    </div>
+  )
+}
+
+export default function ModernOrangeShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  showcaseConfig = {},
+  accentColor = MODERN_ORANGE_DEFAULT_ACCENT_COLOR,
+  atsFriendlyMode = false,
+}) {
+  const isFinnish = locale === 'fi'
+  const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
+
+  const configShowPhoto = showcaseConfig.showPhoto !== false
+  // The one "necessary" color change ATS mode makes here: no user color,
+  // since every other template's ATS pass is fully monochrome too (see
+  // CVPreview.jsx's generic-path comments).
+  const effectiveAccentColor = atsFriendlyMode ? MODERN_ORANGE_ATS_ACCENT_COLOR : accentColor
+
+  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
+  const spaceIndex = fullName.indexOf(' ')
+  const nameFirst = spaceIndex === -1 ? fullName : fullName.slice(0, spaceIndex)
+  const nameRest = spaceIndex === -1 ? '' : fullName.slice(spaceIndex + 1)
+  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
+  const photo = snapshot.photo
+  const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
+    formData.photoVisibilityByTemplate,
+    templateConfig.id,
+  )
+  const about = snapshot.about
+    || (isFinnish
+      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+      : 'Your professional summary will appear here as you fill out the CV form.')
+
+  // Personal info: location, email, phone, website, LinkedIn — deliberately
+  // no date-of-birth row, since CvData has no such field anywhere in the
+  // app (adding one would be a data-model change, not a template one).
+  const personalItems = [
+    ['location', snapshot.location],
+    ['email', snapshot.email],
+    ['phone', snapshot.phone],
+  ].filter(([, value]) => value)
+  const websiteUrl = snapshot.links.website
+  const linkedinUrl = snapshot.links.linkedin
+
+  const sectionVisibility = {
+    ...createSectionVisibility(),
+    ...(formData.sectionVisibility ?? {}),
+  }
+  const templateSectionOrder = [
+    ...templateConfig.primarySections,
+    ...templateConfig.secondarySections,
+  ]
+  const orderedSections = normalizeSectionOrder(formData.sectionOrder, templateSectionOrder)
+  const primarySet = new Set(templateConfig.primarySections)
+  const secondarySet = new Set(templateConfig.secondarySections)
+  const mainSectionKeys = orderedSections.filter((key) => primarySet.has(key) && sectionVisibility[key])
+  const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
+
+  const copy = {
+    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
+    personalInfo: isFinnish ? 'Henkilötiedot' : 'Personal Info',
+    profile: isFinnish ? 'Profiili' : 'Profile',
+    experience: isFinnish ? 'Kokemus' : 'Experience',
+    education: isFinnish ? 'Koulutus' : 'Education',
+    projects: isFinnish ? 'Projektit' : 'Projects',
+    certificates: isFinnish ? 'Sertifikaatit' : 'Certifications',
+    skills: isFinnish ? 'Taidot' : 'Skills',
+    languages: isFinnish ? 'Kielet' : 'Languages',
+    viewProject: isFinnish ? 'Näytä projekti' : 'View project',
+  }
+
+  const renderMainSection = (key) => {
+    if (key === 'about') {
+      return (
+        <Section key={key} id="about" icon="about" title={copy.profile}>
+          <p className="modern-orange-showcase__summary">{about}</p>
+        </Section>
+      )
+    }
+
+    if (key === 'experience') {
+      return (
+        <Section key={key} id="experience" icon="experience" title={copy.experience}>
+          <div className="modern-orange-showcase__exp-list">
+            {snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) => {
+                const dateRange = formatDateRange(item.startDate, item.endDate)
+                const bullets = item.description ? splitToBullets(item.description) : []
+                const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
+
+                return (
+                  <ExperienceRow
+                    key={`${item.role}-${item.company}-${index}`}
+                    date={dateRange || copy.datesPending}
+                    isLast={index === snapshot.experience.length - 1}
+                  >
+                    <p className="modern-orange-showcase__exp-role">{item.role || copy.untitledRole}</p>
+                    {metaLine ? <p className="modern-orange-showcase__exp-meta">{metaLine}</p> : null}
+                    {bullets.length > 0 ? (
+                      <ul className="modern-orange-showcase__bullets">
+                        {bullets.map((line, lineIndex) => (
+                          <li key={lineIndex}>{line}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </ExperienceRow>
+                )
+              })
+            ) : (
+              <p className="modern-orange-showcase__empty">
+                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+              </p>
+            )}
+          </div>
+        </Section>
+      )
+    }
+
+    if (key === 'projects') {
+      return (
+        <Section key={key} id="projects" icon="projects" title={copy.projects}>
+          <div className="modern-orange-showcase__project-grid">
+            {snapshot.projects.length > 0 ? (
+              snapshot.projects.map((item, index) => {
+                const tags = item.stack
+                  ? item.stack.split(',').map((chip) => chip.trim()).filter(Boolean)
+                  : []
+                const projectUrl = item.demoUrl || item.githubUrl
+
+                return (
+                  <div key={`${item.name}-${index}`} className="modern-orange-showcase__project-card" data-export-card="true">
+                    <span className="modern-orange-showcase__project-icon" aria-hidden="true">
+                      {sectionIcons.projects}
+                    </span>
+                    {item.name ? <p className="modern-orange-showcase__project-name">{item.name}</p> : null}
+                    {item.description ? <p className="modern-orange-showcase__project-desc">{item.description}</p> : null}
+                    {tags.length > 0 ? (
+                      <div className="modern-orange-showcase__project-tags">
+                        {tags.map((chip) => (
+                          <span key={chip} className="modern-orange-showcase__project-tag">{chip}</span>
+                        ))}
+                      </div>
+                    ) : null}
+                    {projectUrl ? (
+                      <a href={getSafeHref(projectUrl)} target="_blank" rel="noreferrer" className="modern-orange-showcase__project-link">
+                        {copy.viewProject} ↗
+                      </a>
+                    ) : null}
+                  </div>
+                )
+              })
+            ) : (
+              <p className="modern-orange-showcase__empty">
+                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+              </p>
+            )}
+          </div>
+        </Section>
+      )
+    }
+
+    if (key === 'certificates') {
+      return (
+        <Section key={key} id="certificates" icon="certificates" title={copy.certificates}>
+          <ul className="modern-orange-showcase__cert-list">
+            {snapshot.certificates.length > 0 ? (
+              snapshot.certificates.map((item, index) => (
+                <li key={`${item.name}-${index}`} className="modern-orange-showcase__cert-item" data-export-card="true">
+                  <div className="modern-orange-showcase__cert-row">
+                    <div className="modern-orange-showcase__cert-text">
+                      {item.name ? <p className="modern-orange-showcase__cert-name">{item.name}</p> : null}
+                      {item.issuer ? <p className="modern-orange-showcase__cert-issuer">{item.issuer}</p> : null}
+                    </div>
+                    {item.year ? <p className="modern-orange-showcase__cert-year">{item.year}</p> : null}
+                  </div>
+                </li>
+              ))
+            ) : (
+              <p className="modern-orange-showcase__empty">
+                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certifications will appear here.'}
+              </p>
+            )}
+          </ul>
+        </Section>
+      )
+    }
+
+    return null
+  }
+
+  const renderSidebarSection = (key) => {
+    if (key === 'skills') {
+      return (
+        <SidebarBlock key={key} title={copy.skills}>
+          <div className="modern-orange-showcase__skill-list">
+            {snapshot.skills.length > 0 ? (
+              snapshot.skills.map((skill, index) => (
+                <div key={skill} data-export-skill="true" className="modern-orange-showcase__skill-row">
+                  <span className="modern-orange-showcase__skill-name">{skill}</span>
+                  <DotRow count={skillOrderDotCount(index, snapshot.skills.length)} />
+                </div>
+              ))
+            ) : (
+              <p className="modern-orange-showcase__empty modern-orange-showcase__empty--sidebar">
+                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              </p>
+            )}
+          </div>
+        </SidebarBlock>
+      )
+    }
+
+    if (key === 'languages') {
+      return (
+        <SidebarBlock key={key} title={copy.languages}>
+          <div className="modern-orange-showcase__lang-list">
+            {snapshot.languages.length > 0 ? (
+              snapshot.languages.map((item, index) => (
+                <div key={`${item.language}-${index}`} className="modern-orange-showcase__lang-row">
+                  <div className="modern-orange-showcase__lang-head">
+                    <span className="modern-orange-showcase__lang-name">{item.language}</span>
+                    {item.level ? <span className="modern-orange-showcase__lang-level">{item.level}</span> : null}
+                  </div>
+                  <DotRow count={levelToDotCount(item.level)} />
+                </div>
+              ))
+            ) : (
+              <p className="modern-orange-showcase__empty modern-orange-showcase__empty--sidebar">
+                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+              </p>
+            )}
+          </div>
+        </SidebarBlock>
+      )
+    }
+
+    if (key === 'education') {
+      return (
+        <SidebarBlock key={key} title={copy.education}>
+          <div className="modern-orange-showcase__edu-list">
+            {snapshot.education.length > 0 ? (
+              snapshot.education.map((item, index) => {
+                const metaLine = [item.school, item.location].filter(Boolean).join(', ')
+
+                return (
+                  <EducationRow key={`${item.school}-${index}`} isLast={index === snapshot.education.length - 1}>
+                    <p className="modern-orange-showcase__edu-dates">{formatDateRange(item.startDate, item.endDate)}</p>
+                    <p className="modern-orange-showcase__edu-degree">{item.degree || copy.untitledRole}</p>
+                    {metaLine ? <p className="modern-orange-showcase__edu-meta">{metaLine}</p> : null}
+                  </EducationRow>
+                )
+              })
+            ) : (
+              <p className="modern-orange-showcase__empty modern-orange-showcase__empty--sidebar">
+                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+              </p>
+            )}
+          </div>
+        </SidebarBlock>
+      )
+    }
+
+    return null
+  }
+
+  return (
+    <article
+      ref={previewRef}
+      data-export-root="true"
+      data-export-variant="modernOrange"
+      data-export-content="true"
+      // "preview-document--designer"/"--ats" are pure marker classes (no
+      // styling rules of their own — see index.css) that
+      // ResumeBuilderPage's export handler polls for via
+      // waitForPreviewModeSync before starting a PDF export. This class has
+      // to track the live atsFriendlyMode value (same as Navy Professional
+      // and Modern Timeline) since this Showcase renders in both modes.
+      //
+      // "modern-orange-showcase--ats" collapses the sidebar+main grid to
+      // one column and strips the cream sidebar background (see the
+      // stylesheet) — the one genuinely "necessary" change for ATS mode,
+      // since a side-by-side column is exactly what this app's own ATS
+      // claims ("no columns") promise to remove.
+      className={`modern-orange-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'}${atsFriendlyMode ? ' modern-orange-showcase--ats' : ''}`}
+      style={{ '--mo-accent': effectiveAccentColor }}
+    >
+      <aside className="modern-orange-showcase__sidebar" data-export-secondary="true">
+        {showPhoto ? (
+          <div className="modern-orange-showcase__photo-wrap">
+            <img
+              src={photo}
+              alt={`${fullName} profile`}
+              data-export-photo="true"
+              className="modern-orange-showcase__photo"
+            />
+          </div>
+        ) : null}
+
+        {personalItems.length > 0 || websiteUrl || linkedinUrl ? (
+          <SidebarBlock title={copy.personalInfo}>
+            <div className="modern-orange-showcase__contact-list">
+              {personalItems.map(([key, value]) => (
+                <div key={key} className="modern-orange-showcase__contact-item">
+                  <span className="modern-orange-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
+                  <span>{value}</span>
+                </div>
+              ))}
+              {websiteUrl ? (
+                <div className="modern-orange-showcase__contact-item">
+                  <span className="modern-orange-showcase__contact-icon" aria-hidden="true">{devIcons.website}</span>
+                  <span>{formatLinkDisplayValue(websiteUrl)}</span>
+                </div>
+              ) : null}
+              {linkedinUrl ? (
+                <div className="modern-orange-showcase__contact-item">
+                  <span className="modern-orange-showcase__contact-icon" aria-hidden="true">{devIcons.linkedin}</span>
+                  <span>{formatLinkDisplayValue(linkedinUrl)}</span>
+                </div>
+              ) : null}
+            </div>
+          </SidebarBlock>
+        ) : null}
+
+        {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+      </aside>
+
+      <main className="modern-orange-showcase__main" data-export-primary="true">
+        <header data-export-header="true" className="modern-orange-showcase__header">
+          <p className="modern-orange-showcase__kicker" data-export-ignore="true">
+            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+          </p>
+          <h1 className="modern-orange-showcase__name">
+            <span className="modern-orange-showcase__name-first">{nameFirst}</span>
+            {nameRest ? (
+              <>
+                <br />
+                <span className="modern-orange-showcase__name-last">{nameRest}</span>
+              </>
+            ) : null}
+          </h1>
+          <span className="modern-orange-showcase__title-badge">{title}</span>
+        </header>
+
+        <div className="modern-orange-showcase__header-divider" aria-hidden="true" />
+
+        {mainSectionKeys.map((key) => renderMainSection(key))}
+      </main>
+    </article>
+  )
+}

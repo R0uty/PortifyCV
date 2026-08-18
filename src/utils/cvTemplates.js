@@ -45,8 +45,8 @@ const templateMap = {
     description: 'Editorial profile with a quick-facts sidebar and a violet accent. Suits any profession.',
     variant: 'creative',
     layout: 'split',
-    primarySections: ['about', 'experience', 'projects', 'education'],
-    secondarySections: ['skills', 'certificates', 'links', 'languages', 'interests'],
+    primarySections: ['about', 'experience', 'projects', 'education', 'links'],
+    secondarySections: ['skills', 'certificates', 'languages', 'interests'],
     summaryBadgeLabel: 'Notes',
     thumbnail: {
       accentClassName: 'bg-gradient-to-r from-gray-500 to-gray-500',
@@ -229,6 +229,25 @@ const templateMap = {
       chips: ['Contact', 'Skills'],
     },
   },
+  modernOrange: {
+    id: 'modernOrange',
+    label: 'Modern Orange',
+    description: 'Premium two-column layout with a warm cream sidebar, orange accents, dot-rated skills, and timelines for education and experience — suits almost any profession.',
+    variant: 'modernOrange',
+    layout: 'split',
+    primarySections: ['about', 'experience', 'projects', 'certificates'],
+    secondarySections: ['skills', 'languages', 'education'],
+    summaryBadgeLabel: 'Profile',
+    thumbnail: {
+      accentClassName: 'bg-[#F28C00]',
+      surfaceClassName: 'bg-orange-50',
+      primaryRatioClassName: 'grid-cols-[0.29fr_0.71fr]',
+      titleWidthClassName: 'w-24',
+      subtitleWidthClassName: 'w-16',
+      blockWidths: ['w-full', 'w-11/12', 'w-9/12'],
+      chips: ['Skills', 'Timeline'],
+    },
+  },
 }
 
 const templateLocalization = {
@@ -304,6 +323,12 @@ const templateLocalization = {
       description: 'Moderni kaksipalstainen asettelu tummansinisellä sivupalkilla ja sinisillä aksenteilla — ammattimainen ja ATS-ystävällinen.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Yhteystiedot', 'Taidot'],
+    },
+    modernOrange: {
+      label: 'Moderni oranssi',
+      description: 'Premium-tasoinen kaksipalstainen asettelu lämpimällä kermanvärisellä sivupalkilla, oranssilla aksentilla, pisteytetyillä taidoilla sekä koulutus- ja kokemusaikajanoilla — sopii lähes mille tahansa ammatille.',
+      summaryBadgeLabel: 'Profiili',
+      chips: ['Taidot', 'Aikajana'],
     },
   },
 }

@@ -8,6 +8,10 @@
    No CSS `filter: blur()` anywhere (a blurred decorative element hung
    html2canvas during PDF export in the Developer template — see that fix);
    soft shapes here use radial-gradient fades instead.
+
+   Layout: a full-height right rail (identity + secondary sections) beside
+   a main column (primary sections) on the left — same two-column shape as
+   the Navy Professional / Executive Showcases, mirrored to the right.
    ========================================================================== */
 
 .creative-showcase {
@@ -29,6 +33,8 @@
   --cs-card: #f7f7fa;
 
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.66fr) minmax(220px, 0.34fr);
   overflow: hidden;
   background: var(--cs-card);
   color: var(--cs-text);
@@ -49,7 +55,17 @@
   box-shadow: none !important;
 }
 
-/* ── Decorative background (soft radial-gradient shapes, no filter/blur) ── */
+/* ── Right rail: identity + secondary sections, full height ── */
+
+.creative-showcase__sidebar {
+  position: relative;
+  min-width: 0;
+  background: var(--cs-accent-soft-2);
+  padding: 2.25rem 1.75rem 2.25rem;
+}
+
+/* ── Decorative background (soft radial-gradient shapes, no filter/blur) —
+   scoped to the right rail now, since that's where the hero identity lives. ── */
 
 .creative-showcase__bg {
   position: absolute;
@@ -65,74 +81,68 @@
 }
 
 .creative-showcase__blob--one {
-  top: -120px;
-  right: -100px;
-  width: 340px;
-  height: 340px;
-  background: radial-gradient(circle, var(--cs-accent-soft-2) 0%, rgba(237, 233, 254, 0) 70%);
+  top: -70px;
+  right: -70px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, var(--cs-accent-soft) 0%, rgba(245, 243, 255, 0) 70%);
 }
 
 .creative-showcase__blob--two {
-  top: 160px;
-  right: 120px;
-  width: 180px;
-  height: 180px;
+  top: 220px;
+  right: -30px;
+  width: 130px;
+  height: 130px;
   background: radial-gradient(circle, var(--cs-accent-soft) 0%, rgba(245, 243, 255, 0) 70%);
 }
 
 .creative-showcase__dots {
   position: absolute;
-  top: 40px;
-  right: 260px;
-  width: 90px;
-  height: 90px;
+  top: 20px;
+  right: 110px;
+  width: 60px;
+  height: 60px;
   opacity: 0.35;
   background-image: radial-gradient(var(--cs-accent-border) 1.4px, transparent 1.4px);
   background-size: 14px 14px;
 }
 
-/* ── Header (hero) ── */
+/* ── Identity (photo, name, title, tagline, contact) ── */
 
-.creative-showcase__header {
+.creative-showcase__identity {
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1.75rem;
-  padding: 2.25rem 2.5rem 1.5rem;
-  background: var(--cs-accent-soft-2);
-  border-bottom: 1px solid var(--cs-accent-border);
+  min-width: 0;
 }
 
 .creative-showcase__kicker {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   color: var(--cs-muted);
 }
 
 .creative-showcase__name {
   margin-top: 0.5rem;
-  font-size: 2.75rem;
+  font-size: 1.85rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.05;
+  letter-spacing: -0.01em;
+  line-height: 1.08;
   color: var(--cs-text);
+  overflow-wrap: anywhere;
 }
 
 .creative-showcase__role {
-  margin-top: 0.55rem;
-  font-size: 1.05rem;
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--cs-accent);
 }
 
 .creative-showcase__tagline {
   margin-top: 0.35rem;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-style: italic;
   color: var(--cs-muted);
 }
@@ -140,56 +150,55 @@
 .creative-showcase__contact {
   margin-top: 1rem;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.9rem 1.2rem;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
 .creative-showcase__contact-item {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   color: var(--cs-muted);
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .creative-showcase__contact-icon {
   display: inline-flex;
+  flex-shrink: 0;
   color: var(--cs-accent);
 }
 
 .creative-showcase__photo-wrap {
   position: relative;
-  flex-shrink: 0;
+  z-index: 1;
+  margin-bottom: 1.25rem;
 }
 
 .creative-showcase__photo {
   display: block;
-  width: 8.75rem;
-  height: 8.75rem;
+  width: 6.5rem;
+  height: 6.5rem;
   object-fit: cover;
-  border-radius: 28px;
+  border-radius: 20px;
   border: 3px solid var(--cs-accent-border);
 }
 
-/* ── Body layout: main (70%) + sidebar profile panel (30%) ── */
-
-.creative-showcase__body {
+.creative-showcase__sidebar-divider {
   position: relative;
   z-index: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 2.3fr) minmax(0, 1fr);
-  gap: 1.5rem;
-  padding: 0.5rem 2.5rem 2.25rem;
+  height: 1px;
+  margin: 1.75rem 0;
+  background: var(--cs-accent-border);
 }
+
+/* ── Main column (primary sections) ── */
 
 .creative-showcase__main {
+  position: relative;
+  z-index: 1;
   min-width: 0;
-}
-
-.creative-showcase__sidebar {
-  min-width: 0;
+  padding: 2.25rem 2.25rem 2.25rem 2.5rem;
 }
 
 /* ── Sections — every section (main or sidebar) shares this one card
@@ -591,30 +600,30 @@
   to { opacity: 1; transform: none; }
 }
 
-/* ── Responsive: sidebar below header on tablet, single column on mobile ── */
+/* ── Responsive: sidebar below main on tablet, single column on mobile ── */
 
 @media (max-width: 860px) {
-  .creative-showcase__body {
+  .creative-showcase {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 560px) {
-  .creative-showcase__header {
-    padding: 1.5rem 1.25rem 1.1rem;
+  .creative-showcase__sidebar {
+    padding: 1.5rem 1.25rem;
   }
 
-  .creative-showcase__body {
-    padding: 0.5rem 1.25rem 1.5rem;
+  .creative-showcase__main {
+    padding: 1.5rem 1.25rem;
   }
 
   .creative-showcase__name {
-    font-size: 2.1rem;
+    font-size: 1.6rem;
   }
 
   .creative-showcase__photo {
-    width: 6rem;
-    height: 6rem;
+    width: 5.5rem;
+    height: 5.5rem;
   }
 }
 

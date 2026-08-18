@@ -14,6 +14,14 @@
 // separate content instead (see DeveloperShowcase / CreativeShowcase / index.css
 // for the more heavily-carded counterexamples). Only Projects and Links use a
 // subtle bordered card, matching the spec's explicit "Professional cards" call-out.
+//
+// Layout: the identity block (photo, name, title, tagline, contact) runs
+// full-height down the left rail together with the secondary sections
+// (core competencies, skills, certifications, languages, memberships,
+// links) — same "identity lives in the sidebar" structure as Navy
+// Professional / Modern Orange, rather than a horizontal band across the
+// top. Primary sections (profile, experience, projects, education, ...)
+// fill the remaining main column on the right.
 
 import { useMemo } from 'react'
 
@@ -457,6 +465,7 @@ export default function ExecutiveShowcase({ formData, locale = 'en', previewRef,
       ref={previewRef}
       data-export-root="true"
       data-export-variant="executive"
+      data-export-content="true"
       // "preview-document--designer" is a pure marker class (no styling rules
       // of its own — see index.css) that ResumeBuilderPage's export handler
       // polls for via waitForPreviewModeSync before starting a PDF export.
@@ -464,9 +473,20 @@ export default function ExecutiveShowcase({ formData, locale = 'en', previewRef,
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
       className="executive-showcase preview-document--designer"
+      style={!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
     >
-      <header data-export-header="true" className="executive-showcase__header">
-        <div className="min-w-0">
+      <aside className="executive-showcase__sidebar" data-export-secondary="true">
+        <div className="executive-showcase__identity" data-export-header="true">
+          {showPhoto ? (
+            <div className="executive-showcase__photo-wrap">
+              <img
+                src={photo}
+                alt={`${fullName} profile`}
+                data-export-photo="true"
+                className="executive-showcase__photo"
+              />
+            </div>
+          ) : null}
           <p className="executive-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
@@ -485,34 +505,17 @@ export default function ExecutiveShowcase({ formData, locale = 'en', previewRef,
           ) : null}
         </div>
 
-        {showPhoto ? (
-          <div className="executive-showcase__photo-wrap">
-            <img
-              src={photo}
-              alt={`${fullName} profile`}
-              data-export-photo="true"
-              className="executive-showcase__photo"
-            />
-          </div>
-        ) : null}
-      </header>
-
-      <div className="executive-showcase__header-divider" aria-hidden="true" />
-
-      <div
-        className="executive-showcase__body"
-        data-export-content="true"
-        style={!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
-      >
-        <main className="executive-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key) => renderMainSection(key))}
-        </main>
         {showSidebar ? (
-          <aside className="executive-showcase__sidebar" data-export-secondary="true">
+          <>
+            <div className="executive-showcase__sidebar-divider" aria-hidden="true" />
             {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
-          </aside>
+          </>
         ) : null}
-      </div>
+      </aside>
+
+      <main className="executive-showcase__main" data-export-primary="true">
+        {mainSectionKeys.map((key) => renderMainSection(key))}
+      </main>
     </article>
   )
 }

@@ -1,0 +1,640 @@
+/* ==========================================================================
+   Modern Orange Showcase — hand-authored component styles for the Modern
+   Orange template's non-ATS mode. Scoped entirely under
+   `.modern-orange-showcase`. Light warm cream/orange left sidebar (photo,
+   personal info, skills, languages, education timeline) beside a white main
+   column (name header + orange title badge, profile, an orange experience
+   timeline, project cards, certifications). The one accent color comes from
+   `--mo-accent`, set inline per-render from the `accentColor` prop (see
+   ModernOrangeShowcase.jsx) so it's user-customizable without this
+   stylesheet needing to know about it — the value declared here is only the
+   fallback for contexts where the inline style is somehow absent. Colors
+   are plain hex throughout (no oklch/color-mix) so html2canvas-based PDF
+   export renders them reliably — same constraint as every other bespoke
+   Showcase in this app.
+   ========================================================================== */
+
+.modern-orange-showcase {
+  --mo-accent: #f28c00;
+  --mo-text: #151a22;
+  --mo-muted: #6b7280;
+  --mo-border: #ece1d2;
+  --mo-sidebar-bg: #fdf6ec;
+  --mo-dot-empty: #e6dcc9;
+  /* Deliberately not pure #ffffff for the main column — same blank-canvas
+     PDF export guard used by the Navy Professional/Timeline Showcases. */
+  --mo-bg: #fdfdfd;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(180px, 0.29fr) minmax(0, 0.71fr);
+  background: var(--mo-bg);
+  color: var(--mo-text);
+  font-family: var(--font-sans);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.2);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.modern-orange-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── Sidebar ── */
+
+.modern-orange-showcase__sidebar {
+  background: var(--mo-sidebar-bg);
+  padding: 2.25rem 1.5rem;
+  min-width: 0;
+}
+
+.modern-orange-showcase__photo-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.75rem;
+}
+
+.modern-orange-showcase__photo {
+  display: block;
+  width: 7rem;
+  height: 7rem;
+  object-fit: cover;
+  border-radius: 9999px;
+  border: 3px solid var(--mo-accent);
+  padding: 3px;
+  background: var(--mo-bg);
+}
+
+.modern-orange-showcase__sidebar-block {
+  margin-top: 1.75rem;
+}
+
+.modern-orange-showcase__sidebar-block:first-of-type {
+  margin-top: 0;
+}
+
+.modern-orange-showcase__sidebar-heading {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--mo-accent);
+  margin-bottom: 0.85rem;
+}
+
+.modern-orange-showcase__empty {
+  font-size: 0.78rem;
+  color: var(--mo-muted);
+}
+
+/* ── Sidebar: personal info ── */
+
+.modern-orange-showcase__contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.modern-orange-showcase__contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--mo-text);
+  overflow-wrap: anywhere;
+}
+
+.modern-orange-showcase__contact-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--mo-accent);
+}
+
+/* ── Sidebar: skills (name + dot rating) ── */
+
+.modern-orange-showcase__skill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.modern-orange-showcase__skill-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.modern-orange-showcase__skill-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--mo-text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modern-orange-showcase__dots {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 0.24rem;
+}
+
+.modern-orange-showcase__dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: var(--mo-dot-empty);
+}
+
+.modern-orange-showcase__dot--filled {
+  background: var(--mo-accent);
+}
+
+/* ── Sidebar: languages ── */
+
+.modern-orange-showcase__lang-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.modern-orange-showcase__lang-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.modern-orange-showcase__lang-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.modern-orange-showcase__lang-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--mo-text);
+}
+
+.modern-orange-showcase__lang-level {
+  font-size: 0.68rem;
+  color: var(--mo-muted);
+}
+
+/* ── Sidebar: education timeline ── */
+
+.modern-orange-showcase__edu-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.modern-orange-showcase__edu-row {
+  display: flex;
+  gap: 0.7rem;
+  padding-bottom: 1.1rem;
+}
+
+.modern-orange-showcase__edu-row:last-child {
+  padding-bottom: 0;
+}
+
+.modern-orange-showcase__edu-rail {
+  position: relative;
+  width: 0.6rem;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.modern-orange-showcase__edu-marker {
+  position: absolute;
+  top: 0.22rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  border: 2px solid var(--mo-accent);
+  background: var(--mo-bg);
+}
+
+.modern-orange-showcase__edu-line {
+  position: absolute;
+  top: 0.22rem;
+  bottom: -1.1rem;
+  width: 1.5px;
+  background: var(--mo-accent);
+  opacity: 0.3;
+}
+
+.modern-orange-showcase__edu-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.modern-orange-showcase__edu-dates {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--mo-accent);
+}
+
+.modern-orange-showcase__edu-degree {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--mo-text);
+}
+
+.modern-orange-showcase__edu-meta {
+  margin-top: 0.1rem;
+  font-size: 0.72rem;
+  color: var(--mo-muted);
+}
+
+/* ── Main column ── */
+
+.modern-orange-showcase__main {
+  min-width: 0;
+  padding: 2.5rem 2.5rem 2.5rem 2.25rem;
+}
+
+.modern-orange-showcase__kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--mo-muted);
+}
+
+.modern-orange-showcase__name {
+  margin-top: 0.35rem;
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  color: var(--mo-text);
+  overflow-wrap: anywhere;
+}
+
+.modern-orange-showcase__name-last {
+  color: var(--mo-accent);
+}
+
+.modern-orange-showcase__title-badge {
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 0.9rem;
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  background: var(--mo-accent);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  overflow-wrap: anywhere;
+}
+
+.modern-orange-showcase__header-divider {
+  height: 2px;
+  margin-top: 1.5rem;
+  background: var(--mo-accent);
+  opacity: 0.25;
+}
+
+.modern-orange-showcase__section {
+  margin-top: 2rem;
+}
+
+.modern-orange-showcase__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.modern-orange-showcase__section-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 9999px;
+  background: var(--mo-accent);
+  color: #ffffff;
+}
+
+.modern-orange-showcase__section-icon svg {
+  height: 0.8rem;
+  width: 0.8rem;
+}
+
+.modern-orange-showcase__section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--mo-text);
+}
+
+/* ── Profile ── */
+
+.modern-orange-showcase__summary {
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1.75;
+  color: var(--mo-text);
+  white-space: pre-line;
+}
+
+/* ── Experience timeline ── */
+
+.modern-orange-showcase__exp-list {
+  margin-top: 1rem;
+}
+
+.modern-orange-showcase__exp-row {
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--mo-border);
+  margin-bottom: 1.25rem;
+}
+
+.modern-orange-showcase__exp-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.modern-orange-showcase__exp-date {
+  flex-shrink: 0;
+  width: 6rem;
+  padding-top: 0.15rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--mo-accent);
+}
+
+.modern-orange-showcase__exp-rail {
+  position: relative;
+  width: 0.9rem;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.modern-orange-showcase__exp-marker {
+  position: absolute;
+  top: 0.28rem;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 9999px;
+  border: 2px solid var(--mo-accent);
+  background: var(--mo-bg);
+}
+
+.modern-orange-showcase__exp-line {
+  position: absolute;
+  top: 0.28rem;
+  bottom: -2.5rem;
+  width: 1.5px;
+  background: var(--mo-accent);
+  opacity: 0.3;
+}
+
+.modern-orange-showcase__exp-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.modern-orange-showcase__exp-role {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--mo-text);
+}
+
+.modern-orange-showcase__exp-meta {
+  margin-top: 0.15rem;
+  font-size: 0.78rem;
+  color: var(--mo-accent);
+}
+
+.modern-orange-showcase__bullets {
+  margin-top: 0.5rem;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.modern-orange-showcase__bullets li {
+  font-size: 0.79rem;
+  line-height: 1.6;
+  color: var(--mo-text);
+}
+
+.modern-orange-showcase__bullets li::marker {
+  color: var(--mo-accent);
+}
+
+/* ── Projects: compact three-column cards ── */
+
+.modern-orange-showcase__project-grid {
+  margin-top: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.9rem;
+}
+
+.modern-orange-showcase__project-card {
+  border: 1px solid var(--mo-border);
+  border-radius: 10px;
+  padding: 1rem;
+  background: var(--mo-bg);
+}
+
+.modern-orange-showcase__project-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 9999px;
+  background: var(--mo-accent);
+  color: #ffffff;
+  margin-bottom: 0.55rem;
+}
+
+.modern-orange-showcase__project-icon svg {
+  height: 0.82rem;
+  width: 0.82rem;
+}
+
+.modern-orange-showcase__project-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--mo-text);
+}
+
+.modern-orange-showcase__project-desc {
+  margin-top: 0.3rem;
+  font-size: 0.73rem;
+  line-height: 1.5;
+  color: var(--mo-muted);
+}
+
+.modern-orange-showcase__project-tags {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.modern-orange-showcase__project-tag {
+  border-radius: 5px;
+  border: 1px solid var(--mo-border);
+  padding: 0.18rem 0.45rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--mo-accent);
+}
+
+.modern-orange-showcase__project-link {
+  display: inline-block;
+  margin-top: 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--mo-accent);
+}
+
+/* ── Certifications ── */
+
+.modern-orange-showcase__cert-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  list-style: none;
+}
+
+.modern-orange-showcase__cert-item {
+  padding: 0.8rem 0 0.8rem 0.9rem;
+  border-left: 2px solid var(--mo-accent);
+  border-bottom: 1px solid var(--mo-border);
+}
+
+.modern-orange-showcase__cert-item:first-child {
+  padding-top: 0;
+}
+
+.modern-orange-showcase__cert-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.modern-orange-showcase__cert-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+}
+
+.modern-orange-showcase__cert-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--mo-text);
+}
+
+.modern-orange-showcase__cert-issuer {
+  margin-top: 0.12rem;
+  font-size: 0.76rem;
+  color: var(--mo-muted);
+}
+
+.modern-orange-showcase__cert-year {
+  flex-shrink: 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--mo-accent);
+}
+
+/* ── ATS mode: same layout, one column instead of two, no color ──
+   The "necessary" change: a side-by-side column is exactly what this
+   app's own ATS claims ("no columns") promise to remove, since it can
+   scramble reading order for parsers that extract text left-to-right
+   across the full page width. Everything else — section order, the icon
+   badges, the dot ratings, the timeline — stays in the same relative
+   place, just recolored to the same monochrome every other template's
+   ATS pass already uses (see `--mo-accent`'s ATS override in
+   ModernOrangeShowcase.jsx). */
+
+.modern-orange-showcase--ats {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.modern-orange-showcase--ats .modern-orange-showcase__sidebar {
+  background: transparent;
+  border-bottom: 1px solid var(--mo-border);
+  padding-bottom: 1.75rem;
+}
+
+.modern-orange-showcase--ats .modern-orange-showcase__photo {
+  border-color: var(--mo-muted);
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 860px) {
+  .modern-orange-showcase {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .modern-orange-showcase__sidebar {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .modern-orange-showcase__main {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .modern-orange-showcase__photo {
+    width: 5.5rem;
+    height: 5.5rem;
+  }
+
+  .modern-orange-showcase__name {
+    font-size: 1.8rem;
+  }
+
+  .modern-orange-showcase__exp-date {
+    width: 4.25rem;
+    font-size: 0.66rem;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .modern-orange-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .modern-orange-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+}

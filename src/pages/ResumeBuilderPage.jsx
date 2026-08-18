@@ -326,6 +326,7 @@ function ResumeBuilderPage({
     coverLetterBody,
     sessionRestoreEnabled,
     timelineAccentColor,
+    modernOrangeAccentColor,
     toasts,
   } = uiState
   const ui = getUiTheme()
@@ -858,6 +859,10 @@ function ResumeBuilderPage({
 
   const handleTimelineAccentColorChange = useCallback((color) => {
     dispatchUi({ type: UI_ACTION.SET_TIMELINE_ACCENT_COLOR, color })
+  }, [])
+
+  const handleModernOrangeAccentColorChange = useCallback((color) => {
+    dispatchUi({ type: UI_ACTION.SET_MODERN_ORANGE_ACCENT_COLOR, color })
   }, [])
 
   const handleToggleMobilePreview = useCallback(() => {
@@ -1623,6 +1628,7 @@ function ResumeBuilderPage({
                 locale={locale}
                 atsFriendlyMode={atsFriendlyMode}
                 timelineAccentColor={timelineAccentColor}
+                modernOrangeAccentColor={modernOrangeAccentColor}
               />
             </AppErrorBoundary>
           </div>
@@ -1644,6 +1650,7 @@ function ResumeBuilderPage({
     locale,
     selectedTemplate,
     timelineAccentColor,
+    modernOrangeAccentColor,
     zoomPercent,
     ui.button,
     ui.surface,
@@ -1789,6 +1796,8 @@ function ResumeBuilderPage({
         selectedTemplate={selectedTemplate}
         timelineAccentColor={timelineAccentColor}
         onTimelineAccentColorChange={handleTimelineAccentColorChange}
+        modernOrangeAccentColor={modernOrangeAccentColor}
+        onModernOrangeAccentColorChange={handleModernOrangeAccentColorChange}
       />
 
       <BadgeModal
