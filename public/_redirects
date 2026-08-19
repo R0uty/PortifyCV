@@ -1,6 +1,0 @@
-# Netlify SPA fallback: PortifyCV has no server, so client-side routes like
-# /cv and /privacy only resolve if Netlify serves index.html for any path
-# that isn't a real static file. Without this, a direct visit, a page
-# refresh, or a crawler fetching /cv or /privacy gets a 404 instead of the
-# app. Vercel gets the equivalent via vercel.json's "rewrites".
-/*    /index.html   200
