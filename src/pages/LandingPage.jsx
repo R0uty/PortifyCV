@@ -12,27 +12,27 @@ const LandingTemplatesPreview = lazy(() => import('../components/LandingTemplate
 function getLandingCopy(locale) {
   if (locale === 'fi') {
     return {
-      kicker: 'CV-rakentaja',
+      kicker: 'Ei kirjautumista. Ei tallennettua dataa.',
       startButton: 'Aloita rakentaminen',
-      title: 'Rakenna CV',
-      subtitle: 'Selkeä CV-rakentaja, joka toimii kokonaan selaimessasi.',
+      title: 'Rakenna CV:si. Ota se mukaan. Siinä kaikki.',
+      subtitle: 'Ei tiliä, ei kirjautumista, ei mitään tallennettua — kaikki tapahtuu tässä selaimessasi ja katoaa, kun suljet välilehden.',
       previewAlt: 'Esimerkki PortifyCV:llä rakennetusta CV:stä',
       highlights: [
-        'Ei tiliä, ei palvelinta — mitään kirjoittamastasi ei koskaan lähetetä selaimestasi',
+        'Ei tiliä, ei kirjautumista — aloita kirjoittaminen heti',
+        'Mitään kirjoittamastasi ei koskaan lähetetä selaimestasi',
         '13 pohjaa — vaihda milloin vain sisältöä menettämättä',
-        'Live-esikatselu kirjoittaessasi',
         'ATS-pisteytys ja avainsanaehdotukset',
-        'Vie PDF-, HTML- tai JSON-muodossa',
+        'Vie PDF-, HTML- tai JSON-muodossa — sitten se on poissa',
       ],
       whyTitle: 'Miksi PortifyCV',
       why: [
         {
-          heading: 'Mikään ei koskaan päädy palvelimelle',
-          body: 'Jokainen vienti (PDF, HTML, JSON) ja jakolinkki muodostetaan kokonaan selaimessasi. Toisin kuin tiliä vaativat CV-työkalut, tietojasi ei koskaan ladata, tallenneta tai näe kukaan muu — koska ne eivät koskaan poistu laitteeltasi.',
+          heading: 'Ei tiliä. Ei kirjautumista. Siinä koko juttu.',
+          body: 'Ei rekisteröitymistä, ei sähköpostivahvistusta, ei tiliä ylläpidettäväksi. Avaa sivu, ala kirjoittaa ja vie CV kun olet valmis — muuta ei tarvita.',
         },
         {
-          heading: 'Ei tiliä eikä kirjautumista',
-          body: 'Aloita kirjoittaminen heti — CV rakentuu live-esikatselussa ilman rekisteröitymistä tai sähköpostivahvistusta.',
+          heading: 'Mikään ei koskaan päädy palvelimelle',
+          body: 'Jokainen vienti (PDF, HTML, JSON) ja jakolinkki muodostetaan kokonaan selaimessasi. Toisin kuin tiliä vaativat CV-työkalut, tietojasi ei koskaan ladata, tallenneta tai näe kukaan muu — koska ne eivät koskaan poistu laitteeltasi.',
         },
         {
           heading: 'Rakennettu rekrytointijärjestelmiä varten',
@@ -72,27 +72,27 @@ function getLandingCopy(locale) {
   }
 
   return {
-    kicker: 'CV builder',
+    kicker: 'No login. No data saved.',
     startButton: 'Start building',
-    title: 'Build a CV',
-    subtitle: 'A focused CV builder that runs entirely in your browser.',
+    title: 'Build your CV. Take it. That’s it.',
+    subtitle: 'No login, no account, nothing saved — everything happens right here in your browser, and disappears the moment you close the tab.',
     previewAlt: 'Example CV built with PortifyCV',
     highlights: [
-      'No account, no server — nothing you type ever leaves your browser',
+      'No account, no login — start typing immediately',
+      'Nothing you type ever leaves your browser',
       '13 templates — swap anytime without losing your content',
-      'Live preview as you type',
       'ATS scoring with keyword suggestions',
-      'Export to PDF, HTML, or JSON',
+      'Export to PDF, HTML, or JSON — then it’s gone',
     ],
     whyTitle: 'Why use PortifyCV',
     why: [
       {
-        heading: 'Nothing ever touches a server',
-        body: 'Every export (PDF, HTML, JSON) and every share link is generated entirely in your browser. Unlike CV builders that require an account, your data is never uploaded, stored, or seen by anyone — because it never leaves your device.',
+        heading: 'No account. No login. That’s the whole point.',
+        body: 'Skip the sign-up, the email confirmation, the account to manage. Open the page, start typing, and export when you’re done — there is nothing else to it.',
       },
       {
-        heading: 'No account required',
-        body: 'Skip the sign-up. Start typing and your CV takes shape in the live preview — no registration, no email confirmation.',
+        heading: 'Nothing ever touches a server',
+        body: 'Every export (PDF, HTML, JSON) and every share link is generated entirely in your browser. Unlike CV builders that require an account, your data is never uploaded, stored, or seen by anyone — because it never leaves your device.',
       },
       {
         heading: 'Built for applicant tracking systems',

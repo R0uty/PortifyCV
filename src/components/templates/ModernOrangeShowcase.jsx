@@ -430,6 +430,22 @@ export default function ModernOrangeShowcase({
       className={`modern-orange-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'}${atsFriendlyMode ? ' modern-orange-showcase--ats' : ''}`}
       style={{ '--mo-accent': effectiveAccentColor }}
     >
+      <header data-export-header="true" className="modern-orange-showcase__header">
+        <p className="modern-orange-showcase__kicker" data-export-ignore="true">
+          {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+        </p>
+        <h1 className="modern-orange-showcase__name">
+          <span className="modern-orange-showcase__name-first">{nameFirst}</span>
+          {nameRest ? (
+            <>
+              <br />
+              <span className="modern-orange-showcase__name-last">{nameRest}</span>
+            </>
+          ) : null}
+        </h1>
+        <span className="modern-orange-showcase__title-badge">{title}</span>
+      </header>
+
       <aside className="modern-orange-showcase__sidebar" data-export-secondary="true">
         {showPhoto ? (
           <div className="modern-orange-showcase__photo-wrap">
@@ -471,22 +487,6 @@ export default function ModernOrangeShowcase({
       </aside>
 
       <main className="modern-orange-showcase__main" data-export-primary="true">
-        <header data-export-header="true" className="modern-orange-showcase__header">
-          <p className="modern-orange-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
-          </p>
-          <h1 className="modern-orange-showcase__name">
-            <span className="modern-orange-showcase__name-first">{nameFirst}</span>
-            {nameRest ? (
-              <>
-                <br />
-                <span className="modern-orange-showcase__name-last">{nameRest}</span>
-              </>
-            ) : null}
-          </h1>
-          <span className="modern-orange-showcase__title-badge">{title}</span>
-        </header>
-
         <div className="modern-orange-showcase__header-divider" aria-hidden="true" />
 
         {mainSectionKeys.map((key) => renderMainSection(key))}
