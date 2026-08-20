@@ -66,6 +66,24 @@ function useDocumentHead(view) {
   }, [view])
 }
 
+// Pushes a new history entry for the given view so the address bar, the
+// canonical link (see useDocumentHead), and browser back/forward all agree
+// with what's on screen. Previously view switches only called setView(),
+// leaving the URL frozen at whatever it was on first load — the canonical
+// tag would claim /cv while the address bar still read /, and the back
+// button had nothing to go back to.
+function pushViewUrl(nextView) {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  const path = VIEW_HEAD[nextView]?.path ?? '/'
+
+  if (window.location.pathname !== path) {
+    window.history.pushState({ view: nextView }, '', path)
+  }
+}
+
 function readStoredLocale() {
   const storedLocale = safeStorageGet(UI_LOCALE_STORAGE_KEY).value
   return storedLocale === 'fi' ? 'fi' : 'en'
@@ -121,12 +139,26 @@ function App() {
 
   const goToBuilder = useCallback(() => {
     setView('builder')
+    pushViewUrl('builder')
     scrollToTop()
   }, [])
 
   const goToLanding = useCallback(() => {
     setView('landing')
+    pushViewUrl('landing')
     scrollToTop()
+  }, [])
+
+  // Keep view state in sync when the user navigates with the browser's
+  // back/forward buttons rather than an in-app link — those change the URL
+  // without going through goToBuilder/goToLanding.
+  useEffect(() => {
+    function handlePopState() {
+      setView(getInitialView())
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
   if (view === 'privacy') {
@@ -135,7 +167,13 @@ function App() {
         <header className="project-header print:hidden">
           <div className="project-header__container">
             <div className="project-header__content">
-              <a href="/">
+              <a
+                href="/"
+                onClick={(event) => {
+                  event.preventDefault()
+                  goToLanding()
+                }}
+              >
                 <img
                   src="/PortifyCV.jpg"
                   alt="PortifyCV"
