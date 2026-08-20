@@ -15,6 +15,8 @@ const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
 const FreeCvTemplatesPage = lazy(() => import('./pages/FreeCvTemplatesPage'))
 const AtsFriendlyCvGuidePage = lazy(() => import('./pages/AtsFriendlyCvGuidePage'))
 const HowToWriteACvPage = lazy(() => import('./pages/HowToWriteACvPage'))
+const CoverLetterExamplesPage = lazy(() => import('./pages/CoverLetterExamplesPage'))
+const CvSkillsExamplesPage = lazy(() => import('./pages/CvSkillsExamplesPage'))
 
 const SITE_ORIGIN = 'https://portifycv.app'
 
@@ -48,12 +50,32 @@ const VIEW_HEAD = {
     path: ROUTES.atsGuide,
     description:
       'How applicant tracking systems actually read a CV, the formatting mistakes that break parsing, and how to check your own CV against real keyword scoring.',
+    isArticle: true,
+    datePublished: '2026-08-20',
   },
   howToWrite: {
     title: 'How to Write a CV - PortifyCV',
     path: ROUTES.howToWrite,
     description:
       'A practical, structural guide to writing a CV: what sections to include, how to write experience bullets that show impact, and mistakes to avoid.',
+    isArticle: true,
+    datePublished: '2026-08-20',
+  },
+  coverLetterExamples: {
+    title: 'Cover Letter Examples - PortifyCV',
+    path: ROUTES.coverLetterExamples,
+    description:
+      'Real weak-vs-strong cover letter examples for the opening, experience paragraph, and closing, plus how PortifyCV drafts the first version from your CV.',
+    isArticle: true,
+    datePublished: '2026-08-20',
+  },
+  cvSkills: {
+    title: 'CV Skills Examples - PortifyCV',
+    path: ROUTES.cvSkills,
+    description:
+      'How to choose, group, and phrase the skills section of your CV, with example groupings and how many skills is actually the right number.',
+    isArticle: true,
+    datePublished: '2026-08-20',
   },
 }
 
@@ -67,6 +89,8 @@ const STATIC_PAGES = {
   freeTemplates: FreeCvTemplatesPage,
   atsGuide: AtsFriendlyCvGuidePage,
   howToWrite: HowToWriteACvPage,
+  coverLetterExamples: CoverLetterExamplesPage,
+  cvSkills: CvSkillsExamplesPage,
 }
 
 function getInitialView() {
@@ -88,6 +112,30 @@ function setMetaContent(selector, content) {
   const element = document.querySelector(selector)
   if (element) {
     element.setAttribute('content', content)
+  }
+}
+
+const VIEW_STRUCTURED_DATA_SCRIPT_ID = 'view-structured-data'
+
+// Article schema for guide-type pages (VIEW_HEAD entries with isArticle:
+// true) — index.html's own two JSON-LD blocks (SoftwareApplication,
+// FAQPage) describe the app itself and stay static across every route;
+// this is the per-page equivalent for the guide pages, upserted into one
+// script tag that's added/rewritten/removed as the view changes.
+function buildArticleSchema(head) {
+  const url = `${SITE_ORIGIN}${head.path}`
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: head.title.replace(/ - PortifyCV$/, ''),
+    description: head.description,
+    url,
+    mainEntityOfPage: url,
+    author: { '@type': 'Organization', name: 'PortifyCV', url: SITE_ORIGIN },
+    publisher: { '@type': 'Organization', name: 'PortifyCV', url: SITE_ORIGIN },
+    datePublished: head.datePublished,
+    dateModified: head.dateModified ?? head.datePublished,
   }
 }
 
@@ -114,6 +162,19 @@ function useDocumentHead(view) {
     setMetaContent('meta[property="og:description"]', head.description)
     setMetaContent('meta[name="twitter:title"]', head.title)
     setMetaContent('meta[name="twitter:description"]', head.description)
+
+    const existingScript = document.getElementById(VIEW_STRUCTURED_DATA_SCRIPT_ID)
+    if (head.isArticle) {
+      const script = existingScript ?? document.createElement('script')
+      script.type = 'application/ld+json'
+      script.id = VIEW_STRUCTURED_DATA_SCRIPT_ID
+      script.textContent = JSON.stringify(buildArticleSchema(head))
+      if (!existingScript) {
+        document.head.appendChild(script)
+      }
+    } else if (existingScript) {
+      existingScript.remove()
+    }
   }, [view])
 }
 
@@ -149,7 +210,9 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
   const guideLinks = [
     { view: 'freeTemplates', label: isFinnish ? 'CV-pohjat' : 'Free CV Templates' },
     { view: 'howToWrite', label: isFinnish ? 'Näin kirjoitat CV:n' : 'How to Write a CV' },
+    { view: 'cvSkills', label: isFinnish ? 'Taito-osion esimerkkejä' : 'CV Skills Examples' },
     { view: 'atsGuide', label: isFinnish ? 'ATS-opas' : 'ATS-Friendly CV Guide' },
+    { view: 'coverLetterExamples', label: isFinnish ? 'Saatekirje-esimerkkejä' : 'Cover Letter Examples' },
     { view: 'privacy', label: isFinnish ? 'Tietosuojaseloste' : 'Privacy policy' },
   ]
 

@@ -21,6 +21,8 @@ function getCopy(locale) {
       linksLabel: 'Katso myös:',
       howToWriteLink: 'Näin kirjoitat CV:n',
       atsGuideLink: 'ATS-ystävällinen CV-opas',
+      cvSkillsLink: 'CV:n taito-osion esimerkkejä',
+      coverLetterLink: 'Saatekirje-esimerkkejä',
     }
   }
 
@@ -37,6 +39,8 @@ function getCopy(locale) {
     linksLabel: 'See also:',
     howToWriteLink: 'How to Write a CV',
     atsGuideLink: 'ATS-Friendly CV Guide',
+    cvSkillsLink: 'CV Skills Examples',
+    coverLetterLink: 'Cover Letter Examples',
   }
 }
 
@@ -88,8 +92,14 @@ function FreeCvTemplatesPage({ locale = 'en', onGetStarted = () => {}, onNavigat
           <InternalNavLink to={ROUTES.howToWrite} onNavigate={() => onNavigateToView('howToWrite')}>
             {copy.howToWriteLink}
           </InternalNavLink>
+          <InternalNavLink to={ROUTES.cvSkills} onNavigate={() => onNavigateToView('cvSkills')}>
+            {copy.cvSkillsLink}
+          </InternalNavLink>
           <InternalNavLink to={ROUTES.atsGuide} onNavigate={() => onNavigateToView('atsGuide')}>
             {copy.atsGuideLink}
+          </InternalNavLink>
+          <InternalNavLink to={ROUTES.coverLetterExamples} onNavigate={() => onNavigateToView('coverLetterExamples')}>
+            {copy.coverLetterLink}
           </InternalNavLink>
         </div>
       </div>

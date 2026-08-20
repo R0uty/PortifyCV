@@ -31,17 +31,29 @@ function getCopy(locale) {
           paragraphs: [
             'ATS-ystävällinen tila litistää minkä tahansa 13 pohjasta yksipalstaiseksi, tekstipainotteiseksi asetteluksi vakioiduilla osiotunnisteilla — sarakkeet, kuvakkeet ja koristeelliset elementit poistuvat kyseisestä renderöinnistä. Vie CV tässä tilassa, kun kohde on ATS eikä ihminen.',
           ],
-          linkParagraph: {
-            before: 'Kokeile sitä ',
-            linkText: 'CV-rakentajassa',
-            linkTo: ROUTES.builder,
-            after: ' — vaihda tila päälle Asetuksista.',
-          },
+          linkParagraphs: [
+            {
+              before: 'Kokeile sitä ',
+              linkText: 'CV-rakentajassa',
+              linkTo: ROUTES.builder,
+              view: 'builder',
+              after: ' — vaihda tila päälle Asetuksista.',
+            },
+          ],
         },
         {
           heading: 'Avainsanapisteytys — tarkista oikeaa työpaikkailmoitusta vasten',
           paragraphs: [
             'ATS-tulospaneeli laskee parseroitavuuspisteesi suoraan CV:n sisällöstä selaimessasi. Liitä tavoiteroolisi työpaikkailmoitus samaan paneeliin, ja PortifyCV näyttää, mitkä ilmoituksen tärkeistä termeistä eivät tällä hetkellä esiinny CV:ssäsi — ei arvausta siitä, mitkä avainsanat puuttuvat.',
+          ],
+          linkParagraphs: [
+            {
+              before: 'Katso ',
+              linkText: 'CV:n taito-osion esimerkkejä',
+              linkTo: ROUTES.cvSkills,
+              view: 'cvSkills',
+              after: ' siitä, miten muotoilla taidot niin että ne vastaavat ilmoituksen käyttämiä termejä.',
+            },
           ],
         },
         {
@@ -54,6 +66,15 @@ function getCopy(locale) {
           heading: 'Kirjoita sisältöä, joka pisteytyy hyvin ja lukee hyvin',
           paragraphs: [
             'Avainsanojen tunkeminen tekstiin lukijaa varten ei toimi kummallekaan yleisölle — ATS-pisteytys nostaa esiin puuttuvat termit, mutta lopullinen lukija on silti ihminen. PortifyCV:n sisäänrakennettu ehdotuspaneeli merkitsee passiiviset ilmaisut ("vastuualueena") ja kokemuskohdat, jotka eivät ala vahvalla verbillä tai joista puuttuu mitattava luku — samat asiat, jotka tekevät tekstistä sekä paremmin pisteytyvää että aidosti luettavampaa.',
+          ],
+          linkParagraphs: [
+            {
+              before: 'Katso koko ',
+              linkText: 'Näin kirjoitat CV:n',
+              linkTo: ROUTES.howToWrite,
+              view: 'howToWrite',
+              after: ' -opas heikoista ja vahvoista uudelleenkirjoitusesimerkeistä.',
+            },
           ],
         },
         {
@@ -99,17 +120,29 @@ function getCopy(locale) {
         paragraphs: [
           'ATS-friendly mode flattens any of the 13 templates into a single-column, text-forward layout with standard section headings — columns, icons, and decorative elements are removed from that render. Export in this mode when the destination is an ATS rather than a person.',
         ],
-        linkParagraph: {
-          before: 'Try it in the ',
-          linkText: 'CV builder',
-          linkTo: ROUTES.builder,
-          after: ' — toggle the mode on in Settings.',
-        },
+        linkParagraphs: [
+          {
+            before: 'Try it in the ',
+            linkText: 'CV builder',
+            linkTo: ROUTES.builder,
+            view: 'builder',
+            after: ' — toggle the mode on in Settings.',
+          },
+        ],
       },
       {
         heading: 'Keyword scoring — check against a real job posting',
         paragraphs: [
           'The ATS score panel calculates your parser-readiness score directly from your CV content in your browser. Paste the job posting for the role you’re targeting into the same panel, and PortifyCV shows exactly which of the posting’s important terms don’t currently appear on your CV — no guessing which keywords are missing.',
+        ],
+        linkParagraphs: [
+          {
+            before: 'See ',
+            linkText: 'CV skills examples',
+            linkTo: ROUTES.cvSkills,
+            view: 'cvSkills',
+            after: ' for how to phrase skills so they match the terms a posting actually uses.',
+          },
         ],
       },
       {
@@ -122,6 +155,15 @@ function getCopy(locale) {
         heading: 'Write content that scores well and reads well',
         paragraphs: [
           'Stuffing keywords in for the parser doesn’t work for either audience — ATS scoring surfaces missing terms, but the final reader is still a person. PortifyCV’s built-in suggestions panel flags passive phrasing ("responsible for") and experience bullets that don’t open with a strong verb or are missing a measurable number — the same things that make text score better and read better.',
+        ],
+        linkParagraphs: [
+          {
+            before: 'See the full ',
+            linkText: 'How to Write a CV',
+            linkTo: ROUTES.howToWrite,
+            view: 'howToWrite',
+            after: ' guide for weak-vs-strong rewrite examples.',
+          },
         ],
       },
       {
@@ -162,18 +204,18 @@ function AtsFriendlyCvGuidePage({ locale = 'en', onGetStarted = () => {}, onNavi
                 ))}
               </ul>
             ) : null}
-            {section.linkParagraph ? (
-              <p>
-                {section.linkParagraph.before}
+            {section.linkParagraphs?.map((linkParagraph, index) => (
+              <p key={`link-${index}`}>
+                {linkParagraph.before}
                 <InternalNavLink
-                  to={section.linkParagraph.linkTo}
-                  onNavigate={() => onNavigateToView('builder')}
+                  to={linkParagraph.linkTo}
+                  onNavigate={() => onNavigateToView(linkParagraph.view)}
                 >
-                  {section.linkParagraph.linkText}
+                  {linkParagraph.linkText}
                 </InternalNavLink>
-                {section.linkParagraph.after}
+                {linkParagraph.after}
               </p>
-            ) : null}
+            ))}
           </div>
         ))}
 

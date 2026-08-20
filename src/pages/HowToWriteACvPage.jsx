@@ -29,6 +29,15 @@ function getCopy(locale) {
           paragraphsAfter: [
             'Ero: jälkimmäinen on tarkistettavissa. Se nimeää mitä teit ja suunnilleen kuinka hyvin. Jos lause voisi kuvata tuhansia muita hakijoita muuttumattomana, kirjoita se uudelleen.',
           ],
+          linkParagraphs: [
+            {
+              before: 'Sama "konkreettinen, ei yleinen" -sääntö pätee saatekirjeeseen — katso ',
+              linkText: 'saatekirje-esimerkkejä',
+              linkTo: ROUTES.coverLetterExamples,
+              view: 'coverLetterExamples',
+              after: ' heikoista ja vahvoista avauksista ja lopetuksista.',
+            },
+          ],
         },
         {
           heading: 'Kirjoita kokemuskohdat, jotka näyttävät vaikutuksen — eivät vastuualueita',
@@ -48,12 +57,22 @@ function getCopy(locale) {
           paragraphs: [
             'Listaa taidot, jotka pystyt perustelemaan haastattelussa, ryhmiteltyinä niin että selaaja (ihminen tai ATS) löytää työpaikkailmoitusta vastaavat alle viidessä sekunnissa.',
           ],
-          linkParagraph: {
-            before: 'Jos haet tiettyyn rooliin, liitä työpaikkailmoitus PortifyCV:n ',
-            linkText: 'ATS-paneeliin',
-            linkTo: ROUTES.atsGuide,
-            after: ' — se näyttää mitkä listaamistasi taidoista ja ilmauksista puuttuvat CV:stäsi suhteessa kyseiseen ilmoitukseen.',
-          },
+          linkParagraphs: [
+            {
+              before: 'Katso ',
+              linkText: 'CV:n taito-osion esimerkkejä',
+              linkTo: ROUTES.cvSkills,
+              view: 'cvSkills',
+              after: ' siitä, miten ryhmitellä ja muotoilla ne, ja kuinka monta on oikeasti sopiva määrä.',
+            },
+            {
+              before: 'Jos haet tiettyyn rooliin, liitä työpaikkailmoitus PortifyCV:n ',
+              linkText: 'ATS-paneeliin',
+              linkTo: ROUTES.atsGuide,
+              view: 'atsGuide',
+              after: ' — se näyttää mitkä listaamistasi taidoista ja ilmauksista puuttuvat CV:stäsi suhteessa kyseiseen ilmoitukseen.',
+            },
+          ],
         },
         {
           heading: 'Virheet, jotka kannattaa korjata ennen lähettämistä',
@@ -70,24 +89,30 @@ function getCopy(locale) {
           paragraphs: [
             'Monet yritykset ohjaavat hakemukset hakijaseurantajärjestelmän läpi ennen kuin kukaan avaa niitä. Asettelu, jossa on useita sarakkeita, kuvakkeita otsikoiden tilalla, tai sisältöä tekstiruuduissa ja taulukoissa, voi sekoittua tai kadota tuolle ohjelmistolle, vaikka se näyttäisi sinusta hyvältä.',
           ],
-          linkParagraph: {
-            before: 'Lue ',
-            linkText: 'ATS-ystävällinen CV-opas',
-            linkTo: ROUTES.atsGuide,
-            after: ' siitä, mikä täsmälleen menee rikki ja miten tarkistat oman CV:si.',
-          },
+          linkParagraphs: [
+            {
+              before: 'Lue ',
+              linkText: 'ATS-ystävällinen CV-opas',
+              linkTo: ROUTES.atsGuide,
+              view: 'atsGuide',
+              after: ' siitä, mikä täsmälleen menee rikki ja miten tarkistat oman CV:si.',
+            },
+          ],
         },
         {
           heading: 'Valitse sitten asettelu ihmislukijalle',
           paragraphs: [
             'Kun sisältö on kunnossa, pohja on vain kääre sen ympärillä — pohjan vaihtaminen PortifyCV:ssä ei koskaan koske tekstiäsi, joten muutaman kokeileminen ennen päätöstä on turvallista.',
           ],
-          linkParagraph: {
-            before: 'Katso kaikki ',
-            linkText: '13 ilmaista pohjaa',
-            linkTo: ROUTES.freeTemplates,
-            after: '.',
-          },
+          linkParagraphs: [
+            {
+              before: 'Katso kaikki ',
+              linkText: '13 ilmaista pohjaa',
+              linkTo: ROUTES.freeTemplates,
+              view: 'freeTemplates',
+              after: '.',
+            },
+          ],
         },
       ],
       ctaLabel: 'Aloita CV:si rakentaminen',
@@ -121,6 +146,15 @@ function getCopy(locale) {
         paragraphsAfter: [
           'The difference: the second version is falsifiable. It names what you did and roughly how well. If a sentence could describe thousands of other candidates unchanged, rewrite it.',
         ],
+        linkParagraphs: [
+          {
+            before: 'The same "specific, not generic" rule applies to a cover letter — see ',
+            linkText: 'cover letter examples',
+            linkTo: ROUTES.coverLetterExamples,
+            view: 'coverLetterExamples',
+            after: ' for weak-vs-strong openings and closings.',
+          },
+        ],
       },
       {
         heading: 'Write experience bullets that show impact, not duties',
@@ -140,12 +174,22 @@ function getCopy(locale) {
         paragraphs: [
           'List skills you can defend in an interview, grouped so a scanner — human or ATS — can find the ones that match the job posting in under five seconds.',
         ],
-        linkParagraph: {
-          before: 'If you’re applying to a specific role, paste the job description into PortifyCV’s ',
-          linkText: 'ATS panel',
-          linkTo: ROUTES.atsGuide,
-          after: ' — it shows which of your listed skills and phrases are missing from your CV relative to that posting.',
-        },
+        linkParagraphs: [
+          {
+            before: 'See ',
+            linkText: 'CV skills examples',
+            linkTo: ROUTES.cvSkills,
+            view: 'cvSkills',
+            after: ' for how to group and phrase them, and how many is actually the right number.',
+          },
+          {
+            before: 'If you’re applying to a specific role, paste the job description into PortifyCV’s ',
+            linkText: 'ATS panel',
+            linkTo: ROUTES.atsGuide,
+            view: 'atsGuide',
+            after: ' — it shows which of your listed skills and phrases are missing from your CV relative to that posting.',
+          },
+        ],
       },
       {
         heading: 'Mistakes worth fixing before you send it',
@@ -162,24 +206,30 @@ function getCopy(locale) {
         paragraphs: [
           'Many companies route applications through an applicant tracking system before a person ever opens them. A layout with multiple columns, icons standing in for section headers, or content inside text boxes and tables can get scrambled or dropped by that software, even if it looks fine to you.',
         ],
-        linkParagraph: {
-          before: 'Read the ',
-          linkText: 'ATS-Friendly CV Guide',
-          linkTo: ROUTES.atsGuide,
-          after: ' for what specifically breaks and how to check your own CV against it.',
-        },
+        linkParagraphs: [
+          {
+            before: 'Read the ',
+            linkText: 'ATS-Friendly CV Guide',
+            linkTo: ROUTES.atsGuide,
+            view: 'atsGuide',
+            after: ' for what specifically breaks and how to check your own CV against it.',
+          },
+        ],
       },
       {
         heading: 'Then choose a layout for the human reader',
         paragraphs: [
           'Once the content is solid, the template is a wrapper around it — swapping templates in PortifyCV never touches your text, so it’s safe to try a few before deciding.',
         ],
-        linkParagraph: {
-          before: 'See all ',
-          linkText: '13 free templates',
-          linkTo: ROUTES.freeTemplates,
-          after: '.',
-        },
+        linkParagraphs: [
+          {
+            before: 'See all ',
+            linkText: '13 free templates',
+            linkTo: ROUTES.freeTemplates,
+            view: 'freeTemplates',
+            after: '.',
+          },
+        ],
       },
     ],
     ctaLabel: 'Start building your CV',
@@ -223,20 +273,18 @@ function HowToWriteACvPage({ locale = 'en', onGetStarted = () => {}, onNavigateT
             {section.paragraphsAfter?.map((paragraph, index) => (
               <p key={`after-${index}`}>{paragraph}</p>
             ))}
-            {section.linkParagraph ? (
-              <p>
-                {section.linkParagraph.before}
+            {section.linkParagraphs?.map((linkParagraph, index) => (
+              <p key={`link-${index}`}>
+                {linkParagraph.before}
                 <InternalNavLink
-                  to={section.linkParagraph.linkTo}
-                  onNavigate={() => onNavigateToView(
-                    section.linkParagraph.linkTo === ROUTES.atsGuide ? 'atsGuide' : 'freeTemplates',
-                  )}
+                  to={linkParagraph.linkTo}
+                  onNavigate={() => onNavigateToView(linkParagraph.view)}
                 >
-                  {section.linkParagraph.linkText}
+                  {linkParagraph.linkText}
                 </InternalNavLink>
-                {section.linkParagraph.after}
+                {linkParagraph.after}
               </p>
-            ) : null}
+            ))}
           </div>
         ))}
 
