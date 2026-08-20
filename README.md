@@ -154,7 +154,16 @@ only resolve if the host serves `index.html` for any path that isn't a real
 static file. Without this, a direct visit, a page refresh, or a crawler
 fetching one of those URLs gets a 404 instead of the app.
 
-- **Netlify** reads [`public/_redirects`](public/_redirects) automatically.
+- **Cloudflare Workers** (the live production host) reads
+  [`wrangler.jsonc`](wrangler.jsonc)'s `assets.not_found_handling: "single-page-application"`.
+  Don't add a `public/_redirects` catch-all here — on Workers static
+  assets a `/* /index.html 200` rule intercepts every request, including
+  real files, before the asset lookup runs, which breaks CSS/JS/image
+  serving entirely (confirmed in production: every path returned
+  `index.html`'s content, even for existing static files).
+- **Netlify** reads a `public/_redirects` file with `/*    /index.html   200`
+  automatically (not shipped here since it isn't the live host — add it
+  back if you deploy to Netlify).
 - **Vercel** reads the `rewrites` block in [`vercel.json`](vercel.json)
   automatically.
 - **GitHub Pages** has no rewrite mechanism, but `npm run build` already

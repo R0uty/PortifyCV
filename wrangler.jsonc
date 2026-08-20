@@ -1,0 +1,15 @@
+{
+  // Cloudflare Workers static-assets config. PortifyCV has no server-side
+  // Worker script — this is a pure static site served from ./dist. SPA
+  // routing (so /cv, /privacy etc. resolve on a direct visit or refresh)
+  // is handled via not_found_handling below, NOT via public/_redirects:
+  // on Workers assets, a `/* /index.html 200` _redirects rule intercepts
+  // every request (including real files) before the asset lookup runs,
+  // which is why that approach broke CSS/JS/image serving in production.
+  "name": "portifycv",
+  "compatibility_date": "2024-09-23",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
