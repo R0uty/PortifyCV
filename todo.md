@@ -1118,6 +1118,48 @@ rename pass.
       the pre-existing builder UI (out of scope for a *content* pass);
       Search Console verification (needs an account this session doesn't
       have).
+      **Follow-up, same day — mobile polish pass:** audited every route at
+      a 390px viewport with a Playwright script that flags any element
+      wider than the viewport. All 9 content pages plus privacy came back
+      clean — zero horizontal overflow. Two real, non-cosmetic findings on
+      the builder, both fixed:
+      1. The mobile bottom action bar's format-switcher row (PDF/HTML/
+      JSON/Link/Cover letter) is a horizontal-scroll strip with
+      `no-scrollbar` hiding the native scrollbar — on a 390px screen the
+      row doesn't fit and "Cover letter" was cut off with zero visual hint
+      that scrolling reveals it. Added a right-edge opacity-mask fade
+      (`.quick-actions-scroll-fade`, pure CSS, no JS) so the cut-off
+      button visibly fades to transparent instead of ending in a hard
+      clip. Verified it's inert (no visible effect) when the row isn't
+      overflowing, since it fades an opacity mask over whatever's
+      actually painted rather than painting a color overlay.
+      2. Real bug, not mobile-specific but found via the mobile tap-target
+      sweep: every skill/technology tag's "remove" (×) button was
+      rendering as an empty circle — the icon SVG was being flex-shrunk
+      to under 1px wide (height stayed 12px) because `.tags-input__tag`
+      had no `flex-shrink: 0`, so the last tag on a wrapped line could get
+      squeezed by the flex algorithm. The × was there in the DOM the whole
+      time, just invisible, on desktop and mobile alike — a real, live bug
+      previously undetected. Fixed with `flex-shrink: 0` on the tag pill
+      and the remove button, plus an explicit CSS size on the icon so it's
+      no longer subject to the parent's flex-shrink math. Confirmed all 11
+      tag remove-icons on a sample CV now render at a consistent width on
+      both a 390px and a 1440px viewport.
+      Also checked and found already solid, no changes needed: the
+      landing page's template marquee (already has proper edge-fade
+      masking, hover-to-pause, and `prefers-reduced-motion` handling —
+      it's a deliberate CSS-only ticker, not a bug); the template gallery
+      and cover letter modals on mobile (proper backdrop, close button,
+      scrollable content, no overflow); bottom-of-form spacing above the
+      fixed mobile action bar (already has enough padding that the last
+      field isn't hidden behind it). Icon-only buttons inside experience/
+      education cards (duplicate/delete/drag, ~30px) are smaller than the
+      44px touch-target guideline but left as-is — they're dense-editor
+      secondary actions with a low mis-tap cost, and enlarging them would
+      require restructuring the accordion header row for a marginal gain;
+      not worth it under "don't overbuild."
+      `npm run lint`, `check:share`, `check:reducers`, and `check:feedback`
+      all pass; `npm run build` succeeds.
 
 ## Checked and fine — don't re-investigate
 

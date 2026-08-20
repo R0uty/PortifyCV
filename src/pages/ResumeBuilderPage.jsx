@@ -1704,7 +1704,7 @@ function ResumeBuilderPage({
           {locale === 'fi' ? 'Pohjat' : 'Templates'}
         </button>
       </div>
-      <div className="mx-auto flex max-w-[110rem] items-center gap-2 overflow-x-auto no-scrollbar">
+      <div className="mx-auto flex max-w-[110rem] items-center gap-2 overflow-x-auto no-scrollbar quick-actions-scroll-fade">
         <button
           type="button"
           className={`${compactButtonClassName} border-black bg-gray-100 text-black`}
