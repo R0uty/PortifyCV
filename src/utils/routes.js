@@ -11,4 +11,9 @@ export const ROUTES = {
   howToWrite: '/how-to-write-a-cv',
   coverLetterExamples: '/cover-letter-examples',
   cvSkills: '/cv-skills-examples',
+  cvExamples: '/cv-examples',
+  developerCv: '/developer-cv-examples',
+  itCv: '/it-cv-examples',
+  cybersecurityCv: '/cybersecurity-cv-examples',
+  finnishCv: '/finnish-cv-examples',
 }

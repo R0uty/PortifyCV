@@ -1078,6 +1078,46 @@ rename pass.
       browser: direct visits, per-route canonical/title, structured data
       appearing only on article pages, cross-links actually navigating,
       and no horizontal scroll at 390px.
+      **Follow-up, same day:** shipped the remaining 5 content topics,
+      closing out all 10 from the original brief. **Developer CV
+      Examples** (weak/strong experience bullet, a project-entry example
+      matching the real Projects schema — `githubUrl`/`demoUrl`/`stack`/
+      `impact`/`teamSize` from `cvForm.js`'s `createEmptyProject` — and why
+      the Developer template fits; CTA pre-selects it via
+      `onGetStarted('developer')`). **IT CV Examples** (helpdesk-style
+      ticket-time bullet, certifications tied to the real Certificates
+      schema fields, an IT-specific skills list). **Cybersecurity CV
+      Examples** (incident-response bullet, certifications, SIEM/IAM
+      tools, and a callout that the Links section has dedicated Hack The
+      Box and TryHackMe fields — verified against `createEmptyLinks` in
+      `cvForm.js` before writing it). **Finnish CV Examples** (what
+      Finnish CVs omit vs. US ones, why the languages section carries more
+      weight, and a side-by-side EN/FI example of the same bullet — framed
+      around PortifyCV's real bilingual EN/FI support). **CV Examples**
+      hub page (`/cv-examples`, `.landing-page` layout, a 2×2 card grid
+      linking to the 4 field-specific pages) so the 4 new pages aren't
+      only reachable by guessing URLs; linked from Free CV Templates' "see
+      also" row and added to the footer in place of listing all 4
+      individually (avoids footer clutter while keeping everything at
+      most 2 clicks from anywhere). All 4 field pages get `Article`
+      JSON-LD (`isArticle: true`); the hub page correctly does not, since
+      it's a directory, not an article. `routes.js` and `sitemap.xml`
+      grown accordingly (hub at priority 0.7, field pages at 0.6).
+      One visual bug found and fixed during in-browser verification: the
+      hub page's cards are each a full `InternalNavLink` (an `<a>` tag),
+      and without a style reset the browser's default blue/underlined
+      link styling bled through onto the card title and body text —
+      fixed with `color: inherit; text-decoration: none;` on
+      `.examples-hub-card`, confirmed with a before/after screenshot.
+      `npm run lint`, `npm run build`, `check:share`, `check:reducers`,
+      and `check:feedback` all pass.
+      **Still not done** (explicitly scoped out, not silently dropped):
+      template-specific landing pages (only where there's real search/user
+      value — not done pending evidence any single template needs one
+      beyond the Free CV Templates grid); a deeper mobile/visual audit of
+      the pre-existing builder UI (out of scope for a *content* pass);
+      Search Console verification (needs an account this session doesn't
+      have).
 
 ## Checked and fine — don't re-investigate
 

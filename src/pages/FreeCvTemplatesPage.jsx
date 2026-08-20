@@ -23,6 +23,7 @@ function getCopy(locale) {
       atsGuideLink: 'ATS-ystävällinen CV-opas',
       cvSkillsLink: 'CV:n taito-osion esimerkkejä',
       coverLetterLink: 'Saatekirje-esimerkkejä',
+      cvExamplesLink: 'CV-esimerkkejä aloittain',
     }
   }
 
@@ -41,6 +42,7 @@ function getCopy(locale) {
     atsGuideLink: 'ATS-Friendly CV Guide',
     cvSkillsLink: 'CV Skills Examples',
     coverLetterLink: 'Cover Letter Examples',
+    cvExamplesLink: 'CV Examples by Field',
   }
 }
 
@@ -100,6 +102,9 @@ function FreeCvTemplatesPage({ locale = 'en', onGetStarted = () => {}, onNavigat
           </InternalNavLink>
           <InternalNavLink to={ROUTES.coverLetterExamples} onNavigate={() => onNavigateToView('coverLetterExamples')}>
             {copy.coverLetterLink}
+          </InternalNavLink>
+          <InternalNavLink to={ROUTES.cvExamples} onNavigate={() => onNavigateToView('cvExamples')}>
+            {copy.cvExamplesLink}
           </InternalNavLink>
         </div>
       </div>

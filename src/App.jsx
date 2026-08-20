@@ -17,6 +17,11 @@ const AtsFriendlyCvGuidePage = lazy(() => import('./pages/AtsFriendlyCvGuidePage
 const HowToWriteACvPage = lazy(() => import('./pages/HowToWriteACvPage'))
 const CoverLetterExamplesPage = lazy(() => import('./pages/CoverLetterExamplesPage'))
 const CvSkillsExamplesPage = lazy(() => import('./pages/CvSkillsExamplesPage'))
+const CvExamplesHubPage = lazy(() => import('./pages/CvExamplesHubPage'))
+const DeveloperCvExamplesPage = lazy(() => import('./pages/DeveloperCvExamplesPage'))
+const ItCvExamplesPage = lazy(() => import('./pages/ItCvExamplesPage'))
+const CybersecurityCvExamplesPage = lazy(() => import('./pages/CybersecurityCvExamplesPage'))
+const FinnishCvExamplesPage = lazy(() => import('./pages/FinnishCvExamplesPage'))
 
 const SITE_ORIGIN = 'https://portifycv.app'
 
@@ -77,6 +82,44 @@ const VIEW_HEAD = {
     isArticle: true,
     datePublished: '2026-08-20',
   },
+  cvExamples: {
+    title: 'CV Examples by Field - PortifyCV',
+    path: ROUTES.cvExamples,
+    description:
+      'CV examples by field: developer, IT, cybersecurity, and Finnish CVs, each with real weak-vs-strong bullet examples and field-specific advice.',
+  },
+  developerCv: {
+    title: 'Developer CV Examples - PortifyCV',
+    path: ROUTES.developerCv,
+    description:
+      'How to write a developer CV: project entries, experience bullets that show impact, and skills that read as technical rather than generic.',
+    isArticle: true,
+    datePublished: '2026-08-20',
+  },
+  itCv: {
+    title: 'IT CV Examples - PortifyCV',
+    path: ROUTES.itCv,
+    description:
+      'How to write an IT CV: certifications, systems and tools worth naming precisely, and why IT applications need ATS-friendly formatting.',
+    isArticle: true,
+    datePublished: '2026-08-20',
+  },
+  cybersecurityCv: {
+    title: 'Cybersecurity CV Examples - PortifyCV',
+    path: ROUTES.cybersecurityCv,
+    description:
+      'How to write a cybersecurity CV: certifications, real tools like SIEM platforms, and where a Hack The Box or TryHackMe profile belongs.',
+    isArticle: true,
+    datePublished: '2026-08-20',
+  },
+  finnishCv: {
+    title: 'Finnish CV Examples - PortifyCV',
+    path: ROUTES.finnishCv,
+    description:
+      'How a Finnish CV differs from international norms: what to leave out, the languages section, and a bilingual example of the same content.',
+    isArticle: true,
+    datePublished: '2026-08-20',
+  },
 }
 
 // Static content pages (everything except the builder) share one shell:
@@ -91,6 +134,11 @@ const STATIC_PAGES = {
   howToWrite: HowToWriteACvPage,
   coverLetterExamples: CoverLetterExamplesPage,
   cvSkills: CvSkillsExamplesPage,
+  cvExamples: CvExamplesHubPage,
+  developerCv: DeveloperCvExamplesPage,
+  itCv: ItCvExamplesPage,
+  cybersecurityCv: CybersecurityCvExamplesPage,
+  finnishCv: FinnishCvExamplesPage,
 }
 
 function getInitialView() {
@@ -213,6 +261,7 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
     { view: 'cvSkills', label: isFinnish ? 'Taito-osion esimerkkejä' : 'CV Skills Examples' },
     { view: 'atsGuide', label: isFinnish ? 'ATS-opas' : 'ATS-Friendly CV Guide' },
     { view: 'coverLetterExamples', label: isFinnish ? 'Saatekirje-esimerkkejä' : 'Cover Letter Examples' },
+    { view: 'cvExamples', label: isFinnish ? 'CV-esimerkkejä aloittain' : 'CV Examples by Field' },
     { view: 'privacy', label: isFinnish ? 'Tietosuojaseloste' : 'Privacy policy' },
   ]
 
