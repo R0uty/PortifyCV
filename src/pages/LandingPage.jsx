@@ -157,7 +157,7 @@ function LandingPage({
               <li key={highlight}>{highlight}</li>
             ))}
           </ul>
-          <button type="button" className="landing-cta" onClick={onGetStarted}>
+          <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
             {copy.startButton}
           </button>
         </div>

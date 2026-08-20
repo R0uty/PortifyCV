@@ -1892,6 +1892,69 @@ select.floating-field__control {
   gap: var(--space-8);
 }
 
+.templates-page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--space-8);
+}
+
+.templates-page-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.templates-page-card__thumb {
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.templates-page-card__name {
+  font-size: var(--text-body);
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.templates-page-card__description {
+  flex: 1;
+  font-size: var(--text-body-sm);
+  line-height: 1.6;
+  color: var(--app-text-muted);
+}
+
+.templates-page-card__cta {
+  align-self: flex-start;
+  border: 1.5px solid #111111;
+  background: transparent;
+  color: #111111;
+  padding: 0.55rem 1.1rem;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.templates-page-card__cta:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
+.templates-page-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin-top: var(--space-5);
+  font-size: var(--text-body-sm);
+}
+
+.templates-page-links a {
+  color: var(--app-text);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 .landing-why-card__heading {
   font-size: var(--text-section);
   font-weight: 700;
@@ -2019,6 +2082,13 @@ select.floating-field__control {
   color: var(--app-text);
 }
 
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-left: auto;
+}
+
 .legal-page {
   flex: 1;
   width: 100%;
@@ -2064,6 +2134,27 @@ select.floating-field__control {
   font-size: var(--text-section);
   font-weight: 700;
   color: var(--app-text);
+}
+
+.legal-page h3 {
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-2);
+  font-size: var(--text-body);
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.legal-page__cta {
+  margin-top: var(--space-8);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.legal-page__cta-note {
+  font-size: var(--text-caption);
+  color: var(--app-text-muted);
 }
 
 .legal-page p,

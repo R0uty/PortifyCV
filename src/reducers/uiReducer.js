@@ -1,5 +1,5 @@
 import { CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, safeStorageGet } from '../utils/cvForm'
-import { defaultTemplateId } from '../utils/cvTemplates'
+import { defaultTemplateId, isValidTemplateId } from '../utils/cvTemplates'
 import { UI_LOCALE_STORAGE_KEY } from '../utils/designSystem'
 // Imported from the plain config object, not TimelineShowcase.jsx itself —
 // that component is React.lazy()-loaded (see CVPreview.jsx / item 25's
@@ -29,12 +29,26 @@ export const UI_ACTION = {
   SET_MODERN_ORANGE_ACCENT_COLOR: 'SET_MODERN_ORANGE_ACCENT_COLOR',
 }
 
+// A "Use this template" link from the Free CV Templates page (or any other
+// deep link) can pass ?template=<id> to open the builder with that template
+// already selected instead of always landing on the default. Only trusted
+// once the id is checked against the real template map - an unrecognized or
+// missing id falls back to defaultTemplateId exactly like before.
+function readInitialTemplateId() {
+  if (typeof window === 'undefined') {
+    return defaultTemplateId
+  }
+
+  const requestedTemplateId = new URLSearchParams(window.location.search).get('template')
+  return isValidTemplateId(requestedTemplateId) ? requestedTemplateId : defaultTemplateId
+}
+
 export function createInitialUiState(initialSession) {
   const storedLocale = safeStorageGet(UI_LOCALE_STORAGE_KEY).value
   const storedSessionRestore = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value
 
   return {
-    selectedTemplate: defaultTemplateId,
+    selectedTemplate: readInitialTemplateId(),
     atsFriendlyMode: false,
     locale: storedLocale === 'fi' ? 'fi' : 'en',
     mobilePreviewVisible: false,

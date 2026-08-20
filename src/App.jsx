@@ -9,44 +9,79 @@ import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
 import { safeStorageGet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
 import { getAdConsent, setAdConsent } from './utils/consent'
+import { ROUTES } from './utils/routes'
 
 const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
-
-function getInitialView() {
-  if (typeof window === 'undefined') {
-    return 'landing'
-  }
-  const currentUrl = new URL(window.location.href)
-  if (currentUrl.pathname === '/privacy') {
-    return 'privacy'
-  }
-  if (currentUrl.pathname === '/cv' || currentUrl.searchParams.has(SHARE_QUERY_PARAM)) {
-    return 'builder'
-  }
-  return 'landing'
-}
+const FreeCvTemplatesPage = lazy(() => import('./pages/FreeCvTemplatesPage'))
+const AtsFriendlyCvGuidePage = lazy(() => import('./pages/AtsFriendlyCvGuidePage'))
+const HowToWriteACvPage = lazy(() => import('./pages/HowToWriteACvPage'))
 
 const SITE_ORIGIN = 'https://portifycv.app'
 
 const VIEW_HEAD = {
   landing: {
     title: 'PortifyCV - CV Builder',
-    path: '/',
+    path: ROUTES.landing,
     description:
       'Build a free CV in minutes. No login, no data saved. Live preview, ATS-friendly mode, and PDF/HTML/JSON export.',
   },
   builder: {
     title: 'PortifyCV - Build Your CV Online',
-    path: '/cv',
+    path: ROUTES.builder,
     description:
       'Build and edit your CV online for free. Live preview, ATS-friendly mode, and PDF/HTML/JSON export — no login required.',
   },
   privacy: {
     title: 'Privacy Policy - PortifyCV',
-    path: '/privacy',
+    path: ROUTES.privacy,
     description:
       'How PortifyCV handles your data: no server, no account, and what cookies apply if advertising is enabled.',
   },
+  freeTemplates: {
+    title: 'Free CV Templates - PortifyCV',
+    path: ROUTES.freeTemplates,
+    description:
+      '13 free CV templates, no watermark and no account required. Preview each one with your own content and swap between them any time.',
+  },
+  atsGuide: {
+    title: 'ATS-Friendly CV Guide - PortifyCV',
+    path: ROUTES.atsGuide,
+    description:
+      'How applicant tracking systems actually read a CV, the formatting mistakes that break parsing, and how to check your own CV against real keyword scoring.',
+  },
+  howToWrite: {
+    title: 'How to Write a CV - PortifyCV',
+    path: ROUTES.howToWrite,
+    description:
+      'A practical, structural guide to writing a CV: what sections to include, how to write experience bullets that show impact, and mistakes to avoid.',
+  },
+}
+
+// Static content pages (everything except the builder) share one shell:
+// header with logo + locale toggle, the page itself, then footer/consent/ads.
+// Keyed the same as VIEW_HEAD so adding a new page is one map entry plus one
+// VIEW_HEAD entry, not a new copy of the shell.
+const STATIC_PAGES = {
+  landing: LandingPage,
+  privacy: PrivacyPolicyPage,
+  freeTemplates: FreeCvTemplatesPage,
+  atsGuide: AtsFriendlyCvGuidePage,
+  howToWrite: HowToWriteACvPage,
+}
+
+function getInitialView() {
+  if (typeof window === 'undefined') {
+    return 'landing'
+  }
+  const currentUrl = new URL(window.location.href)
+  const matchedView = Object.entries(VIEW_HEAD).find(([, head]) => head.path === currentUrl.pathname)
+  if (matchedView) {
+    return matchedView[0]
+  }
+  if (currentUrl.searchParams.has(SHARE_QUERY_PARAM)) {
+    return 'builder'
+  }
+  return 'landing'
 }
 
 function setMetaContent(selector, content) {
@@ -109,8 +144,14 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-function SiteFooter({ locale = 'en' }) {
+function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
   const isFinnish = locale === 'fi'
+  const guideLinks = [
+    { view: 'freeTemplates', label: isFinnish ? 'CV-pohjat' : 'Free CV Templates' },
+    { view: 'howToWrite', label: isFinnish ? 'Näin kirjoitat CV:n' : 'How to Write a CV' },
+    { view: 'atsGuide', label: isFinnish ? 'ATS-opas' : 'ATS-Friendly CV Guide' },
+    { view: 'privacy', label: isFinnish ? 'Tietosuojaseloste' : 'Privacy policy' },
+  ]
 
   return (
     <footer className="site-footer">
@@ -118,9 +159,21 @@ function SiteFooter({ locale = 'en' }) {
         <span>
           {isFinnish ? 'Ei kirjautumista. Ei tallennettua dataa.' : 'No login. No data saved.'}
         </span>
-        <a href="/privacy" className="site-footer__link">
-          {isFinnish ? 'Tietosuojaseloste' : 'Privacy policy'}
-        </a>
+        <nav className="site-footer__links" aria-label={isFinnish ? 'Oppaat' : 'Guides'}>
+          {guideLinks.map((link) => (
+            <a
+              key={link.view}
+              href={VIEW_HEAD[link.view].path}
+              className="site-footer__link"
+              onClick={(event) => {
+                event.preventDefault()
+                onNavigate(link.view)
+              }}
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
       </div>
     </footer>
   )
@@ -153,15 +206,39 @@ function App() {
     setHeaderProps({ ...nextProps })
   }, [])
 
-  const goToBuilder = useCallback(() => {
+  // templateId is optional — passed when a link should open the builder with
+  // a specific template already selected (e.g. "Use this template" on the
+  // Free CV Templates page) instead of always landing on the default.
+  // uiReducer's createInitialUiState reads it back off the URL on mount.
+  const goToBuilder = useCallback((templateId) => {
     setView('builder')
-    pushViewUrl('builder')
+
+    if (typeof window !== 'undefined') {
+      const query = typeof templateId === 'string' && templateId
+        ? `?template=${encodeURIComponent(templateId)}`
+        : ''
+      const nextPath = `${VIEW_HEAD.builder.path}${query}`
+
+      if (`${window.location.pathname}${window.location.search}` !== nextPath) {
+        window.history.pushState({ view: 'builder' }, '', nextPath)
+      }
+    }
+
     scrollToTop()
   }, [])
 
   const goToLanding = useCallback(() => {
     setView('landing')
     pushViewUrl('landing')
+    scrollToTop()
+  }, [])
+
+  // Generic version of goToLanding for any non-builder static page (footer
+  // guide links, etc.) — builder goes through goToBuilder since it also
+  // supports the optional ?template= id.
+  const goToView = useCallback((nextView) => {
+    setView(nextView)
+    pushViewUrl(nextView)
     scrollToTop()
   }, [])
 
@@ -177,25 +254,35 @@ function App() {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  if (view === 'privacy') {
+  if (view !== 'builder') {
+    const PageComponent = STATIC_PAGES[view] ?? LandingPage
+
     return (
       <div className="one-pager">
         <header className="project-header print:hidden">
           <div className="project-header__container">
             <div className="project-header__content">
-              <a
-                href="/"
-                onClick={(event) => {
-                  event.preventDefault()
-                  goToLanding()
-                }}
-              >
+              {view === 'landing' ? (
                 <img
                   src="/PortifyCV.jpg"
                   alt="PortifyCV"
                   className="project-header__logo"
                 />
-              </a>
+              ) : (
+                <a
+                  href="/"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    goToLanding()
+                  }}
+                >
+                  <img
+                    src="/PortifyCV.jpg"
+                    alt="PortifyCV"
+                    className="project-header__logo"
+                  />
+                </a>
+              )}
               <button
                 type="button"
                 className="action-button action-button--secondary border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
@@ -207,43 +294,11 @@ function App() {
           </div>
         </header>
 
-        <PrivacyPolicyPage locale={locale} />
+        <Suspense fallback={null}>
+          <PageComponent locale={locale} onGetStarted={goToBuilder} onNavigateToView={goToView} />
+        </Suspense>
 
-        <SiteFooter locale={locale} />
-        <ConsentBanner locale={locale} consent={adConsent} onDecide={handleAdConsentDecision} />
-        <AdSenseLoader consent={adConsent} />
-      </div>
-    )
-  }
-
-  if (view === 'landing') {
-    return (
-      <div className="one-pager">
-        <header className="project-header print:hidden">
-          <div className="project-header__container">
-            <div className="project-header__content">
-              <img
-                src="/PortifyCV.jpg"
-                alt="PortifyCV"
-                className="project-header__logo"
-              />
-              <button
-                type="button"
-                className="action-button action-button--secondary border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
-                onClick={handleToggleLocale}
-              >
-                {locale === 'fi' ? 'EN' : 'FI'}
-              </button>
-            </div>
-          </div>
-        </header>
-
-        <LandingPage
-          locale={locale}
-          onGetStarted={goToBuilder}
-        />
-
-        <SiteFooter locale={locale} />
+        <SiteFooter locale={locale} onNavigate={goToView} />
         <ConsentBanner locale={locale} consent={adConsent} onDecide={handleAdConsentDecision} />
         <AdSenseLoader consent={adConsent} />
       </div>
@@ -289,7 +344,7 @@ function App() {
         </Suspense>
       </section>
 
-      <SiteFooter locale={locale} />
+      <SiteFooter locale={locale} onNavigate={goToView} />
       <ConsentBanner locale={locale} consent={adConsent} onDecide={handleAdConsentDecision} />
       <AdSenseLoader consent={adConsent} />
     </div>
