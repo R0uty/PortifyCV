@@ -4,4 +4,4 @@
 # refresh, or a crawler fetching /cv or /privacy gets a 404 instead of the
 # app. Read by Netlify and by Cloudflare Pages (same _redirects syntax).
 # Vercel gets the equivalent via vercel.json's "rewrites".
-/*    /index.html   200
+/*    /   200
