@@ -49,20 +49,36 @@ const VIEW_HEAD = {
   },
 }
 
+function setMetaContent(selector, content) {
+  const element = document.querySelector(selector)
+  if (element) {
+    element.setAttribute('content', content)
+  }
+}
+
 function useDocumentHead(view) {
   useEffect(() => {
     const head = VIEW_HEAD[view] ?? VIEW_HEAD.landing
+    const url = `${SITE_ORIGIN}${head.path}`
+
     document.title = head.title
 
     const canonicalLink = document.querySelector('link[rel="canonical"]')
     if (canonicalLink) {
-      canonicalLink.setAttribute('href', `${SITE_ORIGIN}${head.path}`)
+      canonicalLink.setAttribute('href', url)
     }
 
-    const descriptionMeta = document.querySelector('meta[name="description"]')
-    if (descriptionMeta) {
-      descriptionMeta.setAttribute('content', head.description)
-    }
+    setMetaContent('meta[name="description"]', head.description)
+
+    // Open Graph / Twitter previously stayed frozen on the homepage's
+    // values for every route (only title/canonical/description were
+    // patched), so a share-preview crawler hitting /cv or /privacy saw
+    // homepage copy and the homepage URL for a page it didn't request.
+    setMetaContent('meta[property="og:url"]', url)
+    setMetaContent('meta[property="og:title"]', head.title)
+    setMetaContent('meta[property="og:description"]', head.description)
+    setMetaContent('meta[name="twitter:title"]', head.title)
+    setMetaContent('meta[name="twitter:description"]', head.description)
   }, [view])
 }
 
