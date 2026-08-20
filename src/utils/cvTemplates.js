@@ -366,3 +366,7 @@ export function getCvTemplate(templateId, locale = 'en') {
   const template = templateMap[templateId] ?? templateMap[defaultTemplateId]
   return localizeTemplate(template, locale)
 }
+
+export function isValidTemplateId(templateId) {
+  return typeof templateId === 'string' && Object.hasOwn(templateMap, templateId)
+}

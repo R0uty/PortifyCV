@@ -937,6 +937,230 @@ rename pass.
       `npm run lint`, `npm run build`, `check:share`, `check:reducers`,
       `check:feedback`, and `test:e2e` (14/14) all pass.
 
+- [x] **31. Full SEO/content audit and Phase 1-6 fixes** — done 2026-08-20,
+      on branch `seo-audit-content-polish`. Given a large brief (audit +
+      content-gap analysis + technical SEO + content pages + polish across
+      the whole site). Ran a 3-agent parallel audit first (technical SEO,
+      page/content inventory, analytics/privacy/ads), then fixed what came
+      back broken, then — after confirming scope with the user rather than
+      guessing — built 3 of the 10 requested content topics.
+      **Broken, fixed:**
+      - `public/_redirects` (Netlify/Cloudflare Pages SPA-fallback file)
+        had been deleted in a standalone commit ("Removed rederect").
+        Without it, a direct visit or refresh on `/cv` or `/privacy` 404s.
+        Confirmed with the user the site is actually on Cloudflare (which
+        reads the same `_redirects` syntax) before restoring it — the
+        deletion was a deliberate, single-purpose commit, not accidental
+        debris, so it wasn't restored blindly.
+      - In-app navigation never updated the URL — clicking "Start
+        building" swapped views and patched `document.title`/canonical via
+        `useDocumentHead`, but never touched `window.location`, so the
+        canonical tag could claim `/cv` while the address bar still read
+        `/`, and the back button had nothing to go back to. Added
+        `history.pushState` on every view switch plus a `popstate`
+        listener, verified with real multi-hop back/forward through both
+        the original 3 views and the 3 new pages added later in this pass.
+      - Open Graph/Twitter meta tags stayed frozen on `index.html`'s
+        homepage values for every route — only title/canonical/description
+        were patched per-route. Extended `useDocumentHead` to patch
+        `og:url`/`og:title`/`og:description`/`twitter:title`/
+        `twitter:description` too.
+      - Two leftover "all 10 templates" references in `index.html` (the
+        FAQPage JSON-LD and the noscript-fallback FAQ) — the app has 13
+        templates now; exactly the content a crawler or non-JS bot reads,
+        so a stale count there is a real accuracy bug.
+      **Needs-polish, fixed:** the cover letter generator (a complete,
+      working feature) had zero mention anywhere on the landing page —
+      only discoverable from inside the builder. Added one FAQ entry
+      (EN + FI, mirrored into the JSON-LD and noscript fallback) rather
+      than a new hero highlight, since the hero list was already at a
+      reasonable density and the brief explicitly warns against
+      overcrowding the homepage.
+      **Missing, partially addressed (by design, not oversight):**
+      PortifyCV had zero content-marketing pages against the brief's 10
+      target topics (CV Examples, How to Write a CV, IT/Developer/
+      Cybersecurity/Finnish CV Examples, CV Skills Examples, ATS-Friendly
+      CV Guide, Free CV Templates, Cover Letter Examples). Rather than
+      guess at scope on a brief that explicitly warns against overbuilding
+      ("do NOT create dozens of thin SEO pages"), asked the user to pick:
+      they chose starting with the 3 highest-leverage topics (the ones
+      that tie to real product features, lowest risk of reading thin/
+      generic) over all 10 at once, and flat keyword-rich URLs
+      (`/free-cv-templates`, `/how-to-write-a-cv`,
+      `/ats-friendly-cv-guide`) over nesting under `/resources`.
+      Built all 3:
+      - **Free CV Templates** — a real grid of all 13 templates using the
+        existing `TemplateThumbnail`/`getCvTemplates` infrastructure (not
+        a new preview system), each with its actual description and a
+        "Use this template" CTA that now actually pre-selects that
+        template in the builder (new `?template=` param, validated against
+        the real template map via new `isValidTemplateId` in
+        `cvTemplates.js` — previously no such deep link existed at all).
+      - **How to Write a CV** — structural guide with concrete weak/strong
+        rewrite examples (not generic listicle advice), cross-linked to
+        the other two new pages.
+      - **ATS-Friendly CV Guide** — what an ATS parser actually does, what
+        breaks it, and how PortifyCV's real ATS mode + keyword-match
+        scoring help. **Found a real, honest limitation while writing this
+        one and did not paper over it:** even ATS-mode PDF export still
+        goes through the same `html2canvas` → image-in-`jsPDF` pipeline as
+        the styled export (`exporters.js` — the genuinely text-based path,
+        `exportCvAsPdfTextFallback`, only runs as a last-resort fallback
+        for a blank-canvas or unsupported-color capture, not as ATS mode's
+        normal behavior). So an ATS-mode PDF isn't inherently more
+        machine-text-extractable than the styled one — both are a picture
+        of the page. The guide says this plainly and recommends HTML
+        export (which does preserve real selectable text) when a target
+        system needs a genuine text layer, instead of overclaiming what
+        the PDF does. **Flagging, not fixing:** making ATS-mode PDF export
+        actually produce real extractable text would be a real product
+        improvement (the text-fallback path exists but covers noticeably
+        fewer sections/layout fidelity than the canvas path today) — out
+        of scope for a content-audit pass, worth its own pass if the ATS
+        story matters enough to invest in.
+      **Supporting engineering, done as part of shipping the 3 pages, not
+      speculative:** generalized `App.jsx` routing from 3 hardcoded view
+      branches to a `VIEW_HEAD`/`STATIC_PAGES` map (adding a page is now
+      one map entry, not a new copy of the header/footer shell — this
+      already removed real duplication between the old landing/privacy
+      branches); new `src/utils/routes.js` as the one place path strings
+      live (avoids a circular import between `App.jsx` and the pages it
+      renders); new `src/components/InternalNavLink.jsx` (real `href` +
+      intercepted click for an SPA transition) reused across the 3 pages'
+      cross-links and the footer. Footer now links to all 3 new pages so
+      none are orphaned. Deliberately did not add a router library
+      (react-router etc.) — the brief explicitly warns against
+      unnecessary dependencies, and the hand-rolled map scales fine for a
+      handful of static pages.
+      `npm run lint`, `npm run build`, `check:share`, `check:reducers`,
+      and `check:feedback` all pass. Verified end to end in a real browser
+      per the details above — screenshots at desktop and 390px mobile
+      width, zero horizontal scroll.
+      **Follow-up, same day:** shipped 2 more of the content backlog —
+      **Cover Letter Examples** (weak/strong opening, experience paragraph,
+      and closing examples, plus a description of the real cover letter
+      generator checked against `coverLetter.js`'s actual paragraph-
+      building logic before writing it — it's a deterministic template
+      pulling from CV data, not AI, and the page says so) and **CV Skills
+      Examples** (hard vs. soft skills, example groupings, and two claims
+      verified against the real product before writing them: skills
+      auto-categorize by keyword regex — frameworks/databases/cloud/
+      DevOps/security — in several templates per `shared.jsx`'s
+      `parseSkillCategories`, and the "at least 4 skills" guidance matches
+      `cvFeedback.js`'s own `MIN_SKILL_COUNT` rather than being invented
+      advice). That's 5 of the original 10 topics shipped; remaining
+      backlog is IT/Developer/Cybersecurity/Finnish CV Examples and a
+      general "CV Examples" page — same reasoning as before, each needs
+      real, specific example content to avoid reading thin.
+      Also added: structured data (`Article` JSON-LD) for all 4 guide-type
+      pages via a new `isArticle` flag on `VIEW_HEAD` entries — one script
+      tag upserted/removed by `useDocumentHead` as the view changes,
+      verified present only on the 4 guide pages and absent elsewhere.
+      Strengthened internal linking per the audit's own "no orphan pages"
+      finding — footer now has 6 links; added cross-links between all 5
+      content pages (How to Write a CV ↔ CV Skills Examples, ↔ Cover
+      Letter Examples; ATS Guide ↔ CV Skills Examples, ↔ How to Write a
+      CV; Free CV Templates → both new pages) rather than leaving them
+      reachable only from the footer. Refactored the per-section link
+      rendering from a single `linkParagraph` with a fragile "guess the
+      view from the URL" ternary to a `linkParagraphs` array with an
+      explicit `view` field, needed once a section could reasonably link
+      to more than one other page.
+      **Still not done** (explicitly scoped out, not silently dropped):
+      the remaining 5 content topics above; template-specific landing
+      pages (only where there's real search/user value — not done pending
+      evidence any single template needs one beyond the Free CV Templates
+      grid); a deeper mobile/visual audit of the pre-existing builder UI
+      (out of scope for a *content* pass); Search Console verification
+      (needs an account this session doesn't have).
+      `npm run lint`, `npm run build`, `check:share`, `check:reducers`,
+      and `check:feedback` all pass. Verified end to end in a real
+      browser: direct visits, per-route canonical/title, structured data
+      appearing only on article pages, cross-links actually navigating,
+      and no horizontal scroll at 390px.
+      **Follow-up, same day:** shipped the remaining 5 content topics,
+      closing out all 10 from the original brief. **Developer CV
+      Examples** (weak/strong experience bullet, a project-entry example
+      matching the real Projects schema — `githubUrl`/`demoUrl`/`stack`/
+      `impact`/`teamSize` from `cvForm.js`'s `createEmptyProject` — and why
+      the Developer template fits; CTA pre-selects it via
+      `onGetStarted('developer')`). **IT CV Examples** (helpdesk-style
+      ticket-time bullet, certifications tied to the real Certificates
+      schema fields, an IT-specific skills list). **Cybersecurity CV
+      Examples** (incident-response bullet, certifications, SIEM/IAM
+      tools, and a callout that the Links section has dedicated Hack The
+      Box and TryHackMe fields — verified against `createEmptyLinks` in
+      `cvForm.js` before writing it). **Finnish CV Examples** (what
+      Finnish CVs omit vs. US ones, why the languages section carries more
+      weight, and a side-by-side EN/FI example of the same bullet — framed
+      around PortifyCV's real bilingual EN/FI support). **CV Examples**
+      hub page (`/cv-examples`, `.landing-page` layout, a 2×2 card grid
+      linking to the 4 field-specific pages) so the 4 new pages aren't
+      only reachable by guessing URLs; linked from Free CV Templates' "see
+      also" row and added to the footer in place of listing all 4
+      individually (avoids footer clutter while keeping everything at
+      most 2 clicks from anywhere). All 4 field pages get `Article`
+      JSON-LD (`isArticle: true`); the hub page correctly does not, since
+      it's a directory, not an article. `routes.js` and `sitemap.xml`
+      grown accordingly (hub at priority 0.7, field pages at 0.6).
+      One visual bug found and fixed during in-browser verification: the
+      hub page's cards are each a full `InternalNavLink` (an `<a>` tag),
+      and without a style reset the browser's default blue/underlined
+      link styling bled through onto the card title and body text —
+      fixed with `color: inherit; text-decoration: none;` on
+      `.examples-hub-card`, confirmed with a before/after screenshot.
+      `npm run lint`, `npm run build`, `check:share`, `check:reducers`,
+      and `check:feedback` all pass.
+      **Still not done** (explicitly scoped out, not silently dropped):
+      template-specific landing pages (only where there's real search/user
+      value — not done pending evidence any single template needs one
+      beyond the Free CV Templates grid); a deeper mobile/visual audit of
+      the pre-existing builder UI (out of scope for a *content* pass);
+      Search Console verification (needs an account this session doesn't
+      have).
+      **Follow-up, same day — mobile polish pass:** audited every route at
+      a 390px viewport with a Playwright script that flags any element
+      wider than the viewport. All 9 content pages plus privacy came back
+      clean — zero horizontal overflow. Two real, non-cosmetic findings on
+      the builder, both fixed:
+      1. The mobile bottom action bar's format-switcher row (PDF/HTML/
+      JSON/Link/Cover letter) is a horizontal-scroll strip with
+      `no-scrollbar` hiding the native scrollbar — on a 390px screen the
+      row doesn't fit and "Cover letter" was cut off with zero visual hint
+      that scrolling reveals it. Added a right-edge opacity-mask fade
+      (`.quick-actions-scroll-fade`, pure CSS, no JS) so the cut-off
+      button visibly fades to transparent instead of ending in a hard
+      clip. Verified it's inert (no visible effect) when the row isn't
+      overflowing, since it fades an opacity mask over whatever's
+      actually painted rather than painting a color overlay.
+      2. Real bug, not mobile-specific but found via the mobile tap-target
+      sweep: every skill/technology tag's "remove" (×) button was
+      rendering as an empty circle — the icon SVG was being flex-shrunk
+      to under 1px wide (height stayed 12px) because `.tags-input__tag`
+      had no `flex-shrink: 0`, so the last tag on a wrapped line could get
+      squeezed by the flex algorithm. The × was there in the DOM the whole
+      time, just invisible, on desktop and mobile alike — a real, live bug
+      previously undetected. Fixed with `flex-shrink: 0` on the tag pill
+      and the remove button, plus an explicit CSS size on the icon so it's
+      no longer subject to the parent's flex-shrink math. Confirmed all 11
+      tag remove-icons on a sample CV now render at a consistent width on
+      both a 390px and a 1440px viewport.
+      Also checked and found already solid, no changes needed: the
+      landing page's template marquee (already has proper edge-fade
+      masking, hover-to-pause, and `prefers-reduced-motion` handling —
+      it's a deliberate CSS-only ticker, not a bug); the template gallery
+      and cover letter modals on mobile (proper backdrop, close button,
+      scrollable content, no overflow); bottom-of-form spacing above the
+      fixed mobile action bar (already has enough padding that the last
+      field isn't hidden behind it). Icon-only buttons inside experience/
+      education cards (duplicate/delete/drag, ~30px) are smaller than the
+      44px touch-target guideline but left as-is — they're dense-editor
+      secondary actions with a low mis-tap cost, and enlarging them would
+      require restructuring the accordion header row for a marginal gain;
+      not worth it under "don't overbuild."
+      `npm run lint`, `check:share`, `check:reducers`, and `check:feedback`
+      all pass; `npm run build` succeeds.
+
 ## Checked and fine — don't re-investigate
 
 - Responsive layout is handled (breakpoints at 1023 / 860 / 560px).

@@ -67,6 +67,10 @@ function getLandingCopy(locale) {
           q: 'Mitä tietoja PortifyCV tallentaa selaimeeni?',
           a: 'Oletuksena vain neljä pientä asetusta (kielivalinta, oletko nähnyt opastuksen, mainosevästevalintasi ja onko istunnon palautus päällä) tallennetaan paikallisesti — mikään niistä ei sisällä osaa CV:stäsi. Jos otat käyttöön valinnaisen "Palauta viimeisin istunto" -toiminnon Asetuksista, CV:stäsi pidetään työkopiota vain kyseisessä selainvälilehdessä, jotta vahinkopäivitys ei tuhoa työtäsi — kopio poistuu automaattisesti heti kun suljet välilehden, eikä sitä koskaan lähetetä minnekään. Katso tietosuojaseloste.',
         },
+        {
+          q: 'Voinko luoda myös saatekirjeen?',
+          a: 'Kyllä — sisäänrakennettu generaattori luo saatekirjeluonnoksen CV:si yhteenvedon, viimeisimmän roolin ja tärkeimpien taitojen perusteella. Se pysyy selaimessasi kuten kaikki muukin, ja voit kopioida sen, ladata sen tekstinä tai viedä sen PDF-muodossa.',
+        },
       ],
     }
   }
@@ -127,6 +131,10 @@ function getLandingCopy(locale) {
         q: 'What data does PortifyCV store in my browser?',
         a: "By default, only four small preferences (your language choice, whether you have seen the onboarding tip, your advertising-cookie choice, and whether session restore is on) are stored locally — none of them contain any part of your CV. If you turn on the optional \"Restore last session\" feature in Settings, a working copy of your CV is kept in that browser tab only, so an accidental refresh doesn't lose your work — it's cleared automatically the moment you close the tab and is never sent anywhere. See the privacy policy for details.",
       },
+      {
+        q: 'Can I also create a cover letter?',
+        a: 'Yes — a built-in generator drafts a cover letter from your CV’s summary, most recent role, and top skills. It stays in your browser like everything else, and you can copy it, download it as text, or export it as a PDF.',
+      },
     ],
   }
 }
@@ -149,7 +157,7 @@ function LandingPage({
               <li key={highlight}>{highlight}</li>
             ))}
           </ul>
-          <button type="button" className="landing-cta" onClick={onGetStarted}>
+          <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
             {copy.startButton}
           </button>
         </div>
