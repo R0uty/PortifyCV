@@ -1018,12 +1018,6 @@ rename pass.
         fewer sections/layout fidelity than the canvas path today) — out
         of scope for a content-audit pass, worth its own pass if the ATS
         story matters enough to invest in.
-      Remaining 7 content topics (IT/Developer/Cybersecurity/Finnish CV
-      Examples, CV Skills Examples, Cover Letter Examples, general "CV
-      Examples") are a deliberate backlog, not forgotten — same reasoning
-      as above, each needs real, specific example content to avoid reading
-      thin, and that's a second content pass, not a rushed add-on to this
-      one.
       **Supporting engineering, done as part of shipping the 3 pages, not
       speculative:** generalized `App.jsx` routing from 3 hardcoded view
       branches to a `VIEW_HEAD`/`STATIC_PAGES` map (adding a page is now
@@ -1038,19 +1032,52 @@ rename pass.
       (react-router etc.) — the brief explicitly warns against
       unnecessary dependencies, and the hand-rolled map scales fine for a
       handful of static pages.
-      **Not yet done from the original 20-section brief** (explicitly
-      scoped out of this pass, not silently dropped): structured data for
-      the 3 new pages (an `Article`/`HowTo` JSON-LD per guide would be a
-      reasonable small follow-up); template-specific landing pages (the
-      brief says only where there's real search/user value — not done
-      pending evidence any single template needs its own page beyond the
-      Free CV Templates grid); a deeper mobile/visual audit of the
-      pre-existing builder UI (out of scope for a *content* pass); Search
-      Console verification (needs an account this session doesn't have).
       `npm run lint`, `npm run build`, `check:share`, `check:reducers`,
       and `check:feedback` all pass. Verified end to end in a real browser
       per the details above — screenshots at desktop and 390px mobile
       width, zero horizontal scroll.
+      **Follow-up, same day:** shipped 2 more of the content backlog —
+      **Cover Letter Examples** (weak/strong opening, experience paragraph,
+      and closing examples, plus a description of the real cover letter
+      generator checked against `coverLetter.js`'s actual paragraph-
+      building logic before writing it — it's a deterministic template
+      pulling from CV data, not AI, and the page says so) and **CV Skills
+      Examples** (hard vs. soft skills, example groupings, and two claims
+      verified against the real product before writing them: skills
+      auto-categorize by keyword regex — frameworks/databases/cloud/
+      DevOps/security — in several templates per `shared.jsx`'s
+      `parseSkillCategories`, and the "at least 4 skills" guidance matches
+      `cvFeedback.js`'s own `MIN_SKILL_COUNT` rather than being invented
+      advice). That's 5 of the original 10 topics shipped; remaining
+      backlog is IT/Developer/Cybersecurity/Finnish CV Examples and a
+      general "CV Examples" page — same reasoning as before, each needs
+      real, specific example content to avoid reading thin.
+      Also added: structured data (`Article` JSON-LD) for all 4 guide-type
+      pages via a new `isArticle` flag on `VIEW_HEAD` entries — one script
+      tag upserted/removed by `useDocumentHead` as the view changes,
+      verified present only on the 4 guide pages and absent elsewhere.
+      Strengthened internal linking per the audit's own "no orphan pages"
+      finding — footer now has 6 links; added cross-links between all 5
+      content pages (How to Write a CV ↔ CV Skills Examples, ↔ Cover
+      Letter Examples; ATS Guide ↔ CV Skills Examples, ↔ How to Write a
+      CV; Free CV Templates → both new pages) rather than leaving them
+      reachable only from the footer. Refactored the per-section link
+      rendering from a single `linkParagraph` with a fragile "guess the
+      view from the URL" ternary to a `linkParagraphs` array with an
+      explicit `view` field, needed once a section could reasonably link
+      to more than one other page.
+      **Still not done** (explicitly scoped out, not silently dropped):
+      the remaining 5 content topics above; template-specific landing
+      pages (only where there's real search/user value — not done pending
+      evidence any single template needs one beyond the Free CV Templates
+      grid); a deeper mobile/visual audit of the pre-existing builder UI
+      (out of scope for a *content* pass); Search Console verification
+      (needs an account this session doesn't have).
+      `npm run lint`, `npm run build`, `check:share`, `check:reducers`,
+      and `check:feedback` all pass. Verified end to end in a real
+      browser: direct visits, per-route canonical/title, structured data
+      appearing only on article pages, cross-links actually navigating,
+      and no horizontal scroll at 390px.
 
 ## Checked and fine — don't re-investigate
 
