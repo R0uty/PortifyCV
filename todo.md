@@ -1225,6 +1225,21 @@ rename pass.
       not independently confirmed.
       `npm run lint`, `check:share`, `check:reducers`, `check:feedback`,
       and `npm run build` all pass.
+      **Follow-up, same day — privacy policy update (user-requested):**
+      the site now uses Cloudflare Web Analytics, so the Privacy Policy's
+      "Analytics" section (`PrivacyPolicyPage.jsx`) — which previously
+      stated "PortifyCV does not currently use any analytics or tracking
+      service" — was rewritten to disclose it clearly, in both EN and FI:
+      what it is (Cloudflare Web Analytics, run by the same company that
+      serves the site), what it collects (aggregated, anonymized traffic
+      stats — page, referrer, approximate country, device/browser type),
+      and what it explicitly does not do (no cookies, no local storage,
+      no cross-site tracking, no access to CV content). Bumped the
+      effective date to match, per the policy's own "if this changes,
+      the date updates" promise. Checked the landing page's two "what
+      does PortifyCV store" FAQ answers (EN/FI) for consistency — neither
+      makes a "we collect nothing at all" claim, both already just point
+      to the privacy policy, so no edit needed there.
 
 ## Checked and fine — don't re-investigate
 

@@ -1,6 +1,6 @@
 const EFFECTIVE_DATE = {
-  en: '15 August 2026',
-  fi: '15. elokuuta 2026',
+  en: '21 August 2026',
+  fi: '21. elokuuta 2026',
 }
 
 function getPrivacyCopy(locale) {
@@ -113,10 +113,20 @@ function getPrivacyCopy(locale) {
           ],
         },
         {
-          heading: 'Analytiikka',
+          heading: 'Analytiikka (Cloudflare)',
           paragraphs: [
-            'PortifyCV ei tällä hetkellä käytä mitään analytiikka- tai '
-            + 'seurantapalvelua. Jos tämä muuttuu, tämä seloste päivitetään ensin.',
+            'PortifyCV käyttää Cloudflare Web Analytics -palvelua nähdäkseen '
+            + 'sivuston kokonaiskävijämäärän: kuinka moni vierailee, mitkä '
+            + 'sivut ovat suosittuja ja kuinka nopeasti sivut latautuvat. '
+            + 'Cloudflare on sama yhtiö, joka toimittaa tämän sivuston. '
+            + 'Palvelu ei käytä evästeitä, paikallista tallennustilaa eikä '
+            + 'mitään muutakaan selainpuolen seurantatunnistetta, eikä se '
+            + 'seuraa sinua muilla verkkosivustoilla.',
+            'Kerätty data on koottua ja anonymisoitua — esimerkiksi '
+            + 'vierailtu sivu, viittaava sivusto, karkea maa sekä laite- tai '
+            + 'selaintyyppi. Sillä ei ole pääsyä mihinkään, mitä kirjoitat '
+            + 'CV-rakentajaan: se pysyy omassa selaimessasi täsmälleen yllä '
+            + 'kuvatulla tavalla, eikä Cloudflare näe sitä koskaan.',
           ],
         },
         {
@@ -263,10 +273,20 @@ function getPrivacyCopy(locale) {
         ],
       },
       {
-        heading: 'Analytics',
+        heading: 'Analytics (Cloudflare)',
         paragraphs: [
-          'PortifyCV does not currently use any analytics or tracking '
-          + 'service. If that changes, this policy will be updated first.',
+          'PortifyCV uses Cloudflare Web Analytics to see aggregate traffic '
+          + 'to this site: how many people visit, which pages are popular, '
+          + 'and how fast pages load. Cloudflare is the same company that '
+          + 'serves this site. It does not use cookies, local storage, or '
+          + 'any other client-side tracking identifier, and it does not '
+          + 'follow you across other websites.',
+          'The data it collects is aggregated and anonymized — things like '
+          + 'the page you visited, the site that referred you, your '
+          + 'approximate country, and your device or browser type. It has '
+          + 'no access to anything you type into the CV builder; that stays '
+          + 'in your own browser exactly as described above, and Cloudflare '
+          + 'never sees it.',
         ],
       },
       {
