@@ -16,6 +16,13 @@ const PDF_MODES = {
 }
 const A4_WIDTH_MM = 210
 const A4_HEIGHT_MM = 297
+// Must match --preview-paper-width in src/styles/tokens.css. The live preview
+// pane is only ever this wide on a roomy desktop viewport — on mobile (and in
+// the narrower split-pane layout) it's clamped down to fit the screen via
+// `width: min(100%, var(--preview-paper-width))`. Designer-mode capture needs
+// the *designed* page width regardless of the device it's exported from, so
+// it must not read the live on-screen width (see createExportSandbox).
+const DESIGNER_PAPER_WIDTH_MM = 220
 const PX_PER_INCH = 96
 const MM_PER_INCH = 25.4
 const MAX_CAPTURE_PIXEL_AREA = 12_000_000
@@ -703,11 +710,11 @@ function createExportSandbox(previewElement, mode, expectedVariant = '') {
   }
 
   const clone = exportRoot.cloneNode(true)
-  const previewWidthPx = Math.max(1, Math.round(exportRoot.getBoundingClientRect().width))
+  const designerContentWidthPx = mmToPx(DESIGNER_PAPER_WIDTH_MM)
   const a4ContentWidthPx = mmToPx(
     A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right,
   )
-  const contentWidthPx = mode === 'designer' ? previewWidthPx : a4ContentWidthPx
+  const contentWidthPx = mode === 'designer' ? designerContentWidthPx : a4ContentWidthPx
   const sandbox = document.createElement('div')
   const captureRoot = document.createElement('div')
 
@@ -803,6 +810,61 @@ async function renderCaptureCanvas(captureRoot, captureOptions = {}) {
   })
 }
 
+// html2canvas can reject instead of resolving with a blank canvas — e.g. a
+// CSS color function it can't parse throws synchronously during style
+// resolution. Folding that into the same "no usable canvas yet" signal as a
+// blank capture lets the caller run through its full recapture/fallback
+// chain (foreignObjectRendering toggle, then color-normalized retry) instead
+// of a single failed attempt skipping straight past it.
+async function captureCanvasOrNull(captureRoot, captureOptions) {
+  try {
+    return await renderCaptureCanvas(captureRoot, captureOptions)
+  } catch {
+    return null
+  }
+}
+
+let colorNormalizationContext = null
+
+function getColorNormalizationContext() {
+  if (!colorNormalizationContext) {
+    const canvas = document.createElement('canvas')
+    canvas.width = 1
+    canvas.height = 1
+    colorNormalizationContext = canvas.getContext('2d')
+  }
+  return colorNormalizationContext
+}
+
+// html2canvas 1.x can't parse CSS Color 4 functions (oklch/oklab/lch/lab/
+// color/color-mix) — and some browsers (notably Firefox) can report those
+// from getComputedStyle even when the source rule only used color-mix() to
+// derive an otherwise ordinary color. Round-tripping through a canvas 2D
+// context's fillStyle normalizes any of those to a plain rgb()/rgba() string
+// html2canvas understands, without changing the color it resolves to.
+function normalizeCssColor(value) {
+  try {
+    const context = getColorNormalizationContext()
+    context.fillStyle = '#000000'
+    context.fillStyle = value
+    return context.fillStyle
+  } catch {
+    return value
+  }
+}
+
+const MODERN_COLOR_FUNCTION_PATTERN =
+  /(?:oklch|oklab|lch|lab|color-mix|color)\([^()]*(?:\([^()]*\)[^()]*)*\)/gi
+
+function normalizeCssColorFunctions(value) {
+  if (!value || !MODERN_COLOR_FUNCTION_PATTERN.test(value)) {
+    return value
+  }
+
+  MODERN_COLOR_FUNCTION_PATTERN.lastIndex = 0
+  return value.replace(MODERN_COLOR_FUNCTION_PATTERN, (match) => normalizeCssColor(match))
+}
+
 function applyComputedColorFallbackStyles(sourceRoot, cloneRoot) {
   if (!sourceRoot || !cloneRoot) {
     return
@@ -825,7 +887,7 @@ function applyComputedColorFallbackStyles(sourceRoot, cloneRoot) {
       const value = computed.getPropertyValue(prop)
 
       if (value) {
-        cloneNode.style.setProperty(prop, value, 'important')
+        cloneNode.style.setProperty(prop, normalizeCssColorFunctions(value), 'important')
       }
     })
   }
@@ -842,24 +904,32 @@ function isCanvasLikelyBlank(canvas) {
   const sampleRows = 10
   let nonWhitePixelCount = 0
 
-  for (let row = 0; row < sampleRows; row += 1) {
-    for (let column = 0; column < sampleColumns; column += 1) {
-      const x = Math.min(
-        canvas.width - 1,
-        Math.floor(((column + 0.5) / sampleColumns) * canvas.width),
-      )
-      const y = Math.min(
-        canvas.height - 1,
-        Math.floor(((row + 0.5) / sampleRows) * canvas.height),
-      )
-      const [r, g, b, a] = context.getImageData(x, y, 1, 1).data
-      const isTransparent = a < 8
-      const isNearWhite = r > 248 && g > 248 && b > 248
+  try {
+    for (let row = 0; row < sampleRows; row += 1) {
+      for (let column = 0; column < sampleColumns; column += 1) {
+        const x = Math.min(
+          canvas.width - 1,
+          Math.floor(((column + 0.5) / sampleColumns) * canvas.width),
+        )
+        const y = Math.min(
+          canvas.height - 1,
+          Math.floor(((row + 0.5) / sampleRows) * canvas.height),
+        )
+        const [r, g, b, a] = context.getImageData(x, y, 1, 1).data
+        const isTransparent = a < 8
+        const isNearWhite = r > 248 && g > 248 && b > 248
 
-      if (!isTransparent && !isNearWhite) {
-        nonWhitePixelCount += 1
+        if (!isTransparent && !isNearWhite) {
+          nonWhitePixelCount += 1
+        }
       }
     }
+  } catch {
+    // A canvas can be "tainted" (e.g. by a cross-origin resource html2canvas
+    // drew into it) in a way that only surfaces here, as a SecurityError from
+    // getImageData, rather than at draw time. Treat it the same as blank so
+    // the caller runs the same recapture/fallback chain instead of crashing.
+    return true
   }
 
   return nonWhitePixelCount === 0
@@ -2182,24 +2252,24 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
   )
 
   try {
-    let canvas = await renderCaptureCanvas(captureRoot, {
+    let canvas = await captureCanvasOrNull(captureRoot, {
       foreignObjectRendering: false,
     })
 
-    if (isCanvasLikelyBlank(canvas)) {
-      canvas = await renderCaptureCanvas(captureRoot, {
+    if (!canvas || isCanvasLikelyBlank(canvas)) {
+      canvas = await captureCanvasOrNull(captureRoot, {
         foreignObjectRendering: true,
       })
     }
 
-    if (isCanvasLikelyBlank(canvas)) {
+    if (!canvas || isCanvasLikelyBlank(canvas)) {
       applyComputedColorFallbackStyles(exportRoot, clone)
-      canvas = await renderCaptureCanvas(captureRoot, {
+      canvas = await captureCanvasOrNull(captureRoot, {
         foreignObjectRendering: false,
       })
     }
 
-    if (isCanvasLikelyBlank(canvas) && options.formData) {
+    if ((!canvas || isCanvasLikelyBlank(canvas)) && options.formData) {
       await exportCvAsPdfTextFallback(
         options.formData,
         fileName,
@@ -2210,7 +2280,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
       return
     }
 
-    if (canvas.width <= 0 || canvas.height <= 0) {
+    if (!canvas || canvas.width <= 0 || canvas.height <= 0) {
       throw new Error('Captured preview is empty. Open preview and try exporting again.')
     }
 
