@@ -63,6 +63,13 @@ function getCopy(locale) {
       ],
       ctaLabel: 'Aloita Developer-pohjalla',
       ctaNote: 'Ei kirjautumista. Vaihda pohjaa milloin tahansa.',
+      seeAlsoLabel: 'Katso myös:',
+      seeAlso: [
+        { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV:n taito-osion esimerkkejä' },
+        { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-ystävällinen CV-opas' },
+        { to: ROUTES.freeTemplates, view: 'freeTemplates', text: 'Ilmaiset CV-pohjat' },
+        { to: ROUTES.cvExamples, view: 'cvExamples', text: 'CV-esimerkkejä aloittain' },
+      ],
     }
   }
 
@@ -126,6 +133,13 @@ function getCopy(locale) {
     ],
     ctaLabel: 'Start with the Developer template',
     ctaNote: 'No login. Switch templates any time.',
+    seeAlsoLabel: 'See also:',
+    seeAlso: [
+      { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV Skills Examples' },
+      { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-Friendly CV Guide' },
+      { to: ROUTES.freeTemplates, view: 'freeTemplates', text: 'Free CV Templates' },
+      { to: ROUTES.cvExamples, view: 'cvExamples', text: 'CV Examples by Field' },
+    ],
   }
 }
 
@@ -175,6 +189,14 @@ function DeveloperCvExamplesPage({ locale = 'en', onGetStarted = () => {}, onNav
             {copy.ctaLabel}
           </button>
           <span className="legal-page__cta-note">{copy.ctaNote}</span>
+        </div>
+        <div className="templates-page-links">
+          <span>{copy.seeAlsoLabel}</span>
+          {copy.seeAlso.map((link) => (
+            <InternalNavLink key={link.view} to={link.to} onNavigate={() => onNavigateToView(link.view)}>
+              {link.text}
+            </InternalNavLink>
+          ))}
         </div>
       </div>
     </section>

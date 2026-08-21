@@ -72,6 +72,13 @@ function getCopy(locale) {
       ],
       ctaLabel: 'Luo saatekirjeesi',
       ctaNote: 'Ei kirjautumista. Luonnos pysyy selaimessasi.',
+      seeAlsoLabel: 'Katso myös:',
+      seeAlso: [
+        { to: ROUTES.howToWrite, view: 'howToWrite', text: 'Näin kirjoitat CV:n' },
+        { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-ystävällinen CV-opas' },
+        { to: ROUTES.freeTemplates, view: 'freeTemplates', text: 'Ilmaiset CV-pohjat' },
+        { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV:n taito-osion esimerkkejä' },
+      ],
     }
   }
 
@@ -144,6 +151,13 @@ function getCopy(locale) {
     ],
     ctaLabel: 'Generate your cover letter',
     ctaNote: 'No login. The draft stays in your browser.',
+    seeAlsoLabel: 'See also:',
+    seeAlso: [
+      { to: ROUTES.howToWrite, view: 'howToWrite', text: 'How to Write a CV' },
+      { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-Friendly CV Guide' },
+      { to: ROUTES.freeTemplates, view: 'freeTemplates', text: 'Free CV Templates' },
+      { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV Skills Examples' },
+    ],
   }
 }
 
@@ -200,6 +214,14 @@ function CoverLetterExamplesPage({ locale = 'en', onGetStarted = () => {}, onNav
             {copy.ctaLabel}
           </button>
           <span className="legal-page__cta-note">{copy.ctaNote}</span>
+        </div>
+        <div className="templates-page-links">
+          <span>{copy.seeAlsoLabel}</span>
+          {copy.seeAlso.map((link) => (
+            <InternalNavLink key={link.view} to={link.to} onNavigate={() => onNavigateToView(link.view)}>
+              {link.text}
+            </InternalNavLink>
+          ))}
         </div>
       </div>
     </section>
