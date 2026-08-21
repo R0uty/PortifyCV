@@ -154,13 +154,21 @@ only resolve if the host serves `index.html` for any path that isn't a real
 static file. Without this, a direct visit, a page refresh, or a crawler
 fetching one of those URLs gets a 404 instead of the app.
 
-- **Cloudflare Workers** (the live production host) reads
-  [`wrangler.jsonc`](wrangler.jsonc)'s `assets.not_found_handling: "single-page-application"`.
-  Don't add a `public/_redirects` catch-all here — on Workers static
-  assets a `/* /index.html 200` rule intercepts every request, including
-  real files, before the asset lookup runs, which breaks CSS/JS/image
-  serving entirely (confirmed in production: every path returned
-  `index.html`'s content, even for existing static files).
+- **Cloudflare Workers** (the live production host) runs
+  [`worker/index.js`](worker/index.js) in front of the static assets
+  (wired up via `main` + `assets.binding` in
+  [`wrangler.jsonc`](wrangler.jsonc)). The worker matches the request path
+  against `src/utils/routes.js`/`pageMeta.js` itself and serves
+  `dist/index.html` for known routes, rewriting each route's own
+  title/canonical/description/OG/structured-data into the response at the
+  edge — so a crawler that never runs JS still sees the right metadata for
+  `/cv`, `/privacy`, etc., not the homepage's. Unknown paths get a real
+  `404` (with `noindex`) instead of a 200. Don't add a `public/_redirects`
+  catch-all here — on Workers static assets a `/* /index.html 200` rule
+  intercepts every request, including real files, before the asset lookup
+  runs, which breaks CSS/JS/image serving entirely (confirmed in
+  production: every path returned `index.html`'s content, even for
+  existing static files).
 - **Netlify** reads a `public/_redirects` file with `/*    /index.html   200`
   automatically (not shipped here since it isn't the live host — add it
   back if you deploy to Netlify).
@@ -182,7 +190,7 @@ After deployment, complete Google indexing and performance monitoring:
 3. Submit `https://your-domain/sitemap.xml`.
 4. Use Search Console "Page indexing" and "Core Web Vitals" reports to track visibility and performance.
 
-If your live domain is not `https://portifycv.app`, update canonical/OG URLs in `index.html`, the `SITE_ORIGIN` constant in `src/App.jsx`, and the domain in `public/sitemap.xml` and `public/robots.txt`.
+If your live domain is not `https://portifycv.app`, update canonical/OG URLs in `index.html`, the `SITE_ORIGIN` constant in `src/utils/pageMeta.js` (read by both `src/App.jsx` and `worker/index.js`), and the domain in `public/sitemap.xml` and `public/robots.txt`.
 
 ### AdSense readiness
 

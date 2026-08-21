@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# wrangler dev's local state (miniflare SQLite, cached bindings)
+.wrangler
+
 # Playwright
 test-results
 playwright-report

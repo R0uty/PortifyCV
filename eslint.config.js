@@ -24,4 +24,12 @@ export default defineConfig([
       globals: globals.node,
     },
   },
+  {
+    // Cloudflare Workers runtime: not Node, not a browser — HTMLRewriter is
+    // a Workers-only global on top of the standard fetch-event globals.
+    files: ['worker/**/*.js'],
+    languageOptions: {
+      globals: { ...globals.worker, HTMLRewriter: 'readonly' },
+    },
+  },
 ])

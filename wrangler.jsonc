@@ -1,15 +1,16 @@
 {
-  // Cloudflare Workers static-assets config. PortifyCV has no server-side
-  // Worker script — this is a pure static site served from ./dist. SPA
-  // routing (so /cv, /privacy etc. resolve on a direct visit or refresh)
-  // is handled via not_found_handling below, NOT via public/_redirects:
-  // on Workers assets, a `/* /index.html 200` _redirects rule intercepts
-  // every request (including real files) before the asset lookup runs,
-  // which is why that approach broke CSS/JS/image serving in production.
+  // Cloudflare Workers static-assets config, fronted by worker/index.js.
+  // The worker decides routing itself (matching against src/utils/routes.js
+  // + src/utils/pageMeta.js) so it can rewrite each route's title/canonical/
+  // description/OG/structured-data at the edge and return a real 404 for
+  // unknown paths — plain static-assets SPA fallback (not_found_handling)
+  // can't do either, since it has no notion of which paths are real routes
+  // vs. typos, and always serves index.html byte-for-byte unedited.
   "name": "portifycv",
   "compatibility_date": "2024-09-23",
+  "main": "worker/index.js",
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS"
   }
 }
