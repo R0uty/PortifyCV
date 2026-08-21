@@ -866,8 +866,36 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.TOGGLE_MOBILE_PREVIEW })
   }, [])
 
+  const skipMobilePreviewScrollRef = useRef(true)
+
+  // Below the `lg` breakpoint, AppShell stacks the editor and preview as one
+  // long page-scrolled column (see app-shell.css's .app-shell__nav / the
+  // showContentOnMobile prop) instead of two independently-scrolling panes.
+  // Toggling mobilePreviewVisible only changed which pane was in the DOM —
+  // it never scrolled to it, so tapping "Preview" while scrolled deep into a
+  // long form produced no visible change at all (the ~2400px preview section
+  // just got appended far below the current scroll position). Bring the
+  // newly-shown pane to the top of the viewport so the tap does something.
+  useEffect(() => {
+    if (skipMobilePreviewScrollRef.current) {
+      skipMobilePreviewScrollRef.current = false
+      return
+    }
+
+    if (typeof window === 'undefined' || window.matchMedia('(min-width: 1024px)').matches) {
+      return
+    }
+
+    const target = document.querySelector(mobilePreviewVisible ? '.app-shell__preview' : '.app-shell__editor')
+    target?.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' })
+  }, [mobilePreviewVisible])
+
   const handleSelectTemplate = useCallback((templateId) => {
     dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
+  }, [])
+
+  const handleOpenSettings = useCallback(() => {
+    setIsSettingsOpen(true)
   }, [])
 
   const handleLocaleChange = useCallback((nextLocale) => {
@@ -1108,6 +1136,7 @@ function ResumeBuilderPage({
       onToggleFullscreenPreview: handleToggleFullscreenPreview,
       isResponsivePreview,
       onToggleResponsivePreview: handleToggleResponsivePreview,
+      onOpenSettings: handleOpenSettings,
     })
   }, [
     activeExport, isActionBusy, locale,
@@ -1117,6 +1146,7 @@ function ResumeBuilderPage({
     searchQuery, handlePrint,
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
+    handleOpenSettings,
     onHeaderChange,
   ])
 

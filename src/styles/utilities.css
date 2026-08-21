@@ -39,8 +39,15 @@
 [class~='right-4'] { right: 1rem; }
 [class~='top-1'] { top: 0.25rem; }
 [class~='bottom-0'] { bottom: 0; }
-[class~='bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))]'] {
-  bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+/* Clears ResumeBuilderPage's mobile bottom bar (the Editor/Preview/Templates
+   tab row plus the PDF/HTML/JSON/Link/Cover-letter action row beneath it) —
+   measured at 177.75px tall, so 12rem (192px) leaves a small gap above it.
+   This drifted out of sync once before (was 5.5rem, calibrated for a
+   shorter version of that bar before the action row grew a 5th button) and
+   nothing else asserts the relationship, so if the bar's contents change
+   again, re-measure rather than assume this value still clears it. */
+[class~='bottom-[calc(12rem+env(safe-area-inset-bottom,0px))]'] {
+  bottom: calc(12rem + env(safe-area-inset-bottom, 0px));
 }
 [class~='-left-[9px]'] { left: -9px; }
 [class~='z-40'] { z-index: 40; }

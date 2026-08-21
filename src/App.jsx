@@ -378,6 +378,7 @@ function App() {
           isActionBusy={headerProps.isActionBusy}
           onExport={headerProps.onExport}
           onCopyShareLink={headerProps.onCopyShareLink}
+          onOpenSettings={headerProps.onOpenSettings}
         />
       )}
 

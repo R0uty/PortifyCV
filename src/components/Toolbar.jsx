@@ -8,6 +8,7 @@ import {
   Printer,
   Redo2,
   Search,
+  Settings,
   Smartphone,
   Undo2,
 } from 'lucide-react'
@@ -37,6 +38,7 @@ function Toolbar({
   isActionBusy = false,
   onExport = () => {},
   onCopyShareLink = () => {},
+  onOpenSettings = () => {},
 }) {
   const isFinnish = locale === 'fi'
   const [isExportMenuOpen, setIsExportMenuOpen] = useState(false)
@@ -236,6 +238,16 @@ function Toolbar({
             ) : (
               <Maximize2 size={16} strokeWidth={2} aria-hidden="true" />
             )}
+          </button>
+
+          <button
+            type="button"
+            className="app-toolbar__icon-button lg:hidden"
+            onClick={onOpenSettings}
+            aria-label={isFinnish ? 'Asetukset' : 'Settings'}
+            title={isFinnish ? 'Asetukset' : 'Settings'}
+          >
+            <Settings size={16} strokeWidth={2} aria-hidden="true" />
           </button>
 
           <button

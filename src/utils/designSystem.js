@@ -31,6 +31,5 @@ export function getUiTheme() {
     textSecondary: 'text-gray-700',
     textMuted: 'text-gray-500',
     textSoft: 'text-gray-800',
-    toastOffset: 'bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:bottom-4',
   }
 }

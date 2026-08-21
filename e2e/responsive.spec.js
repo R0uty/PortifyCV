@@ -36,4 +36,33 @@ test.describe('Mobile layout', () => {
 
     expect(await hasHorizontalOverflow(page)).toBe(false)
   })
+
+  // Regression guard: below the `lg` breakpoint, the editor and preview are
+  // one long page-scrolled column (AppShell's showContentOnMobile), not two
+  // independently-scrolling panes like on desktop. The Editor/Preview tabs
+  // in the mobile bottom bar only toggled which pane was in the DOM — they
+  // never scrolled to it, so tapping "Preview" while scrolled into a long
+  // form produced no visible change at all (the preview section just got
+  // appended thousands of pixels below the current scroll position).
+  test('tapping Preview in the mobile tab bar scrolls the preview into view', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+
+    await page.getByRole('tab', { name: 'Preview' }).click()
+    await expect(page.locator('.app-shell__preview')).toBeInViewport()
+
+    await page.getByRole('tab', { name: 'Editor' }).click()
+    await expect(page.locator('.app-shell__editor')).toBeInViewport()
+  })
+
+  // Regression guard: Settings only lived in the desktop nav-rail
+  // (app-shell__nav, display: none below the lg breakpoint) with no
+  // equivalent anywhere in the mobile bottom bar — mobile users had no way
+  // to reach ATS-friendly mode, section visibility, or session restore.
+  test('Settings is reachable via the toolbar gear icon on mobile', async ({ page }) => {
+    await page.goto('/cv')
+
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+  })
 })

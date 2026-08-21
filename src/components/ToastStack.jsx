@@ -23,7 +23,7 @@ function ToastStack({ toasts = [] }) {
 
   return (
     <div
-      className="pointer-events-none fixed right-4 z-50 flex w-[min(92vw,24rem)] flex-col gap-3 print:hidden bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] sm:bottom-4"
+      className="pointer-events-none fixed right-4 z-50 flex w-[min(92vw,24rem)] flex-col gap-3 print:hidden bottom-[calc(12rem+env(safe-area-inset-bottom,0px))] sm:bottom-4"
     >
       {toasts.map((toast) => (
         <div
