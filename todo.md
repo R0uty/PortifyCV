@@ -1160,6 +1160,71 @@ rename pass.
       not worth it under "don't overbuild."
       `npm run lint`, `check:share`, `check:reducers`, and `check:feedback`
       all pass; `npm run build` succeeds.
+      **Follow-up, same day — PDF export bugs (user-reported):** two real
+      fixes to `src/utils/exporters.js`.
+      1. **Mobile Designer-PDF export was captured at the phone's screen
+      width instead of the resume's designed page width.** Root cause:
+      `createExportSandbox` set the capture width to
+      `exportRoot.getBoundingClientRect().width` — the live on-screen
+      preview pane's *current* rendered width. On desktop that's close
+      enough to look right by coincidence; on mobile the preview pane is
+      clamped to the phone's screen (`.preview-document`'s own CSS is
+      `width: min(100%, var(--preview-paper-width))`, and
+      `--preview-paper-width: min(100%, 220mm)` in `tokens.css`), so the
+      whole resume got laid out and captured at ~350–390px instead of its
+      designed width, baking a cramped mobile-style reflow into the PDF.
+      Fixed by capturing Designer-mode PDFs at a fixed
+      `DESIGNER_PAPER_WIDTH_MM = 220` (matching `--preview-paper-width`)
+      converted to px, regardless of device — the same value ATS mode
+      already used a fixed A4-based width for. Verified with Playwright:
+      instrumented the sandbox's capture width and confirmed it's now a
+      constant 831px on both a 390px and a 1440px viewport (previously
+      the two produced different sandbox widths). Downloaded a real
+      Designer PDF from both viewports and rendered both to PNG — the two
+      are now visually identical, same layout, same line breaks, same 2
+      pages; previously the mobile one would have reflowed at the narrow
+      capture width.
+      2. **Firefox export could fail outright** — reported by the user,
+      not independently reproduced (no Firefox binary in this sandbox to
+      test against; Chromium only). Found a real flow bug on code
+      inspection: the capture pipeline already had a 3-step recovery
+      chain (retry with `foreignObjectRendering` toggled, then retry
+      again after copying computed color/background values onto the
+      clone) for when html2canvas returns a *blank* canvas — but that
+      chain only ran on a blank result, not on a *thrown* error. If
+      html2canvas rejects synchronously (e.g. hitting a CSS color syntax
+      it can't parse — html2canvas 1.4.1 predates CSS Color 4 and throws
+      on `oklch()`/`lab()`/`color-mix()`, which Firefox's
+      `getComputedStyle` can report for a `color-mix()`-authored value
+      even when Chromium reports the same rule as a plain `rgb()`), the
+      first attempt's rejection skipped the entire recovery chain and
+      jumped straight to a hard-degraded text-only PDF or a raw error
+      toast. Fixed in three parts: (a) wrapped each capture attempt so a
+      thrown error is treated the same as a blank canvas, letting every
+      attempt go through the full recovery chain instead of only the
+      first one mattering; (b) made the existing "copy computed colors
+      onto the clone" fallback actually useful for this case by
+      round-tripping any `oklch`/`oklab`/`lch`/`lab`/`color`/`color-mix`
+      value through a canvas 2D context's `fillStyle` (which any browser
+      normalizes to plain `rgb()`/`rgba()`) before applying it — previously
+      it copied the computed value verbatim, which would have re-copied
+      the same unparseable Firefox-reported value and fixed nothing; (c)
+      hardened `isCanvasLikelyBlank` against a tainted-canvas
+      `SecurityError` from `getImageData` (another known cross-browser
+      html2canvas failure mode) so it's treated as "not usable yet"
+      rather than crashing the whole export. None of this was found in
+      `color-mix()` usage inside the actual captured resume template CSS
+      (checked — templates are plain hex/rgba on purpose, per existing
+      comments in `modernOrange.css`/`developer.css`); the two
+      `color-mix()` uses in the codebase are both in `app-shell.css`
+      builder chrome (`.app-toolbar`, `.preview-zoom-bar`) outside the
+      captured export root, so this is a defensive/robustness fix for
+      the general failure mode rather than a fix targeting a located
+      `color-mix()` call. **This should be verified against real Firefox**
+      before being treated as fully resolved — flagged to the user as
+      not independently confirmed.
+      `npm run lint`, `check:share`, `check:reducers`, `check:feedback`,
+      and `npm run build` all pass.
 
 ## Checked and fine — don't re-investigate
 
