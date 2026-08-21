@@ -473,9 +473,6 @@ function ResumeBuilderPage({
 
   useEffect(() => {
     setStorageValue(UI_LOCALE_STORAGE_KEY, locale)
-    if (typeof document !== 'undefined') {
-      document.documentElement.lang = locale
-    }
     onLocaleChange(locale)
   }, [locale, onLocaleChange, setStorageValue])
 
@@ -1762,6 +1759,7 @@ function ResumeBuilderPage({
 
   return (
     <>
+      <h1 className="sr-only">{locale === 'fi' ? 'Rakenna CV:si' : 'Build Your CV'}</h1>
       <AppShell
         shellStyle={shellStyle}
         showContentOnMobile={mobilePreviewVisible}

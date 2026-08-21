@@ -221,6 +221,15 @@ function App() {
 
   useDocumentHead(view)
 
+  // Previously only ResumeBuilderPage synced this, so toggling to Finnish
+  // anywhere else (landing, the 10 content pages) left `lang="en"` on
+  // `<html>` while Finnish text rendered — a screen reader would apply
+  // English pronunciation rules to it. Owning this in App means it stays
+  // correct regardless of which view is mounted.
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
+
   const handleAdConsentDecision = useCallback((value) => {
     setAdConsent(value)
     setAdConsentState(value)
@@ -332,7 +341,12 @@ function App() {
         </Suspense>
 
         <SiteFooter locale={locale} onNavigate={goToView} />
-        <ConsentBanner locale={locale} consent={adConsent} onDecide={handleAdConsentDecision} />
+        <ConsentBanner
+          locale={locale}
+          consent={adConsent}
+          onDecide={handleAdConsentDecision}
+          onNavigateToPrivacy={() => goToView('privacy')}
+        />
         <AdSenseLoader consent={adConsent} />
       </div>
     )
@@ -378,7 +392,12 @@ function App() {
       </section>
 
       <SiteFooter locale={locale} onNavigate={goToView} />
-      <ConsentBanner locale={locale} consent={adConsent} onDecide={handleAdConsentDecision} />
+      <ConsentBanner
+        locale={locale}
+        consent={adConsent}
+        onDecide={handleAdConsentDecision}
+        onNavigateToPrivacy={() => goToView('privacy')}
+      />
       <AdSenseLoader consent={adConsent} />
     </div>
   )
