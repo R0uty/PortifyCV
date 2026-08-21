@@ -146,12 +146,12 @@ function getInitialView() {
     return 'landing'
   }
   const currentUrl = new URL(window.location.href)
+  if (currentUrl.searchParams.has(SHARE_QUERY_PARAM)) {
+    return 'builder'
+  }
   const matchedView = Object.entries(VIEW_HEAD).find(([, head]) => head.path === currentUrl.pathname)
   if (matchedView) {
     return matchedView[0]
-  }
-  if (currentUrl.searchParams.has(SHARE_QUERY_PARAM)) {
-    return 'builder'
   }
   return 'landing'
 }
@@ -278,6 +278,9 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
               href={VIEW_HEAD[link.view].path}
               className="site-footer__link"
               onClick={(event) => {
+                if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                  return
+                }
                 event.preventDefault()
                 onNavigate(link.view)
               }}
