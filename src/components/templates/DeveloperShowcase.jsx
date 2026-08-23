@@ -4,6 +4,14 @@
 // exact same CvData shape as every other template — this file only differs
 // in presentation. ATS mode (the app's existing global toggle) bypasses this
 // component entirely and falls back to the shared flat renderer.
+//
+// Restyled 2026-08-23 against docs/developer-showcase-cv.html: sidebar is
+// now a full-bleed dark column (no gap/rounded-corner floating panel), and
+// most sidebar list items (links, certificates, education, languages) and
+// the top-level section wrapper lost their individual card box — only the
+// portfolio-style item cards (Projects/Achievements/Open Source/
+// Publications) keep a bordered/tinted card, matching the reference. See
+// developer.css's own header comment and todo.md item 35 for the full diff.
 
 import { useMemo } from 'react'
 

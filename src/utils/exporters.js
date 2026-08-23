@@ -935,6 +935,24 @@ function isCanvasLikelyBlank(canvas) {
   return nonWhitePixelCount === 0
 }
 
+// Every `[data-export-section]` also carries `data-export-placement="main"`
+// or `"side"` (see each bespoke Showcase's `Section` wrapper). In a
+// two-column layout the main column and sidebar are independent content
+// streams that merely happen to share the same Y-axis once rasterized onto
+// one canvas — a breakpoint that lands cleanly between two sidebar items
+// (say, between two certificates) can fall in the middle of a main-column
+// card at that exact same Y, and vice-versa. Rather than trying to satisfy
+// both streams' rhythms at once (which isn't always possible), the
+// page-break decision is driven by the main column only — it typically
+// carries the denser, more narrative content a mid-cut is most jarring
+// for — and the sidebar is left to fall wherever that decision lands.
+// `collectCanvasSectionRanges` (used only to draw a "content continues"
+// line under whichever column got cut) is deliberately NOT filtered this
+// way, since that cosmetic feature is meant to cover both columns.
+function isSidebarPlacedElement(element) {
+  return Boolean(element.closest('[data-export-placement="side"]'))
+}
+
 function collectCanvasPageBreakpoints(captureRoot, canvas) {
   if (!captureRoot || !canvas) {
     return []
@@ -944,7 +962,8 @@ function collectCanvasPageBreakpoints(captureRoot, canvas) {
   const sourceRect = captureRoot.getBoundingClientRect()
   const scaleY = canvas.height / sourceHeight
   const breakpoints = new Set([0, canvas.height])
-  const candidates = captureRoot.querySelectorAll(PAGE_BREAK_SELECTOR)
+  const candidates = Array.from(captureRoot.querySelectorAll(PAGE_BREAK_SELECTOR))
+    .filter((element) => !isSidebarPlacedElement(element))
 
   candidates.forEach((element) => {
     const rect = element.getBoundingClientRect()
@@ -973,7 +992,9 @@ function collectCanvasContentBlocks(captureRoot, canvas) {
   const sourceHeight = Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1)
   const sourceRect = captureRoot.getBoundingClientRect()
   const scaleY = canvas.height / sourceHeight
-  const anchors = captureRoot.querySelectorAll('[data-export-header], [data-export-section]')
+  // Main-column only — see `isSidebarPlacedElement`'s comment above.
+  const anchors = Array.from(captureRoot.querySelectorAll('[data-export-header], [data-export-section]'))
+    .filter((element) => !isSidebarPlacedElement(element))
   const ranges = []
 
   anchors.forEach((anchor) => {
@@ -1046,6 +1067,44 @@ function collectCanvasSectionRanges(captureRoot, canvas) {
       return { top, bottom, left, right }
     })
     .filter((range) => range.bottom > range.top && range.right > range.left)
+}
+
+// For each `[data-export-section]`, maps its own top (canvas px, matching
+// the `top` a content block built from that same section will carry) to
+// the bottom edge of just its *first child* — the heading/title row every
+// template's `Section` wrapper renders before the divider and real body
+// content. Used to stop the page-fill logic below from "filling" the tail
+// of a page with nothing but an orphaned section heading.
+function collectCanvasSectionHeadingBottoms(captureRoot, canvas) {
+  const headingBottoms = new Map()
+
+  if (!captureRoot || !canvas) {
+    return headingBottoms
+  }
+
+  const sourceHeight = Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1)
+  const sourceRect = captureRoot.getBoundingClientRect()
+  const scaleY = canvas.height / sourceHeight
+  // Main-column only, matching `collectCanvasContentBlocks` — a sidebar
+  // section's top never appears as a `block.top` for lookup once that
+  // filtering is in place, so this mirrors it for consistency.
+  const sections = Array.from(captureRoot.querySelectorAll('[data-export-section]'))
+    .filter((element) => !isSidebarPlacedElement(element))
+
+  sections.forEach((section) => {
+    const sectionRect = section.getBoundingClientRect()
+    const sectionTop = Math.max(0, Math.round((sectionRect.top - sourceRect.top) * scaleY))
+    const headingEl = section.firstElementChild
+    const headingRect = headingEl ? headingEl.getBoundingClientRect() : sectionRect
+    const headingBottom = Math.min(
+      canvas.height,
+      Math.round((headingRect.bottom - sourceRect.top) * scaleY),
+    )
+
+    headingBottoms.set(sectionTop, headingBottom)
+  })
+
+  return headingBottoms
 }
 
 function resolvePageSliceHeight(offsetY, pageHeightPx, totalHeight, breakpoints) {
@@ -1121,7 +1180,7 @@ function findFillBreakpoint(breakpoints, blockTop, blockBottom, limitY) {
   return snapY
 }
 
-function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []) {
+function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = [], headingBottoms = new Map()) {
   if (!contentBlocks.length) {
     return []
   }
@@ -1130,6 +1189,18 @@ function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []
   let currentPageTop = 0
   let currentPageBottom = 0
   let currentPageHeight = 0
+
+  // A snap-fill breakpoint that lands at or before a section's own heading
+  // is worthless — it "fills" the page with a title and divider but none
+  // of the section's actual content, orphaning the heading alone at the
+  // bottom of one page while everything it introduces starts fresh on the
+  // next. Only accept a fill that reaches past the heading. Blocks that
+  // aren't a whole section (e.g. a gap-filler) have no entry in
+  // `headingBottoms`, so they're unaffected.
+  const clearsOrphanedHeading = (snapY, blockTop) => {
+    const headingBottom = headingBottoms.get(blockTop)
+    return headingBottom === undefined || snapY > headingBottom
+  }
 
   const pushCurrentPage = () => {
     if (currentPageBottom > currentPageTop) {
@@ -1184,7 +1255,7 @@ function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []
           const naturalEnd = currentPageBottom + remainingPx
           const snapY = findFillBreakpoint(breakpoints, block.top, block.bottom, naturalEnd)
 
-          if (snapY >= block.top + minFillDepth) {
+          if (snapY >= block.top + minFillDepth && clearsOrphanedHeading(snapY, block.top)) {
             currentPageBottom = snapY
             currentPageHeight = currentPageBottom - currentPageTop
             pushCurrentPage()
@@ -1218,7 +1289,7 @@ function buildPageSlicesFromBlocks(pageHeightPx, contentBlocks, breakpoints = []
       const minFillDepth = Math.max(50, Math.floor(pageHeightPx * 0.05))
       const snapY = findFillBreakpoint(breakpoints, block.top, block.bottom, naturalEnd)
 
-      if (snapY >= block.top + minFillDepth) {
+      if (snapY >= block.top + minFillDepth && clearsOrphanedHeading(snapY, block.top)) {
         currentPageBottom = Math.max(currentPageBottom, Math.min(snapY, block.bottom))
         currentPageHeight = currentPageBottom - currentPageTop
         pushCurrentPage()
@@ -1270,6 +1341,7 @@ function addCanvasPagesToPdf(
   breakpoints = [],
   contentBlocks = [],
   sectionRanges = [],
+  headingBottoms = new Map(),
 ) {
   const renderedWidth = A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right
   const printableHeight = A4_HEIGHT_MM - pdfMode.marginMm.top - pdfMode.marginMm.bottom
@@ -1286,6 +1358,7 @@ function addCanvasPagesToPdf(
     pageHeightPx,
     contentBlocks.length > 0 ? contentBlocks : [{ top: 0, bottom: canvas.height }],
     breakpoints,
+    headingBottoms,
   )
   const effectiveContentBlocks = contentBlocks.length > 0
     ? contentBlocks
@@ -1363,7 +1436,7 @@ function addCanvasPagesToPdf(
   })
 }
 
-function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks = [], sectionRanges = []) {
+function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks = [], sectionRanges = [], headingBottoms = new Map()) {
   const renderedWidth = A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right
   const printableHeight = A4_HEIGHT_MM - pdfMode.marginMm.top - pdfMode.marginMm.bottom
   const pageBottomY = A4_HEIGHT_MM - pdfMode.marginMm.bottom
@@ -1379,6 +1452,7 @@ function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks
     pageHeightPx,
     contentBlocks.length > 0 ? contentBlocks : [{ top: 0, bottom: canvas.height }],
     breakpoints,
+    headingBottoms,
   )
   const effectiveContentBlocks = contentBlocks.length > 0
     ? contentBlocks
@@ -2287,6 +2361,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     const breakpoints = collectCanvasPageBreakpoints(captureRoot, canvas)
     const contentBlocks = collectCanvasContentBlocks(captureRoot, canvas)
     const sectionRanges = collectCanvasSectionRanges(captureRoot, canvas)
+    const headingBottoms = collectCanvasSectionHeadingBottoms(captureRoot, canvas)
     const exportName =
       mode === 'designer' ? fileName : `${fileName}-${createPdfMode(mode).fileSuffix}`
     const workerPages = createWorkerPageSlices(
@@ -2295,6 +2370,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
       breakpoints,
       contentBlocks,
       sectionRanges,
+      headingBottoms,
     )
 
     try {
@@ -2309,7 +2385,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
         format: 'a4',
       })
 
-      addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints, contentBlocks, sectionRanges)
+      addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints, contentBlocks, sectionRanges, headingBottoms)
       const blob = pdf.output('blob')
       saveAs(blob, `${exportName}.pdf`)
     }

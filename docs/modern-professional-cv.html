@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modern Professional CV — Premium Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       Modern Professional Showcase — refined premium edition
+       Design language: executive consulting-firm resume
+       Palette: deep navy, soft rose, warm blush, pure white
+       Principles: restraint, typographic hierarchy, thin lines,
+                   metric emphasis, zero decorative noise
+       ============================================================ */
+
+    :root {
+      /* Core palette */
+      --navy: #0f172a;
+      --navy-soft: #1e293b;
+      --navy-muted: #334155;
+      --rose: #be123c;
+      --rose-soft: #e11d48;
+      --blush: #fda4af;
+      --blush-pale: #fff1f2;
+      --slate: #64748b;
+      --slate-light: #94a3b8;
+      --border: #e2e8f0;
+      --border-soft: #f1f5f9;
+      --bg: #ffffff;
+      --bg-subtle: #fafafa;
+
+      /* Typography */
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-serif: 'Playfair Display', Georgia, serif;
+
+      /* Spacing & rhythm */
+      --page-pad: 48px;
+      --section-gap: 28px;
+      --item-gap: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: 10.5px;
+      line-height: 1.5;
+      color: var(--navy);
+      background: #e2e8f0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ---------- Page container (A4 ratio) ---------- */
+    .cv {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 32px auto;
+      background: var(--bg);
+      box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.18);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle top accent line */
+    .cv::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--navy) 0%, var(--rose) 55%, var(--blush) 100%);
+    }
+
+    /* ========== HEADER ========== */
+    .header {
+      padding: 36px var(--page-pad) 28px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .header__left {
+      min-width: 0;
+    }
+
+    .kicker {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 10px;
+    }
+
+    .name {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--navy);
+      line-height: 1.15;
+      margin-bottom: 6px;
+    }
+
+    .role {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--navy-muted);
+      letter-spacing: 0.01em;
+      margin-bottom: 16px;
+    }
+
+    .contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 18px;
+    }
+
+    .contact-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--slate);
+    }
+
+    .contact-item svg {
+      width: 12px;
+      height: 12px;
+      color: var(--rose);
+      flex-shrink: 0;
+    }
+
+    /* Photo */
+    .photo-wrap {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+      box-shadow: 0 4px 12px rgb(15 23 42 / 0.08);
+      flex-shrink: 0;
+    }
+
+    .photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Header divider */
+    .header-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 var(--page-pad);
+    }
+
+    /* ========== BODY ========== */
+    .body {
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+      gap: 0;
+      flex: 1;
+      padding: 0;
+    }
+
+    .main {
+      padding: 28px var(--page-pad) 36px 0;
+      padding-left: var(--page-pad);
+      border-right: 1px solid var(--border);
+    }
+
+    .sidebar {
+      padding: 28px var(--page-pad) 36px 24px;
+      background: var(--bg-subtle);
+    }
+
+    /* ========== SECTION ========== */
+    .section {
+      margin-bottom: var(--section-gap);
+    }
+
+    .section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .section-icon {
+      width: 14px;
+      height: 14px;
+      color: var(--rose);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .section-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .section-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--navy);
+    }
+
+    .section-divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 14px;
+    }
+
+    /* ========== SUMMARY ========== */
+    .summary {
+      font-size: 11px;
+      line-height: 1.65;
+      color: var(--navy-soft);
+      text-align: justify;
+    }
+
+    /* ========== EXPERIENCE / TIMELINE ========== */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      gap: 12px;
+      position: relative;
+    }
+
+    .timeline-item:not(:last-child) {
+      padding-bottom: 20px;
+    }
+
+    .timeline-rail {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 5px;
+    }
+
+    .timeline-marker {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--rose);
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 0 1.5px var(--rose);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .timeline-line {
+      flex: 1;
+      width: 1px;
+      background: var(--border);
+      margin-top: 4px;
+      min-height: 12px;
+    }
+
+    .timeline-item:last-child .timeline-line {
+      display: none;
+    }
+
+    .timeline-card {
+      min-width: 0;
+    }
+
+    .role-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    .role-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--navy);
+      letter-spacing: -0.01em;
+    }
+
+    .company {
+      font-size: 10.5px;
+      color: var(--slate);
+      margin-top: 1px;
+    }
+
+    .dates {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--rose);
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+    }
+
+    .bullets {
+      list-style: none;
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bullets li {
+      position: relative;
+      padding-left: 12px;
+      font-size: 10.5px;
+      line-height: 1.55;
+      color: var(--navy-soft);
+    }
+
+    .bullets li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 7px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--blush);
+    }
+
+    .metric {
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    /* ========== EDUCATION ========== */
+    .edu-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .edu-card {
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .edu-card:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .edu-degree {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .edu-meta {
+      font-size: 10px;
+      color: var(--slate);
+      margin-top: 2px;
+    }
+
+    .edu-dates {
+      font-size: 9.5px;
+      color: var(--rose);
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    /* ========== PROJECTS ========== */
+    .project-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .project-card {
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .project-card:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .project-name {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .project-desc {
+      font-size: 10.5px;
+      color: var(--navy-soft);
+      margin-top: 3px;
+      line-height: 1.5;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 7px;
+    }
+
+    .tag {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      color: var(--navy-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+
+    .project-link {
+      font-size: 9.5px;
+      color: var(--rose);
+      margin-top: 5px;
+      word-break: break-all;
+    }
+
+    /* ========== ACHIEVEMENTS ========== */
+    .achievement-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .achievement-item {
+      display: grid;
+      grid-template-columns: 10px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .achievement-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--rose);
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .achievement-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .achievement-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .achievement-year {
+      font-size: 9.5px;
+      color: var(--rose);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .achievement-desc {
+      font-size: 10px;
+      color: var(--slate);
+      margin-top: 2px;
+      line-height: 1.45;
+    }
+
+    /* ========== SIDEBAR SECTIONS ========== */
+    .skill-group {
+      margin-bottom: 12px;
+    }
+
+    .skill-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .skill-group-label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--slate);
+      margin-bottom: 6px;
+    }
+
+    .sidebar .tag {
+      background: var(--bg);
+      border-color: var(--border);
+    }
+
+    /* Languages */
+    .lang-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .lang-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 10.5px;
+      color: var(--navy-soft);
+    }
+
+    .lang-level {
+      font-size: 9.5px;
+      color: var(--rose);
+      font-weight: 500;
+    }
+
+    /* Certificates */
+    .cert-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .cert-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .cert-meta {
+      font-size: 9.5px;
+      color: var(--slate);
+      margin-top: 2px;
+    }
+
+    .cert-link {
+      font-size: 9px;
+      color: var(--rose);
+      text-decoration: none;
+      margin-top: 3px;
+      display: inline-block;
+    }
+
+    .cert-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Links */
+    .link-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .link-card {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .link-icon {
+      width: 16px;
+      height: 16px;
+      color: var(--rose);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .link-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .link-label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--slate);
+    }
+
+    .link-value {
+      font-size: 10px;
+      color: var(--navy-soft);
+      word-break: break-all;
+      margin-top: 1px;
+    }
+
+    /* Interests */
+    .interest-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .interest-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9.5px;
+      color: var(--navy-muted);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+
+    .interest-chip svg {
+      width: 10px;
+      height: 10px;
+      color: var(--rose);
+    }
+
+    /* Empty state */
+    .empty {
+      font-size: 10px;
+      color: var(--slate-light);
+      font-style: italic;
+    }
+
+    /* ========== PRINT ========== */
+    @media print {
+      body {
+        background: white;
+      }
+      .cv {
+        margin: 0;
+        box-shadow: none;
+        width: 100%;
+        min-height: auto;
+      }
+      .cv::before {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+
+    /* Narrow preview fallback */
+    @media (max-width: 800px) {
+      .cv {
+        width: 100%;
+        margin: 0;
+        box-shadow: none;
+      }
+      .body {
+        grid-template-columns: 1fr;
+      }
+      .main {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding-right: var(--page-pad);
+      }
+      .sidebar {
+        padding-left: var(--page-pad);
+      }
+    }
+  </style>
+</head>
+<body>
+  <article class="cv" data-export-root="true" data-export-variant="modern">
+
+    <!-- ========== HEADER ========== -->
+    <header class="header" data-export-header="true">
+      <div class="header__left">
+        <p class="kicker">Modern Professional · Template</p>
+        <h1 class="name">Alexandra Chen</h1>
+        <p class="role">Senior Strategy Consultant · Digital Transformation</p>
+        <div class="contact">
+          <span class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            alexandra.chen@consulting.com
+          </span>
+          <span class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            +1 (415) 555-0192
+          </span>
+          <span class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            San Francisco, CA
+          </span>
+        </div>
+      </div>
+      <div class="photo-wrap">
+        <!-- Placeholder avatar — replace with real photo -->
+        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=faces" alt="Alexandra Chen profile" data-export-photo="true" />
+      </div>
+    </header>
+
+    <div class="header-divider" aria-hidden="true"></div>
+
+    <!-- ========== BODY ========== -->
+    <div class="body" data-export-content="true">
+
+      <!-- MAIN COLUMN -->
+      <main class="main" data-export-primary="true">
+
+        <!-- Professional Summary -->
+        <section class="section" data-export-section="about" data-export-placement="main">
+          <div class="section-head">
+            <span class="section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </span>
+            <p class="section-title">Professional Summary</p>
+          </div>
+          <div class="section-divider" aria-hidden="true"></div>
+          <p class="summary">
+            Senior strategy consultant with 9+ years advising Fortune 500 clients on digital transformation, operating model redesign, and growth strategy. Track record of delivering $120M+ in identified value through data-driven interventions. Trusted advisor to C-suite leaders across technology, financial services, and healthcare. Passionate about building high-performing teams and translating complex analysis into decisive action.
+          </p>
+        </section>
+
+        <!-- Experience -->
+        <section class="section" data-export-section="experience" data-export-placement="main">
+          <div class="section-head">
+            <span class="section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </span>
+            <p class="section-title">Experience</p>
+          </div>
+          <div class="section-divider" aria-hidden="true"></div>
+
+          <div class="timeline">
+            <!-- Role 1 -->
+            <div class="timeline-item" data-export-card="true">
+              <div class="timeline-rail">
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <span class="timeline-line" aria-hidden="true"></span>
+              </div>
+              <div class="timeline-card">
+                <div class="role-row">
+                  <div>
+                    <p class="role-title">Principal Consultant</p>
+                    <p class="company">Apex Strategy Partners · San Francisco</p>
+                  </div>
+                  <p class="dates">2021 — Present</p>
+                </div>
+                <ul class="bullets">
+                  <li>Led digital transformation for a global insurer, identifying <span class="metric">$48M</span> in annual cost savings and accelerating claims processing by <span class="metric">35%</span>.</li>
+                  <li>Built and managed a cross-functional team of 12 consultants; improved utilization from 68% to <span class="metric">91%</span> within 18 months.</li>
+                  <li>Advised three PE portfolio companies on post-merger operating model design, contributing to <span class="metric">2.4x</span> EBITDA improvement.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Role 2 -->
+            <div class="timeline-item" data-export-card="true">
+              <div class="timeline-rail">
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <span class="timeline-line" aria-hidden="true"></span>
+              </div>
+              <div class="timeline-card">
+                <div class="role-row">
+                  <div>
+                    <p class="role-title">Senior Consultant</p>
+                    <p class="company">Horizon Advisory Group · New York</p>
+                  </div>
+                  <p class="dates">2017 — 2021</p>
+                </div>
+                <ul class="bullets">
+                  <li>Designed growth strategy for a mid-market SaaS platform that underpinned a successful <span class="metric">$220M</span> Series C.</li>
+                  <li>Directed customer analytics program that lifted retention by <span class="metric">18%</span> and expanded wallet share across the top 50 accounts.</li>
+                  <li>Authored firm thought leadership on platform economics; content generated <span class="metric">40+</span> qualified inbound leads.</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Role 3 -->
+            <div class="timeline-item" data-export-card="true">
+              <div class="timeline-rail">
+                <span class="timeline-marker" aria-hidden="true"></span>
+                <span class="timeline-line" aria-hidden="true"></span>
+              </div>
+              <div class="timeline-card">
+                <div class="role-row">
+                  <div>
+                    <p class="role-title">Business Analyst</p>
+                    <p class="company">Global Bank · London</p>
+                  </div>
+                  <p class="dates">2014 — 2017</p>
+                </div>
+                <ul class="bullets">
+                  <li>Supported wholesale banking transformation; automated reporting reduced monthly close cycle by <span class="metric">4 days</span>.</li>
+                  <li>Built pricing models used across <span class="metric">12</span> product lines, improving margin visibility for senior leadership.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Education -->
+        <section class="section" data-export-section="education" data-export-placement="main">
+          <div class="section-head">
+            <span class="section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            </span>
+            <p class="section-title">Education</p>
+          </div>
+          <div class="section-divider" aria-hidden="true"></div>
+          <div class="edu-grid">
+            <div class="edu-card" data-export-card="true">
+              <p class="edu-degree">MBA, Strategy & Finance</p>
+              <p class="edu-meta">London Business School · London, UK</p>
+              <p class="edu-dates">2012 — 2014</p>
+            </div>
+            <div class="edu-card" data-export-card="true">
+              <p class="edu-degree">BSc Economics, First Class Honours</p>
+              <p class="edu-meta">University College London · London, UK</p>
+              <p class="edu-dates">2009 — 2012</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Achievements -->
+        <section class="section" data-export-section="achievements" data-export-placement="main">
+          <div class="section-head">
+            <span class="section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+            </span>
+            <p class="section-title">Achievements</p>
+          </div>
+          <div class="section-divider" aria-hidden="true"></div>
+          <ul class="achievement-list">
+            <li class="achievement-item">
+              <span class="achievement-dot" aria-hidden="true"></span>
+              <div>
+                <div class="achievement-row">
+                  <p class="achievement-title">Partner Candidate — Apex Strategy</p>
+                  <p class="achievement-year">2025</p>
+                </div>
+                <p class="achievement-desc">Selected for partnership track after consecutive top-quartile performance reviews.</p>
+              </div>
+            </li>
+            <li class="achievement-item">
+              <span class="achievement-dot" aria-hidden="true"></span>
+              <div>
+                <div class="achievement-row">
+                  <p class="achievement-title">Forbes 30 Under 30 — Consulting</p>
+                  <p class="achievement-year">2019</p>
+                </div>
+                <p class="achievement-desc">Recognized for impact on digital operating models in financial services.</p>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </main>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar" data-export-secondary="true">
+
+        <!-- Skills -->
+        <section class="section" data-export-section="skills" data-export-placement="side">
+          <div class="section-head">
+            <span class="section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </span>
+            <p class="section-title">Skills</p>
+          </div>
+          <div class="section-divider" aria-hidden="true"></div>
+
+          <div class="skill-group">
+            <p class="skill-group-label">Strategy & Analysis</p>
+            <div class="tag-row">
+              <span class="tag" data-export-skill="true">Market Entry</span>
+              <span class="tag" data-export-skill="true">M&A Diligence</span>
+              <span class="tag" data-export-skill="true">Operating Model</span>
+              <span class="tag" data-export-skill="true">Value Creation</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label">Digital & Data</p>
+            <div class="tag-row">
+              <span class="tag" data-export-skill="true">Digital Transformation</span>
+              <span class="tag" data-export-skill="true">Customer Analytics</span>
+              <span class="tag" data-export-skill="true">Product Strategy</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label">Leadership</p>
+            <div class="tag-row">
+              <span class="tag" data-export-skill="true">Team Building</span>
+              <span class="tag" data-export-skill="true">Client Management</span>
+              <span class="tag" data-export-skill="true">Workshop Facilitation</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Languages -->
+        <section class="section" data-export-section="languages" data-export-placement="side">
+          <div class="section-head">
+            <span class="section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+            </span>
+            <p class="section-title">Languages</p>
+          </div>
+          <div class="section-divider" aria-hidden="true"></div>
+          <div class="lang-list">
+            <div class="lang-item">
+              <span>English</span>
+              <span class="lang-level">Native</span>
+            </div>
+            <div class="lang-item">
+              <span>Mandarin</span>
+              <span class="lang-level">Fluent</span>
+            </div>
+            <div class="lang-item">
+              <span>French</span>
+              <span class="lang-level">Professional</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Certificates -->
+        <section class="section" data-export-section="certificates" data-export-placement="side">
+          <div class="section-head">
+            <span class="section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v7"/><path d="m9 18 3-3 3 3"/><circle cx="12" cy="8" r="6"/></svg>
+            </span>
+            <p class="section-title">Certificates</p>
+          </div>
+          <div class="section-divider" aria-hidden="true"></div>
+          <div class="cert-list">
+            <div class="cert-item">
+              <p class="cert-name">PMP — Project Management</p>
+              <p class="cert-meta">PMI · 2020</p>
+            </div>
+            <div class="cert-item">
+              <p class="cert-name">Certified Management Consultant</p>
+              <p class="cert-meta">IMC USA · 2022</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Links -->
+        <section class="section" data-export-section="links" data-export-placement="side">
+          <div class="section-head">
+            <span class="section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </span>
+            <p class="section-title">Links</p>
+          </div>
+          <div class="section-divider" aria-hidden="true"></div>
+          <div class="link-list">
+            <div class="link-card" data-export-card="true">
+              <span class="link-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              </span>
+              <div>
+                <p class="link-label">LinkedIn</p>
+                <p class="link-value">linkedin.com/in/alexandrachen</p>
+              </div>
+            </div>
+            <div class="link-card" data-export-card="true">
+              <span class="link-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+              </span>
+              <div>
+                <p class="link-label">Portfolio</p>
+                <p class="link-value">alexandrachen.work</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Interests -->
+        <section class="section" data-export-section="interests" data-export-placement="side">
+          <div class="section-head">
+            <span class="section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.2 5.6L20 10l-4.4 3.8L17 20l-5-3.2L7 20l1.4-6.2L4 10l5.8-1.4L12 3z"/></svg>
+            </span>
+            <p class="section-title">Interests</p>
+          </div>
+          <div class="section-divider" aria-hidden="true"></div>
+          <div class="interest-row">
+            <span class="interest-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.2 5.6L20 10l-4.4 3.8L17 20l-5-3.2L7 20l1.4-6.2L4 10l5.8-1.4L12 3z"/></svg>
+              Trail running
+            </span>
+            <span class="interest-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.2 5.6L20 10l-4.4 3.8L17 20l-5-3.2L7 20l1.4-6.2L4 10l5.8-1.4L12 3z"/></svg>
+              Classical piano
+            </span>
+            <span class="interest-chip">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.2 5.6L20 10l-4.4 3.8L17 20l-5-3.2L7 20l1.4-6.2L4 10l5.8-1.4L12 3z"/></svg>
+              Urban sketching
+            </span>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </article>
+</body>
+</html>

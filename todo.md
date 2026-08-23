@@ -1241,6 +1241,465 @@ rename pass.
       makes a "we collect nothing at all" claim, both already just point
       to the privacy policy, so no edit needed there.
 
+## Fresh template visual audit — 2026-08-23
+
+Re-ran items 12-17's checks against the current 13-template set (they'd only
+been verified through 10 templates, before Classic Professional, Navy
+Professional, and Modern Orange shipped, and before Timeline became Modern
+Timeline). Live browser against the running dev server, demo CV loaded,
+template-gallery thumbnails plus live full-size preview.
+
+- [x] **32. Modern Orange's name/title fragmented mid-word in the builder's
+      live preview at realistic desktop window widths** — found and fixed
+      2026-08-23. Not a resize-tool artifact: reproduced with real
+      `getBoundingClientRect` measurements at preview-pane widths a normal
+      browser window produces between roughly the 1024px split-pane
+      breakpoint and ~1300px (a common laptop range — window not
+      maximized, or maximized on a 13"-14" display). At those widths
+      "Alex Morgan" rendered as "Ale / x / Mo / rga / n" and the title
+      badge similarly shattered ("SENI/OR PROD/UCT DESI/GNER"). Confirmed
+      not a general split-pane problem: Navy Professional, Creative, and
+      Executive all wrap cleanly at word boundaries at the same widths.
+      **Root cause, two layered issues:**
+      1. `.modern-orange-showcase`'s header/main grid column was
+         `minmax(0, 0.71fr)` — no floor — while the sidebar column had a
+         180px floor (`minmax(180px, 0.29fr)`). Below ~620px total card
+         width the sidebar's floor wins and eats a fixed 180px, leaving
+         the *name-bearing* column to shrink arbitrarily small (measured
+         as low as 148px, ~72px after its own padding) as the card
+         narrows further — the wrong column was the one protected.
+         Creative and Executive don't have this failure mode because they
+         put their *name* in the column that carries the floor (220px /
+         200px respectively), not the unbounded one.
+      2. `overflow-wrap: anywhere` on the name/badge (present on several
+         other templates too, at smaller font sizes) let the browser
+         break literally anywhere once the column got that narrow, rather
+         than only as a last resort — combined with issue 1, ordinary
+         short names broke instead of just very long single words.
+      **Fixed:** gave the header/main column a 200px floor
+      (`minmax(200px, 0.71fr)`) so the name-bearing column can no longer
+      collapse arbitrarily, and reduced the name from `2.4rem` (the
+      largest heading of any template, and part of why this template
+      alone hit the failure) to `2.05rem`, which comfortably fits the new
+      floor's content width without materially changing the design intent
+      (still the boldest name treatment in the app). `overflow-wrap`
+      switched from `anywhere` to `break-word` on both the name and badge
+      as a secondary safety net for the genuinely pathological case (an
+      unbroken single word wider than the whole floored column). Verified
+      empirically, not just visually: forced the live preview pane down to
+      356px and 505px via direct DOM measurement (`getBoundingClientRect`,
+      trusted over the browser-automation `resize_window` tool per this
+      project's own known tooling quirk) — name renders as clean
+      "Alex"/"Morgan" 2-line wrap with zero character-level fragmentation
+      at both widths, and the card's right edge never exceeds the preview
+      pane's right edge (no new clipping introduced by the wider floor).
+      Re-checked at a normal wide window and in the template gallery
+      thumbnail — both still look correct. `npm run lint` and
+      `npm run build` both pass.
+      **Not verified this pass:** real Designer-mode PDF export (skipped —
+      export already captures at a fixed `DESIGNER_PAPER_WIDTH_MM = 220`
+      regardless of live pane width, per item 31's mobile-export fix, so
+      it was never exposed to this narrow-pane failure mode in the first
+      place; this fix only touches the live in-app preview).
+- [x] **33. Modern Professional and Tech Executive read as near-twins in the
+      gallery** — reconfirmed 2026-08-23 (first flagged in item 12,
+      2026-08-14, as "may already read as distinct enough — wasn't verified
+      in-browser"; this pass verified it in-browser and found they don't:
+      same blue accent hue, same circular icon-badge treatment, same
+      photo-top-left header + white-sidebar-on-right structure, same
+      bordered pill skill tags). **Fixed same day**, recoloring Modern
+      Professional's entire accent identity from blue to rose — kept Tech
+      Executive's blue/navy untouched, since its own header comment already
+      documents a deliberate "Deep Navy / Royal Blue" two-color brief with a
+      dedicated navy footer band and heading color that Modern Professional
+      never had (item 12's original note); Modern Professional's own blue
+      was the less load-bearing, more purely decorative one of the two.
+      Pure recolor, no layout/structure/feature changes (nothing deleted or
+      restructured, per explicit instruction) — same photo-top-left header
+      and icon-badge shapes remain, just a different hue, which is the same
+      scope the Executive/Graduate fix (item 12) used successfully.
+      Two places carried the blue, both updated: (1) the bespoke
+      `ModernShowcase.jsx`'s CSS (`modern.css`) — renamed the custom
+      properties themselves, not just their values (`--ms-blue` →
+      `--ms-rose` #be123c, `--ms-sky` → `--ms-blush` #fb7185,
+      `--ms-header-bg` → a matching light rose wash), following item 12's
+      own precedent of renaming (not just re-valuing) a hue-named variable
+      so a future reader isn't misled; new rose value checked for contrast
+      the same way item 12 checked its gold (~6.3:1 on white, clears WCAG
+      AA's 4.5:1 with margin). (2) `modern.js`'s ATS-mode Tailwind-alike
+      class config (`text-blue-600`, `bg-blue-50`, `border-blue-900/40`,
+      etc.) — swapped every `blue` token to `rose`.
+      **Real risk caught before shipping, not just a find-and-replace:**
+      this app's utility CSS (`src/styles/utilities.css`) is hand-authored,
+      not real Tailwind (no `tailwind.config.js`/`tailwindcss` dependency in
+      `package.json`) — only the exact classes some template actually
+      references get defined. `rose-*` didn't exist at all (0 matches)
+      before this pass, so a naive `blue`→`rose` swap in `modern.js` would
+      have silently produced unstyled ATS-mode output (undefined classes
+      render as nothing). Added the exact 16 rose-* class definitions
+      `modern.js` needed (mirroring `blue`'s existing entries 1:1 — same
+      shades, same opacity-modifier variants) to `utilities.css`, using
+      real Tailwind `rose` hex values for correctness even though this repo
+      doesn't run real Tailwind. Also fixed one small pre-existing latent
+      bug spotted along the way while mirroring the set: `timelineDot`'s
+      dark-mode branch referenced `bg-blue-400`, which was *never* defined
+      either — dark-mode ATS timeline dots have presumably rendered
+      invisible since this template shipped. Added `bg-rose-400` (not
+      `bg-blue-400`, since blue is being retired) rather than reproducing
+      the bug.
+      Verified in a real browser: live preview (all sections — header,
+      timeline, projects, skills, links, achievements — consistently
+      rose/blush, no leftover blue), ATS-mode toggle (correctly falls back
+      to the app's fully monochrome ATS rendering, no color leaks, no
+      unstyled/broken elements), and the template-gallery thumbnail (zoomed
+      in, confirmed rose end-to-end). Updated the EN + FI gallery
+      descriptions ("blue timeline" → "rose timeline" /
+      "sininen aikajana" → "roosa aikajana") and both files' header
+      comments so nothing still claims "blue" for this template.
+      `npm run lint`, `npm run build`, `check:share`, `check:reducers`, and
+      `check:feedback` all pass.
+      Also checked, low-priority, not worth a todo item on its own:
+      Developer and Navy Professional both use a "dark full-height sidebar
+      + white main with colored icon badges" structural conceit — clearly
+      distinguishable close up (near-black/cyan vs. navy-blue/blue) so left
+      alone.
+      **Checked and confirmed still fine:** Modern Orange vs. Navy
+      Professional vs. Executive vs. Classic Professional accent colors (
+      orange/cream, navy/blue, gold/amber, plain grayscale-serif — all
+      clearly distinct); the Executive/Graduate indigo collision from item
+      12's original fix (still holds).
+      **Not completed this pass, lower-confidence or skipped:** a full
+      computed-style typography sweep across all 13 (spot-checked only,
+      script timed out partway through — no new duplicate styling found in
+      what was checked, but this isn't as thorough as item 14's original
+      pass); photo/avatar treatment (demo CV carries no photo, nothing to
+      compare); split-layout sidebar/main balance under sparse-secondary
+      conditions for the 3 newest split templates (item 16's methodology
+      wasn't re-run against Classic Professional/Navy Professional/Modern
+      Orange).
+
+## Modern Professional restyle — 2026-08-23
+
+- [x] **34. Restyled Modern Professional's Showcase against a user-supplied
+      reference mockup** (`docs/modern-professional-cv.html`, a full static
+      HTML/CSS resume built around the same navy/rose/blush palette item
+      33 had just landed). Pure CSS/JSX-comment restyle of the existing
+      bespoke Showcase (`ModernShowcase.jsx` + `modern.css`) — no sections,
+      fields, or JSX structure removed; every `data-export-*` hook, class
+      name, and section type is unchanged, so nothing else in the app
+      (ATS-mode fallback, export pipeline, gallery/thumbnail plumbing)
+      needed to change.
+      **What moved, cross-checked line-by-line against the reference:**
+      - Rose is now reserved for wayfinding accents only (icons, dates,
+        timeline marker, kicker, one gradient hairline) — never for primary
+        content text. Moved *off* rose: `.role` (→ navy-muted `#334155`,
+        a repurposed, previously-unused `--ms-gray` var), `.metric` (→ navy
+        bold, not rose), `.header-divider` (→ plain gray border, not rose),
+        `.project-card`'s accent-colored left border (removed entirely).
+        Moved *onto* rose (previously plain gray): `.dates`, `.edu-dates`,
+        `.lang-level`, `.achievement-year`, `.kicker`.
+      - Removed the header's tinted background band and each section's
+        individual bordered/background "card" box (`border` + `background`
+        + `border-radius` + `padding` on `.modern-showcase__section`) —
+        sections now flow directly on the page, separated only by the
+        existing divider line under each title, matching the reference's
+        "restraint, zero decorative noise" brief. `.edu-card`/`.project-card`
+        switched from full boxed cards to the same plain bottom-border-divider
+        pattern `.cert-item`/`.lang-item` already used elsewhere in this
+        same file — one consistent list idiom instead of two.
+      - Added a 3px top gradient hairline (navy → rose → blush) via
+        `.modern-showcase::before` — the one deliberate spot of decoration
+        the reference allows. Checked first that gradients don't hit the
+        known html2canvas failure modes documented elsewhere in this repo
+        (only `clip-path` and `filter: blur()` are flagged, not
+        `linear-gradient` — and Portfolio/Developer already use gradients
+        safely) before adding it.
+      - Sidebar now carries a subtly tinted background (`--ms-bg-subtle:
+        #fafafa`, new var) with a 1px hairline dividing it from the main
+        column, each column now owning its own padding instead of one
+        shared `.modern-showcase__body` padding — needed so the sidebar
+        tint fills flush to the divider line the way the reference's does,
+        rather than stopping short inside a shared padded box. Mirrored the
+        same border-right→border-bottom swap the reference's own
+        `@media (max-width: 800px)` fallback uses into this app's existing
+        `@media (max-width: 860px)` single-column breakpoint.
+      - Photo border/shadow softened from a heavy 3px navy ring + colored
+        glow to a thin 1.5px neutral border + soft drop shadow, matching
+        the reference's more restrained treatment.
+      - Timeline marker refined from a soft blurred glow ring to a crisp
+        bordered ring (small dot + white inner ring + 1.5px rose outline),
+        matching the reference's technique exactly.
+      **One deliberate deviation from the reference, flagged rather than
+      silently done:** the reference loads Playfair Display (serif) for
+      the name via a Google Fonts `<link>`. Used a system serif stack
+      instead (`Georgia, 'Times New Roman', Times, serif`) — same exact
+      stack Classic Professional already uses for its own serif name
+      (`classicProfessional.css`) — to avoid reversing item 9's self-hosted-
+      Inter work, whose whole point was eliminating the app's one
+      third-party network request. Self-hosting a second font family via
+      `@fontsource` for one template's headline was judged disproportionate
+      to the ask; a system serif delivers the same serif-vs-sans editorial
+      contrast at zero bundle/network cost.
+      Verified in a real browser with the demo CV: live preview (all
+      sections — header, timeline, education, projects, achievements,
+      skills, languages, certificates, links, interests — checked against
+      the reference's own color assignments one property at a time), the
+      template-gallery thumbnail and the landing page's template preview
+      (both render correctly, no blank Suspense gaps), ATS-mode toggle
+      (unaffected — still falls back to the app's monochrome generic
+      renderer, this restyle only touches the non-ATS bespoke Showcase),
+      and a direct `exportCvAsPdf()` call (2.1s, no blank-canvas fallback
+      triggered, zero console errors) confirming the new gradient/
+      no-card-box/serif-font styling doesn't regress PDF export.
+      `npm run lint`, `npm run build`, `check:share`, `check:reducers`,
+      and `check:feedback` all pass.
+
+## Developer restyle — 2026-08-23
+
+- [x] **35. Restyled Developer against a second user-supplied reference
+      mockup** (`docs/developer-showcase-cv.html`). Pure CSS/comment
+      restyle of the existing bespoke Showcase (`DeveloperShowcase.jsx` +
+      `developer.css`) — no JSX structural changes needed at all, since
+      every visual property is class-driven; only class names' CSS rules
+      changed. Unlike item 34 (Modern Professional), this template was
+      already visually close to its reference going in (gradient name/
+      photo-ring/timeline, colored skill tags, blob decorations) — the real
+      gaps were structural (card-boxing) and a few color/typography details,
+      not a from-scratch redesign.
+      **Structural change, same "editorial vs. card-grid" pattern as item
+      34:** removed the per-section card box (`.dev-showcase__section--
+      main`/`--sidebar`, border+background+padding) and un-boxed most
+      sidebar list items — `.link-card`, `.edu-item`, `.lang-item` are now
+      plain flowing rows, `.cert-card` became a bottom-border-divider list
+      item (matching `.cert-item` elsewhere in this same file) — matching
+      the reference exactly, which only boxes the main column's four
+      "portfolio tile" item types (Project/Achievement/Open-Source/
+      Publication cards). Those four kept their card treatment but lost an
+      extra decorative left-accent-border stripe the current code had added
+      beyond the reference (project=blue, open-source=teal) — removed for
+      consistency, since achievement-card never had one either and the
+      reference treats all four uniformly. Added `background: var(--dev-
+      surface)` to achievement-card/open-source-card/publication-item to
+      match project-card and the reference's own uniform tinted-card look
+      (previously only project-card had this tint, an inconsistency).
+      **Sidebar became full-bleed**: was a rounded, gap-separated floating
+      panel inside the grid (`gap: 1.5rem`, sidebar `border-radius: 16px`);
+      now a plain rectangular column running edge-to-edge with the card's
+      own top/left/bottom, `gap: 0`, no independent rounding — padding
+      moved off the shared `.dev-showcase__body` and onto `.dev-showcase__
+      main`/`.dev-showcase__sidebar` individually so the sidebar's dark
+      background reaches the true edge instead of stopping inside a gutter.
+      Also added the two-stop dark gradient (`#0f172a` → `#1e293b`) the
+      reference's own sidebar background uses, replacing the flat navy fill.
+      **Color/typography moved to match the reference precisely:** `.role`
+      (was bold/uppercase/tracked/navy → now plain/500-weight/muted-gray);
+      `.header` background (was a teal-tinted `#f0fdfa` band → now a neutral
+      white-ish gradient, letting the gradient name be the header's only
+      color note); `.contact-icon` (was wrapped in a small blue circular
+      badge → now a plain teal icon, no badge, matching the reference);
+      `.dates` (was gray/uppercase-tracked → now teal, matching the
+      reference's own `.dates { color: var(--dev-teal) }`); kicker/dates/
+      skill-group-label/link-label all gained `font-family: var(--font-
+      mono)` — the reference loads JetBrains Mono for these specifically
+      (a deliberate "developer" thematic touch: monospace for labels/dates,
+      sans for prose) and this app already has a system-monospace token
+      (`--font-mono` in `tokens.css`, used elsewhere in the app already) so
+      this was a zero-cost addition, no new font/network request needed —
+      same reasoning as item 34's system-serif substitution, just here the
+      substitute was already sitting in the design-token file waiting to be
+      used. `.link-btn--primary` (the Projects section's "Live Demo"
+      button) switched from a flat navy fill to the reference's teal→blue
+      gradient fill.
+      **Also aligned the mobile single-column order** with the reference's
+      own `@media (max-width: 800px)` fallback: main content (Experience/
+      Projects/etc.) now renders above the sidebar (skills/links/reference
+      info) when stacked, not below — the reference's explicit choice
+      (`.main { order: 1 } .sidebar { order: 2 }`), and arguably the more
+      sensible one (primary content before secondary on a narrow screen).
+      **Confirmed, not changed:** the existing blob/grid decorative
+      background (`filter: blur(40px)`, `data-export-ignore="true"`) is
+      already exactly the safe pattern the reference itself uses
+      (`data-export-ignore="true"` on its own `.cv__bg`) — verified via
+      `exporters.js` that `data-export-ignore` elements are stripped from
+      the clone before html2canvas ever sees them, so the blur never
+      reaches the rasterizer. (A different, unrelated blur — an SVG
+      decorative shape directly in the exported content, not background-
+      ignored — is what actually hung an earlier Creative-template attempt,
+      per that file's own header comment; this blob was never that case.)
+      Left the animated gradient name-text and the project/achievement/
+      open-source hover-lift effects as-is (not in the static reference,
+      since it can't show hover/animation, but pre-existing app features
+      this pass didn't touch or regress — same "don't delete working
+      features to chase a static mockup" call as item 34's animated
+      gradient).
+      Verified in a real browser with the demo CV (including a real photo,
+      exercising the photo-ring gradient): live preview against the
+      reference's own property-by-property assignments, the template-
+      gallery thumbnail, ATS-mode toggle (unaffected — separate generic-
+      renderer code path), and a direct `exportCvAsPdf()` call (723ms, zero
+      console errors, no blank-canvas fallback). `npm run lint`,
+      `npm run build`, `check:share`, `check:reducers`, and `check:feedback`
+      all pass.
+
+- [x] **36. Developer template's PDF export dropped the name entirely** —
+      user-reported ("export for developer template cuts name off in pdf"),
+      found and fixed 2026-08-23, same day as item 35. Not a regression from
+      item 35 — root-caused as pre-existing since item 35 never touched
+      `.dev-showcase__name`, just never caught before (this pass's own
+      item-35 export verification only checked for absence of errors/hangs,
+      not that all text actually rendered — a real gap in that
+      verification, noted for next time: render the exported PDF back to an
+      image and actually look at it, don't just check for a clean
+      completion).
+      **Root cause:** `.dev-showcase__name` fills the name text with a
+      gradient via `-webkit-background-clip: text; background-clip: text;
+      color: transparent`. html2canvas does not reliably support
+      `background-clip: text` — instead of clipping the gradient to the
+      glyph shapes, it paints the full background rectangle behind
+      fully-transparent text, so the name silently vanishes (confirmed by
+      rendering a real export to an image: a solid teal→blue gradient bar
+      where "Alex Morgan" should have been, nothing else on the page
+      affected). The component already had the *correct* fallback for
+      this — `-webkit-text-fill-color: currentColor; color: var(--dev-
+      primary)` — wired into `@media print` (for the browser's native
+      Ctrl+P path) and into a `gradientEnabled`-gated `--name--solid`
+      class, but neither of those ever fires for the actual PDF export
+      pipeline, which is a JS-driven `html2canvas` capture of a cloned DOM
+      node, not a real print render.
+      **Fixed** by duplicating that same fallback under `.pdf-export-root`
+      — the class `exporters.js` actually adds to the clone right before
+      handing it to `html2canvas` (confirmed via that file directly,
+      `clone.classList.add('pdf-export-root')`) — so it now reliably
+      applies to the one code path that needed it, regardless of the
+      `gradientEnabled` config flag's value. Same technique other
+      templates already use for their own capture-only overrides (e.g.
+      `modern.css`'s `.pdf-export-root.modern-showcase`).
+      Grepped for any other `background-clip: text` usage in the codebase
+      first — this is the only one, so no other template needed the same
+      fix. Verified by rendering both the broken (before) and fixed
+      (after) export to an image side by side: name is fully legible, bold
+      navy, in the fixed version; everything else on the page (unaffected
+      by this change) matches. `npm run lint`, `npm run build`,
+      `check:share`, `check:reducers`, and `check:feedback` all pass.
+
+- [x] **37. PDF export could silently drop entire sections' content across
+      *any* template with a CSS entrance animation** — user-reported ("we
+      need to fix the transition from 1 page to 2 page and so on now its
+      cuting part of templates"), found and fixed 2026-08-23, same session
+      as items 35-36. Far more severe than a page-break-position nit: whole
+      sections' content was going fully invisible, which is what reads as
+      "cutting" — confirmed by rendering real exports to images (repeatedly
+      reproduced on Developer: header and the sidebar's raw background
+      block rendered, but literally every section's actual content —
+      skills, links, certs, experience, projects, everything — was blank).
+      **Root cause:** Developer's `.dev-showcase__section` and Creative's
+      equivalent both carry a CSS entrance animation (`animation: dev-
+      fade-up 320ms ease-out both` / `cs-fade-up`) for the live preview. A
+      cloned DOM node re-triggers that animation from its "from" keyframe
+      (opacity 0) the instant it's inserted into the export sandbox, and
+      the export pipeline only waits two `requestAnimationFrame` callbacks
+      (~30ms) before handing the clone to html2canvas — nowhere near a
+      ~300ms fade's real duration, so sections got rasterized mid-fade at
+      near-zero opacity and vanished. **This is why it was flaky rather
+      than 100%-reproducible-every-time** (real elapsed time between those
+      two animation frames varies with system load, so it sometimes
+      finished the fade in time by chance and sometimes didn't) — several
+      exports earlier in this same session had rendered correctly, which
+      is what made this look intermittent rather than a hard break.
+      `app-shell.css` already had `.pdf-export-root { animation: none
+      !important }`, clearly written with exactly this class of bug in
+      mind — but that selector only covers the root element itself, not
+      any descendants, so it never actually reached `.dev-showcase__section`
+      or any other nested animated element.
+      **Fixed globally, not per-template**, since the same risk applies to
+      any current or future bespoke Showcase with an entrance animation:
+      added `.pdf-export-root *, .pdf-export-root *::before, .pdf-export-
+      root *::after { animation: none !important }` right next to the
+      existing root-only rule in `app-shell.css`. Forces every descendant
+      to its settled end-state before capture, regardless of timing.
+      Verified by exporting Developer 3 times in a row (previously flaky —
+      now consistently full content every time) and Creative once (same
+      animation pattern, confirmed protected by the same global fix without
+      needing its own separate rule).
+      **Not the same bug as item 36** (also fixed same day) — that one was
+      `background-clip: text` never rendering under html2canvas regardless
+      of timing; this one is animation-timing-dependent and affects
+      different elements. Both needed fixing, for different reasons.
+      **Residual, smaller issue spotted while verifying, not yet fixed:**
+      with the content-loss bug gone, an real page-break placement issue
+      is now visible underneath it — a section's heading can be stranded
+      alone at the bottom of one page with all its actual content pushed
+      to the next (seen with Developer's "Open Source" heading on page 1,
+      its card starting fresh on page 2). Root-caused and fixed same day —
+      see item 38 below.
+      `npm run lint`, `npm run build`, `check:share`, `check:reducers`,
+      and `check:feedback` all pass.
+
+- [x] **38. Orphaned section headings at page breaks (item 37's flagged
+      residual)** — fixed 2026-08-23, same day, user asked to fix it after
+      item 37 landed. Two real, separate bugs, both in `exporters.js`'s
+      page-break-selection logic — root-caused by adding temporary
+      `console.log` tracing to a real export run and reading the actual
+      breakpoint values back, not by reasoning about the code in the
+      abstract (first theory — that a snap-fill only needed to clear the
+      section's own heading — turned out to be necessary but not
+      sufficient; tracing real numbers caught the second, bigger bug).
+      **Bug 1**: a page-fill could accept a breakpoint that only cleared a
+      section's heading + a small gap, without reaching any of the
+      section's actual body content — "filling" the page bottom with a
+      title and nothing else. Fixed with a new `collectCanvasSectionHeadingBottoms()`
+      helper (maps each section's own top to the bottom edge of just its
+      first child — the heading/divider wrapper every template's `Section`
+      component renders) and a `clearsOrphanedHeading()` guard requiring
+      any accepted snap-fill breakpoint to land *past* that heading, not
+      just anywhere within the section.
+      **Bug 2, the actual cause of the specific case reported — bigger and
+      more interesting**: `PAGE_BREAK_SELECTOR` candidates (and the
+      section anchors used to build content blocks) are gathered from the
+      *entire* two-column layout without regard to which column an
+      element belongs to. In a sidebar+main split, the sidebar and main
+      column are independent content streams that only share a Y-axis
+      because they're rasterized onto one canvas — a breakpoint that's
+      perfectly clean for the sidebar's rhythm (say, between two
+      certificates) can land mid-card in the main column at that exact
+      same Y, and the algorithm can't tell the difference since both
+      contribute to one shared `breakpoints` array. Traced with real
+      numbers: "Open Source"'s snap-fill accepted a Y that technically
+      cleared its own heading by 68px (passing bug 1's fix) but was
+      actually the bottom edge of an unrelated *sidebar* item
+      ("Education") that happened to fall in that range — not real
+      main-column content at all.
+      **Fixed** by making the whole page-break decision main-column-only:
+      every `[data-export-section]` already carries `data-export-placement="main"`/`"side"`
+      (confirmed present on all 11 bespoke Showcases via grep before
+      relying on it); added `isSidebarPlacedElement()` and filtered it out
+      of `collectCanvasPageBreakpoints`'s candidates and
+      `collectCanvasContentBlocks`'s anchors (and, for consistency,
+      `collectCanvasSectionHeadingBottoms`'s own lookup). The sidebar
+      typically carries shorter, more reference-like content (skills,
+      links, certs) where a mid-item cut reads far less badly than a
+      mid-paragraph cut in Experience/Projects, so letting the main
+      column's rhythm drive the decision — and letting the sidebar just
+      fall wherever that lands — is a deliberate, reasoned simplification,
+      not an oversight. `collectCanvasSectionRanges` (the *separate*
+      function that draws the thin "content continues" line under
+      whatever got cut) was deliberately left unfiltered, since that
+      cosmetic feature is meant to cover both columns and still does.
+      **Confirmed safe for the generic renderer path** (Minimalist, Tech
+      Executive, and every template's ATS-mode fallback, all rendered via
+      `CVPreview.jsx`): grepped and confirmed that file never emits
+      `data-export-section` or `data-export-placement` at all, so
+      `isSidebarPlacedElement` always evaluates to `false` there — nothing
+      gets filtered, behavior is provably unchanged for that path.
+      Verified against real exports, not just re-reading the logic:
+      Developer's "Open Source" section (the exact reported case) now
+      moves as one whole unit to page 2, confirmed stable across 3 repeat
+      exports; Modern Professional's own overflow (sidebar links running
+      past page 1) also now breaks cleanly with no mid-card artifacts; a
+      single-page CV (Executive) still renders as one page with no
+      spurious second page. `npm run lint`, `npm run build`,
+      `check:share`, `check:reducers`, and `check:feedback` all pass.
+
 ## Checked and fine — don't re-investigate
 
 - Responsive layout is handled (breakpoints at 1023 / 860 / 560px).

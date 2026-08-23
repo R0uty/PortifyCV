@@ -184,6 +184,12 @@
 [class~='bg-blue-600'] { background-color: #2563eb; }
 [class~='bg-blue-900/40'] { background-color: rgba(30, 58, 138, 0.4); }
 [class~='bg-blue-950/30'] { background-color: rgba(23, 37, 84, 0.3); }
+[class~='bg-rose-50'] { background-color: #fff1f2; }
+[class~='bg-rose-50/60'] { background-color: rgba(255, 241, 242, 0.6); }
+[class~='bg-rose-400'] { background-color: #fb7185; }
+[class~='bg-rose-600'] { background-color: #e11d48; }
+[class~='bg-rose-900/40'] { background-color: rgba(136, 19, 55, 0.4); }
+[class~='bg-rose-950/30'] { background-color: rgba(76, 5, 25, 0.3); }
 [class~='bg-indigo-50'] { background-color: #eef2ff; }
 [class~='bg-indigo-50/40'] { background-color: rgba(238, 242, 255, 0.4); }
 [class~='bg-indigo-50/60'] { background-color: rgba(238, 242, 255, 0.6); }
@@ -227,6 +233,11 @@
 [class~='text-blue-400'] { color: #60a5fa; }
 [class~='text-blue-600'] { color: #2563eb; }
 [class~='text-blue-700'] { color: #1d4ed8; }
+[class~='text-rose-100'] { color: #ffe4e6; }
+[class~='text-rose-300'] { color: #fda4af; }
+[class~='text-rose-400'] { color: #fb7185; }
+[class~='text-rose-600'] { color: #e11d48; }
+[class~='text-rose-700'] { color: #be123c; }
 [class~='text-indigo-100'] { color: #e0e7ff; }
 [class~='text-indigo-300'] { color: #a5b4fc; }
 [class~='text-indigo-600'] { color: #4f46e5; }
@@ -265,6 +276,12 @@
 [class~='border-blue-800'] { border-color: #1e40af; }
 [class~='border-blue-900/30'] { border-color: rgba(30, 58, 138, 0.3); }
 [class~='border-blue-900/40'] { border-color: rgba(30, 58, 138, 0.4); }
+[class~='border-rose-100'] { border-color: #ffe4e6; }
+[class~='border-rose-200'] { border-color: #fecdd3; }
+[class~='border-rose-300'] { border-color: #fda4af; }
+[class~='border-rose-800'] { border-color: #9f1239; }
+[class~='border-rose-900/30'] { border-color: rgba(136, 19, 55, 0.3); }
+[class~='border-rose-900/40'] { border-color: rgba(136, 19, 55, 0.4); }
 [class~='border-indigo-100'] { border-color: #e0e7ff; }
 [class~='border-indigo-200'] { border-color: #c7d2fe; }
 [class~='border-indigo-300'] { border-color: #a5b4fc; }

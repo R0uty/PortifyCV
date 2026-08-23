@@ -8,6 +8,16 @@
    is bespoke to this one template and doesn't belong in the shared utility
    simulation. Colors are plain hex/rgba throughout (no oklch/color-mix) so
    html2canvas-based PDF export renders them reliably.
+
+   Restyled 2026-08-23 against a reference mockup
+   (docs/developer-showcase-cv.html) toward a flatter "editorial portfolio"
+   language: individual sections and most sidebar list items (links, certs,
+   languages, education) no longer sit in their own bordered/background
+   card — only the main column's higher-value item types (project,
+   achievement, open-source, publication cards) keep a card treatment,
+   matching the reference exactly. The sidebar itself is now a full-bleed
+   dark column (no gap, no independent rounded corners) rather than a
+   floating rounded panel inside a gapped grid.
    ========================================================================== */
 
 .dev-showcase {
@@ -22,8 +32,7 @@
   --dev-border: #e2e8f0;
   --dev-bg: #ffffff;
   --dev-surface: #f8fafc;
-  --dev-header-bg: #f0fdfa;
-  --dev-header-border: #99f6e4;
+  --dev-header-border: #e2e8f0;
   --dev-sidebar: #0f172a;
   --dev-text: #0f172a;
   --dev-muted: #64748b;
@@ -46,6 +55,24 @@
   margin: 0 auto;
   align-self: center;
   border: 1px solid var(--app-border);
+}
+
+/* html2canvas (the PDF export pipeline) does not reliably support
+   `background-clip: text` — instead of clipping the gradient to the text
+   glyphs, it paints the full background rectangle behind fully-transparent
+   text, so the name silently disappears in the exported PDF (name-shaped
+   blank/solid-gradient box, confirmed by rendering a real export to an
+   image). The `@media print` block below already has the correct
+   solid-color fallback for the browser's native Ctrl+P print path, but
+   that media query never applies to the JS-driven html2canvas capture —
+   `.pdf-export-root` is the class the export pipeline actually adds to the
+   clone before rasterizing it (see `exporters.js`), so the same fallback
+   needs to be duplicated here to actually reach that path. */
+.pdf-export-root.dev-showcase .dev-showcase__name {
+  background: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: var(--dev-primary) !important;
+  animation: none !important;
 }
 
 /* ── Decorative background (opacity kept under 5%, excluded from exports) ── */
@@ -110,16 +137,17 @@
   justify-content: space-between;
   gap: 1.5rem;
   padding: 2rem 2.25rem 1.75rem;
-  background: var(--dev-header-bg);
+  background: linear-gradient(180deg, var(--dev-surface) 0%, var(--dev-bg) 100%);
   border-bottom: 1px solid var(--dev-header-border);
 }
 
 .dev-showcase__kicker {
+  font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: var(--dev-muted);
+  color: var(--dev-teal);
 }
 
 .dev-showcase__name {
@@ -139,10 +167,8 @@
 .dev-showcase__role {
   margin-top: 0.5rem;
   font-size: 0.95rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--dev-primary);
+  font-weight: 500;
+  color: var(--dev-muted);
 }
 
 .dev-showcase__contact {
@@ -164,13 +190,11 @@
 
 .dev-showcase__contact-icon {
   display: inline-flex;
-  height: 1.1rem;
-  width: 1.1rem;
+  height: 0.8rem;
+  width: 0.8rem;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px;
-  background: var(--dev-surface);
-  color: var(--dev-blue);
+  color: var(--dev-teal);
 }
 
 .dev-showcase__photo-wrap {
@@ -215,35 +239,34 @@
   border: 3px solid var(--dev-bg);
 }
 
-/* ── Body layout: sidebar (30%) + main (70%) ── */
+/* ── Body layout: full-bleed dark sidebar (30%) + main (70%), no gap —
+   the sidebar is one continuous panel from edge to edge, not a floating
+   card, matching the reference exactly ── */
 
 .dev-showcase__body {
   position: relative;
   z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 2fr);
-  gap: 1.5rem;
-  padding: 1.75rem 2.25rem 2.25rem;
 }
 
 .dev-showcase__sidebar {
-  background: var(--dev-sidebar);
+  background: linear-gradient(180deg, var(--dev-sidebar) 0%, #1e293b 100%);
   color: #e2e8f0;
-  border-radius: 16px;
-  padding: 1.5rem 1.35rem;
-  align-self: start;
+  padding: 1.5rem 1.35rem 2rem;
 }
 
 .dev-showcase__main {
   min-width: 0;
+  padding: 1.75rem 2.25rem 2.25rem 1.75rem;
 }
 
-/* ── Sections (shared by sidebar + main) ── */
+/* ── Sections (shared by sidebar + main) — no card box, sections flow
+   directly on the sidebar/main surface; the divider line under each title
+   is the only separator ── */
 
 .dev-showcase__section {
   animation: dev-fade-up 320ms ease-out both;
-  border-radius: 14px;
-  padding: 1.1rem 1.25rem 1.3rem;
 }
 
 .dev-showcase__section + .dev-showcase__section {
@@ -252,19 +275,6 @@
 
 .dev-showcase__sidebar .dev-showcase__section + .dev-showcase__section {
   margin-top: 1.1rem;
-}
-
-/* Every section — main column or sidebar — carries the same background
-   treatment (just a different tint per surface) so no single section reads
-   as visually distinct from the rest. */
-.dev-showcase__section--main {
-  border: 1px solid var(--dev-border);
-  background: var(--dev-surface);
-}
-
-.dev-showcase__section--sidebar {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.05);
 }
 
 .dev-showcase__section-title {
@@ -321,6 +331,7 @@
 }
 
 .dev-showcase__skill-group-label {
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -362,34 +373,31 @@
 .dev-showcase__main .dev-showcase__skill-tag--pink { color: #be185d; }
 .dev-showcase__main .dev-showcase__skill-tag--gray { color: #334155; }
 
-/* ── Links (sidebar icon-cards) ── */
+/* ── Links (sidebar, plain rows — no card) ── */
 
 .dev-showcase__link-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.6rem;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.55rem 0.7rem;
 }
 
 .dev-showcase__link-card + .dev-showcase__link-card {
-  margin-top: 0.5rem;
+  margin-top: 0.65rem;
 }
 
 .dev-showcase__link-icon {
   display: inline-flex;
-  height: 1.6rem;
-  width: 1.6rem;
+  height: 1.1rem;
+  width: 1.1rem;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  background: rgba(59, 130, 246, 0.18);
-  color: #93c5fd;
+  margin-top: 0.05rem;
+  color: var(--dev-teal);
 }
 
 .dev-showcase__link-label {
+  font-family: var(--font-mono);
   font-size: 0.6rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -406,16 +414,20 @@
   white-space: nowrap;
 }
 
-/* ── Certificates (sidebar cards) ── */
+/* ── Certificates (sidebar, divider-line list — no card) ── */
 
 .dev-showcase__cert-card {
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.65rem 0.75rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .dev-showcase__cert-card + .dev-showcase__cert-card {
   margin-top: 0.6rem;
+}
+
+.dev-showcase__cert-card:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .dev-showcase__cert-name {
@@ -438,12 +450,9 @@
   word-break: break-all;
 }
 
-/* ── Education (sidebar timeline) ── */
-
-.dev-showcase__edu-item {
-  border-left: 3px solid var(--dev-teal);
-  padding: 0.65rem 0.75rem;
-}
+/* ── Education (sidebar, plain — no card; className kept on the element
+   for the JSX/CSS pairing convention even though this rule has no
+   properties of its own right now) ── */
 
 .dev-showcase__edu-item + .dev-showcase__edu-item {
   margin-top: 0.75rem;
@@ -461,7 +470,7 @@
   color: #94a3b8;
 }
 
-/* ── Languages (sidebar list) ── */
+/* ── Languages (sidebar, plain rows — no card) ── */
 
 .dev-showcase__lang-item {
   display: flex;
@@ -469,13 +478,10 @@
   gap: 0.5rem;
   font-size: 0.78rem;
   color: #e2e8f0;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.5rem 0.7rem;
 }
 
 .dev-showcase__lang-item + .dev-showcase__lang-item {
-  margin-top: 0.5rem;
+  margin-top: 0.45rem;
 }
 
 .dev-showcase__lang-dot {
@@ -539,14 +545,12 @@
   box-shadow: 0 0 0 3px var(--dev-bg);
 }
 
-/* Every experience entry is a card — consistent with Projects/Achievements/
-   Open Source — whether or not the timeline rail (marker + line) is shown. */
+/* Plain, no card — matches the reference's unboxed timeline entries. Only
+   Projects/Achievements/Open Source/Publications (higher-value, portfolio-
+   style items) get a card treatment. */
 .dev-showcase__timeline-card {
   flex: 1;
   min-width: 0;
-  border-radius: 12px;
-  border: 1px solid var(--dev-border);
-  padding: 0.9rem 1.1rem;
 }
 
 .dev-showcase__role-row {
@@ -572,11 +576,10 @@
 
 .dev-showcase__dates {
   flex-shrink: 0;
+  font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--dev-muted);
+  color: var(--dev-teal);
 }
 
 .dev-showcase__bullets {
@@ -606,7 +609,7 @@
   position: relative;
   border-radius: 12px;
   border: 1px solid var(--dev-border);
-  border-left: 4px solid var(--dev-blue);
+  background: var(--dev-surface);
   padding: 1rem 1.15rem;
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
@@ -681,8 +684,8 @@
 }
 
 .dev-showcase__link-btn--primary {
-  background: var(--dev-primary);
-  border-color: var(--dev-primary);
+  background: linear-gradient(135deg, var(--dev-teal), var(--dev-blue));
+  border-color: transparent;
   color: #ffffff;
 }
 
@@ -694,6 +697,7 @@
   gap: 0.75rem;
   border-radius: 12px;
   border: 1px solid var(--dev-border);
+  background: var(--dev-surface);
   padding: 0.85rem 1rem;
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
@@ -749,7 +753,7 @@
 .dev-showcase__opensource-card {
   border-radius: 12px;
   border: 1px solid var(--dev-border);
-  border-left: 4px solid var(--dev-teal);
+  background: var(--dev-surface);
   padding: 1rem 1.15rem;
   transition: transform 160ms ease, box-shadow 160ms ease;
 }
@@ -795,6 +799,7 @@
 .dev-showcase__publication-item {
   border-radius: 12px;
   border: 1px solid var(--dev-border);
+  background: var(--dev-surface);
   padding: 0.85rem 1.1rem;
 }
 
@@ -838,15 +843,19 @@
   animation: none !important;
 }
 
-/* ── Responsive: sidebar moves above main on tablet, single column on mobile ── */
+/* ── Responsive: single column on tablet/mobile, main content first
+   (matching the reference's own mobile fallback) — sidebar (skills/links/
+   reference info) drops below rather than pushing the primary content
+   down the page ── */
 
 @media (max-width: 860px) {
   .dev-showcase__body {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .dev-showcase__sidebar {
+  .dev-showcase__main {
     order: -1;
+    padding: 1.75rem 2.25rem;
   }
 }
 
@@ -855,7 +864,11 @@
     padding: 1.5rem 1.25rem 1.25rem;
   }
 
-  .dev-showcase__body {
+  .dev-showcase__main {
+    padding: 1.25rem 1.25rem 1.75rem;
+  }
+
+  .dev-showcase__sidebar {
     padding: 1.25rem 1.25rem 1.75rem;
   }
 
@@ -896,14 +909,8 @@
     border: 1px solid var(--dev-border) !important;
   }
 
-  .dev-showcase__section--main,
-  .dev-showcase__section--sidebar,
-  .dev-showcase__link-card,
-  .dev-showcase__cert-card,
-  .dev-showcase__edu-item,
-  .dev-showcase__lang-item {
-    background: #ffffff !important;
-    border: 1px solid var(--dev-border) !important;
+  .dev-showcase__cert-card {
+    border-bottom-color: var(--dev-border) !important;
   }
 
   .dev-showcase__link-label,

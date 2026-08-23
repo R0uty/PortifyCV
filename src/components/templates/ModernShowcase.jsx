@@ -6,10 +6,16 @@
 // bypasses this component entirely and falls back to the shared flat
 // renderer (modern.js).
 //
-// Design language: premium executive consulting-firm resume. Navy / royal
-// blue / sky blue palette, thin 1px borders, uppercase section titles with
-// wide tracking, no gradients, no decorative boxes, no colored section
-// backgrounds — restraint over ornamentation (see DeveloperShowcase /
+// Design language: premium executive consulting-firm resume, restyled
+// 2026-08-23 against docs/modern-professional-cv.html. Navy / rose / blush
+// palette, thin 1px hairline dividers, uppercase section titles with wide
+// tracking. Rose is reserved for wayfinding accents only — icons, dates,
+// timeline markers, one 3px gradient hairline at the very top of the card —
+// never for primary content text (name, role, and metrics all stay navy).
+// Sections flow directly on the page (no per-section card border/
+// background); the only structural color block is the sidebar's subtle
+// off-white tint, separated from the main column by a single vertical
+// hairline — restraint over ornamentation (see DeveloperShowcase /
 // CreativeShowcase for the more colorful counterexamples).
 
 import { useMemo } from 'react'

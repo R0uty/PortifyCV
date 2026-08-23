@@ -1,19 +1,26 @@
 /* ==========================================================================
    Modern Showcase — hand-authored component styles for the Modern
    Professional template's non-ATS "premium executive" mode. Scoped entirely
-   under `.modern-showcase`. Navy / royal-blue / sky-blue palette. No
-   gradients, no decorative shapes, no colored section backgrounds — thin
-   1px borders and generous whitespace only, per the "Not flashy. Not
-   creative. Premium." brief. Section cards use plain white/off-white fills
-   with a border, never a tinted background.
+   under `.modern-showcase`. Navy / rose / blush palette. Restyled
+   2026-08-23 against a reference mockup (docs/modern-professional-cv.html)
+   to a more restrained "editorial print resume" language: rose is used only
+   for wayfinding accents (icons, dates, markers, one gradient hairline) —
+   never for primary content text (name, role, metrics all stay navy) —
+   and sections flow directly on the page (a divider line under each title)
+   instead of sitting in individual bordered/background cards, matching the
+   reference's "restraint, zero decorative noise" brief.
    ========================================================================== */
 
 .modern-showcase {
   --ms-navy: #0f172a;
-  --ms-blue: #2563eb;
-  --ms-sky: #60a5fa;
-  --ms-gray: #64748b;
+  --ms-navy-muted: #334155;
+  /* Rose accent — Tailwind rose-700, checked against white at ~6.3:1
+     contrast (comfortably clears WCAG AA's 4.5:1 for the normal-size text
+     this is used on, e.g. the timeline dates and section-icon fills). */
+  --ms-rose: #be123c;
+  --ms-blush: #fb7185;
   --ms-border: #e2e8f0;
+  --ms-border-soft: #f1f5f9;
   --ms-text: #1e293b;
   --ms-muted: #64748b;
   /* Deliberately NOT pure #ffffff — same blank-canvas PDF export guard used
@@ -22,8 +29,8 @@
      background can make every sampled point register as near-white and
      silently fall back to a plain-text PDF render. */
   --ms-bg: #f7f7fa;
+  --ms-bg-subtle: #fafafa;
   --ms-card: #ffffff;
-  --ms-header-bg: #eff6ff;
 
   position: relative;
   background: var(--ms-bg);
@@ -38,13 +45,24 @@
   align-self: center;
 }
 
+/* Thin top hairline, navy → rose → blush — the one deliberate spot of
+   color-as-ornament the reference mockup allows ("zero decorative noise"
+   elsewhere). Sits flush with the card's own edges so the parent's
+   `overflow: hidden` + border-radius clips its corners for free, matching
+   every other rounded-corner treatment in this app. */
+.modern-showcase::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ms-navy) 0%, var(--ms-rose) 55%, var(--ms-blush) 100%);
+}
+
 .pdf-export-root.modern-showcase {
   border-radius: 0 !important;
   box-shadow: none !important;
-}
-
-.pdf-export-root.modern-showcase .modern-showcase__header {
-  border-radius: 0 !important;
 }
 
 /* ── Header ── */
@@ -56,8 +74,6 @@
   justify-content: space-between;
   gap: 1.75rem;
   padding: 2.5rem 2.75rem 1.75rem;
-  background: var(--ms-header-bg);
-  border-radius: 20px 20px 0 0;
 }
 
 .modern-showcase__kicker {
@@ -65,13 +81,14 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: var(--ms-muted);
+  color: var(--ms-rose);
 }
 
 .modern-showcase__name {
   margin-top: 0.5rem;
+  font-family: Georgia, 'Times New Roman', Times, serif;
   font-size: 2.875rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.05;
   color: var(--ms-navy);
@@ -81,7 +98,7 @@
   margin-top: 0.5rem;
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--ms-blue);
+  color: var(--ms-navy-muted);
 }
 
 .modern-showcase__contact {
@@ -103,7 +120,7 @@
 
 .modern-showcase__contact-icon {
   display: inline-flex;
-  color: var(--ms-blue);
+  color: var(--ms-rose);
 }
 
 .modern-showcase__photo-wrap {
@@ -116,41 +133,39 @@
   height: 7.5rem;
   object-fit: cover;
   border-radius: 9999px;
-  border: 3px solid var(--ms-navy);
-  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.25);
+  border: 1.5px solid var(--ms-border);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 .modern-showcase__header-divider {
   height: 1px;
   margin: 0 2.75rem;
-  background: var(--ms-blue);
+  background: var(--ms-border);
 }
 
-/* ── Body layout: main (65%) + sidebar (35%) ── */
+/* ── Body layout: main (65%) + sidebar (35%), separated by a hairline
+   rather than a gap — sidebar carries a subtle tint, main stays white,
+   each column owns its own padding so the tint fills flush to the divider ── */
 
 .modern-showcase__body {
   display: grid;
   grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
-  gap: 2rem;
-  padding: 1.75rem 2.75rem 2.5rem;
 }
 
 .modern-showcase__main {
   min-width: 0;
+  padding: 1.75rem 2.75rem 2.5rem 2.75rem;
+  border-right: 1px solid var(--ms-border);
 }
 
 .modern-showcase__sidebar {
   min-width: 0;
+  padding: 1.75rem 2.75rem 2.5rem 1.75rem;
+  background: var(--ms-bg-subtle);
 }
 
-/* ── Sections — thin border card, no tinted background, uppercase title ── */
-
-.modern-showcase__section {
-  border-radius: 12px;
-  border: 1px solid var(--ms-border);
-  background: var(--ms-card);
-  padding: 1.1rem 1.25rem 1.35rem;
-}
+/* ── Sections — no card box; a divider line under the title is the only
+   separator, sections flow directly on the page (main/sidebar background) ── */
 
 .modern-showcase__section + .modern-showcase__section {
   margin-top: 1.875rem;
@@ -165,7 +180,7 @@
 .modern-showcase__section-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--ms-blue);
+  color: var(--ms-rose);
 }
 
 .modern-showcase__section-icon svg {
@@ -203,7 +218,7 @@
   white-space: pre-line;
 }
 
-/* ── Experience (blue timeline, small circles) ── */
+/* ── Experience (rose timeline, small circles) ── */
 
 .modern-showcase__timeline {
   margin-top: 1rem;
@@ -231,8 +246,9 @@
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 9999px;
-  background: var(--ms-blue);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  background: var(--ms-rose);
+  border: 2px solid var(--ms-card);
+  box-shadow: 0 0 0 1.5px var(--ms-rose);
   z-index: 1;
 }
 
@@ -276,7 +292,7 @@
 .modern-showcase__dates {
   font-size: 0.68rem;
   font-weight: 600;
-  color: var(--ms-muted);
+  color: var(--ms-rose);
   white-space: nowrap;
 }
 
@@ -295,27 +311,31 @@
 }
 
 .modern-showcase__bullets li::marker {
-  color: var(--ms-sky);
+  color: var(--ms-blush);
 }
 
 .modern-showcase__metric {
-  color: var(--ms-blue);
+  color: var(--ms-navy);
   font-weight: 700;
 }
 
-/* ── Education (modern clean cards) ── */
+/* ── Education (plain rows, divider between entries) ── */
 
 .modern-showcase__edu-grid {
   margin-top: 1rem;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.75rem;
 }
 
 .modern-showcase__edu-card {
-  border-radius: 12px;
-  border: 1px solid var(--ms-border);
-  padding: 0.85rem 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--ms-border-soft);
+}
+
+.modern-showcase__edu-card:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .modern-showcase__edu-degree {
@@ -334,10 +354,10 @@
   margin-top: 0.15rem;
   font-size: 0.68rem;
   font-weight: 600;
-  color: var(--ms-muted);
+  color: var(--ms-rose);
 }
 
-/* ── Projects (simple cards, accent border only) ── */
+/* ── Projects (plain rows, divider between entries) ── */
 
 .modern-showcase__project-grid {
   margin-top: 1rem;
@@ -347,11 +367,13 @@
 }
 
 .modern-showcase__project-card {
-  border-radius: 12px;
-  border: 1px solid var(--ms-border);
-  border-left: 3px solid var(--ms-blue);
-  background: var(--ms-card);
-  padding: 0.85rem 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--ms-border-soft);
+}
+
+.modern-showcase__project-card:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .modern-showcase__project-name {
@@ -371,7 +393,7 @@
 .modern-showcase__project-link {
   margin-top: 0.4rem;
   font-size: 0.72rem;
-  color: var(--ms-blue);
+  color: var(--ms-rose);
   word-break: break-all;
 }
 
@@ -412,7 +434,7 @@
   width: 0.4rem;
   height: 0.4rem;
   border-radius: 9999px;
-  background: var(--ms-blue);
+  background: var(--ms-rose);
 }
 
 .modern-showcase__achievement-row {
@@ -432,7 +454,7 @@
 .modern-showcase__achievement-year {
   font-size: 0.68rem;
   font-weight: 600;
-  color: var(--ms-muted);
+  color: var(--ms-rose);
 }
 
 .modern-showcase__achievement-desc {
@@ -489,7 +511,7 @@
 
 .modern-showcase__lang-level {
   font-size: 0.7rem;
-  color: var(--ms-muted);
+  color: var(--ms-rose);
 }
 
 /* ── Certificates ── */
@@ -528,7 +550,7 @@
   margin-top: 0.3rem;
   font-size: 0.7rem;
   font-weight: 600;
-  color: var(--ms-blue);
+  color: var(--ms-rose);
 }
 
 /* ── Links (minimal cards) ── */
@@ -552,7 +574,7 @@
 .modern-showcase__link-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--ms-blue);
+  color: var(--ms-rose);
 }
 
 .modern-showcase__link-label {
@@ -596,7 +618,7 @@
 .modern-showcase__interest-chip svg {
   height: 0.85rem;
   width: 0.85rem;
-  color: var(--ms-blue);
+  color: var(--ms-rose);
 }
 
 /* ── Responsive ── */
@@ -604,6 +626,16 @@
 @media (max-width: 860px) {
   .modern-showcase__body {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .modern-showcase__main {
+    padding-right: 2.75rem;
+    border-right: none;
+    border-bottom: 1px solid var(--ms-border);
+  }
+
+  .modern-showcase__sidebar {
+    padding-left: 2.75rem;
   }
 }
 
@@ -616,7 +648,11 @@
     margin: 0 1.25rem;
   }
 
-  .modern-showcase__body {
+  .modern-showcase__main {
+    padding: 1.25rem 1.25rem 1.75rem;
+  }
+
+  .modern-showcase__sidebar {
     padding: 1.25rem 1.25rem 1.75rem;
   }
 

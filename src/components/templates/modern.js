@@ -1,6 +1,9 @@
-// Modern Professional template config — dark blue header with split-column layout.
-// Blue accent color. Flat skills, card-style links. Traditional timeline experience.
-// Sidebar holds skills and links, main column holds experience and education.
+// Modern Professional template config — dark navy header with split-column layout
+// (this file is the ATS-friendly-mode fallback only; the normal "Showcase" mode
+// renders via ModernShowcase.jsx / modern.css instead, and uses a plain white
+// header, not this dark band). Rose accent color. Flat skills, card-style links.
+// Traditional timeline experience. Sidebar holds skills and links, main column
+// holds experience and education.
 export default {
   // Outer document border — adapts to dark/light mode, rounded with shadow
   preview: (isDark) => isDark ? 'border-gray-800 bg-black shadow-black/30' : 'border-black/10 bg-white shadow-black/10',
@@ -11,37 +14,37 @@ export default {
   // Full name heading — semibold, large
   headerTitle: () => 'mt-2 text-3xl font-semibold tracking-tight sm:text-4xl lg:text-5xl',
 
-  // Professional title — blue-tinted subtitle text
-  headerSubtitle: (isDark) => `mt-2 text-base leading-7 sm:text-lg ${isDark ? 'text-blue-400' : 'text-blue-100'}`,
+  // Professional title — rose-tinted subtitle text
+  headerSubtitle: (isDark) => `mt-2 text-base leading-7 sm:text-lg ${isDark ? 'text-rose-400' : 'text-rose-100'}`,
 
-  // Section headings — blue color, uses shared base classes
-  sectionTitle: (previewSectionTitleClasses) => `${previewSectionTitleClasses} text-blue-600`,
+  // Section headings — rose color, uses shared base classes
+  sectionTitle: (previewSectionTitleClasses) => `${previewSectionTitleClasses} text-rose-600`,
 
   // Main content section — dark rounded card with border
   mainSection: (isDark) => isDark
     ? 'rounded-3xl border border-gray-800 bg-black/50 p-5 sm:p-6 print:border-0 print:px-0'
     : 'rounded-3xl border border-black/10 bg-gray-50/80 p-5 sm:p-6 print:border-0 print:px-0',
 
-  // Sidebar container — blue-tinted background with rounded corners
+  // Sidebar container — rose-tinted background with rounded corners
   sideContainer: (isDark) => isDark
-    ? 'space-y-6 rounded-2xl border border-blue-900/40 bg-blue-950/30 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
-    : 'space-y-6 rounded-2xl border border-blue-100 bg-blue-50/60 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0',
+    ? 'space-y-6 rounded-2xl border border-rose-900/40 bg-rose-950/30 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0'
+    : 'space-y-6 rounded-2xl border border-rose-100 bg-rose-50/60 p-5 sm:space-y-6 sm:p-6 print:rounded-none print:bg-transparent print:p-0',
 
-  // Individual sidebar section — blue-tinted card
+  // Individual sidebar section — rose-tinted card
   sideSection: (isDark) => isDark
-    ? 'rounded-xl border border-blue-900/30 bg-black/30 p-4 print:border-0 print:px-0'
-    : 'rounded-xl border border-blue-100 bg-white/80 p-4 print:border-0 print:px-0',
+    ? 'rounded-xl border border-rose-900/30 bg-black/30 p-4 print:border-0 print:px-0'
+    : 'rounded-xl border border-rose-100 bg-white/80 p-4 print:border-0 print:px-0',
 
-  // Skill tag pill — blue fill with border
+  // Skill tag pill — rose fill with border
   skillTag: (isDark) => isDark
-    ? 'rounded-lg border border-blue-800 bg-blue-900/40 px-3 py-1.5 text-xs font-semibold text-blue-300'
-    : 'rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700',
+    ? 'rounded-lg border border-rose-800 bg-rose-900/40 px-3 py-1.5 text-xs font-semibold text-rose-300'
+    : 'rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700',
 
-  // Timeline left-border color — blue
-  timelineBorder: (isDark) => isDark ? 'border-blue-800' : 'border-blue-300',
+  // Timeline left-border color — rose
+  timelineBorder: (isDark) => isDark ? 'border-rose-800' : 'border-rose-300',
 
-  // Timeline dot circle color — blue fill
-  timelineDot: (isDark) => isDark ? 'border-gray-950 bg-blue-400' : 'border-white bg-blue-600',
+  // Timeline dot circle color — rose fill
+  timelineDot: (isDark) => isDark ? 'border-gray-950 bg-rose-400' : 'border-white bg-rose-600',
 
   // Education card — dark rounded card
   educationCard: (isDark) => isDark
@@ -56,13 +59,13 @@ export default {
   // Split-column grid — standard ratios
   splitColumns: () => 'grid gap-5 sm:gap-6 md:grid-cols-[minmax(0,1.62fr)_minmax(200px,0.88fr)] md:gap-8 print:grid-cols-1',
 
-  // Accent color — blue for ATS mode badge tinting
-  accentColor: () => ({ light: 'blue', dark: 'blue' }),
+  // Accent color — rose for ATS mode badge tinting
+  accentColor: () => ({ light: 'rose', dark: 'rose' }),
 
-  // Summary badge — blue border and fill
+  // Summary badge — rose border and fill
   summaryBadge: (isDark) => isDark
-    ? 'border border-blue-800 bg-blue-900/40 text-blue-300'
-    : 'border border-blue-200 bg-blue-50 text-blue-700',
+    ? 'border border-rose-800 bg-rose-900/40 text-rose-300'
+    : 'border border-rose-200 bg-rose-50 text-rose-700',
 
   // Profile photo border — adapts to dark/light mode
   photoBorder: (isDark) => isDark ? 'border-white/15' : 'border-black/10',

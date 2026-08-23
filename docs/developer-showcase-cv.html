@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Developer Showcase CV — Premium Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       Developer Showcase — refined premium edition
+       Design language: modern full-stack developer portfolio resume
+       Palette: deep slate base + vibrant teal / blue / purple / pink
+       Principles: color-coded skills, gradient accents, soft cards,
+                   subtle grid + blobs, strong hierarchy, print-ready
+       ============================================================ */
+
+    :root {
+      /* Core */
+      --dev-bg: #0f172a;
+      --dev-surface: #1e293b;
+      --dev-surface-2: #334155;
+      --dev-border: #334155;
+      --dev-text: #f1f5f9;
+      --dev-muted: #94a3b8;
+      --dev-primary: #e2e8f0;
+
+      /* Accent spectrum */
+      --dev-blue: #3b82f6;
+      --dev-teal: #14b8a6;
+      --dev-purple: #a855f7;
+      --dev-pink: #ec4899;
+      --dev-orange: #f97316;
+      --dev-green: #22c55e;
+
+      /* Light page (print-friendly main canvas) */
+      --page-bg: #ffffff;
+      --page-text: #0f172a;
+      --page-muted: #64748b;
+      --page-border: #e2e8f0;
+      --page-subtle: #f8fafc;
+
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+      --page-pad: 40px;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @page { size: A4; margin: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: 10.5px;
+      line-height: 1.5;
+      color: var(--page-text);
+      background: #0f172a;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---------- Page ---------- */
+    .cv {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 28px auto;
+      background: var(--page-bg);
+      box-shadow: 0 25px 60px -15px rgb(0 0 0 / 0.45);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative background (non-print / export-ignore) */
+    .cv__bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.18;
+    }
+    .blob--teal  { width: 280px; height: 280px; background: var(--dev-teal);  top: -80px; right: -60px; }
+    .blob--purple{ width: 220px; height: 220px; background: var(--dev-purple); bottom: 20%; left: -80px; }
+    .blob--blue  { width: 180px; height: 180px; background: var(--dev-blue);  bottom: -40px; right: 15%; }
+
+    .grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 20%, transparent 70%);
+    }
+
+    /* ========== HEADER ========== */
+    .header {
+      position: relative;
+      z-index: 1;
+      padding: 32px var(--page-pad) 24px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: start;
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border-bottom: 1px solid var(--page-border);
+    }
+
+    .kicker {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--dev-teal);
+      margin-bottom: 8px;
+      font-family: var(--font-mono);
+    }
+
+    .name {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 4px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e40af 45%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .name--solid {
+      background: none;
+      color: var(--page-text);
+    }
+
+    .role {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--page-muted);
+      margin-bottom: 14px;
+    }
+
+    .contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 16px;
+    }
+
+    .contact-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: var(--page-muted);
+    }
+
+    .contact-item svg {
+      width: 12px;
+      height: 12px;
+      color: var(--dev-teal);
+      flex-shrink: 0;
+    }
+
+    /* Photo with ring */
+    .photo-wrap {
+      position: relative;
+      width: 96px;
+      height: 96px;
+      flex-shrink: 0;
+    }
+
+    .photo-ring {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, var(--dev-teal), var(--dev-blue), var(--dev-purple));
+    }
+
+    .photo-ring-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--page-bg);
+      border: 2px solid white;
+    }
+
+    .photo-ring-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-dot {
+      position: absolute;
+      bottom: 4px;
+      right: 6px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--dev-green);
+      border: 2.5px solid white;
+      box-shadow: 0 1px 4px rgb(0 0 0 / 0.15);
+    }
+
+    /* ========== BODY ========== */
+    .body {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 210px minmax(0, 1fr);
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Sidebar — dark developer panel */
+    .sidebar {
+      background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+      color: var(--dev-text);
+      padding: 24px 18px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .main {
+      padding: 24px var(--page-pad) 32px 28px;
+      background: var(--page-bg);
+    }
+
+    /* ========== SECTION ========== */
+    .section {
+      margin-bottom: 0;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .sidebar .section-title {
+      color: #f1f5f9;
+    }
+
+    .main .section-title {
+      color: var(--page-text);
+    }
+
+    .section-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: white;
+    }
+
+    .section-icon svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .section-divider {
+      height: 1px;
+      background: currentColor;
+      opacity: 0.12;
+      margin-bottom: 12px;
+    }
+
+    .sidebar .section-divider {
+      background: #475569;
+      opacity: 1;
+    }
+
+    .main .section-divider {
+      background: var(--page-border);
+      opacity: 1;
+    }
+
+    /* ========== SIDEBAR CONTENT ========== */
+    .skill-group {
+      margin-bottom: 12px;
+    }
+    .skill-group:last-child { margin-bottom: 0; }
+
+    .skill-group-label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dev-muted);
+      margin-bottom: 6px;
+      font-family: var(--font-mono);
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .skill-tag {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.01em;
+    }
+
+    .skill-tag--blue   { background: rgba(59, 130, 246, 0.2);  color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.35); }
+    .skill-tag--purple { background: rgba(168, 85, 247, 0.2);  color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.35); }
+    .skill-tag--orange { background: rgba(249, 115, 22, 0.2);  color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.35); }
+    .skill-tag--teal   { background: rgba(20, 184, 166, 0.2);  color: #5eead4; border: 1px solid rgba(20, 184, 166, 0.35); }
+    .skill-tag--pink   { background: rgba(236, 72, 153, 0.2);  color: #f9a8d4; border: 1px solid rgba(236, 72, 153, 0.35); }
+    .skill-tag--green  { background: rgba(34, 197, 94, 0.2);   color: #86efac; border: 1px solid rgba(34, 197, 94, 0.35); }
+    .skill-tag--gray   { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; border: 1px solid rgba(148, 163, 184, 0.3); }
+
+    /* Links */
+    .link-card {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .link-card:last-child { margin-bottom: 0; }
+
+    .link-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--dev-teal);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .link-icon svg { width: 100%; height: 100%; }
+
+    .link-label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dev-muted);
+      font-family: var(--font-mono);
+    }
+
+    .link-value {
+      font-size: 10px;
+      color: #e2e8f0;
+      word-break: break-all;
+      margin-top: 1px;
+    }
+
+    /* Certificates */
+    .cert-card {
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(71, 85, 105, 0.6);
+    }
+    .cert-card:last-child { margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+
+    .cert-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .cert-meta {
+      font-size: 9.5px;
+      color: var(--dev-muted);
+      margin-top: 2px;
+    }
+
+    .cert-link {
+      font-size: 9px;
+      color: var(--dev-teal);
+      text-decoration: none;
+      margin-top: 3px;
+      display: inline-block;
+    }
+
+    /* Education */
+    .edu-item {
+      margin-bottom: 12px;
+    }
+    .edu-item:last-child { margin-bottom: 0; }
+
+    .edu-degree {
+      font-size: 11px;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+
+    .edu-meta {
+      font-size: 9.5px;
+      color: var(--dev-muted);
+      margin-top: 2px;
+    }
+
+    /* Languages */
+    .lang-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10.5px;
+      color: #e2e8f0;
+      margin-bottom: 6px;
+    }
+    .lang-item:last-child { margin-bottom: 0; }
+
+    .lang-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--dev-teal);
+      flex-shrink: 0;
+    }
+
+    .lang-level {
+      color: var(--dev-muted);
+      font-size: 9.5px;
+    }
+
+    /* ========== MAIN CONTENT ========== */
+    .summary {
+      font-size: 11px;
+      line-height: 1.65;
+      color: #334155;
+      text-align: justify;
+      margin-bottom: 22px;
+    }
+
+    /* Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 22px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 16px 1fr;
+      gap: 12px;
+      position: relative;
+    }
+
+    .timeline-item:not(:last-child) {
+      padding-bottom: 18px;
+    }
+
+    .timeline-rail {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 5px;
+    }
+
+    .timeline-marker {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--dev-teal), var(--dev-blue));
+      border: 2px solid white;
+      box-shadow: 0 0 0 1.5px var(--dev-teal);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .timeline-line {
+      flex: 1;
+      width: 2px;
+      background: linear-gradient(180deg, var(--dev-teal), #e2e8f0);
+      margin-top: 4px;
+      min-height: 12px;
+      border-radius: 1px;
+    }
+
+    .timeline-item:last-child .timeline-line { display: none; }
+
+    .timeline-card { min-width: 0; }
+
+    .role-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 3px;
+    }
+
+    .role-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--page-text);
+      letter-spacing: -0.01em;
+    }
+
+    .company {
+      font-size: 10.5px;
+      color: var(--page-muted);
+      margin-top: 1px;
+    }
+
+    .dates {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--dev-teal);
+      white-space: nowrap;
+      font-family: var(--font-mono);
+    }
+
+    .bullets {
+      list-style: none;
+      margin-top: 7px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bullets li {
+      position: relative;
+      padding-left: 12px;
+      font-size: 10.5px;
+      line-height: 1.55;
+      color: #334155;
+    }
+
+    .bullets li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 7px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--dev-teal);
+      opacity: 0.7;
+    }
+
+    /* Project / achievement / opensource cards */
+    .card-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .project-card,
+    .achievement-card,
+    .opensource-card,
+    .publication-item {
+      background: var(--page-subtle);
+      border: 1px solid var(--page-border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      transition: border-color 0.15s ease;
+    }
+
+    .project-name,
+    .opensource-name,
+    .achievement-title,
+    .publication-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--page-text);
+      letter-spacing: -0.01em;
+    }
+
+    .project-desc,
+    .opensource-desc,
+    .achievement-desc {
+      font-size: 10.5px;
+      color: #475569;
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+
+    .chip--blue   { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .chip--teal   { background: #f0fdfa; color: #0f766e; border: 1px solid #99f6e4; }
+    .chip--purple { background: #faf5ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+    .chip--orange { background: #fff7ed; color: #c2410c; border: 1px solid #fed7aa; }
+    .chip--green  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+    .chip--pink   { background: #fdf2f8; color: #be185d; border: 1px solid #fbcfe8; }
+
+    .link-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .link-btn {
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 5px;
+      text-decoration: none;
+      border: 1px solid var(--page-border);
+      color: #475569;
+      background: white;
+    }
+
+    .link-btn--primary {
+      background: linear-gradient(135deg, var(--dev-teal), var(--dev-blue));
+      color: white;
+      border: none;
+    }
+
+    /* Achievements */
+    .achievement-card {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .trophy-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--dev-orange), var(--dev-pink));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .trophy-icon svg { width: 14px; height: 14px; }
+
+    .achievement-title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .achievement-year {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--dev-orange);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+
+    /* Open source meta */
+    .opensource-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 5px;
+      font-size: 10px;
+      color: var(--page-muted);
+    }
+
+    .opensource-meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .opensource-meta-item .lang-dot {
+      background: var(--dev-blue);
+    }
+
+    /* Publications */
+    .publication-meta {
+      font-size: 10px;
+      color: var(--page-muted);
+      margin-top: 3px;
+    }
+
+    /* Empty */
+    .empty {
+      font-size: 10px;
+      color: var(--page-muted);
+      font-style: italic;
+    }
+
+    /* ========== PRINT ========== */
+    @media print {
+      body { background: white; }
+      .cv {
+        margin: 0;
+        box-shadow: none;
+        width: 100%;
+        min-height: auto;
+      }
+      .cv__bg { display: none; }
+      .blob, .grid { display: none; }
+    }
+
+    @media (max-width: 800px) {
+      .cv { width: 100%; margin: 0; box-shadow: none; }
+      .body { grid-template-columns: 1fr; }
+      .sidebar { order: 2; }
+      .main { order: 1; padding: 24px var(--page-pad); }
+    }
+  </style>
+</head>
+<body>
+  <article class="cv" data-export-root="true" data-export-variant="developer">
+
+    <!-- Decorative background (export-ignore) -->
+    <div class="cv__bg" data-export-ignore="true" aria-hidden="true">
+      <span class="blob blob--teal"></span>
+      <span class="blob blob--purple"></span>
+      <span class="blob blob--blue"></span>
+      <span class="grid"></span>
+    </div>
+
+    <!-- ========== HEADER ========== -->
+    <header class="header" data-export-header="true">
+      <div>
+        <p class="kicker">Developer · Template</p>
+        <h1 class="name">Jordan Blake</h1>
+        <p class="role">Senior Full-Stack Engineer · Platform & Infrastructure</p>
+        <div class="contact">
+          <span class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            jordan.blake@devmail.io
+          </span>
+          <span class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            +1 (628) 555-0147
+          </span>
+          <span class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            Austin, TX
+          </span>
+        </div>
+      </div>
+
+      <div class="photo-wrap">
+        <div class="photo-ring">
+          <div class="photo-ring-inner">
+            <img
+              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces"
+              alt="Jordan Blake profile"
+              data-export-photo="true"
+            />
+          </div>
+        </div>
+        <span class="photo-dot" aria-hidden="true"></span>
+      </div>
+    </header>
+
+    <!-- ========== BODY ========== -->
+    <div class="body" data-export-content="true">
+
+      <!-- SIDEBAR (dark) -->
+      <aside class="sidebar" data-export-secondary="true">
+
+        <!-- Skills -->
+        <section class="section" data-export-section="skills" data-export-placement="side">
+          <div class="section-title">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--dev-blue), var(--dev-teal));">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </span>
+            Skills
+          </div>
+          <div class="section-divider"></div>
+
+          <div class="skill-group">
+            <p class="skill-group-label">Languages</p>
+            <div class="skill-tags">
+              <span class="skill-tag skill-tag--blue" data-export-skill="true">TypeScript</span>
+              <span class="skill-tag skill-tag--blue" data-export-skill="true">Python</span>
+              <span class="skill-tag skill-tag--blue" data-export-skill="true">Go</span>
+              <span class="skill-tag skill-tag--blue" data-export-skill="true">Rust</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label">Frameworks</p>
+            <div class="skill-tags">
+              <span class="skill-tag skill-tag--purple" data-export-skill="true">React</span>
+              <span class="skill-tag skill-tag--purple" data-export-skill="true">Next.js</span>
+              <span class="skill-tag skill-tag--purple" data-export-skill="true">Node.js</span>
+              <span class="skill-tag skill-tag--purple" data-export-skill="true">FastAPI</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label">Cloud & DevOps</p>
+            <div class="skill-tags">
+              <span class="skill-tag skill-tag--teal" data-export-skill="true">AWS</span>
+              <span class="skill-tag skill-tag--teal" data-export-skill="true">Kubernetes</span>
+              <span class="skill-tag skill-tag--pink" data-export-skill="true">Terraform</span>
+              <span class="skill-tag skill-tag--pink" data-export-skill="true">CI/CD</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label">Databases</p>
+            <div class="skill-tags">
+              <span class="skill-tag skill-tag--orange" data-export-skill="true">PostgreSQL</span>
+              <span class="skill-tag skill-tag--orange" data-export-skill="true">Redis</span>
+              <span class="skill-tag skill-tag--orange" data-export-skill="true">DynamoDB</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Links -->
+        <section class="section" data-export-section="links" data-export-placement="side">
+          <div class="section-title">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--dev-purple), var(--dev-blue));">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </span>
+            Links
+          </div>
+          <div class="section-divider"></div>
+
+          <div class="link-card" data-export-card="true">
+            <span class="link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+            </span>
+            <div>
+              <p class="link-label">GitHub</p>
+              <p class="link-value">github.com/jordanblake</p>
+            </div>
+          </div>
+          <div class="link-card" data-export-card="true">
+            <span class="link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            </span>
+            <div>
+              <p class="link-label">LinkedIn</p>
+              <p class="link-value">linkedin.com/in/jordanblake</p>
+            </div>
+          </div>
+          <div class="link-card" data-export-card="true">
+            <span class="link-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+            </span>
+            <div>
+              <p class="link-label">Portfolio</p>
+              <p class="link-value">jordanblake.dev</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Certificates -->
+        <section class="section" data-export-section="certificates" data-export-placement="side">
+          <div class="section-title">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--dev-green), var(--dev-teal));">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v7"/><path d="m9 18 3-3 3 3"/><circle cx="12" cy="8" r="6"/></svg>
+            </span>
+            Certificates
+          </div>
+          <div class="section-divider"></div>
+
+          <div class="cert-card" data-export-card="true">
+            <p class="cert-name">AWS Solutions Architect</p>
+            <p class="cert-meta">Amazon · 2023</p>
+          </div>
+          <div class="cert-card" data-export-card="true">
+            <p class="cert-name">CKA — Kubernetes Admin</p>
+            <p class="cert-meta">CNCF · 2022</p>
+          </div>
+        </section>
+
+        <!-- Education -->
+        <section class="section" data-export-section="education" data-export-placement="side">
+          <div class="section-title">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--dev-orange), var(--dev-purple));">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+            </span>
+            Education
+          </div>
+          <div class="section-divider"></div>
+
+          <div class="edu-item" data-export-card="true">
+            <p class="edu-degree">B.S. Computer Science</p>
+            <p class="edu-meta">University of Texas · Austin</p>
+            <p class="edu-meta">2014 — 2018</p>
+          </div>
+        </section>
+
+        <!-- Languages -->
+        <section class="section" data-export-section="languages" data-export-placement="side">
+          <div class="section-title">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--dev-pink), var(--dev-purple));">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+            </span>
+            Languages
+          </div>
+          <div class="section-divider"></div>
+
+          <div class="lang-item">
+            <span class="lang-dot"></span>
+            <span>English</span>
+            <span class="lang-level">— Native</span>
+          </div>
+          <div class="lang-item">
+            <span class="lang-dot"></span>
+            <span>Spanish</span>
+            <span class="lang-level">— Conversational</span>
+          </div>
+        </section>
+      </aside>
+
+      <!-- MAIN -->
+      <main class="main" data-export-primary="true">
+
+        <!-- Summary -->
+        <section class="section" data-export-section="about" data-export-placement="main">
+          <div class="section-title">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--dev-blue), var(--dev-purple));">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </span>
+            Summary
+          </div>
+          <div class="section-divider"></div>
+          <p class="summary">
+            Senior full-stack engineer with 8+ years building high-scale platforms and developer tooling. Specialized in TypeScript, distributed systems, and cloud-native infrastructure. Led teams that shipped products serving 10M+ users. Passionate about clean architecture, observability, and open-source contribution. Currently focused on platform engineering and internal developer experience.
+          </p>
+        </section>
+
+        <!-- Experience -->
+        <section class="section" data-export-section="experience" data-export-placement="main">
+          <div class="section-title">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--dev-teal), var(--dev-blue));">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </span>
+            Experience
+          </div>
+          <div class="section-divider"></div>
+
+          <div class="timeline">
+            <div class="timeline-item" data-export-card="true">
+              <div class="timeline-rail">
+                <span class="timeline-marker"></span>
+                <span class="timeline-line"></span>
+              </div>
+              <div class="timeline-card">
+                <div class="role-row">
+                  <div>
+                    <p class="role-title">Senior Software Engineer</p>
+                    <p class="company">Nimbus Cloud · Austin</p>
+                  </div>
+                  <p class="dates">2021 — Present</p>
+                </div>
+                <ul class="bullets">
+                  <li>Architected multi-tenant control plane serving 2.4M daily active tenants with 99.99% uptime.</li>
+                  <li>Reduced mean time to recovery by 65% by introducing distributed tracing and SLO-based alerting.</li>
+                  <li>Mentored 6 engineers; established RFC process and design review culture across the platform org.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="timeline-item" data-export-card="true">
+              <div class="timeline-rail">
+                <span class="timeline-marker"></span>
+                <span class="timeline-line"></span>
+              </div>
+              <div class="timeline-card">
+                <div class="role-row">
+                  <div>
+                    <p class="role-title">Software Engineer II</p>
+                    <p class="company">PixelForge · Remote</p>
+                  </div>
+                  <p class="dates">2018 — 2021</p>
+                </div>
+                <ul class="bullets">
+                  <li>Built real-time collaboration engine (CRDTs + WebSockets) powering the core product experience.</li>
+                  <li>Migrated monolith to event-driven microservices; cut deploy cycle from weekly to multiple times per day.</li>
+                  <li>Open-sourced internal feature-flag library — 1.8k GitHub stars within first year.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="timeline-item" data-export-card="true">
+              <div class="timeline-rail">
+                <span class="timeline-marker"></span>
+                <span class="timeline-line"></span>
+              </div>
+              <div class="timeline-card">
+                <div class="role-row">
+                  <div>
+                    <p class="role-title">Junior Developer</p>
+                    <p class="company">Startly · Austin</p>
+                  </div>
+                  <p class="dates">2016 — 2018</p>
+                </div>
+                <ul class="bullets">
+                  <li>Shipped customer-facing React dashboard and Node API for a B2B analytics product.</li>
+                  <li>Implemented automated testing and CI that reduced production regressions by ~40%.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Projects -->
+        <section class="section" data-export-section="projects" data-export-placement="main">
+          <div class="section-title">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--dev-purple), var(--dev-pink));">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </span>
+            Projects
+          </div>
+          <div class="section-divider"></div>
+
+          <div class="card-grid">
+            <div class="project-card" data-export-card="true">
+              <p class="project-name">Flux Queue — Distributed Job System</p>
+              <p class="project-desc">High-throughput job queue with exactly-once semantics, priority lanes, and horizontal scaling. Used in production by three internal teams.</p>
+              <div class="chip-row">
+                <span class="chip chip--blue">Go</span>
+                <span class="chip chip--teal">Redis</span>
+                <span class="chip chip--purple">gRPC</span>
+                <span class="chip chip--orange">Kubernetes</span>
+              </div>
+              <div class="link-row">
+                <a href="#" class="link-btn">GitHub</a>
+                <a href="#" class="link-btn link-btn--primary">Live Demo</a>
+              </div>
+            </div>
+
+            <div class="project-card" data-export-card="true">
+              <p class="project-name">Schema Diff — Database Migration Tool</p>
+              <p class="project-desc">CLI + GitHub Action that generates safe, reviewable migration plans from schema changes. Adopted by 40+ repositories.</p>
+              <div class="chip-row">
+                <span class="chip chip--blue">TypeScript</span>
+                <span class="chip chip--green">PostgreSQL</span>
+                <span class="chip chip--pink">GitHub Actions</span>
+              </div>
+              <div class="link-row">
+                <a href="#" class="link-btn">GitHub</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Achievements -->
+        <section class="section" data-export-section="achievements" data-export-placement="main">
+          <div class="section-title">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--dev-orange), var(--dev-pink));">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+            </span>
+            Achievements
+          </div>
+          <div class="section-divider"></div>
+
+          <div class="card-grid">
+            <div class="achievement-card" data-export-card="true">
+              <span class="trophy-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+              </span>
+              <div>
+                <div class="achievement-title-row">
+                  <p class="achievement-title">Staff Engineer Promotion Track</p>
+                  <p class="achievement-year">2025</p>
+                </div>
+                <p class="achievement-desc">Selected for staff track after leading the multi-tenant platform rewrite.</p>
+              </div>
+            </div>
+            <div class="achievement-card" data-export-card="true">
+              <span class="trophy-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+              </span>
+              <div>
+                <div class="achievement-title-row">
+                  <p class="achievement-title">Open Source Impact Award — Internal</p>
+                  <p class="achievement-year">2023</p>
+                </div>
+                <p class="achievement-desc">Recognized for feature-flag library adoption across the company and external community.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Open Source -->
+        <section class="section" data-export-section="openSource" data-export-placement="main">
+          <div class="section-title">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--dev-teal), var(--dev-green));">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+            </span>
+            Open Source
+          </div>
+          <div class="section-divider"></div>
+
+          <div class="card-grid">
+            <div class="opensource-card" data-export-card="true">
+              <p class="opensource-name">feature-flags</p>
+              <div class="opensource-meta">
+                <span class="opensource-meta-item"><span class="lang-dot"></span> TypeScript</span>
+                <span class="opensource-meta-item">★ 1.8k</span>
+                <span class="opensource-meta-item">⑂ 214</span>
+              </div>
+              <p class="opensource-desc">Lightweight, typed feature-flag library with React hooks and edge-runtime support.</p>
+            </div>
+            <div class="opensource-card" data-export-card="true">
+              <p class="opensource-name">schema-diff</p>
+              <div class="opensource-meta">
+                <span class="opensource-meta-item"><span class="lang-dot"></span> TypeScript</span>
+                <span class="opensource-meta-item">★ 620</span>
+                <span class="opensource-meta-item">⑂ 48</span>
+              </div>
+              <p class="opensource-desc">Safe schema migration planner for PostgreSQL with GitHub Action integration.</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </article>
+</body>
+</html>

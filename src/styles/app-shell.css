@@ -2300,6 +2300,24 @@ select.floating-field__control {
   animation: none !important;
 }
 
+/* Several bespoke Showcases (Developer, Creative) give their sections a
+   CSS entrance animation (e.g. fade-up) for the live preview. A cloned
+   node re-triggers that animation from its "from" keyframe the moment it's
+   inserted into the export sandbox, and html2canvas only waits a couple of
+   animation frames before capturing — nowhere near a ~300ms fade's actual
+   duration. The result: whole sections get rasterized mid-fade, at
+   near-zero opacity, and silently vanish from the export (confirmed by
+   rendering a real export to an image — header and sidebar background
+   present, every section's actual content missing). `animation: none` on
+   `.pdf-export-root` itself (above) only covers that one root element, not
+   its descendants, so it never reached this. Force every descendant to its
+   settled end-state instead of relying on capture timing. */
+.pdf-export-root *,
+.pdf-export-root *::before,
+.pdf-export-root *::after {
+  animation: none !important;
+}
+
 .pdf-export-root[data-export-root='true'] {
   border: 0 !important;
 }

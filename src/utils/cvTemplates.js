@@ -61,15 +61,15 @@ const templateMap = {
   modern: {
     id: 'modern',
     label: 'Modern Professional',
-    description: 'Consulting-style layout with a blue timeline and circular photo — built for a clear, step-by-step career story.',
+    description: 'Consulting-style layout with a rose timeline and circular photo — built for a clear, step-by-step career story.',
     variant: 'modern',
     layout: 'split',
     primarySections: ['about', 'experience', 'education', 'projects', 'achievements'],
     secondarySections: ['skills', 'languages', 'certificates', 'links', 'interests'],
     summaryBadgeLabel: 'Summary',
     thumbnail: {
-      accentClassName: 'bg-blue-600',
-      surfaceClassName: 'bg-blue-50',
+      accentClassName: 'bg-rose-600',
+      surfaceClassName: 'bg-rose-50',
       primaryRatioClassName: 'grid-cols-[1.5fr_0.8fr]',
       titleWidthClassName: 'w-24',
       subtitleWidthClassName: 'w-20',
@@ -272,7 +272,7 @@ const templateLocalization = {
     },
     modern: {
       label: 'Moderni ammattilainen',
-      description: 'Konsulttityylinen asettelu, sininen aikajana ja pyöreä profiilikuva — selkeä, vaihe vaiheelta etenevä uratarina.',
+      description: 'Konsulttityylinen asettelu, roosa aikajana ja pyöreä profiilikuva — selkeä, vaihe vaiheelta etenevä uratarina.',
       summaryBadgeLabel: 'Yhteenveto',
       chips: ['Kokemus', 'Taidot'],
     },
