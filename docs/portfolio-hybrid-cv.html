@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio Hybrid CV — Premium Template</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       Portfolio Showcase — refined premium edition
+       Design language: portfolio website condensed into a résumé
+       Hero = Featured Projects (premium cards, colorful chips, CTAs)
+       Sidebar Tech Stack = category-colored badges
+       Palette: warm ivory + deep ink + emerald / sky / violet accents
+       ============================================================ */
+
+    :root {
+      --ink: #0c1222;
+      --ink-soft: #1a2332;
+      --ink-muted: #4a5568;
+      --ink-faint: #718096;
+      --surface: #ffffff;
+      --surface-2: #f7f8fa;
+      --surface-3: #eef0f4;
+      --border: #e2e6ee;
+      --border-soft: #eef1f6;
+
+      --emerald: #059669;
+      --emerald-soft: #d1fae5;
+      --teal: #0d9488;
+      --sky: #0284c7;
+      --sky-soft: #e0f2fe;
+      --violet: #7c3aed;
+      --violet-soft: #ede9fe;
+      --pink: #db2777;
+      --pink-soft: #fce7f3;
+      --green: #16a34a;
+      --green-soft: #dcfce7;
+      --orange: #ea580c;
+      --orange-soft: #ffedd5;
+      --blue: #2563eb;
+      --blue-soft: #dbeafe;
+      --gray: #64748b;
+      --gray-soft: #f1f5f9;
+
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+
+      --page-pad: 40px;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @page { size: A4; margin: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      font-size: 10.5px;
+      line-height: 1.55;
+      color: var(--ink);
+      background: #1a1f2e;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .cv {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 28px auto;
+      background: var(--surface);
+      box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.5);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Subtle top accent */
+    .cv::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--emerald) 0%, var(--sky) 40%, var(--violet) 100%);
+      z-index: 2;
+    }
+
+    /* ========== HEADER ========== */
+    .header {
+      padding: 36px var(--page-pad) 28px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 28px;
+      align-items: start;
+      background:
+        radial-gradient(ellipse 80% 120% at 100% 0%, rgba(5, 150, 105, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 100% at 0% 100%, rgba(2, 132, 199, 0.05) 0%, transparent 45%),
+        linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .kicker {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--emerald);
+      margin-bottom: 10px;
+    }
+
+    .name {
+      font-family: var(--font-serif);
+      font-size: 34px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .role {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      margin-bottom: 4px;
+    }
+
+    .tagline {
+      font-size: 11.5px;
+      font-style: italic;
+      color: var(--ink-muted);
+      margin-bottom: 14px;
+      max-width: 420px;
+      line-height: 1.45;
+    }
+
+    .contact {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 16px;
+    }
+
+    .contact-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+      color: var(--ink-faint);
+    }
+
+    .contact-item svg {
+      width: 12px;
+      height: 12px;
+      color: var(--emerald);
+      flex-shrink: 0;
+    }
+
+    /* Photo */
+    .photo-wrap {
+      width: 100px;
+      height: 100px;
+      flex-shrink: 0;
+    }
+
+    .photo-ring {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      padding: 3px;
+      background: linear-gradient(135deg, var(--emerald), var(--sky), var(--violet));
+      box-shadow: 0 8px 24px -6px rgba(5, 150, 105, 0.35);
+    }
+
+    .photo-ring img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 2.5px solid white;
+      display: block;
+    }
+
+    /* ========== BODY ========== */
+    .body {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+      flex: 1;
+      min-height: 0;
+    }
+
+    .main {
+      padding: 26px var(--page-pad) 36px 0;
+      padding-left: var(--page-pad);
+      border-right: 1px solid var(--border);
+    }
+
+    .sidebar {
+      padding: 26px 22px 36px 20px;
+      background: var(--surface-2);
+    }
+
+    /* ========== SECTION ========== */
+    .section {
+      margin-bottom: 26px;
+    }
+    .section:last-child { margin-bottom: 0; }
+
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .section-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--emerald), var(--teal));
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px -2px rgba(5, 150, 105, 0.4);
+    }
+    .section-icon svg { width: 14px; height: 14px; }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+
+    .section-subtitle {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--ink-faint);
+      margin-top: 1px;
+    }
+
+    /* ========== ABOUT ========== */
+    .summary {
+      font-size: 11.5px;
+      line-height: 1.7;
+      color: var(--ink-muted);
+      text-align: justify;
+    }
+
+    /* ========== FEATURED PROJECTS (hero) ========== */
+    .project-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgb(0 0 0 / 0.04);
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--emerald), var(--sky));
+      border-radius: 3px 0 0 3px;
+    }
+
+    .project-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+    }
+
+    .project-desc {
+      font-size: 11px;
+      color: var(--ink-muted);
+      line-height: 1.55;
+      margin-bottom: 6px;
+    }
+
+    .project-impact {
+      font-size: 10.5px;
+      color: var(--ink-soft);
+      line-height: 1.5;
+      margin-bottom: 8px;
+      padding: 6px 10px;
+      background: linear-gradient(90deg, rgba(5, 150, 105, 0.06), transparent);
+      border-radius: 6px;
+      border-left: 2px solid var(--emerald);
+    }
+
+    .metric {
+      font-weight: 700;
+      color: var(--emerald);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+
+    .chip {
+      font-size: 9px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 5px;
+      letter-spacing: 0.01em;
+    }
+
+    .chip--emerald { background: var(--emerald-soft); color: #047857; border: 1px solid #a7f3d0; }
+    .chip--teal    { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+    .chip--sky     { background: var(--sky-soft); color: #0369a1; border: 1px solid #bae6fd; }
+    .chip--purple  { background: var(--violet-soft); color: #6d28d9; border: 1px solid #ddd6fe; }
+    .chip--green   { background: var(--green-soft); color: #15803d; border: 1px solid #bbf7d0; }
+    .chip--pink    { background: var(--pink-soft); color: #be185d; border: 1px solid #fbcfe8; }
+
+    .link-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .link-btn {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--ink-muted);
+      background: var(--surface);
+      transition: all 0.15s ease;
+    }
+
+    .link-btn--primary {
+      background: linear-gradient(135deg, var(--emerald), var(--teal));
+      color: white;
+      border: none;
+      box-shadow: 0 2px 8px -2px rgba(5, 150, 105, 0.45);
+    }
+
+    /* ========== EXPERIENCE ========== */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 16px 1fr;
+      gap: 12px;
+    }
+
+    .timeline-item:not(:last-child) {
+      padding-bottom: 18px;
+    }
+
+    .timeline-rail {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 5px;
+    }
+
+    .timeline-marker {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--emerald), var(--sky));
+      border: 2px solid white;
+      box-shadow: 0 0 0 1.5px var(--emerald);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .timeline-line {
+      flex: 1;
+      width: 2px;
+      background: linear-gradient(180deg, var(--emerald), var(--border));
+      margin-top: 4px;
+      min-height: 12px;
+      border-radius: 1px;
+    }
+
+    .timeline-item:last-child .timeline-line { display: none; }
+
+    .role-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 3px;
+    }
+
+    .role-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .company {
+      font-size: 10.5px;
+      color: var(--ink-faint);
+      margin-top: 1px;
+    }
+
+    .dates {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--emerald);
+      white-space: nowrap;
+    }
+
+    .bullets {
+      list-style: none;
+      margin-top: 7px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bullets li {
+      position: relative;
+      padding-left: 12px;
+      font-size: 10.5px;
+      line-height: 1.55;
+      color: var(--ink-muted);
+    }
+
+    .bullets li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 7px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--emerald);
+      opacity: 0.65;
+    }
+
+    /* ========== CASE STUDIES ========== */
+    .case-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .case-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .case-rows {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .case-row {
+      font-size: 10.5px;
+      color: var(--ink-muted);
+      line-height: 1.5;
+    }
+
+    .case-label {
+      font-weight: 700;
+      color: var(--ink-soft);
+      margin-right: 4px;
+    }
+
+    /* ========== OPEN SOURCE / EDU ========== */
+    .project-meta {
+      font-size: 10px;
+      color: var(--ink-faint);
+      margin-bottom: 4px;
+    }
+
+    .project-link {
+      font-size: 10px;
+      color: var(--sky);
+      margin-top: 4px;
+      word-break: break-all;
+    }
+
+    .edu-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .edu-item {
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .edu-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+    /* ========== TESTIMONIALS ========== */
+    .testimonial-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .testimonial-card {
+      background: linear-gradient(135deg, rgba(5, 150, 105, 0.04), rgba(2, 132, 199, 0.04));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      position: relative;
+    }
+
+    .testimonial-quote {
+      font-family: var(--font-serif);
+      font-size: 12.5px;
+      font-style: italic;
+      color: var(--ink-soft);
+      line-height: 1.55;
+      margin-bottom: 8px;
+    }
+
+    .testimonial-meta {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--ink-faint);
+    }
+
+    /* ========== SIDEBAR ========== */
+    .skill-group {
+      margin-bottom: 14px;
+    }
+    .skill-group:last-child { margin-bottom: 0; }
+
+    .skill-group-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 6px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .badge {
+      font-size: 9.5px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 5px;
+      letter-spacing: 0.01em;
+    }
+
+    .badge--blue   { background: var(--blue-soft); color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .badge--purple { background: var(--violet-soft); color: #6d28d9; border: 1px solid #ddd6fe; }
+    .badge--orange { background: var(--orange-soft); color: #c2410c; border: 1px solid #fed7aa; }
+    .badge--teal   { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+    .badge--pink   { background: var(--pink-soft); color: #be185d; border: 1px solid #fbcfe8; }
+    .badge--green  { background: var(--green-soft); color: #15803d; border: 1px solid #bbf7d0; }
+    .badge--gray   { background: var(--gray-soft); color: #475569; border: 1px solid #e2e8f0; }
+
+    /* List items (certs, langs, achievements) */
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .list-item {
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+    .list-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .list-item--row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      border-bottom: none;
+      padding-bottom: 0;
+      font-size: 11px;
+      color: var(--ink-soft);
+    }
+
+    .list-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .list-meta {
+      font-size: 9.5px;
+      color: var(--ink-faint);
+      margin-top: 1px;
+    }
+
+    .list-desc {
+      font-size: 10px;
+      color: var(--ink-muted);
+      margin-top: 2px;
+      line-height: 1.45;
+    }
+
+    .list-link {
+      font-size: 9.5px;
+      color: var(--sky);
+      text-decoration: none;
+      margin-top: 3px;
+      display: inline-block;
+    }
+
+    .list-item-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    /* Links */
+    .link-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .link-card {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .link-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--emerald);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .link-icon svg { width: 100%; height: 100%; }
+
+    .link-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    .link-value {
+      font-size: 10.5px;
+      color: var(--ink-soft);
+      word-break: break-all;
+      margin-top: 1px;
+    }
+
+    /* Interests */
+    .interest-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .interest-chip {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--ink-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    .empty {
+      font-size: 10px;
+      color: var(--ink-faint);
+      font-style: italic;
+    }
+
+    /* ========== PRINT ========== */
+    @media print {
+      body { background: white; }
+      .cv {
+        margin: 0;
+        box-shadow: none;
+        width: 100%;
+        min-height: auto;
+      }
+      .cv::before {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .cv { width: 100%; margin: 0; box-shadow: none; }
+      .body { grid-template-columns: 1fr; }
+      .main { border-right: none; border-bottom: 1px solid var(--border); padding-right: var(--page-pad); }
+      .sidebar { padding-left: var(--page-pad); }
+    }
+  </style>
+</head>
+<body>
+  <article class="cv" data-export-root="true" data-export-variant="portfolio">
+
+    <!-- ========== HEADER ========== -->
+    <header class="header" data-export-header="true">
+      <div>
+        <p class="kicker">Portfolio Hybrid · Template</p>
+        <h1 class="name">Sam Rivera</h1>
+        <p class="role">Product Designer &amp; Front-End Engineer</p>
+        <p class="tagline">Crafting thoughtful interfaces and systems that people actually enjoy using.</p>
+        <div class="contact">
+          <span class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            sam@rivera.design
+          </span>
+          <span class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            +1 (415) 555-0284
+          </span>
+          <span class="contact-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            Portland, OR
+          </span>
+        </div>
+      </div>
+
+      <div class="photo-wrap">
+        <div class="photo-ring">
+          <img
+            src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop&crop=faces"
+            alt="Sam Rivera profile"
+            data-export-photo="true"
+          />
+        </div>
+      </div>
+    </header>
+
+    <!-- ========== BODY ========== -->
+    <div class="body" data-export-content="true">
+
+      <!-- MAIN -->
+      <main class="main" data-export-primary="true">
+
+        <!-- About -->
+        <section class="section" data-export-section="about" data-export-placement="main">
+          <div class="section-head">
+            <span class="section-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <div>
+              <p class="section-title">About Me</p>
+              <p class="section-subtitle">A little about me</p>
+            </div>
+          </div>
+          <p class="summary">
+            Designer-engineer hybrid with 7+ years shipping product experiences from research through production code. I bridge design systems, accessibility, and front-end architecture so teams move faster without sacrificing craft. Previously led design systems at two growth-stage startups and contributed to open-source UI libraries used by thousands of developers.
+          </p>
+        </section>
+
+        <!-- Featured Projects (hero) -->
+        <section class="section" data-export-section="projects" data-export-placement="main">
+          <div class="section-head">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--violet), var(--sky));" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </span>
+            <div>
+              <p class="section-title">Featured Projects</p>
+              <p class="section-subtitle">Selected work</p>
+            </div>
+          </div>
+
+          <div class="project-grid">
+            <div class="project-card" data-export-card="true">
+              <p class="project-name">Orbit Design System</p>
+              <p class="project-desc">Multi-brand component library and tokens platform powering 4 product surfaces. Built with React, Storybook, and automated visual regression.</p>
+              <p class="project-impact">Adopted by <span class="metric">12 teams</span> · reduced UI defect rate by <span class="metric">40%</span> · cut design-to-dev handoff time by <span class="metric">2 days</span> per feature.</p>
+              <div class="chip-row">
+                <span class="chip chip--emerald">React</span>
+                <span class="chip chip--teal">TypeScript</span>
+                <span class="chip chip--sky">Storybook</span>
+                <span class="chip chip--purple">Figma API</span>
+              </div>
+              <div class="link-row">
+                <a href="#" class="link-btn">GitHub</a>
+                <a href="#" class="link-btn link-btn--primary">Live Demo</a>
+              </div>
+            </div>
+
+            <div class="project-card" data-export-card="true">
+              <p class="project-name">Pulse Analytics Dashboard</p>
+              <p class="project-desc">Real-time product analytics UI for non-technical stakeholders. Focused on progressive disclosure, accessible charts, and mobile-first layouts.</p>
+              <p class="project-impact">Drove <span class="metric">3.2×</span> increase in weekly active dashboards · NPS +28 among power users.</p>
+              <div class="chip-row">
+                <span class="chip chip--emerald">Next.js</span>
+                <span class="chip chip--sky">D3</span>
+                <span class="chip chip--green">Tailwind</span>
+                <span class="chip chip--pink">tRPC</span>
+              </div>
+              <div class="link-row">
+                <a href="#" class="link-btn">GitHub</a>
+                <a href="#" class="link-btn link-btn--primary">Live Demo</a>
+              </div>
+            </div>
+
+            <div class="project-card" data-export-card="true">
+              <p class="project-name">Accessible Form Kit</p>
+              <p class="project-desc">Open-source headless form primitives with full WCAG 2.2 AA coverage, validation patterns, and React Hook Form adapters.</p>
+              <div class="chip-row">
+                <span class="chip chip--emerald">React</span>
+                <span class="chip chip--teal">ARIA</span>
+                <span class="chip chip--purple">Vite</span>
+              </div>
+              <div class="link-row">
+                <a href="#" class="link-btn">GitHub</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Experience -->
+        <section class="section" data-export-section="experience" data-export-placement="main">
+          <div class="section-head">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--sky), var(--emerald));" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </span>
+            <div>
+              <p class="section-title">Professional Experience</p>
+            </div>
+          </div>
+
+          <div class="timeline">
+            <div class="timeline-item" data-export-card="true">
+              <div class="timeline-rail">
+                <span class="timeline-marker"></span>
+                <span class="timeline-line"></span>
+              </div>
+              <div>
+                <div class="role-row">
+                  <div>
+                    <p class="role-title">Staff Product Designer</p>
+                    <p class="company">Northwind Labs · Remote</p>
+                  </div>
+                  <p class="dates">2022 — Present</p>
+                </div>
+                <ul class="bullets">
+                  <li>Own design system and core product surfaces used by <span class="metric">80k+</span> monthly users.</li>
+                  <li>Partnered with engineering to ship design tokens pipeline — reduced theme bugs by <span class="metric">70%</span>.</li>
+                  <li>Mentored 4 designers; established critique and research synthesis rituals.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="timeline-item" data-export-card="true">
+              <div class="timeline-rail">
+                <span class="timeline-marker"></span>
+                <span class="timeline-line"></span>
+              </div>
+              <div>
+                <div class="role-row">
+                  <div>
+                    <p class="role-title">Senior Front-End Engineer</p>
+                    <p class="company">Brightpath · San Francisco</p>
+                  </div>
+                  <p class="dates">2019 — 2022</p>
+                </div>
+                <ul class="bullets">
+                  <li>Built and maintained the public marketing site and authenticated app shell in Next.js.</li>
+                  <li>Introduced component library that cut new-feature UI time by roughly <span class="metric">35%</span>.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="timeline-item" data-export-card="true">
+              <div class="timeline-rail">
+                <span class="timeline-marker"></span>
+                <span class="timeline-line"></span>
+              </div>
+              <div>
+                <div class="role-row">
+                  <div>
+                    <p class="role-title">Product Designer</p>
+                    <p class="company">Studio Kite · Portland</p>
+                  </div>
+                  <p class="dates">2017 — 2019</p>
+                </div>
+                <ul class="bullets">
+                  <li>End-to-end design for client products across fintech and education.</li>
+                  <li>Shipped interactive prototypes and production HTML/CSS for rapid validation.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Case Studies -->
+        <section class="section" data-export-section="caseStudies" data-export-placement="main">
+          <div class="section-head">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--orange), var(--pink));" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </span>
+            <div>
+              <p class="section-title">Case Studies</p>
+            </div>
+          </div>
+
+          <div class="case-list">
+            <div class="case-card" data-export-card="true">
+              <p class="project-name">Redesigning onboarding for activation</p>
+              <div class="case-rows">
+                <p class="case-row"><span class="case-label">Problem</span> New users abandoned setup before completing their first project (42% drop-off).</p>
+                <p class="case-row"><span class="case-label">Solution</span> Progressive onboarding with template templates, inline help, and deferred account creation.</p>
+                <p class="case-row"><span class="case-label">Technologies</span> Figma, React, Amplitude, feature flags</p>
+                <p class="case-row"><span class="case-label">Outcome</span> Activation rate +18pp; time-to-first-value cut from 12 min to 4 min.</p>
+                <p class="case-row"><span class="case-label">Lessons</span> Defer friction, measure one primary activation event, ship in slices.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Testimonials -->
+        <section class="section" data-export-section="testimonials" data-export-placement="main">
+          <div class="section-head">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--violet), var(--pink));" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </span>
+            <div>
+              <p class="section-title">Testimonials</p>
+            </div>
+          </div>
+
+          <div class="testimonial-list">
+            <div class="testimonial-card" data-export-card="true">
+              <p class="testimonial-quote">“Sam is the rare person who can own both the design system vision and the production implementation. Our UI quality jumped the quarter they joined.”</p>
+              <p class="testimonial-meta">Alex Chen, VP Engineering · Northwind Labs</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- SIDEBAR -->
+      <aside class="sidebar" data-export-secondary="true">
+
+        <!-- Tech Stack -->
+        <section class="section" data-export-section="skills" data-export-placement="side">
+          <div class="section-head">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--emerald), var(--sky));" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </span>
+            <div>
+              <p class="section-title">Tech Stack</p>
+            </div>
+          </div>
+
+          <div class="skill-group">
+            <p class="skill-group-label">Languages</p>
+            <div class="tag-row">
+              <span class="badge badge--blue" data-export-skill="true">TypeScript</span>
+              <span class="badge badge--blue" data-export-skill="true">JavaScript</span>
+              <span class="badge badge--blue" data-export-skill="true">CSS</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label">Frameworks</p>
+            <div class="tag-row">
+              <span class="badge badge--purple" data-export-skill="true">React</span>
+              <span class="badge badge--purple" data-export-skill="true">Next.js</span>
+              <span class="badge badge--purple" data-export-skill="true">Node</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label">Design</p>
+            <div class="tag-row">
+              <span class="badge badge--teal" data-export-skill="true">Figma</span>
+              <span class="badge badge--teal" data-export-skill="true">Design Systems</span>
+              <span class="badge badge--pink" data-export-skill="true">Accessibility</span>
+            </div>
+          </div>
+          <div class="skill-group">
+            <p class="skill-group-label">Tooling</p>
+            <div class="tag-row">
+              <span class="badge badge--orange" data-export-skill="true">Storybook</span>
+              <span class="badge badge--green" data-export-skill="true">Vitest</span>
+              <span class="badge badge--gray" data-export-skill="true">Git</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Links -->
+        <section class="section" data-export-section="links" data-export-placement="side">
+          <div class="section-head">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--sky), var(--violet));" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </span>
+            <div>
+              <p class="section-title">Links</p>
+            </div>
+          </div>
+
+          <div class="link-list">
+            <div class="link-card" data-export-card="true">
+              <span class="link-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+              </span>
+              <div>
+                <p class="link-label">Portfolio</p>
+                <p class="link-value">samrivera.design</p>
+              </div>
+            </div>
+            <div class="link-card" data-export-card="true">
+              <span class="link-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg>
+              </span>
+              <div>
+                <p class="link-label">GitHub</p>
+                <p class="link-value">github.com/samrivera</p>
+              </div>
+            </div>
+            <div class="link-card" data-export-card="true">
+              <span class="link-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              </span>
+              <div>
+                <p class="link-label">LinkedIn</p>
+                <p class="link-value">linkedin.com/in/samrivera</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Certificates -->
+        <section class="section" data-export-section="certificates" data-export-placement="side">
+          <div class="section-head">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--green), var(--teal));" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15v7"/><path d="m9 18 3-3 3 3"/><circle cx="12" cy="8" r="6"/></svg>
+            </span>
+            <div>
+              <p class="section-title">Certificates</p>
+            </div>
+          </div>
+          <div class="list">
+            <div class="list-item">
+              <p class="list-title">Google UX Design Professional</p>
+              <p class="list-meta">Coursera · 2021</p>
+            </div>
+            <div class="list-item">
+              <p class="list-title">Web Accessibility Specialist</p>
+              <p class="list-meta">IAAP · 2023</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Languages -->
+        <section class="section" data-export-section="languages" data-export-placement="side">
+          <div class="section-head">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--pink), var(--violet));" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+            </span>
+            <div>
+              <p class="section-title">Languages</p>
+            </div>
+          </div>
+          <div class="list">
+            <div class="list-item list-item--row">
+              <span>English</span>
+              <span class="list-meta">Native</span>
+            </div>
+            <div class="list-item list-item--row">
+              <span>Spanish</span>
+              <span class="list-meta">Fluent</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Achievements -->
+        <section class="section" data-export-section="achievements" data-export-placement="side">
+          <div class="section-head">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--orange), var(--pink));" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+            </span>
+            <div>
+              <p class="section-title">Achievements</p>
+            </div>
+          </div>
+          <div class="list">
+            <div class="list-item">
+              <div class="list-item-row">
+                <p class="list-title">Awwwards Honorable Mention</p>
+                <p class="list-meta">2023</p>
+              </div>
+              <p class="list-desc">Orbit Design System documentation site</p>
+            </div>
+            <div class="list-item">
+              <div class="list-item-row">
+                <p class="list-title">Speaker — Config 2024</p>
+                <p class="list-meta">2024</p>
+              </div>
+              <p class="list-desc">Talk: “Design tokens that survive scale”</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Interests -->
+        <section class="section" data-export-section="interests" data-export-placement="side">
+          <div class="section-head">
+            <span class="section-icon" style="background: linear-gradient(135deg, var(--teal), var(--emerald));" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.2 5.6L20 10l-4.4 3.8L17 20l-5-3.2L7 20l1.4-6.2L4 10l5.8-1.4L12 3z"/></svg>
+            </span>
+            <div>
+              <p class="section-title">Interests</p>
+            </div>
+          </div>
+          <div class="interest-row">
+            <span class="interest-chip">Typography</span>
+            <span class="interest-chip">Film photography</span>
+            <span class="interest-chip">Climbing</span>
+            <span class="interest-chip">Open source</span>
+          </div>
+        </section>
+
+      </aside>
+    </div>
+  </article>
+</body>
+</html>

@@ -14,8 +14,21 @@
 // spec's own CONFIG SUPPORT list only has a showTechStack flag, not a
 // separate showSkills one — confirming these are the same underlying data
 // rendered with more personality.
+//
+// Restyled 2026-08-23 against docs/portfolio-hybrid-cv.html: serif display
+// name (Instrument Serif, self-hosted here via @fontsource rather than
+// main.jsx's global Inter import, so its ~9KB weight is only ever fetched
+// by users who actually land on this one template's lazy chunk — see
+// CVPreview.jsx's React.lazy() split), a gradient hairline across the very
+// top of the card, and every section icon upgraded from a flat glyph to a
+// small colored gradient badge (a different two-color pairing per section,
+// per the reference) — matching the template's already-established
+// "portfolio website condensed into a résumé" multi-color identity instead
+// of the single-accent badge every other bespoke Showcase uses.
 
 import { useMemo } from 'react'
+import '@fontsource/instrument-serif/400.css'
+import '@fontsource/instrument-serif/400-italic.css'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
@@ -64,10 +77,33 @@ function highlightMetrics(text) {
   ))
 }
 
-function SectionHead({ icon, title, subtitle }) {
+// Two-color gradient badge per section id, matching the reference mockup's
+// per-section icon treatment (About falls back to the base rule's
+// emerald→teal gradient in portfolio.css, so it has no entry here).
+const SECTION_ICON_TONE = {
+  projects: 'violet-sky',
+  experience: 'sky-emerald',
+  caseStudies: 'orange-pink',
+  openSource: 'sky-teal',
+  education: 'emerald-teal',
+  testimonials: 'violet-pink',
+  skills: 'emerald-sky',
+  links: 'sky-violet',
+  certificates: 'green-teal',
+  languages: 'pink-violet',
+  achievements: 'orange-pink',
+  interests: 'teal-emerald',
+}
+
+function SectionHead({ id, icon, title, subtitle }) {
+  const tone = SECTION_ICON_TONE[id]
+  const iconClassName = tone
+    ? `portfolio-showcase__section-icon portfolio-showcase__section-icon--${tone}`
+    : 'portfolio-showcase__section-icon'
+
   return (
     <div className="portfolio-showcase__section-head">
-      <span className="portfolio-showcase__section-icon" aria-hidden="true">
+      <span className={iconClassName} aria-hidden="true">
         {sectionIcons[icon]}
       </span>
       <div>
@@ -81,7 +117,7 @@ function SectionHead({ icon, title, subtitle }) {
 function Section({ id, placement, icon, title, subtitle, children }) {
   return (
     <section className="portfolio-showcase__section" data-export-section={id} data-export-placement={placement}>
-      <SectionHead icon={icon} title={title} subtitle={subtitle} />
+      <SectionHead id={id} icon={icon} title={title} subtitle={subtitle} />
       {children}
     </section>
   )

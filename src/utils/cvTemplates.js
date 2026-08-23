@@ -42,11 +42,11 @@ const templateMap = {
   creative: {
     id: 'creative',
     label: 'Creative',
-    description: 'Editorial profile with a quick-facts sidebar and a violet accent. Suits any profession.',
+    description: 'Editorial full-width header with a two-tone name and a color-coded sidebar of quick facts. Suits any creative profession.',
     variant: 'creative',
     layout: 'split',
-    primarySections: ['about', 'experience', 'projects', 'education', 'links'],
-    secondarySections: ['skills', 'certificates', 'languages', 'interests'],
+    primarySections: ['about', 'experience', 'projects'],
+    secondarySections: ['skills', 'education', 'certificates', 'links', 'languages', 'interests'],
     summaryBadgeLabel: 'Notes',
     thumbnail: {
       accentClassName: 'bg-gradient-to-r from-gray-500 to-gray-500',
@@ -266,7 +266,7 @@ const templateLocalization = {
     },
     creative: {
       label: 'Luova',
-      description: 'Lehtiprofiili, pikatietojen sivupalkki ja violetti aksenttiväri. Sopii mille tahansa ammatille.',
+      description: 'Koko leveyden otsikko kaksivärisellä nimellä ja väri­koodattu pikatietojen sivupalkki. Sopii mille tahansa luovalle ammatille.',
       summaryBadgeLabel: 'Huomiot',
       chips: ['Tarina', 'Linkit'],
     },
