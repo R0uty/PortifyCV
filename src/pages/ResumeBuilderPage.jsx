@@ -74,8 +74,15 @@ import {
 } from '../utils/atsScore'
 import { evaluateCvFeedback } from '../utils/cvFeedback'
 import { generateCoverLetterDraft } from '../utils/coverLetter'
+import { extractTextFromPdfFile } from '../utils/resumeFileImport'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
+// Generous on purpose: PortifyCV's own "Export PDF" (pdf-designer, a
+// rasterized html2canvas image embedded per page) can run several MB for a
+// multi-page CV — someone's first instinct to "test" this feature is often
+// re-uploading their own just-exported PDF, and an 8MB cap rejected that
+// real case during manual testing.
+const MAX_RESUME_FILE_SIZE_BYTES = 25 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
 
 // Order must match the section cards' actual JSX order in CVForm.jsx (personal,
@@ -332,6 +339,7 @@ function ResumeBuilderPage({
   const ui = getUiTheme()
   const previewRef = useRef(null)
   const importInputRef = useRef(null)
+  const resumeFileInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
   const storageWarningShownRef = useRef(false)
   const sessionRestoreWarningShownRef = useRef(false)
@@ -349,6 +357,11 @@ function ResumeBuilderPage({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
+  // JSON import and PDF text extraction both drive the shared isImporting
+  // flag (so isActionBusy disables both buttons + the textarea together,
+  // like every other import path) — this just tracks which one so only the
+  // button actually doing work shows a busy label, not both at once.
+  const [activeImportKind, setActiveImportKind] = useState(null)
 
   const [historyPast, setHistoryPast] = useState([])
   const [historyFuture, setHistoryFuture] = useState([])
@@ -720,6 +733,7 @@ function ResumeBuilderPage({
     }
 
     dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: true })
+    setActiveImportKind('json')
 
     try {
       if (file.size > MAX_IMPORT_FILE_SIZE_BYTES) {
@@ -758,9 +772,68 @@ function ResumeBuilderPage({
       }
     } finally {
       dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: false })
+      setActiveImportKind(null)
       event.target.value = ''
     }
   }, [dispatchFormData, locale, setStorageValue])
+
+  const handleResumeFileImportClick = useCallback(() => {
+    resumeFileInputRef.current?.click()
+  }, [])
+
+  // Thin adapter, not a structured importer: extracts raw text from the PDF
+  // and drops it into the same pastedCvText textarea the manual-paste flow
+  // already uses, so parsePastedCvText/MERGE_FORM_DATA handle it completely
+  // unchanged. The user reviews the extracted text and clicks "Paste CV
+  // text" themselves — this never auto-imports, same review step a manual
+  // copy-paste already gets.
+  const handleResumeFileImport = useCallback(async (event) => {
+    const [file] = event.target.files ?? []
+
+    if (!file) {
+      return
+    }
+
+    dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: true })
+    setActiveImportKind('pdf')
+
+    try {
+      if (file.size > MAX_RESUME_FILE_SIZE_BYTES) {
+        showToast(
+          locale === 'fi'
+            ? 'Tiedosto on liian suuri. Tuetun koko on enintään 25 Mt.'
+            : 'File is too large. Maximum supported size is 25MB.',
+          'error',
+        )
+        return
+      }
+
+      showToast(
+        locale === 'fi' ? `Puretaan tekstiä tiedostosta ${file.name}...` : `Extracting text from ${file.name}...`,
+        'info',
+      )
+      const extractedText = await extractTextFromPdfFile(file, { locale })
+
+      dispatchUi({ type: UI_ACTION.SET_PASTED_CV_TEXT, value: extractedText })
+      setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+      showToast(
+        locale === 'fi'
+          ? `Teksti purettu tiedostosta ${file.name}. Tarkista se alla ja paina sitten "Tuo liitetty teksti".`
+          : `Extracted text from ${file.name}. Review it below, then click "Paste CV text".`,
+      )
+    } catch (error) {
+      showToast(
+        error instanceof Error
+          ? error.message
+          : locale === 'fi' ? 'PDF-tiedoston tuonti epäonnistui.' : 'Failed to import the PDF file.',
+        'error',
+      )
+    } finally {
+      dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: false })
+      setActiveImportKind(null)
+      event.target.value = ''
+    }
+  }, [locale, setStorageValue])
 
   const handleResetForm = useCallback(() => {
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
@@ -1285,6 +1358,13 @@ function ResumeBuilderPage({
         className="hidden"
         onChange={handleImportFile}
       />
+      <input
+        ref={resumeFileInputRef}
+        type="file"
+        accept="application/pdf,.pdf"
+        className="hidden"
+        onChange={handleResumeFileImport}
+      />
       <div className="stack-5">
         <div className="flex flex-wrap gap-3">
           <button
@@ -1350,8 +1430,8 @@ function ResumeBuilderPage({
           <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Pikatuonti' : 'Quick import'}</p>
           <p className={`mt-3 text-sm ${ui.textSecondary}`}>
             {locale === 'fi'
-              ? 'Liitä CV-katkelma nimen, tittelin, taitojen ja lyhyen yhteenvedon tunnistamiseksi.'
-              : 'Paste a resume snippet to detect a name, title, skills, and a short summary.'}
+              ? 'Liitä CV-katkelma tai lataa PDF nimen, tittelin, taitojen ja lyhyen yhteenvedon tunnistamiseksi.'
+              : 'Paste a resume snippet, or upload a PDF, to detect a name, title, skills, and a short summary.'}
           </p>
           <textarea
             className={`mt-4 min-h-32 w-full border px-4 py-3 text-sm transition ${ui.input}`}
@@ -1378,9 +1458,19 @@ function ResumeBuilderPage({
               disabled={isActionBusy}
               onClick={handleImportClick}
             >
-              {isImporting
+              {activeImportKind === 'json'
                 ? locale === 'fi' ? 'Tuodaan JSON...' : 'Importing JSON...'
                 : locale === 'fi' ? 'Tuo JSON' : 'Import JSON'}
+            </button>
+            <button
+              type="button"
+              className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+              disabled={isActionBusy}
+              onClick={handleResumeFileImportClick}
+            >
+              {activeImportKind === 'pdf'
+                ? locale === 'fi' ? 'Puretaan tekstiä...' : 'Extracting text...'
+                : locale === 'fi' ? 'Lataa PDF' : 'Upload PDF'}
             </button>
           </div>
         </section>
@@ -1450,6 +1540,7 @@ function ResumeBuilderPage({
       </AppErrorBoundary>
     </div>
   ), [
+    activeImportKind,
     atsScore,
     atsFriendlyMode,
     currentTemplate.label,
@@ -1466,10 +1557,11 @@ function ResumeBuilderPage({
     handlePasteCvImport,
     handlePastedCvTextChange,
     handleResetForm,
+    handleResumeFileImport,
+    handleResumeFileImportClick,
     handleToggleAtsFriendlyMode,
     handleToggleMobilePreview,
     isActionBusy,
-    isImporting,
     jobDescription,
     jobDescriptionAnalysis,
     locale,
