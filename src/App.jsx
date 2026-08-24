@@ -3,6 +3,7 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import LandingPage from './pages/LandingPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import Toolbar from './components/Toolbar'
+import LocaleFlagIcon from './components/LocaleFlagIcon'
 import AdSenseLoader from './components/AdSenseLoader'
 import ConsentBanner from './components/ConsentBanner'
 import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
@@ -327,9 +328,10 @@ function App() {
               )}
               <button
                 type="button"
-                className="action-button action-button--secondary border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
+                className="action-button action-button--secondary flex items-center gap-1.5 border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
                 onClick={handleToggleLocale}
               >
+                <LocaleFlagIcon locale={locale === 'fi' ? 'en' : 'fi'} />
                 {locale === 'fi' ? 'EN' : 'FI'}
               </button>
             </div>

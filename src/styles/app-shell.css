@@ -1305,6 +1305,20 @@ select.floating-field__control {
   white-space: nowrap;
 }
 
+/* Base look for LocaleFlagIcon.jsx's inline-SVG flags — a hairline border
+   keeps the Finnish flag's white field from bleeding into a white button
+   background. .app-toolbar__locale-flag only adds the toolbar's spacing;
+   App.jsx's header button spaces its icon via the gap-1.5 utility instead. */
+.locale-flag-icon {
+  flex-shrink: 0;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.app-toolbar__locale-flag {
+  margin-right: 0.35em;
+}
+
 .app-toolbar__icon-button--active {
   color: var(--accent-solid);
   border-color: var(--accent-border);
@@ -1774,6 +1788,30 @@ select.floating-field__control {
   color: #111111;
 }
 
+/* Outline variant of .landing-cta — used where a section already has a
+   primary action (e.g. "Start building" in the hero) and this is a
+   secondary link to a full listing page, like the templates section's
+   link through to the /free-cv-templates gallery. */
+.landing-secondary-cta {
+  display: block;
+  margin: var(--space-8) auto 0;
+  border: 1.5px solid #111111;
+  background: transparent;
+  color: #111111;
+  padding: 0.85rem 2rem;
+  font-size: var(--text-body-sm);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.landing-secondary-cta:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
 /* A real picture of the result is the strongest conversion element for a
    visual product. PortifyCV2.jpg is a pre-built marketing shot (logo,
    wordmark, and a styled CV mockup), so it's just a plain image here — no
@@ -2024,10 +2062,10 @@ select.floating-field__control {
 }
 
 .landing-faq {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-7);
-  max-width: 56rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--space-10);
+  row-gap: var(--space-7);
   margin: 0;
 }
 
@@ -2055,6 +2093,11 @@ select.floating-field__control {
   .landing-why-grid {
     grid-template-columns: 1fr;
     gap: var(--space-6);
+  }
+
+  .landing-faq {
+    grid-template-columns: 1fr;
+    row-gap: var(--space-6);
   }
 }
 

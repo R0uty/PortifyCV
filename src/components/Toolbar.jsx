@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 
 import Logo from './Logo'
+import LocaleFlagIcon from './LocaleFlagIcon'
 
 function Toolbar({
   locale = 'en',
@@ -201,6 +202,7 @@ function Toolbar({
             aria-label={isFinnish ? 'Vaihda kieli' : 'Switch language'}
             title={isFinnish ? 'Vaihda kieli' : 'Switch language'}
           >
+            <LocaleFlagIcon locale={isFinnish ? 'en' : 'fi'} className="app-toolbar__locale-flag" />
             {isFinnish ? 'EN' : 'FI'}
           </button>
 

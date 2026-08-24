@@ -41,6 +41,7 @@ function getLandingCopy(locale) {
       ],
       templatesTitle: 'Katso pohjat',
       templatesSubtitle: 'Kaikki 13 asettelua yhdellä silmäyksellä — vaihda milloin tahansa rakentaessasi, ilman että sisältösi katoaa.',
+      templatesCta: 'Selaa kaikkia pohjia',
       faqTitle: 'Usein kysytyt kysymykset',
       faq: [
         {
@@ -105,6 +106,7 @@ function getLandingCopy(locale) {
     ],
     templatesTitle: 'See the templates',
     templatesSubtitle: 'All 13 layouts at a glance — swap between them any time while you build, without losing your content.',
+    templatesCta: 'Browse all templates',
     faqTitle: 'Frequently asked questions',
     faq: [
       {
@@ -142,6 +144,7 @@ function getLandingCopy(locale) {
 function LandingPage({
   locale = 'en',
   onGetStarted = () => {},
+  onNavigateToView = () => {},
 }) {
   const copy = getLandingCopy(locale)
 
@@ -189,6 +192,13 @@ function LandingPage({
         <Suspense fallback={null}>
           <LandingTemplatesPreview locale={locale} />
         </Suspense>
+        <button
+          type="button"
+          className="landing-secondary-cta"
+          onClick={() => onNavigateToView('freeTemplates')}
+        >
+          {copy.templatesCta}
+        </button>
       </div>
 
       <div className="landing-section">
