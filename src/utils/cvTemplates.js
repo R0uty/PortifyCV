@@ -248,6 +248,25 @@ const templateMap = {
       chips: ['Skills', 'Timeline'],
     },
   },
+  colorfulCompact: {
+    id: 'colorfulCompact',
+    label: 'Colorful Compact',
+    description: 'Dark editorial header over a tight two-column body, with every section — Skills, Experience, Projects, Languages — in its own rainbow accent color. Suits any creative or product profile.',
+    variant: 'colorfulCompact',
+    layout: 'split',
+    primarySections: ['about', 'experience', 'projects'],
+    secondarySections: ['skills', 'education', 'languages', 'links', 'achievements'],
+    summaryBadgeLabel: 'About',
+    thumbnail: {
+      accentClassName: 'bg-[#16132A]',
+      surfaceClassName: 'bg-gray-50',
+      primaryRatioClassName: 'grid-cols-[1.65fr_1fr]',
+      titleWidthClassName: 'w-24',
+      subtitleWidthClassName: 'w-16',
+      blockWidths: ['w-full', 'w-11/12', 'w-9/12'],
+      chips: ['Skills', 'Projects'],
+    },
+  },
 }
 
 const templateLocalization = {
@@ -329,6 +348,12 @@ const templateLocalization = {
       description: 'Premium-tasoinen kaksipalstainen asettelu lämpimällä kermanvärisellä sivupalkilla, oranssilla aksentilla, pisteytetyillä taidoilla sekä koulutus- ja kokemusaikajanoilla — sopii lähes mille tahansa ammatille.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Taidot', 'Aikajana'],
+    },
+    colorfulCompact: {
+      label: 'Värikäs tiivis',
+      description: 'Tumma otsikko tiiviin kaksipalstaisen rungon päällä, jossa jokainen osio — Taidot, Kokemus, Projektit, Kielet — saa oman sateenkaariväriaksentin. Sopii mille tahansa luovalle tai tuoteprofiilille.',
+      summaryBadgeLabel: 'Esittely',
+      chips: ['Taidot', 'Projektit'],
     },
   },
 }

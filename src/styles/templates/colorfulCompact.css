@@ -1,0 +1,536 @@
+/* ==========================================================================
+   Colorful Compact Showcase — hand-authored component styles for the
+   Colorful Compact template's non-ATS "showcase" mode. Scoped entirely
+   under `.colorful-compact-showcase`. Built against
+   docs/Colorfull-compact.png (a hand-mocked reference screenshot, not
+   markup — colors/spacing below are eyeballed off that image).
+
+   Dark full-bleed header framed top and bottom by a plain rainbow gradient
+   bar, over a tight two-column body: a wide white main column and a narrow
+   gray-tinted sidebar. Every section header cycles through a fixed
+   six-color rainbow (pink/orange/blue/green/teal/purple) instead of one
+   template-wide accent — see the six SECTION_COLORS in the .jsx file.
+
+   No CSS `filter: blur()` anywhere (a blurred decorative element hung
+   html2canvas during PDF export in the Developer template — see that fix).
+   The rainbow bars use a single multi-stop `linear-gradient`, not a
+   *repeating* one — html2canvas only drops the repeating variant (see
+   CreativeShowcase's stripe comment); a plain gradient bar already ships
+   safely in Portfolio Hybrid's header hairline.
+   ========================================================================== */
+
+.colorful-compact-showcase {
+  --cc-pink: #ec4899;
+  --cc-pink-text: #be185d;
+  --cc-orange: #f97316;
+  --cc-orange-text: #c2410c;
+  --cc-yellow: #eab308;
+  --cc-yellow-text: #854d0e;
+  --cc-green: #22c55e;
+  --cc-green-text: #15803d;
+  --cc-teal: #14b8a6;
+  --cc-teal-text: #0f766e;
+  --cc-blue: #3b82f6;
+  --cc-blue-text: #1d4ed8;
+  --cc-purple: #a855f7;
+  --cc-purple-text: #7e22ce;
+  --cc-charcoal: #27272a;
+
+  --cc-dark: #16132a;
+  --cc-ink: #18181b;
+  --cc-muted: #6b7280;
+  --cc-sidebar: #f2f4f8;
+  --cc-border: #e5e7eb;
+  --cc-card: #ffffff;
+
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+  color: var(--cc-ink);
+  font-family: var(--font-sans);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px -32px rgba(15, 10, 30, 0.3);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.colorful-compact-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── Rainbow bars — real linear-gradient, not repeating (see file header) ── */
+
+.colorful-compact-showcase__rainbow {
+  position: relative;
+  z-index: 1;
+  height: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--cc-pink) 0%,
+    var(--cc-orange) 20%,
+    var(--cc-yellow) 40%,
+    var(--cc-green) 55%,
+    var(--cc-teal) 70%,
+    var(--cc-blue) 85%,
+    var(--cc-purple) 100%
+  );
+}
+
+/* ── Header: dark full-bleed strip, identity left, photo right ── */
+
+.colorful-compact-showcase__header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: var(--cc-dark);
+  padding: 1.9rem 2.25rem;
+}
+
+.colorful-compact-showcase__kicker {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.colorful-compact-showcase__name {
+  margin-top: 0.4rem;
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+.colorful-compact-showcase__name-lead {
+  color: #ffffff;
+}
+
+.colorful-compact-showcase__name-accent {
+  color: var(--cc-orange);
+}
+
+.colorful-compact-showcase__role {
+  margin-top: 0.35rem;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.colorful-compact-showcase__contact {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.colorful-compact-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.colorful-compact-showcase__contact-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.colorful-compact-showcase__contact-dot--pink { background: var(--cc-pink); }
+.colorful-compact-showcase__contact-dot--teal { background: var(--cc-teal); }
+.colorful-compact-showcase__contact-dot--purple { background: var(--cc-purple); }
+
+.colorful-compact-showcase__photo-ring {
+  flex-shrink: 0;
+  padding: 3px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--cc-pink), var(--cc-teal), var(--cc-purple));
+}
+
+.colorful-compact-showcase__photo {
+  display: block;
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: cover;
+  border-radius: 13px;
+}
+
+/* ── Body layout: main (white) + sidebar (light gray-blue) ── */
+
+.colorful-compact-showcase__body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+}
+
+.colorful-compact-showcase__main {
+  min-width: 0;
+  padding: 1.75rem 2rem 2.25rem 2.25rem;
+}
+
+.colorful-compact-showcase__sidebar {
+  min-width: 0;
+  background: var(--cc-sidebar);
+  padding: 1.75rem 2rem 2.25rem 1.75rem;
+}
+
+/* ── Sections ── */
+
+.colorful-compact-showcase__section {
+  animation: cc-fade-up 320ms ease-out both;
+}
+
+.colorful-compact-showcase__section + .colorful-compact-showcase__section {
+  margin-top: 1.5rem;
+}
+
+.colorful-compact-showcase__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.colorful-compact-showcase__section-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.colorful-compact-showcase__section-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.colorful-compact-showcase__section-dot--pink,
+.colorful-compact-showcase__section-title--pink { color: var(--cc-pink-text); }
+.colorful-compact-showcase__section-dot--pink { background: var(--cc-pink); }
+
+.colorful-compact-showcase__section-dot--orange,
+.colorful-compact-showcase__section-title--orange { color: var(--cc-orange-text); }
+.colorful-compact-showcase__section-dot--orange { background: var(--cc-orange); }
+
+.colorful-compact-showcase__section-dot--blue,
+.colorful-compact-showcase__section-title--blue { color: var(--cc-blue-text); }
+.colorful-compact-showcase__section-dot--blue { background: var(--cc-blue); }
+
+.colorful-compact-showcase__section-dot--green,
+.colorful-compact-showcase__section-title--green { color: var(--cc-green-text); }
+.colorful-compact-showcase__section-dot--green { background: var(--cc-green); }
+
+.colorful-compact-showcase__section-dot--teal,
+.colorful-compact-showcase__section-title--teal { color: var(--cc-teal-text); }
+.colorful-compact-showcase__section-dot--teal { background: var(--cc-teal); }
+
+.colorful-compact-showcase__section-dot--purple,
+.colorful-compact-showcase__section-title--purple { color: var(--cc-purple-text); }
+.colorful-compact-showcase__section-dot--purple { background: var(--cc-purple); }
+
+.colorful-compact-showcase__empty {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--cc-muted);
+}
+
+/* ── About ── */
+
+.colorful-compact-showcase__summary {
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  color: #3f3f46;
+  white-space: pre-line;
+}
+
+/* ── Experience — borderless rows with a dashed divider ── */
+
+.colorful-compact-showcase__exp-list {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.colorful-compact-showcase__exp-row {
+  padding: 0.75rem 0;
+  border-bottom: 1px dashed var(--cc-border);
+}
+
+.colorful-compact-showcase__exp-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.colorful-compact-showcase__exp-row:first-child {
+  padding-top: 0;
+}
+
+.colorful-compact-showcase__exp-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.colorful-compact-showcase__exp-role {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--cc-ink);
+}
+
+.colorful-compact-showcase__exp-meta {
+  margin-top: 0.1rem;
+  font-size: 0.76rem;
+  color: var(--cc-muted);
+}
+
+.colorful-compact-showcase__exp-date {
+  flex-shrink: 0;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.colorful-compact-showcase__exp-date--orange { color: var(--cc-orange-text); }
+.colorful-compact-showcase__exp-date--teal { color: var(--cc-teal-text); }
+.colorful-compact-showcase__exp-date--purple { color: var(--cc-purple-text); }
+
+.colorful-compact-showcase__bullets {
+  margin-top: 0.4rem;
+  padding-left: 1.1rem;
+}
+
+.colorful-compact-showcase__bullets li {
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: #3f3f46;
+}
+
+.colorful-compact-showcase__bullets li::marker {
+  color: var(--cc-muted);
+}
+
+/* ── Projects — bordered white cards, colorful tag pills ── */
+
+.colorful-compact-showcase__project-grid {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.colorful-compact-showcase__project-card {
+  border-radius: 12px;
+  border: 1px solid var(--cc-border);
+  background: var(--cc-card);
+  padding: 0.85rem 1rem;
+}
+
+.colorful-compact-showcase__project-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--cc-ink);
+}
+
+.colorful-compact-showcase__project-desc {
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #3f3f46;
+  white-space: pre-line;
+}
+
+.colorful-compact-showcase__tag-row {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.colorful-compact-showcase__tag {
+  border-radius: 9999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.colorful-compact-showcase__tag--blue { background: #dbeafe; color: var(--cc-blue-text); }
+.colorful-compact-showcase__tag--purple { background: #f3e8ff; color: var(--cc-purple-text); }
+.colorful-compact-showcase__tag--green { background: #dcfce7; color: var(--cc-green-text); }
+.colorful-compact-showcase__tag--pink { background: #fce7f3; color: var(--cc-pink-text); }
+.colorful-compact-showcase__tag--teal { background: #ccfbf1; color: var(--cc-teal-text); }
+
+/* ── Sidebar: Skills — solid colorful pills, flat wrap ── */
+
+.colorful-compact-showcase__skill-row {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.colorful-compact-showcase__skill-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.colorful-compact-showcase__skill-pill--pink { background: var(--cc-pink); color: #fff; }
+.colorful-compact-showcase__skill-pill--orange { background: var(--cc-orange); color: #fff; }
+.colorful-compact-showcase__skill-pill--yellow { background: var(--cc-yellow); color: #422006; }
+.colorful-compact-showcase__skill-pill--green { background: var(--cc-green); color: #052e12; }
+.colorful-compact-showcase__skill-pill--teal { background: var(--cc-teal); color: #fff; }
+.colorful-compact-showcase__skill-pill--blue { background: var(--cc-blue); color: #fff; }
+.colorful-compact-showcase__skill-pill--purple { background: var(--cc-purple); color: #fff; }
+.colorful-compact-showcase__skill-pill--charcoal { background: var(--cc-charcoal); color: #fff; }
+
+/* ── Sidebar: plain stacked lists (Education, Links, Extras) ── */
+
+.colorful-compact-showcase__plain-list {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.colorful-compact-showcase__plain-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--cc-ink);
+}
+
+.colorful-compact-showcase__plain-meta {
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--cc-muted);
+}
+
+.colorful-compact-showcase__link-item {
+  overflow: hidden;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #3f3f46;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.colorful-compact-showcase__extra-line {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: #3f3f46;
+}
+
+/* ── Sidebar: Languages — name + colored level badge ── */
+
+.colorful-compact-showcase__lang-list {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.colorful-compact-showcase__lang-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.colorful-compact-showcase__lang-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--cc-ink);
+}
+
+.colorful-compact-showcase__lang-badge {
+  flex-shrink: 0;
+  border-radius: 9999px;
+  padding: 0.15rem 0.55rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.colorful-compact-showcase__lang-badge--pink { background: #fce7f3; color: var(--cc-pink-text); }
+.colorful-compact-showcase__lang-badge--blue { background: #dbeafe; color: var(--cc-blue-text); }
+.colorful-compact-showcase__lang-badge--green { background: #dcfce7; color: var(--cc-green-text); }
+
+/* ── Animations ── */
+
+@keyframes cc-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ── Responsive: sidebar below main on tablet, single column on mobile ── */
+
+@media (max-width: 860px) {
+  .colorful-compact-showcase__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .colorful-compact-showcase__header {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .colorful-compact-showcase__main {
+    padding: 1.5rem 1.25rem 1.75rem;
+  }
+
+  .colorful-compact-showcase__sidebar {
+    padding: 1.5rem 1.25rem 1.75rem;
+  }
+
+  .colorful-compact-showcase__name {
+    font-size: 1.7rem;
+  }
+
+  .colorful-compact-showcase__photo {
+    width: 3.75rem;
+    height: 3.75rem;
+  }
+}
+
+/* ── Reduced motion / print ── */
+
+@media (prefers-reduced-motion: reduce) {
+  .colorful-compact-showcase__section {
+    animation: none !important;
+  }
+}
+
+@media print {
+  .colorful-compact-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .colorful-compact-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
+  .colorful-compact-showcase__photo-ring {
+    background: var(--cc-purple) !important;
+  }
+}

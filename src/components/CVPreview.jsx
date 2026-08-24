@@ -40,6 +40,7 @@ const PortfolioShowcase = lazy(() => import('./templates/PortfolioShowcase'))
 const ClassicProfessionalShowcase = lazy(() => import('./templates/ClassicProfessionalShowcase'))
 const NavyProfessionalShowcase = lazy(() => import('./templates/NavyProfessionalShowcase'))
 const ModernOrangeShowcase = lazy(() => import('./templates/ModernOrangeShowcase'))
+const ColorfulCompactShowcase = lazy(() => import('./templates/ColorfulCompactShowcase'))
 
 function CVPreview({
   formData,
@@ -278,6 +279,26 @@ function CVPreview({
       </Suspense>
     )
   }
+  // ── Colorful Compact Showcase delegation ──────────────────────────────
+  // Same reasoning as Developer/Creative/Modern/Executive/Timeline/
+  // Graduate/Compact/Portfolio/Classic Professional Showcase above — a
+  // fully bespoke "rainbow accent per section" visual system that ATS mode
+  // bypasses entirely (ATS mode is monochrome for every template — see the
+  // generic-path comments below — and this template has no single accent
+  // color to fall back to).
+  if (variant === 'colorfulCompact' && !atsFriendlyMode) {
+    return (
+      <Suspense fallback={null}>
+        <ColorfulCompactShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+        />
+      </Suspense>
+    )
+  }
+
   const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
   const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
   const photo = snapshot.photo
