@@ -173,17 +173,47 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+// Shown in the header nav on every static page (landing included) — the
+// builder's Toolbar is a different, task-focused header and deliberately
+// doesn't get these marketing/guide links.
+const GUIDE_LINKS = [
+  { view: 'freeTemplates', en: 'Free CV Templates', fi: 'CV-pohjat' },
+  { view: 'howToWrite', en: 'How to Write a CV', fi: 'Näin kirjoitat CV:n' },
+  { view: 'cvSkills', en: 'CV Skills Examples', fi: 'Taito-osion esimerkkejä' },
+  { view: 'atsGuide', en: 'ATS-Friendly CV Guide', fi: 'ATS-opas' },
+  { view: 'coverLetterExamples', en: 'Cover Letter Examples', fi: 'Saatekirje-esimerkkejä' },
+  { view: 'cvExamples', en: 'CV Examples by Field', fi: 'CV-esimerkkejä aloittain' },
+]
+
+function handleInAppLinkClick(event, view, onNavigate) {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return
+  }
+  event.preventDefault()
+  onNavigate(view)
+}
+
+function HeaderNav({ locale = 'en', onNavigate = () => {} }) {
+  const isFinnish = locale === 'fi'
+
+  return (
+    <nav className="project-header__nav" aria-label={isFinnish ? 'Oppaat' : 'Guides'}>
+      {GUIDE_LINKS.map((link) => (
+        <a
+          key={link.view}
+          href={VIEW_HEAD[link.view].path}
+          className="project-header__link"
+          onClick={(event) => handleInAppLinkClick(event, link.view, onNavigate)}
+        >
+          {isFinnish ? link.fi : link.en}
+        </a>
+      ))}
+    </nav>
+  )
+}
+
 function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
   const isFinnish = locale === 'fi'
-  const guideLinks = [
-    { view: 'freeTemplates', label: isFinnish ? 'CV-pohjat' : 'Free CV Templates' },
-    { view: 'howToWrite', label: isFinnish ? 'Näin kirjoitat CV:n' : 'How to Write a CV' },
-    { view: 'cvSkills', label: isFinnish ? 'Taito-osion esimerkkejä' : 'CV Skills Examples' },
-    { view: 'atsGuide', label: isFinnish ? 'ATS-opas' : 'ATS-Friendly CV Guide' },
-    { view: 'coverLetterExamples', label: isFinnish ? 'Saatekirje-esimerkkejä' : 'Cover Letter Examples' },
-    { view: 'cvExamples', label: isFinnish ? 'CV-esimerkkejä aloittain' : 'CV Examples by Field' },
-    { view: 'privacy', label: isFinnish ? 'Tietosuojaseloste' : 'Privacy policy' },
-  ]
 
   return (
     <footer className="site-footer">
@@ -193,23 +223,14 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
           {' '}
           <span className="site-footer__version">{APP_VERSION}</span>
         </span>
-        <nav className="site-footer__links" aria-label={isFinnish ? 'Oppaat' : 'Guides'}>
-          {guideLinks.map((link) => (
-            <a
-              key={link.view}
-              href={VIEW_HEAD[link.view].path}
-              className="site-footer__link"
-              onClick={(event) => {
-                if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-                  return
-                }
-                event.preventDefault()
-                onNavigate(link.view)
-              }}
-            >
-              {link.label}
-            </a>
-          ))}
+        <nav className="site-footer__links" aria-label={isFinnish ? 'Oikeudellinen' : 'Legal'}>
+          <a
+            href={VIEW_HEAD.privacy.path}
+            className="site-footer__link"
+            onClick={(event) => handleInAppLinkClick(event, 'privacy', onNavigate)}
+          >
+            {isFinnish ? 'Tietosuojaseloste' : 'Privacy policy'}
+          </a>
         </nav>
       </div>
     </footer>
@@ -329,6 +350,7 @@ function App() {
                   />
                 </a>
               )}
+              <HeaderNav locale={locale} onNavigate={goToView} />
               <button
                 type="button"
                 className="action-button action-button--secondary flex items-center gap-1.5 border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
