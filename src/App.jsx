@@ -12,6 +12,7 @@ import { SHARE_QUERY_PARAM } from './utils/shareLinks'
 import { getAdConsent, setAdConsent } from './utils/consent'
 import { ROUTES } from './utils/routes'
 import { VIEW_HEAD, SITE_ORIGIN, buildArticleSchema } from './utils/pageMeta'
+import { APP_VERSION } from './utils/appVersion'
 
 const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
 const FreeCvTemplatesPage = lazy(() => import('./pages/FreeCvTemplatesPage'))
@@ -208,6 +209,7 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
             </a>
           ))}
         </nav>
+        <span className="site-footer__version">{APP_VERSION}</span>
       </div>
     </footer>
   )

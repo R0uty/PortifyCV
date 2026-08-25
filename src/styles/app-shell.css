@@ -1700,6 +1700,11 @@ select.floating-field__control {
   color: var(--app-text-muted);
 }
 
+.site-footer__version {
+  margin-left: auto;
+  color: var(--app-text-muted);
+}
+
 .landing-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 36rem;
