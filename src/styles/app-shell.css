@@ -1217,7 +1217,7 @@ select.floating-field__control {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: var(--space-4);
+  gap: var(--space-6);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
