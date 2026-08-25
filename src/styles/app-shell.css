@@ -1682,7 +1682,11 @@ select.floating-field__control {
   width: 100%;
   margin: 0;
   padding: clamp(4rem, 12vh, 8rem) var(--space-5) var(--space-10);
-  background: var(--app-bg);
+  background-color: var(--app-bg);
+  background-image:
+    linear-gradient(to right, var(--grid-paper-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-paper-line) 1px, transparent 1px);
+  background-size: var(--grid-paper-size) var(--grid-paper-size);
 }
 
 .builder-section {
@@ -2219,7 +2223,11 @@ select.floating-field__control {
   display: flex;
   justify-content: center;
   padding: clamp(3rem, 8vh, 5rem) var(--space-5) var(--space-10);
-  background: var(--app-bg);
+  background-color: var(--app-bg);
+  background-image:
+    linear-gradient(to right, var(--grid-paper-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-paper-line) 1px, transparent 1px);
+  background-size: var(--grid-paper-size) var(--grid-paper-size);
 }
 
 .legal-page__inner {
