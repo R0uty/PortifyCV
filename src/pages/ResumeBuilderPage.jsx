@@ -339,6 +339,15 @@ function ResumeBuilderPage({
   const editorScrollRef = useRef(null)
   const templateSelectRef = useRef(null)
   const previewViewportRef = useRef(null)
+  // Read by TemplateQuickSwitcher when its panel opens, instead of threading
+  // formData itself through onHeaderChange — that object's identity changes
+  // on every keystroke, and putting it in the header-sync effect's deps
+  // below would re-render the toolbar on every keystroke just to keep a
+  // rarely-opened thumbnail strip fresh.
+  const formDataRef = useRef(formData)
+  useEffect(() => {
+    formDataRef.current = formData
+  }, [formData])
 
   const [activeSectionId, setActiveSectionId] = useState('personal')
   const [searchQuery, setSearchQuery] = useState('')
@@ -1129,6 +1138,7 @@ function ResumeBuilderPage({
       selectedTemplateId: selectedTemplate,
       onSelectTemplate: handleSelectTemplate,
       templateSelectRef,
+      formDataRef,
       searchQuery,
       onSearchChange: setSearchQuery,
       onPrint: handlePrint,

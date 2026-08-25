@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft,
   ChevronDown,
@@ -16,6 +16,13 @@ import {
 import Logo from './Logo'
 import LocaleFlagIcon from './LocaleFlagIcon'
 
+// Lazy so Toolbar (statically imported by App.jsx, and rendered on every
+// static page's bundle boundary as a result) doesn't drag TemplateThumbnail's
+// full CVPreview dependency graph into the eagerly-loaded main chunk — it's
+// only ever needed once the builder is open. See CVPreview's own lazy
+// Showcase imports for the same reasoning.
+const TemplateQuickSwitcher = lazy(() => import('./TemplateQuickSwitcher'))
+
 function Toolbar({
   locale = 'en',
   onReturn = () => {},
@@ -28,6 +35,7 @@ function Toolbar({
   selectedTemplateId = '',
   onSelectTemplate = () => {},
   templateSelectRef,
+  formDataRef,
   searchQuery = '',
   onSearchChange = () => {},
   onPrint = () => {},
@@ -181,19 +189,24 @@ function Toolbar({
         <div className="app-toolbar__spacer" />
 
         <div className="app-toolbar__group">
-          <select
-            ref={templateSelectRef}
-            className="app-toolbar__select"
-            value={selectedTemplateId}
-            onChange={(event) => onSelectTemplate(event.target.value)}
-            aria-label={isFinnish ? 'Valitse pohja' : 'Select template'}
+          <Suspense
+            fallback={(
+              <span className="template-quick-switcher__trigger" aria-hidden="true">
+                <span className="template-quick-switcher__trigger-label">
+                  {templates.find((template) => template.id === selectedTemplateId)?.label}
+                </span>
+              </span>
+            )}
           >
-            {templates.map((template) => (
-              <option key={template.id} value={template.id}>
-                {template.label}
-              </option>
-            ))}
-          </select>
+            <TemplateQuickSwitcher
+              templates={templates}
+              selectedTemplateId={selectedTemplateId}
+              onSelectTemplate={onSelectTemplate}
+              formDataRef={formDataRef}
+              locale={locale}
+              triggerRef={templateSelectRef}
+            />
+          </Suspense>
 
           <button
             type="button"

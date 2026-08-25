@@ -394,6 +394,7 @@ function App() {
           selectedTemplateId={headerProps.selectedTemplateId}
           onSelectTemplate={headerProps.onSelectTemplate}
           templateSelectRef={headerProps.templateSelectRef}
+          formDataRef={headerProps.formDataRef}
           searchQuery={headerProps.searchQuery}
           onSearchChange={headerProps.onSearchChange}
           onPrint={headerProps.onPrint}
