@@ -1701,8 +1701,7 @@ select.floating-field__control {
 }
 
 .site-footer__version {
-  margin-left: auto;
-  color: var(--app-text-muted);
+  opacity: 0.7;
 }
 
 .landing-grid {

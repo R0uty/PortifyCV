@@ -190,6 +190,8 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
       <div className="site-footer__inner">
         <span>
           {isFinnish ? 'Ei kirjautumista. Ei tallennettua dataa.' : 'No login. No data saved.'}
+          {' '}
+          <span className="site-footer__version">{APP_VERSION}</span>
         </span>
         <nav className="site-footer__links" aria-label={isFinnish ? 'Oppaat' : 'Guides'}>
           {guideLinks.map((link) => (
@@ -209,7 +211,6 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
             </a>
           ))}
         </nav>
-        <span className="site-footer__version">{APP_VERSION}</span>
       </div>
     </footer>
   )
