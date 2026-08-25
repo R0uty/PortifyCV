@@ -62,9 +62,9 @@ function SectionHead({ title, color }) {
         className={`colorful-compact-showcase__section-dot colorful-compact-showcase__section-dot--${color}`}
         aria-hidden="true"
       />
-      <p className={`colorful-compact-showcase__section-title colorful-compact-showcase__section-title--${color}`}>
+      <h2 className={`colorful-compact-showcase__section-title colorful-compact-showcase__section-title--${color}`}>
         {title}
-      </p>
+      </h2>
     </div>
   )
 }

@@ -64,7 +64,7 @@ function SectionHead({ icon, title }) {
       <span className="executive-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
-      <p className="executive-showcase__section-title">{title}</p>
+      <h2 className="executive-showcase__section-title">{title}</h2>
     </div>
   )
 }

@@ -66,7 +66,7 @@ function splitToBullets(text) {
 function SectionHeading({ icon, label, tone }) {
   return (
     <div>
-      <div
+      <h2
         className="dev-showcase__section-title"
         style={{ color: tone === 'sidebar' ? '#f1f5f9' : 'var(--dev-primary)' }}
       >
@@ -78,7 +78,7 @@ function SectionHeading({ icon, label, tone }) {
           {sectionIcons[icon]}
         </span>
         {label}
-      </div>
+      </h2>
       <div className="dev-showcase__section-divider" aria-hidden="true" />
     </div>
   )

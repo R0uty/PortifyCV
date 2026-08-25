@@ -107,7 +107,7 @@ function SectionHead({ id, icon, title, subtitle }) {
         {sectionIcons[icon]}
       </span>
       <div>
-        <p className="portfolio-showcase__section-title">{title}</p>
+        <h2 className="portfolio-showcase__section-title">{title}</h2>
         {subtitle ? <p className="portfolio-showcase__section-subtitle">{subtitle}</p> : null}
       </div>
     </div>

@@ -55,7 +55,7 @@ function splitToBullets(text) {
 function SectionHead({ title, subtitle }) {
   return (
     <div className="creative-showcase__section-head">
-      <p className="creative-showcase__section-title">{title}</p>
+      <h2 className="creative-showcase__section-title">{title}</h2>
       {subtitle ? <p className="creative-showcase__section-subtitle">{subtitle}</p> : null}
     </div>
   )
