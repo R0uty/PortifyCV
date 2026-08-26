@@ -67,6 +67,7 @@ import {
   getCvTemplate,
 } from '../utils/cvTemplates'
 import { prefetchTemplateShowcases } from '../components/templates'
+import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
 import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
 import {
@@ -358,6 +359,7 @@ function ResumeBuilderPage({
     sessionRestoreEnabled,
     timelineAccentColor,
     modernOrangeAccentColor,
+    cvFontId,
     toasts,
   } = uiState
   const ui = getUiTheme()
@@ -379,6 +381,16 @@ function ResumeBuilderPage({
   useEffect(() => {
     formDataRef.current = formData
   }, [formData])
+
+  // Non-default CV fonts are fetched on demand (see utils/cvFonts.js) rather
+  // than bundled upfront. PDF export snapshots the live DOM, so it has to
+  // wait for this fetch — and for the browser to actually finish painting
+  // with it — or it can capture a fallback font instead; see handleExport's
+  // use of this ref below.
+  const cvFontLoadPromiseRef = useRef(Promise.resolve())
+  useEffect(() => {
+    cvFontLoadPromiseRef.current = loadCvFont(cvFontId)
+  }, [cvFontId])
 
   const [activeSectionId, setActiveSectionId] = useState('personal')
   const [searchQuery, setSearchQuery] = useState('')
@@ -708,6 +720,12 @@ function ResumeBuilderPage({
           return
         }
 
+        // The chosen CV font may still be an in-flight dynamic import (see
+        // cvFontLoadPromiseRef above) — capturing before its @font-face rules
+        // are registered and painted would bake the fallback font into the PDF.
+        await cvFontLoadPromiseRef.current
+        await window.document.fonts.ready
+
         await exportCvAsPdf(previewRef.current, exportFileName, {
           mode: exportPdfMode,
           formData,
@@ -932,6 +950,10 @@ function ResumeBuilderPage({
 
   const handleSelectTemplate = useCallback((templateId) => {
     dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
+  }, [])
+
+  const handleCvFontChange = useCallback((fontId) => {
+    dispatchUi({ type: UI_ACTION.SET_CV_FONT, fontId })
   }, [])
 
   const handleOpenSettings = useCallback(() => {
@@ -1168,6 +1190,8 @@ function ResumeBuilderPage({
       onSelectTemplate: handleSelectTemplate,
       templateSelectRef,
       formDataRef,
+      cvFontId,
+      onCvFontChange: handleCvFontChange,
       searchQuery,
       onSearchChange: setSearchQuery,
       onPrint: handlePrint,
@@ -1182,6 +1206,7 @@ function ResumeBuilderPage({
     handleExport, handleCopyShareLink, handleLocaleChange,
     canUndo, canRedo, handleUndo, handleRedo,
     templates, selectedTemplate, handleSelectTemplate,
+    cvFontId, handleCvFontChange,
     searchQuery, handlePrint,
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
@@ -1682,7 +1707,18 @@ function ResumeBuilderPage({
           >
             {locale === 'fi' ? 'Takaisin editoriin' : 'Back to editor'}
           </button>
-          <div className="preview-zoom-wrapper" style={{ '--preview-zoom': zoomPercent / 100 }}>
+          <div
+            className="preview-zoom-wrapper"
+            style={{
+              '--preview-zoom': zoomPercent / 100,
+              // Shadows the --font-sans token (tokens.css) for this subtree only
+              // — every template's CSS already reads font-family from that
+              // token, so redefining it here changes the CV document's body
+              // font everywhere without touching each template's stylesheet,
+              // and without affecting the app's own chrome outside this wrapper.
+              '--font-sans': getCvFontStack(cvFontId),
+            }}
+          >
             <AppErrorBoundary
               panelTitle={locale === 'fi' ? 'CV-esikatselu' : 'CV preview'}
               locale={locale}
@@ -1704,6 +1740,7 @@ function ResumeBuilderPage({
     </div>
   ), [
     atsFriendlyMode,
+    cvFontId,
     formData,
     handleFitPage,
     handleFitWidth,
@@ -1847,6 +1884,7 @@ function ResumeBuilderPage({
         onSelectTemplate={handleSelectTemplate}
         atsScore={atsScore}
         formData={formData}
+        cvFontId={cvFontId}
         locale={locale}
         onOpenBadge={handleOpenBadge}
       />

@@ -11,7 +11,7 @@ const THUMBNAIL_NATIVE_WIDTH = 780
 // memo keeps sibling previews from re-rendering while the user hovers around
 // the grid — the trimmed CV (see utils/thumbnailCv.js) is a stable reference
 // for the caller's lifetime.
-const TemplateThumbnail = memo(function TemplateThumbnail({ templateId, formData, locale }) {
+const TemplateThumbnail = memo(function TemplateThumbnail({ templateId, formData, locale, fontStack }) {
   const frameRef = useRef(null)
   // Falls back to the CSS default (0.29, tuned for the gallery modal's own
   // card size — see .template-gallery__thumb-page) until the very first
@@ -43,7 +43,16 @@ const TemplateThumbnail = memo(function TemplateThumbnail({ templateId, formData
       <div
         className="template-gallery__thumb-page"
         aria-hidden="true"
-        style={scale ? { transform: `scale(${scale})` } : undefined}
+        style={{
+          ...(scale ? { transform: `scale(${scale})` } : null),
+          // Shadows --font-sans for this thumbnail only — see the identical
+          // override on ResumeBuilderPage's preview-zoom-wrapper for why this
+          // is enough to change every template's body font without touching
+          // each template's stylesheet. Callers with no chosen font (the
+          // static landing/marketing pages) just leave this unset and get
+          // the app default.
+          ...(fontStack ? { '--font-sans': fontStack } : null),
+        }}
       >
         <CVPreview formData={formData} template={templateId} locale={locale} />
       </div>

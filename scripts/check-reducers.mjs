@@ -400,6 +400,13 @@ console.log('\nuiReducer\n')
 
 {
   const state = createInitialUiState({})
+  check('createInitialUiState defaults the CV font', typeof state.cvFontId === 'string' && state.cvFontId.length > 0)
+  const next = uiReducer(state, { type: UI_ACTION.SET_CV_FONT, fontId: 'georgia' })
+  check('SET_CV_FONT stores the chosen font id', next.cvFontId === 'georgia')
+}
+
+{
+  const state = createInitialUiState({})
   const next = uiReducer(state, { type: 'NOT_A_REAL_ACTION' })
   check('An unknown action type returns the same state reference', next === state)
 }

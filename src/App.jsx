@@ -395,6 +395,8 @@ function App() {
           onSelectTemplate={headerProps.onSelectTemplate}
           templateSelectRef={headerProps.templateSelectRef}
           formDataRef={headerProps.formDataRef}
+          cvFontId={headerProps.cvFontId}
+          onCvFontChange={headerProps.onCvFontChange}
           searchQuery={headerProps.searchQuery}
           onSearchChange={headerProps.onSearchChange}
           onPrint={headerProps.onPrint}

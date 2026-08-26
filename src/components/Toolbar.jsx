@@ -15,12 +15,14 @@ import {
 
 import Logo from './Logo'
 import LocaleFlagIcon from './LocaleFlagIcon'
+import CvFontSwitcher from './CvFontSwitcher'
 
 // Lazy so Toolbar (statically imported by App.jsx, and rendered on every
 // static page's bundle boundary as a result) doesn't drag TemplateThumbnail's
 // full CVPreview dependency graph into the eagerly-loaded main chunk — it's
 // only ever needed once the builder is open. See CVPreview's own lazy
-// Showcase imports for the same reasoning.
+// Showcase imports for the same reasoning. CvFontSwitcher has no such
+// dependency (just the small cvFonts.js registry) so it's imported eagerly.
 const TemplateQuickSwitcher = lazy(() => import('./TemplateQuickSwitcher'))
 
 function Toolbar({
@@ -36,6 +38,8 @@ function Toolbar({
   onSelectTemplate = () => {},
   templateSelectRef,
   formDataRef,
+  cvFontId = '',
+  onCvFontChange = () => {},
   searchQuery = '',
   onSearchChange = () => {},
   onPrint = () => {},
@@ -189,24 +193,37 @@ function Toolbar({
         <div className="app-toolbar__spacer" />
 
         <div className="app-toolbar__group">
-          <Suspense
-            fallback={(
-              <span className="template-quick-switcher__trigger" aria-hidden="true">
-                <span className="template-quick-switcher__trigger-label">
-                  {templates.find((template) => template.id === selectedTemplateId)?.label}
+          <div className="app-toolbar__labeled-control">
+            <span className="app-toolbar__control-label">{isFinnish ? 'Pohja' : 'Template'}</span>
+            <Suspense
+              fallback={(
+                <span className="template-quick-switcher__trigger" aria-hidden="true">
+                  <span className="template-quick-switcher__trigger-label">
+                    {templates.find((template) => template.id === selectedTemplateId)?.label}
+                  </span>
                 </span>
-              </span>
-            )}
-          >
-            <TemplateQuickSwitcher
-              templates={templates}
-              selectedTemplateId={selectedTemplateId}
-              onSelectTemplate={onSelectTemplate}
-              formDataRef={formDataRef}
+              )}
+            >
+              <TemplateQuickSwitcher
+                templates={templates}
+                selectedTemplateId={selectedTemplateId}
+                onSelectTemplate={onSelectTemplate}
+                formDataRef={formDataRef}
+                cvFontId={cvFontId}
+                locale={locale}
+                triggerRef={templateSelectRef}
+              />
+            </Suspense>
+          </div>
+
+          <div className="app-toolbar__labeled-control">
+            <span className="app-toolbar__control-label">{isFinnish ? 'Fontti' : 'Font'}</span>
+            <CvFontSwitcher
+              fontId={cvFontId}
+              onSelectFont={onCvFontChange}
               locale={locale}
-              triggerRef={templateSelectRef}
             />
-          </Suspense>
+          </div>
 
           <button
             type="button"

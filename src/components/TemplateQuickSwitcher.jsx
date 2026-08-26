@@ -3,6 +3,7 @@ import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import TemplateThumbnail from './TemplateThumbnail'
 import { buildThumbnailCv } from '../utils/thumbnailCv'
+import { getCvFontStack } from '../utils/cvFonts'
 
 // Toolbar's template picker: a button that opens a horizontally scrollable
 // strip of live thumbnails (same TemplateThumbnail used by the full
@@ -12,6 +13,7 @@ function TemplateQuickSwitcher({
   selectedTemplateId = '',
   onSelectTemplate = () => {},
   formDataRef,
+  cvFontId = '',
   locale = 'en',
   triggerRef,
 }) {
@@ -140,7 +142,12 @@ function TemplateQuickSwitcher({
                   onClick={() => handleSelect(template.id)}
                 >
                   <span className="template-quick-switcher__thumb template-gallery__thumb">
-                    <TemplateThumbnail templateId={template.id} formData={thumbnailCv} locale={locale} />
+                    <TemplateThumbnail
+                      templateId={template.id}
+                      formData={thumbnailCv}
+                      locale={locale}
+                      fontStack={getCvFontStack(cvFontId)}
+                    />
                   </span>
                   <span className="template-quick-switcher__label">{template.label}</span>
                 </button>
