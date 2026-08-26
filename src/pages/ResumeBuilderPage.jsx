@@ -2,21 +2,31 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import {
   Award,
   Briefcase,
-  Download,
+  BookOpen,
+  Building2,
+  FileSearch,
   FileText,
   FolderKanban,
+  GitBranch,
   GraduationCap,
+  HandHeart,
   Heart,
+  IdCard,
   Languages as LanguagesIcon,
   Link2,
   Mail,
+  Mic,
   Minus,
   Plus,
+  Quote,
   Settings as SettingsIcon,
   Sparkles,
   StretchHorizontal,
   StretchVertical,
+  Target,
+  Trophy,
   User,
+  Users,
   X,
   LayoutTemplate,
 } from 'lucide-react'
@@ -79,31 +89,52 @@ const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
 
 // Order must match the section cards' actual JSX order in CVForm.jsx (personal,
-// summary, skills, experience, education, certificates, projects, languages,
-// interests, links) — this list is a separate hardcoded array, not derived from
-// that layout, so it drifts silently if one changes without the other.
+// summary, skills, experience, education, coreStrengths, certificates,
+// projects, languages, interests, achievements, openSource, publications,
+// links, leadership, memberships, speaking, volunteering, internships,
+// caseStudies, testimonials) — this list is a separate hardcoded array, not
+// derived from that layout, so it drifts silently if one changes without the
+// other.
 // sectionKey maps each nav item to the CV_SECTION_ORDER_KEYS entry that
 // gates whether CVForm actually renders that section for the selected
 // template — null means always rendered (not template-gated). Keep this in
 // sync with the section-key checks CVForm.jsx wraps each PanelSection in.
+// Every template-gated section CVForm can render needs an entry here — a
+// section with no nav item (as achievements/openSource/publications/etc once
+// had) is reachable only by scrolling past everything else with no shortcut
+// and no search hit, on templates where it's a primary section.
 const NAV_SECTIONS = [
   { id: 'personal', anchor: 'section-personal', icon: User, kind: 'scroll', sectionKey: null, label: { en: 'Personal Information', fi: 'Henkilötiedot' } },
   { id: 'summary', anchor: 'section-summary', icon: FileText, kind: 'scroll', sectionKey: 'about', label: { en: 'Summary', fi: 'Yhteenveto' } },
   { id: 'skills', anchor: 'section-skills', icon: Sparkles, kind: 'scroll', sectionKey: 'skills', label: { en: 'Skills', fi: 'Taidot' } },
   { id: 'experience', anchor: 'section-experience', icon: Briefcase, kind: 'scroll', sectionKey: 'experience', label: { en: 'Experience', fi: 'Kokemus' } },
   { id: 'education', anchor: 'section-education', icon: GraduationCap, kind: 'scroll', sectionKey: 'education', label: { en: 'Education', fi: 'Koulutus' } },
+  { id: 'coreStrengths', anchor: 'section-coreStrengths', icon: Target, kind: 'scroll', sectionKey: 'coreStrengths', label: { en: 'Core Strengths', fi: 'Vahvuudet' } },
   { id: 'certificates', anchor: 'section-certificates', icon: Award, kind: 'scroll', sectionKey: 'certificates', label: { en: 'Certificates', fi: 'Sertifikaatit' } },
   { id: 'projects', anchor: 'section-projects', icon: FolderKanban, kind: 'scroll', sectionKey: 'projects', label: { en: 'Projects', fi: 'Projektit' } },
   { id: 'languages', anchor: 'section-languages', icon: LanguagesIcon, kind: 'scroll', sectionKey: 'languages', label: { en: 'Languages', fi: 'Kielet' } },
   { id: 'interests', anchor: 'section-interests', icon: Heart, kind: 'scroll', sectionKey: 'interests', label: { en: 'Interests', fi: 'Kiinnostuksen kohteet' } },
+  { id: 'achievements', anchor: 'section-achievements', icon: Trophy, kind: 'scroll', sectionKey: 'achievements', label: { en: 'Achievements', fi: 'Saavutukset' } },
+  { id: 'openSource', anchor: 'section-openSource', icon: GitBranch, kind: 'scroll', sectionKey: 'openSource', label: { en: 'Open Source', fi: 'Avoin lähdekoodi' } },
+  { id: 'publications', anchor: 'section-publications', icon: BookOpen, kind: 'scroll', sectionKey: 'publications', label: { en: 'Publications', fi: 'Julkaisut' } },
   { id: 'links', anchor: 'section-links', icon: Link2, kind: 'scroll', sectionKey: 'links', label: { en: 'Links', fi: 'Linkit' } },
+  { id: 'leadership', anchor: 'section-leadership', icon: Users, kind: 'scroll', sectionKey: 'leadership', label: { en: 'Leadership', fi: 'Johtaminen' } },
+  { id: 'memberships', anchor: 'section-memberships', icon: IdCard, kind: 'scroll', sectionKey: 'memberships', label: { en: 'Memberships', fi: 'Jäsenyydet' } },
+  { id: 'speaking', anchor: 'section-speaking', icon: Mic, kind: 'scroll', sectionKey: 'speaking', label: { en: 'Speaking', fi: 'Esiintymiset' } },
+  { id: 'volunteering', anchor: 'section-volunteering', icon: HandHeart, kind: 'scroll', sectionKey: 'volunteering', label: { en: 'Volunteering', fi: 'Vapaaehtoistyö' } },
+  { id: 'internships', anchor: 'section-internships', icon: Building2, kind: 'scroll', sectionKey: 'internships', label: { en: 'Internships', fi: 'Harjoittelut' } },
+  { id: 'caseStudies', anchor: 'section-caseStudies', icon: FileSearch, kind: 'scroll', sectionKey: 'caseStudies', label: { en: 'Case Studies', fi: 'Tapaustutkimukset' } },
+  { id: 'testimonials', anchor: 'section-testimonials', icon: Quote, kind: 'scroll', sectionKey: 'testimonials', label: { en: 'Testimonials', fi: 'Suositukset' } },
 ]
 
+// Export deliberately has no entry here: the toolbar's Export control offers
+// PDF/HTML/JSON via a menu, and a rail shortcut previously bypassed that
+// choice and always triggered PDF-only, which looked like a second, buggier
+// export button next to the real one instead of a shortcut to it.
 const NAV_UTILITY_ITEMS = [
   { id: 'settings', icon: SettingsIcon, kind: 'action', label: { en: 'Settings', fi: 'Asetukset' } },
   { id: 'templates', icon: LayoutTemplate, kind: 'action', label: { en: 'Templates', fi: 'Pohjat' } },
   { id: 'coverLetter', icon: Mail, kind: 'action', label: { en: 'Cover letter', fi: 'Hakemuskirje' } },
-  { id: 'export', icon: Download, kind: 'action', label: { en: 'Export', fi: 'Vie' } },
 ]
 
 const ALL_SCROLL_NAV_ITEMS = [...NAV_SECTIONS, ...NAV_UTILITY_ITEMS].filter((item) => item.kind === 'scroll')
@@ -919,8 +950,6 @@ function ResumeBuilderPage({
         setIsSettingsOpen(true)
       } else if (item.id === 'coverLetter') {
         setIsCoverLetterOpen(true)
-      } else if (item.id === 'export') {
-        handleExport('pdf-designer')
       }
       return
     }
@@ -932,7 +961,7 @@ function ResumeBuilderPage({
       scrollSectionIntoView(container, target)
       setActiveSectionId(item.id)
     }
-  }, [handleExport])
+  }, [])
 
   const handleManageSections = useCallback(() => {
     setIsSettingsOpen(false)

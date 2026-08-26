@@ -36,6 +36,9 @@ function NavRail({
         <span className="nav-rail__brand-text">PortifyCV</span>
       </div>
 
+      {sections.length ? (
+        <p className="nav-rail__group-label">{isFinnish ? 'Osiot' : 'Sections'}</p>
+      ) : null}
       <ul className="nav-rail__list" role="list">
         {sections.map((item) => (
           <NavItem
@@ -50,6 +53,9 @@ function NavRail({
 
       <div className="nav-rail__divider" role="separator" />
 
+      {utilityItems.length ? (
+        <p className="nav-rail__group-label">{isFinnish ? 'Työkalut' : 'Tools'}</p>
+      ) : null}
       <ul className="nav-rail__list" role="list">
         {utilityItems.map((item) => (
           <NavItem

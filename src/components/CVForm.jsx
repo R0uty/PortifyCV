@@ -1040,6 +1040,7 @@ function CVForm({
 
       {templateSectionKeySet.has('coreStrengths') ? (
       <PanelSection
+        id="section-coreStrengths"
         eyebrow="Section 05"
         title={isFinnish ? 'Vahvuudet' : 'Core Strengths'}
         description={
@@ -1552,6 +1553,7 @@ function CVForm({
 
       {templateSectionKeySet.has('achievements') ? (
       <PanelSection
+        id="section-achievements"
         eyebrow="Section 10"
         title={isFinnish ? 'Saavutukset' : 'Achievements'}
         description={
@@ -1648,6 +1650,7 @@ function CVForm({
 
       {templateSectionKeySet.has('openSource') ? (
       <PanelSection
+        id="section-openSource"
         eyebrow="Section 11"
         title={isFinnish ? 'Avoin lähdekoodi' : 'Open Source'}
         description={
@@ -1773,6 +1776,7 @@ function CVForm({
 
       {templateSectionKeySet.has('publications') ? (
       <PanelSection
+        id="section-publications"
         eyebrow="Section 12"
         title={isFinnish ? 'Julkaisut' : 'Publications'}
         description={
@@ -1928,6 +1932,7 @@ function CVForm({
 
       {templateSectionKeySet.has('leadership') ? (
       <PanelSection
+        id="section-leadership"
         eyebrow="Section 14"
         title={isFinnish ? 'Johtamiskokemus' : 'Leadership Experience'}
         description={
@@ -2044,6 +2049,7 @@ function CVForm({
 
       {templateSectionKeySet.has('memberships') ? (
       <PanelSection
+        id="section-memberships"
         eyebrow="Section 15"
         title={isFinnish ? 'Ammattijäsenyydet' : 'Professional Memberships'}
         description={
@@ -2141,6 +2147,7 @@ function CVForm({
 
       {templateSectionKeySet.has('speaking') ? (
       <PanelSection
+        id="section-speaking"
         eyebrow="Section 16"
         title={isFinnish ? 'Esiintymiset' : 'Speaking'}
         description={
@@ -2249,6 +2256,7 @@ function CVForm({
 
       {templateSectionKeySet.has('volunteering') ? (
       <PanelSection
+        id="section-volunteering"
         eyebrow="Section 17"
         title={isFinnish ? 'Vapaaehtoistyö' : 'Volunteering'}
         description={
@@ -2345,6 +2353,7 @@ function CVForm({
 
       {templateSectionKeySet.has('internships') ? (
       <PanelSection
+        id="section-internships"
         eyebrow="Section 18"
         title={isFinnish ? 'Harjoittelut' : 'Internships'}
         description={
@@ -2477,6 +2486,7 @@ function CVForm({
 
       {templateSectionKeySet.has('caseStudies') ? (
       <PanelSection
+        id="section-caseStudies"
         eyebrow="Section 19"
         title={isFinnish ? 'Tapaustutkimukset' : 'Case Studies'}
         description={
@@ -2595,6 +2605,7 @@ function CVForm({
 
       {templateSectionKeySet.has('testimonials') ? (
       <PanelSection
+        id="section-testimonials"
         eyebrow="Section 20"
         title={isFinnish ? 'Suositukset' : 'Testimonials'}
         description={
