@@ -71,6 +71,7 @@
   --app-shadow: var(--shadow-md);
 
   --nav-width: clamp(13rem, 18vw, 16rem);
+  --nav-width-collapsed: 4.25rem;
   --editor-width: clamp(23rem, 34vw, 32rem);
   --preview-paper-width: min(100%, 220mm);
   --preview-paper-min-height: 297mm;

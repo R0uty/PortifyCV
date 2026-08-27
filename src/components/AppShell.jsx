@@ -4,6 +4,7 @@ function AppShell({
   content,
   shellStyle = {},
   showContentOnMobile = true,
+  navCollapsed = false,
 }) {
   return (
     <div
@@ -12,6 +13,7 @@ function AppShell({
     >
       <div
         className="app-shell__surface mx-auto w-full transition-colors print:min-h-0 print:h-auto print:max-w-none print:rounded-none print:border-0 print:bg-white print:shadow-none"
+        style={navCollapsed ? { '--nav-width': 'var(--nav-width-collapsed)' } : undefined}
       >
         {nav ? (
           <div className="app-shell__nav print:hidden">

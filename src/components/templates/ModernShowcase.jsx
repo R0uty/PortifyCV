@@ -84,7 +84,7 @@ function Section({ id, placement, icon, title, children }) {
   )
 }
 
-export default function ModernShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {} }) {
+export default function ModernShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -435,6 +435,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
       className="modern-showcase preview-document--designer"
+      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
     >
       <header data-export-header="true" className="modern-showcase__header">
         <div className="min-w-0">

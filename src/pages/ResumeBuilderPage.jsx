@@ -46,6 +46,7 @@ import ToastStack from '../components/ToastStack'
 import {
   getUiTheme,
   UI_LOCALE_STORAGE_KEY,
+  UI_NAV_RAIL_COLLAPSED_STORAGE_KEY,
 } from '../utils/designSystem'
 import {
   CV_ONBOARDING_SEEN_STORAGE_KEY,
@@ -68,6 +69,7 @@ import {
 } from '../utils/cvTemplates'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
+import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
 import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
 import {
@@ -360,6 +362,8 @@ function ResumeBuilderPage({
     timelineAccentColor,
     modernOrangeAccentColor,
     cvFontId,
+    cvHeadingColor,
+    navRailCollapsed,
     toasts,
   } = uiState
   const ui = getUiTheme()
@@ -527,6 +531,10 @@ function ResumeBuilderPage({
     setStorageValue(UI_LOCALE_STORAGE_KEY, locale)
     onLocaleChange(locale)
   }, [locale, onLocaleChange, setStorageValue])
+
+  useEffect(() => {
+    setStorageValue(UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, navRailCollapsed ? 'true' : 'false')
+  }, [navRailCollapsed, setStorageValue])
 
   useEffect(() => {
     setStorageValue(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, sessionRestoreEnabled ? 'true' : 'false')
@@ -956,6 +964,14 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.SET_CV_FONT, fontId })
   }, [])
 
+  const handleCvHeadingColorChange = useCallback((color) => {
+    dispatchUi({ type: UI_ACTION.SET_CV_HEADING_COLOR, color })
+  }, [])
+
+  const handleToggleNavRail = useCallback(() => {
+    dispatchUi({ type: UI_ACTION.TOGGLE_NAV_RAIL_COLLAPSED })
+  }, [])
+
   const handleOpenSettings = useCallback(() => {
     setIsSettingsOpen(true)
   }, [])
@@ -1192,6 +1208,8 @@ function ResumeBuilderPage({
       formDataRef,
       cvFontId,
       onCvFontChange: handleCvFontChange,
+      cvHeadingColor,
+      onCvHeadingColorChange: handleCvHeadingColorChange,
       searchQuery,
       onSearchChange: setSearchQuery,
       onPrint: handlePrint,
@@ -1207,6 +1225,7 @@ function ResumeBuilderPage({
     canUndo, canRedo, handleUndo, handleRedo,
     templates, selectedTemplate, handleSelectTemplate,
     cvFontId, handleCvFontChange,
+    cvHeadingColor, handleCvHeadingColorChange,
     searchQuery, handlePrint,
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
@@ -1587,7 +1606,9 @@ function ResumeBuilderPage({
       activeSectionId={activeSectionId}
       onNavigate={handleNavigate}
       locale={locale}
-      version="1.0.0"
+      version={APP_VERSION_RAW}
+      isCollapsed={navRailCollapsed}
+      onToggleCollapsed={handleToggleNavRail}
     />
   ), [
     filteredNavSections,
@@ -1595,6 +1616,8 @@ function ResumeBuilderPage({
     activeSectionId,
     handleNavigate,
     locale,
+    navRailCollapsed,
+    handleToggleNavRail,
   ])
 
   const previewContent = useMemo(() => (
@@ -1731,6 +1754,7 @@ function ResumeBuilderPage({
                 atsFriendlyMode={atsFriendlyMode}
                 timelineAccentColor={timelineAccentColor}
                 modernOrangeAccentColor={modernOrangeAccentColor}
+                headingColor={cvHeadingColor}
               />
             </AppErrorBoundary>
           </div>
@@ -1741,6 +1765,7 @@ function ResumeBuilderPage({
   ), [
     atsFriendlyMode,
     cvFontId,
+    cvHeadingColor,
     formData,
     handleFitPage,
     handleFitWidth,
@@ -1872,6 +1897,7 @@ function ResumeBuilderPage({
         nav={navRailContent}
         sidebar={sidebarContent}
         content={previewContent}
+        navCollapsed={navRailCollapsed}
       />
 
       {mobileBottomActions}
@@ -1885,6 +1911,7 @@ function ResumeBuilderPage({
         atsScore={atsScore}
         formData={formData}
         cvFontId={cvFontId}
+        cvHeadingColor={cvHeadingColor}
         locale={locale}
         onOpenBadge={handleOpenBadge}
       />

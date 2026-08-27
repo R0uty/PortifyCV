@@ -151,6 +151,7 @@ export default function ModernOrangeShowcase({
   showcaseConfig = {},
   accentColor = MODERN_ORANGE_DEFAULT_ACCENT_COLOR,
   atsFriendlyMode = false,
+  headingColor = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -428,7 +429,10 @@ export default function ModernOrangeShowcase({
       // since a side-by-side column is exactly what this app's own ATS
       // claims ("no columns") promise to remove.
       className={`modern-orange-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'}${atsFriendlyMode ? ' modern-orange-showcase--ats' : ''}`}
-      style={{ '--mo-accent': effectiveAccentColor }}
+      style={{
+        '--mo-accent': effectiveAccentColor,
+        ...(headingColor ? { '--cv-heading-color': headingColor } : null),
+      }}
     >
       <header data-export-header="true" className="modern-orange-showcase__header">
         <p className="modern-orange-showcase__kicker" data-export-ignore="true">

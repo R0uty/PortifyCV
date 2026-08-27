@@ -4,6 +4,7 @@ import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import TemplateThumbnail from './TemplateThumbnail'
 import { buildThumbnailCv } from '../utils/thumbnailCv'
 import { getCvFontStack } from '../utils/cvFonts'
+import { useAnchoredPanelPosition } from '../hooks/useAnchoredPanelPosition'
 
 // Toolbar's template picker: a button that opens a horizontally scrollable
 // strip of live thumbnails (same TemplateThumbnail used by the full
@@ -14,6 +15,7 @@ function TemplateQuickSwitcher({
   onSelectTemplate = () => {},
   formDataRef,
   cvFontId = '',
+  cvHeadingColor = '',
   locale = 'en',
   triggerRef,
 }) {
@@ -21,7 +23,9 @@ function TemplateQuickSwitcher({
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
   const stripRef = useRef(null)
+  const panelRef = useRef(null)
   const selectedTemplate = templates.find((template) => template.id === selectedTemplateId)
+  const { style: panelPosition, ready: panelReady } = useAnchoredPanelPosition(isOpen, triggerRef, panelRef)
 
   // Starts as the demo CV (no ref read at render time) and is snapshotted
   // from formDataRef in the effect below each time the panel opens —
@@ -119,6 +123,13 @@ function TemplateQuickSwitcher({
           className="template-quick-switcher__panel"
           role="dialog"
           aria-label={isFinnish ? 'Valitse pohja' : 'Select template'}
+          ref={panelRef}
+          // Positioned in fixed viewport coordinates by the hook above,
+          // clamped so it stays on-screen even when the toolbar has wrapped
+          // and pushed the trigger toward the left edge — kept invisible
+          // (not unmounted, so its real width/height can still be measured)
+          // until that position is computed, to avoid a visible jump.
+          style={{ ...panelPosition, visibility: panelReady ? 'visible' : 'hidden' }}
         >
           <button
             type="button"
@@ -147,6 +158,7 @@ function TemplateQuickSwitcher({
                       formData={thumbnailCv}
                       locale={locale}
                       fontStack={getCvFontStack(cvFontId)}
+                      headingColor={cvHeadingColor}
                     />
                   </span>
                   <span className="template-quick-switcher__label">{template.label}</span>

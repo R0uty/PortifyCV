@@ -70,7 +70,7 @@ function Section({ id, placement, title, subtitle, children }) {
   )
 }
 
-export default function CreativeShowcase({ formData, locale = 'en', previewRef, templateConfig }) {
+export default function CreativeShowcase({ formData, locale = 'en', previewRef, templateConfig, headingColor = null }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -393,6 +393,7 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
       data-export-root="true"
       data-export-variant="creative"
       className="creative-showcase preview-document--designer"
+      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
     >
       <div className="creative-showcase__bg" data-export-ignore="true" aria-hidden="true">
         <span className="creative-showcase__blob creative-showcase__blob--top" />

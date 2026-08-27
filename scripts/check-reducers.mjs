@@ -407,6 +407,24 @@ console.log('\nuiReducer\n')
 
 {
   const state = createInitialUiState({})
+  check('createInitialUiState defaults the CV heading color to "template default"', state.cvHeadingColor === '')
+  const next = uiReducer(state, { type: UI_ACTION.SET_CV_HEADING_COLOR, color: '#1e3a8a' })
+  check('SET_CV_HEADING_COLOR stores the chosen hex color', next.cvHeadingColor === '#1e3a8a')
+  const reset = uiReducer(next, { type: UI_ACTION.SET_CV_HEADING_COLOR, color: '' })
+  check('SET_CV_HEADING_COLOR can reset back to "template default"', reset.cvHeadingColor === '')
+}
+
+{
+  const state = createInitialUiState({})
+  check('createInitialUiState defaults the nav rail to expanded', state.navRailCollapsed === false)
+  const next = uiReducer(state, { type: UI_ACTION.TOGGLE_NAV_RAIL_COLLAPSED })
+  check('TOGGLE_NAV_RAIL_COLLAPSED collapses the nav rail', next.navRailCollapsed === true)
+  const backAgain = uiReducer(next, { type: UI_ACTION.TOGGLE_NAV_RAIL_COLLAPSED })
+  check('TOGGLE_NAV_RAIL_COLLAPSED is reversible', backAgain.navRailCollapsed === false)
+}
+
+{
+  const state = createInitialUiState({})
   const next = uiReducer(state, { type: 'NOT_A_REAL_ACTION' })
   check('An unknown action type returns the same state reference', next === state)
 }

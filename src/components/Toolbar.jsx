@@ -16,6 +16,7 @@ import {
 import Logo from './Logo'
 import LocaleFlagIcon from './LocaleFlagIcon'
 import CvFontSwitcher from './CvFontSwitcher'
+import CvHeadingColorSwitcher from './CvHeadingColorSwitcher'
 
 // Lazy so Toolbar (statically imported by App.jsx, and rendered on every
 // static page's bundle boundary as a result) doesn't drag TemplateThumbnail's
@@ -40,6 +41,8 @@ function Toolbar({
   formDataRef,
   cvFontId = '',
   onCvFontChange = () => {},
+  cvHeadingColor = '',
+  onCvHeadingColorChange = () => {},
   searchQuery = '',
   onSearchChange = () => {},
   onPrint = () => {},
@@ -210,6 +213,7 @@ function Toolbar({
                 onSelectTemplate={onSelectTemplate}
                 formDataRef={formDataRef}
                 cvFontId={cvFontId}
+                cvHeadingColor={cvHeadingColor}
                 locale={locale}
                 triggerRef={templateSelectRef}
               />
@@ -221,6 +225,15 @@ function Toolbar({
             <CvFontSwitcher
               fontId={cvFontId}
               onSelectFont={onCvFontChange}
+              locale={locale}
+            />
+          </div>
+
+          <div className="app-toolbar__labeled-control">
+            <span className="app-toolbar__control-label">{isFinnish ? 'Väri' : 'Color'}</span>
+            <CvHeadingColorSwitcher
+              color={cvHeadingColor}
+              onSelectColor={onCvHeadingColorChange}
               locale={locale}
             />
           </div>

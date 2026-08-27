@@ -14,6 +14,7 @@ function TemplateGalleryModal({
   atsScore,
   formData = null,
   cvFontId = '',
+  cvHeadingColor = '',
   locale = 'en',
   onOpenBadge = null,
 }) {
@@ -62,6 +63,7 @@ function TemplateGalleryModal({
                   formData={thumbnailCv}
                   locale={locale}
                   fontStack={fontStack}
+                  headingColor={cvHeadingColor}
                 />
               </div>
               <div className="template-gallery__meta">

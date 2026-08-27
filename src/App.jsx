@@ -380,7 +380,7 @@ function App() {
   }
 
   return (
-    <div className="one-pager">
+    <div className="one-pager one-pager--builder">
       {headerProps && (
         <Toolbar
           locale={headerProps.locale}
@@ -397,6 +397,8 @@ function App() {
           formDataRef={headerProps.formDataRef}
           cvFontId={headerProps.cvFontId}
           onCvFontChange={headerProps.onCvFontChange}
+          cvHeadingColor={headerProps.cvHeadingColor}
+          onCvHeadingColorChange={headerProps.onCvHeadingColorChange}
           searchQuery={headerProps.searchQuery}
           onSearchChange={headerProps.onSearchChange}
           onPrint={headerProps.onPrint}

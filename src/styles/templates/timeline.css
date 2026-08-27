@@ -76,7 +76,7 @@
   letter-spacing: -0.01em;
   line-height: 1.1;
   text-transform: uppercase;
-  color: #111827;
+  color: var(--cv-heading-color, #111827);
 }
 
 .timeline-showcase__name-accent {
@@ -160,7 +160,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: #111827;
+  color: var(--cv-heading-color, #111827);
 }
 
 .timeline-showcase__empty {

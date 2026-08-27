@@ -240,7 +240,10 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--np-blue);
+  /* Unlike __name (white text on the dark sidebar — deliberately left out
+     of the heading-color override, see utils/cvHeadingColors.js), section
+     titles render in the light main column, so they're safe to override. */
+  color: var(--cv-heading-color, var(--np-blue));
 }
 
 /* ── Profile ── */

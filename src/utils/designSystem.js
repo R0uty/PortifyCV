@@ -1,5 +1,6 @@
 export const UI_ACCENT_STORAGE_KEY = 'portifycv-ui-accent'
 export const UI_LOCALE_STORAGE_KEY = 'ui-locale'
+export const UI_NAV_RAIL_COLLAPSED_STORAGE_KEY = 'portifycv-nav-rail-collapsed'
 export const defaultAccentId = 'monochrome'
 
 export const accentOptions = []

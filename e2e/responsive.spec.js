@@ -55,6 +55,70 @@ test.describe('Mobile layout', () => {
     await expect(page.locator('.app-shell__editor')).toBeInViewport()
   })
 
+  // Regression guard: .app-shell__surface had a leftover `height: 100%;
+  // overflow: auto;` below the `lg` breakpoint, turning it into its own
+  // internally-scrolling box stacked on top of the normal page instead of
+  // just flowing into it (it's a flex item of .one-pager, so it still gets
+  // a definite computed height from flexbox even with no height of its own
+  // — that's enough for `height: 100%` to "work" and start clipping). The
+  // practical symptom: touches over most of the screen hit that box's
+  // cramped internal touch-scroll region instead of the page, so scrolling
+  // only worked very close to the top or bottom of the screen. The fix is
+  // that this element must NOT be its own scroll container on mobile — the
+  // page itself (documentElement) should be, with the surface just flowing
+  // to its natural (taller-than-viewport) content height.
+  test('the builder scrolls the page, not an inner box, on mobile', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+
+    const overflowsPage = await page.evaluate(
+      () => document.documentElement.scrollHeight > document.documentElement.clientHeight,
+    )
+    expect(overflowsPage).toBe(true)
+
+    const surfaceIsNotItsOwnScrollbox = await page.evaluate(() => {
+      const surface = document.querySelector('.app-shell__surface')
+      return surface.scrollHeight <= surface.clientHeight + 1
+    })
+    expect(surfaceIsNotItsOwnScrollbox).toBe(true)
+  })
+
+  // Regression guard: the CSS `zoom` property (used by .preview-zoom-wrapper
+  // to scale the CV preview — app-shell.css) is well known to break native
+  // touch-drag scrolling in WebKit/iOS, even at zoom:1 — an element with
+  // `zoom` applied gets its own hit-testing context that touch-scroll
+  // gestures starting inside it don't reliably escape, while gestures
+  // starting outside it (e.g. right at the screen's top/bottom edge) scroll
+  // the page fine. That produced the "only scrolls near the top or bottom
+  // of the screen" bug. There's no visual cost to disabling it below the
+  // `lg` breakpoint: the zoom bar is hidden there (see the next rule down in
+  // utilities.css) so zoomPercent never leaves its 100% default anyway.
+  // getComputedStyle().zoom isn't a reliable check here — Chromium reports
+  // "1" for both `zoom: 1` and `zoom: normal` — so this checks the actual
+  // cascade winner in the stylesheets instead.
+  test('the CSS zoom property is disabled on the preview wrapper on mobile', async ({ page }) => {
+    await page.goto('/cv')
+    await page.locator('.preview-zoom-wrapper').waitFor({ state: 'attached' })
+
+    const mobileZoomIsNormal = await page.evaluate(() => {
+      for (const sheet of document.styleSheets) {
+        let rules
+        try { rules = sheet.cssRules } catch { continue }
+        for (const rule of rules) {
+          if (rule.media?.mediaText === '(max-width: 1023px)') {
+            for (const inner of rule.cssRules) {
+              if (inner.selectorText === '.preview-zoom-wrapper' && inner.style.zoom === 'normal') {
+                return true
+              }
+            }
+          }
+        }
+      }
+      return false
+    })
+    expect(mobileZoomIsNormal).toBe(true)
+  })
+
   // Regression guard: Settings only lived in the desktop nav-rail
   // (app-shell__nav, display: none below the lg breakpoint) with no
   // equivalent anywhere in the mobile bottom bar — mobile users had no way
@@ -64,5 +128,45 @@ test.describe('Mobile layout', () => {
 
     await page.getByRole('button', { name: 'Settings' }).click()
     await expect(page.getByRole('dialog')).toBeVisible()
+  })
+})
+
+test.describe('Desktop toolbar dropdowns', () => {
+  // Regression guard: the toolbar's last group (Template/Font/Color pickers
+  // plus locale/print/export controls) wraps onto its own row via flex-wrap
+  // at plenty of real desktop widths — 1280px reproduces it reliably. Each
+  // picker's dropdown panel used to be `position: absolute; right: 0`
+  // relative to its own trigger, assuming the trigger always had room to its
+  // left; once a wrapped row pushed a trigger toward the screen's left edge
+  // instead, that assumption broke and the panel rendered mostly off-screen
+  // to the left — clicking any option inside it was impossible. Panels now
+  // position themselves in fixed viewport coordinates via
+  // useAnchoredPanelPosition, clamped to stay fully on-screen regardless of
+  // where the toolbar wrapping puts the trigger.
+  test.use({ viewport: { width: 1280, height: 800 } })
+
+  async function expectPanelOnScreen(page, triggerNamePattern) {
+    const viewport = page.viewportSize()
+    await page.getByRole('button', { name: triggerNamePattern }).click()
+    const panel = page.getByRole('dialog')
+    const box = await panel.boundingBox()
+    expect(box).not.toBeNull()
+    expect(box.x).toBeGreaterThanOrEqual(0)
+    expect(box.x + box.width).toBeLessThanOrEqual(viewport.width)
+  }
+
+  test('the template picker panel stays on-screen when the toolbar wraps', async ({ page }) => {
+    await page.goto('/cv')
+    await expectPanelOnScreen(page, /^Select template:/)
+  })
+
+  test('the font picker panel stays on-screen when the toolbar wraps', async ({ page }) => {
+    await page.goto('/cv')
+    await expectPanelOnScreen(page, /^Select font:/)
+  })
+
+  test('the heading color picker panel stays on-screen when the toolbar wraps', async ({ page }) => {
+    await page.goto('/cv')
+    await expectPanelOnScreen(page, /^Select heading color:/)
   })
 })

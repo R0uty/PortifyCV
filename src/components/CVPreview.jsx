@@ -51,6 +51,12 @@ function CVPreview({
   atsFriendlyMode = false,
   timelineAccentColor,
   modernOrangeAccentColor,
+  // Overrides the name and section-title color for every template except
+  // Developer (animated gradient name), Colorful Compact (dark header, own
+  // per-section rainbow identity), and Navy Professional's name (white on
+  // its dark sidebar) — see utils/cvHeadingColors.js for why those are
+  // excluded. `null`/undefined means "use the template's own color".
+  headingColor = null,
 }) {
   // ── Theme and template resolution ──────────────────────────────────
   // Resolve the UI theme (dark/light) and the template config (variant, layout, etc.)
@@ -98,6 +104,7 @@ function CVPreview({
           locale={locale}
           previewRef={previewRef}
           templateConfig={templateConfig}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -115,6 +122,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -132,6 +140,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -156,6 +165,7 @@ function CVPreview({
           showcaseConfig={t}
           accentColor={timelineAccentColor}
           atsFriendlyMode={atsFriendlyMode}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -174,6 +184,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -192,6 +203,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -210,6 +222,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -229,6 +242,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -253,6 +267,7 @@ function CVPreview({
           templateConfig={templateConfig}
           showcaseConfig={t}
           atsFriendlyMode={atsFriendlyMode}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -275,6 +290,7 @@ function CVPreview({
           showcaseConfig={t}
           accentColor={modernOrangeAccentColor}
           atsFriendlyMode={atsFriendlyMode}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -502,7 +518,7 @@ function CVPreview({
           {sectionIcons[key]}
         </span>
       ) : null}
-      <h4 className={sectionTitleClasses}>{label}</h4>
+      <h4 className={sectionTitleClasses} style={headingColor ? { color: headingColor } : undefined}>{label}</h4>
     </div>
   )
 
@@ -1650,6 +1666,7 @@ function CVPreview({
               className={`leading-none ${
                 atsFriendlyMode ? 'mt-2 text-4xl font-semibold tracking-tight text-gray-900' : t.headerTitle()
               }`}
+              style={headingColor ? { color: headingColor } : undefined}
             >
               {fullName}
             </h3>

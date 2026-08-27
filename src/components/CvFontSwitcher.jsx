@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { CV_FONT_OPTIONS, loadAllCvFonts } from '../utils/cvFonts'
+import { useAnchoredPanelPosition } from '../hooks/useAnchoredPanelPosition'
 
 // Toolbar's font picker, next to the template quick switcher — same
 // dropdown-panel-of-cards shape as TemplateQuickSwitcher.jsx (trigger button,
@@ -15,13 +16,18 @@ function CvFontSwitcher({
   fontId = '',
   onSelectFont = () => {},
   locale = 'en',
-  triggerRef,
 }) {
   const isFinnish = locale === 'fi'
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
   const stripRef = useRef(null)
+  const panelRef = useRef(null)
+  // Toolbar.jsx doesn't pass a triggerRef prop (unlike TemplateQuickSwitcher's
+  // templateSelectRef) — an internal ref both drives the button itself and
+  // gives useAnchoredPanelPosition a real DOM node to measure.
+  const triggerRef = useRef(null)
   const selectedFont = CV_FONT_OPTIONS.find((font) => font.id === fontId)
+  const { style: panelPosition, ready: panelReady } = useAnchoredPanelPosition(isOpen, triggerRef, panelRef)
 
   useEffect(() => {
     if (!isOpen) {
@@ -114,6 +120,8 @@ function CvFontSwitcher({
           className="cv-font-switcher__panel"
           role="dialog"
           aria-label={isFinnish ? 'Valitse fontti' : 'Select font'}
+          ref={panelRef}
+          style={{ ...panelPosition, visibility: panelReady ? 'visible' : 'hidden' }}
         >
           <button
             type="button"

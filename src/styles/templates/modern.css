@@ -91,7 +91,7 @@
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.05;
-  color: var(--ms-navy);
+  color: var(--cv-heading-color, var(--ms-navy));
 }
 
 .modern-showcase__role {
@@ -193,7 +193,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: var(--ms-navy);
+  color: var(--cv-heading-color, var(--ms-navy));
 }
 
 .modern-showcase__section-divider {

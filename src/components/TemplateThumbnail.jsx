@@ -11,7 +11,7 @@ const THUMBNAIL_NATIVE_WIDTH = 780
 // memo keeps sibling previews from re-rendering while the user hovers around
 // the grid — the trimmed CV (see utils/thumbnailCv.js) is a stable reference
 // for the caller's lifetime.
-const TemplateThumbnail = memo(function TemplateThumbnail({ templateId, formData, locale, fontStack }) {
+const TemplateThumbnail = memo(function TemplateThumbnail({ templateId, formData, locale, fontStack, headingColor }) {
   const frameRef = useRef(null)
   // Falls back to the CSS default (0.29, tuned for the gallery modal's own
   // card size — see .template-gallery__thumb-page) until the very first
@@ -54,7 +54,7 @@ const TemplateThumbnail = memo(function TemplateThumbnail({ templateId, formData
           ...(fontStack ? { '--font-sans': fontStack } : null),
         }}
       >
-        <CVPreview formData={formData} template={templateId} locale={locale} />
+        <CVPreview formData={formData} template={templateId} locale={locale} headingColor={headingColor} />
       </div>
     </div>
   )

@@ -36,7 +36,7 @@ function Section({ id, children }) {
   )
 }
 
-export default function ClassicProfessionalShowcase({ formData, locale = 'en', previewRef, templateConfig }) {
+export default function ClassicProfessionalShowcase({ formData, locale = 'en', previewRef, templateConfig, headingColor = null }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -233,6 +233,7 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
       // handler polls forever waiting for a class that can never appear,
       // hanging the export.
       className="classic-professional-showcase preview-document--designer"
+      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
     >
       <header data-export-header="true" className="classic-professional-showcase__header">
         <p className="classic-professional-showcase__kicker" data-export-ignore="true">

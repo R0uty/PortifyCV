@@ -61,7 +61,7 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   line-height: 1.1;
-  color: var(--cp-text);
+  color: var(--cv-heading-color, var(--cp-text));
 }
 
 .classic-professional-showcase__role {
@@ -119,7 +119,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: var(--cp-text);
+  color: var(--cv-heading-color, var(--cp-text));
 }
 
 .classic-professional-showcase__empty {

@@ -59,7 +59,7 @@ function SidebarBlock({ title, children }) {
   )
 }
 
-export default function NavyProfessionalShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, atsFriendlyMode = false }) {
+export default function NavyProfessionalShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, atsFriendlyMode = false, headingColor = null }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -273,6 +273,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
       // claims ("no columns") promise to remove. Section order and
       // everything else about the layout stays the same.
       className={`navy-professional-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'}${atsFriendlyMode ? ' navy-professional-showcase--ats' : ''}`}
+      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
     >
       <aside className="navy-professional-showcase__sidebar" data-export-secondary="true">
         <div data-export-header="true" className="navy-professional-showcase__identity">
