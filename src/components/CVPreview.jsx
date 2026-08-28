@@ -22,9 +22,9 @@ import {
 import { getTemplateConfig } from './templates'
 
 // Only one of these renders at a time (CVPreview picks by `variant`), but
-// the gallery thumbnails render all 13 templates at once, so lazy-loading
+// the gallery thumbnails render all 14 templates at once, so lazy-loading
 // still pays off for the common case: the builder's initial bundle no
-// longer carries code for the 9 bespoke templates the user hasn't opened
+// longer carries code for the 12 bespoke templates the user hasn't opened
 // yet. `prefetchTemplateShowcases()` (called on idle from
 // ResumeBuilderPage, same pattern as the PDF export prefetch) warms these
 // in the background so switching templates or opening the gallery rarely

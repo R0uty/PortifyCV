@@ -1,5 +1,10 @@
 import InternalNavLink from '../components/InternalNavLink'
+import { cvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
+
+// Read off the template registry instead of a hardcoded number — see
+// LandingPage.jsx for why this drifted before.
+const TEMPLATE_COUNT = cvTemplates.length
 
 function getCopy(locale) {
   if (locale === 'fi') {
@@ -48,12 +53,12 @@ function getCopy(locale) {
         {
           heading: 'Turvallinen, ammattimainen pohjavalinta',
           paragraphs: [
-            'Minimalisti, Classic Professional ja Navy Professional lukevat siistin ja asiallisen, mikä sopii suomalaisten työnantajien yleensä maltillisiin odotuksiin — mutta mikä tahansa 13 pohjasta toimii, ja vaihtaminen ei koske tekstiäsi.',
+            `Minimalisti, Classic Professional ja Navy Professional lukevat siistin ja asiallisen, mikä sopii suomalaisten työnantajien yleensä maltillisiin odotuksiin — mutta mikä tahansa ${TEMPLATE_COUNT} pohjasta toimii, ja vaihtaminen ei koske tekstiäsi.`,
           ],
           linkParagraphs: [
             {
               before: 'Katso kaikki ',
-              linkText: '13 ilmaista pohjaa',
+              linkText: `${TEMPLATE_COUNT} ilmaista pohjaa`,
               linkTo: ROUTES.freeTemplates,
               view: 'freeTemplates',
               after: '.',
@@ -118,12 +123,12 @@ function getCopy(locale) {
       {
         heading: 'A safe, professional template choice',
         paragraphs: [
-          'Minimalist, Classic Professional, and Navy Professional read clean and understated, matching the generally restrained expectations of Finnish employers — but any of the 13 templates works, and switching never touches your text.',
+          `Minimalist, Classic Professional, and Navy Professional read clean and understated, matching the generally restrained expectations of Finnish employers — but any of the ${TEMPLATE_COUNT} templates works, and switching never touches your text.`,
         ],
         linkParagraphs: [
           {
             before: 'See all ',
-            linkText: '13 free templates',
+            linkText: `${TEMPLATE_COUNT} free templates`,
             linkTo: ROUTES.freeTemplates,
             view: 'freeTemplates',
             after: '.',

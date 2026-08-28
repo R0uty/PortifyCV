@@ -1,5 +1,10 @@
 import InternalNavLink from '../components/InternalNavLink'
+import { cvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
+
+// Read off the template registry instead of a hardcoded number — see
+// LandingPage.jsx for why this drifted before.
+const TEMPLATE_COUNT = cvTemplates.length
 
 function getCopy(locale) {
   if (locale === 'fi') {
@@ -29,7 +34,7 @@ function getCopy(locale) {
         {
           heading: 'Miten PortifyCV:n ATS-tila auttaa tässä',
           paragraphs: [
-            'ATS-ystävällinen tila litistää minkä tahansa 13 pohjasta yksipalstaiseksi, tekstipainotteiseksi asetteluksi vakioiduilla osiotunnisteilla — sarakkeet, kuvakkeet ja koristeelliset elementit poistuvat kyseisestä renderöinnistä. Vie CV tässä tilassa, kun kohde on ATS eikä ihminen.',
+            `ATS-ystävällinen tila litistää minkä tahansa ${TEMPLATE_COUNT} pohjasta yksipalstaiseksi, tekstipainotteiseksi asetteluksi vakioiduilla osiotunnisteilla — sarakkeet, kuvakkeet ja koristeelliset elementit poistuvat kyseisestä renderöinnistä. Vie CV tässä tilassa, kun kohde on ATS eikä ihminen.`,
           ],
           linkParagraphs: [
             {
@@ -118,7 +123,7 @@ function getCopy(locale) {
       {
         heading: 'How PortifyCV’s ATS mode helps',
         paragraphs: [
-          'ATS-friendly mode flattens any of the 13 templates into a single-column, text-forward layout with standard section headings — columns, icons, and decorative elements are removed from that render. Export in this mode when the destination is an ATS rather than a person.',
+          `ATS-friendly mode flattens any of the ${TEMPLATE_COUNT} templates into a single-column, text-forward layout with standard section headings — columns, icons, and decorative elements are removed from that render. Export in this mode when the destination is an ATS rather than a person.`,
         ],
         linkParagraphs: [
           {

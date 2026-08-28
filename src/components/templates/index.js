@@ -46,7 +46,7 @@ let showcasesPrefetched = false
 /**
  * Warms every bespoke *Showcase.jsx chunk (CVPreview.jsx lazy-loads them
  * per template) so switching templates or opening the gallery — which
- * renders all 13 at once as thumbnails — doesn't pay for 11 dynamic imports
+ * renders all 14 at once as thumbnails — doesn't pay for 12 dynamic imports
  * at that moment. Safe to call speculatively: it only downloads and
  * evaluates the modules, same pattern as prefetchPdfExportAssets in
  * exporters.js.

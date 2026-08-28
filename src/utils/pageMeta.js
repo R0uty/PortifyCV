@@ -5,8 +5,15 @@
 // places a page's HTML actually gets read, so importing one object into
 // both keeps them from drifting apart.
 import { ROUTES } from './routes.js'
+import { cvTemplates } from './cvTemplates.js'
 
 export const SITE_ORIGIN = 'https://portifycv.app'
+
+// Read off the template registry instead of a hardcoded number in the
+// freeTemplates description below — this previously drifted out of sync
+// with cvTemplates.js after a template was added without this file being
+// updated to match (same issue LandingPage.jsx had).
+const TEMPLATE_COUNT = cvTemplates.length
 
 export const VIEW_HEAD = {
   landing: {
@@ -31,7 +38,7 @@ export const VIEW_HEAD = {
     title: 'Free CV Templates - PortifyCV',
     path: ROUTES.freeTemplates,
     description:
-      '13 free CV templates, no watermark and no account required. Preview each one with your own content and swap between them any time.',
+      `${TEMPLATE_COUNT} free CV templates, no watermark and no account required. Preview each one with your own content and swap between them any time.`,
   },
   atsGuide: {
     title: 'ATS-Friendly CV Guide - PortifyCV',
