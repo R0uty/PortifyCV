@@ -355,9 +355,11 @@ function App() {
                 type="button"
                 className="action-button action-button--secondary flex items-center gap-1.5 border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
                 onClick={handleToggleLocale}
+                aria-label={locale === 'fi' ? 'Vaihda kieli' : 'Switch language'}
+                title={locale === 'fi' ? 'Vaihda kieli' : 'Switch language'}
               >
-                <LocaleFlagIcon locale={locale === 'fi' ? 'en' : 'fi'} />
-                {locale === 'fi' ? 'EN' : 'FI'}
+                <LocaleFlagIcon locale={locale} />
+                {locale === 'fi' ? 'FI' : 'EN'}
               </button>
             </div>
           </div>

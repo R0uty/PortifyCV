@@ -245,8 +245,8 @@ function Toolbar({
             aria-label={isFinnish ? 'Vaihda kieli' : 'Switch language'}
             title={isFinnish ? 'Vaihda kieli' : 'Switch language'}
           >
-            <LocaleFlagIcon locale={isFinnish ? 'en' : 'fi'} className="app-toolbar__locale-flag" />
-            {isFinnish ? 'EN' : 'FI'}
+            <LocaleFlagIcon locale={isFinnish ? 'fi' : 'en'} className="app-toolbar__locale-flag" />
+            {isFinnish ? 'FI' : 'EN'}
           </button>
 
           <button
