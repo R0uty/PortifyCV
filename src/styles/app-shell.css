@@ -1285,15 +1285,29 @@ select.floating-field__control {
   flex: 1 1 auto;
 }
 
-/* Wraps the template and font dropdowns with a tiny inline caption so it's
-   clear at a glance which is which, instead of two adjacent value-only
-   buttons (e.g. "Minimalisti" next to "Calibri") with no indication of what
-   category either one picks from. */
+/* Groups the Template/Font/Color labeled controls with a gap wide enough
+   that each label reads as bound to its own dropdown, not the neighboring
+   one — the opposite arrangement (tight cross-group gap, loose in-group
+   gap) is what made the toolbar look like one crowded row instead of three
+   distinct fields. Keep this gap clearly larger than
+   .app-toolbar__labeled-control's own label-to-control gap below. */
+.app-toolbar__control-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* Wraps each dropdown with a tiny inline caption so it's clear at a glance
+   which is which, instead of a value-only button (e.g. "Minimalisti") with
+   no indication of what category it picks from. This gap must stay smaller
+   than .app-toolbar__control-cluster's gap above, so a label visually
+   belongs to the control right next to it. */
 .app-toolbar__labeled-control {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.75rem;
   padding-inline: 0.15rem;
 }
 

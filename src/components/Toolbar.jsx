@@ -5,7 +5,6 @@ import {
   Link2,
   Maximize2,
   Minimize2,
-  Printer,
   Redo2,
   Search,
   Settings,
@@ -45,7 +44,6 @@ function Toolbar({
   onCvHeadingColorChange = () => {},
   searchQuery = '',
   onSearchChange = () => {},
-  onPrint = () => {},
   isFullscreenPreview = false,
   onToggleFullscreenPreview = () => {},
   isResponsivePreview = false,
@@ -196,46 +194,48 @@ function Toolbar({
         <div className="app-toolbar__spacer" />
 
         <div className="app-toolbar__group">
-          <div className="app-toolbar__labeled-control">
-            <span className="app-toolbar__control-label">{isFinnish ? 'Pohja' : 'Template'}</span>
-            <Suspense
-              fallback={(
-                <span className="template-quick-switcher__trigger" aria-hidden="true">
-                  <span className="template-quick-switcher__trigger-label">
-                    {templates.find((template) => template.id === selectedTemplateId)?.label}
+          <div className="app-toolbar__control-cluster">
+            <div className="app-toolbar__labeled-control">
+              <span className="app-toolbar__control-label">{isFinnish ? 'Pohja' : 'Template'}</span>
+              <Suspense
+                fallback={(
+                  <span className="template-quick-switcher__trigger" aria-hidden="true">
+                    <span className="template-quick-switcher__trigger-label">
+                      {templates.find((template) => template.id === selectedTemplateId)?.label}
+                    </span>
                   </span>
-                </span>
-              )}
-            >
-              <TemplateQuickSwitcher
-                templates={templates}
-                selectedTemplateId={selectedTemplateId}
-                onSelectTemplate={onSelectTemplate}
-                formDataRef={formDataRef}
-                cvFontId={cvFontId}
-                cvHeadingColor={cvHeadingColor}
+                )}
+              >
+                <TemplateQuickSwitcher
+                  templates={templates}
+                  selectedTemplateId={selectedTemplateId}
+                  onSelectTemplate={onSelectTemplate}
+                  formDataRef={formDataRef}
+                  cvFontId={cvFontId}
+                  cvHeadingColor={cvHeadingColor}
+                  locale={locale}
+                  triggerRef={templateSelectRef}
+                />
+              </Suspense>
+            </div>
+
+            <div className="app-toolbar__labeled-control">
+              <span className="app-toolbar__control-label">{isFinnish ? 'Fontti' : 'Font'}</span>
+              <CvFontSwitcher
+                fontId={cvFontId}
+                onSelectFont={onCvFontChange}
                 locale={locale}
-                triggerRef={templateSelectRef}
               />
-            </Suspense>
-          </div>
+            </div>
 
-          <div className="app-toolbar__labeled-control">
-            <span className="app-toolbar__control-label">{isFinnish ? 'Fontti' : 'Font'}</span>
-            <CvFontSwitcher
-              fontId={cvFontId}
-              onSelectFont={onCvFontChange}
-              locale={locale}
-            />
-          </div>
-
-          <div className="app-toolbar__labeled-control">
-            <span className="app-toolbar__control-label">{isFinnish ? 'Väri' : 'Color'}</span>
-            <CvHeadingColorSwitcher
-              color={cvHeadingColor}
-              onSelectColor={onCvHeadingColorChange}
-              locale={locale}
-            />
+            <div className="app-toolbar__labeled-control">
+              <span className="app-toolbar__control-label">{isFinnish ? 'Väri' : 'Color'}</span>
+              <CvHeadingColorSwitcher
+                color={cvHeadingColor}
+                onSelectColor={onCvHeadingColorChange}
+                locale={locale}
+              />
+            </div>
           </div>
 
           <button
@@ -247,16 +247,6 @@ function Toolbar({
           >
             <LocaleFlagIcon locale={isFinnish ? 'en' : 'fi'} className="app-toolbar__locale-flag" />
             {isFinnish ? 'EN' : 'FI'}
-          </button>
-
-          <button
-            type="button"
-            className="app-toolbar__icon-button"
-            onClick={onPrint}
-            aria-label={isFinnish ? 'Tulosta' : 'Print'}
-            title={isFinnish ? 'Tulosta' : 'Print'}
-          >
-            <Printer size={16} strokeWidth={2} aria-hidden="true" />
           </button>
 
           <button

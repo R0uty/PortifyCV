@@ -1014,10 +1014,6 @@ function ResumeBuilderPage({
     }
   }, [])
 
-  const handlePrint = useCallback(() => {
-    window.print()
-  }, [])
-
   const handleCloseTemplateGallery = useCallback(() => {
     setIsTemplateGalleryOpen(false)
   }, [])
@@ -1212,7 +1208,6 @@ function ResumeBuilderPage({
       onCvHeadingColorChange: handleCvHeadingColorChange,
       searchQuery,
       onSearchChange: setSearchQuery,
-      onPrint: handlePrint,
       isFullscreenPreview,
       onToggleFullscreenPreview: handleToggleFullscreenPreview,
       isResponsivePreview,
@@ -1226,7 +1221,7 @@ function ResumeBuilderPage({
     templates, selectedTemplate, handleSelectTemplate,
     cvFontId, handleCvFontChange,
     cvHeadingColor, handleCvHeadingColorChange,
-    searchQuery, handlePrint,
+    searchQuery,
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
     handleOpenSettings,

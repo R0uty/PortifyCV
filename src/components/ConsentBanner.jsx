@@ -15,7 +15,7 @@ function ConsentBanner({ consent, onDecide, locale = 'en', onNavigateToPrivacy =
 
   return (
     <div
-      className="consent-banner"
+      className="consent-banner print:hidden"
       role="dialog"
       aria-label={isFinnish ? 'Evästesuostumus' : 'Cookie consent'}
     >

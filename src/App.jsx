@@ -216,7 +216,7 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
   const isFinnish = locale === 'fi'
 
   return (
-    <footer className="site-footer">
+    <footer className="site-footer print:hidden">
       <div className="site-footer__inner">
         <span>
           {isFinnish ? 'Ei kirjautumista. Ei tallennettua dataa.' : 'No login. No data saved.'}
@@ -401,7 +401,6 @@ function App() {
           onCvHeadingColorChange={headerProps.onCvHeadingColorChange}
           searchQuery={headerProps.searchQuery}
           onSearchChange={headerProps.onSearchChange}
-          onPrint={headerProps.onPrint}
           isFullscreenPreview={headerProps.isFullscreenPreview}
           onToggleFullscreenPreview={headerProps.onToggleFullscreenPreview}
           isResponsivePreview={headerProps.isResponsivePreview}
