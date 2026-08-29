@@ -24,10 +24,14 @@ function countWords(text) {
 }
 
 function extractKeywords(snapshot) {
+  // Deliberately excludes employer names. A company name ("Atlas Labs",
+  // "Studio North") is not a role-relevant ATS keyword, and splitting it
+  // into tokens produced nonsense advice like "your CV is missing the
+  // keyword 'labs'". Job titles and skills are the terms worth repeating.
   const rawKeywords = [
     snapshot.title,
     ...snapshot.skills,
-    ...snapshot.experience.flatMap((item) => [item.role, item.company]),
+    ...snapshot.experience.map((item) => item.role),
   ]
 
   return Array.from(

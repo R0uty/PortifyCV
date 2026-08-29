@@ -1743,14 +1743,22 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       running app: two disclosures, each expands to its own intact content.
       `npm run lint`, `npm run build` pass.
 
-- [ ] **41. "Missing keywords" recommends fragments of the user's own
-      employer names.** On the demo CV the ATS keyword card lists `atlas`,
-      `labs`, `north`, `studio` as keywords the CV is "missing" — torn out
-      of "Atlas Labs" / "Studio North" in the user's own experience
-      entries. Reads as broken advice and undermines trust in the whole ATS
-      feature. Same single-token extraction weakness already flagged for
-      the cover letter in item 20, but here it's shown straight to users.
-      Needs employer/proper-noun filtering, or a phrase-level matcher.
+- [x] **41. "Missing keywords" recommended fragments of the user's own
+      employer names.** On the demo CV the ATS keyword card listed `atlas`,
+      `labs`, `north`, `studio` as "missing" keywords — torn out of "Atlas
+      Labs" / "Studio North" in the experience entries. — done 2026-08-29
+      (v1.1.3). `extractKeywords()` in `atsScore.js` built its target-term
+      list from title + skills + every experience entry's *role and
+      company*; dropped `company`. A company name isn't a role-relevant ATS
+      keyword and tokenizing it produced nonsense ("your CV is missing
+      'labs'"). Title and skills are the terms worth repeating in the
+      summary/bullets, and the current role's words already overlap
+      `snapshot.title`. Also feeds `analyzeJobDescription()`'s CV-term set —
+      harmless there (company tokens ~never match JD tokens). Verified on
+      the demo CV: missing keywords are now `senior, strategy, user,
+      research, figma, accessibility, prototyping` — all real skill/title
+      terms, no employer fragments. `npm run lint`, `npm run build`,
+      `check:feedback` pass.
 
 - [ ] **42. The cover-letter draft textarea is ~2 lines tall.** The
       generated letter is 4-5 paragraphs, but it's read and edited through
