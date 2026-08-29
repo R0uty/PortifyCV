@@ -322,6 +322,9 @@ function Toolbar({
                   onClick={() => handleExportSelect('pdf-designer')}
                 >
                   PDF
+                  <span className="app-toolbar__export-item-hint">
+                    {isFinnish ? 'Tulostusvalmis CV, valmis lähetettäväksi' : 'Print-ready CV, ready to send'}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -331,6 +334,9 @@ function Toolbar({
                   onClick={() => handleExportSelect('html')}
                 >
                   HTML
+                  <span className="app-toolbar__export-item-hint">
+                    {isFinnish ? 'Yksi verkkosivutiedosto, avautuu selaimessa' : 'One web-page file, opens in any browser'}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -340,6 +346,9 @@ function Toolbar({
                   onClick={() => handleExportSelect('json')}
                 >
                   JSON
+                  <span className="app-toolbar__export-item-hint">
+                    {isFinnish ? 'Varmuuskopio, jonka voi tuoda takaisin' : 'Backup you can import again later'}
+                  </span>
                 </button>
               </div>
             ) : null}

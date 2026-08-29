@@ -1888,8 +1888,16 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       Verified in the running app: opens showing all 7 (Georgia / Times in
       serif), selecting one closes the panel and restyles the preview.
       `npm run lint`, `npm run build` pass.
-- [ ] **50. Export menu (PDF / HTML / JSON) gives no hint what each format
-      is for** — a first-timer won't know JSON is the re-importable backup.
+- [x] **50. Export menu (PDF / HTML / JSON) gave no hint what each format
+      is for.** — done 2026-08-29 (v1.1.12). Each item in the toolbar's
+      Export dropdown (`Toolbar.jsx`) now has a one-line hint under the
+      format name (EN + FI): PDF → "Print-ready CV, ready to send"; HTML →
+      "One web-page file, opens in any browser"; JSON → "Backup you can
+      import again later". Menu widened to 15rem; `.app-toolbar__export-item`
+      is now a flex column with an `-item-hint` sub-label. Mobile bottom
+      action bar left as-is (item 7's decision — its tight text buttons
+      don't have room). Verified in the running app. `npm run lint`, `npm
+      run build` pass.
 - [ ] **51. Settings → "Manage" scrolls to Section 00 but leaves it
       collapsed** — the user has to find and expand it.
 - [ ] **52. In fullscreen preview the zoom +/- stepper is hidden behind the

@@ -1467,7 +1467,7 @@ select.floating-field__control {
   z-index: 40;
   display: flex;
   flex-direction: column;
-  min-width: 11rem;
+  min-width: 15rem;
   padding: 0.35rem;
   border: 1px solid var(--app-border);
   border-radius: var(--radius-sm);
@@ -1476,6 +1476,9 @@ select.floating-field__control {
 }
 
 .app-toolbar__export-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
   padding: 0.5rem 0.6rem;
   border-radius: calc(var(--radius-sm) - 2px);
   text-align: left;
@@ -1483,6 +1486,12 @@ select.floating-field__control {
   font-weight: 600;
   color: var(--app-text);
   transition: background-color 140ms ease;
+}
+
+.app-toolbar__export-item-hint {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--app-text-muted);
 }
 
 .app-toolbar__export-item:hover:not(:disabled) {
