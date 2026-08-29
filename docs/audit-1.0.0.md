@@ -6,7 +6,7 @@ release. No new features.
 
 This document records what was checked, what was found, how each fix was
 verified, and which behaviours are deliberate rather than defects. The
-user-facing summary of the same work is in [`../CHANGELOG.md`](../CHANGELOG.md).
+user-facing summary of the same work is in [`../changes.md`](../changes.md).
 
 ---
 
