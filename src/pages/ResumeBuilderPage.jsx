@@ -90,6 +90,7 @@ import { generateCoverLetterDraft } from '../utils/coverLetter'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
+const RESET_CONFIRM_WINDOW_MS = 4000
 
 // Order must match the section cards' actual JSX order in CVForm.jsx (personal,
 // summary, skills, experience, education, coreStrengths, certificates,
@@ -376,6 +377,7 @@ function ResumeBuilderPage({
   const editorScrollRef = useRef(null)
   const templateSelectRef = useRef(null)
   const previewViewportRef = useRef(null)
+  const resetConfirmTimeoutRef = useRef(null)
   // Read by TemplateQuickSwitcher when its panel opens, instead of threading
   // formData itself through onHeaderChange — that object's identity changes
   // on every keystroke, and putting it in the header-sync effect's deps
@@ -405,6 +407,11 @@ function ResumeBuilderPage({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
+  // "Reset form" is a two-step button: the first click arms it, a second
+  // click within RESET_CONFIRM_WINDOW_MS actually clears the form. Nothing
+  // is persisted, so an accidental single click next to "Load demo CV"
+  // would otherwise wipe real work with no dialog.
+  const [resetConfirmArmed, setResetConfirmArmed] = useState(false)
 
   const [historyPast, setHistoryPast] = useState([])
   const [historyFuture, setHistoryFuture] = useState([])
@@ -829,9 +836,26 @@ function ResumeBuilderPage({
   }, [dispatchFormData, locale, setStorageValue])
 
   const handleResetForm = useCallback(() => {
+    window.clearTimeout(resetConfirmTimeoutRef.current)
+
+    if (!resetConfirmArmed) {
+      setResetConfirmArmed(true)
+      resetConfirmTimeoutRef.current = window.setTimeout(() => {
+        setResetConfirmArmed(false)
+      }, RESET_CONFIRM_WINDOW_MS)
+      return
+    }
+
+    setResetConfirmArmed(false)
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
-    showToast(locale === 'fi' ? 'Lomake nollattu tyhjäksi CV:ksi.' : 'Form reset to a blank CV.')
-  }, [dispatchFormData, locale])
+    showToast(
+      locale === 'fi'
+        ? 'Lomake nollattu. Palauta työkalupalkin kumoa-nuolella.'
+        : 'Form reset. Restore it with the toolbar undo arrow.',
+    )
+  }, [dispatchFormData, locale, resetConfirmArmed])
+
+  useEffect(() => () => window.clearTimeout(resetConfirmTimeoutRef.current), [])
 
   const handleLoadDemo = useCallback(() => {
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: structuredClone(demoCvData) })
@@ -1387,10 +1411,16 @@ function ResumeBuilderPage({
           <button
             type="button"
             className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonDanger}`}
+            style={resetConfirmArmed
+              ? { backgroundColor: '#b91c1c', borderColor: '#b91c1c', color: '#ffffff' }
+              : undefined}
             disabled={isActionBusy}
+            aria-live="polite"
             onClick={handleResetForm}
           >
-            {locale === 'fi' ? 'Nollaa lomake' : 'Reset form'}
+            {resetConfirmArmed
+              ? locale === 'fi' ? 'Vahvista nollaus' : 'Confirm reset'
+              : locale === 'fi' ? 'Nollaa lomake' : 'Reset form'}
           </button>
           <div
             className={`editor-status-pill ${ui.surfaceMuted} ${ui.textMuted}`}
@@ -1545,6 +1575,7 @@ function ResumeBuilderPage({
     locale,
     mobilePreviewVisible,
     pastedCvText,
+    resetConfirmArmed,
     secondaryButtonClassName,
     selectedTemplate,
     dispatchFormData,

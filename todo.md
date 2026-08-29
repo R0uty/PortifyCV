@@ -1772,11 +1772,22 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       the running app with a generated draft. `npm run lint`, `npm run
       build` pass.
 
-- [ ] **43. "Reset form" wipes everything instantly — no confirm, no inline
-      undo.** It sits right next to "Load demo CV", and with the app's
-      "nothing saved anywhere" model one misclick clears real work. It *is*
-      recoverable via the toolbar undo arrow, but nothing tells the user
-      that. Add a confirm, or an "Undo" action on the "Form reset" toast.
+- [x] **43. "Reset form" wiped everything instantly — no confirm, no inline
+      undo.** — done 2026-08-29 (v1.1.5). "Reset form" is now a two-step
+      button (`ResumeBuilderPage.jsx`): the first click arms it — label
+      switches to "Confirm reset" / "Vahvista nollaus" and the button turns
+      solid red (`#b91c1c` inline; the `buttonDanger` token's
+      `hover:bg-red-500/10` class has no matching utility rule, so the
+      resting button had no danger cue at all) — and a second click within
+      `RESET_CONFIRM_WINDOW_MS` (4s) actually clears the form; otherwise it
+      disarms itself. The post-reset toast now also points at the recovery
+      path ("Restore it with the toolbar undo arrow" / FI equivalent) —
+      `FORM_ACTION.RESET_FORM` was already undoable, nothing said so. New
+      `resetConfirmArmed` state + a timeout ref cleaned up on unmount;
+      `aria-live="polite"` on the button so the label change is announced.
+      Verified in the running app: first click arms + reddens, second
+      resets + toasts, re-arm auto-disarms after 4s. `npm run lint`, `npm
+      run build`, `check:reducers` pass.
 
 ### Medium
 
