@@ -1177,6 +1177,12 @@ select.floating-field__control {
   margin-inline: auto;
 }
 
+/* In fullscreen the "Exit fullscreen" button is fixed at top-right and
+   overlaps the zoom bar's right-hand +/- stepper — reserve room for it. */
+.preview-panel--fullscreen .preview-zoom-bar {
+  padding-right: 9.5rem;
+}
+
 .preview-scroll {
   display: flex;
   flex: 1 1 auto;

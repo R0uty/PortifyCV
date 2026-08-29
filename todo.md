@@ -1909,8 +1909,14 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       panel. Verified in the running app: clicking "Manage" now lands on an
       already-expanded panel. `npm run lint`, `npm run build`,
       `check:reducers` pass.
-- [ ] **52. In fullscreen preview the zoom +/- stepper is hidden behind the
-      "Exit fullscreen" button.**
+- [x] **52. In fullscreen preview the zoom +/- stepper was hidden behind
+      the "Exit fullscreen" button.** — done 2026-08-29 (v1.1.14). The Exit
+      button is `position: fixed` at top-right (z-61); the sticky zoom bar's
+      right-hand stepper group sat at the same spot. Added
+      `.preview-panel--fullscreen .preview-zoom-bar { padding-right: 9.5rem }`
+      so the stepper clears it. Verified in the running app: the stepper's
+      right edge is now ~100px clear of the Exit button, no overlap.
+      `npm run lint`, `npm run build` pass.
 - [ ] **53. Switching templates keeps the editor scroll position**; the
       sections a new template adds (Certificates, Projects…) appear
       mid-scroll with no cue that they were added.
