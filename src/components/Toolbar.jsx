@@ -254,8 +254,10 @@ function Toolbar({
             className={`app-toolbar__icon-button${isResponsivePreview ? ' app-toolbar__icon-button--active' : ''}`}
             onClick={onToggleResponsivePreview}
             aria-pressed={isResponsivePreview}
-            aria-label={isFinnish ? 'Responsiivinen esikatselu' : 'Responsive preview'}
-            title={isFinnish ? 'Responsiivinen esikatselu' : 'Responsive preview'}
+            aria-label={isFinnish ? 'Kapea esikatselu' : 'Narrow preview'}
+            title={isFinnish
+              ? 'Näytä pohja kapealla leveydellä (kuten HTML-vienti puhelimessa)'
+              : 'Show the template at a narrow width (like the HTML export on a phone)'}
           >
             <Smartphone size={16} strokeWidth={2} aria-hidden="true" />
           </button>

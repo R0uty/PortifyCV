@@ -1928,9 +1928,17 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       `[[chrome-smooth-scroll-noop]]`). Verified in the running app:
       scrolled to 1500px, switched template, editor is back at 0. `npm run
       lint`, `npm run build` pass.
-- [ ] **54. "Responsive preview" is a strange concept for a fixed-width
-      PDF/print output**; at narrow widths the two-column templates just
-      get cramped. Only meaningful for HTML export.
+- [x] **54. "Responsive preview" was a misleading name.** — done
+      2026-08-29 (v1.1.16). The toggle shows the *template* squished to a
+      narrow width — not the HTML export's actual single-column mobile
+      layout, and the PDF is fixed-width — so "Responsive preview" oversold
+      it. Relabelled to **"Narrow preview" / "Kapea esikatselu"** with a
+      tooltip that says what it actually is: "Show the template at a narrow
+      width (like the HTML export on a phone)". Kept the feature — checking
+      how a long name or heading wraps at a narrow width is a real use —
+      rather than removing it, which is a product call. `npm run lint`,
+      `npm run build`, `check:share`, `check:reducers`, `check:feedback`
+      pass.
 
 ### Read well, don't re-investigate (this pass)
 
