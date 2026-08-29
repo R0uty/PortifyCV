@@ -1,6 +1,6 @@
 import { useId } from 'react'
 
-function ToggleSwitch({ checked = false, onChange = () => {}, label, disabled = false }) {
+function ToggleSwitch({ checked = false, onChange = () => {}, label, ariaLabel, disabled = false }) {
   const id = useId()
 
   return (
@@ -11,6 +11,7 @@ function ToggleSwitch({ checked = false, onChange = () => {}, label, disabled = 
         className="toggle-switch__input"
         checked={checked}
         disabled={disabled}
+        aria-label={label ? undefined : ariaLabel}
         onChange={(event) => onChange(event.target.checked)}
       />
       <span className="toggle-switch__track" aria-hidden="true">

@@ -1856,11 +1856,25 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       + "Show more (7)"; toggling reveals/hides the rest. `npm run lint`,
       `npm run build`, `check:share` pass.
 
-- [ ] **48. "Section order & visibility" is control-dense and its toggle
-      affordance is unclear.** Each row is a DRAG handle + an "ABOUT: ON"
-      pill (the pill *is* the on/off toggle but reads as a static label) +
-      UP + DOWN. Visibility is also settable via per-section eye icons and
-      per-entry eye icons — three routes to one thing.
+- [x] **48. "Section order & visibility" was control-dense and its toggle
+      affordance unclear.** — done 2026-08-29 (v1.1.10). Each row was
+      `[⋮⋮ DRAG] [ABOUT: ON]` (a filled button that reads as a label) `[UP]
+      [DOWN]` — four uppercase controls. Rebuilt each row as
+      `[⋮ handle] Section name … [▲] [▼] [toggle]`:
+      - The visibility control is now a real `ToggleSwitch` (the same
+        component Settings uses), not a button whose label doubles as
+        state.
+      - Section name is plain text; the drag affordance is the dot-grid
+        handle + `cursor-grab` (the "DRAG"/"RAAHAA" word is gone — the whole
+        row was already `draggable`).
+      - UP/DOWN are now compact `ChevronUp`/`ChevronDown` icon buttons
+        (`sectionMoveButtonClasses`) instead of chunky text buttons.
+      The Photo row below got the same treatment. `ToggleSwitch` gained an
+      optional `ariaLabel` prop (used here to name each switch
+      "<Section>: On/Off" without visible redundant text). Verified in the
+      running app: toggling a section off removes its preview heading;
+      the chevrons reorder rows and the preview follows. `npm run lint`,
+      `npm run build`, `check:reducers` pass.
 
 ### Low / polish
 

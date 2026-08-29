@@ -12,7 +12,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { Sparkles } from 'lucide-react'
+import { ChevronDown, ChevronUp, Sparkles } from 'lucide-react'
 
 import AutoGrowTextarea from './AutoGrowTextarea'
 import EntryBadge from './EntryBadge'
@@ -194,7 +194,7 @@ function CVForm({
   const actionButtonClasses = `border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
   const removeButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonDanger}`
   const utilityButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
-  const sectionDragHandleClasses = `inline-flex cursor-grab select-none items-center gap-2 border px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em] ${ui.button}`
+  const sectionMoveButtonClasses = `inline-flex h-7 w-7 items-center justify-center border transition ${ui.button}`
   const sectionDragDotClasses = 'h-1 w-1 bg-gray-500'
   const fieldLabelClassName = `${ui.textSoft} uppercase tracking-[0.06em] text-xs font-semibold`
   const itemCardClasses = `border p-4 ${ui.surfaceMuted}`
@@ -475,66 +475,65 @@ function CVForm({
                   onDragOver={handleSectionDragOver}
                   onDrop={(event) => handleSectionDrop(event, field.key)}
                   onDragEnd={handleSectionDragEnd}
-                  className={`flex cursor-grab items-center justify-between gap-3 border px-3 py-2 transition ${
+                  className={`flex items-center justify-between gap-3 border px-3 py-2 transition ${
                     draggedSectionKey === field.key ? 'border-[var(--accent-border)] opacity-70' : ''
                   } ${ui.surfaceMuted}`}
                 >
-                  <div className="flex items-center gap-2">
-                    <div className={sectionDragHandleClasses} aria-hidden="true">
-                      <span className="grid grid-cols-2 gap-0.5">
-                        <span className={sectionDragDotClasses} />
-                        <span className={sectionDragDotClasses} />
-                        <span className={sectionDragDotClasses} />
-                        <span className={sectionDragDotClasses} />
-                        <span className={sectionDragDotClasses} />
-                        <span className={sectionDragDotClasses} />
-                      </span>
-                      <span>{copy.drag}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
-                        isVisible ? ui.buttonActive : ui.button
-                      }`}
-                      onClick={() => toggleSectionVisibility(field.key)}
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <span
+                      className={`grid shrink-0 cursor-grab grid-cols-2 gap-0.5 ${ui.textMuted}`}
+                      title={copy.drag}
+                      aria-hidden="true"
                     >
-                      {field.label}: {isVisible ? copy.on : copy.off}
-                    </button>
+                      <span className={sectionDragDotClasses} />
+                      <span className={sectionDragDotClasses} />
+                      <span className={sectionDragDotClasses} />
+                      <span className={sectionDragDotClasses} />
+                      <span className={sectionDragDotClasses} />
+                      <span className={sectionDragDotClasses} />
+                    </span>
+                    <span className={`truncate text-sm font-semibold ${ui.textPrimary}`}>{field.label}</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex shrink-0 items-center gap-1.5">
                     <button
                       type="button"
-                      className={utilityButtonClasses}
+                      className={sectionMoveButtonClasses}
                       onClick={() => moveSectionByDirection(field.key, -1)}
                       disabled={index === 0}
                       aria-label={`${copy.move} ${field.label} ${copy.up.toLowerCase()}`}
                     >
-                      {copy.up}
+                      <ChevronUp size={15} strokeWidth={2.5} aria-hidden="true" />
                     </button>
                     <button
                       type="button"
-                      className={utilityButtonClasses}
+                      className={sectionMoveButtonClasses}
                       onClick={() => moveSectionByDirection(field.key, 1)}
                       disabled={index === orderedSectionFields.length - 1}
                       aria-label={`${copy.move} ${field.label} ${copy.down.toLowerCase()}`}
                     >
-                      {copy.down}
+                      <ChevronDown size={15} strokeWidth={2.5} aria-hidden="true" />
                     </button>
+                    <ToggleSwitch
+                      checked={isVisible}
+                      onChange={() => toggleSectionVisibility(field.key)}
+                      ariaLabel={`${field.label}: ${isVisible ? copy.on : copy.off}`}
+                    />
                   </div>
                 </div>
               )
             })}
           </div>
-          <button
-            type="button"
-            className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
-              isPhotoVisibleInSelectedTemplate ? ui.buttonActive : ui.button
-            }`}
-            onClick={togglePhotoVisibilityForSelectedTemplate}
-            disabled={!selectedTemplate}
-          >
-            {isFinnish ? 'Kuva' : 'Photo'} ({selectedTemplateLabel}): {isPhotoVisibleInSelectedTemplate ? copy.on : copy.off}
-          </button>
+          <div className={`flex items-center justify-between gap-3 border px-3 py-2 ${ui.surfaceMuted}`}>
+            <span className={`truncate text-sm font-semibold ${ui.textPrimary}`}>
+              {isFinnish ? 'Kuva' : 'Photo'} ({selectedTemplateLabel})
+            </span>
+            <ToggleSwitch
+              checked={isPhotoVisibleInSelectedTemplate}
+              onChange={togglePhotoVisibilityForSelectedTemplate}
+              disabled={!selectedTemplate}
+              ariaLabel={`${isFinnish ? 'Kuva' : 'Photo'}: ${isPhotoVisibleInSelectedTemplate ? copy.on : copy.off}`}
+            />
+          </div>
         </div>
       </PanelSection>
 
