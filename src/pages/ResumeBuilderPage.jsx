@@ -1212,6 +1212,23 @@ function ResumeBuilderPage({
     // mount-only observer would miss anchors that show up after a later switch.
   }, [selectedTemplate])
 
+  // A template switch can add or remove editor sections; if the user was
+  // scrolled deep into the form, those changes happen off-screen with no
+  // cue. Jump the editor back to the top so the (possibly new) section list
+  // is visible from the start.
+  const skipTemplateScrollResetRef = useRef(true)
+  useEffect(() => {
+    if (skipTemplateScrollResetRef.current) {
+      skipTemplateScrollResetRef.current = false
+      return
+    }
+
+    // Instant, not smooth: a template switch is a context change, and some
+    // browser setups silently no-op a programmatic smooth scroll anyway.
+    editorScrollRef.current?.scrollTo({ top: 0, behavior: 'auto' })
+    setActiveSectionId('personal')
+  }, [selectedTemplate])
+
   useEffect(() => {
     if (!onHeaderChange) return
     onHeaderChange({

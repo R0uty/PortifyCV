@@ -1917,9 +1917,17 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       so the stepper clears it. Verified in the running app: the stepper's
       right edge is now ~100px clear of the Exit button, no overlap.
       `npm run lint`, `npm run build` pass.
-- [ ] **53. Switching templates keeps the editor scroll position**; the
-      sections a new template adds (Certificates, Projects…) appear
-      mid-scroll with no cue that they were added.
+- [x] **53. Switching templates kept the editor scroll position.** — done
+      2026-08-29 (v1.1.15). A template switch adds/removes editor sections;
+      if the user was scrolled deep in the form, that happened off-screen.
+      Added an effect keyed on `selectedTemplate` (skipping initial mount
+      via a ref) that jumps `editorScrollRef` to `top: 0` and resets the
+      active nav section to `personal`. `behavior: 'auto'`, not smooth —
+      it's a context change, and this project's Chrome test setup silently
+      no-ops programmatic smooth scrolls anyway (see
+      `[[chrome-smooth-scroll-noop]]`). Verified in the running app:
+      scrolled to 1500px, switched template, editor is back at 0. `npm run
+      lint`, `npm run build` pass.
 - [ ] **54. "Responsive preview" is a strange concept for a fixed-width
       PDF/print output**; at narrow widths the two-column templates just
       get cramped. Only meaningful for HTML export.
