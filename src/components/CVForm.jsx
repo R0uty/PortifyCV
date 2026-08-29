@@ -33,6 +33,7 @@ import {
   isPhotoVisibleForTemplate,
   getLinkFields,
   getSectionVisibilityFields,
+  PRIMARY_LINK_KEYS,
   EMPLOYMENT_TYPE_OPTIONS,
 } from '../utils/cvForm'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
@@ -150,6 +151,7 @@ function CVForm({
   const [identityTouched, setIdentityTouched] = useState({ fullName: false, title: false })
   const markIdentityTouched = (field) =>
     setIdentityTouched((prev) => (prev[field] ? prev : { ...prev, [field]: true }))
+  const [showAllLinks, setShowAllLinks] = useState(false)
   const photoInputRef = useRef(null)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -1897,38 +1899,69 @@ function CVForm({
         }
         theme={theme}
       >
-        <div className="grid gap-4 sm:grid-cols-2">
-          {/* The hide/show button is kept outside the <label>: nesting a button
-              inside one is invalid markup and folds the button text into the
-              input's accessible name. */}
-          {linkFields.map(({ key, label, placeholder }) => (
-            <div key={key}>
-              <div className="flex items-center justify-between gap-2">
-                <label
-                  htmlFor={`link-field-${key}`}
-                  className={`text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}
-                >
-                  {label}
-                </label>
+        {(() => {
+          // Show the common platforms and any field that already holds a
+          // value; keep the rest (~11 niche platforms) behind a toggle so
+          // the section isn't a wall of 15 empty URL inputs on open.
+          const isAlwaysShown = (key) =>
+            showAllLinks || PRIMARY_LINK_KEYS.includes(key) || formData.links[key]?.trim()
+          const shownFields = linkFields.filter(({ key }) => isAlwaysShown(key))
+          const hiddenCount = linkFields.length - shownFields.length
+
+          return (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* The hide/show button is kept outside the <label>: nesting a
+                    button inside one is invalid markup and folds the button text
+                    into the input's accessible name. It only appears once a field
+                    has a value — an empty field has nothing to hide from the CV. */}
+                {shownFields.map(({ key, label, placeholder }) => (
+                  <div key={key}>
+                    <div className="flex items-center justify-between gap-2">
+                      <label
+                        htmlFor={`link-field-${key}`}
+                        className={`text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}
+                      >
+                        {label}
+                      </label>
+                      {formData.links[key]?.trim() ? (
+                        <button
+                          type="button"
+                          className="border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] transition"
+                          onClick={() => toggleSectionItemVisibility('links', key)}
+                        >
+                          {isSectionItemVisible(sectionItemVisibility, 'links', key) ? copy.hide : copy.show}
+                        </button>
+                      ) : null}
+                    </div>
+                    <input
+                      id={`link-field-${key}`}
+                      className={inputClasses}
+                      type="url"
+                      value={formData.links[key]}
+                      onChange={(event) => updateLinkField(key, event.target.value)}
+                      placeholder={placeholder}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {hiddenCount > 0 || showAllLinks ? (
                 <button
                   type="button"
-                  className="border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] transition"
-                  onClick={() => toggleSectionItemVisibility('links', key)}
+                  className="mt-4 border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] transition"
+                  onClick={() => setShowAllLinks((value) => !value)}
                 >
-                  {isSectionItemVisible(sectionItemVisibility, 'links', key) ? copy.hide : copy.show}
+                  {showAllLinks
+                    ? isFinnish ? 'Näytä vähemmän alustoja' : 'Show fewer platforms'
+                    : isFinnish
+                      ? `Näytä lisää alustoja (${hiddenCount})`
+                      : `Show more platforms (${hiddenCount})`}
                 </button>
-              </div>
-              <input
-                id={`link-field-${key}`}
-                className={inputClasses}
-                type="url"
-                value={formData.links[key]}
-                onChange={(event) => updateLinkField(key, event.target.value)}
-                placeholder={placeholder}
-              />
-            </div>
-          ))}
-        </div>
+              ) : null}
+            </>
+          )
+        })()}
       </PanelSection>
       ) : null}
 

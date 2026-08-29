@@ -1838,11 +1838,23 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       `#1e40af` and the trigger reads "Navy". `npm run lint`, `npm run
       build` pass.
 
-- [ ] **47. The Links section renders ~17 empty platform fields**, each
-      with its own "HIDE" button (GitHub, Behance, Dribbble, ResearchGate,
-      Hack The Box, TryHackMe, YouTube…). Empty links don't render in the
-      preview anyway, so the per-field HIDE toggle is redundant. Better:
-      show filled links plus an "add link" picker.
+- [x] **47. The Links section rendered 15 platform fields, mostly empty**,
+      each with its own HIDE/SHOW button. — done 2026-08-29 (v1.1.9).
+      Presentational change, no data-model or reducer change (share-link
+      round-trip unaffected, `check:share` passes):
+      - The section now shows only the 4 common platforms
+        (`PRIMARY_LINK_KEYS` in `cvForm.js` — github/linkedin/portfolio/
+        website) plus any field that already holds a value. The other ~11
+        (Behance, ResearchGate, Hack The Box, TryHackMe, …) sit behind a
+        "Show more platforms (N)" / "Show fewer platforms" toggle
+        (`showAllLinks` local state).
+      - The per-field HIDE/SHOW button now renders only when that field has
+        a value — an empty field has nothing to hide from the CV, so the
+        button was pure clutter on the common empty fields.
+      Verified in the running app: blank form shows 4 fields + "Show more
+      (11)"; demo CV shows its 8 filled fields (each with a working HIDE)
+      + "Show more (7)"; toggling reveals/hides the rest. `npm run lint`,
+      `npm run build`, `check:share` pass.
 
 - [ ] **48. "Section order & visibility" is control-dense and its toggle
       affordance is unclear.** Each row is a DRAG handle + an "ABOUT: ON"
