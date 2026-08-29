@@ -12,9 +12,21 @@ function PanelSection({
   theme = 'dark',
   badge = null,
   defaultCollapsed = false,
+  // A changing value here force-expands the section — used when a control
+  // elsewhere (e.g. Settings → "Manage") jumps the user to a section that
+  // defaults collapsed.
+  expandSignal = 0,
 }) {
   const ui = getUiTheme(theme)
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed)
+  const [seenExpandSignal, setSeenExpandSignal] = useState(expandSignal)
+
+  if (expandSignal !== seenExpandSignal) {
+    setSeenExpandSignal(expandSignal)
+    if (isCollapsed) {
+      setIsCollapsed(false)
+    }
+  }
   const badgeClasses =
     badge?.tone === 'warning'
       ? 'bg-gray-100 text-gray-700'

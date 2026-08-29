@@ -412,6 +412,9 @@ function ResumeBuilderPage({
   // is persisted, so an accidental single click next to "Load demo CV"
   // would otherwise wipe real work with no dialog.
   const [resetConfirmArmed, setResetConfirmArmed] = useState(false)
+  // Bumped by "Manage" in Settings to force-expand the (collapsed-by-default)
+  // "Visible sections" panel it scrolls the user to.
+  const [sectionSettingsExpandSignal, setSectionSettingsExpandSignal] = useState(0)
 
   const [historyPast, setHistoryPast] = useState([])
   const [historyFuture, setHistoryFuture] = useState([])
@@ -1027,6 +1030,7 @@ function ResumeBuilderPage({
 
   const handleManageSections = useCallback(() => {
     setIsSettingsOpen(false)
+    setSectionSettingsExpandSignal((value) => value + 1)
 
     const container = editorScrollRef.current
     const target = container?.querySelector('#section-settings')
@@ -1545,6 +1549,7 @@ function ResumeBuilderPage({
           onPhotoError={(message) => showToast(message, 'error')}
           selectedTemplate={selectedTemplate}
           selectedTemplateLabel={currentTemplate.label}
+          sectionSettingsExpandSignal={sectionSettingsExpandSignal}
           locale={locale}
         />
       </AppErrorBoundary>
@@ -1577,6 +1582,7 @@ function ResumeBuilderPage({
     pastedCvText,
     resetConfirmArmed,
     secondaryButtonClassName,
+    sectionSettingsExpandSignal,
     selectedTemplate,
     dispatchFormData,
     ui.button,

@@ -142,6 +142,7 @@ function CVForm({
   onPhotoError,
   selectedTemplate = '',
   selectedTemplateLabel = 'Current template',
+  sectionSettingsExpandSignal = 0,
 }) {
   const [draggedSectionKey, setDraggedSectionKey] = useState('')
   const [collapsedItems, setCollapsedItems] = useState(() => new Set())
@@ -450,6 +451,7 @@ function CVForm({
         title={isFinnish ? 'Näkyvät osiot' : 'Visible sections'}
         badge={{ label: `${visibleSectionCount}/${orderedSectionFields.length} ${isFinnish ? 'näkyvissä' : 'visible'}` }}
         defaultCollapsed
+        expandSignal={sectionSettingsExpandSignal}
         description={
           isFinnish
             ? 'Kytke osioita tai yksittäisiä kohtia pois ilman tietojen poistamista.'

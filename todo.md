@@ -1898,8 +1898,17 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       action bar left as-is (item 7's decision — its tight text buttons
       don't have room). Verified in the running app. `npm run lint`, `npm
       run build` pass.
-- [ ] **51. Settings → "Manage" scrolls to Section 00 but leaves it
-      collapsed** — the user has to find and expand it.
+- [x] **51. Settings → "Manage" scrolled to the "Visible sections" panel
+      but left it collapsed.** — done 2026-08-29 (v1.1.13). `PanelSection`
+      gained an optional `expandSignal` prop — a changing value force-opens
+      the section (adjust-state-during-render pattern, same as
+      `CvHeadingColorSwitcher`). `ResumeBuilderPage` keeps a
+      `sectionSettingsExpandSignal` counter that `handleManageSections`
+      bumps alongside closing the modal and scrolling; it's threaded
+      through `CVForm` to the one collapsed-by-default "Visible sections"
+      panel. Verified in the running app: clicking "Manage" now lands on an
+      already-expanded panel. `npm run lint`, `npm run build`,
+      `check:reducers` pass.
 - [ ] **52. In fullscreen preview the zoom +/- stepper is hidden behind the
       "Exit fullscreen" button.**
 - [ ] **53. Switching templates keeps the editor scroll position**; the
