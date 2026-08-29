@@ -1400,19 +1400,71 @@ function ResumeBuilderPage({
           </div>
         </div>
 
-        {/* Collapsed by default: these four panels are about the CV rather than part
-            of it, and expanded they pushed the first form field more than two screens
-            down. The summary keeps the ATS score and suggestion count visible so
-            nothing is hidden, only folded. */}
+        {/* Import: paste a plain-text snippet or load a JSON export to fill the
+            form. Its own disclosure, collapsed by default so it doesn't push
+            the first form field off-screen. */}
         <details className="editor-tools">
           <summary className="editor-tools__summary">
             <span className="editor-tools__label">
-              {locale === 'fi' ? 'Tuonti ja vientitila' : 'Import & export mode'}
+              {locale === 'fi' ? 'Tuo CV' : 'Import CV'}
+            </span>
+          </summary>
+
+          <div className="editor-tools__body stack-5">
+            <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
+              <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Pikatuonti' : 'Quick import'}</p>
+              <p className={`mt-3 text-sm ${ui.textSecondary}`}>
+                {locale === 'fi'
+                  ? 'Liitä CV-katkelma nimen, tittelin, taitojen ja lyhyen yhteenvedon tunnistamiseksi.'
+                  : 'Paste a resume snippet to detect a name, title, skills, and a short summary.'}
+              </p>
+              <textarea
+                className={`mt-4 min-h-32 w-full border px-4 py-3 text-sm transition ${ui.input}`}
+                value={pastedCvText}
+                disabled={isActionBusy}
+                onChange={handlePastedCvTextChange}
+                aria-label={locale === 'fi' ? 'Liitetty CV-teksti' : 'Pasted CV text'}
+                placeholder={locale === 'fi'
+                  ? `Matti Meikäläinen\nSenior Product Designer\nTaidot: Figma, käyttäjätutkimus, design systemit`
+                  : `Alex Morgan\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
+              />
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+                  disabled={isActionBusy}
+                  onClick={handlePasteCvImport}
+                >
+                  {locale === 'fi' ? 'Tuo liitetty teksti' : 'Paste CV text'}
+                </button>
+                <button
+                  type="button"
+                  className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+                  disabled={isActionBusy}
+                  onClick={handleImportClick}
+                >
+                  {isImporting
+                    ? locale === 'fi' ? 'Tuodaan JSON...' : 'Importing JSON...'
+                    : locale === 'fi' ? 'Tuo JSON' : 'Import JSON'}
+                </button>
+              </div>
+            </section>
+          </div>
+        </details>
+
+        {/* ATS score, keyword match, and writing suggestions — analysis of the
+            CV rather than part of it. Its own disclosure, collapsed by default;
+            the summary keeps the score and suggestion count visible so nothing
+            is hidden, only folded. */}
+        <details className="editor-tools">
+          <summary className="editor-tools__summary">
+            <span className="editor-tools__label">
+              {locale === 'fi' ? 'ATS-pisteet ja ehdotukset' : 'ATS score & suggestions'}
             </span>
             <span className="editor-tools__stats">
               {atsScore ? (
                 <span className="editor-tools__stat">
-                  {locale === 'fi' ? 'ATS' : 'ATS'} {atsScore.score}
+                  ATS {atsScore.score}
                 </span>
               ) : null}
               {feedback?.length ? (
@@ -1424,62 +1476,23 @@ function ResumeBuilderPage({
           </summary>
 
           <div className="editor-tools__body stack-5">
-        <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
-          <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Pikatuonti' : 'Quick import'}</p>
-          <p className={`mt-3 text-sm ${ui.textSecondary}`}>
-            {locale === 'fi'
-              ? 'Liitä CV-katkelma nimen, tittelin, taitojen ja lyhyen yhteenvedon tunnistamiseksi.'
-              : 'Paste a resume snippet to detect a name, title, skills, and a short summary.'}
-          </p>
-          <textarea
-            className={`mt-4 min-h-32 w-full border px-4 py-3 text-sm transition ${ui.input}`}
-            value={pastedCvText}
-            disabled={isActionBusy}
-            onChange={handlePastedCvTextChange}
-            aria-label={locale === 'fi' ? 'Liitetty CV-teksti' : 'Pasted CV text'}
-            placeholder={locale === 'fi'
-              ? `Matti Meikäläinen\nSenior Product Designer\nTaidot: Figma, käyttäjätutkimus, design systemit`
-              : `Alex Morgan\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
-          />
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
-              disabled={isActionBusy}
-              onClick={handlePasteCvImport}
-            >
-              {locale === 'fi' ? 'Tuo liitetty teksti' : 'Paste CV text'}
-            </button>
-            <button
-              type="button"
-              className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
-              disabled={isActionBusy}
-              onClick={handleImportClick}
-            >
-              {isImporting
-                ? locale === 'fi' ? 'Tuodaan JSON...' : 'Importing JSON...'
-                : locale === 'fi' ? 'Tuo JSON' : 'Import JSON'}
-            </button>
-          </div>
-        </section>
+            <ATSScorePanel
+              atsScore={atsScore}
+              locale={locale}
+              atsFriendlyMode={atsFriendlyMode}
+              onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
+              jobDescription={jobDescription}
+              onJobDescriptionChange={handleJobDescriptionChange}
+              onAddMissingKeyword={handleAddMissingKeyword}
+              onCopyMissingKeywords={handleCopyMissingKeywords}
+              onClearJobDescription={handleClearJobDescription}
+              jobDescriptionAnalysis={jobDescriptionAnalysis}
+            />
 
-        <ATSScorePanel
-          atsScore={atsScore}
-          locale={locale}
-          atsFriendlyMode={atsFriendlyMode}
-          onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
-          jobDescription={jobDescription}
-          onJobDescriptionChange={handleJobDescriptionChange}
-          onAddMissingKeyword={handleAddMissingKeyword}
-          onCopyMissingKeywords={handleCopyMissingKeywords}
-          onClearJobDescription={handleClearJobDescription}
-          jobDescriptionAnalysis={jobDescriptionAnalysis}
-        />
-
-        <CVSuggestionsPanel
-          feedback={feedback}
-          locale={locale}
-        />
+            <CVSuggestionsPanel
+              feedback={feedback}
+              locale={locale}
+            />
           </div>
         </details>
 

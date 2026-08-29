@@ -888,7 +888,8 @@ select.floating-field__control {
   background: var(--app-surface-strong);
 }
 
-/* Collapsed "Import, export mode & ATS" disclosure above the CV form. */
+/* Collapsed disclosures above the CV form ("Import CV" and "ATS score &
+   suggestions") — same styling, one class, rendered once each. */
 .editor-tools {
   border: 1px solid var(--app-border);
   border-radius: var(--radius-sm);

@@ -1727,14 +1727,21 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       `npm run lint`, `npm run build`, `check:reducers`, `check:share` all
       pass.
 
-- [ ] **40. The whole analysis surface is buried under a disclosure
-      mislabeled "Import & export mode".** Expanding it reveals Quick
-      Import, Export mode, the full ATS score breakdown (6 cards),
-      Job-description keyword match, *and* Smart Suggestions. A user
-      looking for their ATS score or writing tips would never open a panel
-      called "Import & export mode"; collapsed, its only hint is a cryptic
-      "ATS 78" badge. Split it: give "ATS score & suggestions" its own
-      labelled section (or a nav-rail entry), keep import/export separate.
+- [x] **40. The whole analysis surface is buried under a disclosure
+      mislabeled "Import & export mode".** Expanding it revealed Quick
+      Import, Export mode, the full ATS score breakdown, Job-description
+      keyword match, *and* Smart Suggestions — nobody looking for their ATS
+      score would open a panel called "Import & export mode". — done
+      2026-08-29 (v1.1.2). Split the one `<details className="editor-tools">`
+      into two adjacent disclosures reusing the same class/CSS: **"Import
+      CV"** (the Quick Import section — paste snippet + import JSON) and
+      **"ATS score & suggestions"** (the `ATSScorePanel` + the
+      `CVSuggestionsPanel`), the latter keeping the `ATS <score>` /
+      `<n> suggestions` chips in its collapsed summary. Both still collapsed
+      by default. EN + FI labels. The stale "Import, export mode & ATS"
+      comment on `.editor-tools` in `app-shell.css` updated. Verified in the
+      running app: two disclosures, each expands to its own intact content.
+      `npm run lint`, `npm run build` pass.
 
 - [ ] **41. "Missing keywords" recommends fragments of the user's own
       employer names.** On the demo CV the ATS keyword card lists `atlas`,
