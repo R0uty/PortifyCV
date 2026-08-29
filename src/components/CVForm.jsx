@@ -144,6 +144,12 @@ function CVForm({
 }) {
   const [draggedSectionKey, setDraggedSectionKey] = useState('')
   const [collapsedItems, setCollapsedItems] = useState(() => new Set())
+  // Only surface the "required" message once the user has left the field —
+  // a blank form on load shouldn't greet a first-time visitor with two red
+  // errors for fields they haven't reached yet.
+  const [identityTouched, setIdentityTouched] = useState({ fullName: false, title: false })
+  const markIdentityTouched = (field) =>
+    setIdentityTouched((prev) => (prev[field] ? prev : { ...prev, [field]: true }))
   const photoInputRef = useRef(null)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -542,22 +548,32 @@ function CVForm({
         badge={feedback.sectionBadges.profile}
       >
         <div className="space-y-4">
-          <FloatingField label={isFinnish ? 'Koko nimi' : 'Full name'} error={errors.fullName} required>
+          <FloatingField
+            label={isFinnish ? 'Koko nimi' : 'Full name'}
+            error={identityTouched.fullName ? errors.fullName : ''}
+            required
+          >
             <input
               type="text"
               autoComplete="name"
               value={formData.fullName}
               onChange={(event) => updateRootField('fullName', event.target.value)}
-              aria-invalid={Boolean(errors.fullName)}
+              onBlur={() => markIdentityTouched('fullName')}
+              aria-invalid={identityTouched.fullName && Boolean(errors.fullName)}
             />
           </FloatingField>
 
-          <FloatingField label={isFinnish ? 'Ammattinimike' : 'Professional title'} error={errors.title} required>
+          <FloatingField
+            label={isFinnish ? 'Ammattinimike' : 'Professional title'}
+            error={identityTouched.title ? errors.title : ''}
+            required
+          >
             <input
               type="text"
               value={formData.title}
               onChange={(event) => updateRootField('title', event.target.value)}
-              aria-invalid={Boolean(errors.title)}
+              onBlur={() => markIdentityTouched('title')}
+              aria-invalid={identityTouched.title && Boolean(errors.title)}
             />
           </FloatingField>
 

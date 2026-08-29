@@ -1805,10 +1805,18 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       in the running app: cards show just their titles, no numbers, no
       layout gap. `npm run lint`, `npm run build` pass.
 
-- [ ] **45. Premature validation.** Loading the builder with an empty form
-      (returning visitor, past the onboarding demo-load) shows "Full name
-      is required" / "Professional title is required" in red before any
-      interaction. Defer to blur / export.
+- [x] **45. Premature validation.** — done 2026-08-29 (v1.1.7). The blank
+      form greeted returning visitors with "Full name is required" /
+      "Professional title is required" in red before they'd touched
+      anything. `CVForm.jsx` now tracks `identityTouched` per field, set on
+      the input's `onBlur`; the `error` prop (and `aria-invalid`) for the
+      two required identity fields is only passed once the field has been
+      left. The `required` asterisk on the label still shows immediately, so
+      the requirement is communicated without the alarm. `errors` is still
+      computed the same way in `ResumeBuilderPage.jsx` and consumed
+      elsewhere unchanged. Verified in the running app: no red on load;
+      focusing then leaving an empty Full name field shows the message.
+      `npm run lint`, `npm run build` pass.
 
 - [ ] **46. Appearance controls are split and vaguely labelled.**
       Template / Font / Color live in the top toolbar; ATS mode and
