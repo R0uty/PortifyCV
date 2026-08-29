@@ -18,6 +18,19 @@ export const DEFAULT_CV_HEADING_COLOR = ''
 // (before they've ever chosen a color of their own).
 export const CV_HEADING_COLOR_SEED = '#1f2937'
 
+// One-click presets shown above the color wheel / hex field, so a user who
+// just wants "make the headings navy" doesn't have to reach for a picker.
+// A restrained set of dark, print-safe heading colors; the wheel stays for
+// anyone who wants something exact.
+export const CV_HEADING_COLOR_PRESETS = [
+  { color: '#1f2937', label: { en: 'Slate', fi: 'Liuske' } },
+  { color: '#0f172a', label: { en: 'Ink', fi: 'Muste' } },
+  { color: '#1e40af', label: { en: 'Navy', fi: 'Laivastonsininen' } },
+  { color: '#7f1d1d', label: { en: 'Burgundy', fi: 'Viininpunainen' } },
+  { color: '#166534', label: { en: 'Forest', fi: 'Metsänvihreä' } },
+  { color: '#5b21b6', label: { en: 'Violet', fi: 'Violetti' } },
+]
+
 const HEX_COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
 
 export function isValidCvHeadingColor(color) {

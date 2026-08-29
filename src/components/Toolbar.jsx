@@ -229,7 +229,7 @@ function Toolbar({
             </div>
 
             <div className="app-toolbar__labeled-control">
-              <span className="app-toolbar__control-label">{isFinnish ? 'Väri' : 'Color'}</span>
+              <span className="app-toolbar__control-label">{isFinnish ? 'Otsikot' : 'Headings'}</span>
               <CvHeadingColorSwitcher
                 color={cvHeadingColor}
                 onSelectColor={onCvHeadingColorChange}

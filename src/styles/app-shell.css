@@ -1810,6 +1810,25 @@ select.floating-field__control {
   box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.2);
 }
 
+.cv-heading-color-switcher__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.cv-heading-color-switcher__preset {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid var(--app-border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.cv-heading-color-switcher__preset--active {
+  box-shadow: 0 0 0 2px var(--app-bg), 0 0 0 4px var(--app-text);
+}
+
 .cv-heading-color-switcher__picker-row {
   display: flex;
   align-items: center;

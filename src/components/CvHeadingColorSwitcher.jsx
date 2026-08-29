@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown, RotateCcw } from 'lucide-react'
 
-import { CV_HEADING_COLOR_SEED, isValidCvHeadingColor } from '../utils/cvHeadingColors'
+import {
+  CV_HEADING_COLOR_PRESETS,
+  CV_HEADING_COLOR_SEED,
+  isValidCvHeadingColor,
+} from '../utils/cvHeadingColors'
 import { useAnchoredPanelPosition } from '../hooks/useAnchoredPanelPosition'
 
 // Toolbar's heading-color picker, next to the font switcher — same
@@ -30,6 +34,12 @@ function CvHeadingColorSwitcher({
   const triggerRef = useRef(null)
   const panelRef = useRef(null)
   const colorInputValue = /^#[0-9a-fA-F]{6}$/.test(color) ? color : CV_HEADING_COLOR_SEED
+  const activePreset = CV_HEADING_COLOR_PRESETS.find(
+    (preset) => preset.color.toLowerCase() === color.toLowerCase(),
+  )
+  const triggerLabel = activePreset
+    ? activePreset.label[locale] ?? activePreset.label.en
+    : color || (isFinnish ? 'Oletus' : 'Default')
   const { style: panelPosition, ready: panelReady } = useAnchoredPanelPosition(isOpen, triggerRef, panelRef)
 
   useEffect(() => {
@@ -112,7 +122,7 @@ function CvHeadingColorSwitcher({
           aria-hidden="true"
         />
         <span className="cv-heading-color-switcher__trigger-label">
-          {color || (isFinnish ? 'Oletus' : 'Default')}
+          {triggerLabel}
         </span>
         <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
       </button>
@@ -125,6 +135,27 @@ function CvHeadingColorSwitcher({
           ref={panelRef}
           style={{ ...panelPosition, visibility: panelReady ? 'visible' : 'hidden' }}
         >
+          <div
+            className="cv-heading-color-switcher__presets"
+            role="group"
+            aria-label={isFinnish ? 'Valmiit värit' : 'Preset colors'}
+          >
+            {CV_HEADING_COLOR_PRESETS.map((preset) => (
+              <button
+                key={preset.color}
+                type="button"
+                className={`cv-heading-color-switcher__preset${
+                  preset.color.toLowerCase() === color.toLowerCase() ? ' cv-heading-color-switcher__preset--active' : ''
+                }`}
+                style={{ background: preset.color }}
+                aria-pressed={preset.color.toLowerCase() === color.toLowerCase()}
+                aria-label={preset.label[locale] ?? preset.label.en}
+                title={preset.label[locale] ?? preset.label.en}
+                onClick={() => onSelectColor(preset.color)}
+              />
+            ))}
+          </div>
+
           <label className="cv-heading-color-switcher__picker-row">
             <input
               type="color"

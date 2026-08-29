@@ -1818,11 +1818,25 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       focusing then leaving an empty Full name field shows the message.
       `npm run lint`, `npm run build` pass.
 
-- [ ] **46. Appearance controls are split and vaguely labelled.**
-      Template / Font / Color live in the top toolbar; ATS mode and
-      (conditionally) accent color live in Settings. The toolbar "COLOR"
-      control is a bare hex field (`#1f2937`) + swatch — no presets, and
-      it's unclear it only affects headings.
+- [x] **46. Appearance controls were vaguely labelled / preset-less.** —
+      done 2026-08-29 (v1.1.8). Two changes:
+      (a) Toolbar's "Color" / "Väri" control relabelled **"Headings" /
+      "Otsikot"** — it only ever colored the name + section titles, never
+      body copy, and "Color" gave no hint of that.
+      (b) `CvHeadingColorSwitcher` now shows a row of 6 one-click presets
+      (`CV_HEADING_COLOR_PRESETS` in `cvHeadingColors.js` — Slate / Ink /
+      Navy / Burgundy / Forest / Violet, all dark and print-safe) above the
+      existing native color wheel + hex field, mirroring the accent-swatch
+      pattern already in `SettingsModal`. The trigger shows the preset's
+      name ("Navy") instead of a raw hex when one is active.
+      Deliberately did **not** move ATS mode or the template accent-color
+      rows out of Settings: ATS mode is an export/parsing mode, not
+      appearance, and the accent rows are template-conditional; the
+      toolbar's Template / Font / Headings trio is already a coherent
+      quick-styling cluster. Verified in the running app: label reads
+      "Headings", clicking the Navy preset turns every preview heading
+      `#1e40af` and the trigger reads "Navy". `npm run lint`, `npm run
+      build` pass.
 
 - [ ] **47. The Links section renders ~17 empty platform fields**, each
       with its own "HIDE" button (GitHub, Behance, Dribbble, ResearchGate,
