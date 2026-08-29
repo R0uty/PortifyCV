@@ -1878,9 +1878,16 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ### Low / polish
 
-- [ ] **49. Font picker is a 3-at-a-time arrow carousel**; a dropdown list
-      would show all options at once. Each card also repeats the font name
-      (large, in-font + small label).
+- [x] **49. Font picker was a 3-at-a-time arrow carousel.** — done
+      2026-08-29 (v1.1.11). `CvFontSwitcher` is now a plain vertical
+      dropdown list — all 7 fonts on one screen, each name set in its own
+      face (so the label *is* the preview, no duplicate small label),
+      active one marked with a check. Dropped the horizontal filmstrip, the
+      left/right nav arrows, the wheel-redirect handler, and the two-tier
+      card markup; `role="listbox"` / `role="option"` / `aria-selected`.
+      Verified in the running app: opens showing all 7 (Georgia / Times in
+      serif), selecting one closes the panel and restyles the preview.
+      `npm run lint`, `npm run build` pass.
 - [ ] **50. Export menu (PDF / HTML / JSON) gives no hint what each format
       is for** — a first-timer won't know JSON is the re-importable backup.
 - [ ] **51. Settings → "Manage" scrolls to Section 00 but leaves it

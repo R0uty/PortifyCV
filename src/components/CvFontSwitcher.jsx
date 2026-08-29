@@ -1,17 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Check, ChevronDown } from 'lucide-react'
 
 import { CV_FONT_OPTIONS, loadAllCvFonts } from '../utils/cvFonts'
 import { useAnchoredPanelPosition } from '../hooks/useAnchoredPanelPosition'
 
-// Toolbar's font picker, next to the template quick switcher — same
-// dropdown-panel-of-cards shape as TemplateQuickSwitcher.jsx (trigger button,
-// horizontally scrollable strip, nav arrows), except each card's "thumbnail"
-// is the font's own name set in that font instead of a rendered CV. Every
-// option's CSS is fetched the moment the panel opens (loadAllCvFonts) so all
-// nine samples can preview in their real face — cheap because these are
-// small, mostly-system font stacks (see utils/cvFonts.js), not a dozen full
-// custom fonts.
+// Toolbar's font picker, next to the template quick switcher — a plain
+// vertical dropdown list: every font on one screen, its name set in its own
+// face so the label doubles as the preview. Every option's CSS is fetched
+// the moment the panel opens (loadAllCvFonts) so all samples render in their
+// real face — cheap because these are small, mostly-system font stacks (see
+// utils/cvFonts.js), not a dozen full custom fonts.
 function CvFontSwitcher({
   fontId = '',
   onSelectFont = () => {},
@@ -20,7 +18,6 @@ function CvFontSwitcher({
   const isFinnish = locale === 'fi'
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
-  const stripRef = useRef(null)
   const panelRef = useRef(null)
   // Toolbar.jsx doesn't pass a triggerRef prop (unlike TemplateQuickSwitcher's
   // templateSelectRef) — an internal ref both drives the button itself and
@@ -36,9 +33,9 @@ function CvFontSwitcher({
 
     loadAllCvFonts()
 
-    stripRef.current
+    panelRef.current
       ?.querySelector('[data-active="true"]')
-      ?.scrollIntoView({ block: 'nearest', inline: 'center' })
+      ?.scrollIntoView({ block: 'nearest' })
 
     function handlePointerDown(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
@@ -73,26 +70,6 @@ function CvFontSwitcher({
     triggerRef?.current?.focus()
   }
 
-  // Plain vertical mouse wheels don't scroll a horizontal strip on their
-  // own — redirect that scroll instead of requiring shift+wheel/trackpad.
-  function handleWheel(event) {
-    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
-      return
-    }
-    event.currentTarget.scrollBy({ left: event.deltaY })
-    event.preventDefault()
-  }
-
-  function scrollByCard(direction) {
-    const strip = stripRef.current
-    if (!strip) {
-      return
-    }
-    const card = strip.querySelector('.cv-font-switcher__card')
-    const step = card ? card.getBoundingClientRect().width + 12 : 160
-    strip.scrollBy({ left: direction * step, behavior: 'smooth' })
-  }
-
   return (
     <div className="cv-font-switcher" ref={containerRef} onBlur={handleBlur}>
       <button
@@ -118,49 +95,30 @@ function CvFontSwitcher({
       {isOpen ? (
         <div
           className="cv-font-switcher__panel"
-          role="dialog"
+          role="listbox"
           aria-label={isFinnish ? 'Valitse fontti' : 'Select font'}
           ref={panelRef}
           style={{ ...panelPosition, visibility: panelReady ? 'visible' : 'hidden' }}
         >
-          <button
-            type="button"
-            className="cv-font-switcher__nav cv-font-switcher__nav--left"
-            aria-label={isFinnish ? 'Vieritä vasemmalle' : 'Scroll left'}
-            onClick={() => scrollByCard(-1)}
-          >
-            <ChevronLeft size={16} strokeWidth={2} aria-hidden="true" />
-          </button>
+          {CV_FONT_OPTIONS.map((font) => {
+            const isActive = font.id === fontId
 
-          <div className="cv-font-switcher__strip" ref={stripRef} onWheel={handleWheel}>
-            {CV_FONT_OPTIONS.map((font) => {
-              const isActive = font.id === fontId
-
-              return (
-                <button
-                  key={font.id}
-                  type="button"
-                  className={`cv-font-switcher__card${isActive ? ' cv-font-switcher__card--active' : ''}`}
-                  data-active={isActive}
-                  onClick={() => handleSelect(font.id)}
-                >
-                  <span className="cv-font-switcher__sample" style={{ fontFamily: font.stack }}>
-                    {font.label}
-                  </span>
-                  <span className="cv-font-switcher__label">{font.label}</span>
-                </button>
-              )
-            })}
-          </div>
-
-          <button
-            type="button"
-            className="cv-font-switcher__nav cv-font-switcher__nav--right"
-            aria-label={isFinnish ? 'Vieritä oikealle' : 'Scroll right'}
-            onClick={() => scrollByCard(1)}
-          >
-            <ChevronRight size={16} strokeWidth={2} aria-hidden="true" />
-          </button>
+            return (
+              <button
+                key={font.id}
+                type="button"
+                role="option"
+                aria-selected={isActive}
+                className={`cv-font-switcher__option${isActive ? ' cv-font-switcher__option--active' : ''}`}
+                data-active={isActive}
+                style={{ fontFamily: font.stack }}
+                onClick={() => handleSelect(font.id)}
+              >
+                <span className="cv-font-switcher__option-label">{font.label}</span>
+                {isActive ? <Check size={15} strokeWidth={2.5} aria-hidden="true" /> : null}
+              </button>
+            )
+          })}
         </div>
       ) : null}
     </div>
