@@ -145,10 +145,10 @@ test.describe('Desktop toolbar dropdowns', () => {
   // where the toolbar wrapping puts the trigger.
   test.use({ viewport: { width: 1280, height: 800 } })
 
-  async function expectPanelOnScreen(page, triggerNamePattern) {
+  async function expectPanelOnScreen(page, triggerNamePattern, panelRole = 'dialog') {
     const viewport = page.viewportSize()
     await page.getByRole('button', { name: triggerNamePattern }).click()
-    const panel = page.getByRole('dialog')
+    const panel = page.getByRole(panelRole)
     const box = await panel.boundingBox()
     expect(box).not.toBeNull()
     expect(box.x).toBeGreaterThanOrEqual(0)
@@ -162,7 +162,7 @@ test.describe('Desktop toolbar dropdowns', () => {
 
   test('the font picker panel stays on-screen when the toolbar wraps', async ({ page }) => {
     await page.goto('/cv')
-    await expectPanelOnScreen(page, /^Select font:/)
+    await expectPanelOnScreen(page, /^Select font:/, 'listbox')
   })
 
   test('the heading color picker panel stays on-screen when the toolbar wraps', async ({ page }) => {
