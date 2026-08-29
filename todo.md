@@ -1791,11 +1791,19 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ### Medium
 
-- [ ] **44. Section numbers (SECTION 00 … 01 … 06 … 13) confuse.** They're
-      fixed internal indices, so the visible sequence jumps with gaps for
-      unsupported sections (06 → 13 on the Developer template). Users read
-      it as "sections 7-12 are hidden from me." The numbers carry no user
-      value — drop them or renumber per visible section.
+- [x] **44. Section numbers (SECTION 00 … 01 … 06 … 13) confused.** — done
+      2026-08-29 (v1.1.6). The 21 section panels each passed a hardcoded
+      `eyebrow="Section 00".."Section 20"` to `PanelSection`; templates that
+      hide sections left the visible ones non-contiguous (06 → 13 on
+      Developer), reading as "sections 7-12 are hidden from me". Dropped all
+      21 `eyebrow` props from `CVForm.jsx`; `PanelSection` now renders the
+      eyebrow `<p>` (and its `mt-3`) only when the prop is non-empty, so the
+      section title sits flush at the card top. Wayfinding is unaffected —
+      the nav rail (which was never numbered) still tracks the active
+      section, and each card keeps its title + description + collapse
+      chevron. `eyebrow` kept as an optional prop for future use. Verified
+      in the running app: cards show just their titles, no numbers, no
+      layout gap. `npm run lint`, `npm run build` pass.
 
 - [ ] **45. Premature validation.** Loading the builder with an empty form
       (returning visitor, past the onboarding demo-load) shows "Full name
