@@ -1700,6 +1700,118 @@ template-gallery thumbnails plus live full-size preview.
       spurious second page. `npm run lint`, `npm run build`,
       `check:share`, `check:reducers`, and `check:feedback` all pass.
 
+## Builder usability review — 2026-08-29
+
+Findings from an interactive walkthrough of the running app (dev server,
+demo CV loaded, Minimalist + Developer templates). Evidence is from the
+running app, not from reading code. Ordered by impact. None fixed yet.
+
+### High impact
+
+- [x] **39. The ATS-mode toggle exists in three separate places.** "Export
+      mode → Enable ATS mode" and "ATS score → ATS-friendly mode → Enable
+      ATS" sat ~400px apart *inside the same "Import & export mode"
+      disclosure*, looking like two near-identical controls; a third copy
+      lives in the Settings modal. — done 2026-08-29 (v1.1.1). Removed the
+      standalone "Export mode" `<section>` from the editor-tools panel
+      (`ResumeBuilderPage.jsx`) — it was pure duplication of the
+      "ATS-friendly mode" card rendered right below it by `ATSScorePanel`.
+      Kept two controls in *distinct* contexts: the card in the ATS score
+      panel (where the score it changes is on screen) and the Settings
+      toggle (the mode's natural home) — three near-identical buttons, two
+      in one panel, was the real problem, not two entry points in separate
+      places. Folded the dropped section's "leave it off for fully styled
+      exports" nuance into the ATS card's hint, which now also notes the
+      setting is mirrored in Settings (EN + FI). Verified in the running
+      app: the editor-tools panel now shows one ATS toggle, not two.
+      `npm run lint`, `npm run build`, `check:reducers`, `check:share` all
+      pass.
+
+- [ ] **40. The whole analysis surface is buried under a disclosure
+      mislabeled "Import & export mode".** Expanding it reveals Quick
+      Import, Export mode, the full ATS score breakdown (6 cards),
+      Job-description keyword match, *and* Smart Suggestions. A user
+      looking for their ATS score or writing tips would never open a panel
+      called "Import & export mode"; collapsed, its only hint is a cryptic
+      "ATS 78" badge. Split it: give "ATS score & suggestions" its own
+      labelled section (or a nav-rail entry), keep import/export separate.
+
+- [ ] **41. "Missing keywords" recommends fragments of the user's own
+      employer names.** On the demo CV the ATS keyword card lists `atlas`,
+      `labs`, `north`, `studio` as keywords the CV is "missing" — torn out
+      of "Atlas Labs" / "Studio North" in the user's own experience
+      entries. Reads as broken advice and undermines trust in the whole ATS
+      feature. Same single-token extraction weakness already flagged for
+      the cover letter in item 20, but here it's shown straight to users.
+      Needs employer/proper-noun filtering, or a phrase-level matcher.
+
+- [ ] **42. The cover-letter draft textarea is ~2 lines tall.** The
+      generated letter is 4-5 paragraphs, but it's read and edited through
+      a ~40px window with an inner scrollbar — the feature's main output.
+      Make it 10+ rows or auto-grow.
+
+- [ ] **43. "Reset form" wipes everything instantly — no confirm, no inline
+      undo.** It sits right next to "Load demo CV", and with the app's
+      "nothing saved anywhere" model one misclick clears real work. It *is*
+      recoverable via the toolbar undo arrow, but nothing tells the user
+      that. Add a confirm, or an "Undo" action on the "Form reset" toast.
+
+### Medium
+
+- [ ] **44. Section numbers (SECTION 00 … 01 … 06 … 13) confuse.** They're
+      fixed internal indices, so the visible sequence jumps with gaps for
+      unsupported sections (06 → 13 on the Developer template). Users read
+      it as "sections 7-12 are hidden from me." The numbers carry no user
+      value — drop them or renumber per visible section.
+
+- [ ] **45. Premature validation.** Loading the builder with an empty form
+      (returning visitor, past the onboarding demo-load) shows "Full name
+      is required" / "Professional title is required" in red before any
+      interaction. Defer to blur / export.
+
+- [ ] **46. Appearance controls are split and vaguely labelled.**
+      Template / Font / Color live in the top toolbar; ATS mode and
+      (conditionally) accent color live in Settings. The toolbar "COLOR"
+      control is a bare hex field (`#1f2937`) + swatch — no presets, and
+      it's unclear it only affects headings.
+
+- [ ] **47. The Links section renders ~17 empty platform fields**, each
+      with its own "HIDE" button (GitHub, Behance, Dribbble, ResearchGate,
+      Hack The Box, TryHackMe, YouTube…). Empty links don't render in the
+      preview anyway, so the per-field HIDE toggle is redundant. Better:
+      show filled links plus an "add link" picker.
+
+- [ ] **48. "Section order & visibility" is control-dense and its toggle
+      affordance is unclear.** Each row is a DRAG handle + an "ABOUT: ON"
+      pill (the pill *is* the on/off toggle but reads as a static label) +
+      UP + DOWN. Visibility is also settable via per-section eye icons and
+      per-entry eye icons — three routes to one thing.
+
+### Low / polish
+
+- [ ] **49. Font picker is a 3-at-a-time arrow carousel**; a dropdown list
+      would show all options at once. Each card also repeats the font name
+      (large, in-font + small label).
+- [ ] **50. Export menu (PDF / HTML / JSON) gives no hint what each format
+      is for** — a first-timer won't know JSON is the re-importable backup.
+- [ ] **51. Settings → "Manage" scrolls to Section 00 but leaves it
+      collapsed** — the user has to find and expand it.
+- [ ] **52. In fullscreen preview the zoom +/- stepper is hidden behind the
+      "Exit fullscreen" button.**
+- [ ] **53. Switching templates keeps the editor scroll position**; the
+      sections a new template adds (Certificates, Projects…) appear
+      mid-scroll with no cue that they were added.
+- [ ] **54. "Responsive preview" is a strange concept for a fixed-width
+      PDF/print output**; at narrow widths the two-column templates just
+      get cramped. Only meaningful for HTML export.
+
+### Read well, don't re-investigate (this pass)
+
+- Template gallery with real per-content thumbnails.
+- Live preview, undo/redo.
+- The ATS score detail itself, once found.
+- No console errors anywhere in the walkthrough.
+
 ## Checked and fine — don't re-investigate
 
 - Responsive layout is handled (breakpoints at 1023 / 860 / 560px).

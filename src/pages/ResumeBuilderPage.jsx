@@ -1463,27 +1463,6 @@ function ResumeBuilderPage({
           </div>
         </section>
 
-        <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
-          <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Vientitila' : 'Export mode'}</p>
-          <p className={`mt-3 text-sm ${ui.textSecondary}`}>
-            {locale === 'fi'
-              ? 'ATS-tila yksinkertaistaa muotoilua jäsennystä varten. Jätä se pois päältä täysin tyyliteltyä vientiä varten.'
-              : 'ATS mode simplifies formatting for parsers. Leave it off for fully styled template exports.'}
-          </p>
-          <button
-            type="button"
-            className={`mt-4 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
-              atsFriendlyMode ? ui.buttonActive : ui.button
-            }`}
-            disabled={isActionBusy}
-            onClick={handleToggleAtsFriendlyMode}
-          >
-            {atsFriendlyMode
-              ? locale === 'fi' ? 'ATS-tila käytössä' : 'ATS mode enabled'
-              : locale === 'fi' ? 'Ota ATS-tila käyttöön' : 'Enable ATS mode'}
-          </button>
-        </section>
-
         <ATSScorePanel
           atsScore={atsScore}
           locale={locale}
