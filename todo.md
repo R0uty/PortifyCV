@@ -1760,10 +1760,17 @@ running app, not from reading code. Ordered by impact. None fixed yet.
       terms, no employer fragments. `npm run lint`, `npm run build`,
       `check:feedback` pass.
 
-- [ ] **42. The cover-letter draft textarea is ~2 lines tall.** The
-      generated letter is 4-5 paragraphs, but it's read and edited through
-      a ~40px window with an inner scrollbar — the feature's main output.
-      Make it 10+ rows or auto-grow.
+- [x] **42. The cover-letter draft textarea was ~2 lines tall.** — done
+      2026-08-29 (v1.1.4). Root cause: `CoverLetterModal.jsx`'s draft
+      textarea carried `className="min-h-72 ..."` but no `.min-h-72` rule
+      existed in `utilities.css` (only `min-h-28` / `min-h-32`), so the
+      class was inert and the textarea fell back to the UA default
+      `rows=2`. Added `[class~='min-h-72'] { min-height: 18rem; }` (matching
+      the Tailwind scale the class name implies). The textarea now opens at
+      ~288px — the whole generated letter is visible at once — and stays
+      user-resizable. Only `CoverLetterModal` used the class. Verified in
+      the running app with a generated draft. `npm run lint`, `npm run
+      build` pass.
 
 - [ ] **43. "Reset form" wipes everything instantly — no confirm, no inline
       undo.** It sits right next to "Load demo CV", and with the app's
