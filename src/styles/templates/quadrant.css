@@ -1,0 +1,468 @@
+/* ==========================================================================
+   Quadrant Showcase — hand-authored component styles for the Quadrant
+   template's non-ATS mode. Scoped entirely under `.quadrant-showcase`.
+   Cyan accent — the one primary hue none of the other 14 templates use
+   (see cvTemplates.js for the survey this was checked against).
+
+   Layout: a literal 2x2 CSS grid — the structure itself is this template's
+   identity, the way Timeline's identity is its literal vertical line.
+   Rows are `auto` height (not equal fixed boxes), so the bottom row
+   (Experience / Education+extras) can grow taller than the top row
+   (Profile / Skills) without clipping — real CV content is unpredictable
+   length, a poster-style fixed-height grid would either clip or waste
+   space. Thin 1px dividers between cells read as a literal grid line.
+   ========================================================================== */
+
+.quadrant-showcase {
+  --qd-cyan: #0e7490;
+  --qd-cyan-strong: #155e75;
+  --qd-cyan-tint: #ecfeff;
+  --qd-text: #0f172a;
+  --qd-muted: #64748b;
+  --qd-border: #d5e3e6;
+  /* Deliberately NOT pure #ffffff — same blank-canvas PDF export guard used
+     by the Creative/Modern/Executive Showcases: thin-divider, mostly-
+     whitespace designs can make html2canvas sample every point as
+     near-white and silently fall back to a plain-text PDF render. */
+  --qd-bg: #f7fafa;
+  --qd-card: #ffffff;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  background: var(--qd-bg);
+  color: var(--qd-text);
+  font-family: var(--font-sans);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.2);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.quadrant-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── The four cells ── */
+
+.quadrant-showcase__cell {
+  min-width: 0;
+  padding: 2.1rem 1.85rem;
+}
+
+.quadrant-showcase__cell--profile {
+  background: var(--qd-cyan-tint);
+  border-right: 1px solid var(--qd-border);
+  border-bottom: 1px solid var(--qd-border);
+}
+
+.quadrant-showcase__cell--skills {
+  background: var(--qd-bg);
+  border-bottom: 1px solid var(--qd-border);
+}
+
+.quadrant-showcase__cell--main {
+  background: var(--qd-card);
+  border-right: 1px solid var(--qd-border);
+}
+
+.quadrant-showcase__cell--extras {
+  background: var(--qd-card);
+}
+
+/* ── Profile cell ── */
+
+.quadrant-showcase__photo-wrap {
+  margin-bottom: 1.1rem;
+}
+
+.quadrant-showcase__photo {
+  display: block;
+  width: 5.5rem;
+  height: 5.5rem;
+  object-fit: cover;
+  border-radius: 9999px;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 1px var(--qd-border);
+}
+
+.quadrant-showcase__kicker {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--qd-muted);
+}
+
+.quadrant-showcase__name {
+  margin-top: 0.4rem;
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--cv-heading-color, var(--qd-text));
+  overflow-wrap: anywhere;
+}
+
+.quadrant-showcase__role {
+  margin-top: 0.35rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--qd-cyan);
+}
+
+.quadrant-showcase__tagline {
+  margin-top: 0.4rem;
+  font-size: 0.76rem;
+  font-style: italic;
+  color: var(--qd-muted);
+}
+
+.quadrant-showcase__contact {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quadrant-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--qd-muted);
+  overflow-wrap: anywhere;
+}
+
+.quadrant-showcase__contact-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--qd-cyan);
+}
+
+.quadrant-showcase__summary {
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--qd-border);
+  font-size: 0.78rem;
+  line-height: 1.7;
+  color: var(--qd-text);
+  white-space: pre-line;
+}
+
+/* ── Shared section head (Skills / Experience / Projects / extras) ── */
+
+.quadrant-showcase__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quadrant-showcase__section-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--qd-cyan);
+}
+
+.quadrant-showcase__section-icon svg {
+  height: 0.85rem;
+  width: 0.85rem;
+}
+
+.quadrant-showcase__section-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--cv-heading-color, var(--qd-cyan-strong));
+}
+
+.quadrant-showcase__section + .quadrant-showcase__section {
+  margin-top: 1.75rem;
+}
+
+.quadrant-showcase__empty {
+  margin-top: 0.8rem;
+  font-size: 0.78rem;
+  color: var(--qd-muted);
+}
+
+/* ── Skills cell ── */
+
+.quadrant-showcase__skill-group {
+  margin-top: 1rem;
+}
+
+.quadrant-showcase__skill-group:first-of-type {
+  margin-top: 0.85rem;
+}
+
+.quadrant-showcase__skill-group-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--qd-muted);
+  margin-bottom: 0.45rem;
+}
+
+.quadrant-showcase__tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.quadrant-showcase__tag {
+  border-radius: 6px;
+  border: 1px solid var(--qd-border);
+  background: var(--qd-cyan-tint);
+  padding: 0.28rem 0.6rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--qd-cyan-strong);
+}
+
+/* ── Experience / Education entries ── */
+
+.quadrant-showcase__entry-list {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.quadrant-showcase__entry {
+  padding: 0 0 1.2rem;
+  border-bottom: 1px solid var(--qd-border);
+}
+
+.quadrant-showcase__entry:not(:first-child) {
+  padding-top: 1.2rem;
+}
+
+.quadrant-showcase__entry:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.quadrant-showcase__entry-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.quadrant-showcase__entry-role {
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: var(--qd-text);
+}
+
+.quadrant-showcase__entry-meta {
+  margin-top: 0.15rem;
+  font-size: 0.76rem;
+  color: var(--qd-muted);
+}
+
+.quadrant-showcase__entry-dates {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--qd-muted);
+  white-space: nowrap;
+}
+
+.quadrant-showcase__bullets {
+  margin-top: 0.55rem;
+  padding-left: 1.05rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.quadrant-showcase__bullets li {
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--qd-text);
+}
+
+.quadrant-showcase__bullets li::marker {
+  color: var(--qd-cyan);
+}
+
+/* ── Projects (bordered cards, main cell) ── */
+
+.quadrant-showcase__project-grid {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.quadrant-showcase__project-card {
+  border-radius: 10px;
+  border: 1px solid var(--qd-border);
+  background: var(--qd-bg);
+  padding: 1rem 1.1rem;
+}
+
+.quadrant-showcase__project-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--qd-text);
+}
+
+.quadrant-showcase__project-desc {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--qd-text);
+  white-space: pre-line;
+}
+
+.quadrant-showcase__project-card .quadrant-showcase__tag-row {
+  margin-top: 0.6rem;
+}
+
+/* ── Extras cell: plain lists — no card wrapper, thin dividers ── */
+
+.quadrant-showcase__list {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.quadrant-showcase__list-item {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--qd-border);
+}
+
+.quadrant-showcase__list-item:first-child {
+  padding-top: 0;
+}
+
+.quadrant-showcase__list-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.quadrant-showcase__list-item--row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--qd-text);
+}
+
+.quadrant-showcase__list-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--qd-text);
+}
+
+.quadrant-showcase__list-meta {
+  margin-top: 0.15rem;
+  font-size: 0.7rem;
+  color: var(--qd-muted);
+}
+
+.quadrant-showcase__list-link {
+  display: inline-block;
+  margin-top: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--qd-cyan);
+}
+
+.quadrant-showcase__link-list {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.quadrant-showcase__link-card {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border-radius: 10px;
+  border: 1px solid var(--qd-border);
+  background: var(--qd-bg);
+  padding: 0.5rem 0.65rem;
+}
+
+.quadrant-showcase__link-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--qd-cyan);
+}
+
+.quadrant-showcase__link-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--qd-muted);
+}
+
+.quadrant-showcase__link-value {
+  display: block;
+  overflow: hidden;
+  margin-top: 0.1rem;
+  font-size: 0.74rem;
+  color: var(--qd-text);
+  white-space: nowrap;
+}
+
+/* ── Responsive — under 860px, collapse to one stacked column:
+   Profile, Skills, Experience/Projects, Education+extras ── */
+
+@media (max-width: 860px) {
+  .quadrant-showcase {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+  }
+
+  .quadrant-showcase__cell--profile,
+  .quadrant-showcase__cell--skills,
+  .quadrant-showcase__cell--main {
+    border-right: none;
+    border-bottom: 1px solid var(--qd-border);
+  }
+}
+
+@media (max-width: 560px) {
+  .quadrant-showcase__cell {
+    padding: 1.6rem 1.25rem;
+  }
+
+  .quadrant-showcase__name {
+    font-size: 1.4rem;
+  }
+
+  .quadrant-showcase__photo {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .quadrant-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .quadrant-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+}

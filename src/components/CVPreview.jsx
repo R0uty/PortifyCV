@@ -41,6 +41,7 @@ const ClassicProfessionalShowcase = lazy(() => import('./templates/ClassicProfes
 const NavyProfessionalShowcase = lazy(() => import('./templates/NavyProfessionalShowcase'))
 const ModernOrangeShowcase = lazy(() => import('./templates/ModernOrangeShowcase'))
 const ColorfulCompactShowcase = lazy(() => import('./templates/ColorfulCompactShowcase'))
+const QuadrantShowcase = lazy(() => import('./templates/QuadrantShowcase'))
 
 function CVPreview({
   formData,
@@ -310,6 +311,25 @@ function CVPreview({
           locale={locale}
           previewRef={previewRef}
           templateConfig={templateConfig}
+        />
+      </Suspense>
+    )
+  }
+
+  // ── Quadrant Showcase delegation ────────────────────────────────────
+  // The Quadrant template's non-ATS look is a literal 2x2 grid — a fully
+  // bespoke visual system ATS mode bypasses entirely, same reasoning as
+  // every other bespoke Showcase above.
+  if (variant === 'quadrant' && !atsFriendlyMode) {
+    return (
+      <Suspense fallback={null}>
+        <QuadrantShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )

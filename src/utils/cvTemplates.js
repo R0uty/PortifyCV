@@ -267,6 +267,25 @@ const templateMap = {
       chips: ['Skills', 'Projects'],
     },
   },
+  quadrant: {
+    id: 'quadrant',
+    label: 'Quadrant',
+    description: 'A literal 2x2 grid — profile, skills, experience, and education each in their own quarter, with a single cyan accent. A strong fit if you want your CV to read at a glance rather than top to bottom.',
+    variant: 'quadrant',
+    layout: 'split',
+    primarySections: ['about', 'experience', 'projects'],
+    secondarySections: ['skills', 'education', 'certificates', 'languages', 'links'],
+    summaryBadgeLabel: 'Profile',
+    thumbnail: {
+      accentClassName: 'bg-cyan-600',
+      surfaceClassName: 'bg-gray-50',
+      primaryRatioClassName: 'grid-cols-2',
+      titleWidthClassName: 'w-24',
+      subtitleWidthClassName: 'w-16',
+      blockWidths: ['w-full', 'w-11/12', 'w-9/12'],
+      chips: ['Skills', 'Education'],
+    },
+  },
 }
 
 const templateLocalization = {
@@ -354,6 +373,12 @@ const templateLocalization = {
       description: 'Tumma otsikko tiiviin kaksipalstaisen rungon päällä, jossa jokainen osio — Taidot, Kokemus, Projektit, Kielet — saa oman sateenkaariväriaksentin. Sopii mille tahansa luovalle tai tuoteprofiilille.',
       summaryBadgeLabel: 'Esittely',
       chips: ['Taidot', 'Projektit'],
+    },
+    quadrant: {
+      label: 'Neliö',
+      description: 'Kirjaimellinen 2x2-ruudukko — profiili, taidot, kokemus ja koulutus omissa neljänneksissään, yhdellä syaanilla aksentilla. Sopii hyvin, jos haluat CV:n hahmottuvan yhdellä silmäyksellä ylhäältä alas lukemisen sijaan.',
+      summaryBadgeLabel: 'Profiili',
+      chips: ['Taidot', 'Koulutus'],
     },
   },
 }
