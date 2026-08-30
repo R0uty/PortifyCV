@@ -2834,38 +2834,6 @@ select.floating-field__control {
   color: var(--app-text);
 }
 
-/* Small decorative line-art illustration beside the kicker + title on a
-   handful of writing-themed content pages (Cover Letter Examples, How to
-   Write a CV) — stacks above the text on narrow viewports, sits to its
-   left from 640px up. */
-.legal-page__intro-row {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  margin-bottom: var(--space-3);
-}
-
-.legal-page__illustration {
-  width: 5.5rem;
-  height: auto;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--app-border);
-  background-color: #ffffff;
-}
-
-@media (min-width: 640px) {
-  .legal-page__intro-row {
-    flex-direction: row;
-    align-items: flex-end;
-    gap: var(--space-5);
-  }
-
-  .legal-page__illustration {
-    width: 7rem;
-    flex-shrink: 0;
-  }
-}
-
 .legal-page__meta {
   margin-top: var(--space-3);
   font-size: var(--text-caption);
