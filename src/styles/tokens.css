@@ -45,16 +45,22 @@
   --shadow-soft: var(--shadow-sm);
   --shadow-card: var(--shadow-sm);
 
-  --accent-solid: #4f46e5;
-  --accent-solid-hover: #4338ca;
-  --accent-text: #4f46e5;
-  --accent-text-strong: #4338ca;
+  /* Was a generic SaaS indigo (#4f46e5) — retinted to the same solid black
+     the landing page's own CTAs and hover states use (.landing-cta,
+     .landing-secondary-cta:hover), so the builder's chrome (buttons,
+     active nav states, focus rings, badges — all consumed through these
+     tokens, never a hardcoded color) reads as the same brand instead of
+     defaulting to indigo the moment you leave the marketing pages. */
+  --accent-solid: #111111;
+  --accent-solid-hover: #2d2d2d;
+  --accent-text: #111111;
+  --accent-text-strong: #000000;
   --accent-contrast: #ffffff;
-  --accent-border: rgba(79, 70, 229, 0.30);
-  --accent-soft: rgba(79, 70, 229, 0.08);
-  --accent-soft-strong: rgba(79, 70, 229, 0.14);
-  --accent-ring: rgba(79, 70, 229, 0.35);
-  --accent-glow: rgba(79, 70, 229, 0.20);
+  --accent-border: rgba(17, 17, 17, 0.30);
+  --accent-soft: rgba(17, 17, 17, 0.08);
+  --accent-soft-strong: rgba(17, 17, 17, 0.14);
+  --accent-ring: rgba(17, 17, 17, 0.35);
+  --accent-glow: rgba(17, 17, 17, 0.20);
 
   --app-bg: #fbfbfd;
   --app-bg-elevated: #ffffff;
