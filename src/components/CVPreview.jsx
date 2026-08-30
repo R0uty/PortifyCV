@@ -1056,7 +1056,7 @@ function CVPreview({
                     className={`flex items-start gap-2 text-sm ${supportingTextClasses}`}
                     data-export-card="true"
                   >
-                    <span className={`mt-1.5 h-1 w-1 shrink-0 rounded-full ${resolvedBulletColor}`} aria-hidden="true" />
+                    <span className={`mt-2 h-1 w-1 shrink-0 rounded-full ${resolvedBulletColor}`} aria-hidden="true" />
                     <span>
                       {item.name}
                       {item.issuer || item.year ? (
