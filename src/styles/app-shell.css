@@ -2185,6 +2185,48 @@ select.floating-field__control {
   width: 100%;
 }
 
+/* Sits directly above .site-footer, in normal flow (not sticky) — see the
+   comment on SiteLinksSection in App.jsx for why it's a separate element. */
+.site-links {
+  border-top: 1px solid var(--app-border);
+  background: var(--app-bg);
+}
+
+.site-links__inner {
+  max-width: 90rem;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-5);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3) var(--space-8);
+}
+
+.site-links__heading {
+  font-size: var(--text-body);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--app-text);
+}
+
+.site-links__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  font-size: 0.8rem;
+  color: var(--app-text-muted);
+}
+
+.site-links__link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.site-links__link:hover {
+  color: var(--app-text);
+}
+
 .site-footer {
   border-top: 1px solid var(--app-border);
   background: var(--app-bg);
