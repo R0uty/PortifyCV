@@ -1,7 +1,5 @@
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 
-import Logo from './Logo'
-
 function NavItem({ item, isActive, locale, isCollapsed, onNavigate }) {
   const Icon = item.icon
   const label = item.label[locale] ?? item.label.en
@@ -47,11 +45,6 @@ function NavRail({
       className={`nav-rail${isCollapsed ? ' nav-rail--collapsed' : ''}`}
       aria-label={isFinnish ? 'Osionavigointi' : 'Section navigation'}
     >
-      <div className="nav-rail__brand">
-        <Logo size={22} />
-        <span className="nav-rail__brand-text">PortifyCV</span>
-      </div>
-
       <button
         type="button"
         className="nav-rail__collapse-toggle"
