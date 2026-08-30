@@ -4,6 +4,21 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## E2E coverage for the 2026-08-15 features — 2026-08-30
+
+`todo.md` item 26. Added three Playwright specs (10 tests) for features that
+previously only had `check:reducers` state-transition coverage:
+
+- **`e2e/cover-letter.spec.js`** — generate a draft from the demo CV; the
+  Company field flows into it; copy-to-clipboard; `.txt` download; and a
+  mobile-viewport check that the bottom action bar opens the modal.
+- **`e2e/badge.spec.js`** — "Get the badge" opens from the template gallery
+  with the live preview + snippet; "Copy HTML" writes the snippet.
+- **`e2e/session-restore.spec.js`** — off by default; when on, the CV
+  survives a reload with a toast; turning it off clears the snapshot.
+
+Full e2e suite: 31 passed.
+
 > **Gap:** work between 1.0.0 and the 2026-08-29 pass — the 1.0.1/1.0.2/1.0.3
 > audits, the template visual pass, and `todo.md` items 1–38 — was never written
 > up here. It lives in `todo.md` (marked done, with notes) and in `docs/audit-*.md`.

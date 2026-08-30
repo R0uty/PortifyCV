@@ -673,19 +673,30 @@ rename pass.
 - [x] **26b. `check:feedback` wasn't wired into CI** — found and fixed
       during the same audit pass. `.github/workflows/ci.yml`'s `checks` job
       now runs it alongside `check:reducers`/`check:share`.
-- [ ] **26. Zero e2e coverage for the six features shipped in the
-      2026-08-15 session** (items 19-25: ATS keyword breakdown, cover
-      letter generator, badge, session restore, per-template
-      code-splitting, plus the landing-page privacy rewrite). Each has
-      `check:reducers` coverage for its state transitions and was manually
-      verified in a real browser at implementation time, but none has a
-      Playwright spec — unlike the core editor/export/landing/template/
-      responsive flows in `e2e/`, all of which do. Flagged as a real gap in
-      `audit-1.0.3.md`'s "Known limitations," not yet closed. Candidates
-      for new specs: cover letter generate/copy/download, badge
-      copy-to-clipboard, session-restore survives a reload, mobile Cover
-      letter button opens the modal (already verified once via DOM query
-      during the audit, but not locked in as a regression test).
+- [x] **26. Zero e2e coverage for the six features shipped in the
+      2026-08-15 session** (items 19-25). — done 2026-08-30. Added three
+      Playwright specs covering the four candidates this item named:
+      - `e2e/cover-letter.spec.js` (5 tests): generate a draft from the demo
+        CV and watch the export actions enable; the Company field flows into
+        the draft; copy-to-clipboard (with `clipboard-*` permission granted)
+        writes the letter and toasts; `.txt` download fires; and a
+        mobile-viewport test that the bottom action bar's "Cover letter"
+        button opens the modal (nav rail hidden below `lg`).
+      - `e2e/badge.spec.js` (2 tests): "Get the badge" opens the modal from
+        the template gallery (gallery closes behind it) with the live
+        preview link → `portifycv.app` and the snippet textarea; "Copy HTML"
+        writes the snippet and toasts.
+      - `e2e/session-restore.spec.js` (3 tests): off by default (nothing in
+        `sessionStorage`, no restore on reload); when enabled, the CV
+        survives a reload with a "Restored your last session" toast; turning
+        it back off clears the snapshot immediately. Toggle is clicked via
+        the visible `.toggle-switch` label (the `<input>` is 1×1 sr-only);
+        snapshot writes are awaited with `expect.poll` on `sessionStorage`,
+        not fixed sleeps.
+      ATS keyword breakdown, per-template code-splitting, and the landing
+      privacy copy were left uncovered — a build concern and static copy,
+      lower value for a browser test, and not in this item's candidate list.
+      Full suite: 31 passed. `npm run lint` clean.
 
 ## New templates — 2026-08-15
 
