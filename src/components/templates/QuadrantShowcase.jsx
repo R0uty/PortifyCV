@@ -46,9 +46,13 @@ function SectionHead({ icon, title }) {
   )
 }
 
-function Section({ id, placement, icon, title, children }) {
+function Section({ id, placement, icon, title, children, className = '' }) {
   return (
-    <section className="quadrant-showcase__section" data-export-section={id} data-export-placement={placement}>
+    <section
+      className={`quadrant-showcase__section${className ? ` ${className}` : ''}`}
+      data-export-section={id}
+      data-export-placement={placement}
+    >
       <SectionHead icon={icon} title={title} />
       {children}
     </section>
@@ -103,9 +107,13 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
   const narrativeKeys = orderedSections.filter((key) => primarySet.has(key) && key !== 'about' && sectionVisibility[key])
   const showAbout = sectionVisibility.about !== false
   // Same split for skills — it gets its own quadrant, the rest of the
-  // secondary sections share the "extras" quadrant.
-  const extrasKeys = orderedSections.filter((key) => secondarySet.has(key) && key !== 'skills' && sectionVisibility[key])
+  // secondary sections share the "extras" quadrant. Links always renders
+  // last within that quadrant, in its own bordered box, regardless of the
+  // user's section order — a fixed anchor point rather than something that
+  // drifts around depending on drag order.
+  const extrasKeys = orderedSections.filter((key) => secondarySet.has(key) && key !== 'skills' && key !== 'links' && sectionVisibility[key])
   const showSkills = sectionVisibility.skills !== false
+  const showLinks = sectionVisibility.links !== false
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
@@ -280,7 +288,7 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" icon="links" title={copy.links}>
+        <Section key={key} id="links" placement="side" icon="links" title={copy.links} className="quadrant-showcase__section--boxed">
           <div className="quadrant-showcase__link-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -382,6 +390,7 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
 
       <section className="quadrant-showcase__cell quadrant-showcase__cell--extras" data-export-secondary="true">
         {extrasKeys.map((key) => renderExtraSection(key))}
+        {showLinks ? renderExtraSection('links') : null}
       </section>
     </article>
   )

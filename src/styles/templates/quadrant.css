@@ -380,6 +380,19 @@
   color: var(--qd-cyan);
 }
 
+/* Links always renders last in the extras cell, in its own bordered box —
+   sets it apart from the plain divider-separated lists (Education,
+   Certificates, Languages) above it, and keeps it as a fixed, recognizable
+   anchor point regardless of section order. */
+.quadrant-showcase__section--boxed {
+  border: 1px solid var(--qd-border);
+  border-radius: 12px;
+  padding: 1.1rem 1.1rem 1.25rem;
+  /* Tinted against the (white) extras cell so the box itself reads clearly;
+     individual link-cards inside are --qd-card (white) again, one layer up. */
+  background: var(--qd-bg);
+}
+
 .quadrant-showcase__link-list {
   margin-top: 0.8rem;
   display: flex;
@@ -393,7 +406,7 @@
   gap: 0.55rem;
   border-radius: 10px;
   border: 1px solid var(--qd-border);
-  background: var(--qd-bg);
+  background: var(--qd-card);
   padding: 0.5rem 0.65rem;
 }
 
