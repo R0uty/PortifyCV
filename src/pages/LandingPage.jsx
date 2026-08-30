@@ -10,6 +10,12 @@ import { cvTemplates } from '../utils/cvTemplates'
 // to "Start building" isn't re-downloading it from scratch.
 const LandingTemplatesPreview = lazy(() => import('../components/LandingTemplatesPreview'))
 
+// Same lazy-loading reasoning as LandingTemplatesPreview above, but this one
+// is above the fold — the Suspense fallback below is a same-shaped
+// placeholder (not null) so there's no layout shift while the shared
+// CVPreview chunk downloads.
+const LandingHeroPreview = lazy(() => import('../components/LandingHeroPreview'))
+
 // Read off the template registry instead of a hardcoded number — this
 // count previously drifted out of sync with cvTemplates.js (copy said 13,
 // the registry had grown to 14) after a template was added without the
@@ -173,11 +179,9 @@ function LandingPage({
         </div>
 
         <div className="landing-preview">
-          <img
-            src="/PortifyCV2.jpg"
-            alt={copy.previewAlt}
-            className="landing-preview__image"
-          />
+          <Suspense fallback={<div className="landing-preview__placeholder" aria-hidden="true" />}>
+            <LandingHeroPreview locale={locale} label={copy.previewAlt} />
+          </Suspense>
         </div>
       </div>
 

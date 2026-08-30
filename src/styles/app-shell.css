@@ -2325,30 +2325,32 @@ select.floating-field__control {
 }
 
 /* A real picture of the result is the strongest conversion element for a
-   visual product. PortifyCV2.jpg is a pre-built marketing shot (logo,
-   wordmark, and a styled CV mockup), so it's just a plain image here — no
-   render-and-scale trick needed, unlike the template gallery thumbnails
-   (`.template-gallery__thumb-page`), which scale a live CVPreview instead. */
+   visual product — LandingHeroPreview renders an actual live CVPreview
+   (Minimalist, demo data) via the same TemplateThumbnail the gallery and
+   the marquee below use, scaled to fit .landing-preview__thumb's width. */
 .landing-preview {
   display: flex;
   justify-content: center;
 }
 
-.landing-preview__image {
+.landing-preview__thumb,
+.landing-preview__placeholder {
   width: 100%;
-  height: auto;
-  border-radius: var(--radius-sm);
+  max-width: 22rem;
   box-shadow: 0 32px 64px -32px rgba(0, 0, 0, 0.3);
   transform: rotate(-3deg);
+}
+
+.landing-preview__placeholder {
+  aspect-ratio: 1 / 1.16;
+  border-radius: var(--radius-sm);
+  background: var(--app-surface-strong);
+  border: 1px solid var(--app-border);
 }
 
 @media (max-width: 1023px) {
   .landing-grid {
     grid-template-columns: 1fr;
-  }
-
-  .landing-preview__image {
-    max-width: 32rem;
   }
 }
 
