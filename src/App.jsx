@@ -212,45 +212,6 @@ function HeaderNav({ locale = 'en', onNavigate = () => {} }) {
   )
 }
 
-// A real sitemap block, shown only on static pages, right above the
-// compact SiteFooter — deliberately its own non-sticky element rather than
-// added into SiteFooter itself. SiteFooter is `position: sticky; bottom: 0`
-// on every page (including the builder, where it's a load-bearing "always
-// visible" trust line) and making it taller would permanently eat reading
-// space while scrolling any content page. This block just sits in normal
-// flow at the true end of the page, so it costs nothing until you actually
-// scroll that far.
-function SiteLinksSection({ locale = 'en', onNavigate = () => {} }) {
-  const isFinnish = locale === 'fi'
-
-  return (
-    <nav className="site-links print:hidden" aria-label={isFinnish ? 'Sivukartta' : 'Sitemap'}>
-      <div className="site-links__inner">
-        <p className="site-links__heading">PortifyCV</p>
-        <div className="site-links__grid">
-          {GUIDE_LINKS.map((link) => (
-            <a
-              key={link.view}
-              href={VIEW_HEAD[link.view].path}
-              className="site-links__link"
-              onClick={(event) => handleInAppLinkClick(event, link.view, onNavigate)}
-            >
-              {isFinnish ? link.fi : link.en}
-            </a>
-          ))}
-          <a
-            href={VIEW_HEAD.privacy.path}
-            className="site-links__link"
-            onClick={(event) => handleInAppLinkClick(event, 'privacy', onNavigate)}
-          >
-            {isFinnish ? 'Tietosuojaseloste' : 'Privacy policy'}
-          </a>
-        </div>
-      </div>
-    </nav>
-  )
-}
-
 function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
   const isFinnish = locale === 'fi'
 
@@ -408,7 +369,6 @@ function App() {
           <PageComponent locale={locale} onGetStarted={goToBuilder} onNavigateToView={goToView} />
         </Suspense>
 
-        <SiteLinksSection locale={locale} onNavigate={goToView} />
         <SiteFooter locale={locale} onNavigate={goToView} />
         <ConsentBanner
           locale={locale}
