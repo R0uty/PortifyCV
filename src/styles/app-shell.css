@@ -2381,6 +2381,31 @@ select.floating-field__control {
   color: var(--app-text-muted);
 }
 
+.landing-templates-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-3);
+}
+
+.landing-templates-marquee__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  color: var(--app-text-muted);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.landing-templates-marquee__toggle:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
 /* Stays within the same column as the section title/subtitle above it —
    only the track inside scrolls, clipped at these same left/right edges. */
 .landing-templates-marquee {
@@ -2409,7 +2434,8 @@ select.floating-field__control {
   animation: landing-templates-scroll 40s linear infinite;
 }
 
-.landing-templates-marquee:hover .landing-templates-track {
+.landing-templates-marquee:hover .landing-templates-track,
+.landing-templates-track--paused {
   animation-play-state: paused;
 }
 
