@@ -132,7 +132,9 @@ function ATSScorePanel({
                   {missingKeywords.length > 0 ? (
                     <div>
                       <p className={`text-xs font-bold uppercase tracking-[0.14em] ${ui.textMuted}`}>
-                        {isFinnish ? 'Puuttuvat avainsanat' : 'Missing keywords'}
+                        {isFinnish
+                          ? 'Ei toistu yhteenvedossa tai kokemuksessa'
+                          : 'Not repeated in your summary or experience'}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {missingKeywords.slice(0, 12).map((keyword) => (
