@@ -167,8 +167,20 @@ function CoverLetterExamplesPage({ locale = 'en', onGetStarted = () => {}, onNav
   return (
     <section className="legal-page">
       <div className="legal-page__inner">
-        <p className="legal-page__kicker">{copy.kicker}</p>
-        <h1 className="legal-page__title">{copy.title}</h1>
+        <div className="legal-page__intro-row">
+          <img
+            src="/writing-quill.jpg"
+            alt=""
+            width="784"
+            height="1168"
+            loading="lazy"
+            className="legal-page__illustration"
+          />
+          <div>
+            <p className="legal-page__kicker">{copy.kicker}</p>
+            <h1 className="legal-page__title">{copy.title}</h1>
+          </div>
+        </div>
         <p>{copy.intro}</p>
 
         {copy.sections.map((section) => (
