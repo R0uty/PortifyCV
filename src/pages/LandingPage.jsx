@@ -114,7 +114,7 @@ function getLandingCopy(locale) {
       },
       {
         heading: 'Built for applicant tracking systems',
-        body: 'Toggle ATS mode for a layout parsers can actually read — no columns, icons, or tables to trip them up — plus keyword scoring that shows what your CV is missing.',
+        body: 'Toggle ATS mode for a layout that parsers can actually read — no columns, icons, or tables to trip them up — plus keyword scoring that shows what your CV is missing.',
       },
     ],
     templatesTitle: 'See the templates',
