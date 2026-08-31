@@ -9,12 +9,15 @@
 // sizes to its own content, so a long Experience list can grow taller than
 // a short Education list without clipping or forcing scroll:
 //   top-left     — identity (photo, name, title, contact) + About
-//   top-right    — Skills
+//   top-right    — Skills + Languages (Languages is pinned here rather than
+//                  bottom-right so that quadrant doesn't end up visibly
+//                  taller than the other three — see the extrasKeys comment
+//                  below)
 //   bottom-left  — Experience (+ Projects) — the one cell that drives PDF
 //                  pagination (data-export-placement="main"); the other
 //                  three are "side" and fall wherever they land, same
 //                  asymmetric handling every split-layout template uses.
-//   bottom-right — Education + Certificates + Languages + Links
+//   bottom-right — Education + Certificates + Links
 
 import { useMemo } from 'react'
 
@@ -110,10 +113,15 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
   // secondary sections share the "extras" quadrant. Links always renders
   // last within that quadrant, in its own bordered box, regardless of the
   // user's section order — a fixed anchor point rather than something that
-  // drifts around depending on drag order.
-  const extrasKeys = orderedSections.filter((key) => secondarySet.has(key) && key !== 'skills' && key !== 'links' && sectionVisibility[key])
+  // drifts around depending on drag order. Languages is pinned into the
+  // skills quadrant instead (a short list that pairs naturally with skills)
+  // so the extras quadrant — education/certificates/links — doesn't end up
+  // carrying 4 section types against the skills quadrant's 1, which read as
+  // badly lopsided once a CV had a few certificates and languages.
+  const extrasKeys = orderedSections.filter((key) => secondarySet.has(key) && key !== 'skills' && key !== 'links' && key !== 'languages' && sectionVisibility[key])
   const showSkills = sectionVisibility.skills !== false
   const showLinks = sectionVisibility.links !== false
+  const showLanguages = sectionVisibility.languages !== false
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
@@ -382,6 +390,7 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
             )}
           </>
         ) : null}
+        {showLanguages ? renderExtraSection('languages') : null}
       </section>
 
       <section className="quadrant-showcase__cell quadrant-showcase__cell--main" data-export-primary="true">
