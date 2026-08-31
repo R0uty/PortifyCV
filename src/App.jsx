@@ -175,14 +175,16 @@ function scrollToTop() {
 
 // Shown in the header nav on every static page (landing included) — the
 // builder's Toolbar is a different, task-focused header and deliberately
-// doesn't get these marketing/guide links.
+// doesn't get these marketing/guide links. `short*` is the pill's visible
+// text (kept tight so six links fit one capsule without dominating the
+// header); the full `en`/`fi` label still carries the link's accessible name.
 const GUIDE_LINKS = [
-  { view: 'freeTemplates', en: 'Free CV Templates', fi: 'CV-pohjat' },
-  { view: 'howToWrite', en: 'How to Write a CV', fi: 'Näin kirjoitat CV:n' },
-  { view: 'cvSkills', en: 'CV Skills Examples', fi: 'Taito-osion esimerkkejä' },
-  { view: 'atsGuide', en: 'ATS-Friendly CV Guide', fi: 'ATS-opas' },
-  { view: 'coverLetterExamples', en: 'Cover Letter Examples', fi: 'Saatekirje-esimerkkejä' },
-  { view: 'cvExamples', en: 'CV Examples by Field', fi: 'CV-esimerkkejä aloittain' },
+  { view: 'freeTemplates', en: 'Free CV Templates', fi: 'CV-pohjat', shortEn: 'Templates', shortFi: 'CV-pohjat' },
+  { view: 'howToWrite', en: 'How to Write a CV', fi: 'Näin kirjoitat CV:n', shortEn: 'How to Write', shortFi: 'Kirjoitusopas' },
+  { view: 'cvSkills', en: 'CV Skills Examples', fi: 'Taito-osion esimerkkejä', shortEn: 'Skills Examples', shortFi: 'Taitoesimerkit' },
+  { view: 'atsGuide', en: 'ATS-Friendly CV Guide', fi: 'ATS-opas', shortEn: 'ATS Guide', shortFi: 'ATS-opas' },
+  { view: 'coverLetterExamples', en: 'Cover Letter Examples', fi: 'Saatekirje-esimerkkejä', shortEn: 'Cover Letters', shortFi: 'Saatekirjeet' },
+  { view: 'cvExamples', en: 'CV Examples by Field', fi: 'CV-esimerkkejä aloittain', shortEn: 'Examples by Field', shortFi: 'CV-esimerkit' },
 ]
 
 function handleInAppLinkClick(event, view, onNavigate) {
@@ -193,21 +195,27 @@ function handleInAppLinkClick(event, view, onNavigate) {
   onNavigate(view)
 }
 
-function HeaderNav({ locale = 'en', onNavigate = () => {} }) {
+function HeaderNav({ locale = 'en', activeView, onNavigate = () => {} }) {
   const isFinnish = locale === 'fi'
 
   return (
     <nav className="project-header__nav" aria-label={isFinnish ? 'Oppaat' : 'Guides'}>
-      {GUIDE_LINKS.map((link) => (
-        <a
-          key={link.view}
-          href={VIEW_HEAD[link.view].path}
-          className="project-header__link"
-          onClick={(event) => handleInAppLinkClick(event, link.view, onNavigate)}
-        >
-          {isFinnish ? link.fi : link.en}
-        </a>
-      ))}
+      {GUIDE_LINKS.map((link) => {
+        const isActive = link.view === activeView
+
+        return (
+          <a
+            key={link.view}
+            href={VIEW_HEAD[link.view].path}
+            className="project-header__link"
+            aria-current={isActive ? 'page' : undefined}
+            title={isFinnish ? link.fi : link.en}
+            onClick={(event) => handleInAppLinkClick(event, link.view, onNavigate)}
+          >
+            {isFinnish ? link.shortFi : link.shortEn}
+          </a>
+        )
+      })}
     </nav>
   )
 }
@@ -350,7 +358,7 @@ function App() {
                   />
                 </a>
               )}
-              <HeaderNav locale={locale} onNavigate={goToView} />
+              <HeaderNav locale={locale} activeView={view} onNavigate={goToView} />
               <button
                 type="button"
                 className="action-button action-button--secondary flex items-center gap-1.5 border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"

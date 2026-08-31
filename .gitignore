@@ -34,3 +34,6 @@ graphify-out
 *.njsproj
 *.sln
 *.sw?
+
+# Brainstorming visual companion scratch files
+.superpowers/
