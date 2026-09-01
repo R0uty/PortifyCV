@@ -2499,8 +2499,8 @@ select.floating-field__control {
 }
 
 .landing-templates-card {
-  flex: 0 0 8.5rem;
-  width: 8.5rem;
+  flex: 0 0 12rem;
+  width: 12rem;
 }
 
 /* Wraps TemplateThumbnail's own `.template-gallery__thumb-frame` (border,
