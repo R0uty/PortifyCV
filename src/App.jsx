@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { Menu } from 'lucide-react'
 
 import LandingPage from './pages/LandingPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
@@ -6,6 +7,7 @@ import Toolbar from './components/Toolbar'
 import LocaleFlagIcon from './components/LocaleFlagIcon'
 import AdSenseLoader from './components/AdSenseLoader'
 import ConsentBanner from './components/ConsentBanner'
+import Modal from './components/Modal'
 import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
 import { safeStorageGet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
@@ -198,28 +200,73 @@ function handleInAppLinkClick(event, view, onNavigate) {
   onNavigate(view)
 }
 
+// Below 640px (the same breakpoint .project-header__content already switches
+// padding at) the pill wraps its 7 links across several rows inside its own
+// rounded background, which reads as clutter rather than navigation. Under
+// that width the pill is hidden by CSS and this hamburger button takes its
+// place, opening the same links as a plain vertical list in the shared Modal
+// component instead of building a bespoke drawer.
 function HeaderNav({ locale = 'en', activeView, onNavigate = () => {} }) {
   const isFinnish = locale === 'fi'
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+  const navLabel = isFinnish ? 'Oppaat' : 'Guides'
+
+  function handleMobileNavigate(event, view) {
+    handleInAppLinkClick(event, view, onNavigate)
+    setIsMobileNavOpen(false)
+  }
 
   return (
-    <nav className="project-header__nav" aria-label={isFinnish ? 'Oppaat' : 'Guides'}>
-      {GUIDE_LINKS.map((link) => {
-        const isActive = link.view === activeView
+    <>
+      <nav className="project-header__nav" aria-label={navLabel}>
+        {GUIDE_LINKS.map((link) => {
+          const isActive = link.view === activeView
 
-        return (
-          <a
-            key={link.view}
-            href={VIEW_HEAD[link.view].path}
-            className="project-header__link"
-            aria-current={isActive ? 'page' : undefined}
-            title={isFinnish ? link.fi : link.en}
-            onClick={(event) => handleInAppLinkClick(event, link.view, onNavigate)}
-          >
-            {isFinnish ? link.shortFi : link.shortEn}
-          </a>
-        )
-      })}
-    </nav>
+          return (
+            <a
+              key={link.view}
+              href={VIEW_HEAD[link.view].path}
+              className="project-header__link"
+              aria-current={isActive ? 'page' : undefined}
+              title={isFinnish ? link.fi : link.en}
+              onClick={(event) => handleInAppLinkClick(event, link.view, onNavigate)}
+            >
+              {isFinnish ? link.shortFi : link.shortEn}
+            </a>
+          )
+        })}
+      </nav>
+
+      <button
+        type="button"
+        className="project-header__nav-toggle"
+        onClick={() => setIsMobileNavOpen(true)}
+        aria-label={navLabel}
+        title={navLabel}
+      >
+        <Menu size={18} strokeWidth={2} aria-hidden="true" />
+      </button>
+
+      <Modal isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} title={navLabel}>
+        <nav className="project-header__mobile-nav" aria-label={navLabel}>
+          {GUIDE_LINKS.map((link) => {
+            const isActive = link.view === activeView
+
+            return (
+              <a
+                key={link.view}
+                href={VIEW_HEAD[link.view].path}
+                className="project-header__mobile-nav-link"
+                aria-current={isActive ? 'page' : undefined}
+                onClick={(event) => handleMobileNavigate(event, link.view)}
+              >
+                {isFinnish ? link.fi : link.en}
+              </a>
+            )
+          })}
+        </nav>
+      </Modal>
+    </>
   )
 }
 

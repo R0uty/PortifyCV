@@ -1265,6 +1265,60 @@ select.floating-field__control {
   width: auto;
 }
 
+/* Below 640px the pill's 7 links wrap across several rows inside their own
+   rounded background instead of staying a single row — the hamburger toggle
+   replaces it there and opens the same links as a plain list in a Modal
+   (see HeaderNav in App.jsx). Hidden by default so desktop never sees it. */
+.project-header__nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  color: var(--app-text);
+  cursor: pointer;
+}
+
+.project-header__nav-toggle:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .project-header__nav {
+    display: none;
+  }
+
+  .project-header__nav-toggle {
+    display: inline-flex;
+  }
+}
+
+.project-header__mobile-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.project-header__mobile-nav-link {
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--app-border);
+  color: var(--app-text);
+  font-size: var(--text-body);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.project-header__mobile-nav-link:last-child {
+  border-bottom: none;
+}
+
+.project-header__mobile-nav-link[aria-current='page'] {
+  color: var(--accent-solid);
+}
+
 /* ── App toolbar (builder top bar) ── */
 
 .app-toolbar {
