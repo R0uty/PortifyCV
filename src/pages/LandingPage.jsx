@@ -1,5 +1,7 @@
 import { lazy, Suspense } from 'react'
+import InternalNavLink from '../components/InternalNavLink'
 import { cvTemplates } from '../utils/cvTemplates'
+import { ROUTES } from '../utils/routes'
 
 // Lazy-loaded so the landing page's critical-path bundle doesn't carry
 // CVPreview + the template registry just for this one below-the-fold
@@ -27,6 +29,7 @@ function getLandingCopy(locale) {
     return {
       kicker: 'Ei kirjautumista. Ei tallennettua dataa.',
       startButton: 'Aloita rakentaminen',
+      howItWorksLink: 'Katso miten se toimii',
       title: 'Rakenna CV:si. Ota se mukaan. Siinä kaikki.',
       subtitle: 'Ei tiliä, ei kirjautumista, ei mitään tallennettua — kaikki tapahtuu tässä selaimessasi ja katoaa, kun suljet välilehden.',
       previewAlt: 'Esimerkki PortifyCV:llä rakennetusta CV:stä',
@@ -92,6 +95,7 @@ function getLandingCopy(locale) {
   return {
     kicker: 'No login. No data saved.',
     startButton: 'Start building',
+    howItWorksLink: 'See how it works',
     title: 'Build your CV. Take it. That’s it.',
     subtitle: 'No login, no account, nothing saved — everything happens right here in your browser, and disappears the moment you close the tab.',
     previewAlt: 'Example CV built with PortifyCV',
@@ -176,6 +180,13 @@ function LandingPage({
           <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
             {copy.startButton}
           </button>
+          <InternalNavLink
+            to={ROUTES.howToUse}
+            onNavigate={() => onNavigateToView('howToUse')}
+            className="landing-hero__link"
+          >
+            {copy.howItWorksLink}
+          </InternalNavLink>
         </div>
 
         <div className="landing-preview">

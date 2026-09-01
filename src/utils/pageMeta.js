@@ -56,6 +56,14 @@ export const VIEW_HEAD = {
     isArticle: true,
     datePublished: '2026-08-20',
   },
+  howToUse: {
+    title: 'How to Use the CV Builder - PortifyCV',
+    path: ROUTES.howToUse,
+    description:
+      'A walkthrough of PortifyCV itself: editing sections, ATS mode and scoring, the suggestions panel, switching templates, and exporting or sharing your CV.',
+    isArticle: true,
+    datePublished: '2026-09-01',
+  },
   coverLetterExamples: {
     title: 'Cover Letter Examples - PortifyCV',
     path: ROUTES.coverLetterExamples,

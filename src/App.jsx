@@ -18,6 +18,7 @@ const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
 const FreeCvTemplatesPage = lazy(() => import('./pages/FreeCvTemplatesPage'))
 const AtsFriendlyCvGuidePage = lazy(() => import('./pages/AtsFriendlyCvGuidePage'))
 const HowToWriteACvPage = lazy(() => import('./pages/HowToWriteACvPage'))
+const HowToUseTheBuilderPage = lazy(() => import('./pages/HowToUseTheBuilderPage'))
 const CoverLetterExamplesPage = lazy(() => import('./pages/CoverLetterExamplesPage'))
 const CvSkillsExamplesPage = lazy(() => import('./pages/CvSkillsExamplesPage'))
 const CvExamplesHubPage = lazy(() => import('./pages/CvExamplesHubPage'))
@@ -62,6 +63,7 @@ const STATIC_PAGES = {
   freeTemplates: FreeCvTemplatesPage,
   atsGuide: AtsFriendlyCvGuidePage,
   howToWrite: HowToWriteACvPage,
+  howToUse: HowToUseTheBuilderPage,
   coverLetterExamples: CoverLetterExamplesPage,
   cvSkills: CvSkillsExamplesPage,
   cvExamples: CvExamplesHubPage,
@@ -179,6 +181,7 @@ function scrollToTop() {
 // text (kept tight so six links fit one capsule without dominating the
 // header); the full `en`/`fi` label still carries the link's accessible name.
 const GUIDE_LINKS = [
+  { view: 'howToUse', en: 'How to Use the Builder', fi: 'Käyttöopas', shortEn: 'How to Use', shortFi: 'Käyttöopas' },
   { view: 'freeTemplates', en: 'Free CV Templates', fi: 'CV-pohjat', shortEn: 'Templates', shortFi: 'CV-pohjat' },
   { view: 'howToWrite', en: 'How to Write a CV', fi: 'Näin kirjoitat CV:n', shortEn: 'How to Write', shortFi: 'Kirjoitusopas' },
   { view: 'cvSkills', en: 'CV Skills Examples', fi: 'Taito-osion esimerkkejä', shortEn: 'Skills Examples', shortFi: 'Taitoesimerkit' },

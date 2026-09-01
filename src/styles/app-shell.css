@@ -2292,6 +2292,24 @@ select.floating-field__control {
   color: #111111;
 }
 
+/* Lightweight text link next to the hero's primary CTA — the hero is
+   left-aligned, so .landing-secondary-cta's centered block button (built
+   for the templates section below) doesn't fit here. */
+.landing-hero__link {
+  display: inline-block;
+  margin-top: var(--space-8);
+  margin-left: var(--space-5);
+  color: var(--app-text);
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.landing-hero__link:hover {
+  color: #111111;
+}
+
 /* Outline variant of .landing-cta — used where a section already has a
    primary action (e.g. "Start building" in the hero) and this is a
    secondary link to a full listing page, like the templates section's

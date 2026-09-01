@@ -9,6 +9,7 @@ export const ROUTES = {
   freeTemplates: '/free-cv-templates',
   atsGuide: '/ats-friendly-cv-guide',
   howToWrite: '/how-to-write-a-cv',
+  howToUse: '/how-to-use-the-cv-builder',
   coverLetterExamples: '/cover-letter-examples',
   cvSkills: '/cv-skills-examples',
   cvExamples: '/cv-examples',
