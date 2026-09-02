@@ -210,6 +210,25 @@ const templateMap = {
       chips: ['Summary', 'Experience'],
     },
   },
+  classic: {
+    id: 'classic',
+    label: 'Classic',
+    description: 'Calm left-aligned letterhead — a serif name over a single rule, ink on ivory, no color, no sidebar. Roomy whitespace and hairline dividers make it an easy, universally safe read.',
+    variant: 'classic',
+    layout: 'stacked',
+    primarySections: ['about', 'experience', 'education', 'skills', 'languages', 'certificates', 'links'],
+    secondarySections: [],
+    summaryBadgeLabel: 'Profile',
+    thumbnail: {
+      accentClassName: 'bg-stone-800',
+      surfaceClassName: 'bg-stone-50',
+      primaryRatioClassName: 'grid-cols-1',
+      titleWidthClassName: 'w-28',
+      subtitleWidthClassName: 'w-20',
+      blockWidths: ['w-full', 'w-full', 'w-11/12'],
+      chips: ['Summary', 'Experience'],
+    },
+  },
   navyProfessional: {
     id: 'navyProfessional',
     label: 'Navy Professional',
@@ -353,6 +372,12 @@ const templateLocalization = {
     classicProfessional: {
       label: 'Klassinen ammattilainen',
       description: 'Perinteinen yksipalstainen asettelu keskitetyllä nimellä ja ohuilla erottimilla — universaalisti turvallinen valinta mille tahansa alalle.',
+      summaryBadgeLabel: 'Profiili',
+      chips: ['Yhteenveto', 'Kokemus'],
+    },
+    classic: {
+      label: 'Klassinen',
+      description: 'Rauhallinen vasemmalle tasattu kirjelomake — seriffinimi yhden viivan yllä, mustetta norsunluulla, ei väriä, ei sivupalkkia. Väljä tyhjä tila ja hiusviivaerottimet tekevät siitä helpon, universaalisti turvallisen luettavan.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Yhteenveto', 'Kokemus'],
     },

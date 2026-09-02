@@ -1,0 +1,311 @@
+/* ==========================================================================
+   Classic Showcase — hand-authored component styles for the Classic
+   template's non-ATS mode. Scoped entirely under `.classic-showcase`. Ink on
+   ivory: near-black typography, thin warm-gray rules, no accent color, no
+   sidebar, no photo, no decorative cards. A left-aligned serif name (the one
+   place this template uses a system serif font, rather than the app's
+   self-hosted Inter — see classic.js's headerTitle comment) over a single
+   full-width rule, then generous whitespace and hairline dividers.
+   ========================================================================== */
+
+.classic-showcase {
+  --cl-text: #1a1a1a;
+  --cl-muted: #57534e;
+  --cl-border: #d8d2c7;
+  /* Deliberately not pure #ffffff — same blank-canvas PDF export guard used
+     by the Classic Professional / Creative / Modern Showcases (see those
+     files' CSS): an all-white page with only thin 1px dividers for structure
+     risks a capture sampling point landing on pure white and, in the
+     pathological case, contributing to a false "blank canvas" read. */
+  --cl-bg: #fbfaf7;
+  --cl-serif: Georgia, 'Times New Roman', Times, serif;
+
+  position: relative;
+  background: var(--cl-bg);
+  color: var(--cl-text);
+  font-family: var(--font-sans);
+  border-radius: 4px;
+  box-shadow: 0 24px 60px -32px rgba(28, 25, 23, 0.15);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.classic-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── Header: flush left ── */
+
+.classic-showcase__header {
+  padding: 3.25rem 3.25rem 1.5rem;
+  text-align: left;
+}
+
+.classic-showcase__kicker {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--cl-muted);
+}
+
+.classic-showcase__name {
+  margin-top: 0.5rem;
+  font-family: var(--cl-serif);
+  font-size: 2.85rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: var(--cv-heading-color, var(--cl-text));
+}
+
+.classic-showcase__role {
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--cl-muted);
+}
+
+.classic-showcase__contact {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.75rem;
+}
+
+.classic-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--cl-muted);
+  white-space: nowrap;
+}
+
+.classic-showcase__contact-icon {
+  display: inline-flex;
+  color: var(--cl-text);
+}
+
+.classic-showcase__header-divider {
+  height: 1px;
+  margin: 0 3.25rem;
+  background: var(--cl-border);
+}
+
+/* ── Body: one calm column, sections stacked with hairline dividers ── */
+
+.classic-showcase__body {
+  padding: 2rem 3.25rem 3.25rem;
+}
+
+.classic-showcase__section + .classic-showcase__section {
+  margin-top: 2rem;
+}
+
+.classic-showcase__heading {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--cl-border);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--cv-heading-color, var(--cl-text));
+}
+
+.classic-showcase__empty {
+  margin-top: 0.85rem;
+  font-size: 0.8rem;
+  color: var(--cl-muted);
+}
+
+/* ── Professional Summary ── */
+
+.classic-showcase__summary {
+  margin-top: 0.9rem;
+  font-size: 0.86rem;
+  line-height: 1.85;
+  color: var(--cl-text);
+  white-space: pre-line;
+}
+
+/* ── Experience / Education entries ── */
+
+.classic-showcase__entry-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.classic-showcase__entry-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+}
+
+.classic-showcase__entry-role {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--cl-text);
+}
+
+.classic-showcase__entry-dates {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cl-muted);
+  white-space: nowrap;
+}
+
+.classic-showcase__entry-meta {
+  margin-top: 0.15rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--cl-muted);
+}
+
+.classic-showcase__bullets {
+  margin-top: 0.55rem;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.classic-showcase__bullets li {
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--cl-text);
+}
+
+.classic-showcase__bullets li::marker {
+  color: var(--cl-muted);
+}
+
+/* ── Skills ── */
+
+.classic-showcase__tag-row {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.classic-showcase__tag {
+  border-radius: 4px;
+  border: 1px solid var(--cl-border);
+  padding: 0.3rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--cl-text);
+  background: transparent;
+}
+
+/* ── Languages: inline row separated by a thin pipe ── */
+
+.classic-showcase__language-row {
+  margin-top: 1rem;
+  font-size: 0.82rem;
+  color: var(--cl-text);
+}
+
+.classic-showcase__language-item {
+  white-space: nowrap;
+}
+
+.classic-showcase__language-sep {
+  display: inline-block;
+  margin: 0 0.75rem;
+  color: var(--cl-border);
+}
+
+/* ── Certifications: plain stacked lines ── */
+
+.classic-showcase__cert-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.classic-showcase__cert-item {
+  font-size: 0.82rem;
+  color: var(--cl-text);
+}
+
+/* ── Links: plain stacked lines with a small leading icon ── */
+
+.classic-showcase__link-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.classic-showcase__link-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--cl-text);
+}
+
+.classic-showcase__link-icon {
+  position: relative;
+  top: 0.15rem;
+  display: inline-flex;
+  color: var(--cl-muted);
+}
+
+.classic-showcase__link-label {
+  font-weight: 600;
+}
+
+.classic-showcase__link-value {
+  color: var(--cl-muted);
+  word-break: break-word;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 560px) {
+  .classic-showcase__header {
+    padding: 2rem 1.25rem 1.25rem;
+  }
+
+  .classic-showcase__header-divider {
+    margin: 0 1.25rem;
+  }
+
+  .classic-showcase__body {
+    padding: 1.25rem 1.25rem 1.75rem;
+  }
+
+  .classic-showcase__name {
+    font-size: 2.1rem;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .classic-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .classic-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+}

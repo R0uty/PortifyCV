@@ -38,6 +38,7 @@ const GraduateShowcase = lazy(() => import('./templates/GraduateShowcase'))
 const CompactShowcase = lazy(() => import('./templates/CompactShowcase'))
 const PortfolioShowcase = lazy(() => import('./templates/PortfolioShowcase'))
 const ClassicProfessionalShowcase = lazy(() => import('./templates/ClassicProfessionalShowcase'))
+const ClassicShowcase = lazy(() => import('./templates/ClassicShowcase'))
 const NavyProfessionalShowcase = lazy(() => import('./templates/NavyProfessionalShowcase'))
 const ModernOrangeShowcase = lazy(() => import('./templates/ModernOrangeShowcase'))
 const ColorfulCompactShowcase = lazy(() => import('./templates/ColorfulCompactShowcase'))
@@ -238,6 +239,27 @@ function CVPreview({
     return (
       <Suspense fallback={null}>
         <ClassicProfessionalShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+          headingColor={headingColor}
+        />
+      </Suspense>
+    )
+  }
+
+  // ── Classic Showcase delegation ──────────────────────────────────────
+  // A calm left-aligned letterhead visual — single column, ink on ivory,
+  // no color. ATS mode bypasses it entirely and falls back to the shared
+  // flat renderer (classic.js), which is monochrome by design so the two
+  // modes look nearly identical anyway (the fallback swaps the serif name
+  // for the app's Inter).
+  if (variant === 'classic' && !atsFriendlyMode) {
+    return (
+      <Suspense fallback={null}>
+        <ClassicShowcase
           formData={formData}
           locale={locale}
           previewRef={previewRef}

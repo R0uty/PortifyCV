@@ -13,6 +13,7 @@ import compact from './compact'
 import portfolio from './portfolio'
 import techExec from './techExec'
 import classicProfessional from './classicProfessional'
+import classic from './classic'
 import navyProfessional from './navyProfessional'
 import modernOrange from './modernOrange'
 import colorfulCompact from './colorfulCompact'
@@ -31,6 +32,7 @@ const templates = {
   portfolio,
   techExec,
   classicProfessional,
+  classic,
   navyProfessional,
   modernOrange,
   colorfulCompact,
@@ -48,7 +50,7 @@ let showcasesPrefetched = false
 /**
  * Warms every bespoke *Showcase.jsx chunk (CVPreview.jsx lazy-loads them
  * per template) so switching templates or opening the gallery — which
- * renders all 14 at once as thumbnails — doesn't pay for 12 dynamic imports
+ * renders all of them at once as thumbnails — doesn't pay for a burst of dynamic imports
  * at that moment. Safe to call speculatively: it only downloads and
  * evaluates the modules, same pattern as prefetchPdfExportAssets in
  * exporters.js.
@@ -72,6 +74,7 @@ export function prefetchTemplateShowcases() {
   import('./CompactShowcase')
   import('./PortfolioShowcase')
   import('./ClassicProfessionalShowcase')
+  import('./ClassicShowcase')
   import('./NavyProfessionalShowcase')
   import('./ModernOrangeShowcase')
   import('./ColorfulCompactShowcase')
