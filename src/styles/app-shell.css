@@ -2395,6 +2395,10 @@ select.floating-field__control {
 .landing-preview {
   display: flex;
   justify-content: center;
+  /* The back thumbs are rotated ~11-14deg, so their corners poke past the
+     stack box; on a narrow phone that widened the whole page. Clip only the
+     x-axis — the downward drop shadow still needs to spill vertically. */
+  overflow-x: clip;
 }
 
 .landing-preview__stack {
@@ -2431,6 +2435,22 @@ select.floating-field__control {
   top: 56%;
   transform: translate(-50%, -50%) rotate(11deg);
   opacity: 0.96;
+}
+
+/* Pull the fan in on phone-width screens so the clip above has almost
+   nothing to trim and the side thumbs read as whole cards. */
+@media (max-width: 479px) {
+  .landing-preview__stack {
+    max-width: 22rem;
+  }
+
+  .landing-preview__thumb--back-left {
+    left: 30%;
+  }
+
+  .landing-preview__thumb--back-right {
+    left: 70%;
+  }
 }
 
 .landing-preview__placeholder {
