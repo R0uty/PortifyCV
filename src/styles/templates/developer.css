@@ -715,7 +715,9 @@
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  background: linear-gradient(135deg, var(--dev-orange), var(--dev-pink));
+  /* Matches DeveloperShowcase.jsx's SECTION_ICON_GRADIENT and this file's
+     own .dev-showcase__photo-ring — was orange/pink, an unrelated pair. */
+  background: linear-gradient(135deg, var(--dev-teal), var(--dev-blue), var(--dev-purple));
   color: #ffffff;
 }
 

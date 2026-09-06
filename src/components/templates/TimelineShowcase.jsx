@@ -64,7 +64,7 @@ function SectionHead({ icon, title }) {
       <span className="timeline-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
-      <p className="timeline-showcase__section-title">{title}</p>
+      <h2 className="timeline-showcase__section-title">{title}</h2>
     </div>
   )
 }
@@ -99,6 +99,7 @@ export default function TimelineShowcase({
   showcaseConfig = {},
   accentColor = TIMELINE_DEFAULT_ACCENT_COLOR,
   atsFriendlyMode = false,
+  headingColor = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -382,7 +383,10 @@ export default function TimelineShowcase({
       // than being hardcoded to "designer". Getting this wrong hangs the
       // export: the handler polls forever for a class that never appears.
       className={`timeline-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'}`}
-      style={{ '--tl-accent': effectiveAccentColor }}
+      style={{
+        '--tl-accent': effectiveAccentColor,
+        ...(headingColor ? { '--cv-heading-color': headingColor } : null),
+      }}
     >
       <header data-export-header="true" className="timeline-showcase__header">
         {showPhoto ? (

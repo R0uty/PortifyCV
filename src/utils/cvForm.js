@@ -721,6 +721,11 @@ export function getLinkFields(locale = 'en') {
 
 export const linkFields = getLinkFields('en')
 
+// The handful of platforms most CVs actually use — shown by default in the
+// Links section; the other ~11 (Behance, ResearchGate, Hack The Box, …)
+// stay behind a "show more" toggle unless they already hold a value.
+export const PRIMARY_LINK_KEYS = ['github', 'linkedin', 'portfolio', 'website']
+
 function createStorageError(error) {
   return error instanceof Error ? error : new Error('Storage access failed.')
 }

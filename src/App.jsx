@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { Menu } from 'lucide-react'
 
 import LandingPage from './pages/LandingPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
@@ -6,17 +7,20 @@ import Toolbar from './components/Toolbar'
 import LocaleFlagIcon from './components/LocaleFlagIcon'
 import AdSenseLoader from './components/AdSenseLoader'
 import ConsentBanner from './components/ConsentBanner'
+import Modal from './components/Modal'
 import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
 import { safeStorageGet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
 import { getAdConsent, setAdConsent } from './utils/consent'
 import { ROUTES } from './utils/routes'
 import { VIEW_HEAD, SITE_ORIGIN, buildArticleSchema } from './utils/pageMeta'
+import { APP_VERSION } from './utils/appVersion'
 
 const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
 const FreeCvTemplatesPage = lazy(() => import('./pages/FreeCvTemplatesPage'))
 const AtsFriendlyCvGuidePage = lazy(() => import('./pages/AtsFriendlyCvGuidePage'))
 const HowToWriteACvPage = lazy(() => import('./pages/HowToWriteACvPage'))
+const HowToUseTheBuilderPage = lazy(() => import('./pages/HowToUseTheBuilderPage'))
 const CoverLetterExamplesPage = lazy(() => import('./pages/CoverLetterExamplesPage'))
 const CvSkillsExamplesPage = lazy(() => import('./pages/CvSkillsExamplesPage'))
 const CvExamplesHubPage = lazy(() => import('./pages/CvExamplesHubPage'))
@@ -61,6 +65,7 @@ const STATIC_PAGES = {
   freeTemplates: FreeCvTemplatesPage,
   atsGuide: AtsFriendlyCvGuidePage,
   howToWrite: HowToWriteACvPage,
+  howToUse: HowToUseTheBuilderPage,
   coverLetterExamples: CoverLetterExamplesPage,
   cvSkills: CvSkillsExamplesPage,
   cvExamples: CvExamplesHubPage,
@@ -172,41 +177,118 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
+// Shown in the header nav on every static page (landing included) — the
+// builder's Toolbar is a different, task-focused header and deliberately
+// doesn't get these marketing/guide links. `short*` is the pill's visible
+// text (kept tight so six links fit one capsule without dominating the
+// header); the full `en`/`fi` label still carries the link's accessible name.
+const GUIDE_LINKS = [
+  { view: 'howToUse', en: 'How to Use the Builder', fi: 'Käyttöopas', shortEn: 'How to Use', shortFi: 'Käyttöopas' },
+  { view: 'freeTemplates', en: 'Free CV Templates', fi: 'CV-pohjat', shortEn: 'Templates', shortFi: 'CV-pohjat' },
+  { view: 'howToWrite', en: 'How to Write a CV', fi: 'Näin kirjoitat CV:n', shortEn: 'How to Write', shortFi: 'Kirjoitusopas' },
+  { view: 'cvSkills', en: 'CV Skills Examples', fi: 'Taito-osion esimerkkejä', shortEn: 'Skills Examples', shortFi: 'Taitoesimerkit' },
+  { view: 'atsGuide', en: 'ATS-Friendly CV Guide', fi: 'ATS-opas', shortEn: 'ATS Guide', shortFi: 'ATS-opas' },
+  { view: 'coverLetterExamples', en: 'Cover Letter Examples', fi: 'Saatekirje-esimerkkejä', shortEn: 'Cover Letters', shortFi: 'Saatekirjeet' },
+  { view: 'cvExamples', en: 'CV Examples by Field', fi: 'CV-esimerkkejä aloittain', shortEn: 'Examples by Field', shortFi: 'CV-esimerkit' },
+]
+
+function handleInAppLinkClick(event, view, onNavigate) {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return
+  }
+  event.preventDefault()
+  onNavigate(view)
+}
+
+// Below 640px (the same breakpoint .project-header__content already switches
+// padding at) the pill wraps its 7 links across several rows inside its own
+// rounded background, which reads as clutter rather than navigation. Under
+// that width the pill is hidden by CSS and this hamburger button takes its
+// place, opening the same links as a plain vertical list in the shared Modal
+// component instead of building a bespoke drawer.
+function HeaderNav({ locale = 'en', activeView, onNavigate = () => {} }) {
   const isFinnish = locale === 'fi'
-  const guideLinks = [
-    { view: 'freeTemplates', label: isFinnish ? 'CV-pohjat' : 'Free CV Templates' },
-    { view: 'howToWrite', label: isFinnish ? 'Näin kirjoitat CV:n' : 'How to Write a CV' },
-    { view: 'cvSkills', label: isFinnish ? 'Taito-osion esimerkkejä' : 'CV Skills Examples' },
-    { view: 'atsGuide', label: isFinnish ? 'ATS-opas' : 'ATS-Friendly CV Guide' },
-    { view: 'coverLetterExamples', label: isFinnish ? 'Saatekirje-esimerkkejä' : 'Cover Letter Examples' },
-    { view: 'cvExamples', label: isFinnish ? 'CV-esimerkkejä aloittain' : 'CV Examples by Field' },
-    { view: 'privacy', label: isFinnish ? 'Tietosuojaseloste' : 'Privacy policy' },
-  ]
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
+  const navLabel = isFinnish ? 'Oppaat' : 'Guides'
+
+  function handleMobileNavigate(event, view) {
+    handleInAppLinkClick(event, view, onNavigate)
+    setIsMobileNavOpen(false)
+  }
 
   return (
-    <footer className="site-footer">
-      <div className="site-footer__inner">
-        <span>
-          {isFinnish ? 'Ei kirjautumista. Ei tallennettua dataa.' : 'No login. No data saved.'}
-        </span>
-        <nav className="site-footer__links" aria-label={isFinnish ? 'Oppaat' : 'Guides'}>
-          {guideLinks.map((link) => (
+    <>
+      <nav className="project-header__nav" aria-label={navLabel}>
+        {GUIDE_LINKS.map((link) => {
+          const isActive = link.view === activeView
+
+          return (
             <a
               key={link.view}
               href={VIEW_HEAD[link.view].path}
-              className="site-footer__link"
-              onClick={(event) => {
-                if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-                  return
-                }
-                event.preventDefault()
-                onNavigate(link.view)
-              }}
+              className="project-header__link"
+              aria-current={isActive ? 'page' : undefined}
+              title={isFinnish ? link.fi : link.en}
+              onClick={(event) => handleInAppLinkClick(event, link.view, onNavigate)}
             >
-              {link.label}
+              {isFinnish ? link.shortFi : link.shortEn}
             </a>
-          ))}
+          )
+        })}
+      </nav>
+
+      <button
+        type="button"
+        className="project-header__nav-toggle"
+        onClick={() => setIsMobileNavOpen(true)}
+        aria-label={navLabel}
+        title={navLabel}
+      >
+        <Menu size={18} strokeWidth={2} aria-hidden="true" />
+      </button>
+
+      <Modal isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} title={navLabel}>
+        <nav className="project-header__mobile-nav" aria-label={navLabel}>
+          {GUIDE_LINKS.map((link) => {
+            const isActive = link.view === activeView
+
+            return (
+              <a
+                key={link.view}
+                href={VIEW_HEAD[link.view].path}
+                className="project-header__mobile-nav-link"
+                aria-current={isActive ? 'page' : undefined}
+                onClick={(event) => handleMobileNavigate(event, link.view)}
+              >
+                {isFinnish ? link.fi : link.en}
+              </a>
+            )
+          })}
+        </nav>
+      </Modal>
+    </>
+  )
+}
+
+function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
+  const isFinnish = locale === 'fi'
+
+  return (
+    <footer className="site-footer print:hidden">
+      <div className="site-footer__inner">
+        <span>
+          {isFinnish ? 'Ei kirjautumista. Ei tallennettua dataa.' : 'No login. No data saved.'}
+          {' '}
+          <span className="site-footer__version">{APP_VERSION}</span>
+        </span>
+        <nav className="site-footer__links" aria-label={isFinnish ? 'Oikeudellinen' : 'Legal'}>
+          <a
+            href={VIEW_HEAD.privacy.path}
+            className="site-footer__link"
+            onClick={(event) => handleInAppLinkClick(event, 'privacy', onNavigate)}
+          >
+            {isFinnish ? 'Tietosuojaseloste' : 'Privacy policy'}
+          </a>
         </nav>
       </div>
     </footer>
@@ -326,13 +408,16 @@ function App() {
                   />
                 </a>
               )}
+              <HeaderNav locale={locale} activeView={view} onNavigate={goToView} />
               <button
                 type="button"
                 className="action-button action-button--secondary flex items-center gap-1.5 border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
                 onClick={handleToggleLocale}
+                aria-label={locale === 'fi' ? 'Vaihda kieli' : 'Switch language'}
+                title={locale === 'fi' ? 'Vaihda kieli' : 'Switch language'}
               >
-                <LocaleFlagIcon locale={locale === 'fi' ? 'en' : 'fi'} />
-                {locale === 'fi' ? 'EN' : 'FI'}
+                <LocaleFlagIcon locale={locale} />
+                {locale === 'fi' ? 'FI' : 'EN'}
               </button>
             </div>
           </div>
@@ -355,7 +440,7 @@ function App() {
   }
 
   return (
-    <div className="one-pager">
+    <div className="one-pager one-pager--builder">
       {headerProps && (
         <Toolbar
           locale={headerProps.locale}
@@ -369,9 +454,13 @@ function App() {
           selectedTemplateId={headerProps.selectedTemplateId}
           onSelectTemplate={headerProps.onSelectTemplate}
           templateSelectRef={headerProps.templateSelectRef}
+          formDataRef={headerProps.formDataRef}
+          cvFontId={headerProps.cvFontId}
+          onCvFontChange={headerProps.onCvFontChange}
+          cvHeadingColor={headerProps.cvHeadingColor}
+          onCvHeadingColorChange={headerProps.onCvHeadingColorChange}
           searchQuery={headerProps.searchQuery}
           onSearchChange={headerProps.onSearchChange}
-          onPrint={headerProps.onPrint}
           isFullscreenPreview={headerProps.isFullscreenPreview}
           onToggleFullscreenPreview={headerProps.onToggleFullscreenPreview}
           isResponsivePreview={headerProps.isResponsivePreview}

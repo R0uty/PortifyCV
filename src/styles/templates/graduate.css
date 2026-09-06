@@ -74,7 +74,7 @@
   font-weight: 800;
   letter-spacing: 0;
   line-height: 1.05;
-  color: var(--gr-indigo);
+  color: var(--cv-heading-color, var(--gr-indigo));
 }
 
 .graduate-showcase__role {
@@ -194,7 +194,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: var(--gr-indigo);
+  color: var(--cv-heading-color, var(--gr-indigo));
 }
 
 .graduate-showcase__empty {

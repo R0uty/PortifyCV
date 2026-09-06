@@ -2,21 +2,31 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import {
   Award,
   Briefcase,
-  Download,
+  BookOpen,
+  Building2,
+  FileSearch,
   FileText,
   FolderKanban,
+  GitBranch,
   GraduationCap,
+  HandHeart,
   Heart,
+  IdCard,
   Languages as LanguagesIcon,
   Link2,
   Mail,
+  Mic,
   Minus,
   Plus,
+  Quote,
   Settings as SettingsIcon,
   Sparkles,
   StretchHorizontal,
   StretchVertical,
+  Target,
+  Trophy,
   User,
+  Users,
   X,
   LayoutTemplate,
 } from 'lucide-react'
@@ -36,6 +46,7 @@ import ToastStack from '../components/ToastStack'
 import {
   getUiTheme,
   UI_LOCALE_STORAGE_KEY,
+  UI_NAV_RAIL_COLLAPSED_STORAGE_KEY,
 } from '../utils/designSystem'
 import {
   CV_ONBOARDING_SEEN_STORAGE_KEY,
@@ -57,6 +68,8 @@ import {
   getCvTemplate,
 } from '../utils/cvTemplates'
 import { prefetchTemplateShowcases } from '../components/templates'
+import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
+import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
 import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
 import {
@@ -77,33 +90,55 @@ import { generateCoverLetterDraft } from '../utils/coverLetter'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
+const RESET_CONFIRM_WINDOW_MS = 4000
 
 // Order must match the section cards' actual JSX order in CVForm.jsx (personal,
-// summary, skills, experience, education, certificates, projects, languages,
-// interests, links) — this list is a separate hardcoded array, not derived from
-// that layout, so it drifts silently if one changes without the other.
+// summary, skills, experience, education, coreStrengths, certificates,
+// projects, languages, interests, achievements, openSource, publications,
+// links, leadership, memberships, speaking, volunteering, internships,
+// caseStudies, testimonials) — this list is a separate hardcoded array, not
+// derived from that layout, so it drifts silently if one changes without the
+// other.
 // sectionKey maps each nav item to the CV_SECTION_ORDER_KEYS entry that
 // gates whether CVForm actually renders that section for the selected
 // template — null means always rendered (not template-gated). Keep this in
 // sync with the section-key checks CVForm.jsx wraps each PanelSection in.
+// Every template-gated section CVForm can render needs an entry here — a
+// section with no nav item (as achievements/openSource/publications/etc once
+// had) is reachable only by scrolling past everything else with no shortcut
+// and no search hit, on templates where it's a primary section.
 const NAV_SECTIONS = [
   { id: 'personal', anchor: 'section-personal', icon: User, kind: 'scroll', sectionKey: null, label: { en: 'Personal Information', fi: 'Henkilötiedot' } },
   { id: 'summary', anchor: 'section-summary', icon: FileText, kind: 'scroll', sectionKey: 'about', label: { en: 'Summary', fi: 'Yhteenveto' } },
   { id: 'skills', anchor: 'section-skills', icon: Sparkles, kind: 'scroll', sectionKey: 'skills', label: { en: 'Skills', fi: 'Taidot' } },
   { id: 'experience', anchor: 'section-experience', icon: Briefcase, kind: 'scroll', sectionKey: 'experience', label: { en: 'Experience', fi: 'Kokemus' } },
   { id: 'education', anchor: 'section-education', icon: GraduationCap, kind: 'scroll', sectionKey: 'education', label: { en: 'Education', fi: 'Koulutus' } },
+  { id: 'coreStrengths', anchor: 'section-coreStrengths', icon: Target, kind: 'scroll', sectionKey: 'coreStrengths', label: { en: 'Core Strengths', fi: 'Vahvuudet' } },
   { id: 'certificates', anchor: 'section-certificates', icon: Award, kind: 'scroll', sectionKey: 'certificates', label: { en: 'Certificates', fi: 'Sertifikaatit' } },
   { id: 'projects', anchor: 'section-projects', icon: FolderKanban, kind: 'scroll', sectionKey: 'projects', label: { en: 'Projects', fi: 'Projektit' } },
   { id: 'languages', anchor: 'section-languages', icon: LanguagesIcon, kind: 'scroll', sectionKey: 'languages', label: { en: 'Languages', fi: 'Kielet' } },
   { id: 'interests', anchor: 'section-interests', icon: Heart, kind: 'scroll', sectionKey: 'interests', label: { en: 'Interests', fi: 'Kiinnostuksen kohteet' } },
+  { id: 'achievements', anchor: 'section-achievements', icon: Trophy, kind: 'scroll', sectionKey: 'achievements', label: { en: 'Achievements', fi: 'Saavutukset' } },
+  { id: 'openSource', anchor: 'section-openSource', icon: GitBranch, kind: 'scroll', sectionKey: 'openSource', label: { en: 'Open Source', fi: 'Avoin lähdekoodi' } },
+  { id: 'publications', anchor: 'section-publications', icon: BookOpen, kind: 'scroll', sectionKey: 'publications', label: { en: 'Publications', fi: 'Julkaisut' } },
   { id: 'links', anchor: 'section-links', icon: Link2, kind: 'scroll', sectionKey: 'links', label: { en: 'Links', fi: 'Linkit' } },
+  { id: 'leadership', anchor: 'section-leadership', icon: Users, kind: 'scroll', sectionKey: 'leadership', label: { en: 'Leadership', fi: 'Johtaminen' } },
+  { id: 'memberships', anchor: 'section-memberships', icon: IdCard, kind: 'scroll', sectionKey: 'memberships', label: { en: 'Memberships', fi: 'Jäsenyydet' } },
+  { id: 'speaking', anchor: 'section-speaking', icon: Mic, kind: 'scroll', sectionKey: 'speaking', label: { en: 'Speaking', fi: 'Esiintymiset' } },
+  { id: 'volunteering', anchor: 'section-volunteering', icon: HandHeart, kind: 'scroll', sectionKey: 'volunteering', label: { en: 'Volunteering', fi: 'Vapaaehtoistyö' } },
+  { id: 'internships', anchor: 'section-internships', icon: Building2, kind: 'scroll', sectionKey: 'internships', label: { en: 'Internships', fi: 'Harjoittelut' } },
+  { id: 'caseStudies', anchor: 'section-caseStudies', icon: FileSearch, kind: 'scroll', sectionKey: 'caseStudies', label: { en: 'Case Studies', fi: 'Tapaustutkimukset' } },
+  { id: 'testimonials', anchor: 'section-testimonials', icon: Quote, kind: 'scroll', sectionKey: 'testimonials', label: { en: 'Testimonials', fi: 'Suositukset' } },
 ]
 
+// Export deliberately has no entry here: the toolbar's Export control offers
+// PDF/HTML/JSON via a menu, and a rail shortcut previously bypassed that
+// choice and always triggered PDF-only, which looked like a second, buggier
+// export button next to the real one instead of a shortcut to it.
 const NAV_UTILITY_ITEMS = [
   { id: 'settings', icon: SettingsIcon, kind: 'action', label: { en: 'Settings', fi: 'Asetukset' } },
   { id: 'templates', icon: LayoutTemplate, kind: 'action', label: { en: 'Templates', fi: 'Pohjat' } },
   { id: 'coverLetter', icon: Mail, kind: 'action', label: { en: 'Cover letter', fi: 'Hakemuskirje' } },
-  { id: 'export', icon: Download, kind: 'action', label: { en: 'Export', fi: 'Vie' } },
 ]
 
 const ALL_SCROLL_NAV_ITEMS = [...NAV_SECTIONS, ...NAV_UTILITY_ITEMS].filter((item) => item.kind === 'scroll')
@@ -327,6 +362,9 @@ function ResumeBuilderPage({
     sessionRestoreEnabled,
     timelineAccentColor,
     modernOrangeAccentColor,
+    cvFontId,
+    cvHeadingColor,
+    navRailCollapsed,
     toasts,
   } = uiState
   const ui = getUiTheme()
@@ -339,6 +377,26 @@ function ResumeBuilderPage({
   const editorScrollRef = useRef(null)
   const templateSelectRef = useRef(null)
   const previewViewportRef = useRef(null)
+  const resetConfirmTimeoutRef = useRef(null)
+  // Read by TemplateQuickSwitcher when its panel opens, instead of threading
+  // formData itself through onHeaderChange — that object's identity changes
+  // on every keystroke, and putting it in the header-sync effect's deps
+  // below would re-render the toolbar on every keystroke just to keep a
+  // rarely-opened thumbnail strip fresh.
+  const formDataRef = useRef(formData)
+  useEffect(() => {
+    formDataRef.current = formData
+  }, [formData])
+
+  // Non-default CV fonts are fetched on demand (see utils/cvFonts.js) rather
+  // than bundled upfront. PDF export snapshots the live DOM, so it has to
+  // wait for this fetch — and for the browser to actually finish painting
+  // with it — or it can capture a fallback font instead; see handleExport's
+  // use of this ref below.
+  const cvFontLoadPromiseRef = useRef(Promise.resolve())
+  useEffect(() => {
+    cvFontLoadPromiseRef.current = loadCvFont(cvFontId)
+  }, [cvFontId])
 
   const [activeSectionId, setActiveSectionId] = useState('personal')
   const [searchQuery, setSearchQuery] = useState('')
@@ -349,6 +407,14 @@ function ResumeBuilderPage({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
+  // "Reset form" is a two-step button: the first click arms it, a second
+  // click within RESET_CONFIRM_WINDOW_MS actually clears the form. Nothing
+  // is persisted, so an accidental single click next to "Load demo CV"
+  // would otherwise wipe real work with no dialog.
+  const [resetConfirmArmed, setResetConfirmArmed] = useState(false)
+  // Bumped by "Manage" in Settings to force-expand the (collapsed-by-default)
+  // "Visible sections" panel it scrolls the user to.
+  const [sectionSettingsExpandSignal, setSectionSettingsExpandSignal] = useState(0)
 
   const [historyPast, setHistoryPast] = useState([])
   const [historyFuture, setHistoryFuture] = useState([])
@@ -475,6 +541,10 @@ function ResumeBuilderPage({
     setStorageValue(UI_LOCALE_STORAGE_KEY, locale)
     onLocaleChange(locale)
   }, [locale, onLocaleChange, setStorageValue])
+
+  useEffect(() => {
+    setStorageValue(UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, navRailCollapsed ? 'true' : 'false')
+  }, [navRailCollapsed, setStorageValue])
 
   useEffect(() => {
     setStorageValue(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, sessionRestoreEnabled ? 'true' : 'false')
@@ -668,6 +738,12 @@ function ResumeBuilderPage({
           return
         }
 
+        // The chosen CV font may still be an in-flight dynamic import (see
+        // cvFontLoadPromiseRef above) — capturing before its @font-face rules
+        // are registered and painted would bake the fallback font into the PDF.
+        await cvFontLoadPromiseRef.current
+        await window.document.fonts.ready
+
         await exportCvAsPdf(previewRef.current, exportFileName, {
           mode: exportPdfMode,
           formData,
@@ -763,9 +839,26 @@ function ResumeBuilderPage({
   }, [dispatchFormData, locale, setStorageValue])
 
   const handleResetForm = useCallback(() => {
+    window.clearTimeout(resetConfirmTimeoutRef.current)
+
+    if (!resetConfirmArmed) {
+      setResetConfirmArmed(true)
+      resetConfirmTimeoutRef.current = window.setTimeout(() => {
+        setResetConfirmArmed(false)
+      }, RESET_CONFIRM_WINDOW_MS)
+      return
+    }
+
+    setResetConfirmArmed(false)
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
-    showToast(locale === 'fi' ? 'Lomake nollattu tyhjäksi CV:ksi.' : 'Form reset to a blank CV.')
-  }, [dispatchFormData, locale])
+    showToast(
+      locale === 'fi'
+        ? 'Lomake nollattu. Palauta työkalupalkin kumoa-nuolella.'
+        : 'Form reset. Restore it with the toolbar undo arrow.',
+    )
+  }, [dispatchFormData, locale, resetConfirmArmed])
+
+  useEffect(() => () => window.clearTimeout(resetConfirmTimeoutRef.current), [])
 
   const handleLoadDemo = useCallback(() => {
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: structuredClone(demoCvData) })
@@ -894,6 +987,18 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
   }, [])
 
+  const handleCvFontChange = useCallback((fontId) => {
+    dispatchUi({ type: UI_ACTION.SET_CV_FONT, fontId })
+  }, [])
+
+  const handleCvHeadingColorChange = useCallback((color) => {
+    dispatchUi({ type: UI_ACTION.SET_CV_HEADING_COLOR, color })
+  }, [])
+
+  const handleToggleNavRail = useCallback(() => {
+    dispatchUi({ type: UI_ACTION.TOGGLE_NAV_RAIL_COLLAPSED })
+  }, [])
+
   const handleOpenSettings = useCallback(() => {
     setIsSettingsOpen(true)
   }, [])
@@ -910,8 +1015,6 @@ function ResumeBuilderPage({
         setIsSettingsOpen(true)
       } else if (item.id === 'coverLetter') {
         setIsCoverLetterOpen(true)
-      } else if (item.id === 'export') {
-        handleExport('pdf-designer')
       }
       return
     }
@@ -923,10 +1026,11 @@ function ResumeBuilderPage({
       scrollSectionIntoView(container, target)
       setActiveSectionId(item.id)
     }
-  }, [handleExport])
+  }, [])
 
   const handleManageSections = useCallback(() => {
     setIsSettingsOpen(false)
+    setSectionSettingsExpandSignal((value) => value + 1)
 
     const container = editorScrollRef.current
     const target = container?.querySelector('#section-settings')
@@ -936,10 +1040,6 @@ function ResumeBuilderPage({
         scrollSectionIntoView(container, target)
       })
     }
-  }, [])
-
-  const handlePrint = useCallback(() => {
-    window.print()
   }, [])
 
   const handleCloseTemplateGallery = useCallback(() => {
@@ -1112,6 +1212,23 @@ function ResumeBuilderPage({
     // mount-only observer would miss anchors that show up after a later switch.
   }, [selectedTemplate])
 
+  // A template switch can add or remove editor sections; if the user was
+  // scrolled deep into the form, those changes happen off-screen with no
+  // cue. Jump the editor back to the top so the (possibly new) section list
+  // is visible from the start.
+  const skipTemplateScrollResetRef = useRef(true)
+  useEffect(() => {
+    if (skipTemplateScrollResetRef.current) {
+      skipTemplateScrollResetRef.current = false
+      return
+    }
+
+    // Instant, not smooth: a template switch is a context change, and some
+    // browser setups silently no-op a programmatic smooth scroll anyway.
+    editorScrollRef.current?.scrollTo({ top: 0, behavior: 'auto' })
+    setActiveSectionId('personal')
+  }, [selectedTemplate])
+
   useEffect(() => {
     if (!onHeaderChange) return
     onHeaderChange({
@@ -1129,9 +1246,13 @@ function ResumeBuilderPage({
       selectedTemplateId: selectedTemplate,
       onSelectTemplate: handleSelectTemplate,
       templateSelectRef,
+      formDataRef,
+      cvFontId,
+      onCvFontChange: handleCvFontChange,
+      cvHeadingColor,
+      onCvHeadingColorChange: handleCvHeadingColorChange,
       searchQuery,
       onSearchChange: setSearchQuery,
-      onPrint: handlePrint,
       isFullscreenPreview,
       onToggleFullscreenPreview: handleToggleFullscreenPreview,
       isResponsivePreview,
@@ -1143,7 +1264,9 @@ function ResumeBuilderPage({
     handleExport, handleCopyShareLink, handleLocaleChange,
     canUndo, canRedo, handleUndo, handleRedo,
     templates, selectedTemplate, handleSelectTemplate,
-    searchQuery, handlePrint,
+    cvFontId, handleCvFontChange,
+    cvHeadingColor, handleCvHeadingColorChange,
+    searchQuery,
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
     handleOpenSettings,
@@ -1309,10 +1432,16 @@ function ResumeBuilderPage({
           <button
             type="button"
             className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonDanger}`}
+            style={resetConfirmArmed
+              ? { backgroundColor: '#b91c1c', borderColor: '#b91c1c', color: '#ffffff' }
+              : undefined}
             disabled={isActionBusy}
+            aria-live="polite"
             onClick={handleResetForm}
           >
-            {locale === 'fi' ? 'Nollaa lomake' : 'Reset form'}
+            {resetConfirmArmed
+              ? locale === 'fi' ? 'Vahvista nollaus' : 'Confirm reset'
+              : locale === 'fi' ? 'Nollaa lomake' : 'Reset form'}
           </button>
           <div
             className={`editor-status-pill ${ui.surfaceMuted} ${ui.textMuted}`}
@@ -1322,19 +1451,71 @@ function ResumeBuilderPage({
           </div>
         </div>
 
-        {/* Collapsed by default: these four panels are about the CV rather than part
-            of it, and expanded they pushed the first form field more than two screens
-            down. The summary keeps the ATS score and suggestion count visible so
-            nothing is hidden, only folded. */}
+        {/* Import: paste a plain-text snippet or load a JSON export to fill the
+            form. Its own disclosure, collapsed by default so it doesn't push
+            the first form field off-screen. */}
         <details className="editor-tools">
           <summary className="editor-tools__summary">
             <span className="editor-tools__label">
-              {locale === 'fi' ? 'Tuonti ja vientitila' : 'Import & export mode'}
+              {locale === 'fi' ? 'Tuo CV' : 'Import CV'}
+            </span>
+          </summary>
+
+          <div className="editor-tools__body stack-5">
+            <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
+              <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Pikatuonti' : 'Quick import'}</p>
+              <p className={`mt-3 text-sm ${ui.textSecondary}`}>
+                {locale === 'fi'
+                  ? 'Liitä CV-katkelma nimen, tittelin, taitojen ja lyhyen yhteenvedon tunnistamiseksi.'
+                  : 'Paste a resume snippet to detect a name, title, skills, and a short summary.'}
+              </p>
+              <textarea
+                className={`mt-4 min-h-32 w-full border px-4 py-3 text-sm transition ${ui.input}`}
+                value={pastedCvText}
+                disabled={isActionBusy}
+                onChange={handlePastedCvTextChange}
+                aria-label={locale === 'fi' ? 'Liitetty CV-teksti' : 'Pasted CV text'}
+                placeholder={locale === 'fi'
+                  ? `Matti Meikäläinen\nSenior Product Designer\nTaidot: Figma, käyttäjätutkimus, design systemit`
+                  : `Alex Morgan\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
+              />
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+                  disabled={isActionBusy}
+                  onClick={handlePasteCvImport}
+                >
+                  {locale === 'fi' ? 'Tuo liitetty teksti' : 'Paste CV text'}
+                </button>
+                <button
+                  type="button"
+                  className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+                  disabled={isActionBusy}
+                  onClick={handleImportClick}
+                >
+                  {isImporting
+                    ? locale === 'fi' ? 'Tuodaan JSON...' : 'Importing JSON...'
+                    : locale === 'fi' ? 'Tuo JSON' : 'Import JSON'}
+                </button>
+              </div>
+            </section>
+          </div>
+        </details>
+
+        {/* ATS score, keyword match, and writing suggestions — analysis of the
+            CV rather than part of it. Its own disclosure, collapsed by default;
+            the summary keeps the score and suggestion count visible so nothing
+            is hidden, only folded. */}
+        <details className="editor-tools">
+          <summary className="editor-tools__summary">
+            <span className="editor-tools__label">
+              {locale === 'fi' ? 'ATS-pisteet ja ehdotukset' : 'ATS score & suggestions'}
             </span>
             <span className="editor-tools__stats">
               {atsScore ? (
                 <span className="editor-tools__stat">
-                  {locale === 'fi' ? 'ATS' : 'ATS'} {atsScore.score}
+                  ATS {atsScore.score}
                 </span>
               ) : null}
               {feedback?.length ? (
@@ -1346,83 +1527,23 @@ function ResumeBuilderPage({
           </summary>
 
           <div className="editor-tools__body stack-5">
-        <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
-          <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Pikatuonti' : 'Quick import'}</p>
-          <p className={`mt-3 text-sm ${ui.textSecondary}`}>
-            {locale === 'fi'
-              ? 'Liitä CV-katkelma nimen, tittelin, taitojen ja lyhyen yhteenvedon tunnistamiseksi.'
-              : 'Paste a resume snippet to detect a name, title, skills, and a short summary.'}
-          </p>
-          <textarea
-            className={`mt-4 min-h-32 w-full border px-4 py-3 text-sm transition ${ui.input}`}
-            value={pastedCvText}
-            disabled={isActionBusy}
-            onChange={handlePastedCvTextChange}
-            aria-label={locale === 'fi' ? 'Liitetty CV-teksti' : 'Pasted CV text'}
-            placeholder={locale === 'fi'
-              ? `Matti Meikäläinen\nSenior Product Designer\nTaidot: Figma, käyttäjätutkimus, design systemit`
-              : `Alex Morgan\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
-          />
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
-              disabled={isActionBusy}
-              onClick={handlePasteCvImport}
-            >
-              {locale === 'fi' ? 'Tuo liitetty teksti' : 'Paste CV text'}
-            </button>
-            <button
-              type="button"
-              className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
-              disabled={isActionBusy}
-              onClick={handleImportClick}
-            >
-              {isImporting
-                ? locale === 'fi' ? 'Tuodaan JSON...' : 'Importing JSON...'
-                : locale === 'fi' ? 'Tuo JSON' : 'Import JSON'}
-            </button>
-          </div>
-        </section>
+            <ATSScorePanel
+              atsScore={atsScore}
+              locale={locale}
+              atsFriendlyMode={atsFriendlyMode}
+              onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
+              jobDescription={jobDescription}
+              onJobDescriptionChange={handleJobDescriptionChange}
+              onAddMissingKeyword={handleAddMissingKeyword}
+              onCopyMissingKeywords={handleCopyMissingKeywords}
+              onClearJobDescription={handleClearJobDescription}
+              jobDescriptionAnalysis={jobDescriptionAnalysis}
+            />
 
-        <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
-          <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Vientitila' : 'Export mode'}</p>
-          <p className={`mt-3 text-sm ${ui.textSecondary}`}>
-            {locale === 'fi'
-              ? 'ATS-tila yksinkertaistaa muotoilua jäsennystä varten. Jätä se pois päältä täysin tyyliteltyä vientiä varten.'
-              : 'ATS mode simplifies formatting for parsers. Leave it off for fully styled template exports.'}
-          </p>
-          <button
-            type="button"
-            className={`mt-4 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
-              atsFriendlyMode ? ui.buttonActive : ui.button
-            }`}
-            disabled={isActionBusy}
-            onClick={handleToggleAtsFriendlyMode}
-          >
-            {atsFriendlyMode
-              ? locale === 'fi' ? 'ATS-tila käytössä' : 'ATS mode enabled'
-              : locale === 'fi' ? 'Ota ATS-tila käyttöön' : 'Enable ATS mode'}
-          </button>
-        </section>
-
-        <ATSScorePanel
-          atsScore={atsScore}
-          locale={locale}
-          atsFriendlyMode={atsFriendlyMode}
-          onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
-          jobDescription={jobDescription}
-          onJobDescriptionChange={handleJobDescriptionChange}
-          onAddMissingKeyword={handleAddMissingKeyword}
-          onCopyMissingKeywords={handleCopyMissingKeywords}
-          onClearJobDescription={handleClearJobDescription}
-          jobDescriptionAnalysis={jobDescriptionAnalysis}
-        />
-
-        <CVSuggestionsPanel
-          feedback={feedback}
-          locale={locale}
-        />
+            <CVSuggestionsPanel
+              feedback={feedback}
+              locale={locale}
+            />
           </div>
         </details>
 
@@ -1445,6 +1566,7 @@ function ResumeBuilderPage({
           onPhotoError={(message) => showToast(message, 'error')}
           selectedTemplate={selectedTemplate}
           selectedTemplateLabel={currentTemplate.label}
+          sectionSettingsExpandSignal={sectionSettingsExpandSignal}
           locale={locale}
         />
       </AppErrorBoundary>
@@ -1475,7 +1597,9 @@ function ResumeBuilderPage({
     locale,
     mobilePreviewVisible,
     pastedCvText,
+    resetConfirmArmed,
     secondaryButtonClassName,
+    sectionSettingsExpandSignal,
     selectedTemplate,
     dispatchFormData,
     ui.button,
@@ -1523,7 +1647,9 @@ function ResumeBuilderPage({
       activeSectionId={activeSectionId}
       onNavigate={handleNavigate}
       locale={locale}
-      version="1.0.0"
+      version={APP_VERSION_RAW}
+      isCollapsed={navRailCollapsed}
+      onToggleCollapsed={handleToggleNavRail}
     />
   ), [
     filteredNavSections,
@@ -1531,6 +1657,8 @@ function ResumeBuilderPage({
     activeSectionId,
     handleNavigate,
     locale,
+    navRailCollapsed,
+    handleToggleNavRail,
   ])
 
   const previewContent = useMemo(() => (
@@ -1643,7 +1771,18 @@ function ResumeBuilderPage({
           >
             {locale === 'fi' ? 'Takaisin editoriin' : 'Back to editor'}
           </button>
-          <div className="preview-zoom-wrapper" style={{ '--preview-zoom': zoomPercent / 100 }}>
+          <div
+            className="preview-zoom-wrapper"
+            style={{
+              '--preview-zoom': zoomPercent / 100,
+              // Shadows the --font-sans token (tokens.css) for this subtree only
+              // — every template's CSS already reads font-family from that
+              // token, so redefining it here changes the CV document's body
+              // font everywhere without touching each template's stylesheet,
+              // and without affecting the app's own chrome outside this wrapper.
+              '--font-sans': getCvFontStack(cvFontId),
+            }}
+          >
             <AppErrorBoundary
               panelTitle={locale === 'fi' ? 'CV-esikatselu' : 'CV preview'}
               locale={locale}
@@ -1656,6 +1795,7 @@ function ResumeBuilderPage({
                 atsFriendlyMode={atsFriendlyMode}
                 timelineAccentColor={timelineAccentColor}
                 modernOrangeAccentColor={modernOrangeAccentColor}
+                headingColor={cvHeadingColor}
               />
             </AppErrorBoundary>
           </div>
@@ -1665,6 +1805,8 @@ function ResumeBuilderPage({
     </div>
   ), [
     atsFriendlyMode,
+    cvFontId,
+    cvHeadingColor,
     formData,
     handleFitPage,
     handleFitWidth,
@@ -1796,6 +1938,7 @@ function ResumeBuilderPage({
         nav={navRailContent}
         sidebar={sidebarContent}
         content={previewContent}
+        navCollapsed={navRailCollapsed}
       />
 
       {mobileBottomActions}
@@ -1808,6 +1951,8 @@ function ResumeBuilderPage({
         onSelectTemplate={handleSelectTemplate}
         atsScore={atsScore}
         formData={formData}
+        cvFontId={cvFontId}
+        cvHeadingColor={cvHeadingColor}
         locale={locale}
         onOpenBadge={handleOpenBadge}
       />

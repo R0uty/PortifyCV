@@ -22,9 +22,9 @@ import {
 import { getTemplateConfig } from './templates'
 
 // Only one of these renders at a time (CVPreview picks by `variant`), but
-// the gallery thumbnails render all 13 templates at once, so lazy-loading
+// the gallery thumbnails render all 14 templates at once, so lazy-loading
 // still pays off for the common case: the builder's initial bundle no
-// longer carries code for the 9 bespoke templates the user hasn't opened
+// longer carries code for the 12 bespoke templates the user hasn't opened
 // yet. `prefetchTemplateShowcases()` (called on idle from
 // ResumeBuilderPage, same pattern as the PDF export prefetch) warms these
 // in the background so switching templates or opening the gallery rarely
@@ -38,9 +38,11 @@ const GraduateShowcase = lazy(() => import('./templates/GraduateShowcase'))
 const CompactShowcase = lazy(() => import('./templates/CompactShowcase'))
 const PortfolioShowcase = lazy(() => import('./templates/PortfolioShowcase'))
 const ClassicProfessionalShowcase = lazy(() => import('./templates/ClassicProfessionalShowcase'))
+const ClassicShowcase = lazy(() => import('./templates/ClassicShowcase'))
 const NavyProfessionalShowcase = lazy(() => import('./templates/NavyProfessionalShowcase'))
 const ModernOrangeShowcase = lazy(() => import('./templates/ModernOrangeShowcase'))
 const ColorfulCompactShowcase = lazy(() => import('./templates/ColorfulCompactShowcase'))
+const QuadrantShowcase = lazy(() => import('./templates/QuadrantShowcase'))
 
 function CVPreview({
   formData,
@@ -51,6 +53,12 @@ function CVPreview({
   atsFriendlyMode = false,
   timelineAccentColor,
   modernOrangeAccentColor,
+  // Overrides the name and section-title color for every template except
+  // Developer (animated gradient name), Colorful Compact (dark header, own
+  // per-section rainbow identity), and Navy Professional's name (white on
+  // its dark sidebar) — see utils/cvHeadingColors.js for why those are
+  // excluded. `null`/undefined means "use the template's own color".
+  headingColor = null,
 }) {
   // ── Theme and template resolution ──────────────────────────────────
   // Resolve the UI theme (dark/light) and the template config (variant, layout, etc.)
@@ -98,6 +106,7 @@ function CVPreview({
           locale={locale}
           previewRef={previewRef}
           templateConfig={templateConfig}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -115,6 +124,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -132,6 +142,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -156,6 +167,7 @@ function CVPreview({
           showcaseConfig={t}
           accentColor={timelineAccentColor}
           atsFriendlyMode={atsFriendlyMode}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -174,6 +186,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -192,6 +205,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -210,6 +224,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -229,6 +244,28 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
+        />
+      </Suspense>
+    )
+  }
+
+  // ── Classic Showcase delegation ──────────────────────────────────────
+  // A calm left-aligned letterhead visual — single column, ink on ivory,
+  // no color. ATS mode bypasses it entirely and falls back to the shared
+  // flat renderer (classic.js), which is monochrome by design so the two
+  // modes look nearly identical anyway (the fallback swaps the serif name
+  // for the app's Inter).
+  if (variant === 'classic' && !atsFriendlyMode) {
+    return (
+      <Suspense fallback={null}>
+        <ClassicShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -253,6 +290,7 @@ function CVPreview({
           templateConfig={templateConfig}
           showcaseConfig={t}
           atsFriendlyMode={atsFriendlyMode}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -275,6 +313,7 @@ function CVPreview({
           showcaseConfig={t}
           accentColor={modernOrangeAccentColor}
           atsFriendlyMode={atsFriendlyMode}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -294,6 +333,25 @@ function CVPreview({
           locale={locale}
           previewRef={previewRef}
           templateConfig={templateConfig}
+        />
+      </Suspense>
+    )
+  }
+
+  // ── Quadrant Showcase delegation ────────────────────────────────────
+  // The Quadrant template's non-ATS look is a literal 2x2 grid — a fully
+  // bespoke visual system ATS mode bypasses entirely, same reasoning as
+  // every other bespoke Showcase above.
+  if (variant === 'quadrant' && !atsFriendlyMode) {
+    return (
+      <Suspense fallback={null}>
+        <QuadrantShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+          headingColor={headingColor}
         />
       </Suspense>
     )
@@ -502,7 +560,7 @@ function CVPreview({
           {sectionIcons[key]}
         </span>
       ) : null}
-      <h4 className={sectionTitleClasses}>{label}</h4>
+      <h4 className={sectionTitleClasses} style={headingColor ? { color: headingColor } : undefined}>{label}</h4>
     </div>
   )
 
@@ -1040,7 +1098,7 @@ function CVPreview({
                     className={`flex items-start gap-2 text-sm ${supportingTextClasses}`}
                     data-export-card="true"
                   >
-                    <span className={`mt-1.5 h-1 w-1 shrink-0 rounded-full ${resolvedBulletColor}`} aria-hidden="true" />
+                    <span className={`mt-2 h-1 w-1 shrink-0 rounded-full ${resolvedBulletColor}`} aria-hidden="true" />
                     <span>
                       {item.name}
                       {item.issuer || item.year ? (
@@ -1650,6 +1708,7 @@ function CVPreview({
               className={`leading-none ${
                 atsFriendlyMode ? 'mt-2 text-4xl font-semibold tracking-tight text-gray-900' : t.headerTitle()
               }`}
+              style={headingColor ? { color: headingColor } : undefined}
             >
               {fullName}
             </h3>

@@ -12,7 +12,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
-import { Sparkles } from 'lucide-react'
+import { ChevronDown, ChevronUp, Sparkles } from 'lucide-react'
 
 import AutoGrowTextarea from './AutoGrowTextarea'
 import EntryBadge from './EntryBadge'
@@ -33,6 +33,7 @@ import {
   isPhotoVisibleForTemplate,
   getLinkFields,
   getSectionVisibilityFields,
+  PRIMARY_LINK_KEYS,
   EMPLOYMENT_TYPE_OPTIONS,
 } from '../utils/cvForm'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
@@ -141,9 +142,17 @@ function CVForm({
   onPhotoError,
   selectedTemplate = '',
   selectedTemplateLabel = 'Current template',
+  sectionSettingsExpandSignal = 0,
 }) {
   const [draggedSectionKey, setDraggedSectionKey] = useState('')
   const [collapsedItems, setCollapsedItems] = useState(() => new Set())
+  // Only surface the "required" message once the user has left the field —
+  // a blank form on load shouldn't greet a first-time visitor with two red
+  // errors for fields they haven't reached yet.
+  const [identityTouched, setIdentityTouched] = useState({ fullName: false, title: false })
+  const markIdentityTouched = (field) =>
+    setIdentityTouched((prev) => (prev[field] ? prev : { ...prev, [field]: true }))
+  const [showAllLinks, setShowAllLinks] = useState(false)
   const photoInputRef = useRef(null)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -186,7 +195,7 @@ function CVForm({
   const actionButtonClasses = `border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
   const removeButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonDanger}`
   const utilityButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
-  const sectionDragHandleClasses = `inline-flex cursor-grab select-none items-center gap-2 border px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-[0.14em] ${ui.button}`
+  const sectionMoveButtonClasses = `inline-flex h-7 w-7 items-center justify-center border transition ${ui.button}`
   const sectionDragDotClasses = 'h-1 w-1 bg-gray-500'
   const fieldLabelClassName = `${ui.textSoft} uppercase tracking-[0.06em] text-xs font-semibold`
   const itemCardClasses = `border p-4 ${ui.surfaceMuted}`
@@ -439,10 +448,10 @@ function CVForm({
     <form className="mt-8 space-y-4 sm:space-y-5">
       <PanelSection
         id="section-settings"
-        eyebrow="Section 00"
         title={isFinnish ? 'Näkyvät osiot' : 'Visible sections'}
         badge={{ label: `${visibleSectionCount}/${orderedSectionFields.length} ${isFinnish ? 'näkyvissä' : 'visible'}` }}
         defaultCollapsed
+        expandSignal={sectionSettingsExpandSignal}
         description={
           isFinnish
             ? 'Kytke osioita tai yksittäisiä kohtia pois ilman tietojen poistamista.'
@@ -468,72 +477,70 @@ function CVForm({
                   onDragOver={handleSectionDragOver}
                   onDrop={(event) => handleSectionDrop(event, field.key)}
                   onDragEnd={handleSectionDragEnd}
-                  className={`flex cursor-grab items-center justify-between gap-3 border px-3 py-2 transition ${
+                  className={`flex items-center justify-between gap-3 border px-3 py-2 transition ${
                     draggedSectionKey === field.key ? 'border-[var(--accent-border)] opacity-70' : ''
                   } ${ui.surfaceMuted}`}
                 >
-                  <div className="flex items-center gap-2">
-                    <div className={sectionDragHandleClasses} aria-hidden="true">
-                      <span className="grid grid-cols-2 gap-0.5">
-                        <span className={sectionDragDotClasses} />
-                        <span className={sectionDragDotClasses} />
-                        <span className={sectionDragDotClasses} />
-                        <span className={sectionDragDotClasses} />
-                        <span className={sectionDragDotClasses} />
-                        <span className={sectionDragDotClasses} />
-                      </span>
-                      <span>{copy.drag}</span>
-                    </div>
-                    <button
-                      type="button"
-                      className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
-                        isVisible ? ui.buttonActive : ui.button
-                      }`}
-                      onClick={() => toggleSectionVisibility(field.key)}
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <span
+                      className={`grid shrink-0 cursor-grab grid-cols-2 gap-0.5 ${ui.textMuted}`}
+                      title={copy.drag}
+                      aria-hidden="true"
                     >
-                      {field.label}: {isVisible ? copy.on : copy.off}
-                    </button>
+                      <span className={sectionDragDotClasses} />
+                      <span className={sectionDragDotClasses} />
+                      <span className={sectionDragDotClasses} />
+                      <span className={sectionDragDotClasses} />
+                      <span className={sectionDragDotClasses} />
+                      <span className={sectionDragDotClasses} />
+                    </span>
+                    <span className={`truncate text-sm font-semibold ${ui.textPrimary}`}>{field.label}</span>
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex shrink-0 items-center gap-1.5">
                     <button
                       type="button"
-                      className={utilityButtonClasses}
+                      className={sectionMoveButtonClasses}
                       onClick={() => moveSectionByDirection(field.key, -1)}
                       disabled={index === 0}
                       aria-label={`${copy.move} ${field.label} ${copy.up.toLowerCase()}`}
                     >
-                      {copy.up}
+                      <ChevronUp size={15} strokeWidth={2.5} aria-hidden="true" />
                     </button>
                     <button
                       type="button"
-                      className={utilityButtonClasses}
+                      className={sectionMoveButtonClasses}
                       onClick={() => moveSectionByDirection(field.key, 1)}
                       disabled={index === orderedSectionFields.length - 1}
                       aria-label={`${copy.move} ${field.label} ${copy.down.toLowerCase()}`}
                     >
-                      {copy.down}
+                      <ChevronDown size={15} strokeWidth={2.5} aria-hidden="true" />
                     </button>
+                    <ToggleSwitch
+                      checked={isVisible}
+                      onChange={() => toggleSectionVisibility(field.key)}
+                      ariaLabel={`${field.label}: ${isVisible ? copy.on : copy.off}`}
+                    />
                   </div>
                 </div>
               )
             })}
           </div>
-          <button
-            type="button"
-            className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
-              isPhotoVisibleInSelectedTemplate ? ui.buttonActive : ui.button
-            }`}
-            onClick={togglePhotoVisibilityForSelectedTemplate}
-            disabled={!selectedTemplate}
-          >
-            {isFinnish ? 'Kuva' : 'Photo'} ({selectedTemplateLabel}): {isPhotoVisibleInSelectedTemplate ? copy.on : copy.off}
-          </button>
+          <div className={`flex items-center justify-between gap-3 border px-3 py-2 ${ui.surfaceMuted}`}>
+            <span className={`truncate text-sm font-semibold ${ui.textPrimary}`}>
+              {isFinnish ? 'Kuva' : 'Photo'} ({selectedTemplateLabel})
+            </span>
+            <ToggleSwitch
+              checked={isPhotoVisibleInSelectedTemplate}
+              onChange={togglePhotoVisibilityForSelectedTemplate}
+              disabled={!selectedTemplate}
+              ariaLabel={`${isFinnish ? 'Kuva' : 'Photo'}: ${isPhotoVisibleInSelectedTemplate ? copy.on : copy.off}`}
+            />
+          </div>
         </div>
       </PanelSection>
 
       <PanelSection
         id="section-personal"
-        eyebrow="Section 01"
         title={isFinnish ? 'Profiili' : 'Profile'}
         description={
           isFinnish
@@ -544,22 +551,32 @@ function CVForm({
         badge={feedback.sectionBadges.profile}
       >
         <div className="space-y-4">
-          <FloatingField label={isFinnish ? 'Koko nimi' : 'Full name'} error={errors.fullName} required>
+          <FloatingField
+            label={isFinnish ? 'Koko nimi' : 'Full name'}
+            error={identityTouched.fullName ? errors.fullName : ''}
+            required
+          >
             <input
               type="text"
               autoComplete="name"
               value={formData.fullName}
               onChange={(event) => updateRootField('fullName', event.target.value)}
-              aria-invalid={Boolean(errors.fullName)}
+              onBlur={() => markIdentityTouched('fullName')}
+              aria-invalid={identityTouched.fullName && Boolean(errors.fullName)}
             />
           </FloatingField>
 
-          <FloatingField label={isFinnish ? 'Ammattinimike' : 'Professional title'} error={errors.title} required>
+          <FloatingField
+            label={isFinnish ? 'Ammattinimike' : 'Professional title'}
+            error={identityTouched.title ? errors.title : ''}
+            required
+          >
             <input
               type="text"
               value={formData.title}
               onChange={(event) => updateRootField('title', event.target.value)}
-              aria-invalid={Boolean(errors.title)}
+              onBlur={() => markIdentityTouched('title')}
+              aria-invalid={identityTouched.title && Boolean(errors.title)}
             />
           </FloatingField>
 
@@ -661,7 +678,6 @@ function CVForm({
       {templateSectionKeySet.has('skills') ? (
       <PanelSection
         id="section-skills"
-        eyebrow="Section 02"
         title={isFinnish ? 'Taidot' : 'Skills'}
         description={isFinnish ? 'Paina Enter tai pilkku muuttaaksesi taidon tagiksi.' : 'Press Enter or comma to turn each skill into a tag.'}
         theme={theme}
@@ -691,7 +707,6 @@ function CVForm({
       {templateSectionKeySet.has('experience') ? (
       <PanelSection
         id="section-experience"
-        eyebrow="Section 03"
         title={isFinnish ? 'Kokemus' : 'Experience'}
         description={
           isFinnish
@@ -891,7 +906,6 @@ function CVForm({
       {templateSectionKeySet.has('education') ? (
       <PanelSection
         id="section-education"
-        eyebrow="Section 04"
         title={isFinnish ? 'Koulutus' : 'Education'}
         description={
           isFinnish
@@ -1040,7 +1054,7 @@ function CVForm({
 
       {templateSectionKeySet.has('coreStrengths') ? (
       <PanelSection
-        eyebrow="Section 05"
+        id="section-coreStrengths"
         title={isFinnish ? 'Vahvuudet' : 'Core Strengths'}
         description={
           isFinnish
@@ -1133,7 +1147,6 @@ function CVForm({
       {templateSectionKeySet.has('certificates') ? (
       <PanelSection
         id="section-certificates"
-        eyebrow="Section 06"
         title={isFinnish ? 'Sertifikaatit' : 'Certificates'}
         description={
           isFinnish
@@ -1254,7 +1267,6 @@ function CVForm({
       {templateSectionKeySet.has('projects') ? (
       <PanelSection
         id="section-projects"
-        eyebrow="Section 07"
         title={isFinnish ? 'Projektit' : 'Projects'}
         description={
           isFinnish
@@ -1437,7 +1449,6 @@ function CVForm({
       {templateSectionKeySet.has('languages') ? (
       <PanelSection
         id="section-languages"
-        eyebrow="Section 08"
         title={isFinnish ? 'Kielet' : 'Languages'}
         description={
           isFinnish
@@ -1499,7 +1510,6 @@ function CVForm({
       {templateSectionKeySet.has('interests') ? (
       <PanelSection
         id="section-interests"
-        eyebrow="Section 09"
         title={isFinnish ? 'Kiinnostuksen kohteet' : 'Interests'}
         description={
           isFinnish
@@ -1552,7 +1562,7 @@ function CVForm({
 
       {templateSectionKeySet.has('achievements') ? (
       <PanelSection
-        eyebrow="Section 10"
+        id="section-achievements"
         title={isFinnish ? 'Saavutukset' : 'Achievements'}
         description={
           isFinnish
@@ -1648,7 +1658,7 @@ function CVForm({
 
       {templateSectionKeySet.has('openSource') ? (
       <PanelSection
-        eyebrow="Section 11"
+        id="section-openSource"
         title={isFinnish ? 'Avoin lähdekoodi' : 'Open Source'}
         description={
           isFinnish
@@ -1773,7 +1783,7 @@ function CVForm({
 
       {templateSectionKeySet.has('publications') ? (
       <PanelSection
-        eyebrow="Section 12"
+        id="section-publications"
         title={isFinnish ? 'Julkaisut' : 'Publications'}
         description={
           isFinnish
@@ -1882,7 +1892,6 @@ function CVForm({
       {templateSectionKeySet.has('links') ? (
       <PanelSection
         id="section-links"
-        eyebrow="Section 13"
         title={isFinnish ? 'Linkit' : 'Links'}
         description={
           isFinnish
@@ -1891,44 +1900,75 @@ function CVForm({
         }
         theme={theme}
       >
-        <div className="grid gap-4 sm:grid-cols-2">
-          {/* The hide/show button is kept outside the <label>: nesting a button
-              inside one is invalid markup and folds the button text into the
-              input's accessible name. */}
-          {linkFields.map(({ key, label, placeholder }) => (
-            <div key={key}>
-              <div className="flex items-center justify-between gap-2">
-                <label
-                  htmlFor={`link-field-${key}`}
-                  className={`text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}
-                >
-                  {label}
-                </label>
+        {(() => {
+          // Show the common platforms and any field that already holds a
+          // value; keep the rest (~11 niche platforms) behind a toggle so
+          // the section isn't a wall of 15 empty URL inputs on open.
+          const isAlwaysShown = (key) =>
+            showAllLinks || PRIMARY_LINK_KEYS.includes(key) || formData.links[key]?.trim()
+          const shownFields = linkFields.filter(({ key }) => isAlwaysShown(key))
+          const hiddenCount = linkFields.length - shownFields.length
+
+          return (
+            <>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* The hide/show button is kept outside the <label>: nesting a
+                    button inside one is invalid markup and folds the button text
+                    into the input's accessible name. It only appears once a field
+                    has a value — an empty field has nothing to hide from the CV. */}
+                {shownFields.map(({ key, label, placeholder }) => (
+                  <div key={key}>
+                    <div className="flex items-center justify-between gap-2">
+                      <label
+                        htmlFor={`link-field-${key}`}
+                        className={`text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}
+                      >
+                        {label}
+                      </label>
+                      {formData.links[key]?.trim() ? (
+                        <button
+                          type="button"
+                          className="border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] transition"
+                          onClick={() => toggleSectionItemVisibility('links', key)}
+                        >
+                          {isSectionItemVisible(sectionItemVisibility, 'links', key) ? copy.hide : copy.show}
+                        </button>
+                      ) : null}
+                    </div>
+                    <input
+                      id={`link-field-${key}`}
+                      className={inputClasses}
+                      type="url"
+                      value={formData.links[key]}
+                      onChange={(event) => updateLinkField(key, event.target.value)}
+                      placeholder={placeholder}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {hiddenCount > 0 || showAllLinks ? (
                 <button
                   type="button"
-                  className="border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.06em] transition"
-                  onClick={() => toggleSectionItemVisibility('links', key)}
+                  className="mt-4 border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] transition"
+                  onClick={() => setShowAllLinks((value) => !value)}
                 >
-                  {isSectionItemVisible(sectionItemVisibility, 'links', key) ? copy.hide : copy.show}
+                  {showAllLinks
+                    ? isFinnish ? 'Näytä vähemmän alustoja' : 'Show fewer platforms'
+                    : isFinnish
+                      ? `Näytä lisää alustoja (${hiddenCount})`
+                      : `Show more platforms (${hiddenCount})`}
                 </button>
-              </div>
-              <input
-                id={`link-field-${key}`}
-                className={inputClasses}
-                type="url"
-                value={formData.links[key]}
-                onChange={(event) => updateLinkField(key, event.target.value)}
-                placeholder={placeholder}
-              />
-            </div>
-          ))}
-        </div>
+              ) : null}
+            </>
+          )
+        })()}
       </PanelSection>
       ) : null}
 
       {templateSectionKeySet.has('leadership') ? (
       <PanelSection
-        eyebrow="Section 14"
+        id="section-leadership"
         title={isFinnish ? 'Johtamiskokemus' : 'Leadership Experience'}
         description={
           isFinnish
@@ -2044,7 +2084,7 @@ function CVForm({
 
       {templateSectionKeySet.has('memberships') ? (
       <PanelSection
-        eyebrow="Section 15"
+        id="section-memberships"
         title={isFinnish ? 'Ammattijäsenyydet' : 'Professional Memberships'}
         description={
           isFinnish
@@ -2141,7 +2181,7 @@ function CVForm({
 
       {templateSectionKeySet.has('speaking') ? (
       <PanelSection
-        eyebrow="Section 16"
+        id="section-speaking"
         title={isFinnish ? 'Esiintymiset' : 'Speaking'}
         description={
           isFinnish
@@ -2249,7 +2289,7 @@ function CVForm({
 
       {templateSectionKeySet.has('volunteering') ? (
       <PanelSection
-        eyebrow="Section 17"
+        id="section-volunteering"
         title={isFinnish ? 'Vapaaehtoistyö' : 'Volunteering'}
         description={
           isFinnish
@@ -2345,7 +2385,7 @@ function CVForm({
 
       {templateSectionKeySet.has('internships') ? (
       <PanelSection
-        eyebrow="Section 18"
+        id="section-internships"
         title={isFinnish ? 'Harjoittelut' : 'Internships'}
         description={
           isFinnish
@@ -2477,7 +2517,7 @@ function CVForm({
 
       {templateSectionKeySet.has('caseStudies') ? (
       <PanelSection
-        eyebrow="Section 19"
+        id="section-caseStudies"
         title={isFinnish ? 'Tapaustutkimukset' : 'Case Studies'}
         description={
           isFinnish
@@ -2595,7 +2635,7 @@ function CVForm({
 
       {templateSectionKeySet.has('testimonials') ? (
       <PanelSection
-        eyebrow="Section 20"
+        id="section-testimonials"
         title={isFinnish ? 'Suositukset' : 'Testimonials'}
         description={
           isFinnish

@@ -116,7 +116,11 @@
 }
 
 .creative-showcase__name-lead {
-  color: var(--cr-ink);
+  /* var(--cv-heading-color) is set on the article root by
+     CvHeadingColorSwitcher's selection — see utils/cvHeadingColors.js. Only
+     the ink-colored lead of the name is overridden; the coral accent span
+     is a deliberate two-tone flourish, not overridable body-style text. */
+  color: var(--cv-heading-color, var(--cr-ink));
 }
 
 .creative-showcase__name-accent {
@@ -231,7 +235,7 @@
 .creative-showcase__section-title {
   font-size: 1.3rem;
   font-weight: 800;
-  color: var(--cr-ink);
+  color: var(--cv-heading-color, var(--cr-ink));
 }
 
 .creative-showcase__section-subtitle {

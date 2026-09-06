@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import Modal from './Modal'
 import TemplateThumbnail from './TemplateThumbnail'
 import { buildThumbnailCv } from '../utils/thumbnailCv'
+import { getCvFontStack } from '../utils/cvFonts'
 
 function TemplateGalleryModal({
   isOpen,
@@ -12,11 +13,14 @@ function TemplateGalleryModal({
   onSelectTemplate,
   atsScore,
   formData = null,
+  cvFontId = '',
+  cvHeadingColor = '',
   locale = 'en',
   onOpenBadge = null,
 }) {
   const isFinnish = locale === 'fi'
   const thumbnailCv = useMemo(() => buildThumbnailCv(formData), [formData])
+  const fontStack = getCvFontStack(cvFontId)
 
   return (
     <Modal
@@ -58,6 +62,8 @@ function TemplateGalleryModal({
                   templateId={template.id}
                   formData={thumbnailCv}
                   locale={locale}
+                  fontStack={fontStack}
+                  headingColor={cvHeadingColor}
                 />
               </div>
               <div className="template-gallery__meta">

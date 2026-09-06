@@ -52,7 +52,7 @@ function highlightMetrics(text) {
   ))
 }
 
-export default function CompactShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {} }) {
+export default function CompactShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -152,7 +152,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
     if (key === 'skills') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="skills" data-export-placement="main">
-          <p className="compact-showcase__section-title">{copy.skills}</p>
+          <h2 className="compact-showcase__section-title">{copy.skills}</h2>
           {skillCategories.length > 0 ? (
             <div className="compact-showcase__skill-groups">
               {skillCategories.map((cat) => (
@@ -178,7 +178,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
     if (key === 'experience') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="experience" data-export-placement="main">
-          <p className="compact-showcase__section-title">{copy.experience}</p>
+          <h2 className="compact-showcase__section-title">{copy.experience}</h2>
           <div className="compact-showcase__entry-list">
             {snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => {
@@ -218,7 +218,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
     if (key === 'projects') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="projects" data-export-placement="main">
-          <p className="compact-showcase__section-title">{copy.projects}</p>
+          <h2 className="compact-showcase__section-title">{copy.projects}</h2>
           <div className="compact-showcase__entry-list">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -246,7 +246,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
     if (key === 'education') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="education" data-export-placement="main">
-          <p className="compact-showcase__section-title">{copy.education}</p>
+          <h2 className="compact-showcase__section-title">{copy.education}</h2>
           <div className="compact-showcase__entry-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => {
@@ -275,7 +275,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
     if (key === 'certificates') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="certificates" data-export-placement="main">
-          <p className="compact-showcase__section-title">{copy.certificates}</p>
+          <h2 className="compact-showcase__section-title">{copy.certificates}</h2>
           <div className="compact-showcase__entry-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -299,7 +299,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
     if (key === 'languages') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="languages" data-export-placement="main">
-          <p className="compact-showcase__section-title">{copy.languages}</p>
+          <h2 className="compact-showcase__section-title">{copy.languages}</h2>
           {snapshot.languages.length > 0 ? (
             <p className="compact-showcase__inline-list">
               {snapshot.languages.map((item, index) => (
@@ -321,7 +321,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
     if (key === 'links') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="links" data-export-placement="main">
-          <p className="compact-showcase__section-title">{copy.links}</p>
+          <h2 className="compact-showcase__section-title">{copy.links}</h2>
           {linkEntries.length > 0 ? (
             <div className="compact-showcase__link-row">
               {linkEntries.map(([linkKey, value]) => (
@@ -344,7 +344,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
     if (key === 'interests') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="interests" data-export-placement="main">
-          <p className="compact-showcase__section-title">{copy.interests}</p>
+          <h2 className="compact-showcase__section-title">{copy.interests}</h2>
           {snapshot.interests.length > 0 ? (
             <p className="compact-showcase__inline-list">
               {snapshot.interests.map((item, index) => (
@@ -378,6 +378,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
       className={`compact-showcase preview-document--designer compact-showcase--${density}${showTwoColumn ? ' compact-showcase--two-column' : ''}`}
+      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
     >
       <header data-export-header="true" className="compact-showcase__header">
         <div className="min-w-0">
@@ -413,7 +414,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
 
       {about ? (
         <section className="compact-showcase__section compact-showcase__section--summary" data-export-section="about" data-export-placement="main">
-          <p className="compact-showcase__section-title">{copy.summary}</p>
+          <h2 className="compact-showcase__section-title">{copy.summary}</h2>
           <p className="compact-showcase__summary">{about}</p>
         </section>
       ) : null}

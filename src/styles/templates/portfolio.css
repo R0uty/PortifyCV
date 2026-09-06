@@ -112,7 +112,7 @@
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.1;
-  color: var(--pf-slate);
+  color: var(--cv-heading-color, var(--pf-slate));
 }
 
 .portfolio-showcase__role {
@@ -238,7 +238,7 @@
 .portfolio-showcase__section-title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--pf-slate);
+  color: var(--cv-heading-color, var(--pf-slate));
 }
 
 .portfolio-showcase__section-subtitle {

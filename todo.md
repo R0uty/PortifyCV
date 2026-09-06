@@ -673,19 +673,30 @@ rename pass.
 - [x] **26b. `check:feedback` wasn't wired into CI** — found and fixed
       during the same audit pass. `.github/workflows/ci.yml`'s `checks` job
       now runs it alongside `check:reducers`/`check:share`.
-- [ ] **26. Zero e2e coverage for the six features shipped in the
-      2026-08-15 session** (items 19-25: ATS keyword breakdown, cover
-      letter generator, badge, session restore, per-template
-      code-splitting, plus the landing-page privacy rewrite). Each has
-      `check:reducers` coverage for its state transitions and was manually
-      verified in a real browser at implementation time, but none has a
-      Playwright spec — unlike the core editor/export/landing/template/
-      responsive flows in `e2e/`, all of which do. Flagged as a real gap in
-      `audit-1.0.3.md`'s "Known limitations," not yet closed. Candidates
-      for new specs: cover letter generate/copy/download, badge
-      copy-to-clipboard, session-restore survives a reload, mobile Cover
-      letter button opens the modal (already verified once via DOM query
-      during the audit, but not locked in as a regression test).
+- [x] **26. Zero e2e coverage for the six features shipped in the
+      2026-08-15 session** (items 19-25). — done 2026-08-30. Added three
+      Playwright specs covering the four candidates this item named:
+      - `e2e/cover-letter.spec.js` (5 tests): generate a draft from the demo
+        CV and watch the export actions enable; the Company field flows into
+        the draft; copy-to-clipboard (with `clipboard-*` permission granted)
+        writes the letter and toasts; `.txt` download fires; and a
+        mobile-viewport test that the bottom action bar's "Cover letter"
+        button opens the modal (nav rail hidden below `lg`).
+      - `e2e/badge.spec.js` (2 tests): "Get the badge" opens the modal from
+        the template gallery (gallery closes behind it) with the live
+        preview link → `portifycv.app` and the snippet textarea; "Copy HTML"
+        writes the snippet and toasts.
+      - `e2e/session-restore.spec.js` (3 tests): off by default (nothing in
+        `sessionStorage`, no restore on reload); when enabled, the CV
+        survives a reload with a "Restored your last session" toast; turning
+        it back off clears the snapshot immediately. Toggle is clicked via
+        the visible `.toggle-switch` label (the `<input>` is 1×1 sr-only);
+        snapshot writes are awaited with `expect.poll` on `sessionStorage`,
+        not fixed sleeps.
+      ATS keyword breakdown, per-template code-splitting, and the landing
+      privacy copy were left uncovered — a build concern and static copy,
+      lower value for a browser test, and not in this item's candidate list.
+      Full suite: 31 passed. `npm run lint` clean.
 
 ## New templates — 2026-08-15
 
@@ -1699,6 +1710,253 @@ template-gallery thumbnails plus live full-size preview.
       single-page CV (Executive) still renders as one page with no
       spurious second page. `npm run lint`, `npm run build`,
       `check:share`, `check:reducers`, and `check:feedback` all pass.
+
+## Builder usability review — 2026-08-29
+
+Findings from an interactive walkthrough of the running app (dev server,
+demo CV loaded, Minimalist + Developer templates). Evidence is from the
+running app, not from reading code. Ordered by impact. None fixed yet.
+
+### High impact
+
+- [x] **39. The ATS-mode toggle exists in three separate places.** "Export
+      mode → Enable ATS mode" and "ATS score → ATS-friendly mode → Enable
+      ATS" sat ~400px apart *inside the same "Import & export mode"
+      disclosure*, looking like two near-identical controls; a third copy
+      lives in the Settings modal. — done 2026-08-29 (v1.1.1). Removed the
+      standalone "Export mode" `<section>` from the editor-tools panel
+      (`ResumeBuilderPage.jsx`) — it was pure duplication of the
+      "ATS-friendly mode" card rendered right below it by `ATSScorePanel`.
+      Kept two controls in *distinct* contexts: the card in the ATS score
+      panel (where the score it changes is on screen) and the Settings
+      toggle (the mode's natural home) — three near-identical buttons, two
+      in one panel, was the real problem, not two entry points in separate
+      places. Folded the dropped section's "leave it off for fully styled
+      exports" nuance into the ATS card's hint, which now also notes the
+      setting is mirrored in Settings (EN + FI). Verified in the running
+      app: the editor-tools panel now shows one ATS toggle, not two.
+      `npm run lint`, `npm run build`, `check:reducers`, `check:share` all
+      pass.
+
+- [x] **40. The whole analysis surface is buried under a disclosure
+      mislabeled "Import & export mode".** Expanding it revealed Quick
+      Import, Export mode, the full ATS score breakdown, Job-description
+      keyword match, *and* Smart Suggestions — nobody looking for their ATS
+      score would open a panel called "Import & export mode". — done
+      2026-08-29 (v1.1.2). Split the one `<details className="editor-tools">`
+      into two adjacent disclosures reusing the same class/CSS: **"Import
+      CV"** (the Quick Import section — paste snippet + import JSON) and
+      **"ATS score & suggestions"** (the `ATSScorePanel` + the
+      `CVSuggestionsPanel`), the latter keeping the `ATS <score>` /
+      `<n> suggestions` chips in its collapsed summary. Both still collapsed
+      by default. EN + FI labels. The stale "Import, export mode & ATS"
+      comment on `.editor-tools` in `app-shell.css` updated. Verified in the
+      running app: two disclosures, each expands to its own intact content.
+      `npm run lint`, `npm run build` pass.
+
+- [x] **41. "Missing keywords" recommended fragments of the user's own
+      employer names.** On the demo CV the ATS keyword card listed `atlas`,
+      `labs`, `north`, `studio` as "missing" keywords — torn out of "Atlas
+      Labs" / "Studio North" in the experience entries. — done 2026-08-29
+      (v1.1.3). `extractKeywords()` in `atsScore.js` built its target-term
+      list from title + skills + every experience entry's *role and
+      company*; dropped `company`. A company name isn't a role-relevant ATS
+      keyword and tokenizing it produced nonsense ("your CV is missing
+      'labs'"). Title and skills are the terms worth repeating in the
+      summary/bullets, and the current role's words already overlap
+      `snapshot.title`. Also feeds `analyzeJobDescription()`'s CV-term set —
+      harmless there (company tokens ~never match JD tokens). Verified on
+      the demo CV: missing keywords are now `senior, strategy, user,
+      research, figma, accessibility, prototyping` — all real skill/title
+      terms, no employer fragments. `npm run lint`, `npm run build`,
+      `check:feedback` pass.
+
+- [x] **42. The cover-letter draft textarea was ~2 lines tall.** — done
+      2026-08-29 (v1.1.4). Root cause: `CoverLetterModal.jsx`'s draft
+      textarea carried `className="min-h-72 ..."` but no `.min-h-72` rule
+      existed in `utilities.css` (only `min-h-28` / `min-h-32`), so the
+      class was inert and the textarea fell back to the UA default
+      `rows=2`. Added `[class~='min-h-72'] { min-height: 18rem; }` (matching
+      the Tailwind scale the class name implies). The textarea now opens at
+      ~288px — the whole generated letter is visible at once — and stays
+      user-resizable. Only `CoverLetterModal` used the class. Verified in
+      the running app with a generated draft. `npm run lint`, `npm run
+      build` pass.
+
+- [x] **43. "Reset form" wiped everything instantly — no confirm, no inline
+      undo.** — done 2026-08-29 (v1.1.5). "Reset form" is now a two-step
+      button (`ResumeBuilderPage.jsx`): the first click arms it — label
+      switches to "Confirm reset" / "Vahvista nollaus" and the button turns
+      solid red (`#b91c1c` inline; the `buttonDanger` token's
+      `hover:bg-red-500/10` class has no matching utility rule, so the
+      resting button had no danger cue at all) — and a second click within
+      `RESET_CONFIRM_WINDOW_MS` (4s) actually clears the form; otherwise it
+      disarms itself. The post-reset toast now also points at the recovery
+      path ("Restore it with the toolbar undo arrow" / FI equivalent) —
+      `FORM_ACTION.RESET_FORM` was already undoable, nothing said so. New
+      `resetConfirmArmed` state + a timeout ref cleaned up on unmount;
+      `aria-live="polite"` on the button so the label change is announced.
+      Verified in the running app: first click arms + reddens, second
+      resets + toasts, re-arm auto-disarms after 4s. `npm run lint`, `npm
+      run build`, `check:reducers` pass.
+
+### Medium
+
+- [x] **44. Section numbers (SECTION 00 … 01 … 06 … 13) confused.** — done
+      2026-08-29 (v1.1.6). The 21 section panels each passed a hardcoded
+      `eyebrow="Section 00".."Section 20"` to `PanelSection`; templates that
+      hide sections left the visible ones non-contiguous (06 → 13 on
+      Developer), reading as "sections 7-12 are hidden from me". Dropped all
+      21 `eyebrow` props from `CVForm.jsx`; `PanelSection` now renders the
+      eyebrow `<p>` (and its `mt-3`) only when the prop is non-empty, so the
+      section title sits flush at the card top. Wayfinding is unaffected —
+      the nav rail (which was never numbered) still tracks the active
+      section, and each card keeps its title + description + collapse
+      chevron. `eyebrow` kept as an optional prop for future use. Verified
+      in the running app: cards show just their titles, no numbers, no
+      layout gap. `npm run lint`, `npm run build` pass.
+
+- [x] **45. Premature validation.** — done 2026-08-29 (v1.1.7). The blank
+      form greeted returning visitors with "Full name is required" /
+      "Professional title is required" in red before they'd touched
+      anything. `CVForm.jsx` now tracks `identityTouched` per field, set on
+      the input's `onBlur`; the `error` prop (and `aria-invalid`) for the
+      two required identity fields is only passed once the field has been
+      left. The `required` asterisk on the label still shows immediately, so
+      the requirement is communicated without the alarm. `errors` is still
+      computed the same way in `ResumeBuilderPage.jsx` and consumed
+      elsewhere unchanged. Verified in the running app: no red on load;
+      focusing then leaving an empty Full name field shows the message.
+      `npm run lint`, `npm run build` pass.
+
+- [x] **46. Appearance controls were vaguely labelled / preset-less.** —
+      done 2026-08-29 (v1.1.8). Two changes:
+      (a) Toolbar's "Color" / "Väri" control relabelled **"Headings" /
+      "Otsikot"** — it only ever colored the name + section titles, never
+      body copy, and "Color" gave no hint of that.
+      (b) `CvHeadingColorSwitcher` now shows a row of 6 one-click presets
+      (`CV_HEADING_COLOR_PRESETS` in `cvHeadingColors.js` — Slate / Ink /
+      Navy / Burgundy / Forest / Violet, all dark and print-safe) above the
+      existing native color wheel + hex field, mirroring the accent-swatch
+      pattern already in `SettingsModal`. The trigger shows the preset's
+      name ("Navy") instead of a raw hex when one is active.
+      Deliberately did **not** move ATS mode or the template accent-color
+      rows out of Settings: ATS mode is an export/parsing mode, not
+      appearance, and the accent rows are template-conditional; the
+      toolbar's Template / Font / Headings trio is already a coherent
+      quick-styling cluster. Verified in the running app: label reads
+      "Headings", clicking the Navy preset turns every preview heading
+      `#1e40af` and the trigger reads "Navy". `npm run lint`, `npm run
+      build` pass.
+
+- [x] **47. The Links section rendered 15 platform fields, mostly empty**,
+      each with its own HIDE/SHOW button. — done 2026-08-29 (v1.1.9).
+      Presentational change, no data-model or reducer change (share-link
+      round-trip unaffected, `check:share` passes):
+      - The section now shows only the 4 common platforms
+        (`PRIMARY_LINK_KEYS` in `cvForm.js` — github/linkedin/portfolio/
+        website) plus any field that already holds a value. The other ~11
+        (Behance, ResearchGate, Hack The Box, TryHackMe, …) sit behind a
+        "Show more platforms (N)" / "Show fewer platforms" toggle
+        (`showAllLinks` local state).
+      - The per-field HIDE/SHOW button now renders only when that field has
+        a value — an empty field has nothing to hide from the CV, so the
+        button was pure clutter on the common empty fields.
+      Verified in the running app: blank form shows 4 fields + "Show more
+      (11)"; demo CV shows its 8 filled fields (each with a working HIDE)
+      + "Show more (7)"; toggling reveals/hides the rest. `npm run lint`,
+      `npm run build`, `check:share` pass.
+
+- [x] **48. "Section order & visibility" was control-dense and its toggle
+      affordance unclear.** — done 2026-08-29 (v1.1.10). Each row was
+      `[⋮⋮ DRAG] [ABOUT: ON]` (a filled button that reads as a label) `[UP]
+      [DOWN]` — four uppercase controls. Rebuilt each row as
+      `[⋮ handle] Section name … [▲] [▼] [toggle]`:
+      - The visibility control is now a real `ToggleSwitch` (the same
+        component Settings uses), not a button whose label doubles as
+        state.
+      - Section name is plain text; the drag affordance is the dot-grid
+        handle + `cursor-grab` (the "DRAG"/"RAAHAA" word is gone — the whole
+        row was already `draggable`).
+      - UP/DOWN are now compact `ChevronUp`/`ChevronDown` icon buttons
+        (`sectionMoveButtonClasses`) instead of chunky text buttons.
+      The Photo row below got the same treatment. `ToggleSwitch` gained an
+      optional `ariaLabel` prop (used here to name each switch
+      "<Section>: On/Off" without visible redundant text). Verified in the
+      running app: toggling a section off removes its preview heading;
+      the chevrons reorder rows and the preview follows. `npm run lint`,
+      `npm run build`, `check:reducers` pass.
+
+### Low / polish
+
+- [x] **49. Font picker was a 3-at-a-time arrow carousel.** — done
+      2026-08-29 (v1.1.11). `CvFontSwitcher` is now a plain vertical
+      dropdown list — all 7 fonts on one screen, each name set in its own
+      face (so the label *is* the preview, no duplicate small label),
+      active one marked with a check. Dropped the horizontal filmstrip, the
+      left/right nav arrows, the wheel-redirect handler, and the two-tier
+      card markup; `role="listbox"` / `role="option"` / `aria-selected`.
+      Verified in the running app: opens showing all 7 (Georgia / Times in
+      serif), selecting one closes the panel and restyles the preview.
+      `npm run lint`, `npm run build` pass.
+- [x] **50. Export menu (PDF / HTML / JSON) gave no hint what each format
+      is for.** — done 2026-08-29 (v1.1.12). Each item in the toolbar's
+      Export dropdown (`Toolbar.jsx`) now has a one-line hint under the
+      format name (EN + FI): PDF → "Print-ready CV, ready to send"; HTML →
+      "One web-page file, opens in any browser"; JSON → "Backup you can
+      import again later". Menu widened to 15rem; `.app-toolbar__export-item`
+      is now a flex column with an `-item-hint` sub-label. Mobile bottom
+      action bar left as-is (item 7's decision — its tight text buttons
+      don't have room). Verified in the running app. `npm run lint`, `npm
+      run build` pass.
+- [x] **51. Settings → "Manage" scrolled to the "Visible sections" panel
+      but left it collapsed.** — done 2026-08-29 (v1.1.13). `PanelSection`
+      gained an optional `expandSignal` prop — a changing value force-opens
+      the section (adjust-state-during-render pattern, same as
+      `CvHeadingColorSwitcher`). `ResumeBuilderPage` keeps a
+      `sectionSettingsExpandSignal` counter that `handleManageSections`
+      bumps alongside closing the modal and scrolling; it's threaded
+      through `CVForm` to the one collapsed-by-default "Visible sections"
+      panel. Verified in the running app: clicking "Manage" now lands on an
+      already-expanded panel. `npm run lint`, `npm run build`,
+      `check:reducers` pass.
+- [x] **52. In fullscreen preview the zoom +/- stepper was hidden behind
+      the "Exit fullscreen" button.** — done 2026-08-29 (v1.1.14). The Exit
+      button is `position: fixed` at top-right (z-61); the sticky zoom bar's
+      right-hand stepper group sat at the same spot. Added
+      `.preview-panel--fullscreen .preview-zoom-bar { padding-right: 9.5rem }`
+      so the stepper clears it. Verified in the running app: the stepper's
+      right edge is now ~100px clear of the Exit button, no overlap.
+      `npm run lint`, `npm run build` pass.
+- [x] **53. Switching templates kept the editor scroll position.** — done
+      2026-08-29 (v1.1.15). A template switch adds/removes editor sections;
+      if the user was scrolled deep in the form, that happened off-screen.
+      Added an effect keyed on `selectedTemplate` (skipping initial mount
+      via a ref) that jumps `editorScrollRef` to `top: 0` and resets the
+      active nav section to `personal`. `behavior: 'auto'`, not smooth —
+      it's a context change, and this project's Chrome test setup silently
+      no-ops programmatic smooth scrolls anyway (see
+      `[[chrome-smooth-scroll-noop]]`). Verified in the running app:
+      scrolled to 1500px, switched template, editor is back at 0. `npm run
+      lint`, `npm run build` pass.
+- [x] **54. "Responsive preview" was a misleading name.** — done
+      2026-08-29 (v1.1.16). The toggle shows the *template* squished to a
+      narrow width — not the HTML export's actual single-column mobile
+      layout, and the PDF is fixed-width — so "Responsive preview" oversold
+      it. Relabelled to **"Narrow preview" / "Kapea esikatselu"** with a
+      tooltip that says what it actually is: "Show the template at a narrow
+      width (like the HTML export on a phone)". Kept the feature — checking
+      how a long name or heading wraps at a narrow width is a real use —
+      rather than removing it, which is a product call. `npm run lint`,
+      `npm run build`, `check:share`, `check:reducers`, `check:feedback`
+      pass.
+
+### Read well, don't re-investigate (this pass)
+
+- Template gallery with real per-content thumbnails.
+- Live preview, undo/redo.
+- The ATS score detail itself, once found.
+- No console errors anywhere in the walkthrough.
 
 ## Checked and fine — don't re-investigate
 

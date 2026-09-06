@@ -12,9 +12,21 @@ function PanelSection({
   theme = 'dark',
   badge = null,
   defaultCollapsed = false,
+  // A changing value here force-expands the section — used when a control
+  // elsewhere (e.g. Settings → "Manage") jumps the user to a section that
+  // defaults collapsed.
+  expandSignal = 0,
 }) {
   const ui = getUiTheme(theme)
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed)
+  const [seenExpandSignal, setSeenExpandSignal] = useState(expandSignal)
+
+  if (expandSignal !== seenExpandSignal) {
+    setSeenExpandSignal(expandSignal)
+    if (isCollapsed) {
+      setIsCollapsed(false)
+    }
+  }
   const badgeClasses =
     badge?.tone === 'warning'
       ? 'bg-gray-100 text-gray-700'
@@ -27,8 +39,10 @@ function PanelSection({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="ds-kicker accent-text uppercase tracking-[0.14em]">{eyebrow}</p>
-          <div className="mt-3 flex items-start justify-between gap-3">
+          {eyebrow ? (
+            <p className="ds-kicker accent-text uppercase tracking-[0.14em]">{eyebrow}</p>
+          ) : null}
+          <div className={`flex items-start justify-between gap-3${eyebrow ? ' mt-3' : ''}`}>
             <h2 className={`ds-section-title font-bold uppercase tracking-[-0.02em] sm:text-2xl ${ui.textPrimary}`}>{title}</h2>
             {badge ? (
               <span className={`shrink-0 px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] ${badgeClasses}`}>

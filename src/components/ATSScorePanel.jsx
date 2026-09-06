@@ -74,8 +74,8 @@ function ATSScorePanel({
             <p className={`text-sm font-bold uppercase tracking-[0.04em] ${ui.textPrimary}`}>ATS-friendly mode</p>
             <p className={`mt-1 text-sm ${ui.textSecondary}`}>
                 {isFinnish
-                  ? 'Vaihda esikatselu yksinkertaiseen ATS-yhteensopivaan asetteluun.'
-                  : 'Switch the preview to a simplified, parser-safe layout with reduced styling.'}
+                  ? 'Vaihda esikatselu yksinkertaiseen ATS-yhteensopivaan asetteluun. Jätä pois päältä täysin tyyliteltyä vientiä varten. Sama valinta löytyy myös Asetuksista.'
+                  : 'Switch the preview to a simplified, parser-safe layout with reduced styling. Leave it off for fully styled template exports. Also in Settings.'}
             </p>
           </div>
           <button
@@ -132,7 +132,9 @@ function ATSScorePanel({
                   {missingKeywords.length > 0 ? (
                     <div>
                       <p className={`text-xs font-bold uppercase tracking-[0.14em] ${ui.textMuted}`}>
-                        {isFinnish ? 'Puuttuvat avainsanat' : 'Missing keywords'}
+                        {isFinnish
+                          ? 'Ei toistu yhteenvedossa tai kokemuksessa'
+                          : 'Not repeated in your summary or experience'}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {missingKeywords.slice(0, 12).map((keyword) => (

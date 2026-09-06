@@ -1,6 +1,6 @@
 import { CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, safeStorageGet } from '../utils/cvForm'
 import { defaultTemplateId, isValidTemplateId } from '../utils/cvTemplates'
-import { UI_LOCALE_STORAGE_KEY } from '../utils/designSystem'
+import { UI_LOCALE_STORAGE_KEY, UI_NAV_RAIL_COLLAPSED_STORAGE_KEY } from '../utils/designSystem'
 // Imported from the plain config object, not TimelineShowcase.jsx itself —
 // that component is React.lazy()-loaded (see CVPreview.jsx / item 25's
 // code-splitting), and a reducer importing it directly would pull it into
@@ -8,6 +8,8 @@ import { UI_LOCALE_STORAGE_KEY } from '../utils/designSystem'
 // imported eagerly everywhere via components/templates/index.js.
 import { TIMELINE_DEFAULT_ACCENT_COLOR } from '../components/templates/timeline'
 import { MODERN_ORANGE_DEFAULT_ACCENT_COLOR } from '../components/templates/modernOrange'
+import { DEFAULT_CV_FONT_ID } from '../utils/cvFonts'
+import { DEFAULT_CV_HEADING_COLOR } from '../utils/cvHeadingColors'
 
 export const UI_ACTION = {
   ADD_TOAST: 'ADD_TOAST',
@@ -27,6 +29,9 @@ export const UI_ACTION = {
   TOGGLE_SESSION_RESTORE: 'TOGGLE_SESSION_RESTORE',
   SET_TIMELINE_ACCENT_COLOR: 'SET_TIMELINE_ACCENT_COLOR',
   SET_MODERN_ORANGE_ACCENT_COLOR: 'SET_MODERN_ORANGE_ACCENT_COLOR',
+  SET_CV_FONT: 'SET_CV_FONT',
+  SET_CV_HEADING_COLOR: 'SET_CV_HEADING_COLOR',
+  TOGGLE_NAV_RAIL_COLLAPSED: 'TOGGLE_NAV_RAIL_COLLAPSED',
 }
 
 // A "Use this template" link from the Free CV Templates page (or any other
@@ -46,6 +51,7 @@ function readInitialTemplateId() {
 export function createInitialUiState(initialSession) {
   const storedLocale = safeStorageGet(UI_LOCALE_STORAGE_KEY).value
   const storedSessionRestore = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value
+  const storedNavRailCollapsed = safeStorageGet(UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, 'false').value
 
   return {
     selectedTemplate: readInitialTemplateId(),
@@ -63,6 +69,9 @@ export function createInitialUiState(initialSession) {
     sessionRestoreEnabled: storedSessionRestore === 'true',
     timelineAccentColor: TIMELINE_DEFAULT_ACCENT_COLOR,
     modernOrangeAccentColor: MODERN_ORANGE_DEFAULT_ACCENT_COLOR,
+    cvFontId: DEFAULT_CV_FONT_ID,
+    cvHeadingColor: DEFAULT_CV_HEADING_COLOR,
+    navRailCollapsed: storedNavRailCollapsed === 'true',
     toasts: initialSession.initialToast ? [initialSession.initialToast] : [],
   }
 }
@@ -119,6 +128,15 @@ export function uiReducer(state, action) {
 
     case UI_ACTION.SET_MODERN_ORANGE_ACCENT_COLOR:
       return { ...state, modernOrangeAccentColor: action.color }
+
+    case UI_ACTION.SET_CV_FONT:
+      return { ...state, cvFontId: action.fontId }
+
+    case UI_ACTION.SET_CV_HEADING_COLOR:
+      return { ...state, cvHeadingColor: action.color }
+
+    case UI_ACTION.TOGGLE_NAV_RAIL_COLLAPSED:
+      return { ...state, navRailCollapsed: !state.navRailCollapsed }
 
     default:
       return state

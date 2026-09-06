@@ -64,7 +64,7 @@ function SectionHead({ icon, title }) {
       <span className="executive-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
-      <p className="executive-showcase__section-title">{title}</p>
+      <h2 className="executive-showcase__section-title">{title}</h2>
     </div>
   )
 }
@@ -78,7 +78,7 @@ function Section({ id, placement, icon, title, children }) {
   )
 }
 
-export default function ExecutiveShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {} }) {
+export default function ExecutiveShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -473,7 +473,10 @@ export default function ExecutiveShowcase({ formData, locale = 'en', previewRef,
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
       className="executive-showcase preview-document--designer"
-      style={!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
+      style={{
+        ...(!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : null),
+        ...(headingColor ? { '--cv-heading-color': headingColor } : null),
+      }}
     >
       <aside className="executive-showcase__sidebar" data-export-secondary="true">
         <div className="executive-showcase__identity" data-export-header="true">

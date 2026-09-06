@@ -78,6 +78,7 @@
 [class~='min-h-0'] { min-height: 0; }
 [class~='min-h-28'] { min-height: 7rem; }
 [class~='min-h-32'] { min-height: 8rem; }
+[class~='min-h-72'] { min-height: 18rem; }
 [class~='h-auto'] { height: auto; }
 [class~='max-w-none'] { max-width: none; }
 [class~='mx-auto'] { margin-left: auto; margin-right: auto; }
@@ -627,13 +628,36 @@
     padding: 0;
   }
 
+  /* Gives the flex column below a definite height to distribute, instead of
+     nav/editor/preview each guessing the toolbar's height via `max-height:
+     calc(100dvh - 4rem)` — that guess broke as soon as the toolbar grew past
+     one row (it wraps on narrower desktop widths, and again whenever a new
+     toolbar control is added), leaving those panels taller than the space
+     actually left below it and clipping their bottom edge off-screen. With
+     .one-pager--builder's height fixed to the viewport, .app-shell (flex:1)
+     and .app-shell__surface (height:100% below) size themselves off
+     whatever the toolbar's *real* rendered height is, however tall that
+     turns out to be. */
+  .one-pager--builder {
+    height: 100vh;
+    height: 100dvh;
+  }
+
   .app-shell__surface {
     display: grid;
     grid-template-columns: var(--nav-width) minmax(0, 35fr) minmax(0, 45fr);
-    height: auto;
+    grid-template-rows: minmax(0, 1fr);
+    height: 100%;
+    /* Overrides the base rule's `min-height: 100dvh` — that floor is what
+       actually caused the cutoff (see the comment above): it forced this
+       element to be a full viewport tall no matter how much the toolbar
+       above it had already used, so `height: 100%` here was fighting a
+       min-height that always won. */
+    min-height: 0;
     max-width: 100%;
     border-radius: 0;
     overflow: hidden;
+    transition: grid-template-columns 180ms ease;
   }
 
   .app-shell__nav,
@@ -646,7 +670,8 @@
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--app-border);
-    max-height: calc(100dvh - 4rem);
+    height: 100%;
+    min-height: 0;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
@@ -655,7 +680,8 @@
   .app-shell__editor {
     border-right: 1px solid var(--app-border);
     border-bottom: 1px solid var(--app-border);
-    max-height: calc(100dvh - 4rem);
+    height: 100%;
+    min-height: 0;
     overflow: hidden;
   }
 
@@ -666,7 +692,8 @@
   }
 
   .app-shell__preview {
-    max-height: calc(100dvh - 4rem);
+    height: 100%;
+    min-height: 0;
     overflow: hidden;
   }
 
@@ -699,11 +726,16 @@
     display: none;
   }
 
-  .app-shell__surface {
-    height: 100%;
-    overflow: auto;
-  }
-
+  /* No height/overflow override here — ResumeBuilderPage.jsx stacks the
+     editor and preview as one long page-scrolled column below this
+     breakpoint (see its mobilePreviewVisible scroll-into-view effect), not
+     two independently-scrolling panes. A leftover `height: 100%; overflow:
+     auto;` used to sit here; it was inert in practice (.app-shell__surface
+     is a flex:1 child of .one-pager, which has no height cap, so the whole
+     column just grows to fit content and .app-shell__surface's height
+     always equals its own content height — overflow:auto never had
+     anything to scroll) but contradicted the comment above and the real
+     "one long page-scrolled column" behavior, so it's gone. */
   .app-shell__editor,
   .app-shell__preview {
     overflow: visible;
@@ -711,6 +743,21 @@
 
   .preview-zoom-bar {
     display: none;
+  }
+
+  /* The non-standard CSS `zoom` property (used to scale the CV preview —
+     see .preview-zoom-wrapper in app-shell.css) is well known to break
+     native touch scrolling in WebKit/iOS: an element with `zoom` applied
+     establishes its own hit-testing context that touch-drag scroll gestures
+     starting inside it don't reliably propagate out of, while gestures
+     starting outside it (e.g. right at the very top/bottom edge of the
+     screen, outside the zoomed box) scroll the page normally — exactly the
+     "only scrolls near the top/bottom" symptom this fixes. There's no
+     visual change from disabling it here: the zoom bar above is hidden on
+     mobile, so zoomPercent (ResumeBuilderPage.jsx) never leaves its 100%
+     default and --preview-zoom is always 1 on this breakpoint anyway. */
+  .preview-zoom-wrapper {
+    zoom: normal;
   }
 
   .editor-panel,
@@ -736,4 +783,10 @@
   }
 
   .project-header__container { padding-top: var(--space-3); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell__surface {
+    transition: none;
+  }
 }

@@ -45,7 +45,7 @@ function SectionHead({ icon, title }) {
       <span className="graduate-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
-      <p className="graduate-showcase__section-title">{title}</p>
+      <h2 className="graduate-showcase__section-title">{title}</h2>
     </div>
   )
 }
@@ -63,7 +63,7 @@ function Section({ id, placement, icon, title, tone, children }) {
   )
 }
 
-export default function GraduateShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {} }) {
+export default function GraduateShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -556,6 +556,7 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
       className="graduate-showcase preview-document--designer"
+      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
     >
       <header data-export-header="true" className="graduate-showcase__header">
         <div className="min-w-0">

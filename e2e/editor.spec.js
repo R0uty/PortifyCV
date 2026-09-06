@@ -25,7 +25,9 @@ test.describe('CV editor', () => {
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
     await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Alex Morgan')
 
+    // "Reset form" is a two-step button: first click arms it, second click clears.
     await page.getByRole('button', { name: 'Reset form' }).click()
+    await page.getByRole('button', { name: 'Confirm reset' }).click()
 
     await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('')
   })

@@ -1,11 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft,
   ChevronDown,
   Link2,
   Maximize2,
   Minimize2,
-  Printer,
   Redo2,
   Search,
   Settings,
@@ -15,6 +14,16 @@ import {
 
 import Logo from './Logo'
 import LocaleFlagIcon from './LocaleFlagIcon'
+import CvFontSwitcher from './CvFontSwitcher'
+import CvHeadingColorSwitcher from './CvHeadingColorSwitcher'
+
+// Lazy so Toolbar (statically imported by App.jsx, and rendered on every
+// static page's bundle boundary as a result) doesn't drag TemplateThumbnail's
+// full CVPreview dependency graph into the eagerly-loaded main chunk — it's
+// only ever needed once the builder is open. See CVPreview's own lazy
+// Showcase imports for the same reasoning. CvFontSwitcher has no such
+// dependency (just the small cvFonts.js registry) so it's imported eagerly.
+const TemplateQuickSwitcher = lazy(() => import('./TemplateQuickSwitcher'))
 
 function Toolbar({
   locale = 'en',
@@ -28,9 +37,13 @@ function Toolbar({
   selectedTemplateId = '',
   onSelectTemplate = () => {},
   templateSelectRef,
+  formDataRef,
+  cvFontId = '',
+  onCvFontChange = () => {},
+  cvHeadingColor = '',
+  onCvHeadingColorChange = () => {},
   searchQuery = '',
   onSearchChange = () => {},
-  onPrint = () => {},
   isFullscreenPreview = false,
   onToggleFullscreenPreview = () => {},
   isResponsivePreview = false,
@@ -181,19 +194,49 @@ function Toolbar({
         <div className="app-toolbar__spacer" />
 
         <div className="app-toolbar__group">
-          <select
-            ref={templateSelectRef}
-            className="app-toolbar__select"
-            value={selectedTemplateId}
-            onChange={(event) => onSelectTemplate(event.target.value)}
-            aria-label={isFinnish ? 'Valitse pohja' : 'Select template'}
-          >
-            {templates.map((template) => (
-              <option key={template.id} value={template.id}>
-                {template.label}
-              </option>
-            ))}
-          </select>
+          <div className="app-toolbar__control-cluster">
+            <div className="app-toolbar__labeled-control">
+              <span className="app-toolbar__control-label">{isFinnish ? 'Pohja' : 'Template'}</span>
+              <Suspense
+                fallback={(
+                  <span className="template-quick-switcher__trigger" aria-hidden="true">
+                    <span className="template-quick-switcher__trigger-label">
+                      {templates.find((template) => template.id === selectedTemplateId)?.label}
+                    </span>
+                  </span>
+                )}
+              >
+                <TemplateQuickSwitcher
+                  templates={templates}
+                  selectedTemplateId={selectedTemplateId}
+                  onSelectTemplate={onSelectTemplate}
+                  formDataRef={formDataRef}
+                  cvFontId={cvFontId}
+                  cvHeadingColor={cvHeadingColor}
+                  locale={locale}
+                  triggerRef={templateSelectRef}
+                />
+              </Suspense>
+            </div>
+
+            <div className="app-toolbar__labeled-control">
+              <span className="app-toolbar__control-label">{isFinnish ? 'Fontti' : 'Font'}</span>
+              <CvFontSwitcher
+                fontId={cvFontId}
+                onSelectFont={onCvFontChange}
+                locale={locale}
+              />
+            </div>
+
+            <div className="app-toolbar__labeled-control">
+              <span className="app-toolbar__control-label">{isFinnish ? 'Otsikot' : 'Headings'}</span>
+              <CvHeadingColorSwitcher
+                color={cvHeadingColor}
+                onSelectColor={onCvHeadingColorChange}
+                locale={locale}
+              />
+            </div>
+          </div>
 
           <button
             type="button"
@@ -202,18 +245,8 @@ function Toolbar({
             aria-label={isFinnish ? 'Vaihda kieli' : 'Switch language'}
             title={isFinnish ? 'Vaihda kieli' : 'Switch language'}
           >
-            <LocaleFlagIcon locale={isFinnish ? 'en' : 'fi'} className="app-toolbar__locale-flag" />
-            {isFinnish ? 'EN' : 'FI'}
-          </button>
-
-          <button
-            type="button"
-            className="app-toolbar__icon-button"
-            onClick={onPrint}
-            aria-label={isFinnish ? 'Tulosta' : 'Print'}
-            title={isFinnish ? 'Tulosta' : 'Print'}
-          >
-            <Printer size={16} strokeWidth={2} aria-hidden="true" />
+            <LocaleFlagIcon locale={isFinnish ? 'fi' : 'en'} className="app-toolbar__locale-flag" />
+            {isFinnish ? 'FI' : 'EN'}
           </button>
 
           <button
@@ -221,8 +254,10 @@ function Toolbar({
             className={`app-toolbar__icon-button${isResponsivePreview ? ' app-toolbar__icon-button--active' : ''}`}
             onClick={onToggleResponsivePreview}
             aria-pressed={isResponsivePreview}
-            aria-label={isFinnish ? 'Responsiivinen esikatselu' : 'Responsive preview'}
-            title={isFinnish ? 'Responsiivinen esikatselu' : 'Responsive preview'}
+            aria-label={isFinnish ? 'Kapea esikatselu' : 'Narrow preview'}
+            title={isFinnish
+              ? 'Näytä pohja kapealla leveydellä (kuten HTML-vienti puhelimessa)'
+              : 'Show the template at a narrow width (like the HTML export on a phone)'}
           >
             <Smartphone size={16} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -289,6 +324,9 @@ function Toolbar({
                   onClick={() => handleExportSelect('pdf-designer')}
                 >
                   PDF
+                  <span className="app-toolbar__export-item-hint">
+                    {isFinnish ? 'Tulostusvalmis CV, valmis lähetettäväksi' : 'Print-ready CV, ready to send'}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -298,6 +336,9 @@ function Toolbar({
                   onClick={() => handleExportSelect('html')}
                 >
                   HTML
+                  <span className="app-toolbar__export-item-hint">
+                    {isFinnish ? 'Yksi verkkosivutiedosto, avautuu selaimessa' : 'One web-page file, opens in any browser'}
+                  </span>
                 </button>
                 <button
                   type="button"
@@ -307,6 +348,9 @@ function Toolbar({
                   onClick={() => handleExportSelect('json')}
                 >
                   JSON
+                  <span className="app-toolbar__export-item-hint">
+                    {isFinnish ? 'Varmuuskopio, jonka voi tuoda takaisin' : 'Backup you can import again later'}
+                  </span>
                 </button>
               </div>
             ) : null}

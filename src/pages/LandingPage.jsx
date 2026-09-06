@@ -1,4 +1,7 @@
 import { lazy, Suspense } from 'react'
+import InternalNavLink from '../components/InternalNavLink'
+import { cvTemplates } from '../utils/cvTemplates'
+import { ROUTES } from '../utils/routes'
 
 // Lazy-loaded so the landing page's critical-path bundle doesn't carry
 // CVPreview + the template registry just for this one below-the-fold
@@ -9,18 +12,31 @@ import { lazy, Suspense } from 'react'
 // to "Start building" isn't re-downloading it from scratch.
 const LandingTemplatesPreview = lazy(() => import('../components/LandingTemplatesPreview'))
 
+// Same lazy-loading reasoning as LandingTemplatesPreview above, but this one
+// is above the fold — the Suspense fallback below is a same-shaped
+// placeholder (not null) so there's no layout shift while the shared
+// CVPreview chunk downloads.
+const LandingHeroPreview = lazy(() => import('../components/LandingHeroPreview'))
+
+// Read off the template registry instead of a hardcoded number — this
+// count previously drifted out of sync with cvTemplates.js (copy said 13,
+// the registry had grown to 14) after a template was added without the
+// landing page being updated to match.
+const TEMPLATE_COUNT = cvTemplates.length
+
 function getLandingCopy(locale) {
   if (locale === 'fi') {
     return {
       kicker: 'Ei kirjautumista. Ei tallennettua dataa.',
       startButton: 'Aloita rakentaminen',
+      howItWorksLink: 'Katso miten se toimii',
       title: 'Rakenna CV:si. Ota se mukaan. Siinä kaikki.',
       subtitle: 'Ei tiliä, ei kirjautumista, ei mitään tallennettua — kaikki tapahtuu tässä selaimessasi ja katoaa, kun suljet välilehden.',
       previewAlt: 'Esimerkki PortifyCV:llä rakennetusta CV:stä',
       highlights: [
         'Ei tiliä, ei kirjautumista — aloita kirjoittaminen heti',
         'Mitään kirjoittamastasi ei koskaan lähetetä selaimestasi',
-        '13 pohjaa — vaihda milloin vain sisältöä menettämättä',
+        `${TEMPLATE_COUNT} pohjaa — vaihda milloin vain sisältöä menettämättä`,
         'ATS-pisteytys ja avainsanaehdotukset',
         'Vie PDF-, HTML- tai JSON-muodossa — sitten se on poissa',
       ],
@@ -40,13 +56,13 @@ function getLandingCopy(locale) {
         },
       ],
       templatesTitle: 'Katso pohjat',
-      templatesSubtitle: 'Kaikki 13 asettelua yhdellä silmäyksellä — vaihda milloin tahansa rakentaessasi, ilman että sisältösi katoaa.',
+      templatesSubtitle: `Kaikki ${TEMPLATE_COUNT} asettelua yhdellä silmäyksellä — vaihda milloin tahansa rakentaessasi, ilman että sisältösi katoaa.`,
       templatesCta: 'Selaa kaikkia pohjia',
       faqTitle: 'Usein kysytyt kysymykset',
       faq: [
         {
           q: 'Onko PortifyCV oikeasti ilmainen?',
-          a: 'Kyllä. Ei tilausmaksua, ei vesileimaa, ei piilotettuja rajoituksia — kaikki 13 pohjaa ja kaikki vientimuodot ovat käytössä ilmaiseksi.',
+          a: `Kyllä. Ei tilausmaksua, ei vesileimaa, ei piilotettuja rajoituksia — kaikki ${TEMPLATE_COUNT} pohjaa ja kaikki vientimuodot ovat käytössä ilmaiseksi.`,
         },
         {
           q: 'Tarvitsenko tilin?',
@@ -79,13 +95,14 @@ function getLandingCopy(locale) {
   return {
     kicker: 'No login. No data saved.',
     startButton: 'Start building',
+    howItWorksLink: 'See how it works',
     title: 'Build your CV. Take it. That’s it.',
     subtitle: 'No login, no account, nothing saved — everything happens right here in your browser, and disappears the moment you close the tab.',
     previewAlt: 'Example CV built with PortifyCV',
     highlights: [
       'No account, no login — start typing immediately',
       'Nothing you type ever leaves your browser',
-      '13 templates — swap anytime without losing your content',
+      `${TEMPLATE_COUNT} templates — swap anytime without losing your content`,
       'ATS scoring with keyword suggestions',
       'Export to PDF, HTML, or JSON — then it’s gone',
     ],
@@ -101,17 +118,17 @@ function getLandingCopy(locale) {
       },
       {
         heading: 'Built for applicant tracking systems',
-        body: 'Toggle ATS mode for a layout parsers can actually read — no columns, icons, or tables to trip them up — plus keyword scoring that shows what your CV is missing.',
+        body: 'Toggle ATS mode for a layout that parsers can actually read — no columns, icons, or tables to trip them up — plus keyword scoring that shows what your CV is missing.',
       },
     ],
     templatesTitle: 'See the templates',
-    templatesSubtitle: 'All 13 layouts at a glance — swap between them any time while you build, without losing your content.',
+    templatesSubtitle: `All ${TEMPLATE_COUNT} layouts at a glance — swap between them any time while you build, without losing your content.`,
     templatesCta: 'Browse all templates',
     faqTitle: 'Frequently asked questions',
     faq: [
       {
         q: 'Is PortifyCV really free?',
-        a: 'Yes. No subscription, no watermark, no hidden limits — all 13 templates and every export format are free to use.',
+        a: `Yes. No subscription, no watermark, no hidden limits — all ${TEMPLATE_COUNT} templates and every export format are free to use.`,
       },
       {
         q: 'Do I need to create an account?',
@@ -163,14 +180,19 @@ function LandingPage({
           <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
             {copy.startButton}
           </button>
+          <InternalNavLink
+            to={ROUTES.howToUse}
+            onNavigate={() => onNavigateToView('howToUse')}
+            className="landing-hero__link"
+          >
+            {copy.howItWorksLink}
+          </InternalNavLink>
         </div>
 
         <div className="landing-preview">
-          <img
-            src="/PortifyCV2.jpg"
-            alt={copy.previewAlt}
-            className="landing-preview__image"
-          />
+          <Suspense fallback={<div className="landing-preview__placeholder" aria-hidden="true" />}>
+            <LandingHeroPreview locale={locale} label={copy.previewAlt} />
+          </Suspense>
         </div>
       </div>
 

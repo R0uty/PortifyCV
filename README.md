@@ -227,7 +227,7 @@ Modern browsers (Chrome, Firefox, Safari, Edge) with ES2020+ support.
 
 ## Project Documentation
 
-- [`CHANGELOG.md`](CHANGELOG.md) — release history
+- [`changes.md`](changes.md) — running change log
 - [`docs/audit-1.0.0.md`](docs/audit-1.0.0.md) — the 1.0.0 pre-release audit: what
   was checked, what was fixed, and which behaviours are deliberate
 - [`docs/audit-1.0.1.md`](docs/audit-1.0.1.md) — the 1.0.1 pass: template-gated

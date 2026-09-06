@@ -44,20 +44,14 @@ const CATEGORY_COLOR = {
 // can't know each individual technology's "correct" color ahead of time.
 const CHIP_COLORS = ['blue', 'teal', 'purple', 'orange', 'green', 'pink']
 
-// Gradient background per section icon badge.
-const SECTION_ICON_GRADIENT = {
-  about: 'linear-gradient(135deg, var(--dev-blue), var(--dev-purple))',
-  experience: 'linear-gradient(135deg, var(--dev-teal), var(--dev-blue))',
-  projects: 'linear-gradient(135deg, var(--dev-purple), var(--dev-pink))',
-  achievements: 'linear-gradient(135deg, var(--dev-orange), var(--dev-pink))',
-  openSource: 'linear-gradient(135deg, var(--dev-teal), var(--dev-green))',
-  publications: 'linear-gradient(135deg, var(--dev-blue), var(--dev-teal))',
-  skills: 'linear-gradient(135deg, var(--dev-blue), var(--dev-teal))',
-  links: 'linear-gradient(135deg, var(--dev-purple), var(--dev-blue))',
-  certificates: 'linear-gradient(135deg, var(--dev-green), var(--dev-teal))',
-  education: 'linear-gradient(135deg, var(--dev-orange), var(--dev-purple))',
-  languages: 'linear-gradient(135deg, var(--dev-pink), var(--dev-purple))',
-}
+// Gradient background for every section-icon badge. Previously a different
+// color pair per section, cycling through the full --dev-* palette (blue,
+// purple, pink, orange, green...) with no logic behind which section got
+// which pair — read as random rather than deliberate. Now the same
+// teal → blue → purple gradient the template already uses for the name
+// text, the photo ring, and every section divider (developer.css), so the
+// badges tie into that existing signature instead of introducing more hues.
+const SECTION_ICON_GRADIENT = 'linear-gradient(135deg, var(--dev-teal), var(--dev-blue), var(--dev-purple))'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -66,19 +60,19 @@ function splitToBullets(text) {
 function SectionHeading({ icon, label, tone }) {
   return (
     <div>
-      <div
+      <h2
         className="dev-showcase__section-title"
         style={{ color: tone === 'sidebar' ? '#f1f5f9' : 'var(--dev-primary)' }}
       >
         <span
           className="dev-showcase__section-icon"
-          style={{ background: SECTION_ICON_GRADIENT[icon] || 'var(--dev-blue)' }}
+          style={{ background: SECTION_ICON_GRADIENT }}
           aria-hidden="true"
         >
           {sectionIcons[icon]}
         </span>
         {label}
-      </div>
+      </h2>
       <div className="dev-showcase__section-divider" aria-hidden="true" />
     </div>
   )

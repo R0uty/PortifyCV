@@ -888,7 +888,8 @@ select.floating-field__control {
   background: var(--app-surface-strong);
 }
 
-/* Collapsed "Import, export mode & ATS" disclosure above the CV form. */
+/* Collapsed disclosures above the CV form ("Import CV" and "ATS score &
+   suggestions") — same styling, one class, rendered once each. */
 .editor-tools {
   border: 1px solid var(--app-border);
   border-radius: var(--radius-sm);
@@ -1176,6 +1177,12 @@ select.floating-field__control {
   margin-inline: auto;
 }
 
+/* In fullscreen the "Exit fullscreen" button is fixed at top-right and
+   overlaps the zoom bar's right-hand +/- stepper — reserve room for it. */
+.preview-panel--fullscreen .preview-zoom-bar {
+  padding-right: 9.5rem;
+}
+
 .preview-scroll {
   display: flex;
   flex: 1 1 auto;
@@ -1212,12 +1219,104 @@ select.floating-field__control {
   .project-header__content { padding: var(--space-2) var(--space-6); }
 }
 
+.project-header__nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: rgba(15, 15, 25, 0.05);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+}
+
+.project-header__link {
+  color: var(--app-text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.project-header__link:hover {
+  color: var(--app-text);
+  background: rgba(15, 15, 25, 0.06);
+}
+
+.project-header__link[aria-current='page'] {
+  color: var(--accent-contrast);
+  background: var(--accent-solid);
+}
+
+.project-header__link[aria-current='page']:hover {
+  background: var(--accent-solid-hover);
+}
+
 /* Full PortifyCV.jpg lockup (icon + wordmark), shown at a size where the
    wordmark text is actually legible — unlike the compact icon-only mark used
    in the builder toolbar and nav rail, this header has room for it. */
 .project-header__logo {
   height: 3.75rem;
   width: auto;
+}
+
+/* Below 640px the pill's 7 links wrap across several rows inside their own
+   rounded background instead of staying a single row — the hamburger toggle
+   replaces it there and opens the same links as a plain list in a Modal
+   (see HeaderNav in App.jsx). Hidden by default so desktop never sees it. */
+.project-header__nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  color: var(--app-text);
+  cursor: pointer;
+}
+
+.project-header__nav-toggle:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .project-header__nav {
+    display: none;
+  }
+
+  .project-header__nav-toggle {
+    display: inline-flex;
+  }
+}
+
+.project-header__mobile-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.project-header__mobile-nav-link {
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--app-border);
+  color: var(--app-text);
+  font-size: var(--text-body);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.project-header__mobile-nav-link:last-child {
+  border-bottom: none;
+}
+
+.project-header__mobile-nav-link[aria-current='page'] {
+  color: var(--accent-solid);
 }
 
 /* ── App toolbar (builder top bar) ── */
@@ -1260,6 +1359,41 @@ select.floating-field__control {
 
 .app-toolbar__spacer {
   flex: 1 1 auto;
+}
+
+/* Groups the Template/Font/Color labeled controls with a gap wide enough
+   that each label reads as bound to its own dropdown, not the neighboring
+   one — the opposite arrangement (tight cross-group gap, loose in-group
+   gap) is what made the toolbar look like one crowded row instead of three
+   distinct fields. Keep this gap clearly larger than
+   .app-toolbar__labeled-control's own label-to-control gap below. */
+.app-toolbar__control-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* Wraps each dropdown with a tiny inline caption so it's clear at a glance
+   which is which, instead of a value-only button (e.g. "Minimalisti") with
+   no indication of what category it picks from. This gap must stay smaller
+   than .app-toolbar__control-cluster's gap above, so a label visually
+   belongs to the control right next to it. */
+.app-toolbar__labeled-control {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  padding-inline: 0.15rem;
+}
+
+.app-toolbar__control-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--app-text-subtle);
+  white-space: nowrap;
 }
 
 .app-toolbar__title {
@@ -1408,7 +1542,7 @@ select.floating-field__control {
   z-index: 40;
   display: flex;
   flex-direction: column;
-  min-width: 11rem;
+  min-width: 15rem;
   padding: 0.35rem;
   border: 1px solid var(--app-border);
   border-radius: var(--radius-sm);
@@ -1417,6 +1551,9 @@ select.floating-field__control {
 }
 
 .app-toolbar__export-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
   padding: 0.5rem 0.6rem;
   border-radius: calc(var(--radius-sm) - 2px);
   text-align: left;
@@ -1426,12 +1563,373 @@ select.floating-field__control {
   transition: background-color 140ms ease;
 }
 
+.app-toolbar__export-item-hint {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--app-text-muted);
+}
+
 .app-toolbar__export-item:hover:not(:disabled) {
   background: var(--app-surface-strong);
 }
 
 .app-toolbar__export-item:disabled {
   opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Template quick switcher (toolbar) ── */
+
+.template-quick-switcher {
+  position: relative;
+}
+
+.template-quick-switcher__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  height: 2.15rem;
+  max-width: 10rem;
+  padding: 0 0.6rem 0 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.template-quick-switcher__trigger:hover {
+  border-color: var(--app-border-strong);
+}
+
+.template-quick-switcher__trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.template-quick-switcher__panel {
+  /* top/left come from useAnchoredPanelPosition's inline style — see
+     TemplateQuickSwitcher.jsx — clamped to the viewport so the panel stays
+     on-screen even when the toolbar wraps and pushes the trigger toward
+     the left edge. `position: fixed` here is just the pre-measurement
+     fallback (the panel renders `visibility: hidden` until positioned) so
+     it's out of normal flow from the first frame and never nudges the rest
+     of the toolbar while its real size is being measured. */
+  position: fixed;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  width: min(calc(100vw - 2rem), 34rem);
+  padding: 0.6rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  background: var(--app-surface);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.2);
+}
+
+.template-quick-switcher__nav {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: var(--radius-pill);
+  color: var(--app-text-muted);
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.template-quick-switcher__nav:hover {
+  background: var(--app-surface-strong);
+  color: var(--app-text);
+}
+
+/* Horizontally scrollable filmstrip — trackpad swipe and the wheel handler
+   in TemplateQuickSwitcher both drive this via scrollLeft; scroll-snap just
+   settles the strip on a whole card afterward instead of stopping mid-card. */
+.template-quick-switcher__strip {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-behavior: smooth;
+  padding: 0.1rem;
+  scrollbar-width: none;
+}
+
+.template-quick-switcher__strip::-webkit-scrollbar {
+  display: none;
+}
+
+.template-quick-switcher__card {
+  flex: none;
+  width: 7.25rem;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  background: var(--app-surface);
+  overflow: hidden;
+  text-align: left;
+  transition: transform 140ms ease, border-color 140ms ease;
+}
+
+.template-quick-switcher__card:hover {
+  transform: translateY(-2px);
+  border-color: var(--app-border-strong);
+}
+
+.template-quick-switcher__card--active {
+  border-color: var(--accent-solid);
+  box-shadow: 0 0 0 1px var(--accent-solid);
+}
+
+.template-quick-switcher__label {
+  padding: 0.4rem 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.template-quick-switcher__card--active .template-quick-switcher__label {
+  color: var(--accent-text);
+}
+
+/* ── CV font switcher (toolbar) ── */
+
+.cv-font-switcher {
+  position: relative;
+}
+
+.cv-font-switcher__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  height: 2.15rem;
+  max-width: 11rem;
+  padding: 0 0.6rem 0 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.cv-font-switcher__trigger:hover {
+  border-color: var(--app-border-strong);
+}
+
+.cv-font-switcher__trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cv-font-switcher__panel {
+  /* See the comment on .template-quick-switcher__panel — top/left come from
+     useAnchoredPanelPosition (CvFontSwitcher.jsx), clamped to the viewport. */
+  position: fixed;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  width: min(calc(100vw - 2rem), 15rem);
+  max-height: min(60vh, 22rem);
+  overflow-y: auto;
+  padding: 0.35rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  background: var(--app-surface);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.2);
+}
+
+.cv-font-switcher__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  color: var(--app-text);
+  font-size: 0.95rem;
+  line-height: 1.2;
+  transition: background-color 120ms ease;
+}
+
+.cv-font-switcher__option:hover {
+  background: var(--app-surface-strong);
+}
+
+.cv-font-switcher__option--active {
+  background: var(--app-surface-strong);
+  color: var(--accent-text);
+}
+
+.cv-font-switcher__option-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── CV heading color switcher (toolbar) ── */
+
+.cv-heading-color-switcher {
+  position: relative;
+}
+
+.cv-heading-color-switcher__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  height: 2.15rem;
+  max-width: 10rem;
+  padding: 0 0.6rem 0 0.6rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.cv-heading-color-switcher__trigger:hover {
+  border-color: var(--app-border-strong);
+}
+
+.cv-heading-color-switcher__trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cv-heading-color-switcher__swatch {
+  flex: none;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  border: 1px solid var(--app-border);
+}
+
+.cv-heading-color-switcher__panel {
+  /* See the comment on .template-quick-switcher__panel — top/left come from
+     useAnchoredPanelPosition (CvHeadingColorSwitcher.jsx), clamped to the
+     viewport. */
+  position: fixed;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 13rem;
+  padding: 0.7rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  background: var(--app-surface);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.2);
+}
+
+.cv-heading-color-switcher__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.cv-heading-color-switcher__preset {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid var(--app-border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.cv-heading-color-switcher__preset--active {
+  box-shadow: 0 0 0 2px var(--app-bg), 0 0 0 4px var(--app-text);
+}
+
+.cv-heading-color-switcher__picker-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Strips the browser's own swatch chrome (border/padding) so the native
+   color input reads as a plain round swatch matching the trigger's — the
+   OS/browser picker it opens on click is untouched. */
+.cv-heading-color-switcher__native-input {
+  flex: none;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border: 1px solid var(--app-border);
+  border-radius: 50%;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+}
+
+.cv-heading-color-switcher__native-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.cv-heading-color-switcher__native-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.cv-heading-color-switcher__native-input::-moz-color-swatch {
+  border: none;
+  border-radius: 50%;
+}
+
+.cv-heading-color-switcher__hex-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 2.1rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  text-transform: lowercase;
+}
+
+.cv-heading-color-switcher__reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  height: 2rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  color: var(--app-text-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  transition: color 140ms ease, border-color 140ms ease;
+}
+
+.cv-heading-color-switcher__reset:hover:not(:disabled) {
+  color: var(--app-text);
+  border-color: var(--app-border-strong);
+}
+
+.cv-heading-color-switcher__reset:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -1445,17 +1943,32 @@ select.floating-field__control {
   gap: var(--space-4);
 }
 
-.nav-rail__brand {
-  display: flex;
+.nav-rail--collapsed {
   align-items: center;
-  gap: var(--space-2);
-  padding: 0 var(--space-2);
+  padding-inline: var(--space-2);
 }
 
-.nav-rail__brand-text {
-  font-weight: 800;
-  font-size: 0.9rem;
-  letter-spacing: -0.01em;
+.nav-rail__collapse-toggle {
+  display: inline-flex;
+  align-self: flex-end;
+  align-items: center;
+  justify-content: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  flex-shrink: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--app-text-muted);
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.nav-rail--collapsed .nav-rail__collapse-toggle {
+  align-self: center;
+}
+
+.nav-rail__collapse-toggle:hover {
+  background: var(--app-surface-strong);
   color: var(--app-text);
 }
 
@@ -1466,6 +1979,20 @@ select.floating-field__control {
   list-style: none;
   margin: 0;
   padding: 0;
+  width: 100%;
+}
+
+.nav-rail__group-label {
+  /* Pulls the label in against the list below it — .nav-rail's flex `gap`
+     already puts a full var(--space-4) above the label, so without this the
+     label would float in the middle of that gap instead of reading as a
+     heading for the items directly beneath it. */
+  margin: 0 0 calc(-1 * var(--space-4) + 0.35rem) var(--space-2);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-subtle);
 }
 
 .nav-rail__item {
@@ -1518,10 +2045,25 @@ select.floating-field__control {
   white-space: nowrap;
 }
 
+.nav-rail--collapsed .nav-rail__item {
+  justify-content: center;
+  gap: 0;
+  padding: 0.55rem;
+}
+
+.nav-rail--collapsed .nav-rail__item-label {
+  display: none;
+}
+
 .nav-rail__divider {
+  width: 100%;
   height: 1px;
   margin: 0 var(--space-2);
   background: var(--app-border);
+}
+
+.nav-rail--collapsed .nav-rail__divider {
+  margin: 0;
 }
 
 .nav-rail__footer {
@@ -1649,6 +2191,14 @@ select.floating-field__control {
   margin: 0 auto;
   box-shadow: var(--preview-paper-shadow);
   border: 1px solid var(--app-border);
+  /* Re-reads the --font-sans custom property so CvFontSwitcher's override
+     (set on .preview-zoom-wrapper, an ancestor) actually takes effect here.
+     Every bespoke *Showcase.jsx root already redeclares this the same way —
+     this is the shared flat renderer's root (ATS-friendly mode for every
+     template, plus the Minimal/techExec templates always), which otherwise
+     just inherits the already-resolved Inter font-family from :root and
+     ignores the font switcher entirely. */
+  font-family: var(--font-sans);
 }
 
 .landing-page {
@@ -1659,7 +2209,11 @@ select.floating-field__control {
   width: 100%;
   margin: 0;
   padding: clamp(4rem, 12vh, 8rem) var(--space-5) var(--space-10);
-  background: var(--app-bg);
+  background-color: var(--app-bg);
+  background-image:
+    linear-gradient(to right, var(--grid-paper-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-paper-line) 1px, transparent 1px);
+  background-size: var(--grid-paper-size) var(--grid-paper-size);
 }
 
 .builder-section {
@@ -1698,6 +2252,10 @@ select.floating-field__control {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--app-text-muted);
+}
+
+.site-footer__version {
+  opacity: 0.7;
 }
 
 .landing-grid {
@@ -1788,6 +2346,24 @@ select.floating-field__control {
   color: #111111;
 }
 
+/* Lightweight text link next to the hero's primary CTA — the hero is
+   left-aligned, so .landing-secondary-cta's centered block button (built
+   for the templates section below) doesn't fit here. */
+.landing-hero__link {
+  display: inline-block;
+  margin-top: var(--space-8);
+  margin-left: var(--space-5);
+  color: var(--app-text);
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.landing-hero__link:hover {
+  color: #111111;
+}
+
 /* Outline variant of .landing-cta — used where a section already has a
    primary action (e.g. "Start building" in the hero) and this is a
    secondary link to a full listing page, like the templates section's
@@ -1813,19 +2389,77 @@ select.floating-field__control {
 }
 
 /* A real picture of the result is the strongest conversion element for a
-   visual product. PortifyCV2.jpg is a pre-built marketing shot (logo,
-   wordmark, and a styled CV mockup), so it's just a plain image here — no
-   render-and-scale trick needed, unlike the template gallery thumbnails
-   (`.template-gallery__thumb-page`), which scale a live CVPreview instead. */
+   visual product — LandingHeroPreview renders an actual live CVPreview
+   (Minimalist, demo data) via the same TemplateThumbnail the gallery and
+   the marquee below use, scaled to fit .landing-preview__thumb's width. */
 .landing-preview {
   display: flex;
   justify-content: center;
+  /* The back thumbs are rotated ~11-14deg, so their corners poke past the
+     stack box; on a narrow phone that widened the whole page. Clip only the
+     x-axis — the downward drop shadow still needs to spill vertically. */
+  overflow-x: clip;
 }
 
-.landing-preview__image {
+.landing-preview__stack {
+  position: relative;
   width: 100%;
-  height: auto;
+  max-width: 26rem;
+  aspect-ratio: 6 / 5;
+}
+
+.landing-preview__thumb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 63%;
+  box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.3);
+}
+
+.landing-preview__thumb--front {
+  z-index: 3;
+  transform: translate(-50%, -50%) rotate(-4deg);
+  box-shadow: 0 32px 64px -28px rgba(0, 0, 0, 0.35);
+}
+
+.landing-preview__thumb--back-left {
+  z-index: 1;
+  left: 24%;
+  transform: translate(-50%, -50%) rotate(-14deg);
+  opacity: 0.92;
+}
+
+.landing-preview__thumb--back-right {
+  z-index: 2;
+  left: 76%;
+  top: 56%;
+  transform: translate(-50%, -50%) rotate(11deg);
+  opacity: 0.96;
+}
+
+/* Pull the fan in on phone-width screens so the clip above has almost
+   nothing to trim and the side thumbs read as whole cards. */
+@media (max-width: 479px) {
+  .landing-preview__stack {
+    max-width: 22rem;
+  }
+
+  .landing-preview__thumb--back-left {
+    left: 30%;
+  }
+
+  .landing-preview__thumb--back-right {
+    left: 70%;
+  }
+}
+
+.landing-preview__placeholder {
+  width: 100%;
+  max-width: 22rem;
+  aspect-ratio: 1 / 1.16;
   border-radius: var(--radius-sm);
+  background: var(--app-surface-strong);
+  border: 1px solid var(--app-border);
   box-shadow: 0 32px 64px -32px rgba(0, 0, 0, 0.3);
   transform: rotate(-3deg);
 }
@@ -1833,10 +2467,6 @@ select.floating-field__control {
 @media (max-width: 1023px) {
   .landing-grid {
     grid-template-columns: 1fr;
-  }
-
-  .landing-preview__image {
-    max-width: 32rem;
   }
 }
 
@@ -1867,6 +2497,31 @@ select.floating-field__control {
   color: var(--app-text-muted);
 }
 
+.landing-templates-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-3);
+}
+
+.landing-templates-marquee__toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  color: var(--app-text-muted);
+  cursor: pointer;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.landing-templates-marquee__toggle:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
 /* Stays within the same column as the section title/subtitle above it —
    only the track inside scrolls, clipped at these same left/right edges. */
 .landing-templates-marquee {
@@ -1895,7 +2550,8 @@ select.floating-field__control {
   animation: landing-templates-scroll 40s linear infinite;
 }
 
-.landing-templates-marquee:hover .landing-templates-track {
+.landing-templates-marquee:hover .landing-templates-track,
+.landing-templates-track--paused {
   animation-play-state: paused;
 }
 
@@ -1917,8 +2573,8 @@ select.floating-field__control {
 }
 
 .landing-templates-card {
-  flex: 0 0 8.5rem;
-  width: 8.5rem;
+  flex: 0 0 12rem;
+  width: 12rem;
 }
 
 /* Wraps TemplateThumbnail's own `.template-gallery__thumb-frame` (border,
@@ -2192,7 +2848,11 @@ select.floating-field__control {
   display: flex;
   justify-content: center;
   padding: clamp(3rem, 8vh, 5rem) var(--space-5) var(--space-10);
-  background: var(--app-bg);
+  background-color: var(--app-bg);
+  background-image:
+    linear-gradient(to right, var(--grid-paper-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-paper-line) 1px, transparent 1px);
+  background-size: var(--grid-paper-size) var(--grid-paper-size);
 }
 
 .legal-page__inner {

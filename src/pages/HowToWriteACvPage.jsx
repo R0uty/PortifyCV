@@ -1,5 +1,10 @@
 import InternalNavLink from '../components/InternalNavLink'
+import { cvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
+
+// Read off the template registry instead of a hardcoded number — see
+// LandingPage.jsx for why this drifted before.
+const TEMPLATE_COUNT = cvTemplates.length
 
 function getCopy(locale) {
   if (locale === 'fi') {
@@ -107,7 +112,7 @@ function getCopy(locale) {
           linkParagraphs: [
             {
               before: 'Katso kaikki ',
-              linkText: '13 ilmaista pohjaa',
+              linkText: `${TEMPLATE_COUNT} ilmaista pohjaa`,
               linkTo: ROUTES.freeTemplates,
               view: 'freeTemplates',
               after: '.',
@@ -224,7 +229,7 @@ function getCopy(locale) {
         linkParagraphs: [
           {
             before: 'See all ',
-            linkText: '13 free templates',
+            linkText: `${TEMPLATE_COUNT} free templates`,
             linkTo: ROUTES.freeTemplates,
             view: 'freeTemplates',
             after: '.',

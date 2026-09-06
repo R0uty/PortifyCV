@@ -3,8 +3,13 @@ import { useMemo } from 'react'
 import TemplateThumbnail from '../components/TemplateThumbnail'
 import InternalNavLink from '../components/InternalNavLink'
 import { buildThumbnailCv } from '../utils/thumbnailCv'
-import { getCvTemplates } from '../utils/cvTemplates'
+import { cvTemplates, getCvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
+
+// Read off the template registry instead of a hardcoded number — this
+// count previously drifted out of sync with cvTemplates.js after a
+// template was added without this page's copy being updated to match.
+const TEMPLATE_COUNT = cvTemplates.length
 
 function getCopy(locale) {
   if (locale === 'fi') {
@@ -12,7 +17,7 @@ function getCopy(locale) {
       kicker: 'Pohjat',
       title: 'Ilmaiset CV-pohjat',
       intro:
-        'Kaikki 13 pohjaa ovat täysin ilmaisia, ilman vesileimaa ja ilman tiliä. Vaihda pohjaa milloin tahansa rakentaessasi — sisältösi säilyy, vain asettelu vaihtuu.',
+        `Kaikki ${TEMPLATE_COUNT} pohjaa ovat täysin ilmaisia, ilman vesileimaa ja ilman tiliä. Vaihda pohjaa milloin tahansa rakentaessasi — sisältösi säilyy, vain asettelu vaihtuu.`,
       useTemplate: 'Käytä tätä pohjaa',
       notSureTitle: 'Et ole varma mistä aloittaa?',
       notSureBody:
@@ -31,7 +36,7 @@ function getCopy(locale) {
     kicker: 'Templates',
     title: 'Free CV Templates',
     intro:
-      'All 13 templates are completely free, with no watermark and no account. Swap templates any time while you build — your content stays, only the layout changes.',
+      `All ${TEMPLATE_COUNT} templates are completely free, with no watermark and no account. Swap templates any time while you build — your content stays, only the layout changes.`,
     useTemplate: 'Use this template',
     notSureTitle: 'Not sure where to start?',
     notSureBody:

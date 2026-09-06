@@ -123,7 +123,7 @@ Projects → Languages → Interests → Links. Skills, Experience, Projects, an
 Links were each in a different relative position.
 
 Not the same bug as the 1.0.0-era "section numbering skipped from 05 to 07"
-fix (`../CHANGELOG.md`) — that was a stray index; this is two independently
+fix (see `../changes.md`, 1.0.0 section) — that was a stray index; this is two independently
 hardcoded orderings that drifted apart over time.
 
 **Fix:** reordered `NAV_SECTIONS` to match `CVForm.jsx`'s real order, with a

@@ -31,7 +31,13 @@ const MAX_CAPTURE_PIXEL_AREA = 12_000_000
 // resume PDF from tens of MB (lossless PNG) down to a fraction of that.
 const PDF_PAGE_IMAGE_FORMAT = 'JPEG'
 const PDF_PAGE_IMAGE_MIME = 'image/jpeg'
-const PDF_PAGE_IMAGE_QUALITY = 0.85
+// Measured against real exports (2-4 page A4, 192-227 effective PPI): dropping
+// from 0.85 to 0.72 saves ~20% of file size with no visible difference at 100%
+// zoom, even on flat-color sidebar panels where JPEG banding would show up
+// first. Pushed further (0.65 tested) savings grow but the margin for
+// templates/content not covered by that test shrinks, so 0.72 is the
+// conservative stopping point.
+const PDF_PAGE_IMAGE_QUALITY = 0.72
 const PAGE_BREAK_SELECTOR = '[data-export-header], [data-export-section], [data-export-card], [data-export-skill="true"]'
 const COLOR_STYLE_PROPS = [
   'color',
