@@ -2944,6 +2944,67 @@ select.floating-field__control {
   border-radius: 0.2em;
 }
 
+/* "How to Use the CV Builder" — illustrated step walkthrough. */
+.builder-walkthrough {
+  list-style: none;
+  margin: var(--space-6) 0 0;
+  padding: 0;
+}
+
+.builder-walkthrough__step {
+  margin-top: var(--space-8);
+  padding-top: var(--space-7);
+  border-top: 1px solid var(--app-border-strong);
+}
+
+.builder-walkthrough__step:first-child {
+  margin-top: var(--space-6);
+  padding-top: 0;
+  border-top: 0;
+}
+
+.builder-walkthrough__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.builder-walkthrough__num {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--app-text-muted);
+}
+
+.builder-walkthrough__heading {
+  margin: 0;
+  font-size: var(--text-section);
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.builder-walkthrough__figure {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--app-border-strong);
+  background: #ffffff;
+}
+
+.builder-walkthrough__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.builder-walkthrough__caption {
+  margin-top: var(--space-4);
+  font-size: var(--text-body-sm);
+  line-height: 1.7;
+  color: var(--app-text-muted);
+}
+
 .preview-document__header {
   border-bottom: 1px solid var(--preview-divider);
 }
