@@ -1,31 +1,7 @@
 import Modal from './Modal'
 import ToggleSwitch from './fields/ToggleSwitch'
-
-// Preset swatches for the Modern Timeline template's customizable accent
-// color — a small curated set rather than a free-form color input, so
-// every choice stays "subtle" per that template's own design brief.
-const TIMELINE_ACCENT_SWATCHES = [
-  { color: '#6d28d9', label: { en: 'Violet', fi: 'Violetti' } },
-  { color: '#2563eb', label: { en: 'Blue', fi: 'Sininen' } },
-  { color: '#0d9488', label: { en: 'Teal', fi: 'Sinivihreä' } },
-  { color: '#059669', label: { en: 'Emerald', fi: 'Smaragdi' } },
-  { color: '#b45309', label: { en: 'Amber', fi: 'Meripihka' } },
-  { color: '#be123c', label: { en: 'Rose', fi: 'Ruusu' } },
-]
-
-// Preset swatches for the Modern Orange template's customizable accent
-// color — same "curated set, not free-form" reasoning as the Timeline
-// swatches above. Orange is first/default per that template's own design
-// brief; the rest give some room to adapt without breaking the template's
-// warm, premium feel.
-const MODERN_ORANGE_ACCENT_SWATCHES = [
-  { color: '#f28c00', label: { en: 'Orange', fi: 'Oranssi' } },
-  { color: '#d97706', label: { en: 'Amber', fi: 'Meripihka' } },
-  { color: '#c2410c', label: { en: 'Rust', fi: 'Ruoste' } },
-  { color: '#0d9488', label: { en: 'Teal', fi: 'Sinivihreä' } },
-  { color: '#1d4ed8', label: { en: 'Blue', fi: 'Sininen' } },
-  { color: '#be123c', label: { en: 'Rose', fi: 'Ruusu' } },
-]
+import { getTemplateAccent } from '../utils/cvTemplates'
+import { getAccentSwatches } from '../utils/templateAccents'
 
 function SettingsModal({
   isOpen,
@@ -37,10 +13,8 @@ function SettingsModal({
   sessionRestoreEnabled,
   onToggleSessionRestore,
   selectedTemplate,
-  timelineAccentColor,
-  onTimelineAccentColorChange,
-  modernOrangeAccentColor,
-  onModernOrangeAccentColorChange,
+  templateAccentColors,
+  onTemplateAccentColorChange,
 }) {
   const isFinnish = locale === 'fi'
 
@@ -91,59 +65,44 @@ function SettingsModal({
         <ToggleSwitch checked={sessionRestoreEnabled} onChange={onToggleSessionRestore} />
       </div>
 
-      {selectedTemplate === 'timeline' ? (
-        <div className="settings-row">
-          <div>
-            <p className="settings-row__label">{isFinnish ? 'Aikajanan aksenttiväri' : 'Timeline accent color'}</p>
-            <p className="settings-row__hint">
-              {isFinnish
-                ? 'Vain Moderni aikajana -pohjassa. Väri näkyy nimessä, otsikoissa, aikajanassa ja tunnisteissa.'
-                : 'Only for the Modern Timeline template. Colors the name, headings, timeline, and tags.'}
-            </p>
+      {(() => {
+        const accentConfig = getTemplateAccent(selectedTemplate)
+        if (!accentConfig) return null
+        const active = templateAccentColors[selectedTemplate] ?? accentConfig.default
+        return (
+          <div className="settings-row">
+            <div>
+              <p className="settings-row__label">{isFinnish ? 'Aksenttiväri' : 'Accent color'}</p>
+              <p className="settings-row__hint">
+                {isFinnish
+                  ? 'Väri näkyy nimessä, otsikoissa ja aksenteissa.'
+                  : 'Colors the name, headings, and accents.'}
+              </p>
+            </div>
+            <div className="settings-swatch-row" role="group" aria-label={isFinnish ? 'Aksenttiväri' : 'Accent color'}>
+              {getAccentSwatches(accentConfig.swatchSet).map((swatch) => {
+                // Compare case-insensitively: a template's `accent.default`
+                // and its swatch-set entries can differ only in hex case
+                // (e.g. Modern Orange's default `#F28C00` vs the warm set's
+                // `#f28c00`), which should still read as the same swatch.
+                const isActive = swatch.color.toLowerCase() === active.toLowerCase()
+                return (
+                  <button
+                    key={swatch.color}
+                    type="button"
+                    className={`settings-swatch${isActive ? ' settings-swatch--active' : ''}`}
+                    style={{ backgroundColor: swatch.color }}
+                    aria-pressed={isActive}
+                    aria-label={swatch.label[locale] ?? swatch.label.en}
+                    title={swatch.label[locale] ?? swatch.label.en}
+                    onClick={() => onTemplateAccentColorChange(swatch.color)}
+                  />
+                )
+              })}
+            </div>
           </div>
-          <div className="settings-swatch-row" role="group" aria-label={isFinnish ? 'Aikajanan aksenttiväri' : 'Timeline accent color'}>
-            {TIMELINE_ACCENT_SWATCHES.map((swatch) => (
-              <button
-                key={swatch.color}
-                type="button"
-                className={`settings-swatch${swatch.color === timelineAccentColor ? ' settings-swatch--active' : ''}`}
-                style={{ backgroundColor: swatch.color }}
-                aria-pressed={swatch.color === timelineAccentColor}
-                aria-label={swatch.label[locale] ?? swatch.label.en}
-                title={swatch.label[locale] ?? swatch.label.en}
-                onClick={() => onTimelineAccentColorChange(swatch.color)}
-              />
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {selectedTemplate === 'modernOrange' ? (
-        <div className="settings-row">
-          <div>
-            <p className="settings-row__label">{isFinnish ? 'Aksenttiväri' : 'Accent color'}</p>
-            <p className="settings-row__hint">
-              {isFinnish
-                ? 'Vain Moderni oranssi -pohjassa. Väri näkyy nimessä, otsikkomerkissä, aikajanoissa ja pisteytyksissä.'
-                : 'Only for the Modern Orange template. Colors the name, title badge, timelines, and dot ratings.'}
-            </p>
-          </div>
-          <div className="settings-swatch-row" role="group" aria-label={isFinnish ? 'Aksenttiväri' : 'Accent color'}>
-            {MODERN_ORANGE_ACCENT_SWATCHES.map((swatch) => (
-              <button
-                key={swatch.color}
-                type="button"
-                className={`settings-swatch${swatch.color === modernOrangeAccentColor ? ' settings-swatch--active' : ''}`}
-                style={{ backgroundColor: swatch.color }}
-                aria-pressed={swatch.color === modernOrangeAccentColor}
-                aria-label={swatch.label[locale] ?? swatch.label.en}
-                title={swatch.label[locale] ?? swatch.label.en}
-                onClick={() => onModernOrangeAccentColorChange(swatch.color)}
-              />
-            ))}
-          </div>
-        </div>
-      ) : null}
+        )
+      })()}
     </Modal>
   )
 }

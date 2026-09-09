@@ -66,6 +66,7 @@ import {
 import {
   getCvTemplates,
   getCvTemplate,
+  getTemplateAccent,
 } from '../utils/cvTemplates'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
@@ -360,8 +361,7 @@ function ResumeBuilderPage({
     coverLetterHiringManager,
     coverLetterBody,
     sessionRestoreEnabled,
-    timelineAccentColor,
-    modernOrangeAccentColor,
+    templateAccentColors,
     cvFontId,
     cvHeadingColor,
     navRailCollapsed,
@@ -947,13 +947,9 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.TOGGLE_SESSION_RESTORE })
   }, [])
 
-  const handleTimelineAccentColorChange = useCallback((color) => {
-    dispatchUi({ type: UI_ACTION.SET_TIMELINE_ACCENT_COLOR, color })
-  }, [])
-
-  const handleModernOrangeAccentColorChange = useCallback((color) => {
-    dispatchUi({ type: UI_ACTION.SET_MODERN_ORANGE_ACCENT_COLOR, color })
-  }, [])
+  const handleTemplateAccentColorChange = useCallback((color) => {
+    dispatchUi({ type: UI_ACTION.SET_TEMPLATE_ACCENT_COLOR, templateId: selectedTemplate, color })
+  }, [selectedTemplate])
 
   const handleToggleMobilePreview = useCallback(() => {
     dispatchUi({ type: UI_ACTION.TOGGLE_MOBILE_PREVIEW })
@@ -1793,8 +1789,7 @@ function ResumeBuilderPage({
                 template={selectedTemplate}
                 locale={locale}
                 atsFriendlyMode={atsFriendlyMode}
-                timelineAccentColor={timelineAccentColor}
-                modernOrangeAccentColor={modernOrangeAccentColor}
+                accentColor={templateAccentColors[selectedTemplate] ?? getTemplateAccent(selectedTemplate)?.default}
                 headingColor={cvHeadingColor}
               />
             </AppErrorBoundary>
@@ -1818,8 +1813,7 @@ function ResumeBuilderPage({
     isResponsivePreview,
     locale,
     selectedTemplate,
-    timelineAccentColor,
-    modernOrangeAccentColor,
+    templateAccentColors,
     zoomPercent,
     ui.button,
     ui.surface,
@@ -1967,10 +1961,8 @@ function ResumeBuilderPage({
         sessionRestoreEnabled={sessionRestoreEnabled}
         onToggleSessionRestore={handleToggleSessionRestore}
         selectedTemplate={selectedTemplate}
-        timelineAccentColor={timelineAccentColor}
-        onTimelineAccentColorChange={handleTimelineAccentColorChange}
-        modernOrangeAccentColor={modernOrangeAccentColor}
-        onModernOrangeAccentColorChange={handleModernOrangeAccentColorChange}
+        templateAccentColors={templateAccentColors}
+        onTemplateAccentColorChange={handleTemplateAccentColorChange}
       />
 
       <BadgeModal

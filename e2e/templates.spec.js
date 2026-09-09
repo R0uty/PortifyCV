@@ -50,6 +50,27 @@ test.describe('Template-gated sections', () => {
   })
 })
 
+test.describe('Template accent color', () => {
+  test('choosing a swatch recolors the Modern Timeline preview', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await selectTemplate(page, 'Modern Timeline')
+
+    await page.getByRole('button', { name: 'Settings' }).first().click()
+    // 'Blue' is the 2nd swatch in the 'cool' set (#2563eb)
+    await page.getByRole('button', { name: 'Blue', exact: true }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
+
+    const root = page.locator('.timeline-showcase').first()
+    // `--tl-accent` is an inline CSS custom property; browsers return it as
+    // authored (`#2563eb`), not normalized to rgb().
+    const accent = await root.evaluate((el) =>
+      getComputedStyle(el).getPropertyValue('--tl-accent').trim(),
+    )
+    expect(accent.toLowerCase()).toBe('#2563eb')
+  })
+})
+
 test.describe('Link URL formatting', () => {
   test('templates render link values without the https:// scheme', async ({ page }) => {
     await page.goto('/cv')

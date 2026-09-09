@@ -52,8 +52,10 @@ function CVPreview({
   template = 'minimal',
   locale = 'en',
   atsFriendlyMode = false,
-  timelineAccentColor,
-  modernOrangeAccentColor,
+  // Resolved accent color for the current template (from the app's
+  // per-template `templateAccentColors` map, falling back to the template
+  // registry's default). Only `timeline` and `modernOrange` consume it today.
+  accentColor,
   // Overrides the name and section-title color for every template except
   // Developer (animated gradient name), Colorful Compact (dark header, own
   // per-section rainbow identity), and Navy Professional's name (white on
@@ -166,7 +168,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
-          accentColor={timelineAccentColor}
+          accentColor={accentColor}
           atsFriendlyMode={atsFriendlyMode}
           headingColor={headingColor}
         />
@@ -312,7 +314,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
-          accentColor={modernOrangeAccentColor}
+          accentColor={accentColor}
           atsFriendlyMode={atsFriendlyMode}
           headingColor={headingColor}
         />
