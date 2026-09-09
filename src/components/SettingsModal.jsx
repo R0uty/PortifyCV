@@ -1,6 +1,6 @@
 import Modal from './Modal'
 import ToggleSwitch from './fields/ToggleSwitch'
-import { getTemplateAccent } from '../utils/cvTemplates'
+import { getTemplateAccent, resolveTemplateAccent } from '../utils/cvTemplates'
 import { getAccentSwatches } from '../utils/templateAccents'
 
 function SettingsModal({
@@ -13,7 +13,7 @@ function SettingsModal({
   sessionRestoreEnabled,
   onToggleSessionRestore,
   selectedTemplate,
-  templateAccentColors,
+  templateAccentColors = {},
   onTemplateAccentColorChange,
 }) {
   const isFinnish = locale === 'fi'
@@ -68,7 +68,7 @@ function SettingsModal({
       {(() => {
         const accentConfig = getTemplateAccent(selectedTemplate)
         if (!accentConfig) return null
-        const active = templateAccentColors[selectedTemplate] ?? accentConfig.default
+        const active = resolveTemplateAccent(templateAccentColors, selectedTemplate)
         return (
           <div className="settings-row">
             <div>
@@ -81,10 +81,11 @@ function SettingsModal({
             </div>
             <div className="settings-swatch-row" role="group" aria-label={isFinnish ? 'Aksenttiväri' : 'Accent color'}>
               {getAccentSwatches(accentConfig.swatchSet).map((swatch) => {
-                // Compare case-insensitively: a template's `accent.default`
-                // and its swatch-set entries can differ only in hex case
-                // (e.g. Modern Orange's default `#F28C00` vs the warm set's
-                // `#f28c00`), which should still read as the same swatch.
+                // Compare case-insensitively as a belt-and-suspenders guard
+                // against a future hex-case typo. The cvTemplates.js registry
+                // rule (accent.default is the lowercase hex of the template's
+                // *_DEFAULT_ACCENT_COLOR constant) now makes an exact match
+                // the norm, so this normally compares two already-equal strings.
                 const isActive = swatch.color.toLowerCase() === active.toLowerCase()
                 return (
                   <button

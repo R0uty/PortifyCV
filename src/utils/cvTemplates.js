@@ -3,6 +3,11 @@ export const defaultTemplateId = 'minimal'
 const templateMap = {
   minimal: {
     id: 'minimal',
+    // Wiring a new template's accent is a 3-step opt-in — see docs/template-design-system.md §6.
+    // `accent.default` must be the lowercase hex of that template's
+    // `*_DEFAULT_ACCENT_COLOR` constant in `src/components/templates/<id>.js`
+    // (same colour, exact string match — CSS hex is case-insensitive but the
+    // registry and the constant should agree exactly).
     accent: null,
     label: 'Minimalist',
     description: 'Typography only, thin dividers, contact details in the header — a clean, no-frills layout that works for any role.',
@@ -183,7 +188,7 @@ const templateMap = {
   },
   techExec: {
     id: 'techExec',
-    accent: null,
+    accent: null, // flat-renderer only — see §6
     label: 'Tech Executive',
     description: 'Annual-report layout with a timeline and a core-strengths sidebar, built for leadership-style narratives.',
     variant: 'techExec',
@@ -263,7 +268,7 @@ const templateMap = {
   },
   modernOrange: {
     id: 'modernOrange',
-    accent: { default: '#F28C00', swatchSet: 'warm' },
+    accent: { default: '#f28c00', swatchSet: 'warm' },
     label: 'Modern Orange',
     description: 'Premium two-column layout with a warm cream sidebar, orange accents, dot-rated skills, and timelines for education and experience — suits almost any profession.',
     variant: 'modernOrange',
@@ -464,8 +469,26 @@ export function isValidTemplateId(templateId) {
 
 // A template's accent-color config: `{ default, swatchSet }` for templates
 // that expose a customizable accent, or `null` for those that don't (yet).
+//
+// Registry rule: `accent.default` must be the lowercase hex of that
+// template's `*_DEFAULT_ACCENT_COLOR` constant in
+// `src/components/templates/<id>.js` — same colour, exact string match.
+// Adding this entry is only step 1 of a 3-step opt-in (registry entry →
+// CVPreview.jsx delegation forwards `accentColor` → the Showcase writes
+// `--tpl-accent` + an ATS-mode override); see docs/template-design-system.md
+// §6. Flat-renderer-only templates (no `*Showcase.jsx`, e.g. Tech Executive)
+// keep `accent: null` — the flat path uses Tailwind colour tokens, not hex.
 export function getTemplateAccent(templateId) {
   return templateMap[templateId]?.accent ?? null
+}
+
+// The accent color to render `templateId` with: the user's per-template
+// override from the UI reducer's `templateAccentColors` map, else the
+// template's registry default. One resolver for both call sites
+// (ResumeBuilderPage.jsx's CVPreview `accentColor` prop, SettingsModal's
+// active swatch).
+export function resolveTemplateAccent(templateAccentColors, templateId) {
+  return templateAccentColors?.[templateId] ?? getTemplateAccent(templateId)?.default
 }
 
 // `{ [templateId]: accent.default }` for every template with a non-null

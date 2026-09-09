@@ -66,7 +66,7 @@ import {
 import {
   getCvTemplates,
   getCvTemplate,
-  getTemplateAccent,
+  resolveTemplateAccent,
 } from '../utils/cvTemplates'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
@@ -1789,7 +1789,7 @@ function ResumeBuilderPage({
                 template={selectedTemplate}
                 locale={locale}
                 atsFriendlyMode={atsFriendlyMode}
-                accentColor={templateAccentColors[selectedTemplate] ?? getTemplateAccent(selectedTemplate)?.default}
+                accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
                 headingColor={cvHeadingColor}
               />
             </AppErrorBoundary>

@@ -302,17 +302,51 @@ named.
   Settings accent swatch writes the property; **exposing the swatch is the
   default**, and a template opts *out* explicitly when its concept is a fixed
   palette (Colorful Compact's capped rainbow; the ink-only Classic and
-  Minimalist), in which case the swatch hides for it. This replaces the
-  current situation, where only Modern Timeline and Modern Orange are
-  configurable and each uses its own private property name (`--tl-accent`,
-  `--mo-*`). The accent's soft/tonal derivative is **computed in JS at render
-  time from the chosen accent and written as a second inline custom property**
-  — the pattern Timeline's `accentColor` prop already uses. It is never a
-  second hardcoded hue, and never `color-mix()`/`oklch()`, which the export
-  pipeline cannot rasterize (§8). Templates also need an ATS-mode accent
-  value: Timeline's `TIMELINE_ATS_ACCENT_COLOR` is the precedent — a
-  user-chosen accent must not survive into ATS-friendly output unchanged if
-  it hurts contrast.
+  Minimalist), in which case the swatch hides for it.
+
+  **`accent.default` must be the lowercase hex of that template's
+  `*_DEFAULT_ACCENT_COLOR` constant** in `src/components/templates/<id>.js` —
+  same colour, exact string match, not merely case-insensitively equal.
+  `SettingsModal` still compares case-insensitively as a guard against a
+  future typo, but with this rule an exact match is the norm.
+
+  **Wiring a template's accent is a 3-step opt-in.** Adding the registry
+  entry alone ships a swatch that renders but recolors nothing — only step 1
+  is discoverable from `SettingsModal`:
+  1. Add the `accent: { default, swatchSet }` entry in `cvTemplates.js`.
+  2. In `CVPreview.jsx`, make that template's delegation forward
+     `accentColor={accentColor}` to its Showcase.
+  3. In the Showcase, accept the prop, write `--tpl-accent` (plus the
+     JS-computed soft derivative as a second inline property), and define an
+     ATS-mode override.
+
+  `resolveTemplateAccent(templateAccentColors, templateId)` in
+  `cvTemplates.js` is the single resolver both call sites use
+  (`ResumeBuilderPage.jsx`'s CVPreview `accentColor` prop and
+  `SettingsModal`'s active swatch): the user's per-template override, else
+  the registry default.
+
+  **Flat-renderer-only templates and ATS-mode rendering do not consume
+  `--tpl-accent`.** A template with no `*Showcase.jsx` (today: Tech
+  Executive) renders only through `CVPreview.jsx`'s flat path, whose
+  `t.accentColor()` returns Tailwind colour *names*, not hex, and which
+  ignores `accentColor` entirely. Such a template **opts out** for now —
+  `accent: null` with a `// flat-renderer only` note in its registry entry.
+  The same gap applies to every template's ATS-mode (flat) rendering.
+  Teaching the flat path to consume a hex `--tpl-accent` is out of scope for
+  A.1 and a candidate for a later pass.
+
+  The registry mechanism above already exists on this branch. The two
+  configurable templates (Modern Timeline, Modern Orange) still write their
+  own private properties (`--tl-accent`, `--mo-*`); the A-fix batch moves
+  each onto `--tpl-accent` as that template is reworked. The accent's
+  soft/tonal derivative is **computed in JS at render time from the chosen
+  accent and written as a second inline custom property** — the pattern
+  Timeline's `accentColor` prop already uses. It is never a second hardcoded
+  hue, and never `color-mix()`/`oklch()`, which the export pipeline cannot
+  rasterize (§8). Templates also need an ATS-mode accent value: Timeline's
+  `TIMELINE_ATS_ACCENT_COLOR` is the precedent — a user-chosen accent must
+  not survive into ATS-friendly output unchanged if it hurts contrast.
 - **Heading color override — `--cv-heading-color`** already exists
   (`src/utils/cvHeadingColors.js`) and every section-title rule reads it with
   its own color as the fallback: `color: var(--cv-heading-color, <default>)`.

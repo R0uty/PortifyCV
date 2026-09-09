@@ -1,6 +1,25 @@
 /* Shared template type ramp — see docs/template-design-system.md. Templates opt in by setting font-size: var(--tpl-…) and adding a density class to their root. Not yet adopted by every template (A-fix). */
 
+/* Canonical accent custom property: --tpl-accent (see docs/template-design-system.md §6).
+   No value set here — each Showcase root sets --tpl-accent inline from the
+   user's chosen swatch, or the template's registry default in cvTemplates.js. */
+
 :root {
+  /* `standard` density — also mirrored on .tpl-density-standard below. */
+  --tpl-name-size: 1.95rem;
+  --tpl-name-lh: 1.12;
+  --tpl-title-size: 0.95rem;
+  --tpl-heading-size: 0.75rem;
+  --tpl-entry-title-size: 1.00rem;
+  --tpl-body-size: 0.90rem;
+  --tpl-meta-size: 0.75rem;
+}
+
+/* Duplicates the :root `standard` values on purpose, so an author who writes
+   class="tpl-density-standard" on a showcase root (matching the doc's
+   "one density class per showcase root" model) gets a real selector match
+   rather than relying on inheritance from :root. */
+.tpl-density-standard {
   --tpl-name-size: 1.95rem;
   --tpl-name-lh: 1.12;
   --tpl-title-size: 0.95rem;
