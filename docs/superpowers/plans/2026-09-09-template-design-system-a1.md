@@ -117,7 +117,10 @@ check scripts (`scripts/check-*.mjs`).
      formatter (`formatDateRange`); one contact-row icon set + order;
      skills rendering (chips / inline-list / dot-rating) chosen per density
      class; accent color via the `--tpl-accent` custom property with a
-     per-template default declared in `cvTemplates.js`.
+     per-template default declared in `cvTemplates.js`. **Note for A-fix:**
+     `formatLinkDisplayValue()` is applied to the Links section in A.1;
+     Project and Certificate URL display (currently raw `https://…` in
+     several templates) is a per-template A-fix task, not A.1.
   7. **Content edge-case checklist** every template must pass: long name
      (with the narrow-column-floor note from memory), no photo, 1 job, 10
      jobs, missing optional sections, one very long single skill string,
@@ -225,12 +228,22 @@ test.describe('Link URL formatting', () => {
     for (const label of ['Compact', 'Navy Professional', 'Modern Timeline']) {
       await selectTemplate(page, label)
       const preview = page.locator('[data-export-root]')
-      await expect(preview.getByText('github.com/alexmorgan', { exact: false })).toBeVisible()
-      await expect(preview.getByText(/https:\/\//)).toHaveCount(0)
+      // Target the exact raw link strings, not a blanket /https:\/\// —
+      // the demo CV's Project entries legitimately render full project URLs
+      // (out of scope for A.1; those become a per-template A-fix item).
+      await expect(preview.getByText('linkedin.com/in/alexmorgan', { exact: false })).toBeVisible()
+      await expect(preview.getByText('https://linkedin.com/in/alexmorgan')).toHaveCount(0)
+      await expect(preview.getByText('https://github.com/alexmorgan')).toHaveCount(0)
     }
   })
 })
 ```
+
+If the demo CV's stored link values turn out not to carry the `https://`
+prefix (check `src/utils/cvForm.js` demo data), assert instead that each
+`<template>` renders `github.com/alexmorgan` with no leading scheme by
+reading the link element's text directly. The point of the test is: the
+Links section shows scheme-stripped values.
 
 - [ ] **Step 2: Run it and confirm it fails**
 
