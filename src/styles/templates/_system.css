@@ -1,0 +1,31 @@
+/* Shared template type ramp — see docs/template-design-system.md. Templates opt in by setting font-size: var(--tpl-…) and adding a density class to their root. Not yet adopted by every template (A-fix). */
+
+:root {
+  --tpl-name-size: 1.95rem;
+  --tpl-name-lh: 1.12;
+  --tpl-title-size: 0.95rem;
+  --tpl-heading-size: 0.75rem;
+  --tpl-entry-title-size: 1.00rem;
+  --tpl-body-size: 0.90rem;
+  --tpl-meta-size: 0.75rem;
+}
+
+.tpl-density-roomy {
+  --tpl-name-size: 2.30rem;
+  --tpl-name-lh: 1.10;
+  --tpl-title-size: 1.05rem;
+  --tpl-heading-size: 0.80rem;
+  --tpl-entry-title-size: 1.05rem;
+  --tpl-body-size: 0.95rem;
+  --tpl-meta-size: 0.80rem;
+}
+
+.tpl-density-compact {
+  --tpl-name-size: 1.65rem;
+  --tpl-name-lh: 1.15;
+  --tpl-title-size: 0.85rem;
+  --tpl-heading-size: 0.70rem;
+  --tpl-entry-title-size: 0.90rem;
+  --tpl-body-size: 0.82rem;
+  --tpl-meta-size: 0.70rem;
+}
