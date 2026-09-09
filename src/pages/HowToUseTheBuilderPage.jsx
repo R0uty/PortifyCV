@@ -1,3 +1,4 @@
+import BuilderWalkthroughFigure from '../components/BuilderWalkthroughFigure'
 import InternalNavLink from '../components/InternalNavLink'
 import { cvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
@@ -12,60 +13,62 @@ function getCopy(locale) {
       kicker: 'Opas',
       title: 'Näin käytät CV-editoria',
       intro:
-        'Tämä on läpikäynti itse työkalusta — mistä löydät kunkin ominaisuuden ja mihin se vaikuttaa. CV:n sisällön kirjoittamiseen katso ',
+        'Kuusi vaihetta tyhjästä valmiiseen CV:hen — mistä kukin toiminto löytyy ja mihin se vaikuttaa. Sisällön kirjoittamiseen katso ',
       introLink: {
         linkText: 'Näin kirjoitat CV:n',
         linkTo: ROUTES.howToWrite,
         view: 'howToWrite',
         after: '.',
       },
-      sections: [
+      steps: [
         {
-          heading: 'Siirry osioiden välillä vasemman reunan valikosta',
-          paragraphs: [
-            'Editorin vasemmassa reunassa oleva pystyvalikko listaa jokaisen CV-osion (yhteystiedot, yhteenveto, työkokemus, koulutus, taidot ja muut) sekä Asetukset-painikkeen. Jokainen osio voidaan piilottaa erikseen, jos se ei sovi tähän CV:hen — esikatselu oikealla päivittyy välittömästi jokaisen muutoksen jälkeen, joten näet tarkalleen miltä CV näyttää ennen kuin viet sen mihinkään.',
-          ],
+          step: 'sections',
+          heading: 'Täytä osiot',
+          figureLabel: 'Editorin asettelu: osiovalikko vasemmalla, lomake keskellä, esikatselu oikealla.',
+          caption:
+            'Vasemman reunan valikko listaa jokaisen osion ja vie siihen. Lomakkeen yläosassa olevasta Näkyvät osiot -paneelista voit kytkeä pois sen, mikä ei sovi tähän CV:hen — tiedot säilyvät joka tapauksessa. Oikean reunan esikatselu päivittyy kun kirjoitat.',
         },
         {
-          heading: 'Tarkista muotoilu ATS-tilalla ja avainsanapisteytyksellä',
-          paragraphs: [
-            'Työkalurivin "ATS-ystävällinen tila" -kytkin vaihtaa esikatselun tasaiseksi, yhden sarakkeen asetteluksi ilman kuvakkeita tai taulukoita — juuri sellaiseksi, jonka hakijaseurantajärjestelmät (ATS) osaavat lukea luotettavasti riippumatta siitä, mikä pohja on valittuna.',
-            'ATS-paneeli erikseen antaa liittää työpaikkailmoituksen tekstin: se vertaa ilmoituksen avainsanoja CV:si sisältöön ja näyttää, mitkä termit puuttuvat, jotta voit lisätä ne ennen lähettämistä.',
-          ],
+          step: 'bullets',
+          heading: 'Terävöitä kokemuskohdat',
+          figureLabel: 'Lomakekenttä, jossa yksi luettelokohta on merkitty huomiolipulla.',
+          caption:
+            'Kirjoittaessasi heikot kohdat merkitään suoraan kentän viereen: passiiviset ilmaukset kuten "vastuualueena", aloitukset jotka eivät ole vahva verbi, ja kohdat joista puuttuu mitattava luku. "ATS-pisteet ja ehdotukset" -paneeli laskee ne yhteen.',
         },
         {
-          heading: 'Käytä ehdotuspaneelia heikkojen kohtien löytämiseen',
-          paragraphs: [
-            'CV-ehdotukset-paneeli lukee kokemuskohtasi ja merkitsee suoraan muokattavan kentän viereen asiat, jotka kannattaa korjata: passiiviset ilmaukset kuten "vastuualueena", kohdat jotka eivät ala vahvalla verbillä, ja kohdat joista puuttuu mitattava luku kokonaan.',
-          ],
+          step: 'template',
+          heading: 'Valitse pohja — sisältösi pysyy ennallaan',
+          figureLabel: 'Kolme pohjakorttia rinnakkain, keskimmäinen valittuna.',
+          caption:
+            `Pohjan vaihtaminen ei koskaan kosketa tekstiäsi, joten kaikkien ${TEMPLATE_COUNT} pohjan kokeilu on turvallista. Jokainen pohja käyttää eri osioita — ne, joita pohja ei käytä, piilotetaan editorista ja esikatselusta kunnes vaihdat takaisin.`,
+          linkParagraph: {
+            before: 'Katso kaikki ',
+            linkText: `${TEMPLATE_COUNT} pohjaa`,
+            linkTo: ROUTES.freeTemplates,
+            view: 'freeTemplates',
+            after: ' etukäteen.',
+          },
         },
         {
-          heading: 'Vaihda pohjaa milloin vain — sisältösi pysyy ennallaan',
-          paragraphs: [
-            `Pohjan vaihtaminen ei koskaan kosketa tekstiäsi, joten kaikkien ${TEMPLATE_COUNT} pohjan kokeileminen ennen päätöstä on turvallista. Jokainen pohja tukee hieman eri osioita — esikatselu näyttää heti, jos jokin täyttämäsi osio ei näy valitussa pohjassa.`,
-          ],
-          linkParagraphs: [
-            {
-              before: 'Katso kaikki ',
-              linkText: `${TEMPLATE_COUNT} pohjaa`,
-              linkTo: ROUTES.freeTemplates,
-              view: 'freeTemplates',
-              after: ' etukäteen.',
-            },
-          ],
+          step: 'ats',
+          heading: 'Tarkista CV työpaikkailmoitusta vasten',
+          figureLabel: '"ATS-pisteet ja ehdotukset" -paneeli: ATS-ystävällinen tila -kytkin, ilmoitustekstin kenttä ja lista osuneista ja puuttuvista avainsanoista.',
+          caption:
+            'Avaa lomakekenttien yläpuolelta "ATS-pisteet ja ehdotukset" -paneeli. Sen "ATS-ystävällinen tila" -kytkin vaihtaa esikatselun tasaiseksi, yhden sarakkeen asetteluksi, jonka hakijaseurantajärjestelmät osaavat lukea, ja työpaikkailmoituksen liittäminen listaa avainsanat, jotka CV:stäsi vielä puuttuvat.',
         },
         {
+          step: 'export',
           heading: 'Vie tiedostoksi tai jaa linkkinä',
-          paragraphs: [
-            'Työkalurivin Vie-valikosta löytyy kolme muotoa: PDF tulostukseen ja hakemuksiin, HTML jaettavaksi verkossa, ja JSON varmuuskopioksi tai myöhempää muokkausta varten samassa editorissa.',
-            'Jakolinkki-painike koodaa koko CV:n suoraan URL-osoitteen fragmenttiin — sitä ei koskaan lähetetä palvelimelle. Kuvat eivät mahdu linkkiin, joten jos CV:ssäsi on profiilikuva, vie JSON, jos kuvan pitää säilyä vastaanottajalla.',
-          ],
+          figureLabel: 'Avattu Vie-valikko vaihtoehdoilla PDF, HTML ja JSON sekä jakolinkki.',
+          caption:
+            'Vie-valikossa on kolme muotoa: PDF hakemuksiin, HTML verkkoon ja JSON varmuuskopioksi tai myöhempää muokkausta varten. Jakolinkki koodaa koko CV:n URL-osoitteeseen — sitä ei lähetetä palvelimelle, eivätkä kuvat mahdu mukaan.',
         },
         {
-          heading: 'Ota käyttöön istunnon palautus, jos pelkäät vahinkopäivitystä',
-          paragraphs: [
-            'Oletuksena mitään CV:stäsi ei tallenneta minnekään — välilehden sulkeminen tai päivittäminen pyyhkii kaiken. Jos haluat suojan vahingossa tapahtuvaa päivitystä vastaan, ota Asetuksista käyttöön "Palauta viimeisin istunto": se pitää työkopiota vain kyseisessä selainvälilehdessä ja poistaa sen automaattisesti heti kun suljet välilehden.',
-          ],
+          step: 'restore',
+          heading: 'Suojaa työsi vahinkopäivitykseltä (valinnainen)',
+          figureLabel: 'Asetuspaneeli, jossa "Palauta viimeisin istunto" -kytkin on päällä.',
+          caption:
+            'Oletuksena mitään CV:stäsi ei tallenneta — välilehden sulkeminen pyyhkii kaiken. Ota Asetuksista käyttöön "Palauta viimeisin istunto": työkopio säilyy vain siinä välilehdessä ja poistuu heti kun suljet sen.',
         },
       ],
       ctaLabel: 'Aloita CV:si rakentaminen',
@@ -77,60 +80,62 @@ function getCopy(locale) {
     kicker: 'Guide',
     title: 'How to Use the CV Builder',
     intro:
-      'This is a walkthrough of the tool itself — where to find each feature and what it affects. For advice on what to actually write, see ',
+      'Six steps from blank to finished — where each feature lives and what it affects. For advice on what to actually write, see ',
     introLink: {
       linkText: 'How to Write a CV',
       linkTo: ROUTES.howToWrite,
       view: 'howToWrite',
       after: '.',
     },
-    sections: [
+    steps: [
       {
-        heading: 'Move between sections from the left-hand rail',
-        paragraphs: [
-          'The vertical rail on the left of the editor lists every CV section (contact info, summary, experience, education, skills, and the rest) plus a Settings button. Any section can be hidden individually if it doesn\'t belong on this CV — the live preview on the right updates instantly after every change, so you can see exactly what the CV looks like before exporting anything.',
-        ],
+        step: 'sections',
+        heading: 'Fill in your sections',
+        figureLabel: 'The editor layout: section rail on the left, form in the middle, live preview on the right.',
+        caption:
+          'The rail on the left lists every section and jumps to it. Use the Visible sections panel at the top of the form to switch off anything that doesn\'t apply — your data stays either way. The preview on the right updates as you type.',
       },
       {
-        heading: 'Check formatting with ATS mode and keyword scoring',
-        paragraphs: [
-          'The toolbar\'s "ATS-friendly mode" toggle switches the preview to a flat, single-column layout with no icons or tables — the format applicant tracking systems can reliably parse, regardless of which template is selected.',
-          'The separate ATS panel lets you paste in a job description: it compares that posting\'s keywords against your CV\'s content and shows which terms are missing, so you can add them before applying.',
-        ],
+        step: 'bullets',
+        heading: 'Tighten your experience bullets',
+        figureLabel: 'A form field with one bullet point marked by a warning flag.',
+        caption:
+          'As you write, weak bullets get flagged inline next to the field: passive phrases like "responsible for," openers that aren\'t a strong verb, and bullets with no measurable number. The ATS score & suggestions panel totals them up.',
       },
       {
-        heading: 'Use the suggestions panel to catch weak bullets',
-        paragraphs: [
-          'The CV suggestions panel reads your experience bullets and flags issues right next to the field you\'re editing: passive phrases like "responsible for," bullets that don\'t open with a strong verb, and bullets missing a measurable number entirely.',
-        ],
+        step: 'template',
+        heading: 'Pick a template — your content stays put',
+        figureLabel: 'Three template cards side by side with the middle one selected.',
+        caption:
+          `Swapping templates never touches your text, so it's safe to try all ${TEMPLATE_COUNT} before deciding. Each one uses a different set of sections — the ones a template doesn't use are tucked out of the editor and preview until you switch back.`,
+        linkParagraph: {
+          before: 'See all ',
+          linkText: `${TEMPLATE_COUNT} templates`,
+          linkTo: ROUTES.freeTemplates,
+          view: 'freeTemplates',
+          after: ' ahead of time.',
+        },
       },
       {
-        heading: 'Switch templates any time — your content stays put',
-        paragraphs: [
-          `Swapping templates never touches your text, so it's safe to try all ${TEMPLATE_COUNT} before deciding. Each template supports slightly different sections — the preview immediately shows if something you filled in doesn't appear in the one you've picked.`,
-        ],
-        linkParagraphs: [
-          {
-            before: 'See all ',
-            linkText: `${TEMPLATE_COUNT} templates`,
-            linkTo: ROUTES.freeTemplates,
-            view: 'freeTemplates',
-            after: ' ahead of time.',
-          },
-        ],
+        step: 'ats',
+        heading: 'Check it against the job posting',
+        figureLabel: 'The "ATS score and suggestions" panel: an ATS-friendly-mode toggle, a job-description box, and a matched-and-missing keyword list.',
+        caption:
+          'Open the "ATS score & suggestions" panel above the form fields. Its ATS-friendly-mode toggle flattens the preview to the single-column layout applicant tracking systems can parse, and pasting a job description lists the keywords your CV is still missing.',
       },
       {
+        step: 'export',
         heading: 'Export a file or share a link',
-        paragraphs: [
-          'The toolbar\'s Export menu offers three formats: PDF for printing and applications, HTML for sharing online, and JSON as a backup or to keep editing later in this same builder.',
-          'The share-link button encodes the whole CV directly into the URL fragment — it\'s never sent to a server. Images don\'t fit in the link, so if your CV has a profile photo, export JSON instead if the recipient needs the image too.',
-        ],
+        figureLabel: 'An open export menu offering PDF, HTML and JSON, next to a share link.',
+        caption:
+          'The Export menu offers three formats: PDF for applications, HTML for the web, and JSON as a backup or to keep editing later. The share-link button encodes the whole CV into the URL — never sent to a server, and images don\'t fit.',
       },
       {
-        heading: 'Turn on session restore if you\'re worried about an accidental refresh',
-        paragraphs: [
-          'By default nothing about your CV is saved anywhere — closing or refreshing the tab clears everything. If you want protection against an accidental refresh, enable "Restore last session" in Settings: it keeps a working copy in that browser tab only, and clears it automatically the moment you close the tab.',
-        ],
+        step: 'restore',
+        heading: 'Guard against an accidental refresh (optional)',
+        figureLabel: 'A settings panel with the "Restore last session" toggle switched on.',
+        caption:
+          'By default nothing about your CV is saved — closing or refreshing the tab clears everything. Enable "Restore last session" in Settings and a working copy is kept in that tab only, cleared the moment you close it.',
       },
     ],
     ctaLabel: 'Start building your CV',
@@ -157,26 +162,34 @@ function HowToUseTheBuilderPage({ locale = 'en', onGetStarted = () => {}, onNavi
           {copy.introLink.after}
         </p>
 
-        {copy.sections.map((section) => (
-          <div key={section.heading}>
-            <h2>{section.heading}</h2>
-            {section.paragraphs?.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-            {section.linkParagraphs?.map((linkParagraph, index) => (
-              <p key={`link-${index}`}>
-                {linkParagraph.before}
-                <InternalNavLink
-                  to={linkParagraph.linkTo}
-                  onNavigate={() => onNavigateToView(linkParagraph.view)}
-                >
-                  {linkParagraph.linkText}
-                </InternalNavLink>
-                {linkParagraph.after}
-              </p>
-            ))}
-          </div>
-        ))}
+        <ol className="builder-walkthrough">
+          {copy.steps.map((step, index) => (
+            <li key={step.step} className="builder-walkthrough__step">
+              <div className="builder-walkthrough__head">
+                <span className="builder-walkthrough__num">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <h2 className="builder-walkthrough__heading">{step.heading}</h2>
+              </div>
+              <div className="builder-walkthrough__figure">
+                <BuilderWalkthroughFigure step={step.step} label={step.figureLabel} />
+              </div>
+              <p className="builder-walkthrough__caption">{step.caption}</p>
+              {step.linkParagraph ? (
+                <p className="builder-walkthrough__caption">
+                  {step.linkParagraph.before}
+                  <InternalNavLink
+                    to={step.linkParagraph.linkTo}
+                    onNavigate={() => onNavigateToView(step.linkParagraph.view)}
+                  >
+                    {step.linkParagraph.linkText}
+                  </InternalNavLink>
+                  {step.linkParagraph.after}
+                </p>
+              ) : null}
+            </li>
+          ))}
+        </ol>
 
         <div className="legal-page__cta">
           <button type="button" className="landing-cta" onClick={() => onGetStarted()}>

@@ -2757,74 +2757,6 @@ select.floating-field__control {
   }
 }
 
-.consent-banner {
-  position: fixed;
-  left: var(--space-5);
-  right: var(--space-5);
-  bottom: var(--space-5);
-  z-index: 100;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-5);
-  max-width: 48rem;
-  margin: 0 auto;
-  padding: var(--space-5) var(--space-6);
-  background: var(--app-text);
-  color: #ffffff;
-  border-radius: var(--radius-sm);
-  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.4);
-}
-
-.consent-banner__text {
-  flex: 1;
-  min-width: 16rem;
-  font-size: var(--text-body-sm);
-  line-height: 1.5;
-}
-
-.consent-banner__text a {
-  color: #ffffff;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-
-.consent-banner__actions {
-  display: flex;
-  gap: var(--space-3);
-  flex-shrink: 0;
-}
-
-.consent-banner__button {
-  padding: 0.6rem 1.25rem;
-  font-size: var(--text-caption);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  border: 2px solid #ffffff;
-  transition: background 140ms ease, color 140ms ease;
-}
-
-.consent-banner__button--accept {
-  background: #ffffff;
-  color: var(--app-text);
-}
-
-.consent-banner__button--accept:hover {
-  background: transparent;
-  color: #ffffff;
-}
-
-.consent-banner__button--reject {
-  background: transparent;
-  color: #ffffff;
-}
-
-.consent-banner__button--reject:hover {
-  background: #ffffff;
-  color: var(--app-text);
-}
-
 .site-footer__link {
   color: inherit;
   text-decoration: underline;
@@ -2942,6 +2874,67 @@ select.floating-field__control {
   background: var(--app-surface-strong);
   padding: 0.1em 0.35em;
   border-radius: 0.2em;
+}
+
+/* "How to Use the CV Builder" — illustrated step walkthrough. */
+.builder-walkthrough {
+  list-style: none;
+  margin: var(--space-6) 0 0;
+  padding: 0;
+}
+
+.builder-walkthrough__step {
+  margin-top: var(--space-8);
+  padding-top: var(--space-7);
+  border-top: 1px solid var(--app-border-strong);
+}
+
+.builder-walkthrough__step:first-child {
+  margin-top: var(--space-6);
+  padding-top: 0;
+  border-top: 0;
+}
+
+.builder-walkthrough__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.builder-walkthrough__num {
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--app-text-muted);
+}
+
+.builder-walkthrough__heading {
+  margin: 0;
+  font-size: var(--text-section);
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.builder-walkthrough__figure {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  border: 1px solid var(--app-border-strong);
+  background: #ffffff;
+}
+
+.builder-walkthrough__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.builder-walkthrough__caption {
+  margin-top: var(--space-4);
+  font-size: var(--text-body-sm);
+  line-height: 1.7;
+  color: var(--app-text-muted);
 }
 
 .preview-document__header {

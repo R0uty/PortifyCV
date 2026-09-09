@@ -34,6 +34,12 @@ export const VIEW_HEAD = {
     description:
       'How PortifyCV handles your data: no server, no account, and what cookies apply if advertising is enabled.',
   },
+  about: {
+    title: 'About PortifyCV',
+    path: ROUTES.about,
+    description:
+      'What PortifyCV is, how it works, who makes it, how it is funded, and how to get in touch.',
+  },
   freeTemplates: {
     title: 'Free CV Templates - PortifyCV',
     path: ROUTES.freeTemplates,
@@ -60,7 +66,7 @@ export const VIEW_HEAD = {
     title: 'How to Use the CV Builder - PortifyCV',
     path: ROUTES.howToUse,
     description:
-      'A walkthrough of PortifyCV itself: editing sections, ATS mode and scoring, the suggestions panel, switching templates, and exporting or sharing your CV.',
+      'An illustrated, step-by-step walkthrough of PortifyCV itself: filling in sections, tightening bullets, picking a template, checking ATS keywords, and exporting or sharing your CV.',
     isArticle: true,
     datePublished: '2026-09-01',
   },

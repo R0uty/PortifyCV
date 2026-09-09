@@ -5,18 +5,16 @@ import LandingPage from './pages/LandingPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import Toolbar from './components/Toolbar'
 import LocaleFlagIcon from './components/LocaleFlagIcon'
-import AdSenseLoader from './components/AdSenseLoader'
-import ConsentBanner from './components/ConsentBanner'
 import Modal from './components/Modal'
 import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
 import { safeStorageGet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
-import { getAdConsent, setAdConsent } from './utils/consent'
 import { ROUTES } from './utils/routes'
 import { VIEW_HEAD, SITE_ORIGIN, buildArticleSchema } from './utils/pageMeta'
 import { APP_VERSION } from './utils/appVersion'
 
 const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
+const AboutPage = lazy(() => import('./pages/AboutPage'))
 const FreeCvTemplatesPage = lazy(() => import('./pages/FreeCvTemplatesPage'))
 const AtsFriendlyCvGuidePage = lazy(() => import('./pages/AtsFriendlyCvGuidePage'))
 const HowToWriteACvPage = lazy(() => import('./pages/HowToWriteACvPage'))
@@ -56,12 +54,13 @@ function NotFoundView({ locale, onNavigateToView }) {
 }
 
 // Static content pages (everything except the builder) share one shell:
-// header with logo + locale toggle, the page itself, then footer/consent/ads.
+// header with logo + locale toggle, the page itself, then the footer.
 // Keyed the same as VIEW_HEAD so adding a new page is one map entry plus one
 // VIEW_HEAD entry, not a new copy of the shell.
 const STATIC_PAGES = {
   landing: LandingPage,
   privacy: PrivacyPolicyPage,
+  about: AboutPage,
   freeTemplates: FreeCvTemplatesPage,
   atsGuide: AtsFriendlyCvGuidePage,
   howToWrite: HowToWriteACvPage,
@@ -283,6 +282,13 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
         </span>
         <nav className="site-footer__links" aria-label={isFinnish ? 'Oikeudellinen' : 'Legal'}>
           <a
+            href={VIEW_HEAD.about.path}
+            className="site-footer__link"
+            onClick={(event) => handleInAppLinkClick(event, 'about', onNavigate)}
+          >
+            {isFinnish ? 'Tietoa' : 'About'}
+          </a>
+          <a
             href={VIEW_HEAD.privacy.path}
             className="site-footer__link"
             onClick={(event) => handleInAppLinkClick(event, 'privacy', onNavigate)}
@@ -300,7 +306,6 @@ function App() {
   const [view, setView] = useState(() => getInitialView())
   const [headerProps, setHeaderProps] = useState(null)
   const headerPropsRef = useRef(null)
-  const [adConsent, setAdConsentState] = useState(() => getAdConsent())
 
   useDocumentHead(view)
 
@@ -312,11 +317,6 @@ function App() {
   useEffect(() => {
     document.documentElement.lang = locale
   }, [locale])
-
-  const handleAdConsentDecision = useCallback((value) => {
-    setAdConsent(value)
-    setAdConsentState(value)
-  }, [])
 
   const handleToggleLocale = useCallback(() => {
     setLocale((prev) => (prev === 'fi' ? 'en' : 'fi'))
@@ -428,13 +428,6 @@ function App() {
         </Suspense>
 
         <SiteFooter locale={locale} onNavigate={goToView} />
-        <ConsentBanner
-          locale={locale}
-          consent={adConsent}
-          onDecide={handleAdConsentDecision}
-          onNavigateToPrivacy={() => goToView('privacy')}
-        />
-        <AdSenseLoader consent={adConsent} />
       </div>
     )
   }
@@ -484,13 +477,6 @@ function App() {
       </section>
 
       <SiteFooter locale={locale} onNavigate={goToView} />
-      <ConsentBanner
-        locale={locale}
-        consent={adConsent}
-        onDecide={handleAdConsentDecision}
-        onNavigateToPrivacy={() => goToView('privacy')}
-      />
-      <AdSenseLoader consent={adConsent} />
     </div>
   )
 }

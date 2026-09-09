@@ -4,6 +4,32 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Google AdSense integration and an About page — 2026-09-09
+
+Released as v1.2.0.
+
+- **About & contact page** (`/about`, `src/pages/AboutPage.jsx`), bilingual,
+  footer-linked: what PortifyCV is, how it works, who makes it, how it's
+  funded, and a contact address. AdSense's site review expects a clear
+  about + contact route.
+- **Real contact address.** `privacy@portifycv.app` (never had a mailbox)
+  became `portifycv@gmail.com`, in the privacy policy and on the About page.
+- **AdSense wired in.** The `adsbygoogle.js` snippet (publisher
+  `ca-pub-4696294951019088`) loads in `index.html`'s `<head>` on every
+  route; `public/ads.txt` carries the publisher line. The old
+  env-var-gated `AdSenseLoader` and custom `ConsentBanner` (plus
+  `src/utils/consent.js` and the `portifycv-ad-consent` key) were removed —
+  a consent-gated script isn't discoverable by AdSense's review crawler and
+  most visitors never opt in. EEA/UK/CH consent is now Google's certified
+  GDPR message, enabled dashboard-side.
+- **Privacy policy** rewritten to present tense (the site shows ads now);
+  the local-storage list drops to three items.
+- Sitemap picks up `/about` and the previously-missing
+  `/how-to-use-the-cv-builder`.
+
+Full e2e suite: 31 passed. See `docs/adsense-indexing-readiness.md` for the
+history and the remaining dashboard steps.
+
 ## E2E coverage for the 2026-08-15 features — 2026-08-30
 
 `todo.md` item 26. Added three Playwright specs (10 tests) for features that
