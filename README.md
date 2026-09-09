@@ -192,14 +192,16 @@ After deployment, complete Google indexing and performance monitoring:
 
 If your live domain is not `https://portifycv.app`, update canonical/OG URLs in `index.html`, the `SITE_ORIGIN` constant in `src/utils/pageMeta.js` (read by both `src/App.jsx` and `worker/index.js`), and the domain in `public/sitemap.xml` and `public/robots.txt`.
 
-### AdSense readiness
+### AdSense
 
-The site is prepared for a Google AdSense application (privacy policy,
-consent-gated ad loader, per-route canonical/title/description, working
-`/cv` and `/privacy` on a direct visit) but ships with no publisher ID and
-loads no ads until one is configured — see
+Google AdSense is wired in: the `adsbygoogle.js` snippet
+(publisher `ca-pub-4696294951019088`) loads in `index.html`'s `<head>` on
+every route, and `public/ads.txt` carries the publisher line. EEA/UK/CH
+consent is Google's certified GDPR message, enabled in the AdSense
+dashboard under **Privacy & messaging** — not app code. Privacy policy and
+`/about` disclose the ad cookies. See
 [`docs/adsense-indexing-readiness.md`](docs/adsense-indexing-readiness.md)
-for exactly what's done versus what still requires your own Google account.
+for the history and the remaining dashboard-side steps.
 
 ## Performance
 
@@ -213,8 +215,10 @@ for exactly what's done versus what still requires your own Google account.
 
 - `/` — landing page
 - `/cv` — opens the builder directly
+- `/about` — about + contact
 - `/privacy` — privacy policy
-- `#data=<payload>` — restores a CV from a share link (works on either route)
+- guide/content pages (`/free-cv-templates`, `/how-to-write-a-cv`, `/cv-examples`, …) — see `src/utils/routes.js` for the full list
+- `#data=<payload>` — restores a CV from a share link (works on any route)
 
 Share links carry the CV in the URL fragment, so it is never sent to a server. Uploaded
 images (profile photo, project images) are left out of the link — a single photo is many

@@ -6,6 +6,7 @@ export const ROUTES = {
   landing: '/',
   builder: '/cv',
   privacy: '/privacy',
+  about: '/about',
   freeTemplates: '/free-cv-templates',
   atsGuide: '/ats-friendly-cv-guide',
   howToWrite: '/how-to-write-a-cv',

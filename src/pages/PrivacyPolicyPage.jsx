@@ -1,6 +1,6 @@
 const EFFECTIVE_DATE = {
-  en: '21 August 2026',
-  fi: '21. elokuuta 2026',
+  en: '9 September 2026',
+  fi: '9. syyskuuta 2026',
 }
 
 function getPrivacyCopy(locale) {
@@ -14,7 +14,7 @@ function getPrivacyCopy(locale) {
         'PortifyCV on ilmainen, selaimessa toimiva CV-rakentaja. Sillä ei ole '
         + 'käyttäjätilejä eikä palvelinpuolen tietokantaa — tämä seloste kertoo '
         + 'tarkalleen, mitä tämä tarkoittaa tietojesi kannalta, ja mitä '
-        + 'mainosevästeille tapahtuu, jos ja kun sivusto alkaa näyttää mainoksia.',
+        + 'mainosevästeitä sivuston mainokset käyttävät.',
       sections: [
         {
           heading: 'CV-sisältösi',
@@ -43,19 +43,20 @@ function getPrivacyCopy(locale) {
           heading: 'Mitä PortifyCV tallentaa paikallisesti',
           paragraphs: [
             'PortifyCV tallentaa selaimesi paikalliseen tallennustilaan '
-            + '(local storage) neljä pientä asetusta, jotta ne säilyvät '
+            + '(local storage) kolme pientä asetusta, jotta ne säilyvät '
             + 'käyntikertojen välillä:',
           ],
           list: [
             'minkä käyttöliittymän kielen valitsit viimeksi (englanti vai suomi)',
             'oletko jo nähnyt kertaluonteisen opastusvinkin',
-            'valintasi mainosevästeistä, kun mainonta joskus otetaan käyttöön (katso alla)',
             'onko valinnainen "Palauta viimeisin istunto" -toiminto käytössä (katso alla)',
           ],
           paragraphsAfterList: [
-            'Mikään näistä ei sisällä mitään osaa CV:stäsi. Kaikki neljä voi '
+            'Mikään näistä ei sisällä mitään osaa CV:stäsi. Kaikki kolme voi '
             + 'tyhjentää milloin tahansa poistamalla selaimesi sivustokohtaiset '
-            + 'tiedot tälle verkkotunnukselle.',
+            + 'tiedot tälle verkkotunnukselle. Mainosevästeiden suostumusvalinta '
+            + 'tallennetaan erikseen Googlen suostumustyökalun toimesta (katso '
+            + '"Evästeet ja mainonta" alla).',
           ],
         },
         {
@@ -78,15 +79,12 @@ function getPrivacyCopy(locale) {
         {
           heading: 'Evästeet ja mainonta (Google AdSense)',
           paragraphs: [
-            'Yllä mainitusta voimaantulopäivästä lähtien PortifyCV ei näytä '
-            + 'mainoksia eikä aseta mainosevästeitä. Tämä osio on kirjoitettu '
-            + 'etukäteen, jotta seloste pysyy paikkansapitävänä sinä päivänä, '
-            + 'kun mainonta otetaan käyttöön, sen sijaan että se pitäisi '
-            + 'kirjoittaa uudelleen jälkikäteen.',
+            'PortifyCV näyttää mainoksia Google AdSensen kautta rahoittaakseen '
+            + 'sivuston ylläpidon. Mainosten näyttämiseen liittyy evästeitä, '
+            + 'jotka Google ja sen kumppanit asettavat selaimeesi.',
             {
               parts: [
-                'Kun mainonta otetaan käyttöön, PortifyCV aikoo käyttää Google '
-                + 'AdSenseä mainosten näyttämiseen. Google käyttää kolmantena '
+                'Google käyttää kolmantena '
                 + 'osapuolena evästeitä näyttääkseen mainoksia aiempien '
                 + 'käyntiesi perusteella tällä ja muilla verkkosivustoilla. '
                 + 'Googlen mainosevästeiden käyttö mahdollistaa sen ja sen '
@@ -106,10 +104,13 @@ function getPrivacyCopy(locale) {
                 '.',
               ],
             },
-            'Mainosevästeet, mikäli ja kun ne ovat käytössä, liittyvät '
-            + 'ainoastaan mainosten toimittamiseen ja mittaamiseen. Niillä ei '
-            + 'ole yhteyttä yllä kuvattuun CV-sisältöön, eivätkä ne pääse '
-            + 'siihen käsiksi.',
+            'ETA-alueella, Yhdistyneessä kuningaskunnassa ja Sveitsissä '
+            + 'näytetään Googlen sertifioima suostumusilmoitus, jossa voit '
+            + 'antaa tai evätä suostumuksen mainosevästeille ennen kuin niitä '
+            + 'asetetaan.',
+            'Mainosevästeet liittyvät ainoastaan mainosten toimittamiseen ja '
+            + 'mittaamiseen. Niillä ei ole yhteyttä yllä kuvattuun '
+            + 'CV-sisältöön, eivätkä ne pääse siihen käsiksi.',
           ],
         },
         {
@@ -142,7 +143,7 @@ function getPrivacyCopy(locale) {
             'Koska mitään CV:stäsi ei koskaan tallenneta oman selaimesi '
             + 'ulkopuolelle, meidän puoleltamme ei ole mitään pyydettävää, '
             + 'korjattavaa tai poistettavaa. Voit tyhjentää yllä mainitut '
-            + 'kaksi paikallista asetusta tai kieltäytyä kohdennetuista '
+            + 'paikalliset asetukset tai kieltäytyä kohdennetuista '
             + 'mainoksista milloin tahansa tämän selosteen linkkien avulla.',
           ],
         },
@@ -159,7 +160,7 @@ function getPrivacyCopy(locale) {
             {
               parts: [
                 'Kysymykset tästä selosteesta voi lähettää osoitteeseen ',
-                { link: 'mailto:privacy@portifycv.app', text: 'privacy@portifycv.app' },
+                { link: 'mailto:portifycv@gmail.com', text: 'portifycv@gmail.com' },
                 '.',
               ],
             },
@@ -177,8 +178,8 @@ function getPrivacyCopy(locale) {
     intro:
       'PortifyCV is a free, browser-based CV builder. It has no user '
       + 'accounts and no server-side database — this policy explains '
-      + 'exactly what that means for your data, and what happens with '
-      + 'advertising cookies if and when this site starts showing ads.',
+      + 'exactly what that means for your data, and which advertising '
+      + "cookies the site's ads use.",
     sections: [
       {
         heading: 'Your CV content',
@@ -206,19 +207,20 @@ function getPrivacyCopy(locale) {
       {
         heading: 'What PortifyCV stores locally',
         paragraphs: [
-          "PortifyCV stores four small preferences in your browser's local "
+          "PortifyCV stores three small preferences in your browser's local "
           + 'storage, so they persist between visits:',
         ],
         list: [
           'which interface language you last selected (English or Finnish)',
           'whether you have already seen the one-time onboarding tip',
-          'your choice about advertising cookies, once advertising is enabled (see below)',
           'whether the optional "Restore last session" feature is turned on (see below)',
         ],
         paragraphsAfterList: [
-          "None of these contain any part of your CV. All four can be "
+          "None of these contain any part of your CV. All three can be "
           + "cleared at any time by clearing your browser's site data for "
-          + 'this domain.',
+          + 'this domain. Your advertising-cookie consent choice is stored '
+          + "separately by Google's consent tool (see \"Cookies and "
+          + 'advertising" below).',
         ],
       },
       {
@@ -240,15 +242,12 @@ function getPrivacyCopy(locale) {
       {
         heading: 'Cookies and advertising (Google AdSense)',
         paragraphs: [
-          'As of the effective date above, PortifyCV does not display any '
-          + 'advertising and sets no advertising cookies. This section is '
-          + 'written in advance so this policy stays accurate on the day '
-          + 'advertising is turned on, rather than needing a rewrite after '
-          + 'the fact.',
+          'PortifyCV shows ads through Google AdSense to fund the running of '
+          + 'the site. Serving those ads involves cookies, set in your '
+          + 'browser by Google and its partners.',
           {
             parts: [
-              'When enabled, PortifyCV intends to use Google AdSense to '
-              + 'display ads. Google, as a third party, uses cookies to '
+              'Google, as a third party, uses cookies to '
               + "serve ads based on your prior visits to this and other "
               + "websites. Google's use of advertising cookies enables it "
               + 'and its partners to serve ads based on your visit to this '
@@ -267,9 +266,12 @@ function getPrivacyCopy(locale) {
               '.',
             ],
           },
-          'Advertising cookies, if and when active, relate to ad delivery '
-          + 'and measurement only. They are unrelated to, and cannot access, '
-          + 'the CV content described above.',
+          'In the EEA, the UK, and Switzerland, a Google-certified consent '
+          + 'message is shown so you can grant or refuse consent for '
+          + 'advertising cookies before any are set.',
+          'Advertising cookies relate to ad delivery and measurement only. '
+          + 'They are unrelated to, and cannot access, the CV content '
+          + 'described above.',
         ],
       },
       {
@@ -301,7 +303,7 @@ function getPrivacyCopy(locale) {
         paragraphs: [
           'Because nothing about your CV is ever stored outside your own '
           + 'browser, there is nothing on our end to request, correct, or '
-          + 'delete. You can clear the two local preferences above, or opt '
+          + 'delete. You can clear the local preferences above, or opt '
           + 'out of personalized ads, at any time using the links in this '
           + 'policy.',
         ],
@@ -319,7 +321,7 @@ function getPrivacyCopy(locale) {
           {
             parts: [
               'Questions about this policy can be sent to ',
-              { link: 'mailto:privacy@portifycv.app', text: 'privacy@portifycv.app' },
+              { link: 'mailto:portifycv@gmail.com', text: 'portifycv@gmail.com' },
               '.',
             ],
           },

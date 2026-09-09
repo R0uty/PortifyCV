@@ -34,6 +34,12 @@ export const VIEW_HEAD = {
     description:
       'How PortifyCV handles your data: no server, no account, and what cookies apply if advertising is enabled.',
   },
+  about: {
+    title: 'About PortifyCV',
+    path: ROUTES.about,
+    description:
+      'What PortifyCV is, how it works, who makes it, how it is funded, and how to get in touch.',
+  },
   freeTemplates: {
     title: 'Free CV Templates - PortifyCV',
     path: ROUTES.freeTemplates,

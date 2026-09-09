@@ -12,6 +12,58 @@ format as those documents.
 
 ---
 
+## Update — 2026-09-09
+
+A second pass, now that `portifycv.app` is live and serving all routes:
+
+- **About + contact page added.** `src/pages/AboutPage.jsx` at `/about`,
+  linked from the footer on every view alongside the privacy policy.
+  Covers what PortifyCV is, how it works, who makes it, how it's funded
+  (Google AdSense, disclosed in advance), and a contact address —
+  bilingual en/fi. AdSense's site review expects a clear About page and a
+  contact route; this closes that gap.
+- **Contact address is now real.** `privacy@portifycv.app` (a placeholder
+  that never had a mailbox) was replaced everywhere with
+  `portifycv@gmail.com` — in `src/pages/PrivacyPolicyPage.jsx` (en + fi)
+  and on the new About page. The privacy policy's effective date was
+  bumped to 9 September 2026 to reflect the change.
+- **Sitemap gaps fixed.** `public/sitemap.xml` was missing
+  `/how-to-use-the-cv-builder` (added since the last pass) and now also
+  lists `/about`. `lastmod` on the two changed pages updated.
+
+### AdSense wired in (same day, after the user supplied publisher
+`ca-pub-4696294951019088`)
+
+The original design — an env-var-gated `AdSenseLoader` that injected the
+script only after a click on a custom `ConsentBanner` — was replaced,
+because a consent-gated script is not discoverable by AdSense's
+verification/review crawler and leaves most visitors never loading ads:
+
+- **AdSense snippet in `index.html` `<head>`**, loaded on every route with
+  no JS/consent dependency. Also enables Auto ads. The publisher ID is
+  public (it ships in the tag on every page), so it is committed directly
+  rather than kept in `VITE_ADSENSE_CLIENT_ID`.
+- **`public/ads.txt`** added:
+  `google.com, pub-4696294951019088, DIRECT, f08c47fec0942fa0`.
+- **`src/components/AdSenseLoader.jsx`, `src/components/ConsentBanner.jsx`,
+  `src/utils/consent.js`, and the `.consent-banner` CSS were deleted**,
+  along with their wiring in `src/App.jsx` (the `adConsent` state and the
+  `portifycv-ad-consent` localStorage key are gone). EEA/UK/CH consent is
+  now Google's certified GDPR message, enabled in the AdSense dashboard
+  under **Privacy & messaging** — no app code.
+- **Privacy policy + About page** rewritten from "ads may be enabled
+  later" to present tense: the site shows AdSense ads now; the local-
+  storage list dropped from four items to three (locale, onboarding-seen,
+  session-restore-enabled).
+
+Still open (all dashboard-side, no repo work): finish AdSense approval if
+still pending, and **enable the GDPR consent message in Privacy &
+messaging** — the privacy policy and About page already state that this
+message is shown, so it must actually be turned on before EEA traffic
+arrives.
+
+---
+
 ## Why this doc exists
 
 AdSense approval and Google indexing both depend on things this repo can
