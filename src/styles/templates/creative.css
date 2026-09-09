@@ -112,7 +112,7 @@
   font-weight: 800;
   letter-spacing: -0.01em;
   line-height: 1.05;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .creative-showcase__name-lead {

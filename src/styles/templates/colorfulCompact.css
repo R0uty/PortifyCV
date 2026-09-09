@@ -108,7 +108,7 @@
   font-weight: 800;
   letter-spacing: -0.01em;
   line-height: 1.1;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .colorful-compact-showcase__name-lead {

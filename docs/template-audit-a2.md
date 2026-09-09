@@ -89,12 +89,17 @@ tight. Quadrant is worst: its name sits in a real 50%-width `1fr` cell.
 
 ## Cross-cutting shared fixes (do once, not per-template)
 
-1. **`overflow-wrap: anywhere` on the name → `break-word`** on **Creative,
-   Colorful Compact, Quadrant**. `anywhere` is the wrong fix for a
-   too-narrow box (the Modern Orange post-mortem's core lesson); `break-word`
-   only breaks a word that genuinely can't fit. For Quadrant also give the
-   identity block room (span both columns, or widen the cell). Small, safe,
-   3-file PR — no desktop-appearance change. **Do this first.**
+1. **`overflow-wrap: anywhere` → `break-word`.** `anywhere` is the wrong fix
+   for a too-narrow box (the Modern Orange post-mortem's core lesson);
+   `break-word` only breaks a word that genuinely can't fit. Applies to the
+   **name** on Creative, Colorful Compact, Quadrant, and Executive (`1.9rem`
+   name in a 200px-floored sidebar — right at the edge), and to the
+   **contact-item** rows on Modern Orange, Navy Professional, Executive
+   (Timeline's is deliberately paired with `white-space: nowrap`, left
+   alone). For Quadrant also give the identity block room later (span both
+   columns, or widen the cell) as part of its rework. **Done 2026-09-09**
+   (commit — see git log): 7 rules across 5 files, no desktop-appearance
+   change, lint/build/e2e green.
 2. **Palette capping to the §3 colour rule** — Developer, Creative,
    Portfolio, Graduate (4 accent hues), Executive (residual indigo),
    Colorful Compact (cap to the §3 named-6 exception).
