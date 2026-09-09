@@ -30,6 +30,7 @@ import {
   parseSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  formatLinkDisplayValue,
 } from './shared'
 
 const DENSITY_STEPS = ['cozy', 'snug', 'tight']
@@ -328,7 +329,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
                 <span key={linkKey} className="compact-showcase__link-item" data-export-card="true">
                   <span className="compact-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <span className="compact-showcase__link-label">{formatLinkLabel(linkKey)}:</span>
-                  <span className="compact-showcase__link-value">{value}</span>
+                  <span className="compact-showcase__link-value">{formatLinkDisplayValue(value)}</span>
                 </span>
               ))}
             </div>

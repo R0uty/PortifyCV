@@ -18,6 +18,7 @@ import {
   renderSectionCard,
   formatDateRange,
   formatLinkLabel,
+  formatLinkDisplayValue,
 } from './templates/shared'
 import { getTemplateConfig } from './templates'
 
@@ -955,7 +956,7 @@ function CVPreview({
                       <span className={`shrink-0 ${resolvedLinkIconColor}`}>{devIcons[key] || null}</span>
                       <div className="min-w-0">
                         <p className={`text-[0.6rem] font-bold uppercase tracking-[0.18em] ${resolvedLinkIconColor || 'text-gray-400'}`}>{formatLinkLabel(key)}</p>
-                        <p className="truncate text-[0.72rem] text-gray-600">{value}</p>
+                        <p className="truncate text-[0.72rem] text-gray-600">{formatLinkDisplayValue(value)}</p>
                       </div>
                     </div>
                   ))
@@ -986,7 +987,7 @@ function CVPreview({
                   links.map(([key, value]) => (
                     <div key={key} data-export-card="true" className="flex items-center gap-1.5 text-sm">
                       <span className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-400">{formatLinkLabel(key)}</span>
-                      <span className="text-gray-600">{value}</span>
+                      <span className="text-gray-600">{formatLinkDisplayValue(value)}</span>
                     </div>
                   ))
                 ) : (
@@ -1022,7 +1023,7 @@ function CVPreview({
                       {formatLinkLabel(key)}
                     </p>
                     <p className={`mt-1 break-all text-sm ${supportingTextClasses}`}>
-                      {value}
+                      {formatLinkDisplayValue(value)}
                     </p>
                   </div>
                 ))

@@ -26,6 +26,7 @@ import {
   devIcons,
   sectionIcons,
   formatDateRange,
+  formatLinkDisplayValue,
   getSafeHref,
 } from './shared'
 import { TIMELINE_DEFAULT_ACCENT_COLOR } from './timeline'
@@ -425,7 +426,7 @@ export default function TimelineShowcase({
               {linkContactItems.map(([key, value]) => (
                 <span key={key} className="timeline-showcase__contact-item">
                   <span className="timeline-showcase__contact-icon" aria-hidden="true">{devIcons[key]}</span>
-                  {value}
+                  {formatLinkDisplayValue(value)}
                 </span>
               ))}
             </div>

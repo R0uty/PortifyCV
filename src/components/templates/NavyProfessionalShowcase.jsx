@@ -24,6 +24,7 @@ import {
   devIcons,
   sectionIcons,
   formatDateRange,
+  formatLinkDisplayValue,
 } from './shared'
 
 function splitToBullets(text) {
@@ -308,7 +309,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
               {linkedinUrl ? (
                 <div className="navy-professional-showcase__contact-item">
                   <span className="navy-professional-showcase__contact-icon" aria-hidden="true">{devIcons.linkedin}</span>
-                  <span>{linkedinUrl}</span>
+                  <span>{formatLinkDisplayValue(linkedinUrl)}</span>
                 </div>
               ) : null}
             </div>

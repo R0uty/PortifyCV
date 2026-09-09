@@ -49,3 +49,24 @@ test.describe('Template-gated sections', () => {
     await expect(formPanel.getByRole('heading', { name: 'Certificates', exact: true })).toBeVisible()
   })
 })
+
+test.describe('Link URL formatting', () => {
+  test('templates render link values without the https:// scheme', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+
+    for (const label of ['Compact', 'Navy Professional', 'Modern Timeline']) {
+      await selectTemplate(page, label)
+      const preview = page.locator('[data-export-root]')
+      // Positive: the Links section shows the scheme-stripped value.
+      await expect(preview.getByText('linkedin.com/in/alexmorgan', { exact: false }).first()).toBeVisible()
+      // Negative: the raw stored value (with scheme) is gone from the Links
+      // section. Exact match so the demo CV's Project entries — which
+      // legitimately render full URLs like
+      // https://github.com/alexmorgan/atlas-design-system and are out of
+      // scope here — don't trip the assertion.
+      await expect(preview.getByText('https://linkedin.com/in/alexmorgan', { exact: true })).toHaveCount(0)
+      await expect(preview.getByText('https://github.com/alexmorgan', { exact: true })).toHaveCount(0)
+    }
+  })
+})
