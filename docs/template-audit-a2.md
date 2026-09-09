@@ -48,24 +48,24 @@ E = content edge-cases (§7.1-weighted) · A = ATS parity · X = export (provisi
 | **Navy Professional** | 2 | 2 | 2 | 2 | 2 | 2 | 2 | **keep** | — dark-sidebar family, genuine contrast; URL wrap fixed in A.1 |
 | **Classic Professional** | 3 | 3 | 2 | 2 | 2 | 2 | 2 | **keep** | — the "safe traditional" slot, does its job |
 | **Minimalist** | 2 | 3 | 2 | 2 | 2 | 3 | 2 | **keep** | — honest baseline / default; it *is* the flat renderer |
-| **Modern Professional** | 3 | 3 | 2 | 2 | **1** | 2 | 2 | **polish** | E — name `2.875rem` in unfloored `minmax(0,1.85fr)` column (larger than the Modern Orange bug) |
-| **Portfolio Hybrid** | 2 | **1** | 2 | 2 | **1** | 2 | 2 | **polish** | C — teal + a second green leaking (25 hexes); E — name `2.7rem` unfloored |
-| **Colorful Compact** | 2 | **1** | 2 | 2 | **1** | 2 | 2 | **polish** | C — 29 hexes, far past §3's capped-6 exception; E — `2.1rem` + `overflow-wrap:anywhere` unfloored |
+| **Modern Professional** | 3 | 3 | 2 | 2 | 2 | 2 | 2 | **keep** | — the benchmark. Name is in a full-width flex header, not a grid column, so no §7.1 risk (see §7.1 correction below) |
+| **Portfolio Hybrid** | 2 | **1** | 2 | 2 | 2 | 2 | 2 | **polish** | C — teal + a second green leaking (25 hexes) |
+| **Colorful Compact** | 2 | **1** | 2 | 2 | **1** | 2 | 2 | **polish** | C — 29 hexes, far past §3's capped-6 exception; E — `overflow-wrap:anywhere` on the name will char-fragment when tight |
 | **Tech Executive** | 2 | 2 | **1** | 2 | 2 | 3 | 2 | **rework** | S — no bespoke Showcase, "flat renderer + sidebar". Decision: promote to a real `TechExecShowcase.jsx` + CSS, accent-configurable |
-| **Developer** | 2 | **1** | 2 | 2 | **1** | 2 | 2 | **rework** | C — 28 hexes (teal+green+blue); E — name `2.5rem` unfloored; metadata still says "dark sidebar" (it's light) |
-| **Creative** | 2 | **1** | **0** | 2 | **1** | 2 | 2 | **rework** | S=0 — off-menu heading treatment (design-system §4/§9); C — 24 hexes, multicolour chips + rainbow bar; E — worst §7.1 case (`2.7rem` + `overflow-wrap:anywhere`) |
-| **Graduate** | 2 | **1** | **1** | 2 | **1** | 2 | 2 | **rework** | 3 axes ≤1 — 4 accent hues (indigo/violet/blue/green); SaaS card-grid look, right-rail family shared with modern/creative/portfolio; name `2.875rem` unfloored |
+| **Developer** | 2 | **1** | 2 | 2 | 2 | 2 | 2 | **rework** | C — 28 hexes (teal+green+blue); metadata still says "dark sidebar" (it's light) |
+| **Creative** | 2 | **1** | **0** | 2 | **1** | 2 | 2 | **rework** | S=0 — off-menu heading treatment (design-system §4/§9); C — 24 hexes, multicolour chips + rainbow bar; E — `overflow-wrap:anywhere` on name + `2.7rem` = worst §7.1 case |
+| **Graduate** | 2 | **1** | **1** | 2 | 2 | 2 | 2 | **rework** | C — 4 accent hues (indigo/violet/blue/green); S — SaaS card-grid look, right-rail family shared with modern/creative/portfolio |
 | **Executive** | 2 | **1** | 2 | 2 | 2 | 2 | 2 | **rework** | C — gold accent barely visible AND a residual second hue (`#4338ca` indigo + `#eef2ff`, incompletely removed in the Aug indigo→gold pass) |
-| **Compact** | 2 | **1** | **1** | **1** | 2 | 2 | 2 | **rework or retire** | D=1 — the compact-concept template, but built ad-hoc, not on the `compact` density class; S=1 — visually weakest, differs from the two Classics mainly by thin blue rules; C=1 — blue + a red accent |
-| **Quadrant** | 2 | 2 | 2 | 2 | **1** | 2 | 2 | **rework or retire** | E — dead space in the top-right quadrant, uneven quadrant fill, name in an unfloored 50%-width cell; cyan accent reads near-invisible |
-| **Classic** | 2 | 3 | **1** | 2 | 2 | 2 | 2 | **merge/retire** | S=1 — near-identical to Classic Professional (serif name, uppercase-rule headings, icon contact row); only difference is name alignment (left vs centred) |
+| **Compact** | 2 | **1** | **1** | **1** | 2 | 2 | 2 | **rework** | D=1 — the compact-concept template, but built ad-hoc, not on the `compact` density class; S=1 — visually weakest, differs from the two Classics mainly by thin blue rules; C=1 — blue + a red accent |
+| **Quadrant** | 2 | 2 | 2 | 2 | **1** | 2 | 2 | **rework** | E — `overflow-wrap:anywhere` on the name in a real 50%-width cell (will char-fragment); dead space top-right quadrant, uneven fill; cyan accent reads near-invisible |
+| **Classic** | 2 | 3 | **1** | 2 | 2 | 2 | 2 | **merge** | S=1 — near-identical to Classic Professional (serif name, uppercase-rule headings, icon contact row); only difference is name alignment (left vs centred) |
 
 ## Summary
 
 | | Count | Templates |
 |---|---|---|
-| **keep** (light polish only) | 5 | Modern Orange, Modern Timeline, Navy Professional, Classic Professional, Minimalist |
-| **polish** | 3 | Modern Professional, Portfolio Hybrid, Colorful Compact |
+| **keep** (light polish only) | 6 | Modern Orange, Modern Timeline, Navy Professional, Classic Professional, Minimalist, Modern Professional |
+| **polish** | 2 | Portfolio Hybrid, Colorful Compact |
 | **rework** | 7 | Developer, Creative, Executive, Graduate, Compact, Quadrant, Tech Executive |
 | **merge** | 1 | Classic → fold into Classic Professional (add left/centre alignment option) |
 
@@ -73,16 +73,28 @@ E = content edge-cases (§7.1-weighted) · A = ATS parity · X = export (provisi
 and brought to bar). A.3 then adds 3 new ones (editorial one-column,
 photo-forward, European one-page) → **~18 strong** overall.
 
+### §7.1 correction (from reading the Showcase JSX, not just the CSS grep)
+
+The first pass over-scored name fragmentation. In **Modern Professional,
+Graduate, Developer, Portfolio** the `<h1>` is in a **full-width flex
+header** (a `min-w-0` div above the `__main`/`__aside` grid), not in a grid
+column — so the Modern Orange failure mode (an unfloored grid column
+collapsing) does not apply, and with no `overflow-wrap` override the name
+wraps at word boundaries. Those four are **E:2**.
+
+The genuine §7.1 risk is the three templates that set **`overflow-wrap:
+anywhere` on the name element** — **Creative, Colorful Compact, Quadrant** —
+which breaks a long name mid-word ("Aleksan/drina") the instant the box is
+tight. Quadrant is worst: its name sits in a real 50%-width `1fr` cell.
+
 ## Cross-cutting shared fixes (do once, not per-template)
 
-1. **Name-column floor — the single highest-value A-fix.** Seven templates
-   have the unfloored-name-column + large-name-font setup that caused the
-   documented Modern Orange fragmentation bug, and only Modern Orange was
-   fixed: **Modern Professional, Graduate, Developer, Creative, Portfolio,
-   Colorful Compact, Quadrant**. One technique for all seven: floor the
-   name's grid column (`minmax(<Npx>, …)` per §2's width-floor table), cap
-   the name to `--tpl-name-size`, and swap `overflow-wrap: anywhere` →
-   `break-word` on the name element. One PR.
+1. **`overflow-wrap: anywhere` on the name → `break-word`** on **Creative,
+   Colorful Compact, Quadrant**. `anywhere` is the wrong fix for a
+   too-narrow box (the Modern Orange post-mortem's core lesson); `break-word`
+   only breaks a word that genuinely can't fit. For Quadrant also give the
+   identity block room (span both columns, or widen the cell). Small, safe,
+   3-file PR — no desktop-appearance change. **Do this first.**
 2. **Palette capping to the §3 colour rule** — Developer, Creative,
    Portfolio, Graduate (4 accent hues), Executive (residual indigo),
    Colorful Compact (cap to the §3 named-6 exception).
@@ -93,13 +105,12 @@ photo-forward, European one-page) → **~18 strong** overall.
 
 ## Recommended attack order
 
-1. **Name-floor shared fix** (7 templates, one PR) — biggest risk reduction, smallest change.
-2. **Rework batch**, one PR each, adopting ramp + colour rule + `--tpl-accent`:
-   Creative → Graduate → Executive → Developer.
-3. **Compact & Quadrant decision** (below), then act on it.
-4. **Classic → Classic Professional merge** (retire the `classic` variant; optionally add a left-align option to Classic Professional).
-5. **Polish pass**: Modern Professional (name floor covers most of it), Portfolio, Colorful Compact, Tech Executive, plus the 5 keepers' light polish (URL primitive already done; mostly ramp adoption).
-6. Then **B** (builder usability) and **A.4** (template picker) fold in, then **A.3** (new templates).
+1. **`overflow-wrap` safety fix** (Creative, Colorful Compact, Quadrant — one small PR). No desktop change; stops name char-fragmentation.
+2. **Rework batch**, one PR each, adopting the `--tpl-*` ramp + a density class + the §3 colour rule + `--tpl-accent`:
+   Creative → Graduate → Executive → Developer → Compact (rebuild on `compact` density) → Quadrant (fix the grid) → Tech Executive (new bespoke Showcase).
+3. **Classic → Classic Professional merge** — retire the `classic` variant; add a left/centre name-alignment option to Classic Professional.
+4. **Polish pass**: Portfolio Hybrid, Colorful Compact, plus the keepers' light ramp/`--tpl-accent` adoption.
+5. Then **B** (builder usability) and **A.4** (template picker), then **A.3** (new templates).
 
 ## Decisions (resolved 2026-09-09)
 
