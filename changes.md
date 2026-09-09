@@ -4,6 +4,34 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template design system foundations (roadmap A.1) — 2026-09-09
+
+Released as v1.2.1. First sub-project of the v1.2.0 template roadmap
+(`docs/superpowers/specs/2026-09-09-v1.2.0-roadmap-design.md`).
+
+- **`docs/template-design-system.md`** — the house design language every
+  template is now built and scored against: a type ramp with three density
+  classes, a 1-ink/1-accent/1-tint colour rule (with one documented
+  multicolour exception), a closed section-heading-treatment menu, the
+  structural families, content-edge-case and html2canvas export-safety
+  checklists, and a 0–3 scoring rubric with a pass threshold.
+- **`src/styles/templates/_system.css`** — shared `--tpl-*` type-ramp
+  custom properties (`:root` plus `.tpl-density-{roomy,standard,compact}`),
+  imported into the cascade. Inert until templates adopt it (the A-fix
+  batch).
+- **URL formatting** — Compact, Navy Professional, Modern Timeline and the
+  flat renderer now strip `https://` from displayed link text via the
+  existing `formatLinkDisplayValue()` helper (they were showing raw URLs).
+- **Accent colour generalised** — the two hardcoded per-template accent
+  state slots become one `templateAccentColors` map + one
+  `SET_TEMPLATE_ACCENT_COLOR` action; each template declares an `accent`
+  config in `cvTemplates.js`; `SettingsModal` renders one registry-driven
+  swatch row. Modern Timeline and Modern Orange are migrated onto it; the
+  other 14 opt in as they're reworked. New `resolveTemplateAccent()` helper.
+
+Two new Playwright specs (link URL formatting, accent colour). Full suite:
+33 passed.
+
 ## Google AdSense integration and an About page — 2026-09-09
 
 Released as v1.2.0.
