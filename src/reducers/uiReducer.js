@@ -1,13 +1,6 @@
 import { CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, safeStorageGet } from '../utils/cvForm'
-import { defaultTemplateId, isValidTemplateId } from '../utils/cvTemplates'
+import { defaultTemplateId, getAllTemplateAccents, isValidTemplateId } from '../utils/cvTemplates'
 import { UI_LOCALE_STORAGE_KEY, UI_NAV_RAIL_COLLAPSED_STORAGE_KEY } from '../utils/designSystem'
-// Imported from the plain config object, not TimelineShowcase.jsx itself —
-// that component is React.lazy()-loaded (see CVPreview.jsx / item 25's
-// code-splitting), and a reducer importing it directly would pull it into
-// the eager bundle, defeating the split. timeline.js is cheap and already
-// imported eagerly everywhere via components/templates/index.js.
-import { TIMELINE_DEFAULT_ACCENT_COLOR } from '../components/templates/timeline'
-import { MODERN_ORANGE_DEFAULT_ACCENT_COLOR } from '../components/templates/modernOrange'
 import { DEFAULT_CV_FONT_ID } from '../utils/cvFonts'
 import { DEFAULT_CV_HEADING_COLOR } from '../utils/cvHeadingColors'
 
@@ -27,8 +20,7 @@ export const UI_ACTION = {
   SET_COVER_LETTER_HIRING_MANAGER: 'SET_COVER_LETTER_HIRING_MANAGER',
   SET_COVER_LETTER_BODY: 'SET_COVER_LETTER_BODY',
   TOGGLE_SESSION_RESTORE: 'TOGGLE_SESSION_RESTORE',
-  SET_TIMELINE_ACCENT_COLOR: 'SET_TIMELINE_ACCENT_COLOR',
-  SET_MODERN_ORANGE_ACCENT_COLOR: 'SET_MODERN_ORANGE_ACCENT_COLOR',
+  SET_TEMPLATE_ACCENT_COLOR: 'SET_TEMPLATE_ACCENT_COLOR',
   SET_CV_FONT: 'SET_CV_FONT',
   SET_CV_HEADING_COLOR: 'SET_CV_HEADING_COLOR',
   TOGGLE_NAV_RAIL_COLLAPSED: 'TOGGLE_NAV_RAIL_COLLAPSED',
@@ -67,8 +59,7 @@ export function createInitialUiState(initialSession) {
     coverLetterHiringManager: '',
     coverLetterBody: '',
     sessionRestoreEnabled: storedSessionRestore === 'true',
-    timelineAccentColor: TIMELINE_DEFAULT_ACCENT_COLOR,
-    modernOrangeAccentColor: MODERN_ORANGE_DEFAULT_ACCENT_COLOR,
+    templateAccentColors: getAllTemplateAccents(),
     cvFontId: DEFAULT_CV_FONT_ID,
     cvHeadingColor: DEFAULT_CV_HEADING_COLOR,
     navRailCollapsed: storedNavRailCollapsed === 'true',
@@ -123,11 +114,14 @@ export function uiReducer(state, action) {
     case UI_ACTION.TOGGLE_SESSION_RESTORE:
       return { ...state, sessionRestoreEnabled: !state.sessionRestoreEnabled }
 
-    case UI_ACTION.SET_TIMELINE_ACCENT_COLOR:
-      return { ...state, timelineAccentColor: action.color }
-
-    case UI_ACTION.SET_MODERN_ORANGE_ACCENT_COLOR:
-      return { ...state, modernOrangeAccentColor: action.color }
+    case UI_ACTION.SET_TEMPLATE_ACCENT_COLOR:
+      return {
+        ...state,
+        templateAccentColors: {
+          ...state.templateAccentColors,
+          [action.templateId]: action.color,
+        },
+      }
 
     case UI_ACTION.SET_CV_FONT:
       return { ...state, cvFontId: action.fontId }

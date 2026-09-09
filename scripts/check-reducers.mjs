@@ -393,9 +393,22 @@ console.log('\nuiReducer\n')
 
 {
   const state = createInitialUiState({})
-  check('createInitialUiState defaults the timeline accent color', typeof state.timelineAccentColor === 'string' && state.timelineAccentColor.length > 0)
-  const next = uiReducer(state, { type: UI_ACTION.SET_TIMELINE_ACCENT_COLOR, color: '#2563eb' })
-  check('SET_TIMELINE_ACCENT_COLOR stores the chosen color', next.timelineAccentColor === '#2563eb')
+  check(
+    'createInitialUiState seeds templateAccentColors for accent-capable templates',
+    typeof state.templateAccentColors === 'object'
+      && typeof state.templateAccentColors.timeline === 'string'
+      && typeof state.templateAccentColors.modernOrange === 'string',
+  )
+  const nextAccent = uiReducer(state, {
+    type: UI_ACTION.SET_TEMPLATE_ACCENT_COLOR,
+    templateId: 'timeline',
+    color: '#2563eb',
+  })
+  check(
+    'SET_TEMPLATE_ACCENT_COLOR updates only the named template',
+    nextAccent.templateAccentColors.timeline === '#2563eb'
+      && nextAccent.templateAccentColors.modernOrange === state.templateAccentColors.modernOrange,
+  )
 }
 
 {
