@@ -51,7 +51,7 @@ E = content edge-cases (§7.1-weighted) · A = ATS parity · X = export (provisi
 | **Modern Professional** | 3 | 3 | 2 | 2 | **1** | 2 | 2 | **polish** | E — name `2.875rem` in unfloored `minmax(0,1.85fr)` column (larger than the Modern Orange bug) |
 | **Portfolio Hybrid** | 2 | **1** | 2 | 2 | **1** | 2 | 2 | **polish** | C — teal + a second green leaking (25 hexes); E — name `2.7rem` unfloored |
 | **Colorful Compact** | 2 | **1** | 2 | 2 | **1** | 2 | 2 | **polish** | C — 29 hexes, far past §3's capped-6 exception; E — `2.1rem` + `overflow-wrap:anywhere` unfloored |
-| **Tech Executive** | 2 | 2 | **1** | 2 | 2 | 3 | 2 | **polish** | S — no bespoke Showcase, "flat renderer + sidebar"; flat path can't take `--tpl-accent` (opts out, see design-system §6) |
+| **Tech Executive** | 2 | 2 | **1** | 2 | 2 | 3 | 2 | **rework** | S — no bespoke Showcase, "flat renderer + sidebar". Decision: promote to a real `TechExecShowcase.jsx` + CSS, accent-configurable |
 | **Developer** | 2 | **1** | 2 | 2 | **1** | 2 | 2 | **rework** | C — 28 hexes (teal+green+blue); E — name `2.5rem` unfloored; metadata still says "dark sidebar" (it's light) |
 | **Creative** | 2 | **1** | **0** | 2 | **1** | 2 | 2 | **rework** | S=0 — off-menu heading treatment (design-system §4/§9); C — 24 hexes, multicolour chips + rainbow bar; E — worst §7.1 case (`2.7rem` + `overflow-wrap:anywhere`) |
 | **Graduate** | 2 | **1** | **1** | 2 | **1** | 2 | 2 | **rework** | 3 axes ≤1 — 4 accent hues (indigo/violet/blue/green); SaaS card-grid look, right-rail family shared with modern/creative/portfolio; name `2.875rem` unfloored |
@@ -65,15 +65,13 @@ E = content edge-cases (§7.1-weighted) · A = ATS parity · X = export (provisi
 | | Count | Templates |
 |---|---|---|
 | **keep** (light polish only) | 5 | Modern Orange, Modern Timeline, Navy Professional, Classic Professional, Minimalist |
-| **polish** | 4 | Modern Professional, Portfolio Hybrid, Colorful Compact, Tech Executive |
-| **rework** | 5 | Developer, Creative, Executive, Graduate, Compact* |
-| **merge/retire** | 2 | Classic → fold into Classic Professional; Quadrant* |
+| **polish** | 3 | Modern Professional, Portfolio Hybrid, Colorful Compact |
+| **rework** | 7 | Developer, Creative, Executive, Graduate, Compact, Quadrant, Tech Executive |
+| **merge** | 1 | Classic → fold into Classic Professional (add left/centre alignment option) |
 
-\* Compact and Quadrant are "rework **or** retire" — your call (see decisions below).
-
-**Net:** if Classic merges and Quadrant is cut → **13 strong templates**; if
-Quadrant is reworked → **14**. A.3 then adds up to 3 new ones (editorial
-one-column, photo-forward, European one-page) → **16–17 strong** overall.
+**Net after A-fix:** 15 template variants (Classic retired, all others kept
+and brought to bar). A.3 then adds 3 new ones (editorial one-column,
+photo-forward, European one-page) → **~18 strong** overall.
 
 ## Cross-cutting shared fixes (do once, not per-template)
 
@@ -103,18 +101,20 @@ one-column, photo-forward, European one-page) → **16–17 strong** overall.
 5. **Polish pass**: Modern Professional (name floor covers most of it), Portfolio, Colorful Compact, Tech Executive, plus the 5 keepers' light polish (URL primitive already done; mostly ramp adoption).
 6. Then **B** (builder usability) and **A.4** (template picker) fold in, then **A.3** (new templates).
 
-## Decisions needed from you
+## Decisions (resolved 2026-09-09)
 
-1. **Compact** — rework it (rebuild on the real `compact` density class with
-   genuine compact-typography craft) or **retire** it (its "fits one page"
-   value becomes a density toggle on other templates later)?
-2. **Quadrant** — rework it (fix the dead-space / quadrant-alignment / weak
-   cyan) or **retire** it (the 2×2 concept is distinctive but the execution
-   isn't landing)?
-3. **Classic** — confirm the merge into Classic Professional (retire the
-   separate `classic` variant). Add its left-aligned letterhead as an option
-   on Classic Professional, or drop that treatment entirely?
-4. **Tech Executive** — keep as a distinct polish target, or accept that
-   "flat renderer + a sidebar" isn't really its own template and merge its
-   identity with Minimalist / retire?
-5. **Attack order** — agree with the above, or reprioritise?
+1. **Compact** → **rework.** Rebuild on the real `compact` density class
+   with genuine compact-typography craft. No retirement.
+2. **Quadrant** → **rework.** Fix the quadrant sizing/alignment, make the
+   cyan present, solve overflow behaviour. Keep the 2×2 concept.
+3. **Classic** → **merge into Classic Professional**, adding a left/centre
+   **name-alignment option** to Classic Professional so both looks survive
+   as one template. The `classic` variant is retired.
+4. **Tech Executive** → **rework, promote to a real bespoke template** —
+   its own `TechExecShowcase.jsx` + `techExec.css`, "annual-report / navy
+   leadership" as a genuine distinct design, accent-configurable like the
+   rest. (Moves from "polish" to "rework" in the table.)
+5. **Attack order** — as listed above, accepted.
+
+**Net after A-fix:** 15 template variants (Classic retired, all others
+kept and brought to bar), then A.3 adds 3 → **~18 strong templates**.
