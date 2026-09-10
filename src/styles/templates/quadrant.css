@@ -1,29 +1,38 @@
 /* ==========================================================================
-   Quadrant Showcase — hand-authored component styles for the Quadrant
-   template's non-ATS mode. Scoped entirely under `.quadrant-showcase`.
-   Cyan accent — the one primary hue none of the other 14 templates use
-   (see cvTemplates.js for the survey this was checked against).
+   Quadrant Showcase — hand-authored styles for the Quadrant template's
+   non-ATS mode. Scoped under `.quadrant-showcase`.
 
    Layout: a literal 2x2 CSS grid — the structure itself is this template's
-   identity, the way Timeline's identity is its literal vertical line.
-   Rows are `auto` height (not equal fixed boxes), so the bottom row
-   (Experience / Education+extras) can grow taller than the top row
-   (Profile / Skills) without clipping — real CV content is unpredictable
-   length, a poster-style fixed-height grid would either clip or waste
-   space. Thin 1px dividers between cells read as a literal grid line.
+   identity, the way Timeline's is its vertical line. Rows are `auto` height
+   (not equal fixed boxes) so the bottom row can grow taller than the top
+   without clipping. Thin 1px dividers read as literal grid lines.
+
+   Reworked 2026-09-10 to docs/template-design-system.md:
+   - §2: the `compact` density ramp — root carries `tpl-density-compact`,
+     type sizes read `--tpl-*`.
+   - §3: one cyan accent from `--tpl-accent` (set inline from the
+     `accentColor` prop). `--tpl-accent-soft` is the JS-computed fill. The
+     profile-cell tint, the skill tags and the grid dividers all track it —
+     the cyan used to read washed out (a near-white `#ecfeff` wash + grey
+     borders).
+   - §4 icon-badge: the section glyphs sit in a real soft-cyan rounded
+     badge now (were bare glyphs).
+   - Rebalance: About moved from the identity cell to the top-right cell
+     (see QuadrantShowcase.jsx) so the quadrants fill more evenly.
    ========================================================================== */
 
 .quadrant-showcase {
-  --qd-cyan: #0e7490;
-  --qd-cyan-strong: #155e75;
-  --qd-cyan-tint: #ecfeff;
+  /* Accent — overridden inline per render. Kept in sync with
+     QUADRANT_DEFAULT_ACCENT_COLOR in components/templates/quadrant.js. */
+  --tpl-accent: #0e7490;
+  --tpl-accent-soft: rgba(14, 116, 144, 0.12);
+
   --qd-text: #0f172a;
-  --qd-muted: #64748b;
-  --qd-border: #d5e3e6;
-  /* Deliberately NOT pure #ffffff — same blank-canvas PDF export guard used
-     by the Creative/Modern/Executive Showcases: thin-divider, mostly-
-     whitespace designs can make html2canvas sample every point as
-     near-white and silently fall back to a plain-text PDF render. */
+  --qd-muted: #475569;
+  /* Grid dividers — a pale cyan (not neutral grey) so the literal grid
+     reads as part of the one accent. */
+  --qd-border: #bfe0e6;
+  /* Deliberately NOT pure #ffffff — the blank-canvas PDF export guard. */
   --qd-bg: #f7fafa;
   --qd-card: #ffffff;
 
@@ -34,6 +43,7 @@
   background: var(--qd-bg);
   color: var(--qd-text);
   font-family: var(--font-sans);
+  font-size: var(--tpl-body-size);
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.2);
@@ -53,11 +63,11 @@
 
 .quadrant-showcase__cell {
   min-width: 0;
-  padding: 2.1rem 1.85rem;
+  padding: 2rem 1.75rem;
 }
 
 .quadrant-showcase__cell--profile {
-  background: var(--qd-cyan-tint);
+  background: var(--tpl-accent-soft);
   border-right: 1px solid var(--qd-border);
   border-bottom: 1px solid var(--qd-border);
 }
@@ -79,7 +89,7 @@
 /* ── Profile cell ── */
 
 .quadrant-showcase__photo-wrap {
-  margin-bottom: 1.1rem;
+  margin-bottom: 1rem;
 }
 
 .quadrant-showcase__photo {
@@ -89,11 +99,11 @@
   object-fit: cover;
   border-radius: 9999px;
   border: 3px solid #ffffff;
-  box-shadow: 0 0 0 1px var(--qd-border);
+  box-shadow: 0 0 0 2px var(--tpl-accent);
 }
 
 .quadrant-showcase__kicker {
-  font-size: 0.62rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -102,24 +112,24 @@
 
 .quadrant-showcase__name {
   margin-top: 0.4rem;
-  font-size: 1.7rem;
+  font-size: var(--tpl-name-size);
+  line-height: var(--tpl-name-lh);
   font-weight: 800;
   letter-spacing: -0.01em;
-  line-height: 1.1;
   color: var(--cv-heading-color, var(--qd-text));
   overflow-wrap: break-word;
 }
 
 .quadrant-showcase__role {
   margin-top: 0.35rem;
-  font-size: 0.86rem;
+  font-size: var(--tpl-title-size);
   font-weight: 600;
-  color: var(--qd-cyan);
+  color: var(--tpl-accent);
 }
 
 .quadrant-showcase__tagline {
   margin-top: 0.4rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   font-style: italic;
   color: var(--qd-muted);
 }
@@ -135,7 +145,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   color: var(--qd-muted);
   overflow-wrap: break-word;
 }
@@ -143,20 +153,18 @@
 .quadrant-showcase__contact-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--qd-cyan);
+  color: var(--tpl-accent);
 }
 
 .quadrant-showcase__summary {
-  margin-top: 1.1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--qd-border);
-  font-size: 0.78rem;
-  line-height: 1.7;
-  color: var(--qd-text);
+  margin-top: 0.6rem;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--qd-muted);
   white-space: pre-line;
 }
 
-/* ── Shared section head (Skills / Experience / Projects / extras) ── */
+/* ── Shared section head — §4 icon-badge ── */
 
 .quadrant-showcase__section-head {
   display: flex;
@@ -166,50 +174,56 @@
 
 .quadrant-showcase__section-icon {
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  color: var(--qd-cyan);
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 8px;
+  background: var(--tpl-accent-soft);
+  color: var(--tpl-accent);
 }
 
 .quadrant-showcase__section-icon svg {
-  height: 0.85rem;
-  width: 0.85rem;
+  height: 0.72rem;
+  width: 0.72rem;
 }
 
 .quadrant-showcase__section-title {
-  font-size: 0.68rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--cv-heading-color, var(--qd-cyan-strong));
+  letter-spacing: 0.16em;
+  color: var(--cv-heading-color, var(--qd-text));
 }
 
 .quadrant-showcase__section + .quadrant-showcase__section {
-  margin-top: 1.75rem;
+  margin-top: 1.6rem;
 }
 
 .quadrant-showcase__empty {
-  margin-top: 0.8rem;
-  font-size: 0.78rem;
+  margin-top: 0.7rem;
+  font-size: var(--tpl-meta-size);
   color: var(--qd-muted);
 }
 
 /* ── Skills cell ── */
 
 .quadrant-showcase__skill-group {
-  margin-top: 1rem;
+  margin-top: 0.9rem;
 }
 
 .quadrant-showcase__skill-group:first-of-type {
-  margin-top: 0.85rem;
+  margin-top: 0.75rem;
 }
 
 .quadrant-showcase__skill-group-label {
-  font-size: 0.66rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--qd-muted);
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.4rem;
 }
 
 .quadrant-showcase__tag-row {
@@ -220,29 +234,29 @@
 
 .quadrant-showcase__tag {
   border-radius: 6px;
-  border: 1px solid var(--qd-border);
-  background: var(--qd-cyan-tint);
-  padding: 0.28rem 0.6rem;
-  font-size: 0.7rem;
+  background: var(--tpl-accent-soft);
+  padding: 0.24rem 0.55rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--qd-cyan-strong);
+  color: var(--qd-text);
+  overflow-wrap: anywhere;
 }
 
-/* ── Experience / Education entries ── */
+/* ── Experience / entries ── */
 
 .quadrant-showcase__entry-list {
-  margin-top: 0.85rem;
+  margin-top: 0.8rem;
   display: flex;
   flex-direction: column;
 }
 
 .quadrant-showcase__entry {
-  padding: 0 0 1.2rem;
+  padding: 0 0 1.1rem;
   border-bottom: 1px solid var(--qd-border);
 }
 
 .quadrant-showcase__entry:not(:first-child) {
-  padding-top: 1.2rem;
+  padding-top: 1.1rem;
 }
 
 .quadrant-showcase__entry:last-child {
@@ -259,86 +273,86 @@
 }
 
 .quadrant-showcase__entry-role {
-  font-size: 0.94rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--qd-text);
 }
 
 .quadrant-showcase__entry-meta {
   margin-top: 0.15rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   color: var(--qd-muted);
 }
 
 .quadrant-showcase__entry-dates {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--qd-muted);
+  color: var(--tpl-accent);
   white-space: nowrap;
 }
 
 .quadrant-showcase__bullets {
-  margin-top: 0.55rem;
+  margin-top: 0.5rem;
   padding-left: 1.05rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
 .quadrant-showcase__bullets li {
-  font-size: 0.78rem;
-  line-height: 1.6;
-  color: var(--qd-text);
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--qd-muted);
 }
 
 .quadrant-showcase__bullets li::marker {
-  color: var(--qd-cyan);
+  color: var(--tpl-accent);
 }
 
 /* ── Projects (bordered cards, main cell) ── */
 
 .quadrant-showcase__project-grid {
-  margin-top: 0.85rem;
+  margin-top: 0.8rem;
   display: flex;
   flex-direction: column;
-  gap: 1.1rem;
+  gap: 1rem;
 }
 
 .quadrant-showcase__project-card {
   border-radius: 10px;
   border: 1px solid var(--qd-border);
   background: var(--qd-bg);
-  padding: 1rem 1.1rem;
+  padding: 0.9rem 1rem;
 }
 
 .quadrant-showcase__project-name {
-  font-size: 0.88rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--qd-text);
 }
 
 .quadrant-showcase__project-desc {
-  margin-top: 0.4rem;
-  font-size: 0.78rem;
-  line-height: 1.6;
-  color: var(--qd-text);
+  margin-top: 0.35rem;
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--qd-muted);
   white-space: pre-line;
 }
 
 .quadrant-showcase__project-card .quadrant-showcase__tag-row {
-  margin-top: 0.6rem;
+  margin-top: 0.55rem;
 }
 
-/* ── Extras cell: plain lists — no card wrapper, thin dividers ── */
+/* ── Extras cell: plain lists ── */
 
 .quadrant-showcase__list {
-  margin-top: 0.8rem;
+  margin-top: 0.7rem;
   display: flex;
   flex-direction: column;
 }
 
 .quadrant-showcase__list-item {
-  padding: 0.7rem 0;
+  padding: 0.65rem 0;
   border-bottom: 1px solid var(--qd-border);
 }
 
@@ -356,48 +370,44 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   color: var(--qd-text);
 }
 
 .quadrant-showcase__list-title {
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   font-weight: 700;
   color: var(--qd-text);
 }
 
 .quadrant-showcase__list-meta {
   margin-top: 0.15rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   color: var(--qd-muted);
 }
 
 .quadrant-showcase__list-link {
   display: inline-block;
   margin-top: 0.3rem;
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--qd-cyan);
+  color: var(--tpl-accent);
 }
 
 /* Links always renders last in the extras cell, in its own bordered box —
-   sets it apart from the plain divider-separated lists (Education,
-   Certificates, Languages) above it, and keeps it as a fixed, recognizable
-   anchor point regardless of section order. */
+   a fixed, recognizable anchor point regardless of section order. */
 .quadrant-showcase__section--boxed {
   border: 1px solid var(--qd-border);
   border-radius: 12px;
-  padding: 1.1rem 1.1rem 1.25rem;
-  /* Tinted against the (white) extras cell so the box itself reads clearly;
-     individual link-cards inside are --qd-card (white) again, one layer up. */
+  padding: 1rem 1rem 1.15rem;
   background: var(--qd-bg);
 }
 
 .quadrant-showcase__link-list {
-  margin-top: 0.8rem;
+  margin-top: 0.7rem;
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.5rem;
 }
 
 .quadrant-showcase__link-card {
@@ -407,17 +417,17 @@
   border-radius: 10px;
   border: 1px solid var(--qd-border);
   background: var(--qd-card);
-  padding: 0.5rem 0.65rem;
+  padding: 0.45rem 0.6rem;
 }
 
 .quadrant-showcase__link-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--qd-cyan);
+  color: var(--tpl-accent);
 }
 
 .quadrant-showcase__link-label {
-  font-size: 0.66rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -428,13 +438,12 @@
   display: block;
   overflow: hidden;
   margin-top: 0.1rem;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   color: var(--qd-text);
   white-space: nowrap;
 }
 
-/* ── Responsive — under 860px, collapse to one stacked column:
-   Profile, Skills, Experience/Projects, Education+extras ── */
+/* ── Responsive — under 860px, collapse to one stacked column ── */
 
 @media (max-width: 860px) {
   .quadrant-showcase {
@@ -452,11 +461,7 @@
 
 @media (max-width: 560px) {
   .quadrant-showcase__cell {
-    padding: 1.6rem 1.25rem;
-  }
-
-  .quadrant-showcase__name {
-    font-size: 1.4rem;
+    padding: 1.5rem 1.25rem;
   }
 
   .quadrant-showcase__photo {

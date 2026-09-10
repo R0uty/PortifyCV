@@ -26,6 +26,16 @@ export const ACCENT_SWATCH_SETS = {
     { color: '#7c3aed', label: { en: 'Violet', fi: 'Violetti' } },
     { color: '#1f7a6c', label: { en: 'Teal', fi: 'Sinivihreä' } },
   ],
+  // Cool-cyan set — cyan first/default. Quadrant's range: the one hue no
+  // other template leads with, plus cool alternatives.
+  coolCyan: [
+    { color: '#0e7490', label: { en: 'Cyan', fi: 'Syaani' } },
+    { color: '#0f766e', label: { en: 'Teal', fi: 'Sinivihreä' } },
+    { color: '#2563eb', label: { en: 'Blue', fi: 'Sininen' } },
+    { color: '#059669', label: { en: 'Emerald', fi: 'Smaragdi' } },
+    { color: '#4f46e5', label: { en: 'Indigo', fi: 'Indigo' } },
+    { color: '#334155', label: { en: 'Slate', fi: 'Liuske' } },
+  ],
   // Cool-blue set — sky first/default. Compact's range: crisp blues plus a
   // near-mono slate for a purely typographic one-pager.
   coolBlue: [

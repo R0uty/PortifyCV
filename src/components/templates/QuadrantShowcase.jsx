@@ -8,21 +8,27 @@
 // Layout: a literal 2x2 CSS grid, not four equal boxes — each row auto-
 // sizes to its own content, so a long Experience list can grow taller than
 // a short Education list without clipping or forcing scroll:
-//   top-left     — identity (photo, name, title, contact) + About
-//   top-right    — Skills + Languages (Languages is pinned here rather than
-//                  bottom-right so that quadrant doesn't end up visibly
-//                  taller than the other three — see the extrasKeys comment
-//                  below)
+//   top-left     — identity (photo, name, title, contact) — a tight card
+//   top-right    — Profile summary + Skills + Languages (About moved here
+//                  from the identity cell in the 2026-09-10 rework so the
+//                  top-left quadrant isn't visibly taller than the top-right)
 //   bottom-left  — Experience (+ Projects) — the one cell that drives PDF
 //                  pagination (data-export-placement="main"); the other
 //                  three are "side" and fall wherever they land, same
 //                  asymmetric handling every split-layout template uses.
 //   bottom-right — Education + Certificates + Links
+//
+// Reworked 2026-09-10 to docs/template-design-system.md: the `compact`
+// density ramp (`tpl-density-compact` + `--tpl-*`), one cyan accent read
+// from `--tpl-accent` (real soft-cyan icon-badges, accent-tinted grid
+// dividers, soft-cyan skill tags), and the About rebalance above.
 
 import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import { accentSoftFill } from '../../utils/templateAccents'
+import { QUADRANT_DEFAULT_ACCENT_COLOR } from './quadrant'
 import {
   devIcons,
   contactIcons,
@@ -62,7 +68,15 @@ function Section({ id, placement, icon, title, children, className = '' }) {
   )
 }
 
-export default function QuadrantShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
+export default function QuadrantShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  showcaseConfig = {},
+  headingColor = null,
+  accentColor = QUADRANT_DEFAULT_ACCENT_COLOR,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -127,6 +141,7 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
+    summary: isFinnish ? 'Yhteenveto' : 'Profile',
     experience: isFinnish ? 'Kokemus' : 'Experience',
     projects: isFinnish ? 'Projektit' : 'Projects',
     education: isFinnish ? 'Koulutus' : 'Education',
@@ -333,8 +348,12 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
       // QuadrantShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className="quadrant-showcase preview-document--designer"
-      style={headingColor ? { '--cv-heading-color': headingColor } : null}
+      className="quadrant-showcase preview-document--designer tpl-density-compact"
+      style={{
+        '--tpl-accent': accentColor,
+        '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, QUADRANT_DEFAULT_ACCENT_COLOR),
+        ...(headingColor ? { '--cv-heading-color': headingColor } : null),
+      }}
     >
       <section className="quadrant-showcase__cell quadrant-showcase__cell--profile" data-export-header="true" data-export-secondary="true">
         {showPhoto ? (
@@ -363,15 +382,16 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
             ))}
           </div>
         ) : null}
-        {showAbout ? (
-          <p className="quadrant-showcase__summary" data-export-section="about" data-export-placement="side">{about}</p>
-        ) : null}
       </section>
 
       <section className="quadrant-showcase__cell quadrant-showcase__cell--skills" data-export-secondary="true">
+        {showAbout ? (
+          <Section id="about" placement="side" icon="about" title={copy.summary}>
+            <p className="quadrant-showcase__summary">{about}</p>
+          </Section>
+        ) : null}
         {showSkills ? (
-          <>
-            <SectionHead icon="skills" title={copy.skills} />
+          <Section id="skills" placement="side" icon="skills" title={copy.skills}>
             {skillCategories.length > 0 ? (
               skillCategories.map((cat) => (
                 <div key={cat.key} className="quadrant-showcase__skill-group">
@@ -388,7 +408,7 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
                 {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
               </p>
             )}
-          </>
+          </Section>
         ) : null}
         {showLanguages ? renderExtraSection('languages') : null}
       </section>

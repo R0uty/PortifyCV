@@ -146,6 +146,25 @@ test.describe('Template accent color', () => {
     expect(accent.accent.toLowerCase()).toBe('#be123c')
     expect(accent.soft).toBe('rgba(190, 18, 60, 0.1)')
   })
+
+  test('choosing a swatch recolors the Quadrant preview', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await selectTemplate(page, 'Quadrant')
+
+    await page.getByRole('button', { name: 'Settings' }).first().click()
+    // 'Emerald' is the 4th swatch in the 'coolCyan' set (#059669)
+    await page.getByRole('button', { name: 'Emerald', exact: true }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
+
+    const root = page.locator('.quadrant-showcase').first()
+    const accent = await root.evaluate((el) => ({
+      accent: el.style.getPropertyValue('--tpl-accent').trim(),
+      soft: el.style.getPropertyValue('--tpl-accent-soft').trim(),
+    }))
+    expect(accent.accent.toLowerCase()).toBe('#059669')
+    expect(accent.soft).toBe('rgba(5, 150, 105, 0.12)')
+  })
 })
 
 test.describe('Link URL formatting', () => {

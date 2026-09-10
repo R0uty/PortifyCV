@@ -311,9 +311,9 @@ const templateMap = {
   },
   quadrant: {
     id: 'quadrant',
-    accent: null,
+    accent: { default: '#0e7490', swatchSet: 'coolCyan' },
     label: 'Quadrant',
-    description: 'A literal 2x2 grid — profile, skills, work history, and everything else split into four scannable quarters, with a single cyan accent. A strong fit if you want your CV to read at a glance rather than top to bottom.',
+    description: 'A literal 2x2 grid — identity, summary and skills, work history, and everything else split into four scannable quarters, with a single customizable accent. A strong fit if you want your CV to read at a glance rather than top to bottom.',
     variant: 'quadrant',
     layout: 'split',
     primarySections: ['about', 'experience', 'projects'],
@@ -425,7 +425,7 @@ const templateLocalization = {
     },
     quadrant: {
       label: 'Neliö',
-      description: 'Kirjaimellinen 2x2-ruudukko — profiili, taidot, työkokemus ja loput tiedot omissa neljänneksissään, yhdellä syaanilla aksentilla. Sopii hyvin, jos haluat CV:n hahmottuvan yhdellä silmäyksellä ylhäältä alas lukemisen sijaan.',
+      description: 'Kirjaimellinen 2x2-ruudukko — henkilötiedot, yhteenveto ja taidot, työkokemus sekä loput tiedot omissa neljänneksissään, yhdellä muokattavalla aksenttivärillä. Sopii hyvin, jos haluat CV:n hahmottuvan yhdellä silmäyksellä ylhäältä alas lukemisen sijaan.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Taidot', 'Koulutus'],
     },

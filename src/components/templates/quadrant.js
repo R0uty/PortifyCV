@@ -1,24 +1,28 @@
 // Quadrant template config — the one template built around a literal 2x2
-// grid instead of a single/split column. Cyan accent (the one primary hue
-// none of the other 14 templates use yet — see cvTemplates.js for the
-// survey). Non-ATS mode is a fully bespoke Showcase (QuadrantShowcase.jsx);
-// everything below is what ATS-friendly mode falls back to, same as every
-// other bespoke template.
+// grid. Cyan accent read from --tpl-accent in the non-ATS Showcase
+// (QuadrantShowcase.jsx). Everything below is the ATS-friendly flat fallback
+// (monochrome there — `teal` stands in for the Showcase's `cyan`, which is
+// absent from the hand-authored utilities.css).
+
+// Registry default accent — must match `accent.default` for `quadrant` in
+// cvTemplates.js exactly (lowercase hex). See docs/template-design-system.md §6.
+export const QUADRANT_DEFAULT_ACCENT_COLOR = '#0e7490'
+
 export default {
   // Outer document border — cyan-tinted, white bg
-  preview: () => 'border-cyan-200 bg-white shadow-none',
+  preview: () => 'border-teal-200 bg-white shadow-none',
 
   // Header strip — cyan-tinted background, dark text
-  headerColor: () => 'bg-cyan-50 text-gray-900 border-b border-cyan-200',
+  headerColor: () => 'bg-teal-50 text-gray-900 border-b border-teal-200',
 
   // Full name heading — bold, large
   headerTitle: () => 'mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl',
 
   // Professional title — medium weight, cyan accent
-  headerSubtitle: () => 'mt-1.5 text-sm font-medium leading-6 text-cyan-700',
+  headerSubtitle: () => 'mt-1.5 text-sm font-medium leading-6 text-teal-700',
 
   // Section headings — small uppercase, wide tracking, cyan accent
-  sectionTitle: () => 'text-[0.68rem] font-bold uppercase tracking-[0.2em] text-cyan-700',
+  sectionTitle: () => 'text-[0.68rem] font-bold uppercase tracking-[0.2em] text-teal-700',
 
   // Main content section wrapper — bottom border separator
   mainSection: () => 'border-b border-gray-200 pb-6',
@@ -30,13 +34,13 @@ export default {
   sideSection: () => 'py-4 first:pt-0',
 
   // Skill tag pill — small, cyan-tinted
-  skillTag: () => 'rounded-sm border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700',
+  skillTag: () => 'rounded-sm border border-teal-200 bg-teal-50 px-2.5 py-1 text-xs font-semibold text-teal-700',
 
   // Timeline left-border color — cyan
-  timelineBorder: () => 'border-cyan-300',
+  timelineBorder: () => 'border-teal-300',
 
   // Timeline dot circle color — cyan fill
-  timelineDot: () => 'border-white bg-cyan-600',
+  timelineDot: () => 'border-white bg-teal-600',
 
   // Education card — bottom border separator, no background
   educationCard: () => 'border-b border-gray-100 py-3',
@@ -47,17 +51,17 @@ export default {
   // Split-column grid — standard ratios (used by the ATS-mode flat fallback)
   splitColumns: () => 'grid gap-5 sm:gap-6 md:grid-cols-[minmax(0,1.62fr)_minmax(200px,0.88fr)] md:gap-8 print:grid-cols-1',
 
-  // Accent color for ATS badge tinting — cyan
-  accentColor: () => ({ light: 'cyan', dark: 'cyan' }),
+  // Accent color for ATS badge tinting — teal (stands in for the Showcase's cyan)
+  accentColor: () => ({ light: 'teal', dark: 'teal' }),
 
   // Summary badge — cyan border and fill
-  summaryBadge: () => 'border border-cyan-200 bg-cyan-50 text-cyan-700',
+  summaryBadge: () => 'border border-teal-200 bg-teal-50 text-teal-700',
 
   // Profile photo border
-  photoBorder: () => 'border border-cyan-200 bg-cyan-50 text-cyan-700',
+  photoBorder: () => 'border border-teal-200 bg-teal-50 text-teal-700',
 
   // About section header bottom-border color — cyan
-  aboutBorder: () => 'border-cyan-100',
+  aboutBorder: () => 'border-teal-100',
 
   // Experience rendering — role and company shown separately, no timeline dots
   experienceLayout: 'clean',
@@ -69,18 +73,18 @@ export default {
   linksLayout: 'icon-list',
 
   // Color class for categorized skill group headings — cyan
-  categoryLabelColor: 'text-cyan-600',
+  categoryLabelColor: 'text-teal-600',
 
   // Color class for link icons and labels — cyan
-  linkIconColor: 'text-cyan-600',
+  linkIconColor: 'text-teal-600',
 
   // Header contact line mode — 'personal' renders email/phone/location with icons
   headerContactMode: 'personal',
 
   headerContactGap: 'gap-x-3',
   headerContactTextSize: 'text-[0.7rem]',
-  headerContactTextColor: 'text-cyan-700',
-  headerContactIconColor: 'text-cyan-500',
+  headerContactTextColor: 'text-teal-700',
+  headerContactIconColor: 'text-teal-500',
 
   // ── Quadrant Showcase config (read by QuadrantShowcase.jsx) ──
   // Everything below only applies to the non-ATS "Quadrant" grid mode.

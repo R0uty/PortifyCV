@@ -4,6 +4,36 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Quadrant template rework (roadmap A-fix batch) — 2026-09-10
+
+Released as v1.2.8. Sixth of the A-fix rework batch. Quadrant scored
+**rework** — E1 (plus a muted accent and no density ramp).
+
+- **Rebalanced the 2×2.** The About summary moved from the identity cell
+  (top-left) to the top-right cell, above Skills, with its own Profile
+  icon-badge heading. Top-left is now a tight identity card; top-right
+  carries real content (summary + skills + languages) instead of trailing
+  whitespace. Measured: the two top-row cells now render the same height.
+  (The `overflow-wrap:anywhere` name char-fragmentation E1 flagged was
+  already fixed to `break-word` in A-fix #1 / v1.2.2.)
+- **Made the cyan present.** Real §4 icon-badges — every section glyph now
+  sits in a `1.4rem` soft-cyan rounded badge (were bare glyphs). Skill tags
+  → `--tpl-accent-soft` fill + ink text (were a near-white `#ecfeff` wash +
+  grey border). The literal grid dividers take a pale cyan (`#bfe0e6`, was
+  neutral `#d5e3e6`); the photo gets a 2px cyan ring; the profile-cell tint
+  tracks the accent. `--qd-cyan` / `--qd-cyan-strong` / `--qd-cyan-tint`
+  collapse to `--tpl-accent` + `--tpl-accent-soft`.
+- **`compact` density ramp** — `tpl-density-compact` + `--tpl-*`; name
+  `1.7rem → 1.65rem`, body `0.78rem → 0.82rem`. Ink consolidated.
+- **Accent user-customizable** (§6 3-step): `--tpl-accent` + JS
+  `--tpl-accent-soft`, a new `coolCyan` swatch set (cyan / teal / blue /
+  emerald / indigo / slate), `QUADRANT_DEFAULT_ACCENT_COLOR = '#0e7490'`.
+- `quadrant.js`'s ATS `cyan-*` classes were **undefined** in `utilities.css`
+  — swapped to stocked `teal-*` (near-identical hue).
+
+New Playwright spec for the Quadrant accent swatch; full suite 38 passed.
+Verified in-app and in a rendered-back PDF (the 2×2 top row now fills evenly).
+
 ## Compact template rework (roadmap A-fix batch) — 2026-09-10
 
 Released as v1.2.7. Fifth of the A-fix rework batch. Compact scored
