@@ -4,6 +4,39 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Executive template rework (roadmap A-fix batch) — 2026-09-10
+
+Released as v1.2.5. Third of the A-fix rework batch. Executive scored
+**rework** — colour discipline 1.
+
+- **Colour (C).** The left rail was washed in `#eef2ff` — a pale **indigo**
+  the August indigo→gold pass left behind, fighting the warm gold accent.
+  The rail is now a warm off-white (`#f7f4ef`) — the single §3 tint region —
+  and the ink is warmed from cool slate (`#0f172a` / `#1e293b` / `#64748b`)
+  to a stone scale (`#1c1917` / `#44403c` / `#78716c`) so the whole palette
+  reads one temperature with the gold.
+- **Gold is now present** rather than near-invisible: a 1px gold hairline
+  under every section head (the `rule-under` marker), the role line bumped
+  to weight 600, gold entry dates, gold bullet/award markers and metrics.
+  Skill tags move from outlined-gold-text to a soft-gold fill with ink text.
+  Photo ring → gold.
+- **§4 heading → `rule-under`.** The bare low-contrast section glyph is
+  removed (`sectionIcons` import and the `icon` prop with it); the
+  tracked-uppercase label sits over the gold rule.
+- **Accent user-customizable** (§6 3-step): `--tpl-accent` + JS
+  `--tpl-accent-soft`, a new `warmGold` swatch set (gold / umber / burgundy
+  / teal / navy / forest), `EXECUTIVE_DEFAULT_ACCENT_COLOR = '#b45309'`
+  (kept — brighter "true golds" fail AA on the role/metric text).
+- **Type ramp.** `tpl-density-standard` + `--tpl-*`, reclassified from the
+  design-system's `roomy` starting assignment: the name lives in a ~210px
+  left rail that can't give roomy's 240px column floor.
+- `executive.js`'s ATS-mode `amber-*` classes were **undefined** in the
+  hand-authored `utilities.css` (the Modern-Professional-`rose-*` trap
+  again) — added the real `amber-*` utilities.
+
+New Playwright spec for the Executive accent swatch; full suite 36 passed.
+Verified in-app and in a rendered-back 2-page PDF export.
+
 ## Graduate template rework (roadmap A-fix batch) — 2026-09-10
 
 Released as v1.2.4. Second of the A-fix rework batch. Graduate scored

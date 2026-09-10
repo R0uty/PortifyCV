@@ -88,9 +88,9 @@ const templateMap = {
   },
   executive: {
     id: 'executive',
-    accent: null,
+    accent: { default: '#b45309', swatchSet: 'warmGold' },
     label: 'Executive',
-    description: 'Restrained boardroom layout with a gold accent, no timeline — suits a CV that leads with outcomes over a chronological story.',
+    description: 'Restrained boardroom layout with one customizable accent and no timeline — suits a CV that leads with outcomes over a chronological story.',
     variant: 'executive',
     layout: 'split',
     primarySections: ['about', 'experience', 'leadership', 'projects', 'achievements', 'education'],
@@ -356,7 +356,7 @@ const templateLocalization = {
     },
     executive: {
       label: 'Johtaja',
-      description: 'Hillitty hallitushuoneasettelu kulta-aksentilla, ei aikajanaa — sopii, kun CV:si nostaa tulokset kronologian edelle.',
+      description: 'Hillitty hallitushuoneasettelu yhdellä muokattavalla aksenttivärillä, ei aikajanaa — sopii, kun CV:si nostaa tulokset kronologian edelle.',
       summaryBadgeLabel: 'Johtajaprofiili',
       chips: ['Yhteenveto', 'Johtavuus'],
     },

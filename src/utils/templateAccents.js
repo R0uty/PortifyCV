@@ -26,6 +26,17 @@ export const ACCENT_SWATCH_SETS = {
     { color: '#7c3aed', label: { en: 'Violet', fi: 'Violetti' } },
     { color: '#1f7a6c', label: { en: 'Teal', fi: 'Sinivihreä' } },
   ],
+  // Warm-gold set — gold first/default. Executive's range: restrained,
+  // boardroom-appropriate alternatives, each dark enough to clear 4.5:1 on
+  // white (the accent lands on the role line and metric text, not just icons).
+  warmGold: [
+    { color: '#b45309', label: { en: 'Gold', fi: 'Kulta' } },
+    { color: '#92400e', label: { en: 'Umber', fi: 'Umbra' } },
+    { color: '#9f1239', label: { en: 'Burgundy', fi: 'Viininpunainen' } },
+    { color: '#0f766e', label: { en: 'Teal', fi: 'Sinivihreä' } },
+    { color: '#1e3a8a', label: { en: 'Navy', fi: 'Laivastonsininen' } },
+    { color: '#15803d', label: { en: 'Forest', fi: 'Metsänvihreä' } },
+  ],
   // Cool-indigo set — indigo first/default. Graduate's range: keeps the
   // established indigo identity, with cool alternatives that don't warm it up.
   coolIndigo: [

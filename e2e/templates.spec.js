@@ -108,6 +108,25 @@ test.describe('Template accent color', () => {
     expect(accent.accent.toLowerCase()).toBe('#059669')
     expect(accent.soft).toBe('rgba(5, 150, 105, 0.12)')
   })
+
+  test('choosing a swatch recolors the Executive preview', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await selectTemplate(page, 'Executive')
+
+    await page.getByRole('button', { name: 'Settings' }).first().click()
+    // 'Teal' is the 4th swatch in the 'warmGold' set (#0f766e)
+    await page.getByRole('button', { name: 'Teal', exact: true }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
+
+    const root = page.locator('.executive-showcase').first()
+    const accent = await root.evaluate((el) => ({
+      accent: el.style.getPropertyValue('--tpl-accent').trim(),
+      soft: el.style.getPropertyValue('--tpl-accent-soft').trim(),
+    }))
+    expect(accent.accent.toLowerCase()).toBe('#0f766e')
+    expect(accent.soft).toBe('rgba(15, 118, 110, 0.12)')
+  })
 })
 
 test.describe('Link URL formatting', () => {
