@@ -118,14 +118,12 @@ template that fights its class is a density-handling finding, not a reason
 to invent a fourth class:
 
 - **`roomy`** — Classic Professional, Minimalist, Creative,
-  Executive, Portfolio Hybrid, Modern Professional (A.2 moved it here from
-  `standard` v1.2.13 — its serif display name reads at 2.30rem rather than
-  standard's 1.95rem; the name is in a full-width flex header, no §7.1 risk)
-- **`standard`** — Modern Orange, Navy Professional, Modern Timeline,
-  Developer, Graduate, Tech Executive
+  Executive, Portfolio Hybrid
+- **`standard`** — Modern Professional, Modern Orange, Navy Professional,
+  Modern Timeline, Developer, Graduate, Tech Executive
 - **`compact`** — Compact, Colorful Compact, Quadrant
 
-**Adoption state (v1.2.13):** every bespoke Showcase now carries a
+**Adoption state (v1.2.13–1.2.14):** every bespoke Showcase now carries a
 `tpl-density-*` class on its root and reads the six roles from `--tpl-*`.
 Two documented size overrides remain: Navy Professional's sidebar identity
 block (kicker/name/role — white knockout in a ~180px rail, narrower than any

@@ -107,7 +107,8 @@ tight. Quadrant is worst: its name sits in a real 50%-width `1fr` cell.
    **Done:** the 9 rework/polish templates during their A-fix; the 5 keep
    templates with bespoke Showcases (Modern Professional, Modern Orange,
    Modern Timeline, Navy Professional, Classic Professional) in a batch
-   v1.2.13. Minimalist alone still pending — it is the flat renderer and
+   v1.2.13 (Modern Professional's `roomy` trial reverted to `standard`
+   v1.2.14). Minimalist alone still pending — it is the flat renderer and
    needs that path taught to read `--tpl-*`.
 4. **Adopt `--tpl-accent`** — the 14 templates not migrated in A.1 (Tech
    Executive opts out — flat-renderer-only). **Done** for every bespoke

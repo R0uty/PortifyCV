@@ -4,6 +4,14 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Modern Professional back to standard density — 2026-09-10
+
+Released as v1.2.14. The v1.2.13 `roomy` reclassification made the
+benchmark's body copy noticeably airier (0.95rem vs the hand-authored
+0.80rem), costing one-page density. Reverted to `standard`: name 1.95rem,
+body 0.90rem, section-heading tracking back to 0.16em. Still fully on the
+`--tpl-*` ramp — just the class it points at changed.
+
 ## Keep-template type-ramp adoption (roadmap A-fix) — 2026-09-10
 
 Released as v1.2.13. The five "keep" templates with bespoke Showcases —
@@ -15,10 +23,9 @@ sizes, the one §2 gap left after the rework batch.
   type roles (name / title / section-heading / entry-title / body / meta)
   reads the shared `--tpl-*` tokens. Weight, case, tracking and colour are
   untouched; line-heights kept as authored.
-- **Modern Professional** reclassified `standard` → **`roomy`** (A.2 lets an
-  A-fix change a starting assignment) — its serif display name lands at
-  2.30rem rather than standard's 1.95rem. Body copy rises to the roomy
-  0.95rem, matching Creative / Executive / Classic Professional.
+- **Modern Professional** was reclassified `standard` → `roomy` here, then
+  reverted to `standard` in v1.2.14 (the roomy body copy cost too much
+  one-page density).
 - **Navy Professional**'s sidebar identity block (kicker / name / role)
   keeps its own small sizes — white knockout in a ~180px rail, narrower than
   any density's name-column floor. Documented in the CSS.

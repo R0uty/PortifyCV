@@ -12,11 +12,10 @@
 
    §2 type ramp (docs/template-design-system.md): sizes for the six roles
    come from the shared `--tpl-*` tokens; the root carries
-   `tpl-density-roomy`. This file sets weight/case/tracking/colour only.
-   (A.2 reclassified this template roomy→ the ramp keeps a generous display
-   name — 2.30rem — closer to the benchmark's 2.875rem serif than standard's
-   1.95rem would allow. The name lives in a full-width flex header, so no
-   §7.1 fragmentation risk.)
+   `tpl-density-standard`. This file sets weight/case/tracking/colour only.
+   (The serif display name drops from its hand-authored 2.875rem to the
+   standard 1.95rem — it lives in a full-width flex header, so no §7.1
+   fragmentation risk.)
    ========================================================================== */
 
 .modern-showcase {
@@ -200,7 +199,7 @@
   font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   color: var(--cv-heading-color, var(--ms-navy));
 }
 
