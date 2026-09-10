@@ -273,7 +273,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
       // since a side-by-side column is exactly what this app's own ATS
       // claims ("no columns") promise to remove. Section order and
       // everything else about the layout stays the same.
-      className={`navy-professional-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'}${atsFriendlyMode ? ' navy-professional-showcase--ats' : ''}`}
+      className={`navy-professional-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'} tpl-density-standard${atsFriendlyMode ? ' navy-professional-showcase--ats' : ''}`}
       style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
     >
       <aside className="navy-professional-showcase__sidebar" data-export-secondary="true">

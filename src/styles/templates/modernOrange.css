@@ -12,6 +12,12 @@
    are plain hex throughout (no oklch/color-mix) so html2canvas-based PDF
    export renders them reliably — same constraint as every other bespoke
    Showcase in this app.
+
+   §2 type ramp (docs/template-design-system.md): sizes for the six roles
+   come from the shared `--tpl-*` tokens; the root carries
+   `tpl-density-standard`. This file sets weight/case/tracking/colour only.
+   Sidebar list items (skill/language names, education meta) deliberately
+   stay at `--tpl-meta-size` — the sidebar is a condensed zone.
    ========================================================================== */
 
 .modern-orange-showcase {
@@ -27,7 +33,9 @@
 
   position: relative;
   display: grid;
-  grid-template-columns: minmax(180px, 0.29fr) minmax(200px, 0.71fr);
+  /* Second column holds the name (header + main share it); 210px floor per
+     §2's standard-density name rule. */
+  grid-template-columns: minmax(180px, 0.29fr) minmax(210px, 0.71fr);
   grid-template-rows: auto 1fr;
   grid-template-areas:
     'sidebar header'
@@ -85,16 +93,16 @@
 }
 
 .modern-orange-showcase__sidebar-heading {
-  font-size: 0.68rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   color: var(--mo-accent);
   margin-bottom: 0.85rem;
 }
 
 .modern-orange-showcase__empty {
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   color: var(--mo-muted);
 }
 
@@ -110,7 +118,7 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   line-height: 1.4;
   color: var(--mo-text);
   overflow-wrap: break-word;
@@ -138,7 +146,7 @@
 }
 
 .modern-orange-showcase__skill-name {
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--mo-text);
   min-width: 0;
@@ -186,13 +194,13 @@
 }
 
 .modern-orange-showcase__lang-name {
-  font-size: 0.8rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   color: var(--mo-text);
 }
 
 .modern-orange-showcase__lang-level {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   color: var(--mo-muted);
 }
 
@@ -246,21 +254,21 @@
 }
 
 .modern-orange-showcase__edu-dates {
-  font-size: 0.66rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   color: var(--mo-accent);
 }
 
 .modern-orange-showcase__edu-degree {
   margin-top: 0.15rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   color: var(--mo-text);
 }
 
 .modern-orange-showcase__edu-meta {
   margin-top: 0.1rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   color: var(--mo-muted);
 }
 
@@ -279,7 +287,7 @@
 }
 
 .modern-orange-showcase__kicker {
-  font-size: 0.62rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -288,9 +296,9 @@
 
 .modern-orange-showcase__name {
   margin-top: 0.35rem;
-  font-size: 2.05rem;
+  font-size: var(--tpl-name-size);
   font-weight: 800;
-  line-height: 1.08;
+  line-height: var(--tpl-name-lh);
   letter-spacing: -0.01em;
   color: var(--cv-heading-color, var(--mo-text));
   overflow-wrap: break-word;
@@ -308,7 +316,7 @@
   border-radius: 8px;
   background: var(--mo-accent);
   color: #ffffff;
-  font-size: 0.78rem;
+  font-size: var(--tpl-title-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -350,10 +358,10 @@
 }
 
 .modern-orange-showcase__section-title {
-  font-size: 0.85rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   color: var(--cv-heading-color, var(--mo-text));
 }
 
@@ -361,7 +369,7 @@
 
 .modern-orange-showcase__summary {
   margin-top: 0.9rem;
-  font-size: 0.85rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.75;
   color: var(--mo-text);
   white-space: pre-line;
@@ -391,7 +399,7 @@
   flex-shrink: 0;
   width: 6rem;
   padding-top: 0.15rem;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   color: var(--mo-accent);
 }
@@ -429,14 +437,14 @@
 }
 
 .modern-orange-showcase__exp-role {
-  font-size: 0.92rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--mo-text);
 }
 
 .modern-orange-showcase__exp-meta {
   margin-top: 0.15rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   color: var(--mo-accent);
 }
 
@@ -449,7 +457,7 @@
 }
 
 .modern-orange-showcase__bullets li {
-  font-size: 0.79rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
   color: var(--mo-text);
 }
@@ -492,14 +500,14 @@
 }
 
 .modern-orange-showcase__project-name {
-  font-size: 0.82rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--mo-text);
 }
 
 .modern-orange-showcase__project-desc {
   margin-top: 0.3rem;
-  font-size: 0.73rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.5;
   color: var(--mo-muted);
 }
@@ -515,7 +523,7 @@
   border-radius: 5px;
   border: 1px solid var(--mo-border);
   padding: 0.18rem 0.45rem;
-  font-size: 0.62rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--mo-accent);
 }
@@ -523,7 +531,7 @@
 .modern-orange-showcase__project-link {
   display: inline-block;
   margin-top: 0.6rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--mo-accent);
 }
@@ -562,20 +570,20 @@
 }
 
 .modern-orange-showcase__cert-name {
-  font-size: 0.85rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--mo-text);
 }
 
 .modern-orange-showcase__cert-issuer {
   margin-top: 0.12rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   color: var(--mo-muted);
 }
 
 .modern-orange-showcase__cert-year {
   flex-shrink: 0;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--mo-accent);
 }
@@ -638,10 +646,6 @@
   .modern-orange-showcase__photo {
     width: 5.5rem;
     height: 5.5rem;
-  }
-
-  .modern-orange-showcase__name {
-    font-size: 1.8rem;
   }
 
   .modern-orange-showcase__exp-date {

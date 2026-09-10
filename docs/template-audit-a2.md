@@ -64,7 +64,7 @@ E = content edge-cases (§7.1-weighted) · A = ATS parity · X = export (provisi
 
 | | Count | Templates |
 |---|---|---|
-| **keep** (light polish only) | 6 | Modern Orange, Modern Timeline, Navy Professional, Classic Professional, Minimalist, Modern Professional |
+| **keep** (light polish only) | 6 | Modern Orange, Modern Timeline, Navy Professional, Classic Professional, Minimalist, Modern Professional — `--tpl-*` ramp adopted v1.2.13 (all but Minimalist, the flat renderer) |
 | **polish** | 2 | Portfolio Hybrid, Colorful Compact — both done (v1.2.11, v1.2.12) |
 | **rework** | 7 | Developer, Creative, Executive, Graduate, Compact, Quadrant, Tech Executive — all done (v1.2.3–1.2.9) |
 | **merge** | 1 | Classic → folded into Classic Professional (v1.2.10) |
@@ -103,10 +103,19 @@ tight. Quadrant is worst: its name sits in a real 50%-width `1fr` cell.
 2. **Palette capping to the §3 colour rule** — Developer, Creative,
    Portfolio, Graduate (4 accent hues), Executive (residual indigo),
    Colorful Compact (cap to the §3 named-6 exception).
-3. **Adopt the `--tpl-*` type ramp + a density class** — every template,
-   during its own A-fix.
+3. **Adopt the `--tpl-*` type ramp + a density class** — every template.
+   **Done:** the 9 rework/polish templates during their A-fix; the 5 keep
+   templates with bespoke Showcases (Modern Professional, Modern Orange,
+   Modern Timeline, Navy Professional, Classic Professional) in a batch
+   v1.2.13. Minimalist alone still pending — it is the flat renderer and
+   needs that path taught to read `--tpl-*`.
 4. **Adopt `--tpl-accent`** — the 14 templates not migrated in A.1 (Tech
-   Executive opts out — flat-renderer-only).
+   Executive opts out — flat-renderer-only). **Done** for every bespoke
+   Showcase except the two ink-only opt-outs (Classic Professional,
+   Minimalist) and the fixed-palette opt-outs (Colorful Compact, Developer).
+   Modern Timeline and Modern Orange keep their private `--tl-accent` /
+   `--mo-accent` names (already swatch-wired since A.1) — the rename to
+   `--tpl-accent` is a cosmetic follow-up, not blocking.
 
 ## Recommended attack order
 

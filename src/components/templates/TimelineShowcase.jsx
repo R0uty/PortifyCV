@@ -383,7 +383,7 @@ export default function TimelineShowcase({
       // class has to actually track the live atsFriendlyMode value rather
       // than being hardcoded to "designer". Getting this wrong hangs the
       // export: the handler polls forever for a class that never appears.
-      className={`timeline-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'}`}
+      className={`timeline-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'} tpl-density-standard`}
       style={{
         '--tl-accent': effectiveAccentColor,
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),

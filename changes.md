@@ -4,6 +4,35 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Keep-template type-ramp adoption (roadmap A-fix) — 2026-09-10
+
+Released as v1.2.13. The five "keep" templates with bespoke Showcases —
+**Modern Professional, Modern Orange, Modern Timeline, Navy Professional,
+Classic Professional** — scored *keep* in A.2 but still set ad-hoc font
+sizes, the one §2 gap left after the rework batch.
+
+- Each root now carries a `tpl-density-*` class and every one of the six
+  type roles (name / title / section-heading / entry-title / body / meta)
+  reads the shared `--tpl-*` tokens. Weight, case, tracking and colour are
+  untouched; line-heights kept as authored.
+- **Modern Professional** reclassified `standard` → **`roomy`** (A.2 lets an
+  A-fix change a starting assignment) — its serif display name lands at
+  2.30rem rather than standard's 1.95rem. Body copy rises to the roomy
+  0.95rem, matching Creative / Executive / Classic Professional.
+- **Navy Professional**'s sidebar identity block (kicker / name / role)
+  keeps its own small sizes — white knockout in a ~180px rail, narrower than
+  any density's name-column floor. Documented in the CSS.
+- **Modern Orange** floors its name column at 210px (§2 standard rule).
+- Accent handling unchanged this pass: Modern Timeline / Modern Orange keep
+  their swatch-wired `--tl-accent` / `--mo-accent`; Modern Professional /
+  Navy stay accent-fixed; Classic Professional stays ink-only.
+- **Minimalist excluded** — it has no bespoke Showcase (it is the flat
+  renderer); teaching that path to read `--tpl-*` is a separate pass (§6).
+
+lint / build / e2e (43) green; html2canvas rasterises each showcase clean.
+Design-system §2 and audit-a2 updated. This closes cross-cutting fix #3 for
+every template but Minimalist.
+
 ## Colorful Compact polish (roadmap A-fix polish pass) — 2026-09-10
 
 Released as v1.2.12. A.2 verdict "polish" (C=1, E=1). The template ran ~29

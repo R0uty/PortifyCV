@@ -428,7 +428,7 @@ export default function ModernOrangeShowcase({
       // stylesheet) — the one genuinely "necessary" change for ATS mode,
       // since a side-by-side column is exactly what this app's own ATS
       // claims ("no columns") promise to remove.
-      className={`modern-orange-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'}${atsFriendlyMode ? ' modern-orange-showcase--ats' : ''}`}
+      className={`modern-orange-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'} tpl-density-standard${atsFriendlyMode ? ' modern-orange-showcase--ats' : ''}`}
       style={{
         '--mo-accent': effectiveAccentColor,
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),

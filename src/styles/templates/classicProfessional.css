@@ -7,6 +7,11 @@
    rather than the app's self-hosted Inter — see classicProfessional.js's
    headerTitle comment) and thin 1px dividers are the only visual
    flourishes, per the "traditional and universally safe" brief.
+
+   §2 type ramp (docs/template-design-system.md): sizes for the six roles
+   come from the shared `--tpl-*` tokens; the root carries
+   `tpl-density-roomy`. This file sets weight/case/tracking/colour only.
+   No accent — this template opts out of the Settings swatch (§6, ink-only).
    ========================================================================== */
 
 .classic-professional-showcase {
@@ -56,7 +61,7 @@
 }
 
 .classic-professional-showcase__kicker {
-  font-size: 0.65rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.18em;
@@ -66,16 +71,16 @@
 .classic-professional-showcase__name {
   margin-top: 0.5rem;
   font-family: var(--cp-serif);
-  font-size: 2.75rem;
+  font-size: var(--tpl-name-size);
   font-weight: 700;
   letter-spacing: 0.01em;
-  line-height: 1.1;
+  line-height: var(--tpl-name-lh);
   color: var(--cv-heading-color, var(--cp-text));
 }
 
 .classic-professional-showcase__role {
   margin-top: 0.6rem;
-  font-size: 0.85rem;
+  font-size: var(--tpl-title-size);
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.22em;
@@ -95,7 +100,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   color: var(--cp-muted);
   white-space: nowrap;
 }
@@ -124,16 +129,16 @@
 .classic-professional-showcase__heading {
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--cp-border);
-  font-size: 0.78rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   color: var(--cv-heading-color, var(--cp-text));
 }
 
 .classic-professional-showcase__empty {
   margin-top: 0.8rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   color: var(--cp-muted);
 }
 
@@ -141,7 +146,7 @@
 
 .classic-professional-showcase__summary {
   margin-top: 0.8rem;
-  font-size: 0.85rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.75;
   color: var(--cp-text);
   white-space: pre-line;
@@ -165,13 +170,13 @@
 }
 
 .classic-professional-showcase__entry-role {
-  font-size: 0.92rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--cp-text);
 }
 
 .classic-professional-showcase__entry-dates {
-  font-size: 0.75rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--cp-muted);
   white-space: nowrap;
@@ -179,7 +184,7 @@
 
 .classic-professional-showcase__entry-meta {
   margin-top: 0.15rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-meta-size);
   font-style: italic;
   color: var(--cp-muted);
 }
@@ -193,7 +198,7 @@
 }
 
 .classic-professional-showcase__bullets li {
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
   color: var(--cp-text);
 }
@@ -215,7 +220,7 @@
   border-radius: 4px;
   border: 1px solid var(--cp-border);
   padding: 0.3rem 0.7rem;
-  font-size: 0.75rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 500;
   color: var(--cp-text);
   background: transparent;
@@ -225,7 +230,7 @@
 
 .classic-professional-showcase__language-row {
   margin-top: 0.9rem;
-  font-size: 0.82rem;
+  font-size: var(--tpl-body-size);
   color: var(--cp-text);
 }
 
@@ -249,7 +254,7 @@
 }
 
 .classic-professional-showcase__cert-item {
-  font-size: 0.82rem;
+  font-size: var(--tpl-body-size);
   color: var(--cp-text);
 }
 
@@ -266,10 +271,6 @@
 
   .classic-professional-showcase__body {
     padding: 1.25rem 1.25rem 1.75rem;
-  }
-
-  .classic-professional-showcase__name {
-    font-size: 2rem;
   }
 
   .classic-professional-showcase__contact {

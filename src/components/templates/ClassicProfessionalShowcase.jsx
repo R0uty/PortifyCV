@@ -244,7 +244,7 @@ export default function ClassicProfessionalShowcase({
       // always "designer", never "ats". Without this class the export
       // handler polls forever waiting for a class that can never appear,
       // hanging the export.
-      className="classic-professional-showcase preview-document--designer"
+      className="classic-professional-showcase preview-document--designer tpl-density-roomy"
       style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
     >
       <header data-export-header="true" className="classic-professional-showcase__header">
