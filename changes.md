@@ -4,6 +4,37 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Classic → Classic Professional merge (roadmap A) — 2026-09-10
+
+Released as v1.2.10. A.2 §Decisions #3: Classic and Classic Professional
+were near-identical (single-column, serif name, uppercase `rule-under`
+headings, icon contact row) — the only real difference was **name
+alignment** (Classic left, Classic Professional centred).
+
+- **`classic` retired.** Removed from the registry / prefetch / `CVPreview`
+  delegation / `index.css`; `ClassicShowcase.jsx`, `classic.js`,
+  `classic.css` deleted. Template count **16 → 15** (the landing page reads
+  the count off the registry, so no copy changes needed).
+- **Classic Professional gains a "Name alignment" Settings option** —
+  *Centre* (default) / *Left*. New ephemeral `classicNameAlignment`
+  UI-reducer slot + `SET_CLASSIC_NAME_ALIGNMENT` action (same tier as the
+  accent swatch — not persisted). The row shows only when Classic
+  Professional is active; `ClassicProfessionalShowcase` sets
+  `data-name-align`, and `classicProfessional.css` has a
+  `[data-name-align="left"]` block (header + contact flush left).
+- **Legacy redirect** — a `?template=classic` deep link now resolves to
+  Classic Professional *and* starts left-aligned (`LEGACY_TEMPLATE_ALIASES`
+  in `uiReducer.js`), so old bookmarks / "Use this template" links still
+  land on the Classic look.
+- Not carried over: Classic's slightly warmer ivory palette and its
+  standalone Links section (Classic Professional keeps LinkedIn in the
+  contact row).
+
+Four new `check:reducers` cases, three new Playwright specs (gallery no
+longer lists Classic; the Settings toggle flips `data-name-align`; the
+legacy link opens left-aligned). Full e2e suite: 42 passed. Design-system
+§2/§4/§5 and audit-a2 updated.
+
 ## Tech Executive bespoke Showcase (roadmap A-fix batch) — 2026-09-10
 
 Released as v1.2.9. Last of the seven-template A-fix rework batch. Tech

@@ -24,7 +24,14 @@ export const UI_ACTION = {
   SET_CV_FONT: 'SET_CV_FONT',
   SET_CV_HEADING_COLOR: 'SET_CV_HEADING_COLOR',
   TOGGLE_NAV_RAIL_COLLAPSED: 'TOGGLE_NAV_RAIL_COLLAPSED',
+  SET_CLASSIC_NAME_ALIGNMENT: 'SET_CLASSIC_NAME_ALIGNMENT',
 }
+
+// Retired template ids that map onto a surviving template, so an old
+// `?template=` deep link or bookmark still opens something sensible.
+// `classic` merged into `classicProfessional` (v1.2.10) — its distinguishing
+// left-aligned name lives on as the `classicNameAlignment` option.
+const LEGACY_TEMPLATE_ALIASES = { classic: 'classicProfessional' }
 
 // A "Use this template" link from the Free CV Templates page (or any other
 // deep link) can pass ?template=<id> to open the builder with that template
@@ -36,8 +43,17 @@ function readInitialTemplateId() {
     return defaultTemplateId
   }
 
-  const requestedTemplateId = new URLSearchParams(window.location.search).get('template')
+  const raw = new URLSearchParams(window.location.search).get('template')
+  const requestedTemplateId = LEGACY_TEMPLATE_ALIASES[raw] ?? raw
   return isValidTemplateId(requestedTemplateId) ? requestedTemplateId : defaultTemplateId
+}
+
+// Whether a legacy `?template=classic` link should also start left-aligned.
+function readInitialClassicNameAlignment() {
+  if (typeof window === 'undefined') return 'center'
+  return new URLSearchParams(window.location.search).get('template') === 'classic'
+    ? 'left'
+    : 'center'
 }
 
 export function createInitialUiState(initialSession) {
@@ -62,6 +78,7 @@ export function createInitialUiState(initialSession) {
     templateAccentColors: getAllTemplateAccents(),
     cvFontId: DEFAULT_CV_FONT_ID,
     cvHeadingColor: DEFAULT_CV_HEADING_COLOR,
+    classicNameAlignment: readInitialClassicNameAlignment(),
     navRailCollapsed: storedNavRailCollapsed === 'true',
     toasts: initialSession.initialToast ? [initialSession.initialToast] : [],
   }
@@ -131,6 +148,9 @@ export function uiReducer(state, action) {
 
     case UI_ACTION.TOGGLE_NAV_RAIL_COLLAPSED:
       return { ...state, navRailCollapsed: !state.navRailCollapsed }
+
+    case UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT:
+      return { ...state, classicNameAlignment: action.alignment === 'left' ? 'left' : 'center' }
 
     default:
       return state

@@ -15,6 +15,8 @@ function SettingsModal({
   selectedTemplate,
   templateAccentColors = {},
   onTemplateAccentColorChange,
+  classicNameAlignment = 'center',
+  onClassicNameAlignmentChange,
 }) {
   const isFinnish = locale === 'fi'
 
@@ -104,6 +106,38 @@ function SettingsModal({
           </div>
         )
       })()}
+
+      {selectedTemplate === 'classicProfessional' ? (
+        <div className="settings-row">
+          <div>
+            <p className="settings-row__label">{isFinnish ? 'Nimen tasaus' : 'Name alignment'}</p>
+            <p className="settings-row__hint">
+              {isFinnish
+                ? 'Keskitä otsikkonimi tai tasaa se vasemmalle kirjelomaketyyliin.'
+                : 'Centre the header name, or left-align it letterhead-style.'}
+            </p>
+          </div>
+          <div className="settings-swatch-row" role="group" aria-label={isFinnish ? 'Nimen tasaus' : 'Name alignment'}>
+            {[
+              ['center', isFinnish ? 'Keskitä' : 'Centre'],
+              ['left', isFinnish ? 'Vasen' : 'Left'],
+            ].map(([value, label]) => {
+              const isActive = classicNameAlignment === value
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  className={`settings-choice${isActive ? ' settings-choice--active' : ''}`}
+                  aria-pressed={isActive}
+                  onClick={() => onClassicNameAlignmentChange(value)}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ) : null}
     </Modal>
   )
 }

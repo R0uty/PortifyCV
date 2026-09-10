@@ -186,6 +186,39 @@ test.describe('Template accent color', () => {
   })
 })
 
+test.describe('Classic Professional name alignment', () => {
+  test('the retired Classic template is gone from the gallery', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: /^Select template:/ }).click()
+    const panel = page.getByRole('dialog', { name: 'Select template' })
+    await expect(panel.getByRole('button', { name: 'Classic Professional', exact: true })).toBeVisible()
+    await expect(panel.getByRole('button', { name: 'Classic', exact: true })).toHaveCount(0)
+  })
+
+  test('the Settings option toggles the header alignment', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await selectTemplate(page, 'Classic Professional')
+
+    const root = page.locator('.classic-professional-showcase').first()
+    await expect(root).toHaveAttribute('data-name-align', 'center')
+
+    await page.getByRole('button', { name: 'Settings' }).first().click()
+    await page.getByRole('button', { name: 'Left', exact: true }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
+
+    await expect(root).toHaveAttribute('data-name-align', 'left')
+  })
+
+  test('a legacy ?template=classic link opens Classic Professional, left-aligned', async ({ page }) => {
+    await page.goto('/cv?template=classic')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    const root = page.locator('.classic-professional-showcase').first()
+    await expect(root).toBeVisible()
+    await expect(root).toHaveAttribute('data-name-align', 'left')
+  })
+})
+
 test.describe('Link URL formatting', () => {
   test('templates render link values without the https:// scheme', async ({ page }) => {
     await page.goto('/cv')

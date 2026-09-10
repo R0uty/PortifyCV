@@ -39,7 +39,6 @@ const GraduateShowcase = lazy(() => import('./templates/GraduateShowcase'))
 const CompactShowcase = lazy(() => import('./templates/CompactShowcase'))
 const PortfolioShowcase = lazy(() => import('./templates/PortfolioShowcase'))
 const ClassicProfessionalShowcase = lazy(() => import('./templates/ClassicProfessionalShowcase'))
-const ClassicShowcase = lazy(() => import('./templates/ClassicShowcase'))
 const NavyProfessionalShowcase = lazy(() => import('./templates/NavyProfessionalShowcase'))
 const ModernOrangeShowcase = lazy(() => import('./templates/ModernOrangeShowcase'))
 const ColorfulCompactShowcase = lazy(() => import('./templates/ColorfulCompactShowcase'))
@@ -64,6 +63,9 @@ function CVPreview({
   // its dark sidebar) — see utils/cvHeadingColors.js for why those are
   // excluded. `null`/undefined means "use the template's own color".
   headingColor = null,
+  // 'center' (default) | 'left' — Classic Professional's name-alignment
+  // option, folded in from the retired Classic template (v1.2.10).
+  classicNameAlignment = 'center',
 }) {
   // ── Theme and template resolution ──────────────────────────────────
   // Resolve the UI theme (dark/light) and the template config (variant, layout, etc.)
@@ -244,6 +246,8 @@ function CVPreview({
   // ATS mode bypasses entirely (though this template's ATS fallback and
   // Showcase mode look nearly identical anyway, since it's monochrome by
   // design — the fallback just swaps the serif name for the app's Inter).
+  // `nameAlignment` ('center' | 'left') folds in the retired Classic
+  // template's left-aligned letterhead as a Settings option (v1.2.10).
   if (variant === 'classicProfessional' && !atsFriendlyMode) {
     return (
       <Suspense fallback={null}>
@@ -254,27 +258,7 @@ function CVPreview({
           templateConfig={templateConfig}
           showcaseConfig={t}
           headingColor={headingColor}
-        />
-      </Suspense>
-    )
-  }
-
-  // ── Classic Showcase delegation ──────────────────────────────────────
-  // A calm left-aligned letterhead visual — single column, ink on ivory,
-  // no color. ATS mode bypasses it entirely and falls back to the shared
-  // flat renderer (classic.js), which is monochrome by design so the two
-  // modes look nearly identical anyway (the fallback swaps the serif name
-  // for the app's Inter).
-  if (variant === 'classic' && !atsFriendlyMode) {
-    return (
-      <Suspense fallback={null}>
-        <ClassicShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
+          nameAlignment={classicNameAlignment}
         />
       </Suspense>
     )

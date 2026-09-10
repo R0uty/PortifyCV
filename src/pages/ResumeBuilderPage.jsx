@@ -364,6 +364,7 @@ function ResumeBuilderPage({
     templateAccentColors,
     cvFontId,
     cvHeadingColor,
+    classicNameAlignment,
     navRailCollapsed,
     toasts,
   } = uiState
@@ -950,6 +951,10 @@ function ResumeBuilderPage({
   const handleTemplateAccentColorChange = useCallback((color) => {
     dispatchUi({ type: UI_ACTION.SET_TEMPLATE_ACCENT_COLOR, templateId: selectedTemplate, color })
   }, [selectedTemplate])
+
+  const handleClassicNameAlignmentChange = useCallback((alignment) => {
+    dispatchUi({ type: UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT, alignment })
+  }, [])
 
   const handleToggleMobilePreview = useCallback(() => {
     dispatchUi({ type: UI_ACTION.TOGGLE_MOBILE_PREVIEW })
@@ -1791,6 +1796,7 @@ function ResumeBuilderPage({
                 atsFriendlyMode={atsFriendlyMode}
                 accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
                 headingColor={cvHeadingColor}
+                classicNameAlignment={classicNameAlignment}
               />
             </AppErrorBoundary>
           </div>
@@ -1800,6 +1806,7 @@ function ResumeBuilderPage({
     </div>
   ), [
     atsFriendlyMode,
+    classicNameAlignment,
     cvFontId,
     cvHeadingColor,
     formData,
@@ -1963,6 +1970,8 @@ function ResumeBuilderPage({
         selectedTemplate={selectedTemplate}
         templateAccentColors={templateAccentColors}
         onTemplateAccentColorChange={handleTemplateAccentColorChange}
+        classicNameAlignment={classicNameAlignment}
+        onClassicNameAlignmentChange={handleClassicNameAlignmentChange}
       />
 
       <BadgeModal

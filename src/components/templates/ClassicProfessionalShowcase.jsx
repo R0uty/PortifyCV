@@ -8,10 +8,14 @@
 //
 // Design language: traditional single-column resume — white background,
 // black/dark-gray typography only, no accent color, no sidebar, no photo.
-// A large centered name (system serif, since the app's one self-hosted
+// A large serif name (system serif, since the app's one self-hosted
 // typeface is Inter — see classicProfessional.js's headerTitle comment)
 // is the only visual flourish; everything else is thin 1px dividers and
 // generous whitespace, per the "traditional and universally safe" brief.
+//
+// `nameAlignment` ('center' default | 'left') folds in the retired Classic
+// template's left-aligned letterhead as one option (v1.2.10) — set via
+// data-name-align, handled in classicProfessional.css.
 
 import { useMemo } from 'react'
 
@@ -36,7 +40,14 @@ function Section({ id, children }) {
   )
 }
 
-export default function ClassicProfessionalShowcase({ formData, locale = 'en', previewRef, templateConfig, headingColor = null }) {
+export default function ClassicProfessionalShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  headingColor = null,
+  nameAlignment = 'center',
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -225,6 +236,7 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
       ref={previewRef}
       data-export-root="true"
       data-export-variant="classicProfessional"
+      data-name-align={nameAlignment === 'left' ? 'left' : 'center'}
       // "preview-document--designer" is a pure marker class (no styling
       // rules of its own — see index.css) that ResumeBuilderPage's export
       // handler polls for via waitForPreviewModeSync before starting a PDF

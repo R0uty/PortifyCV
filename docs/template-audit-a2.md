@@ -58,7 +58,7 @@ E = content edge-cases (§7.1-weighted) · A = ATS parity · X = export (provisi
 | **Executive** | 2 | **1** | 2 | 2 | 2 | 2 | 2 | **rework** | C — gold accent barely visible AND a residual second hue (`#4338ca` indigo + `#eef2ff`, incompletely removed in the Aug indigo→gold pass) |
 | **Compact** | 2 | **1** | **1** | **1** | 2 | 2 | 2 | **rework** | D=1 — the compact-concept template, but built ad-hoc, not on the `compact` density class; S=1 — visually weakest, differs from the two Classics mainly by thin blue rules; C=1 — blue + a red accent |
 | **Quadrant** | 2 | 2 | 2 | 2 | **1** | 2 | 2 | **rework** | E — `overflow-wrap:anywhere` on the name in a real 50%-width cell (will char-fragment); dead space top-right quadrant, uneven fill; cyan accent reads near-invisible |
-| **Classic** | 2 | 3 | **1** | 2 | 2 | 2 | 2 | **merge** | S=1 — near-identical to Classic Professional (serif name, uppercase-rule headings, icon contact row); only difference is name alignment (left vs centred) |
+| **Classic** | 2 | 3 | **1** | 2 | 2 | 2 | 2 | **merge (done v1.2.10)** | S=1 — near-identical to Classic Professional. Retired; its left-aligned letterhead is now the `classicNameAlignment` Settings option on Classic Professional, with a `?template=classic` legacy redirect. |
 
 ## Summary
 

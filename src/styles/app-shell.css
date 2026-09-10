@@ -1156,6 +1156,29 @@ select.floating-field__control {
   box-shadow: 0 0 0 2px var(--app-text);
 }
 
+/* Text-label choice buttons in a settings row (e.g. name alignment) */
+.settings-choice {
+  flex-shrink: 0;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  color: var(--app-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease, background-color 120ms ease;
+}
+
+.settings-choice:hover {
+  border-color: var(--accent-border);
+}
+
+.settings-choice--active {
+  border-color: var(--app-text);
+  background: var(--app-text);
+  color: var(--app-bg);
+}
+
 .preview-panel {
   display: flex;
   flex-direction: column;

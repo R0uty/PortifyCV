@@ -9,7 +9,8 @@ template config in `src/utils/cvTemplates.js`
 
 ## 1. Purpose & scope
 
-Every one of PortifyCV's 16 templates was authored by eye and patched
+Every one of PortifyCV's templates (16 at the time of this doc; 15
+after the v1.2.10 Classic merge) was authored by eye and patched
 reactively — type sizes, accent usage, section-heading treatment, skills
 rendering and URL formatting were each decided per template, by whoever was
 working that day. The result is a set that varies mostly by *accent hue*
@@ -116,7 +117,7 @@ Where each template starts. The A.2 triage confirms or changes these; a
 template that fights its class is a density-handling finding, not a reason
 to invent a fourth class:
 
-- **`roomy`** — Classic, Classic Professional, Minimalist, Creative,
+- **`roomy`** — Classic Professional, Minimalist, Creative,
   Executive, Portfolio Hybrid
 - **`standard`** — Modern Professional, Modern Orange, Navy Professional,
   Modern Timeline, Developer, Graduate, Tech Executive
@@ -205,7 +206,7 @@ means amending this document, not adding a variant to one template.
 
 | Treatment | What it is | Current members |
 |---|---|---|
-| `rule-under` | Tracked uppercase label with a hairline rule directly beneath, spanning the column. No glyph, no marker. | Classic, Classic Professional, Compact, Executive, Tech Executive |
+| `rule-under` | Tracked uppercase label with a hairline rule directly beneath, spanning the column. No glyph, no marker. | Classic Professional (centre or left name), Compact, Executive, Tech Executive |
 | `icon-badge` | A small circular/rounded accent-filled badge holding a monochrome stroke glyph (`sectionIcons` in `shared.jsx`), label to its right. | Developer, Modern Professional, Graduate, Modern Orange, Modern Timeline, Navy Professional, Portfolio Hybrid, Quadrant |
 | `left-tick` | A small solid accent mark — a short vertical bar or a dot — immediately left of the label. No glyph. | Colorful Compact (dot form) |
 | `eyebrow-caps` | Small tracked uppercase label, no rule and no marker; separation is whitespace alone. | Minimalist |
@@ -235,8 +236,10 @@ by accent hue alone.** Two templates in the same family with the same
 heading treatment and the same density class are duplicates whatever their
 accents are; that is how Modern Professional and Tech Executive became
 near-twins in August (resolved v1.2.9 — Tech Executive got a bespoke
-navy-masthead/footer Showcase), and how Classic and Classic Professional
-are near-twins now.
+navy-masthead/footer Showcase). Classic and Classic Professional were
+near-identical (only the name alignment differed); v1.2.10 retired `classic`
+and folded its left-aligned letterhead into Classic Professional as a
+`classicNameAlignment` Settings option.
 
 A **new** template must either open a new family or be clearly the
 best-in-class of an existing one. "Another right-rail template in a
@@ -244,7 +247,7 @@ different color" is not a new template.
 
 | Family | One line | Current members |
 |---|---|---|
-| `single-column-flow` | No sidebar. Header, then sections flowing full width, top to bottom. | Minimalist, Classic, Classic Professional, Compact |
+| `single-column-flow` | No sidebar. Header, then sections flowing full width, top to bottom. | Minimalist, Classic Professional, Compact |
 | `single-column-timeline` | Single column whose spine is a vertical timeline running through the career sections. | Modern Timeline |
 | `left-rail + main` | Light full-height rail on the left carrying identity and/or secondary sections; primary sections on the right. | Executive, Modern Orange |
 | `right-rail + main` | Primary sections on the left, secondary sections in a narrower right column. | Modern Professional, Creative, Graduate, Portfolio Hybrid, Colorful Compact, Tech Executive (with a distinguishing deep-navy masthead + footer band, v1.2.9) |
@@ -293,7 +296,7 @@ named.
   entry uses the matching `devIcons` glyph. Canonical order:
   **email → phone → location → website**, with empty fields filtered out and
   the remainder closing up. Email leads because it is the field a recruiter
-  acts on. *Current deviations:* Classic, Classic Professional and Navy
+  acts on. *Current deviations:* Classic Professional and Navy
   Professional lead with phone; Colorful Compact orders email → location →
   phone → website.
 - **Skills rendering — chosen by density class, not by taste.**
@@ -318,7 +321,7 @@ named.
   default value in that template's entry in `src/utils/cvTemplates.js`. The
   Settings accent swatch writes the property; **exposing the swatch is the
   default**, and a template opts *out* explicitly when its concept is a fixed
-  palette (Colorful Compact's capped rainbow; the ink-only Classic and
+  palette (Colorful Compact's capped rainbow; the ink-only Classic Professional and
   Minimalist), in which case the swatch hides for it.
 
   **`accent.default` must be the lowercase hex of that template's

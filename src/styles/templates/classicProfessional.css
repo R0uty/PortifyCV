@@ -46,6 +46,15 @@
   text-align: center;
 }
 
+/* Left-aligned letterhead — folded in from the retired Classic template. */
+.classic-professional-showcase[data-name-align='left'] .classic-professional-showcase__header {
+  text-align: left;
+}
+
+.classic-professional-showcase[data-name-align='left'] .classic-professional-showcase__contact {
+  justify-content: flex-start;
+}
+
 .classic-professional-showcase__kicker {
   font-size: 0.65rem;
   font-weight: 700;

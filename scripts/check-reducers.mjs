@@ -438,6 +438,17 @@ console.log('\nuiReducer\n')
 
 {
   const state = createInitialUiState({})
+  check('createInitialUiState defaults the classic name alignment to centre', state.classicNameAlignment === 'center')
+  const left = uiReducer(state, { type: UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT, alignment: 'left' })
+  check('SET_CLASSIC_NAME_ALIGNMENT switches to left', left.classicNameAlignment === 'left')
+  const backCentre = uiReducer(left, { type: UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT, alignment: 'center' })
+  check('SET_CLASSIC_NAME_ALIGNMENT switches back to centre', backCentre.classicNameAlignment === 'center')
+  const garbage = uiReducer(left, { type: UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT, alignment: 'diagonal' })
+  check('SET_CLASSIC_NAME_ALIGNMENT falls back to centre for an unknown value', garbage.classicNameAlignment === 'center')
+}
+
+{
+  const state = createInitialUiState({})
   const next = uiReducer(state, { type: 'NOT_A_REAL_ACTION' })
   check('An unknown action type returns the same state reference', next === state)
 }

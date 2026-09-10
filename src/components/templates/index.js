@@ -13,7 +13,6 @@ import compact from './compact'
 import portfolio from './portfolio'
 import techExec from './techExec'
 import classicProfessional from './classicProfessional'
-import classic from './classic'
 import navyProfessional from './navyProfessional'
 import modernOrange from './modernOrange'
 import colorfulCompact from './colorfulCompact'
@@ -32,7 +31,6 @@ const templates = {
   portfolio,
   techExec,
   classicProfessional,
-  classic,
   navyProfessional,
   modernOrange,
   colorfulCompact,
@@ -74,7 +72,6 @@ export function prefetchTemplateShowcases() {
   import('./CompactShowcase')
   import('./PortfolioShowcase')
   import('./ClassicProfessionalShowcase')
-  import('./ClassicShowcase')
   import('./NavyProfessionalShowcase')
   import('./ModernOrangeShowcase')
   import('./ColorfulCompactShowcase')
