@@ -1,36 +1,36 @@
 /* ==========================================================================
    Portfolio Showcase — hand-authored component styles for the Portfolio
    Hybrid template's non-ATS "portfolio website condensed into a résumé"
-   mode. Scoped entirely under `.portfolio-showcase`. Emerald / teal /
-   sky-blue / violet / pink / orange palette — Featured Projects is the hero
-   section with the most visual weight (colorful tech chips, GitHub/Live
-   Demo action buttons), while everything else stays calmer so the projects
-   genuinely read as the centerpiece.
+   mode. Scoped entirely under `.portfolio-showcase`.
+
+   Design-system alignment (docs/template-design-system.md):
+   - §2 type ramp: sizes come from `--tpl-*` (the root carries
+     `tpl-density-roomy`); this file sets weight/case/tracking/colour only.
+   - §3 colour: one ink (`--pf-slate` / `--pf-text` / `--pf-gray` tonal
+     steps) + one accent (`--tpl-accent`, set inline from the `accentColor`
+     prop with the emerald default as the fallback here; `--tpl-accent-soft`
+     is the JS-computed fill) + one neutral tint (the sidebar). The earlier
+     emerald/teal/sky/violet/pink/orange/green multi-hue palette — gradient
+     hairline, per-section gradient icon badges, six-colour chips, seven-
+     colour badges, the gradient "Live Demo" button — was the template's
+     A.2 §3 finding and is now a single accent.
+   - §4 heading treatment: `icon-badge` (accent-filled badge + label, with a
+     descriptive subtitle — the "portfolio site section header" look).
 
    Restyled 2026-08-23 against docs/portfolio-hybrid-cv.html: serif display
    name (see PortfolioShowcase.jsx's own header comment on the font import),
-   a gradient hairline across the card's top edge, a two-tone gradient badge
-   per section icon (was a single flat-colored glyph), and the main/sidebar
-   split changed from an even off-white wash to the reference's white
-   main + tinted sidebar separated by one hairline — reads closer to an
-   actual portfolio site's content/nav split than the previous uniform card.
+   a hairline across the card's top edge, white main + tinted sidebar split
+   by one hairline — reads closer to an actual portfolio site's content/nav
+   split than a uniform card.
    ========================================================================== */
 
 .portfolio-showcase {
-  --pf-emerald: #059669;
-  /* Emerald-600 (above) is for decorative/gradient use only — on white it
-     contrasts at ~3.36:1, short of AA's 4.5:1 for normal text. Emerald-700
-     is for any actual text (kicker, dates, metrics): ~4.52:1, passes. */
-  --pf-emerald-text: #047857;
-  --pf-teal: #14b8a6;
-  --pf-sky: #38bdf8;
-  /* Sky-700 — for link/URL text, same reasoning as emerald-text above
-     (sky-400 above is decorative-only; ~1.8:1 on white would fail AA). */
-  --pf-sky-text: #0369a1;
-  --pf-violet: #7c3aed;
-  --pf-pink: #db2777;
-  --pf-orange: #ea580c;
-  --pf-green: #22c55e;
+  /* Accent — set inline on the root from the user's swatch; these are the
+     fallback (emerald-700, ~4.5:1 on white; every swatch in the forestGreen
+     set clears AA too, since the accent lands on the kicker/dates/metrics). */
+  --tpl-accent: #047857;
+  --tpl-accent-soft: rgba(4, 120, 87, 0.1);
+
   --pf-slate: #0f172a;
   --pf-gray: #64748b;
   --pf-border: #e2e8f0;
@@ -48,7 +48,7 @@
   color: var(--pf-text);
   font-family: var(--font-sans);
   border-radius: 22px;
-  box-shadow: 0 24px 60px -32px rgba(5, 150, 105, 0.2);
+  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.18);
 
   width: min(100%, var(--preview-paper-width));
   min-height: var(--preview-paper-min-height);
@@ -56,10 +56,9 @@
   align-self: center;
 }
 
-/* Thin top hairline spanning emerald → sky → violet — the one deliberate
-   spot of full-card-width color the reference mockup adds ("subtle top
-   accent"), echoing the multi-hue palette used throughout the sidebar
-   badges and project chips below it. */
+/* Thin top hairline in the one accent — the reference mockup's "subtle top
+   accent". A rule/divider is §3 wayfinding, so a single solid accent bar is
+   fine; the earlier emerald → sky → violet gradient was not. */
 .portfolio-showcase::before {
   content: '';
   position: absolute;
@@ -67,7 +66,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--pf-emerald) 0%, var(--pf-sky) 40%, var(--pf-violet) 100%);
+  background: var(--tpl-accent);
   z-index: 2;
 }
 
@@ -90,41 +89,42 @@
   gap: 1.75rem;
   padding: 2.5rem 2.75rem 1.5rem;
   background:
-    radial-gradient(ellipse 80% 120% at 100% 0%, rgba(5, 150, 105, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse 60% 100% at 0% 100%, rgba(2, 132, 199, 0.05) 0%, transparent 45%),
+    radial-gradient(ellipse 80% 120% at 100% 0%, var(--tpl-accent-soft) 0%, transparent 50%),
     linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
   border-bottom: 1px solid var(--pf-border);
   border-radius: 22px 22px 0 0;
 }
 
 .portfolio-showcase__kicker {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: var(--pf-emerald-text);
+  color: var(--tpl-accent);
 }
 
 .portfolio-showcase__name {
   margin-top: 0.5rem;
   font-family: 'Instrument Serif', Georgia, serif;
-  font-size: 2.7rem;
+  font-size: var(--tpl-name-size);
+  line-height: var(--tpl-name-lh);
   font-weight: 400;
   letter-spacing: -0.01em;
-  line-height: 1.1;
   color: var(--cv-heading-color, var(--pf-slate));
 }
 
 .portfolio-showcase__role {
   margin-top: 0.35rem;
-  font-size: 1rem;
+  font-size: var(--tpl-title-size);
+  line-height: 1.35;
   font-weight: 600;
   color: var(--pf-text);
 }
 
 .portfolio-showcase__tagline {
   margin-top: 0.5rem;
-  font-size: 0.82rem;
+  font-size: var(--tpl-meta-size);
+  line-height: 1.4;
   font-style: italic;
   color: var(--pf-gray);
   max-width: 48ch;
@@ -142,14 +142,14 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   color: var(--pf-gray);
   white-space: nowrap;
 }
 
 .portfolio-showcase__contact-icon {
   display: inline-flex;
-  color: var(--pf-emerald);
+  color: var(--tpl-accent);
 }
 
 .portfolio-showcase__photo-wrap {
@@ -159,7 +159,7 @@
 .portfolio-showcase__photo-ring {
   padding: 3px;
   border-radius: 9999px;
-  background: linear-gradient(135deg, var(--pf-emerald), var(--pf-sky), var(--pf-violet));
+  background: var(--tpl-accent);
 }
 
 .portfolio-showcase__photo {
@@ -214,8 +214,7 @@
   height: 1.75rem;
   border-radius: 8px;
   color: #ffffff;
-  background: linear-gradient(135deg, var(--pf-emerald), var(--pf-teal));
-  box-shadow: 0 2px 8px -2px rgba(5, 150, 105, 0.4);
+  background: var(--tpl-accent);
 }
 
 .portfolio-showcase__section-icon svg {
@@ -223,33 +222,22 @@
   width: 0.85rem;
 }
 
-.portfolio-showcase__section-icon--violet-sky { background: linear-gradient(135deg, var(--pf-violet), var(--pf-sky)); box-shadow: 0 2px 8px -2px rgba(124, 58, 237, 0.4); }
-.portfolio-showcase__section-icon--sky-emerald { background: linear-gradient(135deg, var(--pf-sky), var(--pf-emerald)); box-shadow: 0 2px 8px -2px rgba(2, 132, 199, 0.4); }
-.portfolio-showcase__section-icon--orange-pink { background: linear-gradient(135deg, var(--pf-orange), var(--pf-pink)); box-shadow: 0 2px 8px -2px rgba(234, 88, 12, 0.4); }
-.portfolio-showcase__section-icon--sky-teal { background: linear-gradient(135deg, var(--pf-sky), var(--pf-teal)); box-shadow: 0 2px 8px -2px rgba(2, 132, 199, 0.4); }
-.portfolio-showcase__section-icon--emerald-teal { background: linear-gradient(135deg, var(--pf-emerald), var(--pf-teal)); box-shadow: 0 2px 8px -2px rgba(5, 150, 105, 0.4); }
-.portfolio-showcase__section-icon--violet-pink { background: linear-gradient(135deg, var(--pf-violet), var(--pf-pink)); box-shadow: 0 2px 8px -2px rgba(124, 58, 237, 0.4); }
-.portfolio-showcase__section-icon--emerald-sky { background: linear-gradient(135deg, var(--pf-emerald), var(--pf-sky)); box-shadow: 0 2px 8px -2px rgba(5, 150, 105, 0.4); }
-.portfolio-showcase__section-icon--sky-violet { background: linear-gradient(135deg, var(--pf-sky), var(--pf-violet)); box-shadow: 0 2px 8px -2px rgba(2, 132, 199, 0.4); }
-.portfolio-showcase__section-icon--green-teal { background: linear-gradient(135deg, var(--pf-green), var(--pf-teal)); box-shadow: 0 2px 8px -2px rgba(34, 197, 94, 0.4); }
-.portfolio-showcase__section-icon--pink-violet { background: linear-gradient(135deg, var(--pf-pink), var(--pf-violet)); box-shadow: 0 2px 8px -2px rgba(219, 39, 119, 0.4); }
-.portfolio-showcase__section-icon--teal-emerald { background: linear-gradient(135deg, var(--pf-teal), var(--pf-emerald)); box-shadow: 0 2px 8px -2px rgba(20, 184, 166, 0.4); }
-
 .portfolio-showcase__section-title {
-  font-size: 0.95rem;
+  font-size: var(--tpl-entry-title-size);
+  line-height: 1.3;
   font-weight: 700;
   color: var(--cv-heading-color, var(--pf-slate));
 }
 
 .portfolio-showcase__section-subtitle {
   margin-top: 0.05rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   color: var(--pf-gray);
 }
 
 .portfolio-showcase__empty {
   margin-top: 0.9rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   color: var(--pf-gray);
 }
 
@@ -257,7 +245,7 @@
 
 .portfolio-showcase__summary {
   margin-top: 0.9rem;
-  font-size: 0.82rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.75;
   color: var(--pf-text);
   white-space: pre-line;
@@ -289,18 +277,19 @@
   bottom: 0;
   width: 3px;
   border-radius: 3px 0 0 3px;
-  background: linear-gradient(180deg, var(--pf-emerald), var(--pf-sky));
+  background: var(--tpl-accent);
 }
 
 .portfolio-showcase__project-name {
-  font-size: 1rem;
+  font-size: var(--tpl-entry-title-size);
+  line-height: 1.3;
   font-weight: 700;
   color: var(--pf-slate);
 }
 
 .portfolio-showcase__project-desc {
   margin-top: 0.4rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
   color: var(--pf-text);
   white-space: pre-line;
@@ -309,24 +298,24 @@
 .portfolio-showcase__project-impact {
   margin-top: 0.5rem;
   padding: 0.45rem 0.7rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   line-height: 1.5;
   color: var(--pf-text);
-  background: linear-gradient(90deg, rgba(5, 150, 105, 0.07), transparent);
-  border-left: 2px solid var(--pf-emerald);
+  background: var(--tpl-accent-soft);
+  border-left: 2px solid var(--tpl-accent);
   border-radius: 6px;
 }
 
 .portfolio-showcase__project-meta {
   margin-top: 0.3rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   color: var(--pf-gray);
 }
 
 .portfolio-showcase__project-link {
   margin-top: 0.3rem;
-  font-size: 0.72rem;
-  color: var(--pf-sky-text);
+  font-size: var(--tpl-meta-size);
+  color: var(--tpl-accent);
   word-break: break-all;
 }
 
@@ -340,17 +329,11 @@
 .portfolio-showcase__chip {
   border-radius: 8px;
   padding: 0.25rem 0.6rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  border: 1px solid transparent;
+  background: var(--tpl-accent-soft);
+  color: var(--tpl-accent);
 }
-
-.portfolio-showcase__chip--emerald { background: rgba(5, 150, 105, 0.1); border-color: rgba(5, 150, 105, 0.3); color: #047857; }
-.portfolio-showcase__chip--teal { background: rgba(20, 184, 166, 0.1); border-color: rgba(20, 184, 166, 0.3); color: #0f766e; }
-.portfolio-showcase__chip--sky { background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.35); color: #0369a1; }
-.portfolio-showcase__chip--purple { background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: #6d28d9; }
-.portfolio-showcase__chip--green { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #15803d; }
-.portfolio-showcase__chip--pink { background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.3); color: #be185d; }
 
 .portfolio-showcase__link-row {
   margin-top: 0.75rem;
@@ -363,16 +346,9 @@
   border-radius: 8px;
   border: 1px solid var(--pf-border);
   padding: 0.4rem 0.85rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--pf-text);
-}
-
-.portfolio-showcase__link-btn--primary {
-  border: none;
-  background: linear-gradient(135deg, var(--pf-emerald), var(--pf-teal));
-  color: #fff;
-  box-shadow: 0 2px 8px -2px rgba(5, 150, 105, 0.45);
 }
 
 /* ── Experience timeline ── */
@@ -403,8 +379,8 @@
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, var(--pf-emerald), var(--pf-sky));
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.16);
+  background: var(--tpl-accent);
+  box-shadow: 0 0 0 3px var(--tpl-accent-soft);
   z-index: 1;
 }
 
@@ -413,7 +389,7 @@
   top: 0.3rem;
   bottom: -1.125rem;
   width: 1px;
-  background: linear-gradient(180deg, var(--pf-emerald), var(--pf-border));
+  background: linear-gradient(180deg, var(--tpl-accent), var(--pf-border));
 }
 
 .portfolio-showcase__timeline-item:last-child .portfolio-showcase__timeline-line {
@@ -434,21 +410,22 @@
 }
 
 .portfolio-showcase__role-title {
-  font-size: 0.92rem;
+  font-size: var(--tpl-entry-title-size);
+  line-height: 1.3;
   font-weight: 700;
   color: var(--pf-slate);
 }
 
 .portfolio-showcase__company {
   margin-top: 0.15rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   color: var(--pf-gray);
 }
 
 .portfolio-showcase__dates {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--pf-emerald-text);
+  color: var(--tpl-accent);
   white-space: nowrap;
 }
 
@@ -461,17 +438,17 @@
 }
 
 .portfolio-showcase__bullets li {
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.55;
   color: var(--pf-text);
 }
 
 .portfolio-showcase__bullets li::marker {
-  color: var(--pf-emerald);
+  color: var(--tpl-accent);
 }
 
 .portfolio-showcase__metric {
-  color: var(--pf-emerald-text);
+  color: var(--tpl-accent);
   font-weight: 700;
 }
 
@@ -499,7 +476,7 @@
 }
 
 .portfolio-showcase__case-row {
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
   color: var(--pf-text);
   white-space: pre-line;
@@ -538,13 +515,13 @@
 .portfolio-showcase__testimonial-card {
   border-radius: 14px;
   border: 1px solid var(--pf-border);
-  background: linear-gradient(135deg, rgba(5, 150, 105, 0.04), rgba(2, 132, 199, 0.04));
+  background: var(--pf-sidebar-tint);
   padding: 1rem 1.15rem;
 }
 
 .portfolio-showcase__testimonial-quote {
   font-family: 'Instrument Serif', Georgia, serif;
-  font-size: 1rem;
+  font-size: var(--tpl-body-size);
   font-style: italic;
   line-height: 1.5;
   color: var(--pf-text);
@@ -553,12 +530,12 @@
 
 .portfolio-showcase__testimonial-meta {
   margin-top: 0.5rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--pf-gray);
 }
 
-/* ── Sidebar: Tech Stack colorful badges ── */
+/* ── Sidebar: Tech Stack badges ── */
 
 .portfolio-showcase__skill-group {
   margin-top: 1rem;
@@ -569,7 +546,7 @@
 }
 
 .portfolio-showcase__skill-group-label {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -586,18 +563,11 @@
 .portfolio-showcase__badge {
   border-radius: 9999px;
   padding: 0.28rem 0.7rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  border: 1px solid transparent;
+  background: var(--tpl-accent-soft);
+  color: var(--tpl-accent);
 }
-
-.portfolio-showcase__badge--blue { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #1d4ed8; }
-.portfolio-showcase__badge--purple { background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: #6d28d9; }
-.portfolio-showcase__badge--orange { background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.3); color: #c2410c; }
-.portfolio-showcase__badge--teal { background: rgba(20, 184, 166, 0.1); border-color: rgba(20, 184, 166, 0.3); color: #0f766e; }
-.portfolio-showcase__badge--pink { background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.3); color: #be185d; }
-.portfolio-showcase__badge--green { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: #15803d; }
-.portfolio-showcase__badge--gray { background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.3); color: #334155; }
 
 /* ── Sidebar: plain lists ── */
 
@@ -626,7 +596,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   color: var(--pf-text);
 }
 
@@ -639,19 +609,19 @@
 }
 
 .portfolio-showcase__list-title {
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   font-weight: 700;
   color: var(--pf-slate);
 }
 
 .portfolio-showcase__list-meta {
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   color: var(--pf-gray);
 }
 
 .portfolio-showcase__list-desc {
   margin-top: 0.2rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   line-height: 1.55;
   color: var(--pf-text);
   white-space: pre-line;
@@ -660,9 +630,9 @@
 .portfolio-showcase__list-link {
   display: inline-block;
   margin-top: 0.3rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--pf-sky-text);
+  color: var(--tpl-accent);
 }
 
 .portfolio-showcase__link-list {
@@ -684,11 +654,11 @@
 .portfolio-showcase__link-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--pf-emerald);
+  color: var(--tpl-accent);
 }
 
 .portfolio-showcase__link-label {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -699,7 +669,7 @@
   display: block;
   overflow: hidden;
   margin-top: 0.1rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   color: var(--pf-text);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -718,7 +688,7 @@
   border-radius: 9999px;
   border: 1px solid var(--pf-border);
   padding: 0.32rem 0.75rem;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   color: var(--pf-text);
 }
 
@@ -746,10 +716,6 @@
 
   .portfolio-showcase__sidebar {
     padding: 1.5rem 1.25rem 1.75rem;
-  }
-
-  .portfolio-showcase__name {
-    font-size: 2.25rem;
   }
 
   .portfolio-showcase__photo {

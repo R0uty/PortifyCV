@@ -1,6 +1,16 @@
 // Portfolio hybrid template config — project-focused layout for developers and creatives.
 // Emerald accent color. Split-column with emerald-tinted sidebar. Traditional timeline experience.
 // Emerald header, project cards, card-style links. Ideal for freelancers and designers.
+//
+// The non-ATS visual is PortfolioShowcase.jsx (one emerald accent read from
+// --tpl-accent, roomy density ramp). This config is only consumed by the
+// shared flat renderer, which Portfolio falls through to in ATS-friendly
+// mode (fully monochrome there).
+
+// Registry default accent — must match `accent.default` for `portfolio` in
+// cvTemplates.js exactly (lowercase hex). See docs/template-design-system.md §6.
+export const PORTFOLIO_DEFAULT_ACCENT_COLOR = '#047857'
+
 export default {
   // Outer document border — adapts to dark/light mode
   preview: (isDark) => isDark ? 'border-gray-800 bg-black shadow-black/30' : 'border-black/10 bg-white shadow-black/10',

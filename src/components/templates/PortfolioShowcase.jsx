@@ -6,25 +6,25 @@
 // ATS mode (the app's existing global toggle) bypasses this component
 // entirely and falls back to the shared flat renderer (portfolio.js).
 //
-// Featured Projects is the hero section — premium cards with colorful tech
-// chips and GitHub/Live Demo action buttons, mirroring the visual weight a
-// real portfolio site would give its project showcase. The sidebar's
-// "Skills" section is deliberately branded and styled as "Tech Stack"
-// (colorful category-colored badges rather than plain tags) since the
-// spec's own CONFIG SUPPORT list only has a showTechStack flag, not a
-// separate showSkills one — confirming these are the same underlying data
-// rendered with more personality.
+// Featured Projects is the hero section — premium cards with tech chips and
+// GitHub/Live Demo links, mirroring the visual weight a real portfolio site
+// would give its project showcase. The sidebar's "Skills" section is
+// branded as "Tech Stack" since the spec's own CONFIG SUPPORT list only has
+// a showTechStack flag, not a separate showSkills one — confirming these are
+// the same underlying data.
 //
 // Restyled 2026-08-23 against docs/portfolio-hybrid-cv.html: serif display
 // name (Instrument Serif, self-hosted here via @fontsource rather than
 // main.jsx's global Inter import, so its ~9KB weight is only ever fetched
 // by users who actually land on this one template's lazy chunk — see
-// CVPreview.jsx's React.lazy() split), a gradient hairline across the very
-// top of the card, and every section icon upgraded from a flat glyph to a
-// small colored gradient badge (a different two-color pairing per section,
-// per the reference) — matching the template's already-established
-// "portfolio website condensed into a résumé" multi-color identity instead
-// of the single-accent badge every other bespoke Showcase uses.
+// CVPreview.jsx's React.lazy() split).
+//
+// Polished v1.2.11 to the design-system bar: the roomy `--tpl-*` type ramp
+// (tpl-density-roomy), and §3's one-ink-one-accent rule — the earlier
+// seven-hue palette (emerald/teal/sky/violet/pink/orange/green gradients on
+// the hairline, section-icon badges, chips, badges and the "Live Demo"
+// button) collapses to a single emerald accent read from `--tpl-accent`,
+// user-customizable via the Settings swatch (`forestGreen` set).
 
 import { useMemo } from 'react'
 import '@fontsource/instrument-serif/400.css'
@@ -32,6 +32,8 @@ import '@fontsource/instrument-serif/400-italic.css'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import { accentSoftFill } from '../../utils/templateAccents'
+import { PORTFOLIO_DEFAULT_ACCENT_COLOR } from './portfolio'
 import {
   devIcons,
   contactIcons,
@@ -42,22 +44,6 @@ import {
   formatLinkDisplayValue,
   getSafeHref,
 } from './shared'
-
-// Category → tag color mapping, matching DeveloperShowcase's palette so
-// "Tech Stack" reads consistently with the app's other colorful showcase.
-const CATEGORY_COLOR = {
-  languages: 'blue',
-  frameworks: 'purple',
-  databases: 'orange',
-  cloud: 'teal',
-  devops: 'pink',
-  security: 'green',
-  other: 'gray',
-}
-
-// Rotating palette for free-text tech-stack chips (project.stack), since we
-// can't know each individual technology's "correct" color ahead of time.
-const CHIP_COLORS = ['emerald', 'teal', 'sky', 'purple', 'green', 'pink']
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -77,33 +63,14 @@ function highlightMetrics(text) {
   ))
 }
 
-// Two-color gradient badge per section id, matching the reference mockup's
-// per-section icon treatment (About falls back to the base rule's
-// emerald→teal gradient in portfolio.css, so it has no entry here).
-const SECTION_ICON_TONE = {
-  projects: 'violet-sky',
-  experience: 'sky-emerald',
-  caseStudies: 'orange-pink',
-  openSource: 'sky-teal',
-  education: 'emerald-teal',
-  testimonials: 'violet-pink',
-  skills: 'emerald-sky',
-  links: 'sky-violet',
-  certificates: 'green-teal',
-  languages: 'pink-violet',
-  achievements: 'orange-pink',
-  interests: 'teal-emerald',
-}
-
-function SectionHead({ id, icon, title, subtitle }) {
-  const tone = SECTION_ICON_TONE[id]
-  const iconClassName = tone
-    ? `portfolio-showcase__section-icon portfolio-showcase__section-icon--${tone}`
-    : 'portfolio-showcase__section-icon'
-
+// One accent-filled icon badge per section (§4 icon-badge treatment), the
+// same single-accent mark every other bespoke Showcase uses — the earlier
+// per-section two-colour gradient badges were the template's §3 colour
+// finding.
+function SectionHead({ icon, title, subtitle }) {
   return (
     <div className="portfolio-showcase__section-head">
-      <span className={iconClassName} aria-hidden="true">
+      <span className="portfolio-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
       <div>
@@ -117,13 +84,21 @@ function SectionHead({ id, icon, title, subtitle }) {
 function Section({ id, placement, icon, title, subtitle, children }) {
   return (
     <section className="portfolio-showcase__section" data-export-section={id} data-export-placement={placement}>
-      <SectionHead id={id} icon={icon} title={title} subtitle={subtitle} />
+      <SectionHead icon={icon} title={title} subtitle={subtitle} />
       {children}
     </section>
   )
 }
 
-export default function PortfolioShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
+export default function PortfolioShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  showcaseConfig = {},
+  accentColor = PORTFOLIO_DEFAULT_ACCENT_COLOR,
+  headingColor = null,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -220,11 +195,8 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                     ) : null}
                     {chips.length > 0 ? (
                       <div className="portfolio-showcase__chip-row">
-                        {chips.map((chip, chipIndex) => (
-                          <span
-                            key={chip}
-                            className={`portfolio-showcase__chip portfolio-showcase__chip--${CHIP_COLORS[chipIndex % CHIP_COLORS.length]}`}
-                          >
+                        {chips.map((chip) => (
+                          <span key={chip} className="portfolio-showcase__chip">
                             {chip}
                           </span>
                         ))}
@@ -242,7 +214,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                             href={getSafeHref(item.demoUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="portfolio-showcase__link-btn portfolio-showcase__link-btn--primary"
+                            className="portfolio-showcase__link-btn"
                           >
                             {isFinnish ? 'Demo' : 'Live Demo'}
                           </a>
@@ -448,7 +420,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                     <span
                       key={skill}
                       data-export-skill="true"
-                      className={`portfolio-showcase__badge portfolio-showcase__badge--${CATEGORY_COLOR[cat.key] || 'gray'}`}
+                      className="portfolio-showcase__badge"
                     >
                       {skill}
                     </span>
@@ -596,8 +568,12 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
       // PortfolioShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className="portfolio-showcase preview-document--designer"
-      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
+      className="portfolio-showcase preview-document--designer tpl-density-roomy"
+      style={{
+        '--tpl-accent': accentColor,
+        '--tpl-accent-soft': accentSoftFill(accentColor, 0.1, PORTFOLIO_DEFAULT_ACCENT_COLOR),
+        ...(headingColor ? { '--cv-heading-color': headingColor } : null),
+      }}
     >
       <header data-export-header="true" className="portfolio-showcase__header">
         <div className="min-w-0">

@@ -166,6 +166,25 @@ test.describe('Template accent color', () => {
     expect(accent.soft).toBe('rgba(5, 150, 105, 0.12)')
   })
 
+  test('choosing a swatch recolors the Portfolio Hybrid preview', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await selectTemplate(page, 'Portfolio Hybrid')
+
+    await page.getByRole('button', { name: 'Settings' }).first().click()
+    // 'Teal' is the 3rd swatch in the 'forestGreen' set (#0f766e)
+    await page.getByRole('button', { name: 'Teal', exact: true }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
+
+    const root = page.locator('.portfolio-showcase').first()
+    const accent = await root.evaluate((el) => ({
+      accent: el.style.getPropertyValue('--tpl-accent').trim(),
+      soft: el.style.getPropertyValue('--tpl-accent-soft').trim(),
+    }))
+    expect(accent.accent.toLowerCase()).toBe('#0f766e')
+    expect(accent.soft).toBe('rgba(15, 118, 110, 0.1)')
+  })
+
   test('choosing a swatch recolors the Tech Executive preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()

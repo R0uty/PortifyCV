@@ -55,7 +55,7 @@ function CVPreview({
   // Resolved accent color for the current template (from the app's
   // per-template `templateAccentColors` map, falling back to the template
   // registry's default). `timeline`, `modernOrange`, `creative`, `graduate`,
-  // `executive`, `compact`, `quadrant` and `techExec` consume it.
+  // `executive`, `compact`, `quadrant`, `techExec` and `portfolio` consume it.
   accentColor,
   // Overrides the name and section-title color for every template except
   // Developer (animated gradient name), Colorful Compact (dark header, own
@@ -235,6 +235,7 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          accentColor={accentColor}
           headingColor={headingColor}
         />
       </Suspense>

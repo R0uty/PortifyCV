@@ -77,6 +77,18 @@ export const ACCENT_SWATCH_SETS = {
     { color: '#059669', label: { en: 'Emerald', fi: 'Smaragdi' } },
     { color: '#be123c', label: { en: 'Rose', fi: 'Ruusu' } },
   ],
+  // Forest-green set — emerald first/default. Portfolio Hybrid's range:
+  // keeps the established emerald identity, with cool growth-adjacent
+  // alternatives. Every hue clears 4.5:1 on white — the accent lands on the
+  // kicker, dates and metric text, not just decorative marks.
+  forestGreen: [
+    { color: '#047857', label: { en: 'Emerald', fi: 'Smaragdi' } },
+    { color: '#15803d', label: { en: 'Forest', fi: 'Metsänvihreä' } },
+    { color: '#0f766e', label: { en: 'Teal', fi: 'Sinivihreä' } },
+    { color: '#0369a1', label: { en: 'Sky', fi: 'Taivas' } },
+    { color: '#4d7c0f', label: { en: 'Moss', fi: 'Sammal' } },
+    { color: '#334155', label: { en: 'Slate', fi: 'Liuske' } },
+  ],
   // Cool set — violet first/default, restrained subtle range.
   // (Originally the Modern Timeline swatches.)
   cool: [

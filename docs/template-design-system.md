@@ -144,11 +144,12 @@ to invent a fourth class:
   three). Dark sidebars count as the tint, not as a second accent.
 
 Nothing else. No second decorative hue, no per-item colors, no "just this
-one" gradient in a third color. The two most recent restyles (Modern
-Professional against `docs/modern-professional-cv.html`, Developer against
-`docs/developer-showcase-cv.html`) both landed exactly here, and the
-templates that still give every skill chip its own bright color — Creative,
-Executive, Colorful Compact — are the ones that read as noisy beside them.
+one" gradient in a third color. The A-fix rework batch and polish pass
+brought every template here: the last multi-hue holdouts — Creative,
+Executive, Graduate, Portfolio Hybrid (seven emerald/teal/sky/violet/pink/
+orange/green tints, capped to one emerald accent v1.2.11) — now run a single
+accent. The one deliberate multicolour template is Colorful Compact, under
+the capped, named exception below.
 
 Deriving a per-element check: recolor the accent to pure black in your head.
 Everything that goes from "colored" to "black" should still be *findable*

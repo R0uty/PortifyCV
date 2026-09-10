@@ -4,6 +4,34 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Portfolio Hybrid polish (roadmap A-fix polish pass) — 2026-09-10
+
+Released as v1.2.11. A.2 verdict "polish" (C=1): the template ran a
+seven-hue palette (`emerald/teal/sky/violet/pink/orange/green`) — a gradient
+top hairline, per-section two-colour gradient icon badges, six-colour
+project chips, seven-colour tech-stack badges, a gradient "Live Demo"
+button, gradient photo ring and project-card stripe.
+
+- **Colour capped to §3** — one ink + **one emerald accent** (`--tpl-accent`)
+  + the sidebar tint. All the gradients collapse to solid `--tpl-accent`
+  (hairline, icon badges, photo ring, card stripe, timeline marker); chips
+  and badges become one `--tpl-accent-soft` style; the "Live Demo" button is
+  now a plain text link identical to "GitHub" (per the A.2 note).
+- **Accent now user-customizable** (§6 3-step wire) — new
+  `PORTFOLIO_DEFAULT_ACCENT_COLOR = '#047857'`, registry
+  `accent: { default, swatchSet: 'forestGreen' }` (new swatch set: Emerald /
+  Forest / Teal / Sky / Moss / Slate, all AA-safe on white), `CVPreview`
+  forwards `accentColor`, the Showcase writes `--tpl-accent` +
+  JS-computed `--tpl-accent-soft`. ATS mode is unaffected (bypasses to the
+  monochrome flat renderer).
+- **Type ramp adopted** — root carries `tpl-density-roomy`; the ad-hoc
+  `2.7rem` serif name drops to `--tpl-name-size` (2.30rem, still Instrument
+  Serif), every other size reads `--tpl-*`.
+
+One new Playwright spec (swatch recolours the preview). lint / build /
+check:reducers / check:share / e2e green; PDF export verified (no hang,
+~455 KB). Design-system §2/§3/§4 and audit-a2 updated.
+
 ## Classic → Classic Professional merge (roadmap A) — 2026-09-10
 
 Released as v1.2.10. A.2 §Decisions #3: Classic and Classic Professional

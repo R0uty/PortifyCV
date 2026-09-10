@@ -171,7 +171,7 @@ const templateMap = {
   },
   portfolio: {
     id: 'portfolio',
-    accent: null,
+    accent: { default: '#047857', swatchSet: 'forestGreen' },
     label: 'Portfolio Hybrid',
     description: 'Featured project cards, case studies, and tech-stack badges — a strong fit when your work speaks for itself through projects.',
     variant: 'portfolio',
