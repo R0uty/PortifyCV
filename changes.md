@@ -4,6 +4,36 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Compact template rework (roadmap A-fix batch) — 2026-09-10
+
+Released as v1.2.7. Fifth of the A-fix rework batch. Compact scored
+**rework** on three axes — D1 / S1 / C1.
+
+- **Rebuilt on the `compact` density ramp (D).** Type was ad-hoc — a
+  `2.25rem` name over a barely-readable `0.68rem` body. Now `tpl-density-compact`
+  + `--tpl-*`: name `1.65rem`, body `0.82rem`, meta `0.70rem`. The
+  cozy/snug/tight auto-fit (the `useLayoutEffect` that shrinks density until
+  the CV fits one page) still works — the snug/tight tiers now progressively
+  override the `--tpl-*` type tokens plus the spacing gaps.
+- **Skills → inline comma lists (S / §6).** `Category: item, item, item`
+  per row instead of bordered chips — chips waste 30–40% of the line at
+  compact sizes. The `.compact-showcase__tag` styling is deleted.
+- **One accent (C).** Sky is now `--tpl-accent`; the second blue
+  (`--cp-blue`, metric highlight) is gone. The thin section rules take the
+  accent (were grey — the reason it read as "the Classic templates with
+  blue lines"); the tiny heading label goes to ink. Ink consolidated to
+  `--cp-ink` / `--cp-ink-muted`.
+- **Accent user-customizable** (§6 3-step): `--tpl-accent` + JS
+  `--tpl-accent-soft`, a new `coolBlue` swatch set (sky / blue / indigo /
+  teal / slate / rose), `COMPACT_DEFAULT_ACCENT_COLOR = '#0284c7'`.
+- The header tint band tracks the accent. Project links now run through
+  `formatLinkDisplayValue()` (were raw `https://…`).
+- `compact.js`'s ATS `sky-*` classes were **undefined** in `utilities.css`
+  (only `blue` is stocked) — swapped to `blue-*`.
+
+New Playwright spec for the Compact accent swatch; full suite 37 passed.
+Verified in-app and in a rendered-back PDF that still auto-fits one page.
+
 ## Developer template rework (roadmap A-fix batch) — 2026-09-10
 
 Released as v1.2.6. Fourth of the A-fix rework batch. Developer scored

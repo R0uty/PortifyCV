@@ -127,6 +127,25 @@ test.describe('Template accent color', () => {
     expect(accent.accent.toLowerCase()).toBe('#0f766e')
     expect(accent.soft).toBe('rgba(15, 118, 110, 0.12)')
   })
+
+  test('choosing a swatch recolors the Compact preview', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await selectTemplate(page, 'Compact')
+
+    await page.getByRole('button', { name: 'Settings' }).first().click()
+    // 'Rose' is the 6th swatch in the 'coolBlue' set (#be123c)
+    await page.getByRole('button', { name: 'Rose', exact: true }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
+
+    const root = page.locator('.compact-showcase').first()
+    const accent = await root.evaluate((el) => ({
+      accent: el.style.getPropertyValue('--tpl-accent').trim(),
+      soft: el.style.getPropertyValue('--tpl-accent-soft').trim(),
+    }))
+    expect(accent.accent.toLowerCase()).toBe('#be123c')
+    expect(accent.soft).toBe('rgba(190, 18, 60, 0.1)')
+  })
 })
 
 test.describe('Link URL formatting', () => {

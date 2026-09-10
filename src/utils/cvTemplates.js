@@ -151,9 +151,9 @@ const templateMap = {
   },
   compact: {
     id: 'compact',
-    accent: null,
+    accent: { default: '#0284c7', swatchSet: 'coolBlue' },
     label: 'Compact',
-    description: 'Tightens spacing automatically until everything fits one page — built for a long, detailed history that needs to stay to one page.',
+    description: 'A tight single-column one-pager with a customizable accent that shrinks its own spacing until everything fits one page — built for a long, detailed history.',
     variant: 'compact',
     layout: 'stacked',
     primarySections: ['about', 'skills', 'experience', 'projects', 'education', 'certificates', 'languages', 'links', 'interests'],
@@ -377,7 +377,7 @@ const templateLocalization = {
     },
     compact: {
       label: 'Tiivis',
-      description: 'Tiivistää välit automaattisesti, kunnes sisältö mahtuu yhdelle sivulle — pitkälle, yksityiskohtaiselle uralle joka pitää saada yhdelle sivulle.',
+      description: 'Tiivis yksipalstainen yhden sivun CV muokattavalla aksenttivärillä, joka pienentää välejään automaattisesti kunnes sisältö mahtuu yhdelle sivulle — pitkälle, yksityiskohtaiselle uralle.',
       summaryBadgeLabel: 'Profiili',
       chips: ['CV', '1-sivu'],
     },

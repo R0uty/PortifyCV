@@ -24,6 +24,8 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import { accentSoftFill } from '../../utils/templateAccents'
+import { COMPACT_DEFAULT_ACCENT_COLOR } from './compact'
 import {
   devIcons,
   contactIcons,
@@ -53,7 +55,15 @@ function highlightMetrics(text) {
   ))
 }
 
-export default function CompactShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
+export default function CompactShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  showcaseConfig = {},
+  headingColor = null,
+  accentColor = COMPACT_DEFAULT_ACCENT_COLOR,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -157,14 +167,10 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
           {skillCategories.length > 0 ? (
             <div className="compact-showcase__skill-groups">
               {skillCategories.map((cat) => (
-                <div key={cat.key} className="compact-showcase__skill-group">
-                  <span className="compact-showcase__skill-group-label">{cat.label}:</span>
-                  <div className="compact-showcase__tag-row">
-                    {cat.items.map((skill) => (
-                      <span key={skill} data-export-skill="true" className="compact-showcase__tag">{skill}</span>
-                    ))}
-                  </div>
-                </div>
+                <p key={cat.key} className="compact-showcase__skill-group" data-export-skill="true">
+                  <span className="compact-showcase__skill-group-label">{cat.label}: </span>
+                  <span className="compact-showcase__skill-items">{cat.items.join(', ')}</span>
+                </p>
               ))}
             </div>
           ) : (
@@ -223,7 +229,10 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
           <div className="compact-showcase__entry-list">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
-                const linkLine = [item.githubUrl, item.demoUrl].filter(Boolean).join('  ·  ')
+                const linkLine = [item.githubUrl, item.demoUrl]
+                  .filter(Boolean)
+                  .map(formatLinkDisplayValue)
+                  .join('  ·  ')
 
                 return (
                   <div key={`${item.name}-${index}`} className="compact-showcase__project" data-export-card="true">
@@ -378,8 +387,12 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
       // CompactShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className={`compact-showcase preview-document--designer compact-showcase--${density}${showTwoColumn ? ' compact-showcase--two-column' : ''}`}
-      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
+      className={`compact-showcase preview-document--designer tpl-density-compact compact-showcase--${density}${showTwoColumn ? ' compact-showcase--two-column' : ''}`}
+      style={{
+        '--tpl-accent': accentColor,
+        '--tpl-accent-soft': accentSoftFill(accentColor, 0.1, COMPACT_DEFAULT_ACCENT_COLOR),
+        ...(headingColor ? { '--cv-heading-color': headingColor } : null),
+      }}
     >
       <header data-export-header="true" className="compact-showcase__header">
         <div className="min-w-0">

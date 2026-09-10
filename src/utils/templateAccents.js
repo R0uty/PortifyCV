@@ -26,6 +26,16 @@ export const ACCENT_SWATCH_SETS = {
     { color: '#7c3aed', label: { en: 'Violet', fi: 'Violetti' } },
     { color: '#1f7a6c', label: { en: 'Teal', fi: 'Sinivihreä' } },
   ],
+  // Cool-blue set — sky first/default. Compact's range: crisp blues plus a
+  // near-mono slate for a purely typographic one-pager.
+  coolBlue: [
+    { color: '#0284c7', label: { en: 'Sky', fi: 'Taivas' } },
+    { color: '#2563eb', label: { en: 'Blue', fi: 'Sininen' } },
+    { color: '#4f46e5', label: { en: 'Indigo', fi: 'Indigo' } },
+    { color: '#0f766e', label: { en: 'Teal', fi: 'Sinivihreä' } },
+    { color: '#334155', label: { en: 'Slate', fi: 'Liuske' } },
+    { color: '#be123c', label: { en: 'Rose', fi: 'Ruusu' } },
+  ],
   // Warm-gold set — gold first/default. Executive's range: restrained,
   // boardroom-appropriate alternatives, each dark enough to clear 4.5:1 on
   // white (the accent lands on the role line and metric text, not just icons).
