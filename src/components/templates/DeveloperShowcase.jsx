@@ -5,13 +5,16 @@
 // in presentation. ATS mode (the app's existing global toggle) bypasses this
 // component entirely and falls back to the shared flat renderer.
 //
-// Restyled 2026-08-23 against docs/developer-showcase-cv.html: sidebar is
-// now a full-bleed dark column (no gap/rounded-corner floating panel), and
-// most sidebar list items (links, certificates, education, languages) and
-// the top-level section wrapper lost their individual card box — only the
-// portfolio-style item cards (Projects/Achievements/Open Source/
-// Publications) keep a bordered/tinted card, matching the reference. See
-// developer.css's own header comment and todo.md item 35 for the full diff.
+// Restyled 2026-08-23 against docs/developer-showcase-cv.html (full-bleed
+// dark sidebar, portfolio-style cards only on the high-value main sections).
+// Reworked 2026-09-10 to docs/template-design-system.md: the per-category /
+// per-chip 7-colour cycle on skill tags and project chips is gone — one tag
+// style now — and the company line is ink, not blue. The template's one
+// documented accent form is the fixed teal→blue→purple cool-spectrum
+// gradient (name, photo ring, icon badges, timeline marker); it opts out of
+// the Settings accent swatch (§6). §4 heading: icon-badge (the gradient
+// divider bar under each title is removed). Type sizes read the `--tpl-*`
+// ramp via `tpl-density-standard`.
 
 import { useMemo } from 'react'
 
@@ -28,29 +31,8 @@ import {
   getSafeHref,
 } from './shared'
 
-// Category → tag color mapping (spec calls for colorful grouped skills rather
-// than plain pills). Falls back to gray for anything unrecognized.
-const CATEGORY_COLOR = {
-  languages: 'blue',
-  frameworks: 'purple',
-  databases: 'orange',
-  cloud: 'teal',
-  devops: 'pink',
-  security: 'green',
-  other: 'gray',
-}
-
-// Rotating palette for free-text tech-stack chips (project.stack), since we
-// can't know each individual technology's "correct" color ahead of time.
-const CHIP_COLORS = ['blue', 'teal', 'purple', 'orange', 'green', 'pink']
-
-// Gradient background for every section-icon badge. Previously a different
-// color pair per section, cycling through the full --dev-* palette (blue,
-// purple, pink, orange, green...) with no logic behind which section got
-// which pair — read as random rather than deliberate. Now the same
-// teal → blue → purple gradient the template already uses for the name
-// text, the photo ring, and every section divider (developer.css), so the
-// badges tie into that existing signature instead of introducing more hues.
+// The fixed cool-spectrum gradient — Developer's one accent form. Used for
+// the name text, photo ring, section-icon badges and timeline marker.
 const SECTION_ICON_GRADIENT = 'linear-gradient(135deg, var(--dev-teal), var(--dev-blue), var(--dev-purple))'
 
 function splitToBullets(text) {
@@ -73,7 +55,6 @@ function SectionHeading({ icon, label, tone }) {
         </span>
         {label}
       </h2>
-      <div className="dev-showcase__section-divider" aria-hidden="true" />
     </div>
   )
 }
@@ -167,11 +148,7 @@ export default function DeveloperShowcase({
                 <p className="dev-showcase__skill-group-label">{cat.label}</p>
                 <div className="dev-showcase__skill-tags">
                   {cat.items.map((skill) => (
-                    <span
-                      key={skill}
-                      data-export-skill="true"
-                      className={`dev-showcase__skill-tag dev-showcase__skill-tag--${CATEGORY_COLOR[cat.key] || 'gray'}`}
-                    >
+                    <span key={skill} data-export-skill="true" className="dev-showcase__skill-tag">
                       {skill}
                     </span>
                   ))}
@@ -377,21 +354,22 @@ export default function DeveloperShowcase({
                     {item.description ? <p className="dev-showcase__project-desc">{item.description}</p> : null}
                     {chips.length > 0 ? (
                       <div className="dev-showcase__chip-row">
-                        {chips.map((chip, chipIndex) => (
-                          <span
-                            key={chip}
-                            className={`dev-showcase__chip dev-showcase__chip--${CHIP_COLORS[chipIndex % CHIP_COLORS.length]}`}
-                          >
-                            {chip}
-                          </span>
+                        {chips.map((chip) => (
+                          <span key={chip} className="dev-showcase__chip">{chip}</span>
                         ))}
                       </div>
                     ) : null}
                     {item.githubUrl || item.demoUrl ? (
                       <div className="dev-showcase__link-row">
                         {item.githubUrl ? (
-                          <a href={getSafeHref(item.githubUrl)} target="_blank" rel="noreferrer" className="dev-showcase__link-btn">
-                            GitHub
+                          <a
+                            href={getSafeHref(item.githubUrl)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="dev-showcase__project-link"
+                            title={item.githubUrl}
+                          >
+                            {formatLinkDisplayValue(item.githubUrl)}
                           </a>
                         ) : null}
                         {item.demoUrl ? (
@@ -399,9 +377,10 @@ export default function DeveloperShowcase({
                             href={getSafeHref(item.demoUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="dev-showcase__link-btn dev-showcase__link-btn--primary"
+                            className="dev-showcase__project-link"
+                            title={item.demoUrl}
                           >
-                            {isFinnish ? 'Demo' : 'Live Demo'}
+                            {formatLinkDisplayValue(item.demoUrl)}
                           </a>
                         ) : null}
                       </div>
@@ -531,7 +510,7 @@ export default function DeveloperShowcase({
       // DeveloperShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className={`dev-showcase preview-document--designer ${animationEnabled ? '' : 'dev-showcase--no-animation'}`}
+      className={`dev-showcase preview-document--designer tpl-density-standard ${animationEnabled ? '' : 'dev-showcase--no-animation'}`}
     >
       {showDecorations ? (
         <div className="dev-showcase__bg" data-export-ignore="true" aria-hidden="true">

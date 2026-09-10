@@ -153,7 +153,19 @@ Deriving a per-element check: recolor the accent to pure black in your head.
 Everything that goes from "colored" to "black" should still be *findable*
 (it was a marker), and nothing should become *ambiguous* (it was content).
 
-### The one documented exception: Colorful Compact
+### Accent expressed as a gradient: Developer
+
+Developer's one accent is a **fixed teal→blue→purple cool-spectrum
+gradient**, used only for decorative wayfinding marks — the name text, the
+photo ring, the section-icon badges, the timeline marker. Never on body,
+role, company or any content text; never a per-item colour. It is one
+coherent cool sweep, not multiple competing hues, and it is the template's
+stated concept — so it counts as Developer's single accent, not a §3
+violation. Developer opts out of the Settings accent swatch (§6) for the
+same reason. Its solid-accent moments (dates, links, bullet markers, icons)
+use `#0f766e` (teal-700), contrast-safe on white.
+
+### The one full multicolour exception: Colorful Compact
 
 Colorful Compact's stated concept **is** multicolor — one hue per section.
 It is the only template allowed more than one accent, and only from this
@@ -241,10 +253,13 @@ Notes on the current distribution, for the A.2 triage:
 
 - **`right-rail + main` holds 6 of 16** — the crowded family, and the one
   where "distinct or duplicate" bites hardest.
-- **`dark-sidebar + main` holds exactly one.** `cvTemplates.js` still
-  describes Developer as a "Dark sidebar" template; its rail has been light
-  for weeks. Either the rail goes back to dark (making it two) or the
-  metadata is corrected — but the description and the family must agree.
+- **`dark-sidebar + main` holds two: Navy Professional and Developer.**
+  (An earlier draft of this note claimed Developer's rail had "been light
+  for weeks" — that was wrong, written from a session where desktop renders
+  were unavailable. Developer's Aug 2026 restyle made it a full-bleed dark
+  navy column; the "Dark sidebar" metadata is accurate.) Navy is a flat
+  navy field with identity in the sidebar; Developer is a navy gradient
+  holding only the secondary sections, identity in a top header — distinct.
 - **`numbered` heading treatment + `single-column-flow`** is the open
   combination the planned editorial one-column template should take, rather
   than becoming a seventh right-rail.

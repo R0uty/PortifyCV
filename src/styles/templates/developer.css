@@ -9,15 +9,19 @@
    simulation. Colors are plain hex/rgba throughout (no oklch/color-mix) so
    html2canvas-based PDF export renders them reliably.
 
-   Restyled 2026-08-23 against a reference mockup
-   (docs/developer-showcase-cv.html) toward a flatter "editorial portfolio"
-   language: individual sections and most sidebar list items (links, certs,
-   languages, education) no longer sit in their own bordered/background
-   card — only the main column's higher-value item types (project,
-   achievement, open-source, publication cards) keep a card treatment,
-   matching the reference exactly. The sidebar itself is now a full-bleed
-   dark column (no gap, no independent rounded corners) rather than a
-   floating rounded panel inside a gapped grid.
+   Restyled 2026-08-23 against docs/developer-showcase-cv.html (full-bleed
+   dark sidebar; card treatment only on the main column's high-value item
+   types — project / achievement / open-source / publication).
+
+   Reworked 2026-09-10 to docs/template-design-system.md: the per-category /
+   per-chip 7-colour cycle on skill tags and project chips is gone (one tag
+   style), the company line is ink not blue, and type sizes read the shared
+   `--tpl-*` ramp (root carries `tpl-density-standard`). The template's one
+   documented accent form (§3) is the fixed teal→blue→purple cool-spectrum
+   gradient — name text, photo ring, section-icon badges, timeline marker.
+   `--dev-accent` (#0f766e) is the solid teal for text/marks that need real
+   contrast on white. §4 heading: icon-badge (the gradient divider bar is
+   removed). Developer opts out of the Settings accent swatch (§6).
    ========================================================================== */
 
 .dev-showcase {
@@ -25,9 +29,9 @@
   --dev-teal: #14b8a6;
   --dev-blue: #3b82f6;
   --dev-purple: #8b5cf6;
-  --dev-orange: #f97316;
-  --dev-green: #22c55e;
-  --dev-pink: #ec4899;
+  /* Solid teal for text/marks on a white surface — the bright --dev-teal
+     fails AA there. The spectrum gradient still uses --dev-teal/blue/purple. */
+  --dev-accent: #0f766e;
   --dev-gray: #64748b;
   --dev-border: #e2e8f0;
   --dev-bg: #ffffff;
@@ -36,15 +40,13 @@
   --dev-sidebar: #0f172a;
   --dev-text: #0f172a;
   --dev-muted: #64748b;
-  --dev-success: #22c55e;
-  --dev-warning: #f97316;
-  --dev-error: #ec4899;
 
   position: relative;
   overflow: hidden;
   background: var(--dev-bg);
   color: var(--dev-text);
   font-family: var(--font-sans);
+  font-size: var(--tpl-body-size);
 
   /* Match the app's shared A4-ish paper sizing (same variables every other
      template's `.preview-document` uses) without inheriting that class's
@@ -143,19 +145,20 @@
 
 .dev-showcase__kicker {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: var(--dev-teal);
+  color: var(--dev-accent);
 }
 
 .dev-showcase__name {
   margin-top: 0.4rem;
-  font-size: 2.5rem;
+  font-size: var(--tpl-name-size);
+  line-height: var(--tpl-name-lh);
   font-weight: 800;
   letter-spacing: -0.02em;
-  line-height: 1.05;
+  overflow-wrap: break-word;
   background: linear-gradient(90deg, var(--dev-teal), var(--dev-blue), var(--dev-purple));
   background-size: 200% auto;
   -webkit-background-clip: text;
@@ -166,7 +169,7 @@
 
 .dev-showcase__role {
   margin-top: 0.5rem;
-  font-size: 0.95rem;
+  font-size: var(--tpl-title-size);
   font-weight: 500;
   color: var(--dev-muted);
 }
@@ -183,7 +186,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-meta-size);
   color: var(--dev-muted);
   white-space: nowrap;
 }
@@ -235,7 +238,7 @@
   height: 1.1rem;
   width: 1.1rem;
   border-radius: 9999px;
-  background: var(--dev-green);
+  background: var(--dev-teal);
   border: 3px solid var(--dev-bg);
 }
 
@@ -281,7 +284,7 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -298,23 +301,15 @@
   color: #ffffff;
 }
 
-.dev-showcase__section-divider {
-  margin-top: 0.6rem;
-  height: 3px;
-  width: 100%;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, var(--dev-teal), var(--dev-blue), var(--dev-purple));
-  opacity: 0.55;
-}
-
 .dev-showcase__empty {
-  font-size: 0.82rem;
+  margin-top: 0.6rem;
+  font-size: var(--tpl-meta-size);
   color: var(--dev-muted);
 }
 
 .dev-showcase__summary {
   margin-top: 0.9rem;
-  font-size: 0.9rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.7;
   color: #334155;
   white-space: pre-line;
@@ -332,7 +327,7 @@
 
 .dev-showcase__skill-group-label {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -346,32 +341,24 @@
   gap: 0.4rem;
 }
 
+/* One tag style — a soft teal fill. Light teal text on the dark sidebar,
+   darker teal on the white main column. (Was a 7-colour per-category cycle.) */
 .dev-showcase__skill-tag {
   display: inline-flex;
   align-items: center;
   border-radius: 8px;
-  border: 1px solid;
   padding: 0.25rem 0.55rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
+  background: rgba(20, 184, 166, 0.16);
+  color: #5eead4;
+  overflow-wrap: anywhere;
 }
 
-.dev-showcase__skill-tag--blue { background: rgba(59, 130, 246, 0.14); border-color: rgba(96, 165, 250, 0.4); color: #93c5fd; }
-.dev-showcase__skill-tag--teal { background: rgba(20, 184, 166, 0.14); border-color: rgba(45, 212, 191, 0.4); color: #5eead4; }
-.dev-showcase__skill-tag--purple { background: rgba(139, 92, 246, 0.14); border-color: rgba(167, 139, 250, 0.4); color: #c4b5fd; }
-.dev-showcase__skill-tag--orange { background: rgba(249, 115, 22, 0.14); border-color: rgba(251, 146, 60, 0.4); color: #fdba74; }
-.dev-showcase__skill-tag--green { background: rgba(34, 197, 94, 0.14); border-color: rgba(74, 222, 128, 0.4); color: #86efac; }
-.dev-showcase__skill-tag--pink { background: rgba(236, 72, 153, 0.14); border-color: rgba(244, 114, 182, 0.4); color: #f9a8d4; }
-.dev-showcase__skill-tag--gray { background: rgba(148, 163, 184, 0.14); border-color: rgba(148, 163, 184, 0.4); color: #cbd5e1; }
-
-/* Skill tags rendered on a white surface (main column) need darker text */
-.dev-showcase__main .dev-showcase__skill-tag--blue { color: #1d4ed8; }
-.dev-showcase__main .dev-showcase__skill-tag--teal { color: #0f766e; }
-.dev-showcase__main .dev-showcase__skill-tag--purple { color: #6d28d9; }
-.dev-showcase__main .dev-showcase__skill-tag--orange { color: #c2410c; }
-.dev-showcase__main .dev-showcase__skill-tag--green { color: #15803d; }
-.dev-showcase__main .dev-showcase__skill-tag--pink { color: #be185d; }
-.dev-showcase__main .dev-showcase__skill-tag--gray { color: #334155; }
+.dev-showcase__main .dev-showcase__skill-tag {
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--dev-accent);
+}
 
 /* ── Links (sidebar, plain rows — no card) ── */
 
@@ -398,7 +385,7 @@
 
 .dev-showcase__link-label {
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -408,7 +395,7 @@
 .dev-showcase__link-value {
   display: block;
   overflow: hidden;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   color: #e2e8f0;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -431,21 +418,21 @@
 }
 
 .dev-showcase__cert-name {
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   font-weight: 600;
   color: #f1f5f9;
 }
 
 .dev-showcase__cert-meta {
   margin-top: 0.15rem;
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   color: #94a3b8;
 }
 
 .dev-showcase__cert-link {
   margin-top: 0.3rem;
   display: inline-block;
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   color: #5eead4;
   word-break: break-all;
 }
@@ -459,14 +446,14 @@
 }
 
 .dev-showcase__edu-degree {
-  font-size: 0.82rem;
+  font-size: var(--tpl-body-size);
   font-weight: 700;
   color: #f1f5f9;
 }
 
 .dev-showcase__edu-meta {
   margin-top: 0.15rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   color: #94a3b8;
 }
 
@@ -476,7 +463,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   color: #e2e8f0;
 }
 
@@ -562,24 +549,24 @@
 }
 
 .dev-showcase__role-title {
-  font-size: 0.98rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--dev-primary);
 }
 
 .dev-showcase__company {
   margin-top: 0.1rem;
-  font-size: 0.82rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--dev-blue);
+  color: #334155;
 }
 
 .dev-showcase__dates {
   flex-shrink: 0;
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--dev-teal);
+  color: var(--dev-accent);
 }
 
 .dev-showcase__bullets {
@@ -588,13 +575,13 @@
 }
 
 .dev-showcase__bullets li {
-  font-size: 0.84rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.65;
   color: #334155;
 }
 
 .dev-showcase__bullets li::marker {
-  color: var(--dev-teal);
+  color: var(--dev-accent);
 }
 
 /* ── Cards shared by Projects / Achievements / Open Source (main column) ── */
@@ -620,14 +607,14 @@
 }
 
 .dev-showcase__project-name {
-  font-size: 0.92rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--dev-primary);
 }
 
 .dev-showcase__project-desc {
   margin-top: 0.35rem;
-  font-size: 0.82rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
   color: #334155;
   white-space: pre-line;
@@ -640,53 +627,29 @@
   gap: 0.35rem;
 }
 
+/* One chip style — soft teal fill, no per-technology colour. */
 .dev-showcase__chip {
   border-radius: 6px;
-  border: 1px solid;
   padding: 0.15rem 0.5rem;
-  font-size: 0.66rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--dev-accent);
+  overflow-wrap: anywhere;
 }
-
-.dev-showcase__chip--blue { background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.35); color: #1d4ed8; }
-.dev-showcase__chip--teal { background: rgba(20, 184, 166, 0.1); border-color: rgba(20, 184, 166, 0.35); color: #0f766e; }
-.dev-showcase__chip--purple { background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.35); color: #6d28d9; }
-.dev-showcase__chip--orange { background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.35); color: #c2410c; }
-.dev-showcase__chip--green { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.35); color: #15803d; }
-.dev-showcase__chip--pink { background: rgba(236, 72, 153, 0.1); border-color: rgba(236, 72, 153, 0.35); color: #be185d; }
-.dev-showcase__chip--gray { background: rgba(100, 116, 139, 0.1); border-color: rgba(100, 116, 139, 0.35); color: #334155; }
 
 .dev-showcase__link-row {
   margin-top: 0.75rem;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.4rem 1.1rem;
 }
 
-.dev-showcase__link-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  border-radius: 8px;
-  border: 1px solid var(--dev-border);
-  background: var(--dev-bg);
-  padding: 0.3rem 0.65rem;
-  font-size: 0.7rem;
+.dev-showcase__project-link {
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--dev-primary);
-  text-decoration: none;
-  transition: transform 160ms ease, box-shadow 160ms ease;
-}
-
-.dev-showcase__link-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px -10px rgba(15, 23, 42, 0.4);
-}
-
-.dev-showcase__link-btn--primary {
-  background: linear-gradient(135deg, var(--dev-teal), var(--dev-blue));
-  border-color: transparent;
-  color: #ffffff;
+  color: var(--dev-accent);
+  overflow-wrap: anywhere;
 }
 
 /* ── Achievements (trophy cards) ── */
@@ -730,21 +693,21 @@
 }
 
 .dev-showcase__achievement-title {
-  font-size: 0.88rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--dev-primary);
 }
 
 .dev-showcase__achievement-year {
   flex-shrink: 0;
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--dev-muted);
 }
 
 .dev-showcase__achievement-desc {
   margin-top: 0.3rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
   color: #334155;
   white-space: pre-line;
@@ -766,9 +729,9 @@
 }
 
 .dev-showcase__opensource-name {
-  font-size: 0.92rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
-  color: var(--dev-teal);
+  color: var(--dev-accent);
 }
 
 .dev-showcase__opensource-meta {
@@ -777,7 +740,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.9rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--dev-muted);
 }
@@ -790,7 +753,7 @@
 
 .dev-showcase__opensource-desc {
   margin-top: 0.5rem;
-  font-size: 0.82rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
   color: #334155;
   white-space: pre-line;
@@ -806,14 +769,14 @@
 }
 
 .dev-showcase__publication-title {
-  font-size: 0.88rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--dev-primary);
 }
 
 .dev-showcase__publication-meta {
   margin-top: 0.2rem;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   color: var(--dev-muted);
 }
 
@@ -872,10 +835,6 @@
 
   .dev-showcase__sidebar {
     padding: 1.25rem 1.25rem 1.75rem;
-  }
-
-  .dev-showcase__name {
-    font-size: 2rem;
   }
 }
 

@@ -4,6 +4,39 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Developer template rework (roadmap A-fix batch) — 2026-09-10
+
+Released as v1.2.6. Fourth of the A-fix rework batch. Developer scored
+**rework** — colour discipline 1.
+
+- **Killed the 7-colour cycle.** Skill tags cycled a colour per skill
+  category and project chips cycled a 6-colour palette per chip — plus the
+  company line rendered in blue. All of that is gone: **one** tag/chip style
+  (a soft-teal fill, light-teal text on the dark sidebar, darker teal on the
+  white main column), and the company line is ink. Distinct hexes in
+  `developer.css` drop from ~28 to ~14. `CATEGORY_COLOR` / `CHIP_COLORS`
+  maps removed.
+- **Kept** the teal→blue→purple cool-spectrum gradient (name, photo ring,
+  section-icon badges, timeline marker) — Developer's stated concept, now
+  documented in the design system's §3 as its accent form, the way Colorful
+  Compact's rainbow is. Developer **opts out** of the Settings accent swatch
+  (§6). Solid-accent moments use `#0f766e` (teal-700), contrast-safe on white.
+- The name's `background-clip:text` gradient keeps its `.pdf-export-root`
+  solid fallback — re-verified: the exported PDF renders the name solid.
+- **§4 heading → icon-badge**: the separate gradient `__section-divider` bar
+  under each title is removed (one on-menu treatment).
+- Project "GitHub" / "Live Demo" bordered + gradient-filled buttons → plain
+  teal text links (scheme-stripped URLs).
+- **Type ramp**: `tpl-density-standard` + `--tpl-*`; name `2.5rem → 1.95rem`.
+- `developer.js`'s ATS `teal-*` classes were **undefined** in the
+  hand-authored `utilities.css` (the recurring trap) — added the real ones.
+- Corrected the stale "Developer's rail has been light for weeks" claim in
+  the design-system doc §5 and the audit-a2 Developer row — the Aug restyle
+  made the sidebar a full-bleed dark navy column; Developer holds the 2nd
+  `dark-sidebar + main` slot alongside Navy Professional.
+
+Full suite: 36 passed. Verified in-app and in a rendered-back 2-page PDF.
+
 ## Executive template rework (roadmap A-fix batch) — 2026-09-10
 
 Released as v1.2.5. Third of the A-fix rework batch. Executive scored

@@ -28,6 +28,9 @@ const templateMap = {
   },
   developer: {
     id: 'developer',
+    // Opts out of the Settings accent swatch (§6): the fixed teal→blue→purple
+    // cool-spectrum gradient is the template's concept, like Colorful Compact's
+    // capped rainbow — not a single configurable hue.
     accent: null,
     label: 'Developer',
     description: 'Dark sidebar with project and achievement cards — a strong fit if your work is naturally project-based.',
