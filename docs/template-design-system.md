@@ -373,13 +373,14 @@ named.
   `TechExecShowcase.jsx`.) Teaching the flat path to consume a hex
   `--tpl-accent` is still a candidate for a later pass.
 
-  The registry mechanism above already exists on this branch. The two
-  configurable templates (Modern Timeline, Modern Orange) still write their
-  own private properties (`--tl-accent`, `--mo-*`); the A-fix batch moves
-  each onto `--tpl-accent` as that template is reworked. The accent's
-  soft/tonal derivative is **computed in JS at render time from the chosen
-  accent and written as a second inline custom property** — the pattern
-  Timeline's `accentColor` prop already uses. It is never a second hardcoded
+  Every configurable Showcase now writes the shared `--tpl-accent` inline
+  (Modern Timeline and Modern Orange, wired since A.1 under private
+  `--tl-accent` / `--mo-accent` names, were renamed onto `--tpl-accent` in
+  v1.2.15; their other private tokens — `--tl-text`, `--mo-border`, … —
+  stay). The accent's soft/tonal derivative is **computed in JS at render
+  time from the chosen accent and written as a second inline custom
+  property** where a template needs one — Timeline and Modern Orange use
+  only the solid accent, so they set just `--tpl-accent`. It is never a second hardcoded
   hue, and never `color-mix()`/`oklch()`, which the export pipeline cannot
   rasterize (§8). Templates also need an ATS-mode accent value: Timeline's
   `TIMELINE_ATS_ACCENT_COLOR` is the precedent — a user-chosen accent must

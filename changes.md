@@ -4,6 +4,15 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Consolidate Timeline/Modern Orange accent onto --tpl-accent — 2026-09-10
+
+Released as v1.2.15. Modern Timeline and Modern Orange were swatch-wired
+since A.1 but still wrote their accent under private `--tl-accent` /
+`--mo-accent` names. Renamed both to the shared `--tpl-accent` (CSS +
+inline style + the Timeline e2e assertion). Their other private tokens
+(`--tl-text`, `--mo-border`, …) are unchanged. Now every configurable
+bespoke Showcase reads its accent from `--tpl-accent`.
+
 ## Modern Professional back to standard density — 2026-09-10
 
 Released as v1.2.14. The v1.2.13 `roomy` reclassification made the

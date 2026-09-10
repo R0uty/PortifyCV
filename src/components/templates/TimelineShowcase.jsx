@@ -385,7 +385,7 @@ export default function TimelineShowcase({
       // export: the handler polls forever for a class that never appears.
       className={`timeline-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'} tpl-density-standard`}
       style={{
-        '--tl-accent': effectiveAccentColor,
+        '--tpl-accent': effectiveAccentColor,
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),
       }}
     >

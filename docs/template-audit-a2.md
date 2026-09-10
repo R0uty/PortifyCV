@@ -114,9 +114,9 @@ tight. Quadrant is worst: its name sits in a real 50%-width `1fr` cell.
    Executive opts out — flat-renderer-only). **Done** for every bespoke
    Showcase except the two ink-only opt-outs (Classic Professional,
    Minimalist) and the fixed-palette opt-outs (Colorful Compact, Developer).
-   Modern Timeline and Modern Orange keep their private `--tl-accent` /
-   `--mo-accent` names (already swatch-wired since A.1) — the rename to
-   `--tpl-accent` is a cosmetic follow-up, not blocking.
+   Modern Timeline and Modern Orange (swatch-wired since A.1) were renamed
+   off their private `--tl-accent` / `--mo-accent` onto `--tpl-accent` in
+   v1.2.15.
 
 ## Recommended attack order
 

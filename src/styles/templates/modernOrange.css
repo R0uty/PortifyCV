@@ -5,7 +5,7 @@
    personal info, skills, languages, education timeline) beside a white main
    column (name header + orange title badge, profile, an orange experience
    timeline, project cards, certifications). The one accent color comes from
-   `--mo-accent`, set inline per-render from the `accentColor` prop (see
+   `--tpl-accent`, set inline per-render from the `accentColor` prop (see
    ModernOrangeShowcase.jsx) so it's user-customizable without this
    stylesheet needing to know about it — the value declared here is only the
    fallback for contexts where the inline style is somehow absent. Colors
@@ -21,7 +21,7 @@
    ========================================================================== */
 
 .modern-orange-showcase {
-  --mo-accent: #f28c00;
+  --tpl-accent: #f28c00;
   --mo-text: #151a22;
   --mo-muted: #6b7280;
   --mo-border: #ece1d2;
@@ -79,7 +79,7 @@
   height: 7rem;
   object-fit: cover;
   border-radius: 9999px;
-  border: 3px solid var(--mo-accent);
+  border: 3px solid var(--tpl-accent);
   padding: 3px;
   background: var(--mo-bg);
 }
@@ -97,7 +97,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
   margin-bottom: 0.85rem;
 }
 
@@ -127,7 +127,7 @@
 .modern-orange-showcase__contact-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 /* ── Sidebar: skills (name + dot rating) ── */
@@ -169,7 +169,7 @@
 }
 
 .modern-orange-showcase__dot--filled {
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
 }
 
 /* ── Sidebar: languages ── */
@@ -235,7 +235,7 @@
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 9999px;
-  border: 2px solid var(--mo-accent);
+  border: 2px solid var(--tpl-accent);
   background: var(--mo-bg);
 }
 
@@ -244,7 +244,7 @@
   top: 0.22rem;
   bottom: -1.1rem;
   width: 1.5px;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   opacity: 0.3;
 }
 
@@ -256,7 +256,7 @@
 .modern-orange-showcase__edu-dates {
   font-size: var(--tpl-meta-size);
   font-weight: 700;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 .modern-orange-showcase__edu-degree {
@@ -305,7 +305,7 @@
 }
 
 .modern-orange-showcase__name-last {
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 .modern-orange-showcase__title-badge {
@@ -314,7 +314,7 @@
   margin-top: 0.9rem;
   padding: 0.45rem 1rem;
   border-radius: 8px;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   color: #ffffff;
   font-size: var(--tpl-title-size);
   font-weight: 700;
@@ -326,7 +326,7 @@
 .modern-orange-showcase__header-divider {
   height: 2px;
   margin-top: 1.5rem;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   opacity: 0.25;
 }
 
@@ -348,7 +348,7 @@
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 9999px;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   color: #ffffff;
 }
 
@@ -401,7 +401,7 @@
   padding-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   font-weight: 700;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 .modern-orange-showcase__exp-rail {
@@ -418,7 +418,7 @@
   width: 0.6rem;
   height: 0.6rem;
   border-radius: 9999px;
-  border: 2px solid var(--mo-accent);
+  border: 2px solid var(--tpl-accent);
   background: var(--mo-bg);
 }
 
@@ -427,7 +427,7 @@
   top: 0.28rem;
   bottom: -2.5rem;
   width: 1.5px;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   opacity: 0.3;
 }
 
@@ -445,7 +445,7 @@
 .modern-orange-showcase__exp-meta {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 .modern-orange-showcase__bullets {
@@ -463,7 +463,7 @@
 }
 
 .modern-orange-showcase__bullets li::marker {
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 /* ── Projects: compact three-column cards ── */
@@ -489,7 +489,7 @@
   width: 1.7rem;
   height: 1.7rem;
   border-radius: 9999px;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   color: #ffffff;
   margin-bottom: 0.55rem;
 }
@@ -525,7 +525,7 @@
   padding: 0.18rem 0.45rem;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 .modern-orange-showcase__project-link {
@@ -533,7 +533,7 @@
   margin-top: 0.6rem;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 /* ── Certifications ── */
@@ -548,7 +548,7 @@
 
 .modern-orange-showcase__cert-item {
   padding: 0.8rem 0 0.8rem 0.9rem;
-  border-left: 2px solid var(--mo-accent);
+  border-left: 2px solid var(--tpl-accent);
   border-bottom: 1px solid var(--mo-border);
 }
 
@@ -585,7 +585,7 @@
   flex-shrink: 0;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 /* ── ATS mode: same layout, one column instead of two, no color ──
@@ -595,7 +595,7 @@
    across the full page width. Everything else — section order, the icon
    badges, the dot ratings, the timeline — stays in the same relative
    place, just recolored to the same monochrome every other template's
-   ATS pass already uses (see `--mo-accent`'s ATS override in
+   ATS pass already uses (see `--tpl-accent`'s ATS override in
    ModernOrangeShowcase.jsx). */
 
 .modern-orange-showcase--ats {

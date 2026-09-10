@@ -62,10 +62,10 @@ test.describe('Template accent color', () => {
     await page.getByRole('button', { name: 'Close' }).click()
 
     const root = page.locator('.timeline-showcase').first()
-    // `--tl-accent` is an inline CSS custom property; browsers return it as
+    // `--tpl-accent` is an inline CSS custom property; browsers return it as
     // authored (`#2563eb`), not normalized to rgb().
     const accent = await root.evaluate((el) =>
-      getComputedStyle(el).getPropertyValue('--tl-accent').trim(),
+      getComputedStyle(el).getPropertyValue('--tpl-accent').trim(),
     )
     expect(accent.toLowerCase()).toBe('#2563eb')
   })

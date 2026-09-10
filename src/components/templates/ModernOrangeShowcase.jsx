@@ -430,7 +430,7 @@ export default function ModernOrangeShowcase({
       // claims ("no columns") promise to remove.
       className={`modern-orange-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'} tpl-density-standard${atsFriendlyMode ? ' modern-orange-showcase--ats' : ''}`}
       style={{
-        '--mo-accent': effectiveAccentColor,
+        '--tpl-accent': effectiveAccentColor,
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),
       }}
     >
