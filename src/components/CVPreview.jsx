@@ -44,6 +44,7 @@ const NavyProfessionalShowcase = lazy(() => import('./templates/NavyProfessional
 const ModernOrangeShowcase = lazy(() => import('./templates/ModernOrangeShowcase'))
 const ColorfulCompactShowcase = lazy(() => import('./templates/ColorfulCompactShowcase'))
 const QuadrantShowcase = lazy(() => import('./templates/QuadrantShowcase'))
+const TechExecShowcase = lazy(() => import('./templates/TechExecShowcase'))
 
 function CVPreview({
   formData,
@@ -55,7 +56,7 @@ function CVPreview({
   // Resolved accent color for the current template (from the app's
   // per-template `templateAccentColors` map, falling back to the template
   // registry's default). `timeline`, `modernOrange`, `creative`, `graduate`,
-  // `executive`, `compact` and `quadrant` consume it.
+  // `executive`, `compact`, `quadrant` and `techExec` consume it.
   accentColor,
   // Overrides the name and section-title color for every template except
   // Developer (animated gradient name), Colorful Compact (dark header, own
@@ -354,6 +355,27 @@ function CVPreview({
     return (
       <Suspense fallback={null}>
         <QuadrantShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          showcaseConfig={t}
+          headingColor={headingColor}
+          accentColor={accentColor}
+        />
+      </Suspense>
+    )
+  }
+
+  // ── Tech Executive Showcase delegation ──────────────────────────────
+  // Promoted to a bespoke Showcase in v1.2.9 (was flat-renderer-only): a
+  // navy masthead + navy footer band around a right-rail body. ATS mode
+  // bypasses to the flat renderer (techExec.js), same as every other
+  // bespoke Showcase above.
+  if (variant === 'techExec' && !atsFriendlyMode) {
+    return (
+      <Suspense fallback={null}>
+        <TechExecShowcase
           formData={formData}
           locale={locale}
           previewRef={previewRef}

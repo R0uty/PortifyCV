@@ -26,6 +26,16 @@ export const ACCENT_SWATCH_SETS = {
     { color: '#7c3aed', label: { en: 'Violet', fi: 'Violetti' } },
     { color: '#1f7a6c', label: { en: 'Teal', fi: 'Sinivihreä' } },
   ],
+  // Royal-blue set — royal blue first/default. Tech Executive's range:
+  // corporate blues (with its own deep navy) plus restrained cool alternatives.
+  royalBlue: [
+    { color: '#2563eb', label: { en: 'Royal Blue', fi: 'Kuninkaansininen' } },
+    { color: '#163d7a', label: { en: 'Navy', fi: 'Laivastonsininen' } },
+    { color: '#1d4ed8', label: { en: 'Blue', fi: 'Sininen' } },
+    { color: '#0f766e', label: { en: 'Teal', fi: 'Sinivihreä' } },
+    { color: '#4f46e5', label: { en: 'Indigo', fi: 'Indigo' } },
+    { color: '#334155', label: { en: 'Slate', fi: 'Liuske' } },
+  ],
   // Cool-cyan set — cyan first/default. Quadrant's range: the one hue no
   // other template leads with, plus cool alternatives.
   coolCyan: [

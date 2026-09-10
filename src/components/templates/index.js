@@ -79,6 +79,7 @@ export function prefetchTemplateShowcases() {
   import('./ModernOrangeShowcase')
   import('./ColorfulCompactShowcase')
   import('./QuadrantShowcase')
+  import('./TechExecShowcase')
 }
 
 // Export the full map for cases where iteration over all templates is needed

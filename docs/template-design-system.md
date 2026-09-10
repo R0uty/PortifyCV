@@ -205,20 +205,21 @@ means amending this document, not adding a variant to one template.
 
 | Treatment | What it is | Current members |
 |---|---|---|
-| `rule-under` | Tracked uppercase label with a hairline rule directly beneath, spanning the column. No glyph, no marker. | Classic, Classic Professional, Compact |
-| `icon-badge` | A small circular/rounded accent-filled badge holding a monochrome stroke glyph (`sectionIcons` in `shared.jsx`), label to its right. | Developer, Modern Professional, Executive, Graduate, Modern Orange, Modern Timeline, Navy Professional, Portfolio Hybrid, Quadrant, Tech Executive |
+| `rule-under` | Tracked uppercase label with a hairline rule directly beneath, spanning the column. No glyph, no marker. | Classic, Classic Professional, Compact, Executive, Tech Executive |
+| `icon-badge` | A small circular/rounded accent-filled badge holding a monochrome stroke glyph (`sectionIcons` in `shared.jsx`), label to its right. | Developer, Modern Professional, Graduate, Modern Orange, Modern Timeline, Navy Professional, Portfolio Hybrid, Quadrant |
 | `left-tick` | A small solid accent mark — a short vertical bar or a dot — immediately left of the label. No glyph. | Colorful Compact (dot form) |
 | `eyebrow-caps` | Small tracked uppercase label, no rule and no marker; separation is whitespace alone. | Minimalist |
-| `numbered` | A two-digit ordinal (`01`, `02`, …) in the accent, preceding the label. | *(none — available)* |
+| `numbered` | A two-digit ordinal (`01`, `02`, …) in the accent, preceding the label. | Creative |
 
-**`icon-badge` is on 10 of 16, and that happened by default, not by
-choice.** It is the house cliché: pick it because the template's voice wants
-a glyph, not because it is what the last template did. (The v1.2.0 roadmap's
-visual pass counted 9 — it credited Colorful Compact, which actually uses a
-dot, and missed Quadrant and Modern Orange. The code count is 10.)
+**`icon-badge` was on 10 of 16 by default, not by choice** — the house
+cliché. The v1.2.0 A-fix batch moved Executive and Tech Executive onto
+`rule-under` and Creative onto `numbered`, bringing it down to 8. Pick it
+because the template's voice wants a glyph, not because it is what the last
+template did.
 
-**Non-conforming today:** **Creative** uses an off-menu treatment — a
-`1.3rem` bold sentence-case title with an italic accent subtitle beneath.
+**Members lists in this section reflect the post-A-fix state** (Creative /
+Graduate / Executive / Developer / Compact / Quadrant / Tech Executive
+reworked, v1.2.3–1.2.9). They are kept current as each rework lands.
 It scores **0** on structural clarity in §9 — that axis's 0 anchor names
 off-menu heading treatments explicitly — until it is moved onto one of the
 five, or until its treatment is added to this menu deliberately, given a
@@ -233,8 +234,9 @@ template by *structure* or by a genuinely distinct typographic voice — never
 by accent hue alone.** Two templates in the same family with the same
 heading treatment and the same density class are duplicates whatever their
 accents are; that is how Modern Professional and Tech Executive became
-near-twins in August, and how Classic and Classic Professional are near-twins
-now.
+near-twins in August (resolved v1.2.9 — Tech Executive got a bespoke
+navy-masthead/footer Showcase), and how Classic and Classic Professional
+are near-twins now.
 
 A **new** template must either open a new family or be clearly the
 best-in-class of an existing one. "Another right-rail template in a
@@ -244,9 +246,9 @@ different color" is not a new template.
 |---|---|---|
 | `single-column-flow` | No sidebar. Header, then sections flowing full width, top to bottom. | Minimalist, Classic, Classic Professional, Compact |
 | `single-column-timeline` | Single column whose spine is a vertical timeline running through the career sections. | Modern Timeline |
-| `left-rail + main` | Light full-height rail on the left carrying identity and/or secondary sections; primary sections on the right. | Developer, Executive, Modern Orange |
-| `right-rail + main` | Primary sections on the left, secondary sections in a narrower right column. | Modern Professional, Creative, Graduate, Portfolio Hybrid, Colorful Compact, Tech Executive |
-| `dark-sidebar + main` | As `left-rail + main`, but the rail is a dark, saturated field with knocked-out white type. | Navy Professional |
+| `left-rail + main` | Light full-height rail on the left carrying identity and/or secondary sections; primary sections on the right. | Executive, Modern Orange |
+| `right-rail + main` | Primary sections on the left, secondary sections in a narrower right column. | Modern Professional, Creative, Graduate, Portfolio Hybrid, Colorful Compact, Tech Executive (with a distinguishing deep-navy masthead + footer band, v1.2.9) |
+| `dark-sidebar + main` | As `left-rail + main`, but the rail is a dark, saturated field with knocked-out white type. | Navy Professional, Developer |
 | `grid` | Neither a rail nor a flow — content partitioned into cells that read at a glance rather than in order. | Quadrant |
 
 Notes on the current distribution, for the A.2 triage:
@@ -341,15 +343,14 @@ named.
   `SettingsModal`'s active swatch): the user's per-template override, else
   the registry default.
 
-  **Flat-renderer-only templates and ATS-mode rendering do not consume
-  `--tpl-accent`.** A template with no `*Showcase.jsx` (today: Tech
-  Executive) renders only through `CVPreview.jsx`'s flat path, whose
-  `t.accentColor()` returns Tailwind colour *names*, not hex, and which
-  ignores `accentColor` entirely. Such a template **opts out** for now —
-  `accent: null` with a `// flat-renderer only` note in its registry entry.
-  The same gap applies to every template's ATS-mode (flat) rendering.
-  Teaching the flat path to consume a hex `--tpl-accent` is out of scope for
-  A.1 and a candidate for a later pass.
+  **The flat renderer (Minimalist, and every template's ATS-mode) does not
+  consume `--tpl-accent`.** Its `t.accentColor()` returns Tailwind colour
+  *names*, not hex, and it ignores `accentColor` entirely. Minimalist (no
+  `*Showcase.jsx`) **opts out** — `accent: null`. Every other template now
+  has a bespoke Showcase that consumes `--tpl-accent` in non-ATS mode.
+  (Tech Executive was the last flat-only template; v1.2.9 gave it
+  `TechExecShowcase.jsx`.) Teaching the flat path to consume a hex
+  `--tpl-accent` is still a candidate for a later pass.
 
   The registry mechanism above already exists on this branch. The two
   configurable templates (Modern Timeline, Modern Orange) still write their

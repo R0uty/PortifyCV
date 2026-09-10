@@ -191,9 +191,9 @@ const templateMap = {
   },
   techExec: {
     id: 'techExec',
-    accent: null, // flat-renderer only — see §6
+    accent: { default: '#2563eb', swatchSet: 'royalBlue' },
     label: 'Tech Executive',
-    description: 'Annual-report layout with a timeline and a core-strengths sidebar, built for leadership-style narratives.',
+    description: 'An annual-report layout — a deep-navy masthead and footer band around a two-column body, with a core-strengths sidebar and a customizable accent. Built for leadership-style narratives.',
     variant: 'techExec',
     layout: 'split',
     primarySections: ['about', 'experience', 'education', 'skills'],
@@ -389,7 +389,7 @@ const templateLocalization = {
     },
     techExec: {
       label: 'Tekninen johtaja',
-      description: 'Vuosikertomustyylinen asettelu, aikajana ja ydinvahvuuksien sivupalkki — rakennettu johtajuustarinoille.',
+      description: 'Vuosikertomustyylinen asettelu — syvän laivastonsininen otsikko- ja alapalkki kaksipalstaisen rungon ympärillä, ydinvahvuuksien sivupalkki ja muokattava aksenttiväri. Rakennettu johtajuustarinoille.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Vahvuudet', 'Projektit'],
     },
@@ -479,8 +479,9 @@ export function isValidTemplateId(templateId) {
 // Adding this entry is only step 1 of a 3-step opt-in (registry entry →
 // CVPreview.jsx delegation forwards `accentColor` → the Showcase writes
 // `--tpl-accent` + an ATS-mode override); see docs/template-design-system.md
-// §6. Flat-renderer-only templates (no `*Showcase.jsx`, e.g. Tech Executive)
-// keep `accent: null` — the flat path uses Tailwind colour tokens, not hex.
+// §6. A template with no `*Showcase.jsx` (only the flat renderer path, e.g.
+// Minimalist) keeps `accent: null` — the flat path uses Tailwind colour
+// tokens, not hex.
 export function getTemplateAccent(templateId) {
   return templateMap[templateId]?.accent ?? null
 }

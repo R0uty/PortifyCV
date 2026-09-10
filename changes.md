@@ -4,6 +4,42 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Tech Executive bespoke Showcase (roadmap A-fix batch) — 2026-09-10
+
+Released as v1.2.9. Last of the seven-template A-fix rework batch. Tech
+Executive scored **rework** on **S=1** — it had no bespoke Showcase, so
+non-ATS mode rendered through the shared flat renderer (dressed up with
+config) and read as a near-twin of Modern Professional.
+
+- **New `src/components/templates/TechExecShowcase.jsx` +
+  `src/styles/templates/techExec.css`** — an "annual-report / navy
+  leadership" design: a deep-navy (`#163D7A`) full-width **masthead** with
+  knocked-out white identity, a `right-rail + main` two-column body (65/35),
+  and a deep-navy **footer band** carrying the user's tagline as the
+  document's sign-off (only rendered when they have one). Navy Professional
+  puts navy in a *sidebar*; Tech Executive puts it in *bands top and
+  bottom* — that's the distinguishing structure.
+- §3: one ink + one royal-blue accent (`--tpl-accent`) + the navy bands as
+  the single tint region. §4 heading: `rule-under` (a royal-blue hairline,
+  no icon-badge). §2: `tpl-density-standard` + `--tpl-*`. Skills render as
+  grouped inline lists.
+- **Accent user-customizable** (§6 3-step) — `TECHEXEC_DEFAULT_ACCENT_COLOR
+  = '#2563eb'`, a new `royalBlue` swatch set. Wired through `CVPreview.jsx`
+  (lazy import + delegation), `templates/index.js` (prefetch),
+  `src/index.css` (`@import`). `techExec.js` stays as the ATS-mode flat
+  fallback.
+- Docs updated: design-system §4 (Tech Executive → `rule-under`; icon-badge
+  down to 8 of 16), §5 (no longer a Modern Professional near-twin; also
+  fixed Developer's family: `left-rail` → `dark-sidebar`), §6 (no more
+  "flat-renderer-only" templates besides Minimalist), and the audit-a2 row.
+
+New Playwright spec for the Tech Executive accent swatch; full suite 39
+passed. Verified in-app and in a rendered-back 2-page PDF.
+
+**A-fix batch complete** (7 templates, v1.2.3–1.2.9). Remaining roadmap
+A work: the Classic → Classic Professional merge, then the polish pass
+(Portfolio Hybrid, Colorful Compact, + the keepers' light ramp adoption).
+
 ## Quadrant template rework (roadmap A-fix batch) — 2026-09-10
 
 Released as v1.2.8. Sixth of the A-fix rework batch. Quadrant scored
