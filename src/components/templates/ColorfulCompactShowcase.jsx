@@ -12,11 +12,17 @@
 // see CreativeShowcase.jsx's STRIPE_SEGMENTS comment for why a *repeating*
 // linear-gradient is unsafe for html2canvas; a single multi-stop
 // linear-gradient bar like this one doesn't hit that bug (confirmed already
-// in production by portfolio.css's header hairline). Every section header
-// cycles through a fixed six-color rainbow rather than one template-wide
-// accent, which is the one visual idea this whole template is built around
-// — so unlike Modern Timeline/Modern Orange, there is no user-customizable
-// accentColor prop here.
+// in production by portfolio.css's header hairline).
+//
+// Colour is the one visual idea this template is built around, so it is the
+// single template allowed more than one accent — but only under the design
+// system's capped exception (§3): a fixed, named six-swatch palette, one hue
+// assigned per *section*, in order. Never per skill chip, per project card
+// or per bullet — everything decorative inside a section takes that
+// section's one colour. There is no user-customizable accentColor prop.
+// (Polished v1.2.12: the 7th/8th hues — yellow, charcoal — retired, and the
+// per-item colour cycles collapsed to the section colour; compact type ramp
+// adopted.)
 
 import { useMemo } from 'react'
 
@@ -24,28 +30,14 @@ import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import { formatDateRange, formatLinkDisplayValue } from './shared'
 
-// Cycled by running position (main sections first, then sidebar) so every
-// section on the page gets its own color, wrapping back to pink after six —
-// exactly the reference's About/Experience/Projects/Skills/Education/
-// Languages/Links/Extras coloring (the 7th and 8th sections reuse pink/orange).
-const SECTION_COLORS = ['pink', 'orange', 'blue', 'green', 'teal', 'purple']
+// The capped, named palette (design-system §3). Assigned by running section
+// position (main sections first, then sidebar), wrapping after six. Order
+// matches the spec's table: pink, orange, green, teal, blue, purple.
+const SECTION_COLORS = ['pink', 'orange', 'green', 'teal', 'blue', 'purple']
 
-// Cycled by skill index — the reference's Toolkit row uses eight distinct
-// solid-fill pill colors before repeating.
-const SKILL_COLORS = ['pink', 'orange', 'yellow', 'green', 'teal', 'blue', 'purple', 'charcoal']
-
-// Cycled by experience-entry index for the date-range label.
-const EXP_DATE_COLORS = ['orange', 'teal', 'purple']
-
-// Cycled per project, reset for each card — matches the reference's varied
-// (not globally continuous) tag coloring per project.
-const TAG_COLORS = ['blue', 'purple', 'green', 'pink', 'teal']
-
-// Cycled by language-entry index for the level badge.
-const LANG_LEVEL_COLORS = ['pink', 'blue', 'green']
-
-// Cycled by contact-item index for the small dot marker in the header.
-const CONTACT_DOT_COLORS = ['pink', 'teal', 'purple']
+// Fixed single colour for the dark header's contact dots — matches the
+// two-tone name's accent half. Not a section, so not part of the cycle.
+const HEADER_ACCENT = 'orange'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -153,7 +145,6 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
                 const dateRange = formatDateRange(item.startDate, item.endDate)
                 const bullets = item.description ? splitToBullets(item.description) : []
                 const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
-                const dateColor = colorAt(EXP_DATE_COLORS, index)
 
                 return (
                   <div
@@ -166,7 +157,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
                         <p className="colorful-compact-showcase__exp-role">{item.role || copy.untitledRole}</p>
                         {metaLine ? <p className="colorful-compact-showcase__exp-meta">{metaLine}</p> : null}
                       </div>
-                      <p className={`colorful-compact-showcase__exp-date colorful-compact-showcase__exp-date--${dateColor}`}>
+                      <p className={`colorful-compact-showcase__exp-date colorful-compact-showcase__exp-date--${color}`}>
                         {dateRange || copy.datesPending}
                       </p>
                     </div>
@@ -206,10 +197,10 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
                     {item.description ? <p className="colorful-compact-showcase__project-desc">{item.description}</p> : null}
                     {tags.length > 0 ? (
                       <div className="colorful-compact-showcase__tag-row">
-                        {tags.map((tag, tagIndex) => (
+                        {tags.map((tag) => (
                           <span
                             key={tag}
-                            className={`colorful-compact-showcase__tag colorful-compact-showcase__tag--${colorAt(TAG_COLORS, tagIndex)}`}
+                            className={`colorful-compact-showcase__tag colorful-compact-showcase__tag--${color}`}
                           >
                             {tag}
                           </span>
@@ -238,11 +229,11 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
         <Section key={key} id="skills" placement="side" title={copy.skills} color={color}>
           {snapshot.skills.length > 0 ? (
             <div className="colorful-compact-showcase__skill-row">
-              {snapshot.skills.map((skill, index) => (
+              {snapshot.skills.map((skill) => (
                 <span
                   key={skill}
                   data-export-skill="true"
-                  className={`colorful-compact-showcase__skill-pill colorful-compact-showcase__skill-pill--${colorAt(SKILL_COLORS, index)}`}
+                  className={`colorful-compact-showcase__skill-pill colorful-compact-showcase__skill-pill--${color}`}
                 >
                   {skill}
                 </span>
@@ -297,7 +288,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
                   <span className="colorful-compact-showcase__lang-name">{item.language}</span>
                   {item.level ? (
                     <span
-                      className={`colorful-compact-showcase__lang-badge colorful-compact-showcase__lang-badge--${colorAt(LANG_LEVEL_COLORS, index)}`}
+                      className={`colorful-compact-showcase__lang-badge colorful-compact-showcase__lang-badge--${color}`}
                     >
                       {item.level}
                     </span>
@@ -362,7 +353,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
       ref={previewRef}
       data-export-root="true"
       data-export-variant="colorfulCompact"
-      className="colorful-compact-showcase preview-document--designer"
+      className="colorful-compact-showcase preview-document--designer tpl-density-compact"
     >
       <div className="colorful-compact-showcase__rainbow colorful-compact-showcase__rainbow--top" aria-hidden="true" />
 
@@ -380,10 +371,10 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
           </p>
           {contactItems.length > 0 ? (
             <div className="colorful-compact-showcase__contact">
-              {contactItems.map(([key, value], index) => (
+              {contactItems.map(([key, value]) => (
                 <span key={key} className="colorful-compact-showcase__contact-item">
                   <span
-                    className={`colorful-compact-showcase__contact-dot colorful-compact-showcase__contact-dot--${colorAt(CONTACT_DOT_COLORS, index)}`}
+                    className={`colorful-compact-showcase__contact-dot colorful-compact-showcase__contact-dot--${HEADER_ACCENT}`}
                     aria-hidden="true"
                   />
                   {key === 'website' ? formatLinkDisplayValue(value) : value}

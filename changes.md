@@ -4,6 +4,37 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Colorful Compact polish (roadmap A-fix polish pass) — 2026-09-10
+
+Released as v1.2.12. A.2 verdict "polish" (C=1, E=1). The template ran ~29
+hexes: a fixed six-colour section palette (fine — it's the one design-system
+§3 multicolour exception) *plus* independent per-item colour cycles on skill
+pills (8 hues), project tags (5), experience dates (3), language badges (3)
+and header contact dots (3), and a 7th/8th hue (`--cc-yellow`,
+`--cc-charcoal`).
+
+- **Capped to the named 6, one hue per section.** `SKILL_COLORS` /
+  `TAG_COLORS` / `EXP_DATE_COLORS` / `LANG_LEVEL_COLORS` /
+  `CONTACT_DOT_COLORS` removed — every decorative mark in a section (dot,
+  label, date, tag, pill, badge) now takes that section's assigned colour,
+  exactly as §3's exception requires. `SECTION_COLORS` reordered to the
+  spec's table order (pink / orange / green / teal / blue / purple).
+- **Yellow + charcoal retired** — vars, `skill-pill--yellow/--charcoal`, and
+  the yellow stop in the header rainbow bars (7 stops → 6).
+- **Header contact dots** unified to one fixed swatch (orange, matching the
+  two-tone name's accent half) — the header is not a section.
+- **Compact type ramp adopted** — root carries `tpl-density-compact`; ~20
+  ad-hoc font sizes now read `--tpl-*`. Section-heading tracking bumped to
+  the compact `0.18em`.
+- E=1: the name's `overflow-wrap` was already `break-word` (cross-cutting
+  fix, 2026-09-09) — confirmed.
+
+Stays swatch-opt-out (`accent: null`) — the fixed palette is its concept.
+lint / build / check:reducers / check:share / e2e (43) green; html2canvas
+rasterises the showcase DOM clean (389 ms). Design-system §3 and audit-a2
+updated — the A-fix batch + polish pass is now complete (15 templates, all
+at bar).
+
 ## Portfolio Hybrid polish (roadmap A-fix polish pass) — 2026-09-10
 
 Released as v1.2.11. A.2 verdict "polish" (C=1): the template ran a

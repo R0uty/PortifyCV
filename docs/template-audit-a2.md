@@ -50,7 +50,7 @@ E = content edge-cases (§7.1-weighted) · A = ATS parity · X = export (provisi
 | **Minimalist** | 2 | 3 | 2 | 2 | 2 | 3 | 2 | **keep** | — honest baseline / default; it *is* the flat renderer |
 | **Modern Professional** | 3 | 3 | 2 | 2 | 2 | 2 | 2 | **keep** | — the benchmark. Name is in a full-width flex header, not a grid column, so no §7.1 risk (see §7.1 correction below) |
 | **Portfolio Hybrid** | 2 | **1** | 2 | 2 | 2 | 2 | 2 | **polish (done v1.2.11)** | C — seven-hue palette (gradient hairline / per-section gradient icon badges / 6-colour chips / 7-colour badges / gradient "Live Demo" button). **Done v1.2.11:** capped to one emerald `--tpl-accent` (user-customizable, `forestGreen` swatch set), `tpl-density-roomy` ramp, "Live Demo" is now a plain link. |
-| **Colorful Compact** | 2 | **1** | 2 | 2 | **1** | 2 | 2 | **polish** | C — 29 hexes, far past §3's capped-6 exception; E — `overflow-wrap:anywhere` on the name will char-fragment when tight |
+| **Colorful Compact** | 2 | **1** | 2 | 2 | **1** | 2 | 2 | **polish (done v1.2.12)** | C — 29 hexes, per-item colour cycles past §3's capped-6 exception; E — `overflow-wrap` on the name. **Done v1.2.12:** capped to the named 6, one hue per section (no per-item cycles), yellow/charcoal retired, `compact` type ramp adopted; name already `break-word`. |
 | **Tech Executive** | 2 | 2 | **1** | 2 | 2 | 3 | 2 | **rework** | S — was "flat renderer + sidebar", a near-twin of Modern Professional. **Done v1.2.9:** bespoke `TechExecShowcase.jsx` + `techExec.css` — a deep-navy masthead + footer band around a right-rail body, `rule-under` headings, `--tpl-accent` (royalBlue set). |
 | **Developer** | 2 | **1** | 2 | 2 | 2 | 2 | 2 | **rework** | C — ~28 hexes from a 7-colour per-category/per-chip cycle on skill tags + project chips, plus the company line in blue. (The "dark sidebar" note in an earlier draft — "it's light" — was wrong: the Aug restyle made it a full-bleed dark navy column, and the metadata is accurate.) Reworked v1.2.6: one tag style, ink company line, the fixed cool-spectrum gradient kept as the documented accent form (§3). |
 | **Creative** | 2 | **1** | **0** | 2 | **1** | 2 | 2 | **rework** | S=0 — off-menu heading treatment (design-system §4/§9); C — 24 hexes, multicolour chips + rainbow bar; E — `overflow-wrap:anywhere` on name + `2.7rem` = worst §7.1 case |
@@ -65,9 +65,9 @@ E = content edge-cases (§7.1-weighted) · A = ATS parity · X = export (provisi
 | | Count | Templates |
 |---|---|---|
 | **keep** (light polish only) | 6 | Modern Orange, Modern Timeline, Navy Professional, Classic Professional, Minimalist, Modern Professional |
-| **polish** | 2 | Portfolio Hybrid, Colorful Compact |
-| **rework** | 7 | Developer, Creative, Executive, Graduate, Compact, Quadrant, Tech Executive |
-| **merge** | 1 | Classic → fold into Classic Professional (add left/centre alignment option) |
+| **polish** | 2 | Portfolio Hybrid, Colorful Compact — both done (v1.2.11, v1.2.12) |
+| **rework** | 7 | Developer, Creative, Executive, Graduate, Compact, Quadrant, Tech Executive — all done (v1.2.3–1.2.9) |
+| **merge** | 1 | Classic → folded into Classic Professional (v1.2.10) |
 
 **Net after A-fix:** 15 template variants (Classic retired, all others kept
 and brought to bar). A.3 then adds 3 new ones (editorial one-column,

@@ -7,9 +7,21 @@
 
    Dark full-bleed header framed top and bottom by a plain rainbow gradient
    bar, over a tight two-column body: a wide white main column and a narrow
-   gray-tinted sidebar. Every section header cycles through a fixed
-   six-color rainbow (pink/orange/blue/green/teal/purple) instead of one
-   template-wide accent — see the six SECTION_COLORS in the .jsx file.
+   gray-tinted sidebar.
+
+   Design-system alignment (docs/template-design-system.md):
+   - §2 type ramp: sizes come from `--tpl-*` (the root carries
+     `tpl-density-compact`); this file sets weight/case/tracking/colour only.
+   - §3 colour: this is the *one* template under the capped multicolour
+     exception — a fixed six-swatch named palette (pink / orange / green /
+     teal / blue / purple), one hue assigned per section, in order. Every
+     decorative mark inside a section (dot, heading label, date, tag, skill
+     pill, level badge) uses that section's one colour — never per item.
+     The 7th/8th hues (`--cc-yellow`, `--cc-charcoal`) were retired v1.2.12:
+     the yellow dot failed on white at the size it was drawn and its text
+     pair read brown.
+   - §4 heading treatment: `left-tick` (dot form) — a small solid swatch dot
+     left of the tracked uppercase label.
 
    No CSS `filter: blur()` anywhere (a blurred decorative element hung
    html2canvas during PDF export in the Developer template — see that fix).
@@ -24,8 +36,6 @@
   --cc-pink-text: #be185d;
   --cc-orange: #f97316;
   --cc-orange-text: #c2410c;
-  --cc-yellow: #eab308;
-  --cc-yellow-text: #854d0e;
   --cc-green: #22c55e;
   --cc-green-text: #15803d;
   --cc-teal: #14b8a6;
@@ -34,7 +44,6 @@
   --cc-blue-text: #1d4ed8;
   --cc-purple: #a855f7;
   --cc-purple-text: #7e22ce;
-  --cc-charcoal: #27272a;
 
   --cc-dark: #16132a;
   --cc-ink: #18181b;
@@ -62,7 +71,8 @@
   box-shadow: none !important;
 }
 
-/* ── Rainbow bars — real linear-gradient, not repeating (see file header) ── */
+/* ── Rainbow bars — real linear-gradient, not repeating (see file header).
+   Exactly the six named palette swatches, in order. ── */
 
 .colorful-compact-showcase__rainbow {
   position: relative;
@@ -72,10 +82,9 @@
     90deg,
     var(--cc-pink) 0%,
     var(--cc-orange) 20%,
-    var(--cc-yellow) 40%,
-    var(--cc-green) 55%,
-    var(--cc-teal) 70%,
-    var(--cc-blue) 85%,
+    var(--cc-green) 40%,
+    var(--cc-teal) 60%,
+    var(--cc-blue) 80%,
     var(--cc-purple) 100%
   );
 }
@@ -95,7 +104,7 @@
 }
 
 .colorful-compact-showcase__kicker {
-  font-size: 0.65rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -104,10 +113,10 @@
 
 .colorful-compact-showcase__name {
   margin-top: 0.4rem;
-  font-size: 2.1rem;
+  font-size: var(--tpl-name-size);
+  line-height: var(--tpl-name-lh);
   font-weight: 800;
   letter-spacing: -0.01em;
-  line-height: 1.1;
   overflow-wrap: break-word;
 }
 
@@ -121,7 +130,8 @@
 
 .colorful-compact-showcase__role {
   margin-top: 0.35rem;
-  font-size: 0.86rem;
+  font-size: var(--tpl-title-size);
+  line-height: 1.3;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.65);
 }
@@ -132,7 +142,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.9rem;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   color: rgba(255, 255, 255, 0.8);
 }
 
@@ -149,9 +159,7 @@
   flex-shrink: 0;
 }
 
-.colorful-compact-showcase__contact-dot--pink { background: var(--cc-pink); }
-.colorful-compact-showcase__contact-dot--teal { background: var(--cc-teal); }
-.colorful-compact-showcase__contact-dot--purple { background: var(--cc-purple); }
+.colorful-compact-showcase__contact-dot--orange { background: var(--cc-orange); }
 
 .colorful-compact-showcase__photo-ring {
   flex-shrink: 0;
@@ -212,10 +220,10 @@
 }
 
 .colorful-compact-showcase__section-title {
-  font-size: 0.72rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
 }
 
 .colorful-compact-showcase__section-dot--pink,
@@ -244,7 +252,7 @@
 
 .colorful-compact-showcase__empty {
   margin-top: 0.75rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   color: var(--cc-muted);
 }
 
@@ -252,7 +260,7 @@
 
 .colorful-compact-showcase__summary {
   margin-top: 0.65rem;
-  font-size: 0.85rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.65;
   color: #3f3f46;
   white-space: pre-line;
@@ -289,25 +297,28 @@
 }
 
 .colorful-compact-showcase__exp-role {
-  font-size: 0.9rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--cc-ink);
 }
 
 .colorful-compact-showcase__exp-meta {
   margin-top: 0.1rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   color: var(--cc-muted);
 }
 
 .colorful-compact-showcase__exp-date {
   flex-shrink: 0;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
 }
 
+.colorful-compact-showcase__exp-date--pink { color: var(--cc-pink-text); }
 .colorful-compact-showcase__exp-date--orange { color: var(--cc-orange-text); }
+.colorful-compact-showcase__exp-date--green { color: var(--cc-green-text); }
 .colorful-compact-showcase__exp-date--teal { color: var(--cc-teal-text); }
+.colorful-compact-showcase__exp-date--blue { color: var(--cc-blue-text); }
 .colorful-compact-showcase__exp-date--purple { color: var(--cc-purple-text); }
 
 .colorful-compact-showcase__bullets {
@@ -316,7 +327,7 @@
 }
 
 .colorful-compact-showcase__bullets li {
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.55;
   color: #3f3f46;
 }
@@ -325,7 +336,7 @@
   color: var(--cc-muted);
 }
 
-/* ── Projects — bordered white cards, colorful tag pills ── */
+/* ── Projects — bordered white cards, section-coloured tag pills ── */
 
 .colorful-compact-showcase__project-grid {
   margin-top: 0.85rem;
@@ -342,14 +353,14 @@
 }
 
 .colorful-compact-showcase__project-name {
-  font-size: 0.88rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--cc-ink);
 }
 
 .colorful-compact-showcase__project-desc {
   margin-top: 0.3rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.55;
   color: #3f3f46;
   white-space: pre-line;
@@ -365,17 +376,18 @@
 .colorful-compact-showcase__tag {
   border-radius: 9999px;
   padding: 0.2rem 0.6rem;
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
 }
 
+.colorful-compact-showcase__tag--pink { background: #fce7f3; color: var(--cc-pink-text); }
+.colorful-compact-showcase__tag--orange { background: #ffedd5; color: var(--cc-orange-text); }
+.colorful-compact-showcase__tag--green { background: #dcfce7; color: var(--cc-green-text); }
+.colorful-compact-showcase__tag--teal { background: #ccfbf1; color: var(--cc-teal-text); }
 .colorful-compact-showcase__tag--blue { background: #dbeafe; color: var(--cc-blue-text); }
 .colorful-compact-showcase__tag--purple { background: #f3e8ff; color: var(--cc-purple-text); }
-.colorful-compact-showcase__tag--green { background: #dcfce7; color: var(--cc-green-text); }
-.colorful-compact-showcase__tag--pink { background: #fce7f3; color: var(--cc-pink-text); }
-.colorful-compact-showcase__tag--teal { background: #ccfbf1; color: var(--cc-teal-text); }
 
-/* ── Sidebar: Skills — solid colorful pills, flat wrap ── */
+/* ── Sidebar: Skills — solid section-coloured pills, flat wrap ── */
 
 .colorful-compact-showcase__skill-row {
   margin-top: 0.75rem;
@@ -389,18 +401,16 @@
   align-items: center;
   border-radius: 8px;
   padding: 0.3rem 0.65rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
 }
 
 .colorful-compact-showcase__skill-pill--pink { background: var(--cc-pink); color: #fff; }
 .colorful-compact-showcase__skill-pill--orange { background: var(--cc-orange); color: #fff; }
-.colorful-compact-showcase__skill-pill--yellow { background: var(--cc-yellow); color: #422006; }
 .colorful-compact-showcase__skill-pill--green { background: var(--cc-green); color: #052e12; }
 .colorful-compact-showcase__skill-pill--teal { background: var(--cc-teal); color: #fff; }
 .colorful-compact-showcase__skill-pill--blue { background: var(--cc-blue); color: #fff; }
 .colorful-compact-showcase__skill-pill--purple { background: var(--cc-purple); color: #fff; }
-.colorful-compact-showcase__skill-pill--charcoal { background: var(--cc-charcoal); color: #fff; }
 
 /* ── Sidebar: plain stacked lists (Education, Links, Extras) ── */
 
@@ -412,20 +422,20 @@
 }
 
 .colorful-compact-showcase__plain-title {
-  font-size: 0.82rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--cc-ink);
 }
 
 .colorful-compact-showcase__plain-meta {
   margin-top: 0.15rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   color: var(--cc-muted);
 }
 
 .colorful-compact-showcase__link-item {
   overflow: hidden;
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: #3f3f46;
   text-overflow: ellipsis;
@@ -433,12 +443,12 @@
 }
 
 .colorful-compact-showcase__extra-line {
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.55;
   color: #3f3f46;
 }
 
-/* ── Sidebar: Languages — name + colored level badge ── */
+/* ── Sidebar: Languages — name + section-coloured level badge ── */
 
 .colorful-compact-showcase__lang-list {
   margin-top: 0.75rem;
@@ -455,7 +465,7 @@
 }
 
 .colorful-compact-showcase__lang-name {
-  font-size: 0.82rem;
+  font-size: var(--tpl-body-size);
   font-weight: 600;
   color: var(--cc-ink);
 }
@@ -464,13 +474,16 @@
   flex-shrink: 0;
   border-radius: 9999px;
   padding: 0.15rem 0.55rem;
-  font-size: 0.66rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
 }
 
 .colorful-compact-showcase__lang-badge--pink { background: #fce7f3; color: var(--cc-pink-text); }
-.colorful-compact-showcase__lang-badge--blue { background: #dbeafe; color: var(--cc-blue-text); }
+.colorful-compact-showcase__lang-badge--orange { background: #ffedd5; color: var(--cc-orange-text); }
 .colorful-compact-showcase__lang-badge--green { background: #dcfce7; color: var(--cc-green-text); }
+.colorful-compact-showcase__lang-badge--teal { background: #ccfbf1; color: var(--cc-teal-text); }
+.colorful-compact-showcase__lang-badge--blue { background: #dbeafe; color: var(--cc-blue-text); }
+.colorful-compact-showcase__lang-badge--purple { background: #f3e8ff; color: var(--cc-purple-text); }
 
 /* ── Animations ── */
 
@@ -498,10 +511,6 @@
 
   .colorful-compact-showcase__sidebar {
     padding: 1.5rem 1.25rem 1.75rem;
-  }
-
-  .colorful-compact-showcase__name {
-    font-size: 1.7rem;
   }
 
   .colorful-compact-showcase__photo {

@@ -187,15 +187,24 @@ Rules for the exception:
 - Swatches are assigned to **sections**, in the order above, and a section
   keeps its swatch. Never per skill chip, per project card, or per bullet —
   "each item a random hue" is exactly what this exception does not license.
+  Everything decorative inside a section (dot, heading label, date, tag,
+  skill pill, level badge) takes that section's one colour.
 - Within a section, the marker hex is for the dot/rule/fill and the text hex
   is for the heading label. Body copy in a colorful section is still ink.
-- The palette does not grow. The seventh hue currently in
-  `colorfulCompact.css` (`--cc-yellow: #eab308` / `--cc-yellow-text:
-  #854d0e`) is **retired**: the dot is the only one in the set that fails
-  against a white card at the size it is drawn, and its text pair reads
-  brown rather than yellow.
+- The palette does not grow. The seventh and eighth hues (`--cc-yellow:
+  #eab308` / `--cc-yellow-text: #854d0e`, and `--cc-charcoal`) were
+  **retired v1.2.12**: the yellow dot was the only one in the set that fails
+  against a white card at the size it is drawn, and its text pair read brown
+  rather than yellow.
 - Every other template, including the ink-only ones, follows §3's main rule
   with no exceptions.
+
+*Realized v1.2.12:* the exception's rules above are now met exactly — the
+per-item colour cycles (`SKILL_COLORS`, `TAG_COLORS`, `EXP_DATE_COLORS`,
+`LANG_LEVEL_COLORS`, `CONTACT_DOT_COLORS`) collapsed to the section colour,
+yellow/charcoal removed, and the template adopted the `compact` type ramp.
+The dark header's contact dots use one fixed swatch (orange, matching the
+two-tone name's accent half).
 
 ---
 
