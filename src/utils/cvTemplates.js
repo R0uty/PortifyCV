@@ -128,9 +128,9 @@ const templateMap = {
   },
   graduate: {
     id: 'graduate',
-    accent: null,
+    accent: { default: '#4f46e5', swatchSet: 'coolIndigo' },
     label: 'Graduate',
-    description: 'Bright indigo layout leading with education, academic projects, and internships — a strong fit when those are the strongest part of your story.',
+    description: 'An education-first layout that leads with your degree, academic projects, and internships, with a customizable accent color — a strong fit when those are the strongest part of your story.',
     variant: 'graduate',
     layout: 'split',
     primarySections: ['about', 'education', 'projects', 'internships', 'experience', 'publications', 'volunteering'],
@@ -368,7 +368,7 @@ const templateLocalization = {
     },
     graduate: {
       label: 'Tutkinto',
-      description: 'Kirkas indigoasettelu nostaa koulutuksen, akateemiset projektit ja harjoittelut etusijalle — sopii, kun ne ovat tarinasi vahvin osa.',
+      description: 'Koulutuksen etusijalle nostava asettelu, joka aloittaa tutkinnostasi, akateemisista projekteista ja harjoitteluista — muokattavalla aksenttivärillä. Sopii, kun ne ovat tarinasi vahvin osa.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Koulutus', 'Taidot'],
     },

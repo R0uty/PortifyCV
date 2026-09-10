@@ -28,21 +28,8 @@ import { useMemo } from 'react'
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import { parseSkillCategories, formatDateRange, formatLinkDisplayValue } from './shared'
+import { accentSoftFill } from '../../utils/templateAccents'
 import { CREATIVE_DEFAULT_ACCENT_COLOR } from './creative'
-
-// Soft fill derived from the chosen accent — computed here, not in CSS, so it
-// tracks a user-picked swatch and stays a plain rgba() the PDF export
-// pipeline can rasterize (no color-mix()/oklch()). Falls back to the default
-// coral if the accent string isn't a 3/6-digit hex.
-function hexToRgba(hex, alpha) {
-  const match = typeof hex === 'string' && hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i)
-  const raw = match ? match[1] : CREATIVE_DEFAULT_ACCENT_COLOR.slice(1)
-  const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw
-  const r = parseInt(full.slice(0, 2), 16)
-  const g = parseInt(full.slice(2, 4), 16)
-  const b = parseInt(full.slice(4, 6), 16)
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
-}
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -388,7 +375,7 @@ export default function CreativeShowcase({
       className="creative-showcase preview-document--designer tpl-density-roomy"
       style={{
         '--tpl-accent': accentColor,
-        '--tpl-accent-soft': hexToRgba(accentColor, 0.12),
+        '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, CREATIVE_DEFAULT_ACCENT_COLOR),
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),
       }}
     >

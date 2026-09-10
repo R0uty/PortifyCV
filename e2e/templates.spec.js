@@ -89,6 +89,25 @@ test.describe('Template accent color', () => {
     // the soft fill is derived in JS from the chosen accent, not a static hue
     expect(accent.soft).toBe('rgba(31, 122, 108, 0.12)')
   })
+
+  test('choosing a swatch recolors the Graduate preview', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await selectTemplate(page, 'Graduate')
+
+    await page.getByRole('button', { name: 'Settings' }).first().click()
+    // 'Emerald' is the 5th swatch in the 'coolIndigo' set (#059669)
+    await page.getByRole('button', { name: 'Emerald', exact: true }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
+
+    const root = page.locator('.graduate-showcase').first()
+    const accent = await root.evaluate((el) => ({
+      accent: el.style.getPropertyValue('--tpl-accent').trim(),
+      soft: el.style.getPropertyValue('--tpl-accent-soft').trim(),
+    }))
+    expect(accent.accent.toLowerCase()).toBe('#059669')
+    expect(accent.soft).toBe('rgba(5, 150, 105, 0.12)')
+  })
 })
 
 test.describe('Link URL formatting', () => {

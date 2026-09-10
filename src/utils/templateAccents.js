@@ -26,6 +26,16 @@ export const ACCENT_SWATCH_SETS = {
     { color: '#7c3aed', label: { en: 'Violet', fi: 'Violetti' } },
     { color: '#1f7a6c', label: { en: 'Teal', fi: 'Sinivihreä' } },
   ],
+  // Cool-indigo set — indigo first/default. Graduate's range: keeps the
+  // established indigo identity, with cool alternatives that don't warm it up.
+  coolIndigo: [
+    { color: '#4f46e5', label: { en: 'Indigo', fi: 'Indigo' } },
+    { color: '#6d28d9', label: { en: 'Violet', fi: 'Violetti' } },
+    { color: '#2563eb', label: { en: 'Blue', fi: 'Sininen' } },
+    { color: '#0d9488', label: { en: 'Teal', fi: 'Sinivihreä' } },
+    { color: '#059669', label: { en: 'Emerald', fi: 'Smaragdi' } },
+    { color: '#be123c', label: { en: 'Rose', fi: 'Ruusu' } },
+  ],
   // Cool set — violet first/default, restrained subtle range.
   // (Originally the Modern Timeline swatches.)
   cool: [
@@ -40,4 +50,18 @@ export const ACCENT_SWATCH_SETS = {
 
 export function getAccentSwatches(setName) {
   return ACCENT_SWATCH_SETS[setName] ?? ACCENT_SWATCH_SETS.cool
+}
+
+// A soft translucent fill derived from a chosen accent hex — for chip/badge
+// backgrounds that must track a user-picked swatch. Returns a plain `rgba()`
+// (which the html2canvas PDF export can rasterize, unlike `color-mix()`).
+// Falls back to `fallbackHex` if `hex` is not a 3/6-digit hex string.
+export function accentSoftFill(hex, alpha, fallbackHex) {
+  const match = typeof hex === 'string' && hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i)
+  const raw = match ? match[1] : String(fallbackHex ?? '#000000').replace('#', '')
+  const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw
+  const r = parseInt(full.slice(0, 2), 16)
+  const g = parseInt(full.slice(2, 4), 16)
+  const b = parseInt(full.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }

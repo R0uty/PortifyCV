@@ -1,6 +1,15 @@
-// Graduate template config — education-focused for entry-level candidates.
-// Indigo accent color. Education section listed first. Traditional timeline experience.
-// Indigo-tinted header, rounded section cards, flat skills, card-style links.
+// Graduate template config — education-first layout. The non-ATS visual is
+// GraduateShowcase.jsx (sections flow on the page, one indigo accent read
+// from --tpl-accent, a header tint band, education entries with a left rule,
+// an internships timeline). This config is only consumed by the shared flat
+// renderer, which Graduate falls through to in ATS-friendly mode (fully
+// monochrome there — the indigo-* classes below only matter if the flat path
+// is ever taught to render Graduate in non-ATS mode, which it never does).
+
+// Registry default accent — must match `accent.default` for `graduate` in
+// cvTemplates.js exactly (lowercase hex). See docs/template-design-system.md §6.
+export const GRADUATE_DEFAULT_ACCENT_COLOR = '#4f46e5'
+
 export default {
   // Outer document border — adapts to dark/light mode
   preview: (isDark) => isDark ? 'border-gray-800 bg-black shadow-black/30' : 'border-black/10 bg-white shadow-black/10',

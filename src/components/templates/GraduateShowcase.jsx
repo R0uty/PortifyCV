@@ -5,18 +5,20 @@
 // in presentation. ATS mode (the app's existing global toggle) bypasses this
 // component entirely and falls back to the shared flat renderer (graduate.js).
 //
-// Design language: bright, optimistic, education-first. Indigo/blue/sky
-// palette with soft rounded indigo-tinted section cards (unlike Executive/
-// Timeline's "no heavy containers" austerity — Graduate leans into a
-// friendlier, welcoming surface per the brief). Education renders first and
-// biggest, since it's the strongest asset for a candidate with limited work
-// history. Internships get a small dedicated timeline treatment; every other
-// section is a plain card list.
+// Design language (reworked 2026-09-10 to docs/template-design-system.md):
+// education-first, welcoming, but no longer a "SaaS card grid" — sections
+// flow directly on the page (only a light header tint band remains, the §3
+// one-tint region), with the §4 icon-badge heading treatment. One indigo
+// accent read from --tpl-accent (user-customizable), replacing the old
+// indigo/blue/sky/purple/green palette. Education renders first, with a
+// left accent rule; internships keep their small timeline treatment.
 
 import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import { accentSoftFill } from '../../utils/templateAccents'
+import { GRADUATE_DEFAULT_ACCENT_COLOR } from './graduate'
 import {
   devIcons,
   contactIcons,
@@ -50,10 +52,10 @@ function SectionHead({ icon, title }) {
   )
 }
 
-function Section({ id, placement, icon, title, tone, children }) {
+function Section({ id, placement, icon, title, children }) {
   return (
     <section
-      className={`graduate-showcase__section${tone === 'plain' ? ' graduate-showcase__section--plain' : ''}`}
+      className="graduate-showcase__section"
       data-export-section={id}
       data-export-placement={placement}
     >
@@ -63,7 +65,15 @@ function Section({ id, placement, icon, title, tone, children }) {
   )
 }
 
-export default function GraduateShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
+export default function GraduateShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  showcaseConfig = {},
+  headingColor = null,
+  accentColor = GRADUATE_DEFAULT_ACCENT_COLOR,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -205,13 +215,25 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
                     {item.githubUrl || item.demoUrl ? (
                       <div className="graduate-showcase__link-row">
                         {item.githubUrl ? (
-                          <a href={getSafeHref(item.githubUrl)} target="_blank" rel="noreferrer" className="graduate-showcase__link-btn">
-                            GitHub
+                          <a
+                            href={getSafeHref(item.githubUrl)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="graduate-showcase__project-link"
+                            title={item.githubUrl}
+                          >
+                            {formatLinkDisplayValue(item.githubUrl)}
                           </a>
                         ) : null}
                         {item.demoUrl ? (
-                          <a href={getSafeHref(item.demoUrl)} target="_blank" rel="noreferrer" className="graduate-showcase__link-btn graduate-showcase__link-btn--primary">
-                            {isFinnish ? 'Demo' : 'Live Demo'}
+                          <a
+                            href={getSafeHref(item.demoUrl)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="graduate-showcase__project-link"
+                            title={item.demoUrl}
+                          >
+                            {formatLinkDisplayValue(item.demoUrl)}
                           </a>
                         ) : null}
                       </div>
@@ -373,7 +395,7 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
   const renderSidebarSection = (key) => {
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side" icon="skills" title={copy.skills} tone="plain">
+        <Section key={key} id="skills" placement="side" icon="skills" title={copy.skills}>
           {skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="graduate-showcase__skill-group">
@@ -396,7 +418,7 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" icon="languages" title={copy.languages} tone="plain">
+        <Section key={key} id="languages" placement="side" icon="languages" title={copy.languages}>
           <div className="graduate-showcase__list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -417,7 +439,7 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" placement="side" icon="certificates" title={copy.certificates} tone="plain">
+        <Section key={key} id="certificates" placement="side" icon="certificates" title={copy.certificates}>
           <div className="graduate-showcase__list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -452,7 +474,7 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" icon="links" title={copy.links} tone="plain">
+        <Section key={key} id="links" placement="side" icon="links" title={copy.links}>
           <div className="graduate-showcase__link-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -476,7 +498,7 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'achievements') {
       return (
-        <Section key={key} id="achievements" placement="side" icon="achievements" title={copy.achievements} tone="plain">
+        <Section key={key} id="achievements" placement="side" icon="achievements" title={copy.achievements}>
           <div className="graduate-showcase__list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
@@ -500,7 +522,7 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'memberships') {
       return (
-        <Section key={key} id="memberships" placement="side" icon="memberships" title={copy.memberships} tone="plain">
+        <Section key={key} id="memberships" placement="side" icon="memberships" title={copy.memberships}>
           <div className="graduate-showcase__list">
             {snapshot.memberships.length > 0 ? (
               snapshot.memberships.map((item, index) => (
@@ -525,7 +547,7 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'interests') {
       return (
-        <Section key={key} id="interests" placement="side" icon="interests" title={copy.interests} tone="plain">
+        <Section key={key} id="interests" placement="side" icon="interests" title={copy.interests}>
           <div className="graduate-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
@@ -555,8 +577,12 @@ export default function GraduateShowcase({ formData, locale = 'en', previewRef, 
       // GraduateShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className="graduate-showcase preview-document--designer"
-      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
+      className="graduate-showcase preview-document--designer tpl-density-standard"
+      style={{
+        '--tpl-accent': accentColor,
+        '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, GRADUATE_DEFAULT_ACCENT_COLOR),
+        ...(headingColor ? { '--cv-heading-color': headingColor } : null),
+      }}
     >
       <header data-export-header="true" className="graduate-showcase__header">
         <div className="min-w-0">

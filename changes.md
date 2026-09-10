@@ -4,6 +4,35 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Graduate template rework (roadmap A-fix batch) — 2026-09-10
+
+Released as v1.2.4. Second of the A-fix rework batch. Graduate scored
+**rework** — colour discipline 1, structural clarity 1.
+
+- **De-boxed (S).** The "SaaS card grid" is gone: every main section was an
+  indigo-tinted rounded box and every sidebar section a bordered box, with
+  entry cards nested inside. Sections now flow directly on the page with the
+  §4 `icon-badge` heading over a hairline rule. Only education entries keep a
+  visual treatment (a left accent rule), and internships keep their timeline.
+  The header tint band is the single §3 tint region. Project "GitHub" /
+  "Live Demo" buttons become plain accent text links (scheme-stripped URLs).
+- **One ink + one accent + header tint (C).** Ink `#1e293b` (+ one muted
+  step); one indigo accent from `--tpl-accent` on the kicker, role line,
+  section badges, education rule, timeline, bullets, dates, links, and the
+  "currently studying" badge (recoloured off green). `--gr-blue/-sky/-purple/
+  -green` deleted — distinct hexes in `graduate.css` drop from ~11 to 5.
+- **Accent is user-customizable** (§6 3-step): `--tpl-accent` from the
+  `accentColor` prop, JS `--tpl-accent-soft`, a new `coolIndigo` swatch set
+  (indigo default), `GRADUATE_DEFAULT_ACCENT_COLOR` in `graduate.js`.
+- **Type ramp.** `tpl-density-standard` + `--tpl-*`; the name drops from
+  `2.875rem` (2nd-largest in the app) to the ramp's `1.95rem`, and is now
+  ink rather than indigo.
+
+Also extracted the accent→rgba helper Creative introduced into
+`accentSoftFill()` in `templateAccents.js` (now shared by both). New
+Playwright spec for the Graduate accent swatch; full suite 35 passed.
+Verified in-app and in a rendered-back 2-page PDF export.
+
 ## Creative template rework (roadmap A-fix batch) — 2026-09-10
 
 Released as v1.2.3. First of the seven-template A-fix rework batch
