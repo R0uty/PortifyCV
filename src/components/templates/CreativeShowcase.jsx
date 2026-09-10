@@ -5,78 +5,81 @@
 // presentation. ATS mode (the app's existing global toggle) bypasses this
 // component entirely and falls back to the shared flat renderer (creative.js).
 //
-// Restyled 2026-08-23 against docs/creative.png (a hand-mocked reference
-// screenshot, not markup like the other templates' docs/*.html references —
-// colors/spacing below are eyeballed off that image, not lifted from source).
-// Full-width editorial header (name/role/tagline/contact + photo) instead of
-// a full-height identity sidebar, a multi-color striped hairline under it,
-// and a five-color accent system (coral / ink / teal / violet / gold) used
-// for the two-tone name, alternating card left-borders, and pill fills —
-// replacing the old single-accent design entirely. Section headers lost
-// their icon badge (the reference has none) and their title+subtitle now
-// sit inline on one baseline rather than stacked. Only individual entries
-// (experience/project cards) get a bordered card treatment; section
-// containers themselves (About, Toolkit, School, ...) sit directly on the
-// page/sidebar background with no card of their own — a Portfolio-Hybrid-
-// style change from the old "every section is a white card" rule.
+// Reworked 2026-09-10 to the house design system (docs/template-design-system.md):
+//   - Section headings moved onto the §4 `numbered` treatment (a two-digit
+//     ordinal in the accent, running once through the whole document, main
+//     column then sidebar) — replacing the previous off-menu bold
+//     sentence-case title + italic subtitle, which scored 0 on structural
+//     clarity.
+//   - Colour collapsed to §3: one ink (+ two muted steps), one accent read
+//     from `--tpl-accent` (with a JS-computed soft fill in `--tpl-accent-soft`),
+//     and the cream page / tan sidebar as the single neutral tint. The old
+//     five-colour accent system (coral / teal / violet / gold + five pastel
+//     tag tints + a four-colour stripe + alternating card borders) is gone.
+//   - Type sizes read the shared `--tpl-*` ramp via the `tpl-density-roomy`
+//     class on the root; the name is no longer two-tone.
+//   - Accent is user-customizable via the Settings swatch (`accentColor`
+//     prop, warmCoral swatch set — see cvTemplates.js / templateAccents.js).
+// Structure (right-rail + main), the decorative export-ignored blobs, the
+// bordered entry cards and the section order are unchanged.
 
 import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import { parseSkillCategories, formatDateRange, formatLinkDisplayValue } from './shared'
+import { CREATIVE_DEFAULT_ACCENT_COLOR } from './creative'
 
-// Cycled by index for experience-card left borders (five-tint variety).
-const CARD_ACCENTS = ['coral', 'teal', 'violet', 'gold']
-
-// Cycled by index for solid-fill pills (Toolkit, coreStrengths badges) —
-// exactly the three-color rotation the reference mockup uses for its
-// Toolkit pills (coral / ink / gold), not the five-tint card-border set.
-const PILL_CYCLE = ['coral', 'ink', 'gold']
-
-// Cycled by index for project tag chips — a softer/lighter five-tint set
-// than CARD_ACCENTS, matching the reference's pastel project tags versus
-// its solid-fill toolkit pills.
-const TAG_CYCLE = ['peach', 'mint', 'gold', 'lavender', 'pink']
-
-// The header's striped hairline is built from real elements, not a CSS
-// `repeating-linear-gradient` — html2canvas (the PDF export renderer)
-// silently drops that gradient function entirely (transparent, not even a
-// solid fallback), confirmed against a real exported PDF: the stripe shows
-// correctly in the live preview but is simply missing from the page. 40
-// segments comfortably tiles the widest card width the app renders at.
-const STRIPE_COLORS = ['coral', 'teal', 'gold', 'violet']
-const STRIPE_SEGMENTS = Array.from({ length: 40 }, (_, index) => STRIPE_COLORS[index % STRIPE_COLORS.length])
+// Soft fill derived from the chosen accent — computed here, not in CSS, so it
+// tracks a user-picked swatch and stays a plain rgba() the PDF export
+// pipeline can rasterize (no color-mix()/oklch()). Falls back to the default
+// coral if the accent string isn't a 3/6-digit hex.
+function hexToRgba(hex, alpha) {
+  const match = typeof hex === 'string' && hex.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i)
+  const raw = match ? match[1] : CREATIVE_DEFAULT_ACCENT_COLOR.slice(1)
+  const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw
+  const r = parseInt(full.slice(0, 2), 16)
+  const g = parseInt(full.slice(2, 4), 16)
+  const b = parseInt(full.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
 }
 
-function SectionHead({ title, subtitle }) {
+function SectionHead({ number, title }) {
   return (
     <div className="creative-showcase__section-head">
+      <span className="creative-showcase__section-num" aria-hidden="true">
+        {String(number).padStart(2, '0')}
+      </span>
       <h2 className="creative-showcase__section-title">{title}</h2>
-      {subtitle ? <p className="creative-showcase__section-subtitle">{subtitle}</p> : null}
     </div>
   )
 }
 
-function Section({ id, placement, title, subtitle, children }) {
+function Section({ id, placement, number, title, children }) {
   return (
     <section className="creative-showcase__section" data-export-section={id} data-export-placement={placement}>
-      <SectionHead title={title} subtitle={subtitle} />
+      <SectionHead number={number} title={title} />
       {children}
     </section>
   )
 }
 
-export default function CreativeShowcase({ formData, locale = 'en', previewRef, templateConfig, headingColor = null }) {
+export default function CreativeShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  headingColor = null,
+  accentColor = CREATIVE_DEFAULT_ACCENT_COLOR,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
   const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const [nameLead, ...nameRestParts] = fullName.split(' ')
-  const nameAccent = nameRestParts.join(' ')
   const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Creative Problem Solver')
   const tagline = snapshot.tagline
   const photo = snapshot.photo
@@ -96,8 +99,8 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
   ].filter(([, value]) => value)
 
   const linkEntries = Object.entries(snapshot.links)
-  // Flattened, not grouped by category — the reference's "Toolkit" is one
-  // flat pill row with no category labels above it.
+  // Flattened, not grouped by category — the "Toolkit" pill row has no
+  // category labels above it.
   const flatSkills = useMemo(
     () => parseSkillCategories(snapshot.skills, isFinnish).flatMap((cat) => cat.items),
     [snapshot.skills, isFinnish],
@@ -117,33 +120,36 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
   const mainSectionKeys = orderedSections.filter((key) => primarySet.has(key) && sectionVisibility[key])
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
 
+  // One running ordinal for the `numbered` heading treatment — main column
+  // first, then sidebar, so it reads as a single editorial index of the
+  // whole document rather than restarting per column.
+  const numberedKeys = [...mainSectionKeys, ...sidebarSectionKeys]
+  const sectionNumber = (key) => numberedKeys.indexOf(key) + 1
+
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    about: { title: isFinnish ? 'Hei' : 'Hello', subtitle: isFinnish ? 'vähän minusta' : 'a little about me' },
-    experience: { title: isFinnish ? 'Työ' : 'Work', subtitle: isFinnish ? 'valitut roolit' : 'selected roles' },
-    projects: { title: isFinnish ? 'Projektit' : 'Projects', subtitle: isFinnish ? 'esittelyssä' : 'featured' },
-    education: { title: isFinnish ? 'Koulutus' : 'School', subtitle: '' },
-    skills: { title: isFinnish ? 'Työkalut' : 'Toolkit', subtitle: '' },
-    certificates: { title: isFinnish ? 'Sertifikaatit' : 'Certificates', subtitle: '' },
-    links: { title: isFinnish ? 'Löydä minut' : 'Find me', subtitle: '' },
-    languages: { title: isFinnish ? 'Kielet' : 'Languages', subtitle: '' },
-    interests: { title: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests', subtitle: '' },
+    about: isFinnish ? 'Hei' : 'Hello',
+    experience: isFinnish ? 'Työ' : 'Work',
+    projects: isFinnish ? 'Projektit' : 'Projects',
+    education: isFinnish ? 'Koulutus' : 'School',
+    skills: isFinnish ? 'Työkalut' : 'Toolkit',
+    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
+    links: isFinnish ? 'Löydä minut' : 'Find me',
+    languages: isFinnish ? 'Kielet' : 'Languages',
+    interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
   }
 
   const renderMainSection = (key) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" placement="main" title={copy.about.title} subtitle={copy.about.subtitle}>
+        <Section key={key} id="about" placement="main" number={sectionNumber(key)} title={copy.about}>
           <p className="creative-showcase__intro">{about}</p>
           {snapshot.coreStrengths.length > 0 ? (
             <div className="creative-showcase__pill-row">
               {snapshot.coreStrengths.slice(0, 3).map((item, index) => (
                 item.title ? (
-                  <span
-                    key={`${item.title}-${index}`}
-                    className={`creative-showcase__pill creative-showcase__pill--${PILL_CYCLE[index % PILL_CYCLE.length]}`}
-                  >
+                  <span key={`${item.title}-${index}`} className="creative-showcase__pill">
                     {item.title}
                   </span>
                 ) : null
@@ -156,18 +162,17 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main" title={copy.experience.title} subtitle={copy.experience.subtitle}>
+        <Section key={key} id="experience" placement="main" number={sectionNumber(key)} title={copy.experience}>
           <div className="creative-showcase__exp-list">
             {snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => {
                 const dateRange = formatDateRange(item.startDate, item.endDate)
                 const bullets = item.description ? splitToBullets(item.description) : []
-                const accent = CARD_ACCENTS[index % CARD_ACCENTS.length]
 
                 return (
                   <div
                     key={`${item.role}-${item.company}-${index}`}
-                    className={`creative-showcase__exp-card creative-showcase__exp-card--${accent}`}
+                    className="creative-showcase__exp-card"
                     data-export-card="true"
                   >
                     <div className="creative-showcase__exp-row">
@@ -203,7 +208,7 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="main" title={copy.projects.title} subtitle={copy.projects.subtitle}>
+        <Section key={key} id="projects" placement="main" number={sectionNumber(key)} title={copy.projects}>
           <div className="creative-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -217,13 +222,8 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
                     {item.description ? <p className="creative-showcase__project-desc">{item.description}</p> : null}
                     {tags.length > 0 ? (
                       <div className="creative-showcase__tag-row">
-                        {tags.map((tag, tagIndex) => (
-                          <span
-                            key={tag}
-                            className={`creative-showcase__tag creative-showcase__tag--${TAG_CYCLE[tagIndex % TAG_CYCLE.length]}`}
-                          >
-                            {tag}
-                          </span>
+                        {tags.map((tag) => (
+                          <span key={tag} className="creative-showcase__tag">{tag}</span>
                         ))}
                       </div>
                     ) : null}
@@ -246,15 +246,11 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
   const renderSidebarSection = (key) => {
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side" title={copy.skills.title}>
+        <Section key={key} id="skills" placement="side" number={sectionNumber(key)} title={copy.skills}>
           {flatSkills.length > 0 ? (
             <div className="creative-showcase__pill-row">
-              {flatSkills.map((skill, index) => (
-                <span
-                  key={skill}
-                  data-export-skill="true"
-                  className={`creative-showcase__pill creative-showcase__pill--${PILL_CYCLE[index % PILL_CYCLE.length]}`}
-                >
+              {flatSkills.map((skill) => (
+                <span key={skill} data-export-skill="true" className="creative-showcase__pill">
                   {skill}
                 </span>
               ))}
@@ -270,7 +266,7 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="side" title={copy.education.title}>
+        <Section key={key} id="education" placement="side" number={sectionNumber(key)} title={copy.education}>
           <div className="creative-showcase__plain-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
@@ -296,7 +292,7 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" placement="side" title={copy.certificates.title}>
+        <Section key={key} id="certificates" placement="side" number={sectionNumber(key)} title={copy.certificates}>
           <div className="creative-showcase__plain-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -321,7 +317,7 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" title={copy.links.title}>
+        <Section key={key} id="links" placement="side" number={sectionNumber(key)} title={copy.links}>
           <div className="creative-showcase__arrow-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -342,7 +338,7 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" title={copy.languages.title}>
+        <Section key={key} id="languages" placement="side" number={sectionNumber(key)} title={copy.languages}>
           <div className="creative-showcase__plain-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -363,14 +359,11 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
 
     if (key === 'interests') {
       return (
-        <Section key={key} id="interests" placement="side" title={copy.interests.title}>
+        <Section key={key} id="interests" placement="side" number={sectionNumber(key)} title={copy.interests}>
           <div className="creative-showcase__pill-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span
-                  key={`${item.name}-${index}`}
-                  className={`creative-showcase__tag creative-showcase__tag--${TAG_CYCLE[index % TAG_CYCLE.length]}`}
-                >
+                <span key={`${item.name}-${index}`} className="creative-showcase__tag">
                   {item.name}
                 </span>
               ))
@@ -392,8 +385,12 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
       ref={previewRef}
       data-export-root="true"
       data-export-variant="creative"
-      className="creative-showcase preview-document--designer"
-      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
+      className="creative-showcase preview-document--designer tpl-density-roomy"
+      style={{
+        '--tpl-accent': accentColor,
+        '--tpl-accent-soft': hexToRgba(accentColor, 0.12),
+        ...(headingColor ? { '--cv-heading-color': headingColor } : null),
+      }}
     >
       <div className="creative-showcase__bg" data-export-ignore="true" aria-hidden="true">
         <span className="creative-showcase__blob creative-showcase__blob--top" />
@@ -405,10 +402,7 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
           <p className="creative-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="creative-showcase__name">
-            <span className="creative-showcase__name-lead">{nameLead}</span>
-            {nameAccent ? <> <span className="creative-showcase__name-accent">{nameAccent}</span></> : null}
-          </h1>
+          <h1 className="creative-showcase__name">{fullName}</h1>
           <p className="creative-showcase__role">{title}</p>
           {tagline ? <p className="creative-showcase__tagline">{tagline}</p> : null}
           {personalContactItems.length > 0 ? (
@@ -432,16 +426,10 @@ export default function CreativeShowcase({ formData, locale = 'en', previewRef, 
         ) : null}
       </header>
 
-      {/* Not data-export-ignore — unlike the pure-decoration blobs above,
-          this striped bar is a real brand element the exported PDF should
-          keep, the same way Modern/Portfolio Hybrid's top gradient hairline
-          survives into their exports. Built from real segment elements —
-          see STRIPE_SEGMENTS above for why. */}
-      <div className="creative-showcase__stripe" aria-hidden="true">
-        {STRIPE_SEGMENTS.map((color, index) => (
-          <span key={index} className={`creative-showcase__stripe-seg creative-showcase__stripe-seg--${color}`} />
-        ))}
-      </div>
+      {/* Single accent rule under the header — a real brand element the
+          exported PDF keeps (a solid background colour rasterizes fine,
+          unlike the repeating-linear-gradient an earlier version used). */}
+      <div className="creative-showcase__stripe" aria-hidden="true" />
 
       <div className="creative-showcase__body" data-export-content="true">
         <main className="creative-showcase__main" data-export-primary="true">

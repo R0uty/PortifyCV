@@ -4,6 +4,38 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Creative template rework (roadmap A-fix batch) — 2026-09-10
+
+Released as v1.2.3. First of the seven-template A-fix rework batch
+(`docs/template-audit-a2.md`). Brings Creative to the
+`docs/template-design-system.md` bar — it scored **rework** (structural
+clarity 0, colour discipline 1).
+
+- **Section headings → the §4 `numbered` treatment** (previously an off-menu
+  bold sentence-case title + italic subtitle). A two-digit accent ordinal
+  runs once through the whole document — `01`–`03` down the main column,
+  continuing `04`+ through the sidebar — before an uppercase tracked label.
+  This claims the one unused slot in the heading menu.
+- **Colour collapsed to the §3 rule** — one ink (`#1a1a1a` + two muted
+  steps), one accent, and the cream page / tan sidebar as the single
+  neutral tint. The old five-colour system (coral / teal / violet / gold,
+  five pastel tag tints, a four-colour stripe, alternating card borders) is
+  gone: distinct hex values in `creative.css` drop from ~24 to 8. Skill
+  pills and project tags are one soft-accent style; the stripe is one solid
+  accent rule; the name is no longer two-tone.
+- **Accent is now user-customizable** (§6 3-step opt-in) — `--tpl-accent`
+  read from the `accentColor` prop with a JS-computed `--tpl-accent-soft`
+  fill, a `warmCoral` Settings swatch set (coral default), and
+  `CREATIVE_DEFAULT_ACCENT_COLOR` in `creative.js`. ATS-mode (flat-renderer)
+  accent classes moved off the undefined `violet-*` utilities onto `rose-*`.
+- **Type sizes read the shared `--tpl-*` ramp** via `tpl-density-roomy` on
+  the showcase root; the name drops from `2.7rem` to the ramp's `2.30rem`.
+
+Verified in the running app and a rendered-back PDF export (name renders,
+all content present and ordered, numbered headings intact, URLs
+scheme-stripped). One new Playwright spec (Creative accent swatch). Full
+suite: 34 passed.
+
 ## Template design system foundations (roadmap A.1) — 2026-09-09
 
 Released as v1.2.1. First sub-project of the v1.2.0 template roadmap

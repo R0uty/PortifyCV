@@ -15,6 +15,17 @@ export const ACCENT_SWATCH_SETS = {
     { color: '#1d4ed8', label: { en: 'Blue', fi: 'Sininen' } },
     { color: '#be123c', label: { en: 'Rose', fi: 'Ruusu' } },
   ],
+  // Warm-coral set — coral first/default. Editorial warm range for the
+  // Creative template; distinct from `warm` (which leads with Modern
+  // Orange's #f28c00) by opening on a redder coral.
+  warmCoral: [
+    { color: '#e2572a', label: { en: 'Coral', fi: 'Koralli' } },
+    { color: '#c2410c', label: { en: 'Rust', fi: 'Ruoste' } },
+    { color: '#b45309', label: { en: 'Amber', fi: 'Meripihka' } },
+    { color: '#be123c', label: { en: 'Rose', fi: 'Ruusu' } },
+    { color: '#7c3aed', label: { en: 'Violet', fi: 'Violetti' } },
+    { color: '#1f7a6c', label: { en: 'Teal', fi: 'Sinivihreä' } },
+  ],
   // Cool set — violet first/default, restrained subtle range.
   // (Originally the Modern Timeline swatches.)
   cool: [

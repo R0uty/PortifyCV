@@ -69,6 +69,26 @@ test.describe('Template accent color', () => {
     )
     expect(accent.toLowerCase()).toBe('#2563eb')
   })
+
+  test('choosing a swatch recolors the Creative preview', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await selectTemplate(page, 'Creative')
+
+    await page.getByRole('button', { name: 'Settings' }).first().click()
+    // 'Teal' is the 6th swatch in the 'warmCoral' set (#1f7a6c)
+    await page.getByRole('button', { name: 'Teal', exact: true }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
+
+    const root = page.locator('.creative-showcase').first()
+    const accent = await root.evaluate((el) => ({
+      accent: el.style.getPropertyValue('--tpl-accent').trim(),
+      soft: el.style.getPropertyValue('--tpl-accent-soft').trim(),
+    }))
+    expect(accent.accent.toLowerCase()).toBe('#1f7a6c')
+    // the soft fill is derived in JS from the chosen accent, not a static hue
+    expect(accent.soft).toBe('rgba(31, 122, 108, 0.12)')
+  })
 })
 
 test.describe('Link URL formatting', () => {

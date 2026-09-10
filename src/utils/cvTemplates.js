@@ -48,9 +48,9 @@ const templateMap = {
   },
   creative: {
     id: 'creative',
-    accent: null,
+    accent: { default: '#e2572a', swatchSet: 'warmCoral' },
     label: 'Creative',
-    description: 'Editorial full-width header with a two-tone name and a color-coded sidebar of quick facts. Suits any creative profession.',
+    description: 'Editorial two-column layout with numbered section headings, a full-width header, and a single customizable accent color. Suits any creative profession.',
     variant: 'creative',
     layout: 'split',
     primarySections: ['about', 'experience', 'projects'],
@@ -344,7 +344,7 @@ const templateLocalization = {
     },
     creative: {
       label: 'Luova',
-      description: 'Koko leveyden otsikko kaksivärisellä nimellä ja väri­koodattu pikatietojen sivupalkki. Sopii mille tahansa luovalle ammatille.',
+      description: 'Toimituksellinen kaksipalstainen asettelu numeroiduilla osiootsikoilla, koko leveyden otsikkoalue ja yksi muokattava korostusväri. Sopii mille tahansa luovalle ammatille.',
       summaryBadgeLabel: 'Huomiot',
       chips: ['Tarina', 'Linkit'],
     },
