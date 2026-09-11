@@ -21,6 +21,7 @@ import {
   ImageRun,
 } from 'docx'
 import { cropPhotoDataUrlToSquare, getPhotoDataUrl } from './exporters'
+import { formatDateRange } from './shared'
 
 // Monochrome by design (see the spec) — no hue anywhere, just tonal
 // hierarchy within near-black/gray, the same way the PDF text-fallback uses
@@ -32,6 +33,9 @@ const INK_SUBTLE = '666666'
 const META_SIZE = 20
 const NAME_SIZE = 40
 const ROLE_SIZE = 24
+const BODY_SIZE = 21
+const SUBHEAD_SIZE = 22
+const HEADING_SIZE = 24
 
 const NO_BORDER = { style: BorderStyle.NONE }
 const NO_CELL_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER }
@@ -116,4 +120,111 @@ export async function buildIdentityBlock(snapshot, copy, includePhoto) {
       ],
     }),
   ]
+}
+
+function sectionHeading(text) {
+  return new Paragraph({
+    heading: HeadingLevel.HEADING_2,
+    spacing: { before: 280, after: 120 },
+    children: [new TextRun({ text: text.toUpperCase(), bold: true, size: HEADING_SIZE, color: INK })],
+  })
+}
+
+function boldLine(text, opts = {}) {
+  if (!text) {
+    return null
+  }
+  return new Paragraph({
+    spacing: { after: opts.after ?? 40 },
+    children: [new TextRun({ text, bold: true, size: opts.size ?? SUBHEAD_SIZE, color: INK })],
+  })
+}
+
+function plainLine(text, opts = {}) {
+  if (!text) {
+    return null
+  }
+  return new Paragraph({
+    spacing: { after: opts.after ?? 160 },
+    children: [new TextRun({
+      text,
+      size: opts.size ?? BODY_SIZE,
+      color: opts.subtle ? INK_SUBTLE : INK,
+      italics: opts.italics ?? false,
+    })],
+  })
+}
+
+function bulletLines(items) {
+  return items.map((item) => new Paragraph({
+    bullet: { level: 0 },
+    spacing: { after: 60 },
+    children: [new TextRun({ text: item, size: BODY_SIZE, color: INK })],
+  }))
+}
+
+function emptyNotice(text) {
+  return new Paragraph({
+    spacing: { after: 160 },
+    children: [new TextRun({ text, size: BODY_SIZE, color: INK_SUBTLE, italics: true })],
+  })
+}
+
+// Multi-line fields (experience/internship descriptions, etc.) render as
+// real bullets when they have more than one line, matching how every DOM
+// Showcase already treats these \n-separated fields — a deliberate
+// improvement over the PDF text-fallback's single-wrapped-paragraph
+// approach (see Global Constraints in the plan).
+function descriptionLines(text) {
+  if (!text) {
+    return []
+  }
+  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+  return lines.length > 1 ? bulletLines(lines) : [plainLine(lines[0])]
+}
+
+export function buildAboutSection(snapshot, copy) {
+  const body = snapshot.about ? plainLine(snapshot.about) : emptyNotice(copy.addSummary)
+  return [sectionHeading(copy.about), body]
+}
+
+export function buildSkillsSection(snapshot, copy) {
+  if (snapshot.skills.length === 0) {
+    return [sectionHeading(copy.skills), emptyNotice(copy.addSkills)]
+  }
+  return [sectionHeading(copy.skills), ...bulletLines(snapshot.skills)]
+}
+
+export function buildExperienceSection(snapshot, copy) {
+  if (snapshot.experience.length === 0) {
+    return [sectionHeading(copy.experience), emptyNotice(copy.noExperience)]
+  }
+  const entries = snapshot.experience.flatMap((item) => {
+    const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
+    const dateRange = formatDateRange(item.startDate, item.endDate)
+    return [
+      boldLine(heading),
+      dateRange ? plainLine(dateRange, { subtle: true, size: META_SIZE, after: 120 }) : null,
+      ...descriptionLines(item.description),
+    ].filter(Boolean)
+  })
+  return [sectionHeading(copy.experience), ...entries]
+}
+
+export function buildEducationSection(snapshot, copy) {
+  if (snapshot.education.length === 0) {
+    return [sectionHeading(copy.education), emptyNotice(copy.noEducation)]
+  }
+  const entries = snapshot.education.flatMap((item) => {
+    const heading = [item.degree, item.school].filter(Boolean).join(', ') || copy.educationEntry
+    const dateRange = formatDateRange(item.startDate, item.endDate)
+    const gradeLine = [item.grade, item.coursework].filter(Boolean).join(' · ')
+    return [
+      boldLine(heading),
+      dateRange ? plainLine(dateRange, { subtle: true, size: META_SIZE }) : null,
+      item.honors ? plainLine(item.honors, { subtle: true, size: META_SIZE }) : null,
+      gradeLine ? plainLine(gradeLine, { subtle: true, size: META_SIZE, after: 160 }) : null,
+    ].filter(Boolean)
+  })
+  return [sectionHeading(copy.education), ...entries]
 }

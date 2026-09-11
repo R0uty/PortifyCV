@@ -30,9 +30,15 @@ const srcDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src')
 const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, relativePath)).href)
 
 const { Paragraph } = await import('docx')
-const { buildIdentityBlock } = await importSrc('utils/docxExport.js')
+const {
+  buildIdentityBlock,
+  buildAboutSection,
+  buildSkillsSection,
+  buildExperienceSection,
+  buildEducationSection,
+} = await importSrc('utils/docxExport.js')
 const { createExportCopy } = await importSrc('utils/exporters.js')
-const { demoCvData } = await importSrc('utils/cvForm.js')
+const { demoCvData, createInitialCvData } = await importSrc('utils/cvForm.js')
 const { createCvSnapshot } = await importSrc('utils/cvSnapshot.js')
 
 let failures = 0
@@ -58,6 +64,42 @@ console.log('\ndocxExport: identity block\n')
   const copy = createExportCopy('en')
   const block = await buildIdentityBlock(snapshot, copy, false)
   check('drops the contact line entirely when there is no contact info', block.length === 2)
+}
+
+console.log('\ndocxExport: core narrative sections\n')
+
+{
+  const snapshot = createCvSnapshot(demoCvData)
+  const copy = createExportCopy('en')
+
+  const about = buildAboutSection(snapshot, copy)
+  check('About: heading + one body paragraph for the demo CV', about.length === 2)
+
+  const skills = buildSkillsSection(snapshot, copy)
+  check('Skills: heading + one bullet per skill', skills.length === 1 + demoCvData.skills.length)
+
+  const experience = buildExperienceSection(snapshot, copy)
+  check('Experience: at least a heading plus one entry', experience.length > 1)
+
+  const education = buildEducationSection(snapshot, copy)
+  check('Education: at least a heading plus one entry', education.length > 1)
+}
+
+{
+  const blankSnapshot = createCvSnapshot(createInitialCvData())
+  const copy = createExportCopy('en')
+
+  const about = buildAboutSection(blankSnapshot, copy)
+  check('About falls back to "Add a professional summary" placeholder copy', about.length === 2)
+
+  const skills = buildSkillsSection(blankSnapshot, copy)
+  check('Skills falls back to a single placeholder line when empty', skills.length === 2)
+
+  const experience = buildExperienceSection(blankSnapshot, copy)
+  check('Experience falls back to a single placeholder line when empty', experience.length === 2)
+
+  const education = buildEducationSection(blankSnapshot, copy)
+  check('Education falls back to a single placeholder line when empty', education.length === 2)
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)
