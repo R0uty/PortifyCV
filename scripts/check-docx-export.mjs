@@ -44,6 +44,12 @@ const {
   buildAchievementsSection,
   buildMembershipsSection,
   buildPublicationsSection,
+  buildProjectsSection,
+  buildOpenSourceSection,
+  buildLeadershipSection,
+  buildSpeakingSection,
+  buildVolunteeringSection,
+  buildInternshipsSection,
 } = await importSrc('utils/docxExport.js')
 const { createExportCopy } = await importSrc('utils/exporters.js')
 const { demoCvData, createInitialCvData } = await importSrc('utils/cvForm.js')
@@ -157,6 +163,27 @@ console.log('\ndocxExport: achievement-shaped sections\n')
 
   const publications = buildPublicationsSection(snapshot, copy)
   check('Publications: at least a heading plus one entry', publications.length > 1)
+}
+
+console.log('\ndocxExport: career-narrative sections\n')
+
+{
+  const snapshot = createCvSnapshot(demoCvData)
+  const copy = createExportCopy('en')
+
+  const sections = [
+    ['Projects', buildProjectsSection, demoCvData.projects],
+    ['Open Source', buildOpenSourceSection, demoCvData.openSource],
+    ['Leadership', buildLeadershipSection, demoCvData.leadership],
+    ['Speaking', buildSpeakingSection, demoCvData.speaking],
+    ['Volunteering', buildVolunteeringSection, demoCvData.volunteering],
+    ['Internships', buildInternshipsSection, demoCvData.internships],
+  ]
+
+  sections.forEach(([label, build, sourceData]) => {
+    const result = build(snapshot, copy)
+    check(`${label}: at least a heading plus one entry per item`, result.length >= 1 + sourceData.length)
+  })
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)

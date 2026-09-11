@@ -299,3 +299,84 @@ export function buildPublicationsSection(snapshot, copy) {
   })
   return [sectionHeading(copy.publications), ...entries]
 }
+
+export function buildProjectsSection(snapshot, copy) {
+  const entries = snapshot.projects.flatMap((item) => {
+    const contributionLine = [item.teamSize, item.contribution].filter(Boolean).join(' · ')
+    const linkLine = [item.githubUrl, item.demoUrl].filter(Boolean).join('  ·  ')
+    return [
+      boldLine(item.name),
+      item.organization ? plainLine(item.organization, { subtle: true, size: META_SIZE }) : null,
+      plainLine(item.description),
+      item.impact ? boldLine(item.impact, { size: META_SIZE }) : null,
+      contributionLine ? plainLine(contributionLine, { subtle: true, size: META_SIZE }) : null,
+      item.stack ? plainLine(item.stack, { subtle: true, size: META_SIZE }) : null,
+      linkLine ? plainLine(linkLine, { subtle: true, size: META_SIZE, after: 240 }) : null,
+    ].filter(Boolean)
+  })
+  return [sectionHeading(copy.projects), ...entries]
+}
+
+export function buildOpenSourceSection(snapshot, copy) {
+  const entries = snapshot.openSource.flatMap((item) => {
+    const meta = [item.language, item.stars ? `★ ${item.stars}` : '', item.forks ? `⑂ ${item.forks}` : '']
+      .filter(Boolean)
+      .join('   ')
+    return [
+      boldLine(item.name),
+      meta ? plainLine(meta, { subtle: true, size: META_SIZE }) : null,
+      plainLine(item.description),
+    ].filter(Boolean)
+  })
+  return [sectionHeading(copy.openSource), ...entries]
+}
+
+export function buildLeadershipSection(snapshot, copy) {
+  const entries = snapshot.leadership.flatMap((item) => {
+    const heading = [item.role, item.organization].filter(Boolean).join(' — ')
+    const dateRange = formatDateRange(item.startDate, item.endDate)
+    return [
+      boldLine(heading),
+      dateRange ? plainLine(dateRange, { subtle: true, size: META_SIZE }) : null,
+      plainLine(item.description),
+    ].filter(Boolean)
+  })
+  return [sectionHeading(copy.leadership), ...entries]
+}
+
+export function buildSpeakingSection(snapshot, copy) {
+  const entries = snapshot.speaking.flatMap((item) => {
+    const meta = [item.conference, item.date].filter(Boolean).join(' · ')
+    return [
+      boldLine(item.topic),
+      meta ? plainLine(meta, { subtle: true, size: META_SIZE }) : null,
+      item.audience ? plainLine(item.audience, { subtle: true, size: META_SIZE }) : null,
+    ].filter(Boolean)
+  })
+  return [sectionHeading(copy.speaking), ...entries]
+}
+
+export function buildVolunteeringSection(snapshot, copy) {
+  const entries = snapshot.volunteering.flatMap((item) => {
+    const heading = [item.role, item.organization].filter(Boolean).join(' — ')
+    return [boldLine(heading), plainLine(item.description)].filter(Boolean)
+  })
+  return [sectionHeading(copy.volunteering), ...entries]
+}
+
+export function buildInternshipsSection(snapshot, copy) {
+  if (snapshot.internships.length === 0) {
+    return [sectionHeading(copy.internships)]
+  }
+  const entries = snapshot.internships.flatMap((item) => {
+    const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
+    const dateRange = formatDateRange(item.startDate, item.endDate)
+    return [
+      boldLine(heading),
+      dateRange ? plainLine(dateRange, { subtle: true, size: META_SIZE }) : null,
+      ...descriptionLines(item.description),
+      item.technologies ? plainLine(item.technologies, { subtle: true, size: META_SIZE }) : null,
+    ].filter(Boolean)
+  })
+  return [sectionHeading(copy.internships), ...entries]
+}
