@@ -352,6 +352,20 @@ function Toolbar({
                     {isFinnish ? 'Varmuuskopio, jonka voi tuoda takaisin' : 'Backup you can import again later'}
                   </span>
                 </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-toolbar__export-item"
+                  disabled={isActionBusy}
+                  onClick={() => handleExportSelect('docx')}
+                >
+                  Word
+                  <span className="app-toolbar__export-item-hint">
+                    {isFinnish
+                      ? 'Muokattava .docx, toimii kaikkien ATS-järjestelmien kanssa'
+                      : 'Editable .docx, works with any ATS'}
+                  </span>
+                </button>
               </div>
             ) : null}
           </div>

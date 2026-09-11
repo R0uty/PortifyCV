@@ -676,14 +676,18 @@ function ResumeBuilderPage({
           : 'Designer PDF'
         : type === 'html'
           ? 'HTML'
-          : 'JSON'
+          : type === 'docx'
+            ? 'Word'
+            : 'JSON'
 
     const toastLabel =
       type === 'pdf-designer'
         ? locale === 'fi' ? 'Valmistellaan PDF-vientiä...' : 'Preparing PDF export...'
         : type === 'html'
           ? locale === 'fi' ? 'Valmistellaan HTML-vientiä...' : 'Preparing HTML export...'
-          : locale === 'fi' ? 'Valmistellaan JSON-vientiä...' : 'Preparing JSON export...'
+          : type === 'docx'
+            ? locale === 'fi' ? 'Valmistellaan Word-vientiä...' : 'Preparing Word export...'
+            : locale === 'fi' ? 'Valmistellaan JSON-vientiä...' : 'Preparing JSON export...'
 
     showToast(toastLabel, 'info')
 
@@ -761,6 +765,11 @@ function ResumeBuilderPage({
 
       if (type === 'html') {
         exportCvAsHtml(formData, exportFileName, { locale })
+      }
+
+      if (type === 'docx') {
+        const { exportCvAsDocx } = await import('../utils/docxExport')
+        await exportCvAsDocx(formData, exportFileName, { template: selectedTemplate, locale })
       }
 
       showToast(
