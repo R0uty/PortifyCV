@@ -4,6 +4,41 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Word (.docx) export — 2026-09-11
+
+Released as v1.2.16. Ships the C1 phase of the roadmap's Word export plan
+(`docs/superpowers/specs/2026-09-11-word-export-c1-design.md`): an
+ATS-friendly, one-column `.docx` download, available for every template
+regardless of the ATS/Designer toggle.
+
+- New `exportCvAsDocx`/`buildDocxDocument` in `src/utils/docxExport.js`,
+  dynamically imported from `exporters.js` the same lazy way html2canvas/
+  jsPDF already are. Adds `docx` as a normal dependency (pure-JS OOXML
+  generation, no headless-office conversion, no worker — unlike the PDF
+  path, assembling a CV's text into a `.docx` is fast enough to run
+  synchronously on the main thread).
+- 20 section builders (About, Skills, Experience, Education, Links, Core
+  Strengths, Certificates, Achievements, Memberships, Publications,
+  Projects, Open Source, Leadership, Speaking, Volunteering, Internships,
+  Case Studies, Testimonials, Languages, Interests) plus an identity block,
+  all reusing the same data-shaping the PDF text-fallback already
+  established rather than inventing new field logic: `createCvSnapshot`,
+  `createExportCopy`, `normalizeSectionOrder`, `formatDateRange`, and
+  `formatLinkLabel`/`formatLinkDisplayValue`.
+- Deliberately monochrome, one-column, and real-Word-styled (Heading 1/2,
+  genuine bullet paragraphs, no `•` characters or color/shading) — the
+  guaranteed-to-parse fallback every template gets today; a styled,
+  per-template `.docx` layout is future work (C2/C3 in the roadmap).
+- New `Word` item in the export menu alongside PDF/HTML/JSON, wired into
+  `Toolbar.jsx` and `ResumeBuilderPage.jsx`'s export handler.
+- New `scripts/check-docx-export.mjs` (`npm run check:docx-export`) —
+  framework-free checks covering every section builder, empty/blank-CV
+  fallback copy, Finnish locale, a non-default section order, and that the
+  assembled buffer is a real `.docx` (ZIP-signature) file.
+
+lint / build / check:docx-export (35) / check:reducers / check:share /
+e2e (44) all green.
+
 ## Consolidate Timeline/Modern Orange accent onto --tpl-accent — 2026-09-10
 
 Released as v1.2.15. Modern Timeline and Modern Orange were swatch-wired
