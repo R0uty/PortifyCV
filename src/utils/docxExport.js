@@ -380,3 +380,31 @@ export function buildInternshipsSection(snapshot, copy) {
   })
   return [sectionHeading(copy.internships), ...entries]
 }
+
+export function buildCaseStudiesSection(snapshot, copy) {
+  const entries = snapshot.caseStudies.flatMap((item) => {
+    const rows = [
+      [copy.problem, item.problem],
+      [copy.solution, item.solution],
+      [copy.technologies, item.technologies],
+      [copy.outcome, item.outcome],
+      [copy.lessonsLearned, item.lessons],
+    ].filter(([, value]) => value)
+    return [
+      boldLine(item.title),
+      ...rows.map(([label, value]) => plainLine(`${label}: ${value}`)),
+    ].filter(Boolean)
+  })
+  return [sectionHeading(copy.caseStudies), ...entries]
+}
+
+export function buildTestimonialsSection(snapshot, copy) {
+  const entries = snapshot.testimonials.flatMap((item) => {
+    const meta = [item.author, item.role].filter(Boolean).join(', ')
+    return [
+      item.quote ? plainLine(`"${item.quote}"`, { italics: true }) : null,
+      meta ? plainLine(meta, { subtle: true, size: META_SIZE, after: 240 }) : null,
+    ].filter(Boolean)
+  })
+  return [sectionHeading(copy.testimonials), ...entries]
+}

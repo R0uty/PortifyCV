@@ -50,6 +50,8 @@ const {
   buildSpeakingSection,
   buildVolunteeringSection,
   buildInternshipsSection,
+  buildCaseStudiesSection,
+  buildTestimonialsSection,
 } = await importSrc('utils/docxExport.js')
 const { createExportCopy } = await importSrc('utils/exporters.js')
 const { demoCvData, createInitialCvData } = await importSrc('utils/cvForm.js')
@@ -184,6 +186,19 @@ console.log('\ndocxExport: career-narrative sections\n')
     const result = build(snapshot, copy)
     check(`${label}: at least a heading plus one entry per item`, result.length >= 1 + sourceData.length)
   })
+}
+
+console.log('\ndocxExport: case studies and testimonials\n')
+
+{
+  const snapshot = createCvSnapshot(demoCvData)
+  const copy = createExportCopy('en')
+
+  const caseStudies = buildCaseStudiesSection(snapshot, copy)
+  check('Case Studies: at least a heading plus one entry', caseStudies.length > 1)
+
+  const testimonials = buildTestimonialsSection(snapshot, copy)
+  check('Testimonials: at least a heading plus one entry', testimonials.length > 1)
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)
