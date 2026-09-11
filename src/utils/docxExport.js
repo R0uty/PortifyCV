@@ -9,6 +9,8 @@
 // at docx objects instead of jsPDF draw calls).
 
 import {
+  Document,
+  Packer,
   Paragraph,
   TextRun,
   HeadingLevel,
@@ -19,9 +21,18 @@ import {
   WidthType,
   BorderStyle,
   ImageRun,
+  convertMillimetersToTwip,
 } from 'docx'
-import { cropPhotoDataUrlToSquare, getPhotoDataUrl } from './exporters'
+// 'file-saver' is CommonJS-only — a named `import { saveAs }` fails under
+// plain Node ESM (as used by scripts/check-docx-export.mjs), so this takes
+// the same default-import-then-destructure shape as exporters.js.
+import fileSaverPkg from 'file-saver'
+const { saveAs } = fileSaverPkg
+import { defaultTemplateId, getCvTemplate } from './cvTemplates'
+import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from './cvForm'
+import { createCvSnapshot } from './cvSnapshot'
 import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
+import { createExportCopy, cropPhotoDataUrlToSquare, getPhotoDataUrl } from './exporters'
 
 // Monochrome by design (see the spec) — no hue anywhere, just tonal
 // hierarchy within near-black/gray, the same way the PDF text-fallback uses
@@ -407,4 +418,81 @@ export function buildTestimonialsSection(snapshot, copy) {
     ].filter(Boolean)
   })
   return [sectionHeading(copy.testimonials), ...entries]
+}
+
+const PAGE_MARGIN_MM = { top: 16, right: 16, bottom: 18, left: 16 }
+
+export async function buildDocxDocument(formData, options = {}) {
+  const { template = defaultTemplateId, locale = 'en' } = options
+  const snapshot = createCvSnapshot(formData)
+  const copy = createExportCopy(locale)
+  const templateConfig = getCvTemplate(template)
+  const sectionVisibility = { ...createSectionVisibility(), ...(formData.sectionVisibility ?? {}) }
+  const templateSectionOrder = [...templateConfig.primarySections, ...templateConfig.secondarySections]
+  const sectionOrder = normalizeSectionOrder(formData.sectionOrder, templateSectionOrder)
+  const isVisible = (section) => sectionVisibility[section] !== false
+  const includePhoto = isPhotoVisibleForTemplate(formData.photoVisibilityByTemplate, templateConfig.id)
+
+  const sectionBuilders = {
+    about: () => buildAboutSection(snapshot, copy),
+    skills: () => buildSkillsSection(snapshot, copy),
+    experience: () => buildExperienceSection(snapshot, copy),
+    education: () => buildEducationSection(snapshot, copy),
+    links: () => buildLinksSection(snapshot, copy),
+    languages: () => buildLanguagesSection(snapshot, copy),
+    interests: () => buildInterestsSection(snapshot, copy),
+    coreStrengths: () => buildCoreStrengthsSection(snapshot, copy),
+    certificates: () => buildCertificatesSection(snapshot, copy),
+    achievements: () => buildAchievementsSection(snapshot, copy),
+    memberships: () => buildMembershipsSection(snapshot, copy),
+    publications: () => buildPublicationsSection(snapshot, copy),
+    projects: () => buildProjectsSection(snapshot, copy),
+    openSource: () => buildOpenSourceSection(snapshot, copy),
+    leadership: () => buildLeadershipSection(snapshot, copy),
+    speaking: () => buildSpeakingSection(snapshot, copy),
+    volunteering: () => buildVolunteeringSection(snapshot, copy),
+    internships: () => buildInternshipsSection(snapshot, copy),
+    caseStudies: () => buildCaseStudiesSection(snapshot, copy),
+    testimonials: () => buildTestimonialsSection(snapshot, copy),
+  }
+
+  const renderedSections = new Set()
+  const children = [...(await buildIdentityBlock(snapshot, copy, includePhoto))]
+
+  const appendSection = (section) => {
+    const build = sectionBuilders[section]
+    if (build && !renderedSections.has(section) && isVisible(section)) {
+      children.push(...build())
+      renderedSections.add(section)
+    }
+  }
+
+  sectionOrder.forEach(appendSection)
+  Object.keys(sectionBuilders).forEach(appendSection)
+
+  return new Document({
+    sections: [{
+      properties: {
+        page: {
+          size: {
+            width: convertMillimetersToTwip(210),
+            height: convertMillimetersToTwip(297),
+          },
+          margin: {
+            top: convertMillimetersToTwip(PAGE_MARGIN_MM.top),
+            right: convertMillimetersToTwip(PAGE_MARGIN_MM.right),
+            bottom: convertMillimetersToTwip(PAGE_MARGIN_MM.bottom),
+            left: convertMillimetersToTwip(PAGE_MARGIN_MM.left),
+          },
+        },
+      },
+      children,
+    }],
+  })
+}
+
+export async function exportCvAsDocx(formData, fileName, options = {}) {
+  const doc = await buildDocxDocument(formData, options)
+  const blob = await Packer.toBlob(doc)
+  saveAs(blob, `${fileName}.docx`)
 }

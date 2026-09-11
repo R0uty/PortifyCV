@@ -29,9 +29,10 @@ registerHooks({
 const srcDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src')
 const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, relativePath)).href)
 
-const { Paragraph } = await import('docx')
+const { Paragraph, Packer } = await import('docx')
 const {
   buildIdentityBlock,
+  buildDocxDocument,
   buildAboutSection,
   buildSkillsSection,
   buildExperienceSection,
@@ -199,6 +200,33 @@ console.log('\ndocxExport: case studies and testimonials\n')
 
   const testimonials = buildTestimonialsSection(snapshot, copy)
   check('Testimonials: at least a heading plus one entry', testimonials.length > 1)
+}
+
+console.log('\ndocxExport: full document assembly\n')
+
+{
+  const doc = await buildDocxDocument(demoCvData, { template: 'modern', locale: 'en' })
+  const buffer = await Packer.toBuffer(doc)
+  check('produces a non-empty buffer for the demo CV', buffer.length > 0)
+  check('produces a real ZIP container (.docx magic bytes)', buffer[0] === 0x50 && buffer[1] === 0x4b)
+}
+
+{
+  const doc = await buildDocxDocument(createInitialCvData(), { template: 'minimal', locale: 'en' })
+  const buffer = await Packer.toBuffer(doc)
+  check('builds successfully from a blank CV (every section on placeholder copy)', buffer.length > 0)
+}
+
+{
+  const doc = await buildDocxDocument(demoCvData, { template: 'modern', locale: 'fi' })
+  const buffer = await Packer.toBuffer(doc)
+  check('builds successfully in Finnish locale', buffer.length > 0)
+}
+
+{
+  const doc = await buildDocxDocument(demoCvData, { template: 'timeline', locale: 'en' })
+  const buffer = await Packer.toBuffer(doc)
+  check('builds successfully for a template with a different section order', buffer.length > 0)
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)
