@@ -32,7 +32,7 @@ import { defaultTemplateId, getCvTemplate } from './cvTemplates'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
 import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
-import { createExportCopy, cropPhotoDataUrlToSquare, getPhotoDataUrl } from './exporters'
+import { createExportCopy, cropPhotoDataUrlToSquare, getPhotoDataUrl, getImageFormatFromDataUrl } from './exporters'
 
 // Monochrome by design (see the spec) — no hue anywhere, just tonal
 // hierarchy within near-black/gray, the same way the PDF text-fallback uses
@@ -102,6 +102,12 @@ export async function buildIdentityBlock(snapshot, copy, includePhoto) {
 
   const croppedDataUrl = await cropPhotoDataUrlToSquare(rawPhotoDataUrl)
   const photoBytes = dataUrlToUint8Array(croppedDataUrl)
+  // cropPhotoDataUrlToSquare can fall back to returning the ORIGINAL,
+  // un-cropped data URL unchanged (image load failure, zero-dimension
+  // image, or no 2D canvas context) instead of always converting to JPEG —
+  // sniff the actual bytes rather than assuming 'jpg' so a PNG upload
+  // doesn't get packed into the docx mislabeled as image/jpeg.
+  const photoType = getImageFormatFromDataUrl(croppedDataUrl) === 'PNG' ? 'png' : 'jpg'
 
   return [
     new Table({
@@ -120,7 +126,7 @@ export async function buildIdentityBlock(snapshot, copy, includePhoto) {
               children: [new Paragraph({
                 alignment: AlignmentType.RIGHT,
                 children: [new ImageRun({
-                  type: 'jpg',
+                  type: photoType,
                   data: photoBytes,
                   transformation: { width: 79, height: 79 },
                 })],
@@ -250,18 +256,24 @@ export function buildLinksSection(snapshot, copy) {
 }
 
 export function buildLanguagesSection(snapshot, copy) {
+  if (snapshot.languages.length === 0) {
+    return []
+  }
   const lines = snapshot.languages.map((item) => plainLine(item.level ? `${item.language} — ${item.level}` : item.language))
   return [sectionHeading(copy.languages), ...lines]
 }
 
 export function buildInterestsSection(snapshot, copy) {
   if (snapshot.interests.length === 0) {
-    return [sectionHeading(copy.interests)]
+    return []
   }
   return [sectionHeading(copy.interests), plainLine(snapshot.interests.map((item) => item.name).join('  ·  '))]
 }
 
 export function buildCoreStrengthsSection(snapshot, copy) {
+  if (snapshot.coreStrengths.length === 0) {
+    return []
+  }
   const entries = snapshot.coreStrengths.flatMap((item) => [
     boldLine(item.title),
     plainLine(item.description),
@@ -271,7 +283,7 @@ export function buildCoreStrengthsSection(snapshot, copy) {
 
 export function buildCertificatesSection(snapshot, copy) {
   if (snapshot.certificates.length === 0) {
-    return [sectionHeading(copy.certificates)]
+    return []
   }
   const lines = snapshot.certificates.map((item) => {
     const meta = [item.issuer, item.year].filter(Boolean).join(', ')
@@ -282,6 +294,9 @@ export function buildCertificatesSection(snapshot, copy) {
 }
 
 export function buildAchievementsSection(snapshot, copy) {
+  if (snapshot.achievements.length === 0) {
+    return []
+  }
   const entries = snapshot.achievements.flatMap((item) => {
     const heading = item.year ? `${item.title}  —  ${item.year}` : item.title
     return [boldLine(heading), plainLine(item.description)].filter(Boolean)
@@ -291,7 +306,7 @@ export function buildAchievementsSection(snapshot, copy) {
 
 export function buildMembershipsSection(snapshot, copy) {
   if (snapshot.memberships.length === 0) {
-    return [sectionHeading(copy.memberships)]
+    return []
   }
   const lines = snapshot.memberships.map((item) => {
     const meta = [item.role, item.year].filter(Boolean).join(', ')
@@ -301,6 +316,9 @@ export function buildMembershipsSection(snapshot, copy) {
 }
 
 export function buildPublicationsSection(snapshot, copy) {
+  if (snapshot.publications.length === 0) {
+    return []
+  }
   const entries = snapshot.publications.flatMap((item) => {
     const meta = [item.publisher, item.year].filter(Boolean).join(' · ')
     return [
@@ -312,6 +330,9 @@ export function buildPublicationsSection(snapshot, copy) {
 }
 
 export function buildProjectsSection(snapshot, copy) {
+  if (snapshot.projects.length === 0) {
+    return []
+  }
   const entries = snapshot.projects.flatMap((item) => {
     const contributionLine = [item.teamSize, item.contribution].filter(Boolean).join(' · ')
     const linkLine = [item.githubUrl, item.demoUrl].filter(Boolean).join('  ·  ')
@@ -329,6 +350,9 @@ export function buildProjectsSection(snapshot, copy) {
 }
 
 export function buildOpenSourceSection(snapshot, copy) {
+  if (snapshot.openSource.length === 0) {
+    return []
+  }
   const entries = snapshot.openSource.flatMap((item) => {
     const meta = [item.language, item.stars ? `★ ${item.stars}` : '', item.forks ? `⑂ ${item.forks}` : '']
       .filter(Boolean)
@@ -343,6 +367,9 @@ export function buildOpenSourceSection(snapshot, copy) {
 }
 
 export function buildLeadershipSection(snapshot, copy) {
+  if (snapshot.leadership.length === 0) {
+    return []
+  }
   const entries = snapshot.leadership.flatMap((item) => {
     const heading = [item.role, item.organization].filter(Boolean).join(' — ')
     const dateRange = formatDateRange(item.startDate, item.endDate)
@@ -356,6 +383,9 @@ export function buildLeadershipSection(snapshot, copy) {
 }
 
 export function buildSpeakingSection(snapshot, copy) {
+  if (snapshot.speaking.length === 0) {
+    return []
+  }
   const entries = snapshot.speaking.flatMap((item) => {
     const meta = [item.conference, item.date].filter(Boolean).join(' · ')
     return [
@@ -368,6 +398,9 @@ export function buildSpeakingSection(snapshot, copy) {
 }
 
 export function buildVolunteeringSection(snapshot, copy) {
+  if (snapshot.volunteering.length === 0) {
+    return []
+  }
   const entries = snapshot.volunteering.flatMap((item) => {
     const heading = [item.role, item.organization].filter(Boolean).join(' — ')
     return [boldLine(heading), plainLine(item.description)].filter(Boolean)
@@ -377,7 +410,7 @@ export function buildVolunteeringSection(snapshot, copy) {
 
 export function buildInternshipsSection(snapshot, copy) {
   if (snapshot.internships.length === 0) {
-    return [sectionHeading(copy.internships)]
+    return []
   }
   const entries = snapshot.internships.flatMap((item) => {
     const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
@@ -393,6 +426,9 @@ export function buildInternshipsSection(snapshot, copy) {
 }
 
 export function buildCaseStudiesSection(snapshot, copy) {
+  if (snapshot.caseStudies.length === 0) {
+    return []
+  }
   const entries = snapshot.caseStudies.flatMap((item) => {
     const rows = [
       [copy.problem, item.problem],
@@ -410,6 +446,9 @@ export function buildCaseStudiesSection(snapshot, copy) {
 }
 
 export function buildTestimonialsSection(snapshot, copy) {
+  if (snapshot.testimonials.length === 0) {
+    return []
+  }
   const entries = snapshot.testimonials.flatMap((item) => {
     const meta = [item.author, item.role].filter(Boolean).join(', ')
     return [

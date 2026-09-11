@@ -146,7 +146,7 @@ console.log('\ndocxExport: list-shaped sections\n')
   check('Links falls back to a single placeholder line when empty', links.length === 2)
 
   const interests = buildInterestsSection(blankSnapshot, copy)
-  check('Interests renders just the heading when empty', interests.length === 1)
+  check('Interests renders nothing (no orphan heading) when empty', interests.length === 0)
 }
 
 console.log('\ndocxExport: achievement-shaped sections\n')
@@ -227,6 +227,84 @@ console.log('\ndocxExport: full document assembly\n')
   const doc = await buildDocxDocument(demoCvData, { template: 'timeline', locale: 'en' })
   const buffer = await Packer.toBuffer(doc)
   check('builds successfully for a template with a different section order', buffer.length > 0)
+}
+
+console.log('\ndocxExport: no orphan headings on a partially-filled CV\n')
+
+{
+  const partialCvData = {
+    ...demoCvData,
+    interests: [],
+    languages: [],
+    coreStrengths: [],
+    certificates: [],
+    achievements: [],
+    memberships: [],
+    publications: [],
+    projects: [],
+    openSource: [],
+    leadership: [],
+    speaking: [],
+    volunteering: [],
+    internships: [],
+    caseStudies: [],
+    testimonials: [],
+  }
+  const snapshot = createCvSnapshot(partialCvData)
+  const copy = createExportCopy('en')
+
+  const emptyBuilders = [
+    ['Languages', buildLanguagesSection],
+    ['CoreStrengths', buildCoreStrengthsSection],
+    ['Certificates', buildCertificatesSection],
+    ['Achievements', buildAchievementsSection],
+    ['Memberships', buildMembershipsSection],
+    ['Publications', buildPublicationsSection],
+    ['Projects', buildProjectsSection],
+    ['OpenSource', buildOpenSourceSection],
+    ['Leadership', buildLeadershipSection],
+    ['Speaking', buildSpeakingSection],
+    ['Volunteering', buildVolunteeringSection],
+    ['Internships', buildInternshipsSection],
+    ['CaseStudies', buildCaseStudiesSection],
+    ['Testimonials', buildTestimonialsSection],
+  ]
+
+  emptyBuilders.forEach(([label, build]) => {
+    check(`${label} contributes nothing when empty (no orphan heading)`, build(snapshot, copy).length === 0)
+  })
+
+  // Interests was already covered by an existing check above — but confirm here too for completeness of this fixture.
+  check('Interests contributes nothing when empty (no orphan heading)', buildInterestsSection(snapshot, copy).length === 0)
+}
+
+console.log('\ndocxExport: monochrome by design (no stray colors in the generated XML)\n')
+
+{
+  // document.xml lives inside the .docx ZIP container, typically DEFLATE-
+  // compressed — a raw-byte regex over the packed buffer finds nothing, so
+  // this unzips with JSZip (already a transitive dependency of docx, and
+  // available at node_modules/jszip) and inspects the real XML text.
+  const doc = await buildDocxDocument(demoCvData, { template: 'modern', locale: 'en' })
+  const buffer = await Packer.toBuffer(doc)
+
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  const documentXmlFile = zip.file('word/document.xml')
+  check('word/document.xml is present in the packed .docx', documentXmlFile !== null)
+
+  if (documentXmlFile) {
+    const documentXml = await documentXmlFile.async('string')
+    const colorMatches = [...documentXml.matchAll(/w:color w:val="([0-9A-Fa-f]{6})"/g)]
+    const colorsUsed = new Set(colorMatches.map(([, hex]) => hex.toUpperCase()))
+
+    check('found at least one w:color in the generated document', colorMatches.length > 0)
+    check(
+      'every text color is one of the two monochrome tokens (1A1A1A / 666666) — no stray hues',
+      colorsUsed.size > 0 && [...colorsUsed].every((hex) => hex === '1A1A1A' || hex === '666666'),
+      `colors found: ${[...colorsUsed].join(', ')}`,
+    )
+  }
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)

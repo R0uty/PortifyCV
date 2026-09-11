@@ -1,3 +1,6 @@
+// 'file-saver' is CommonJS-only — a named import { saveAs } fails under
+// plain Node ESM (as used by scripts/check-docx-export.mjs), so this takes
+// the default-import-then-destructure shape instead.
 import fileSaverPkg from 'file-saver'
 const { saveAs } = fileSaverPkg
 import { defaultTemplateId, getCvTemplate } from './cvTemplates'
@@ -280,7 +283,7 @@ export async function cropPhotoDataUrlToSquare(dataUrl) {
   }
 }
 
-function getImageFormatFromDataUrl(dataUrl) {
+export function getImageFormatFromDataUrl(dataUrl) {
   if (/^data:image\/png;base64,/i.test(dataUrl)) {
     return 'PNG'
   }
