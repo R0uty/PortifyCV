@@ -21,7 +21,7 @@ import {
   ImageRun,
 } from 'docx'
 import { cropPhotoDataUrlToSquare, getPhotoDataUrl } from './exporters'
-import { formatDateRange } from './shared'
+import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
 
 // Monochrome by design (see the spec) — no hue anywhere, just tonal
 // hierarchy within near-black/gray, the same way the PDF text-fallback uses
@@ -227,4 +227,33 @@ export function buildEducationSection(snapshot, copy) {
     ].filter(Boolean)
   })
   return [sectionHeading(copy.education), ...entries]
+}
+
+export function buildLinksSection(snapshot, copy) {
+  const links = Object.entries(snapshot.links)
+  if (links.length === 0) {
+    return [sectionHeading(copy.links), emptyNotice(copy.noLinks)]
+  }
+  const lines = links.map(([key, value]) => plainLine(`${formatLinkLabel(key)}: ${formatLinkDisplayValue(value)}`))
+  return [sectionHeading(copy.links), ...lines]
+}
+
+export function buildLanguagesSection(snapshot, copy) {
+  const lines = snapshot.languages.map((item) => plainLine(item.level ? `${item.language} — ${item.level}` : item.language))
+  return [sectionHeading(copy.languages), ...lines]
+}
+
+export function buildInterestsSection(snapshot, copy) {
+  if (snapshot.interests.length === 0) {
+    return [sectionHeading(copy.interests)]
+  }
+  return [sectionHeading(copy.interests), plainLine(snapshot.interests.map((item) => item.name).join('  ·  '))]
+}
+
+export function buildCoreStrengthsSection(snapshot, copy) {
+  const entries = snapshot.coreStrengths.flatMap((item) => [
+    boldLine(item.title),
+    plainLine(item.description),
+  ].filter(Boolean))
+  return [sectionHeading(copy.coreStrengths), ...entries]
 }

@@ -36,6 +36,10 @@ const {
   buildSkillsSection,
   buildExperienceSection,
   buildEducationSection,
+  buildLinksSection,
+  buildLanguagesSection,
+  buildInterestsSection,
+  buildCoreStrengthsSection,
 } = await importSrc('utils/docxExport.js')
 const { createExportCopy } = await importSrc('utils/exporters.js')
 const { demoCvData, createInitialCvData } = await importSrc('utils/cvForm.js')
@@ -100,6 +104,36 @@ console.log('\ndocxExport: core narrative sections\n')
 
   const education = buildEducationSection(blankSnapshot, copy)
   check('Education falls back to a single placeholder line when empty', education.length === 2)
+}
+
+console.log('\ndocxExport: list-shaped sections\n')
+
+{
+  const snapshot = createCvSnapshot(demoCvData)
+  const copy = createExportCopy('en')
+
+  const links = buildLinksSection(snapshot, copy)
+  check('Links: heading + one line per link', links.length === 1 + Object.keys(snapshot.links).length)
+
+  const languages = buildLanguagesSection(snapshot, copy)
+  check('Languages: heading + one line per language', languages.length === 1 + snapshot.languages.length)
+
+  const interests = buildInterestsSection(snapshot, copy)
+  check('Interests: heading + one joined line', interests.length === 2)
+
+  const coreStrengths = buildCoreStrengthsSection(snapshot, copy)
+  check('Core Strengths: at least a heading plus one entry', coreStrengths.length > 1)
+}
+
+{
+  const blankSnapshot = createCvSnapshot(createInitialCvData())
+  const copy = createExportCopy('en')
+
+  const links = buildLinksSection(blankSnapshot, copy)
+  check('Links falls back to a single placeholder line when empty', links.length === 2)
+
+  const interests = buildInterestsSection(blankSnapshot, copy)
+  check('Interests renders just the heading when empty', interests.length === 1)
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)
