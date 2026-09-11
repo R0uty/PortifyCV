@@ -12,8 +12,11 @@ ATS-friendly, one-column `.docx` download, available for every template
 regardless of the ATS/Designer toggle.
 
 - New `exportCvAsDocx`/`buildDocxDocument` in `src/utils/docxExport.js`,
-  dynamically imported from `exporters.js` the same lazy way html2canvas/
-  jsPDF already are. Adds `docx` as a normal dependency (pure-JS OOXML
+  dynamically imported directly by `ResumeBuilderPage.jsx` (its own
+  standalone `await import('../utils/docxExport')` statement) — lazy the
+  same way `exporters.js` already lazy-loads html2canvas/jsPDF for the
+  other export paths, just via a separate import site rather than through
+  `exporters.js` itself. Adds `docx` as a normal dependency (pure-JS OOXML
   generation, no headless-office conversion, no worker — unlike the PDF
   path, assembling a CV's text into a `.docx` is fast enough to run
   synchronously on the main thread).
