@@ -1,4 +1,5 @@
-import { saveAs } from 'file-saver'
+import fileSaverPkg from 'file-saver'
+const { saveAs } = fileSaverPkg
 import { defaultTemplateId, getCvTemplate } from './cvTemplates'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
