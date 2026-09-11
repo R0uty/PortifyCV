@@ -257,3 +257,45 @@ export function buildCoreStrengthsSection(snapshot, copy) {
   ].filter(Boolean))
   return [sectionHeading(copy.coreStrengths), ...entries]
 }
+
+export function buildCertificatesSection(snapshot, copy) {
+  if (snapshot.certificates.length === 0) {
+    return [sectionHeading(copy.certificates)]
+  }
+  const lines = snapshot.certificates.map((item) => {
+    const meta = [item.issuer, item.year].filter(Boolean).join(', ')
+    const expiry = item.expiry ? ` (expires ${item.expiry})` : ''
+    return (meta ? `${item.name} — ${meta}` : item.name) + expiry
+  })
+  return [sectionHeading(copy.certificates), ...bulletLines(lines)]
+}
+
+export function buildAchievementsSection(snapshot, copy) {
+  const entries = snapshot.achievements.flatMap((item) => {
+    const heading = item.year ? `${item.title}  —  ${item.year}` : item.title
+    return [boldLine(heading), plainLine(item.description)].filter(Boolean)
+  })
+  return [sectionHeading(copy.achievements), ...entries]
+}
+
+export function buildMembershipsSection(snapshot, copy) {
+  if (snapshot.memberships.length === 0) {
+    return [sectionHeading(copy.memberships)]
+  }
+  const lines = snapshot.memberships.map((item) => {
+    const meta = [item.role, item.year].filter(Boolean).join(', ')
+    return meta ? `${item.organization} — ${meta}` : item.organization
+  })
+  return [sectionHeading(copy.memberships), ...bulletLines(lines)]
+}
+
+export function buildPublicationsSection(snapshot, copy) {
+  const entries = snapshot.publications.flatMap((item) => {
+    const meta = [item.publisher, item.year].filter(Boolean).join(' · ')
+    return [
+      boldLine(item.title),
+      meta ? plainLine(meta, { subtle: true, size: META_SIZE }) : null,
+    ].filter(Boolean)
+  })
+  return [sectionHeading(copy.publications), ...entries]
+}

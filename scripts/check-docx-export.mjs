@@ -40,6 +40,10 @@ const {
   buildLanguagesSection,
   buildInterestsSection,
   buildCoreStrengthsSection,
+  buildCertificatesSection,
+  buildAchievementsSection,
+  buildMembershipsSection,
+  buildPublicationsSection,
 } = await importSrc('utils/docxExport.js')
 const { createExportCopy } = await importSrc('utils/exporters.js')
 const { demoCvData, createInitialCvData } = await importSrc('utils/cvForm.js')
@@ -134,6 +138,25 @@ console.log('\ndocxExport: list-shaped sections\n')
 
   const interests = buildInterestsSection(blankSnapshot, copy)
   check('Interests renders just the heading when empty', interests.length === 1)
+}
+
+console.log('\ndocxExport: achievement-shaped sections\n')
+
+{
+  const snapshot = createCvSnapshot(demoCvData)
+  const copy = createExportCopy('en')
+
+  const certificates = buildCertificatesSection(snapshot, copy)
+  check('Certificates: heading + one bullet per certificate', certificates.length === 1 + demoCvData.certificates.length)
+
+  const achievements = buildAchievementsSection(snapshot, copy)
+  check('Achievements: at least a heading plus one entry', achievements.length > 1)
+
+  const memberships = buildMembershipsSection(snapshot, copy)
+  check('Memberships: heading + one bullet per membership', memberships.length === 1 + demoCvData.memberships.length)
+
+  const publications = buildPublicationsSection(snapshot, copy)
+  check('Publications: at least a heading plus one entry', publications.length > 1)
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)
