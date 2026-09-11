@@ -16,7 +16,7 @@ function getAboutCopy(locale, onNavigateToView) {
             'PortifyCV auttaa kokoamaan siistin, tulostuskelpoisen ansioluettelon '
             + 'muutamassa minuutissa. Mukana on reaaliaikainen esikatselu, useita '
             + 'valmiita pohjia, ATS-ystävällinen tila hakijaseurantajärjestelmiä '
-            + 'varten sekä vienti PDF-, HTML- ja JSON-muodossa. Koko käyttöliittymä '
+            + 'varten sekä vienti PDF-, Word-, HTML- ja JSON-muodossa. Koko käyttöliittymä '
             + 'toimii sekä englanniksi että suomeksi.',
             'Kaikki toiminnot ovat ilmaisia. Ei vesileimoja, ei maksumuurin takana '
             + 'olevia pohjia eikä pakollista rekisteröitymistä.',
@@ -104,7 +104,7 @@ function getAboutCopy(locale, onNavigateToView) {
           'PortifyCV helps you put together a clean, print-ready CV in a few '
           + 'minutes. It has a live preview, a set of ready-made templates, an '
           + 'ATS-friendly mode for applicant tracking systems, and export to '
-          + 'PDF, HTML, and JSON. The whole interface works in both English '
+          + 'PDF, Word, HTML, and JSON. The whole interface works in both English '
           + 'and Finnish.',
           'Every feature is free. There are no watermarks, no paywalled '
           + 'templates, and no required sign-up.',

@@ -24,7 +24,7 @@ function getPrivacyCopy(locale) {
             + 'istuntosi ajan. Sitä ei koskaan lähetetä palvelimelle, koska '
             + 'PortifyCV:llä ei ole sellaista, johon sen voisi lähettää. Se '
             + 'poistuu laitteeltasi vain, jos valitset itse tiedoston viennin '
-            + '(PDF, HTML tai JSON) tai luot jakolinkin, ja silloinkin se '
+            + '(PDF, Word, HTML tai JSON) tai luot jakolinkin, ja silloinkin se '
             + 'päätyy suoraan omaan latauskansioosi tai jakamaasi '
             + 'URL-osoitteeseen — ei PortifyCV:lle.',
             {
@@ -189,7 +189,7 @@ function getPrivacyCopy(locale) {
           + 'memory for the duration of your session. It is never uploaded to '
           + 'a server, because PortifyCV does not have one to upload it to. It '
           + 'leaves your device only if you explicitly choose to export a file '
-          + '(PDF, HTML, or JSON) or generate a share link, and even then it '
+          + '(PDF, Word, HTML, or JSON) or generate a share link, and even then it '
           + 'goes directly to your own downloads folder or into the URL you '
           + 'choose to share — not to PortifyCV.',
           {

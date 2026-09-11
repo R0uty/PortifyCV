@@ -59,9 +59,9 @@ function getCopy(locale) {
         {
           step: 'export',
           heading: 'Vie tiedostoksi tai jaa linkkinä',
-          figureLabel: 'Avattu Vie-valikko vaihtoehdoilla PDF, HTML ja JSON sekä jakolinkki.',
+          figureLabel: 'Avattu Vie-valikko vaihtoehdoilla PDF, Word, HTML ja JSON sekä jakolinkki.',
           caption:
-            'Vie-valikossa on kolme muotoa: PDF hakemuksiin, HTML verkkoon ja JSON varmuuskopioksi tai myöhempää muokkausta varten. Jakolinkki koodaa koko CV:n URL-osoitteeseen — sitä ei lähetetä palvelimelle, eivätkä kuvat mahdu mukaan.',
+            'Vie-valikossa on neljä muotoa: PDF hakemuksiin, Word muokattavaksi toisessa ohjelmassa, HTML verkkoon ja JSON varmuuskopioksi tai myöhempää muokkausta varten. Jakolinkki koodaa koko CV:n URL-osoitteeseen — sitä ei lähetetä palvelimelle, eivätkä kuvat mahdu mukaan.',
         },
         {
           step: 'restore',
@@ -126,9 +126,9 @@ function getCopy(locale) {
       {
         step: 'export',
         heading: 'Export a file or share a link',
-        figureLabel: 'An open export menu offering PDF, HTML and JSON, next to a share link.',
+        figureLabel: 'An open export menu offering PDF, Word, HTML and JSON, next to a share link.',
         caption:
-          'The Export menu offers three formats: PDF for applications, HTML for the web, and JSON as a backup or to keep editing later. The share-link button encodes the whole CV into the URL — never sent to a server, and images don\'t fit.',
+          'The Export menu offers four formats: PDF for applications, Word for editing in another program, HTML for the web, and JSON as a backup or to keep editing later. The share-link button encodes the whole CV into the URL — never sent to a server, and images don\'t fit.',
       },
       {
         step: 'restore',

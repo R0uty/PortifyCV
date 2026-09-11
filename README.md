@@ -16,7 +16,7 @@ A modern, minimal CV builder for creating and exporting professional resumes in 
 - **ATS Optimization**: Parser-readiness score, job-description keyword matching, and a
   dedicated ATS-friendly mode that flattens any template for applicant tracking systems
 - **CV Suggestions**: Rule-based feedback on clarity, impact, and completeness
-- **Export**: PDF (rendered, with a text-based fallback), standalone HTML, and JSON
+- **Export**: PDF (rendered, with a text-based fallback), Word (.docx), standalone HTML, and JSON
 - **Share & Import**: Generate a shareable link that carries the CV text in the URL,
   or import a JSON backup / paste raw resume text
 - **Bilingual UI**: English and Finnish

@@ -38,7 +38,7 @@ function getLandingCopy(locale) {
         'Mitään kirjoittamastasi ei koskaan lähetetä selaimestasi',
         `${TEMPLATE_COUNT} pohjaa — vaihda milloin vain sisältöä menettämättä`,
         'ATS-pisteytys ja avainsanaehdotukset',
-        'Vie PDF-, HTML- tai JSON-muodossa — sitten se on poissa',
+        'Vie PDF-, Word-, HTML- tai JSON-muodossa — sitten se on poissa',
       ],
       whyTitle: 'Miksi PortifyCV',
       why: [
@@ -48,7 +48,7 @@ function getLandingCopy(locale) {
         },
         {
           heading: 'Mikään ei koskaan päädy palvelimelle',
-          body: 'Jokainen vienti (PDF, HTML, JSON) ja jakolinkki muodostetaan kokonaan selaimessasi. Toisin kuin tiliä vaativat CV-työkalut, tietojasi ei koskaan ladata, tallenneta tai näe kukaan muu — koska ne eivät koskaan poistu laitteeltasi.',
+          body: 'Jokainen vienti (PDF, Word, HTML, JSON) ja jakolinkki muodostetaan kokonaan selaimessasi. Toisin kuin tiliä vaativat CV-työkalut, tietojasi ei koskaan ladata, tallenneta tai näe kukaan muu — koska ne eivät koskaan poistu laitteeltasi.',
         },
         {
           heading: 'Rakennettu rekrytointijärjestelmiä varten',
@@ -74,7 +74,7 @@ function getLandingCopy(locale) {
         },
         {
           q: 'Mihin muotoihin voin viedä CV:ni?',
-          a: 'PDF, HTML tai JSON — PDF tulostukseen ja hakemuksiin, HTML jaettavaksi verkossa, JSON varmuuskopioksi tai myöhempää muokkausta varten.',
+          a: 'PDF, Word, HTML tai JSON — PDF tulostukseen ja hakemuksiin, Word muokattavaksi toisessa ohjelmassa, HTML jaettavaksi verkossa, JSON varmuuskopioksi tai myöhempää muokkausta varten.',
         },
         {
           q: 'Voinko jakaa CV:ni ilman tiedoston lähettämistä?',
@@ -104,7 +104,7 @@ function getLandingCopy(locale) {
       'Nothing you type ever leaves your browser',
       `${TEMPLATE_COUNT} templates — swap anytime without losing your content`,
       'ATS scoring with keyword suggestions',
-      'Export to PDF, HTML, or JSON — then it’s gone',
+      'Export to PDF, Word, HTML, or JSON — then it’s gone',
     ],
     whyTitle: 'Why use PortifyCV',
     why: [
@@ -114,7 +114,7 @@ function getLandingCopy(locale) {
       },
       {
         heading: 'Nothing ever touches a server',
-        body: 'Every export (PDF, HTML, JSON) and every share link is generated entirely in your browser. Unlike CV builders that require an account, your data is never uploaded, stored, or seen by anyone — because it never leaves your device.',
+        body: 'Every export (PDF, Word, HTML, JSON) and every share link is generated entirely in your browser. Unlike CV builders that require an account, your data is never uploaded, stored, or seen by anyone — because it never leaves your device.',
       },
       {
         heading: 'Built for applicant tracking systems',
@@ -140,7 +140,7 @@ function getLandingCopy(locale) {
       },
       {
         q: 'What formats can I export to?',
-        a: 'PDF, HTML, or JSON — PDF for printing and applications, HTML for sharing online, JSON as a backup or to keep editing later.',
+        a: 'PDF, Word, HTML, or JSON — PDF for printing and applications, Word for editing in another program, HTML for sharing online, JSON as a backup or to keep editing later.',
       },
       {
         q: 'Can I share my CV without sending a file?',
