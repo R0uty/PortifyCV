@@ -402,7 +402,7 @@ export function buildTestimonialsSection(snapshot, copy) {
   const entries = snapshot.testimonials.flatMap((item) => {
     const meta = [item.author, item.role].filter(Boolean).join(', ')
     return [
-      item.quote ? plainLine(`"${item.quote}"`, { italics: true }) : null,
+      item.quote ? plainLine(`“${item.quote}”`, { italics: true }) : null,
       meta ? plainLine(meta, { subtle: true, size: META_SIZE, after: 240 }) : null,
     ].filter(Boolean)
   })
