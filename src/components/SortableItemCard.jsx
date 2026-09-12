@@ -54,7 +54,7 @@ function SortableItemCard({
             className={`sortable-card__chevron${isCollapsed ? ' sortable-card__chevron--collapsed' : ''}`}
             aria-hidden="true"
           />
-          <span className="sortable-card__title-text">{title}</span>
+          <span className="sortable-card__title-text" title={title}>{title}</span>
           {badge}
         </button>
         <div className="sortable-card__actions">

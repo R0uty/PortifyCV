@@ -4,6 +4,32 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Builder usability polish — 2026-09-12
+
+Released as v1.2.18. Roadmap item B (builder usability), scoped to B3-B5
+per `docs/superpowers/specs/2026-09-09-v1.2.0-roadmap-design.md` — small
+polish, not a project (B1/B2 were already covered by earlier roadmap work).
+
+- Experience's per-entry Achievement bullets (`ReorderableListInput`) now
+  auto-grow like every other long-form field instead of staying single-line
+  and clipping text.
+- Experience's Description field grows from a taller default (160px vs the
+  112px baseline every other `AutoGrowTextarea` still uses), since a
+  paragraph-length description rarely fit in one screen's worth of space.
+- `SortableItemCard` entry headers (Experience/Education/Certificates/
+  Projects) now carry a native `title` tooltip, so a title too long for the
+  card header's ellipsis is still readable on hover.
+- Experience's and Education's `startDate`/`endDate` fields gained a format
+  hint placeholder (`e.g. Jan 2022` / `esim. tammikuu 2022`), since the
+  field was otherwise unlabeled free text with no cue about expected style.
+- Fixed a real bug surfaced while building the above: `AutoGrowTextarea`
+  measured `scrollHeight` once on mount, which is wrong when a field first
+  renders while an ancestor (a collapsible card, a panel entrance
+  animation) is still mid-layout — it now also re-measures via a
+  `ResizeObserver` on its row once layout actually settles, and skips
+  measuring an empty value entirely (some browsers factor a long
+  placeholder into `scrollHeight` for an empty field, ballooning the box).
+
 ## Word (.docx) export — 2026-09-11
 
 Released as v1.2.16. Ships the C1 phase of the roadmap's Word export plan

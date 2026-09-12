@@ -427,7 +427,7 @@ select.floating-field__control {
 
 .reorderable-list__row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
 }
 
@@ -440,6 +440,8 @@ select.floating-field__control {
   background: var(--app-surface);
   color: var(--app-text);
   font-size: 0.85rem;
+  resize: none;
+  overflow: hidden;
 }
 
 .reorderable-list__actions {

@@ -811,6 +811,7 @@ function CVForm({
                             <input
                               type="text"
                               value={item.startDate}
+                              placeholder={isFinnish ? 'esim. tammikuu 2022' : 'e.g. Jan 2022'}
                               onChange={(event) =>
                                 updateArrayItem('experience', index, 'startDate', event.target.value)
                               }
@@ -821,7 +822,11 @@ function CVForm({
                               type="text"
                               value={item.isCurrent ? '' : item.endDate}
                               disabled={item.isCurrent}
-                              placeholder={item.isCurrent ? (isFinnish ? 'Nykyinen' : 'Present') : ' '}
+                              placeholder={
+                                item.isCurrent
+                                  ? (isFinnish ? 'Nykyinen' : 'Present')
+                                  : (isFinnish ? 'esim. kesäkuu 2023' : 'e.g. Jun 2023')
+                              }
                               onChange={(event) =>
                                 updateArrayItem('experience', index, 'endDate', event.target.value)
                               }
@@ -844,6 +849,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
                             <AutoGrowTextarea
                               value={item.description}
+                              minHeight={160}
                               onChange={(event) =>
                                 updateArrayItem('experience', index, 'description', event.target.value)
                               }
@@ -997,6 +1003,7 @@ function CVForm({
                             <input
                               type="text"
                               value={item.startDate}
+                              placeholder={isFinnish ? 'esim. syyskuu 2018' : 'e.g. Sep 2018'}
                               onChange={(event) =>
                                 updateArrayItem('education', index, 'startDate', event.target.value)
                               }
@@ -1006,6 +1013,7 @@ function CVForm({
                             <input
                               type="text"
                               value={item.endDate}
+                              placeholder={isFinnish ? 'esim. kesäkuu 2022' : 'e.g. Jun 2022'}
                               onChange={(event) =>
                                 updateArrayItem('education', index, 'endDate', event.target.value)
                               }
