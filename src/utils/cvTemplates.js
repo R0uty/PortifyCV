@@ -309,6 +309,26 @@ const templateMap = {
       chips: ['Skills', 'Education'],
     },
   },
+  editorial: {
+    id: 'editorial',
+    accent: { default: '#9f1239', swatchSet: 'inkCrimson' },
+    label: 'Editorial',
+    description: 'A magazine-style single column — an oversized byline name, numbered sections, and a wide reading measure. No sidebar, no clutter.',
+    variant: 'editorial',
+    layout: 'stacked',
+    primarySections: ['about', 'experience', 'education', 'skills', 'projects', 'links', 'languages', 'certificates'],
+    secondarySections: [],
+    summaryBadgeLabel: 'Profile',
+    thumbnail: {
+      accentClassName: 'bg-rose-800',
+      surfaceClassName: 'bg-gray-50',
+      primaryRatioClassName: 'grid-cols-1',
+      titleWidthClassName: 'w-28',
+      subtitleWidthClassName: 'w-20',
+      blockWidths: ['w-full', 'w-full', 'w-11/12'],
+      chips: ['Byline', 'Sections'],
+    },
+  },
 }
 
 const templateLocalization = {
@@ -402,6 +422,12 @@ const templateLocalization = {
       description: 'Kirjaimellinen 2x2-ruudukko — henkilötiedot, yhteenveto ja taidot, työkokemus sekä loput tiedot omissa neljänneksissään, yhdellä muokattavalla aksenttivärillä. Sopii hyvin, jos haluat CV:n hahmottuvan yhdellä silmäyksellä ylhäältä alas lukemisen sijaan.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Taidot', 'Koulutus'],
+    },
+    editorial: {
+      label: 'Toimituksellinen',
+      description: 'Aikakauslehtityylinen yksipalstainen asettelu — suuri nimiotsikko, numeroidut osiot ja leveä lukumitta. Ei sivupalkkia, ei sotkua.',
+      summaryBadgeLabel: 'Profiili',
+      chips: ['Nimiö', 'Osiot'],
     },
   },
 }

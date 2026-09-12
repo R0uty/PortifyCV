@@ -44,6 +44,7 @@ const ModernOrangeShowcase = lazy(() => import('./templates/ModernOrangeShowcase
 const ColorfulCompactShowcase = lazy(() => import('./templates/ColorfulCompactShowcase'))
 const QuadrantShowcase = lazy(() => import('./templates/QuadrantShowcase'))
 const TechExecShowcase = lazy(() => import('./templates/TechExecShowcase'))
+const EditorialShowcase = lazy(() => import('./templates/EditorialShowcase'))
 
 function CVPreview({
   formData,
@@ -55,7 +56,8 @@ function CVPreview({
   // Resolved accent color for the current template (from the app's
   // per-template `templateAccentColors` map, falling back to the template
   // registry's default). `timeline`, `modernOrange`, `creative`, `graduate`,
-  // `executive`, `compact`, `quadrant`, `techExec` and `portfolio` consume it.
+  // `executive`, `compact`, `quadrant`, `techExec`, `portfolio` and
+  // `editorial` consume it.
   accentColor,
   // Overrides the name and section-title color for every template except
   // Developer (animated gradient name), Colorful Compact (dark header, own
@@ -366,6 +368,25 @@ function CVPreview({
           previewRef={previewRef}
           templateConfig={templateConfig}
           showcaseConfig={t}
+          headingColor={headingColor}
+          accentColor={accentColor}
+        />
+      </Suspense>
+    )
+  }
+
+  // ── Editorial Showcase delegation ───────────────────────────────────
+  // The Editorial template's non-ATS look is a magazine-style single
+  // column — a fully bespoke visual system ATS mode bypasses entirely,
+  // same reasoning as every other bespoke Showcase above.
+  if (variant === 'editorial' && !atsFriendlyMode) {
+    return (
+      <Suspense fallback={null}>
+        <EditorialShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
           headingColor={headingColor}
           accentColor={accentColor}
         />

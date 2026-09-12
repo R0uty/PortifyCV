@@ -4,6 +4,44 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## New template: Editorial — 2026-09-13
+
+Released as v1.2.20. First of roadmap A.3's three new templates (editorial
+one-column / photo-forward / European one-page). Fills the gap the design
+system (§5) named directly: the `numbered` heading treatment (until now
+only Creative) combined with the `single-column-flow` family (until now
+Minimalist and Classic Professional's `eyebrow-caps`/`rule-under`) — a
+magazine-style single column, no sidebar.
+
+- New `src/components/templates/editorial.js` (ATS flat-renderer fallback
+  + `EDITORIAL_DEFAULT_ACCENT_COLOR`) and `EditorialShowcase.jsx` (the
+  bespoke visual): an oversized masthead name, an accent-colored
+  professional title, a middle-dot-separated contact line, a single accent
+  rule under the masthead, and two-digit numbered section ordinals. One
+  customizable accent (`--tpl-accent`) used sparingly — the title, the
+  ordinals, and the rule; section labels and body text stay ink, unlike
+  Creative which also tints dates/tags. An optional modest photo (user
+  toggle, like Creative — unlike Classic Professional, which never shows
+  one). Sections: about, experience, education, skills, projects, links,
+  languages, certificates — a fuller stacked set than Minimalist (5) or
+  Classic Professional (6), matching the "generous measure" brief.
+- New `inkCrimson` accent swatch set in `templateAccents.js` (Crimson
+  default `#9f1239`, plus Brick/Navy/Slate/Teal/Indigo) — verified 8:1
+  contrast on white for the default, comfortably clears AA on text roles.
+- Registered like every other bespoke template: `templates/index.js`
+  (registry + prefetch), `cvTemplates.js` (EN + FI entries), `index.css`
+  (`@import`), `CVPreview.jsx` (lazy import + delegation block). No
+  hardcoded template-count strings anywhere needed updating — `cvTemplates
+  .js`'s exports and `LandingPage.jsx`/`FreeCvTemplatesPage.jsx` are fully
+  dynamic (confirmed before starting, not assumed).
+- Verified: the design-system's long-name edge case (a single very long
+  word wraps cleanly, no overflow, via direct DOM measurement in the live
+  app), the no-photo default state, live accent-swatch switching (numbered
+  ordinals + bullet markers + rule all track the chosen color), both
+  locales. `npm run lint` clean, e2e 44/44 (new "choosing a swatch
+  recolors the Editorial preview" test added, matching every other
+  accent-configurable template).
+
 ## Template quick-switcher retired — 2026-09-13
 
 Released as v1.2.19. Roadmap item A.4 (also closes B1): the toolbar's

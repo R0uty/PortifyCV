@@ -228,7 +228,7 @@ means amending this document, not adding a variant to one template.
 | `icon-badge` | A small circular/rounded accent-filled badge holding a monochrome stroke glyph (`sectionIcons` in `shared.jsx`), label to its right. | Developer, Modern Professional, Graduate, Modern Orange, Modern Timeline, Navy Professional, Portfolio Hybrid, Quadrant |
 | `left-tick` | A small solid accent mark — a short vertical bar or a dot — immediately left of the label. No glyph. | Colorful Compact (dot form) |
 | `eyebrow-caps` | Small tracked uppercase label, no rule and no marker; separation is whitespace alone. | Minimalist |
-| `numbered` | A two-digit ordinal (`01`, `02`, …) in the accent, preceding the label. | Creative |
+| `numbered` | A two-digit ordinal (`01`, `02`, …) in the accent, preceding the label. | Creative, Editorial |
 
 **`icon-badge` was on 10 of 16 by default, not by choice** — the house
 cliché. The v1.2.0 A-fix batch moved Executive and Tech Executive onto
@@ -265,7 +265,7 @@ different color" is not a new template.
 
 | Family | One line | Current members |
 |---|---|---|
-| `single-column-flow` | No sidebar. Header, then sections flowing full width, top to bottom. | Minimalist, Classic Professional, Compact |
+| `single-column-flow` | No sidebar. Header, then sections flowing full width, top to bottom. | Minimalist, Classic Professional, Compact, Editorial |
 | `single-column-timeline` | Single column whose spine is a vertical timeline running through the career sections. | Modern Timeline |
 | `left-rail + main` | Light full-height rail on the left carrying identity and/or secondary sections; primary sections on the right. | Executive, Modern Orange |
 | `right-rail + main` | Primary sections on the left, secondary sections in a narrower right column. | Modern Professional, Creative, Graduate, Portfolio Hybrid, Colorful Compact, Tech Executive (with a distinguishing deep-navy masthead + footer band, v1.2.9) |
@@ -283,9 +283,10 @@ Notes on the current distribution, for the A.2 triage:
   navy column; the "Dark sidebar" metadata is accurate.) Navy is a flat
   navy field with identity in the sidebar; Developer is a navy gradient
   holding only the secondary sections, identity in a top header — distinct.
-- **`numbered` heading treatment + `single-column-flow`** is the open
-  combination the planned editorial one-column template should take, rather
-  than becoming a seventh right-rail.
+- **`numbered` heading treatment + `single-column-flow`** was the open
+  combination named here for the planned editorial one-column template,
+  rather than it becoming a seventh right-rail — filled by Editorial
+  (v1.2.20, 2026-09-13).
 
 ---
 

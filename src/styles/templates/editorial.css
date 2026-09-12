@@ -1,0 +1,357 @@
+/* ==========================================================================
+   Editorial Showcase — hand-authored component styles for the Editorial
+   template's non-ATS "showcase" mode. Scoped entirely under
+   `.editorial-showcase`.
+
+   docs/template-design-system.md:
+   - §5 structural family: `single-column-flow`, joining Minimalist and
+     Classic Professional — but the only one of the three with a
+     customizable accent, and the only one on the `numbered` heading
+     treatment (§4), which combined with this family is a genuinely new
+     combination (Creative is the only other `numbered` member, and it's
+     right-rail + main).
+   - §3 colour rule: one ink (`--ed-ink` + two muted steps), one accent
+     (`--tpl-accent`, set inline from the `accentColor` prop with the
+     crimson default as the fallback here; `--tpl-accent-soft` is the
+     JS-computed rgba fill) used sparingly — the role line, the numbered
+     ordinals, and the single rule under the masthead. Section labels and
+     body text stay ink, unlike Creative which also tints dates/tags.
+   - §2 type ramp: sizes come from `--tpl-*` (the root carries
+     `tpl-density-roomy`); this file sets weight/case/tracking/colour only.
+   - A capped "measure" (max-width) on the intro paragraph is the one
+     typographic flourish specific to this template's magazine-editorial
+     voice — comfortable line length instead of the full page width every
+     other single-column-flow member uses.
+
+   No CSS `filter: blur()` (has hung html2canvas PDF export before); no
+   `color-mix()`/`oklch()` (the export pipeline can't rasterize them, §8).
+   No decorative animation — matches Classic Professional's restraint.
+   ========================================================================== */
+
+.editorial-showcase {
+  /* Accent — overridden inline per render from the chosen swatch. Kept in
+     sync with EDITORIAL_DEFAULT_ACCENT_COLOR in components/templates/editorial.js. */
+  --tpl-accent: #9f1239;
+  --tpl-accent-soft: rgba(159, 18, 57, 0.1);
+
+  --ed-ink: #1a1a1a;
+  --ed-muted: #52525b;
+  --ed-faint: #71717a;
+  --ed-border: #e4e4e7;
+  /* Deliberately not pure #ffffff — same blank-canvas PDF export guard used
+     by the Creative/Classic Professional/Executive Showcases (see those
+     files' CSS): an all-#ffffff page with only thin dividers for structure
+     risks a capture sampling point landing on pure white. */
+  --ed-bg: #fdfdfd;
+
+  position: relative;
+  background: var(--ed-bg);
+  color: var(--ed-ink);
+  font-family: var(--font-sans);
+  font-size: var(--tpl-body-size);
+  border-radius: 4px;
+  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.15);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.editorial-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── Header: masthead identity left, optional photo right ── */
+
+.editorial-showcase__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.75rem;
+  padding: 2.75rem 3rem 1.5rem;
+}
+
+.editorial-showcase__kicker {
+  font-size: var(--tpl-meta-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ed-faint);
+}
+
+.editorial-showcase__name {
+  margin-top: 0.5rem;
+  font-size: var(--tpl-name-size);
+  line-height: var(--tpl-name-lh);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+  color: var(--cv-heading-color, var(--ed-ink));
+}
+
+.editorial-showcase__role {
+  margin-top: 0.5rem;
+  font-size: var(--tpl-title-size);
+  font-weight: 600;
+  color: var(--tpl-accent);
+}
+
+.editorial-showcase__meta {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--tpl-meta-size);
+  color: var(--ed-faint);
+  overflow-wrap: break-word;
+}
+
+.editorial-showcase__meta-item + .editorial-showcase__meta-item::before {
+  content: '·';
+  margin-right: 0.4rem;
+  color: var(--ed-faint);
+}
+
+.editorial-showcase__photo-wrap {
+  flex-shrink: 0;
+}
+
+.editorial-showcase__photo {
+  display: block;
+  width: 5.5rem;
+  height: 5.5rem;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid var(--tpl-accent);
+}
+
+/* ── Single accent rule under the masthead ── */
+
+.editorial-showcase__rule {
+  height: 3px;
+  background: var(--tpl-accent);
+}
+
+/* ── Body: one column, sections flow full width ── */
+
+.editorial-showcase__body {
+  padding: 1.75rem 3rem 3rem;
+}
+
+.editorial-showcase__section + .editorial-showcase__section {
+  margin-top: 1.9rem;
+}
+
+.editorial-showcase__section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ed-border);
+}
+
+.editorial-showcase__section-num {
+  flex-shrink: 0;
+  font-size: var(--tpl-entry-title-size);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--tpl-accent);
+}
+
+.editorial-showcase__section-title {
+  font-size: var(--tpl-heading-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--cv-heading-color, var(--ed-ink));
+}
+
+.editorial-showcase__empty {
+  margin-top: 0.8rem;
+  font-size: var(--tpl-body-size);
+  color: var(--ed-faint);
+}
+
+/* ── About — capped measure, the one typographic flourish specific to this
+   template's magazine-editorial voice. ── */
+
+.editorial-showcase__intro {
+  margin-top: 0.85rem;
+  max-width: 62ch;
+  font-size: var(--tpl-body-size);
+  line-height: 1.75;
+  color: var(--ed-muted);
+  white-space: pre-line;
+}
+
+/* ── Experience / Education / Projects entries — plain stacked rows, no
+   card border (thin section-head rule is the only divider, per the
+   single-column-flow family's "generous whitespace, thin dividers"
+   convention). ── */
+
+.editorial-showcase__entry-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.editorial-showcase__entry-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+}
+
+.editorial-showcase__entry-role {
+  font-size: var(--tpl-entry-title-size);
+  font-weight: 700;
+  color: var(--ed-ink);
+}
+
+.editorial-showcase__entry-dates {
+  font-size: var(--tpl-meta-size);
+  font-weight: 600;
+  color: var(--ed-muted);
+  white-space: nowrap;
+}
+
+.editorial-showcase__entry-meta {
+  margin-top: 0.15rem;
+  font-size: var(--tpl-meta-size);
+  font-style: italic;
+  color: var(--ed-muted);
+}
+
+.editorial-showcase__bullets {
+  margin-top: 0.5rem;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.editorial-showcase__bullets li {
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--ed-ink);
+}
+
+.editorial-showcase__bullets li::marker {
+  color: var(--tpl-accent);
+}
+
+.editorial-showcase__project-desc {
+  margin-top: 0.3rem;
+  max-width: 62ch;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--ed-muted);
+  white-space: pre-line;
+}
+
+/* ── Skills / project tags ── */
+
+.editorial-showcase__tag-row {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.editorial-showcase__tag {
+  border-radius: 4px;
+  border: 1px solid var(--ed-border);
+  padding: 0.3rem 0.7rem;
+  font-size: var(--tpl-meta-size);
+  font-weight: 500;
+  color: var(--ed-ink);
+  background: transparent;
+  overflow-wrap: anywhere;
+}
+
+/* ── Links: plain stacked lines ── */
+
+.editorial-showcase__plain-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.editorial-showcase__link-item {
+  font-size: var(--tpl-body-size);
+  font-weight: 600;
+  color: var(--ed-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Languages: inline row separated by a thin middle dot ── */
+
+.editorial-showcase__language-row {
+  margin-top: 0.9rem;
+  font-size: var(--tpl-body-size);
+  color: var(--ed-ink);
+}
+
+.editorial-showcase__language-item {
+  white-space: nowrap;
+}
+
+.editorial-showcase__language-sep {
+  display: inline-block;
+  margin: 0 0.75rem;
+  color: var(--ed-border);
+}
+
+/* ── Certificates: plain stacked lines ── */
+
+.editorial-showcase__cert-item {
+  margin-top: 0.9rem;
+  font-size: var(--tpl-body-size);
+  color: var(--ed-ink);
+}
+
+.editorial-showcase__cert-item + .editorial-showcase__cert-item {
+  margin-top: 0.5rem;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 560px) {
+  .editorial-showcase__header {
+    padding: 1.75rem 1.25rem 1.25rem;
+  }
+
+  .editorial-showcase__body {
+    padding: 1.5rem 1.25rem 1.75rem;
+  }
+
+  .editorial-showcase__photo {
+    width: 4.5rem;
+    height: 4.5rem;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .editorial-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .editorial-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+}

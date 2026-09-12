@@ -89,6 +89,17 @@ export const ACCENT_SWATCH_SETS = {
     { color: '#4d7c0f', label: { en: 'Moss', fi: 'Sammal' } },
     { color: '#334155', label: { en: 'Slate', fi: 'Liuske' } },
   ],
+  // Ink-crimson set — crimson first/default. Editorial's range: a
+  // masthead-red accent plus restrained cool alternatives for a magazine
+  // voice that otherwise stays monochrome.
+  inkCrimson: [
+    { color: '#9f1239', label: { en: 'Crimson', fi: 'Karmiini' } },
+    { color: '#7f1d1d', label: { en: 'Brick', fi: 'Tiili' } },
+    { color: '#1e3a8a', label: { en: 'Navy', fi: 'Laivastonsininen' } },
+    { color: '#334155', label: { en: 'Slate', fi: 'Liuske' } },
+    { color: '#0f766e', label: { en: 'Teal', fi: 'Sinivihreä' } },
+    { color: '#4f46e5', label: { en: 'Indigo', fi: 'Indigo' } },
+  ],
   // Cool set — violet first/default, restrained subtle range.
   // (Originally the Modern Timeline swatches.)
   cool: [
