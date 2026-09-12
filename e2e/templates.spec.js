@@ -5,14 +5,14 @@ import { test, expect } from '@playwright/test'
 // couldn't render them at all. Minimalist supports 5 section types;
 // Developer supports 11, including Certificates.
 //
-// The template picker is TemplateQuickSwitcher (see src/components/), a
-// button that opens a scrollable strip of thumbnail cards rather than a
-// native <select> — selecting a template means opening that panel and
-// clicking the card with the matching name.
+// The template picker is the toolbar's "Template" trigger, which opens
+// TemplateGalleryModal (the same modal the nav rail's Templates item and
+// the mobile "Templates" tab use) — selecting a template means opening
+// that dialog and clicking the card with the matching name.
 async function selectTemplate(page, label) {
   await page.getByRole('button', { name: /^Select template:/ }).click()
-  const panel = page.getByRole('dialog', { name: 'Select template' })
-  await panel.getByRole('button', { name: label, exact: true }).click()
+  const dialog = page.getByRole('dialog', { name: 'Template gallery' })
+  await dialog.getByText(label, { exact: true }).click()
 }
 
 test.describe('Template-gated sections', () => {
@@ -22,11 +22,11 @@ test.describe('Template-gated sections', () => {
     const nav = page.getByRole('navigation', { name: 'Section navigation' })
 
     // Minimalist is the default template and does not support Certificates.
-    await expect(page.locator('.template-quick-switcher__trigger-label')).toHaveText('Minimalist')
+    await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Minimalist')
     await expect(nav.getByRole('button', { name: 'Certificates' })).toBeHidden()
 
     await selectTemplate(page, 'Developer')
-    await expect(page.locator('.template-quick-switcher__trigger-label')).toHaveText('Developer')
+    await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Developer')
     await expect(nav.getByRole('button', { name: 'Certificates' })).toBeVisible()
 
     await selectTemplate(page, 'Minimalist')
@@ -209,9 +209,9 @@ test.describe('Classic Professional name alignment', () => {
   test('the retired Classic template is gone from the gallery', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: /^Select template:/ }).click()
-    const panel = page.getByRole('dialog', { name: 'Select template' })
-    await expect(panel.getByRole('button', { name: 'Classic Professional', exact: true })).toBeVisible()
-    await expect(panel.getByRole('button', { name: 'Classic', exact: true })).toHaveCount(0)
+    const dialog = page.getByRole('dialog', { name: 'Template gallery' })
+    await expect(dialog.getByText('Classic Professional', { exact: true })).toBeVisible()
+    await expect(dialog.getByText('Classic', { exact: true })).toHaveCount(0)
   })
 
   test('the Settings option toggles the header alignment', async ({ page }) => {

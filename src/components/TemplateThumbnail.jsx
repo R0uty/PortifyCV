@@ -16,10 +16,10 @@ const TemplateThumbnail = memo(function TemplateThumbnail({ templateId, formData
   // Falls back to the CSS default (0.29, tuned for the gallery modal's own
   // card size — see .template-gallery__thumb-page) until the very first
   // ResizeObserver callback fires, which happens well before paint in
-  // practice. Callers with a differently sized frame (the toolbar's
-  // TemplateQuickSwitcher, the landing page marquee) get measured and
-  // corrected instead of inheriting a scale tuned for a wider card, which
-  // used to clip most of the thumbnail off-frame.
+  // practice. Callers with a differently sized frame (the landing page
+  // marquee) get measured and corrected instead of inheriting a scale
+  // tuned for a wider card, which used to clip most of the thumbnail
+  // off-frame.
   const [scale, setScale] = useState(null)
 
   useEffect(() => {

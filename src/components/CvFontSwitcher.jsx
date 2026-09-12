@@ -19,9 +19,9 @@ function CvFontSwitcher({
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
   const panelRef = useRef(null)
-  // Toolbar.jsx doesn't pass a triggerRef prop (unlike TemplateQuickSwitcher's
-  // templateSelectRef) — an internal ref both drives the button itself and
-  // gives useAnchoredPanelPosition a real DOM node to measure.
+  // Toolbar.jsx doesn't pass a triggerRef prop — an internal ref both drives
+  // the button itself and gives useAnchoredPanelPosition a real DOM node to
+  // measure.
   const triggerRef = useRef(null)
   const selectedFont = CV_FONT_OPTIONS.find((font) => font.id === fontId)
   const { style: panelPosition, ready: panelReady } = useAnchoredPanelPosition(isOpen, triggerRef, panelRef)

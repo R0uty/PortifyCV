@@ -376,18 +376,8 @@ function ResumeBuilderPage({
   const sessionRestoreWarningShownRef = useRef(false)
   const shareWarningShownRef = useRef(false)
   const editorScrollRef = useRef(null)
-  const templateSelectRef = useRef(null)
   const previewViewportRef = useRef(null)
   const resetConfirmTimeoutRef = useRef(null)
-  // Read by TemplateQuickSwitcher when its panel opens, instead of threading
-  // formData itself through onHeaderChange — that object's identity changes
-  // on every keystroke, and putting it in the header-sync effect's deps
-  // below would re-render the toolbar on every keystroke just to keep a
-  // rarely-opened thumbnail strip fresh.
-  const formDataRef = useRef(formData)
-  useEffect(() => {
-    formDataRef.current = formData
-  }, [formData])
 
   // Non-default CV fonts are fetched on demand (see utils/cvFonts.js) rather
   // than bundled upfront. PDF export snapshots the live DOM, so it has to
@@ -1052,6 +1042,10 @@ function ResumeBuilderPage({
     }
   }, [])
 
+  const handleOpenTemplateGallery = useCallback(() => {
+    setIsTemplateGalleryOpen(true)
+  }, [])
+
   const handleCloseTemplateGallery = useCallback(() => {
     setIsTemplateGalleryOpen(false)
   }, [])
@@ -1254,9 +1248,7 @@ function ResumeBuilderPage({
       onRedo: handleRedo,
       templates,
       selectedTemplateId: selectedTemplate,
-      onSelectTemplate: handleSelectTemplate,
-      templateSelectRef,
-      formDataRef,
+      onOpenTemplateGallery: handleOpenTemplateGallery,
       cvFontId,
       onCvFontChange: handleCvFontChange,
       cvHeadingColor,
@@ -1273,7 +1265,7 @@ function ResumeBuilderPage({
     activeExport, isActionBusy, locale,
     handleExport, handleCopyShareLink, handleLocaleChange,
     canUndo, canRedo, handleUndo, handleRedo,
-    templates, selectedTemplate, handleSelectTemplate,
+    templates, selectedTemplate, handleOpenTemplateGallery,
     cvFontId, handleCvFontChange,
     cvHeadingColor, handleCvHeadingColorChange,
     searchQuery,

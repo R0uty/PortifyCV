@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft,
   ChevronDown,
@@ -17,14 +17,6 @@ import LocaleFlagIcon from './LocaleFlagIcon'
 import CvFontSwitcher from './CvFontSwitcher'
 import CvHeadingColorSwitcher from './CvHeadingColorSwitcher'
 
-// Lazy so Toolbar (statically imported by App.jsx, and rendered on every
-// static page's bundle boundary as a result) doesn't drag TemplateThumbnail's
-// full CVPreview dependency graph into the eagerly-loaded main chunk — it's
-// only ever needed once the builder is open. See CVPreview's own lazy
-// Showcase imports for the same reasoning. CvFontSwitcher has no such
-// dependency (just the small cvFonts.js registry) so it's imported eagerly.
-const TemplateQuickSwitcher = lazy(() => import('./TemplateQuickSwitcher'))
-
 function Toolbar({
   locale = 'en',
   onReturn = () => {},
@@ -35,9 +27,7 @@ function Toolbar({
   onRedo = () => {},
   templates = [],
   selectedTemplateId = '',
-  onSelectTemplate = () => {},
-  templateSelectRef,
-  formDataRef,
+  onOpenTemplateGallery = () => {},
   cvFontId = '',
   onCvFontChange = () => {},
   cvHeadingColor = '',
@@ -197,26 +187,19 @@ function Toolbar({
           <div className="app-toolbar__control-cluster">
             <div className="app-toolbar__labeled-control">
               <span className="app-toolbar__control-label">{isFinnish ? 'Pohja' : 'Template'}</span>
-              <Suspense
-                fallback={(
-                  <span className="template-quick-switcher__trigger" aria-hidden="true">
-                    <span className="template-quick-switcher__trigger-label">
-                      {templates.find((template) => template.id === selectedTemplateId)?.label}
-                    </span>
-                  </span>
-                )}
+              <button
+                type="button"
+                className="app-toolbar__template-trigger"
+                onClick={onOpenTemplateGallery}
               >
-                <TemplateQuickSwitcher
-                  templates={templates}
-                  selectedTemplateId={selectedTemplateId}
-                  onSelectTemplate={onSelectTemplate}
-                  formDataRef={formDataRef}
-                  cvFontId={cvFontId}
-                  cvHeadingColor={cvHeadingColor}
-                  locale={locale}
-                  triggerRef={templateSelectRef}
-                />
-              </Suspense>
+                {/* Visually hidden so sighted users just see the template name, but
+                    screen readers get "Select template: X" instead of only "X". */}
+                <span className="sr-only">{isFinnish ? 'Valitse pohja: ' : 'Select template: '}</span>
+                <span className="app-toolbar__template-trigger-label">
+                  {templates.find((template) => template.id === selectedTemplateId)?.label}
+                </span>
+                <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
+              </button>
             </div>
 
             <div className="app-toolbar__labeled-control">

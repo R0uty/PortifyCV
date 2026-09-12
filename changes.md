@@ -4,6 +4,29 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template quick-switcher retired — 2026-09-13
+
+Released as v1.2.19. Roadmap item A.4 (also closes B1): the toolbar's
+`TEMPLATE` control was a carousel-like dropdown with its own scrollable
+thumbnail strip — a second, weaker template picker alongside the nav rail's
+full gallery modal. Collapsed to one: the toolbar control now just opens
+`TemplateGalleryModal` directly (same modal as the nav rail's Templates
+item and the mobile "Templates" tab).
+
+- Deleted `TemplateQuickSwitcher.jsx` and its `.template-quick-switcher__*`
+  CSS. `Toolbar.jsx`'s template control is now a plain button (same visual
+  slot, current template name + chevron) wired to a new
+  `onOpenTemplateGallery` prop.
+- Removed `templateSelectRef` and `formDataRef`, both dead once nothing
+  reads them (they existed only to feed the quick-switcher's own trigger
+  ref and its live thumbnail-strip snapshot).
+- `e2e/templates.spec.js`'s `selectTemplate()` helper (and two other
+  direct copies of the same pattern) now open the gallery modal and click
+  a card by name instead of the old mini-panel. Deleted
+  `e2e/responsive.spec.js`'s "template picker panel stays on-screen when
+  the toolbar wraps" test — it guarded an anchored-dropdown positioning
+  bug that can't happen once the trigger opens a centered modal instead.
+
 ## Builder usability polish — 2026-09-12
 
 Released as v1.2.18. Roadmap item B (builder usability), scoped to B3-B5

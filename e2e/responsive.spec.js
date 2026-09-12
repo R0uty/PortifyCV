@@ -132,17 +132,22 @@ test.describe('Mobile layout', () => {
 })
 
 test.describe('Desktop toolbar dropdowns', () => {
-  // Regression guard: the toolbar's last group (Template/Font/Color pickers
-  // plus locale/print/export controls) wraps onto its own row via flex-wrap
-  // at plenty of real desktop widths — 1280px reproduces it reliably. Each
-  // picker's dropdown panel used to be `position: absolute; right: 0`
-  // relative to its own trigger, assuming the trigger always had room to its
-  // left; once a wrapped row pushed a trigger toward the screen's left edge
-  // instead, that assumption broke and the panel rendered mostly off-screen
-  // to the left — clicking any option inside it was impossible. Panels now
-  // position themselves in fixed viewport coordinates via
-  // useAnchoredPanelPosition, clamped to stay fully on-screen regardless of
-  // where the toolbar wrapping puts the trigger.
+  // Regression guard: the toolbar's last group (Font/Color pickers plus
+  // locale/print/export controls, and — before A.4 collapsed it into the
+  // template gallery modal — the template picker too) wraps onto its own
+  // row via flex-wrap at plenty of real desktop widths — 1280px reproduces
+  // it reliably. Each picker's dropdown panel used to be `position:
+  // absolute; right: 0` relative to its own trigger, assuming the trigger
+  // always had room to its left; once a wrapped row pushed a trigger
+  // toward the screen's left edge instead, that assumption broke and the
+  // panel rendered mostly off-screen to the left — clicking any option
+  // inside it was impossible. Panels now position themselves in fixed
+  // viewport coordinates via useAnchoredPanelPosition, clamped to stay
+  // fully on-screen regardless of where the toolbar wrapping puts the
+  // trigger. The template picker no longer uses this hook (it opens
+  // TemplateGalleryModal, a centered modal that isn't anchored to its
+  // trigger and so isn't subject to this failure mode), so it has no test
+  // here anymore.
   test.use({ viewport: { width: 1280, height: 800 } })
 
   async function expectPanelOnScreen(page, triggerNamePattern, panelRole = 'dialog') {
@@ -154,11 +159,6 @@ test.describe('Desktop toolbar dropdowns', () => {
     expect(box.x).toBeGreaterThanOrEqual(0)
     expect(box.x + box.width).toBeLessThanOrEqual(viewport.width)
   }
-
-  test('the template picker panel stays on-screen when the toolbar wraps', async ({ page }) => {
-    await page.goto('/cv')
-    await expectPanelOnScreen(page, /^Select template:/)
-  })
 
   test('the font picker panel stays on-screen when the toolbar wraps', async ({ page }) => {
     await page.goto('/cv')

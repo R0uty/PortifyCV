@@ -445,9 +445,7 @@ function App() {
           onRedo={headerProps.onRedo}
           templates={headerProps.templates}
           selectedTemplateId={headerProps.selectedTemplateId}
-          onSelectTemplate={headerProps.onSelectTemplate}
-          templateSelectRef={headerProps.templateSelectRef}
-          formDataRef={headerProps.formDataRef}
+          onOpenTemplateGallery={headerProps.onOpenTemplateGallery}
           cvFontId={headerProps.cvFontId}
           onCvFontChange={headerProps.onCvFontChange}
           cvHeadingColor={headerProps.cvHeadingColor}
