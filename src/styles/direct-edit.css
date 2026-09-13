@@ -117,6 +117,7 @@
 }
 
 .direct-edit-preview {
+  position: relative;
   max-width: var(--preview-paper-width, 56rem);
   margin: 0 auto;
 }
@@ -156,4 +157,54 @@
   background: var(--ds-surface, #ffffff);
   color: var(--ds-text-primary, #18181b);
   box-shadow: 0 0 0 1px var(--ds-border-strong, #d4d4d8);
+}
+
+.direct-edit-sections {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  /* z-index:auto (the brief's original omission) is not enough here: the
+     CV header content it overlaps is deep inside a plain, non-positioned
+     ARTICLE/HEADER subtree, yet real-browser paint/hit-testing still put
+     that subtree above this popover without an explicit z-index — verified
+     via elementsFromPoint before/after adding this. An explicit value is
+     required for the trigger to actually be clickable. */
+  z-index: 5;
+}
+
+.direct-edit-sections__trigger {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ds-text-secondary, #52525b);
+  background: var(--ds-surface, #ffffff);
+  border: 1px solid var(--ds-border, #e4e4e7);
+  border-radius: 999px;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+
+.direct-edit-sections__panel {
+  position: absolute;
+  top: 38px;
+  right: 0;
+  min-width: 168px;
+  background: var(--ds-surface, #ffffff);
+  border: 1px solid var(--ds-border, #e4e4e7);
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.direct-edit-sections__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.direct-edit-sections__row:hover {
+  background: var(--ds-surface-muted, #fafaf9);
 }

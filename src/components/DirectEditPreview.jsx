@@ -1,4 +1,5 @@
 import CVPreview from './CVPreview'
+import SectionsMenu from './SectionsMenu'
 import { isDirectEditSupported } from '../utils/directEdit'
 
 export default function DirectEditPreview({
@@ -23,6 +24,14 @@ export default function DirectEditPreview({
             ? `Suora muokkaus ei ole vielä käytössä pohjalle "${templateConfig.label}". Vaihda Classic-tilaan muokataksesi, tai valitse toinen pohja.`
             : `Direct Edit isn't available yet for "${templateConfig.label}". Switch to Classic to edit, or pick a different template.`}
         </p>
+      ) : null}
+      {isSupported ? (
+        <SectionsMenu
+          formData={formData}
+          dispatchFormData={dispatchFormData}
+          templateConfig={templateConfig}
+          locale={locale}
+        />
       ) : null}
       <CVPreview
         formData={formData}
