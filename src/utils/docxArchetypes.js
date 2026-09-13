@@ -129,7 +129,7 @@ function buildLabelGridExperience(snapshot, copy) {
     return [sectionHeading(copy.experience), emptyNotice(copy.noExperience)]
   }
   const rows = snapshot.experience.map((item) => {
-    const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
+    const heading = item.role || copy.untitledRole
     const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
     const dateRange = formatDateRange(item.startDate, item.endDate)
     const value = [
@@ -147,7 +147,7 @@ function buildLabelGridEducation(snapshot, copy) {
     return [sectionHeading(copy.education), emptyNotice(copy.noEducation)]
   }
   const rows = snapshot.education.map((item) => {
-    const heading = [item.degree, item.school].filter(Boolean).join(', ') || copy.educationEntry
+    const heading = item.degree || copy.educationEntry
     const metaLine = [item.school, item.location].filter(Boolean).join(' · ')
     const dateRange = formatDateRange(item.startDate, item.endDate)
     const value = [
