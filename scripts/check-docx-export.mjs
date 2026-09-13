@@ -485,7 +485,15 @@ console.log('\ndocxExport: archetype dispatch (buildDocxDocument)\n')
 }
 
 {
-  // darkSidebarTable (Developer) — 1 table, and the dark fill present.
+  // darkSidebarTable (Developer) — 1 table, dark fill present, rail text
+  // color correctly separated from main text color, and the shaded cell
+  // genuinely on the left (secondary/Skills content before primary/
+  // Experience content in document order) — not just "a fill exists
+  // somewhere," which would still pass even if railSide silently
+  // reverted to buildRailTableBody's own 'right' default. This exact
+  // regression class already happened once during this plan's
+  // development (caught by a task review, not by this check, until now).
+  const copy = createExportCopy('en')
   const doc = await buildDocxDocument(demoCvData, { template: 'developer', locale: 'en' })
   const buffer = await Packer.toBuffer(doc)
   const { default: JSZip } = await import('jszip')
@@ -493,6 +501,21 @@ console.log('\ndocxExport: archetype dispatch (buildDocxDocument)\n')
   const xml = await zip.file('word/document.xml').async('string')
   check('darkSidebarTable (developer) produces exactly 1 table', (xml.match(/<w:tbl>/g) ?? []).length === 1)
   check('dark sidebar fill present', xml.includes('w:fill="1F2937"'))
+
+  const skillsIndex = xml.indexOf(copy.skills.toUpperCase())
+  const experienceIndex = xml.indexOf(copy.experience.toUpperCase())
+  check(
+    'the rail (Skills, a secondary section) appears before the main column (Experience, a primary section) — confirms railSide "left" through the real DOCX_ARCHETYPES dispatch path',
+    skillsIndex > -1 && experienceIndex > -1 && skillsIndex < experienceIndex,
+  )
+
+  check('rail text uses the light palette ink color (F5F5F5)', xml.includes('w:val="F5F5F5"'))
+  check('rail text uses the light palette muted color (D4D4D8)', xml.includes('w:val="D4D4D8"'))
+  check('rail heading uses white (FFFFFF)', xml.includes('w:val="FFFFFF"'))
+  check(
+    'main content (from the Experience heading onward) does not use the light palette ink color — confirms the dark palette did not leak into main',
+    !xml.slice(experienceIndex).includes('w:val="F5F5F5"'),
+  )
 }
 
 {
