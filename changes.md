@@ -4,6 +4,44 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Styled Word export (C2/C3) — 2026-09-13
+
+Released as v1.2.23. Completes the Word-export sub-project (C1 shipped
+one-column, C2/C3 ships styled layout; nothing further is planned in this
+roadmap cycle). Adds per-template `.docx` layouts mirroring the on-screen
+structure, plus accent-color headings matching each template's visual identity.
+
+- **5-archetype mapping** via `DOCX_ARCHETYPES` in `src/utils/docxExport.js`:
+  18 templates mapped to layout families matching A.1's structural archetypes:
+  `oneColumn` (Minimalist, Compact, Editorial, Colorful Compact, Quadrant
+  single-column fallback), `railTable` (left-rail templates: Portfolio Hybrid,
+  Modern Professional, Navy Professional, Modern Timeline, Creative, Tech
+  Executive), `darkSidebarTable` (Developer, Executive), `gridTable` (Quadrant),
+  `labelGridTable` (European). Each layout reflects the template's on-screen
+  organization: main column + sidebar as a 2-cell table, 2×2 grids with borders,
+  label/value pairs per section, or a single column with section breaks.
+- **Color threading via `withPalette` mechanism:** each template's accent color
+  is applied to section headings in the `.docx`, carried by `buildDocxDocument`'s
+  new `palette` parameter (added in Task 1) and dispatched through the 5 layout
+  builders (Tasks 2–4). Heading styles read the accent from the palette; text
+  shaping respects it (e.g., `withPalette(accent)(text)` in section headers).
+- **Two real bugs found and fixed during review:**
+  1. Task 4's `labelGridTable` builder (used by European template) initially
+     left an orphan heading when a section had no items — the "Projects" heading
+     appeared with an empty table below it. Fixed by skipping empty sections
+     entirely before building the label/value grid.
+  2. Task 5's dark-sidebar detection check didn't verify table structure or
+     text-color separation — it only counted tables and checked for cell fill
+     presence. Fixed by adding explicit verification: cell order (left=darker
+     sidebar, right=main content), and contrast between sidebar and main text
+     colors to ensure readability.
+- **Check-script coverage** extended across all five tasks: `npm run check:docx-export`
+  now exercises all 18 templates and all 5 layout archetypes, verifying table
+  structure, cell order, accent color application, empty-section handling, and
+  heading style integrity. No test suite (framework-free Node scripts per project
+  convention), but coverage is comprehensive — every real-world layout path is
+  exercised before a `.docx` export reaches the user.
+
 ## New template: European — 2026-09-13
 
 Released as v1.2.22. Third and final of roadmap A.3's new templates
