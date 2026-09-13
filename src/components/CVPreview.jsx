@@ -45,6 +45,7 @@ const ColorfulCompactShowcase = lazy(() => import('./templates/ColorfulCompactSh
 const QuadrantShowcase = lazy(() => import('./templates/QuadrantShowcase'))
 const TechExecShowcase = lazy(() => import('./templates/TechExecShowcase'))
 const EditorialShowcase = lazy(() => import('./templates/EditorialShowcase'))
+const PortraitShowcase = lazy(() => import('./templates/PortraitShowcase'))
 
 function CVPreview({
   formData,
@@ -56,8 +57,8 @@ function CVPreview({
   // Resolved accent color for the current template (from the app's
   // per-template `templateAccentColors` map, falling back to the template
   // registry's default). `timeline`, `modernOrange`, `creative`, `graduate`,
-  // `executive`, `compact`, `quadrant`, `techExec`, `portfolio` and
-  // `editorial` consume it.
+  // `executive`, `compact`, `quadrant`, `techExec`, `portfolio`,
+  // `editorial` and `portrait` consume it.
   accentColor,
   // Overrides the name and section-title color for every template except
   // Developer (animated gradient name), Colorful Compact (dark header, own
@@ -383,6 +384,25 @@ function CVPreview({
     return (
       <Suspense fallback={null}>
         <EditorialShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          headingColor={headingColor}
+          accentColor={accentColor}
+        />
+      </Suspense>
+    )
+  }
+
+  // ── Portrait Showcase delegation ────────────────────────────────────
+  // The Portrait template's non-ATS look is a full-bleed photo column — a
+  // fully bespoke visual system ATS mode bypasses entirely, same reasoning
+  // as every other bespoke Showcase above.
+  if (variant === 'portrait' && !atsFriendlyMode) {
+    return (
+      <Suspense fallback={null}>
+        <PortraitShowcase
           formData={formData}
           locale={locale}
           previewRef={previewRef}

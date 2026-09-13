@@ -222,6 +222,25 @@ test.describe('Template accent color', () => {
     expect(accent.accent.toLowerCase()).toBe('#0f766e')
     expect(accent.soft).toBe('rgba(15, 118, 110, 0.12)')
   })
+
+  test('choosing a swatch recolors the Portrait preview', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await selectTemplate(page, 'Portrait')
+
+    await page.getByRole('button', { name: 'Settings' }).first().click()
+    // 'Slate' is the 3rd swatch in the 'quietTeal' set (#334155)
+    await page.getByRole('button', { name: 'Slate', exact: true }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
+
+    const root = page.locator('.portrait-showcase').first()
+    const accent = await root.evaluate((el) => ({
+      accent: el.style.getPropertyValue('--tpl-accent').trim(),
+      soft: el.style.getPropertyValue('--tpl-accent-soft').trim(),
+    }))
+    expect(accent.accent.toLowerCase()).toBe('#334155')
+    expect(accent.soft).toBe('rgba(51, 65, 85, 0.12)')
+  })
 })
 
 test.describe('Classic Professional name alignment', () => {

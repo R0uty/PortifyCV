@@ -329,6 +329,26 @@ const templateMap = {
       chips: ['Byline', 'Sections'],
     },
   },
+  portrait: {
+    id: 'portrait',
+    accent: { default: '#0f766e', swatchSet: 'quietTeal' },
+    label: 'Portrait',
+    description: 'A full-height photo fills the left column; identity and every section flow on the right, with one customizable accent. The photo is the structure, not an accent — the strongest fit if you want your face to lead.',
+    variant: 'portrait',
+    layout: 'stacked',
+    primarySections: ['about', 'experience', 'education', 'skills', 'projects', 'links', 'languages', 'certificates'],
+    secondarySections: [],
+    summaryBadgeLabel: 'Profile',
+    thumbnail: {
+      accentClassName: 'bg-teal-700',
+      surfaceClassName: 'bg-gray-50',
+      primaryRatioClassName: 'grid-cols-[0.4fr_0.6fr]',
+      titleWidthClassName: 'w-24',
+      subtitleWidthClassName: 'w-16',
+      blockWidths: ['w-full', 'w-11/12', 'w-9/12'],
+      chips: ['Photo', 'Sections'],
+    },
+  },
 }
 
 const templateLocalization = {
@@ -428,6 +448,12 @@ const templateLocalization = {
       description: 'Aikakauslehtityylinen yksipalstainen asettelu — suuri nimiotsikko, numeroidut osiot ja leveä lukumitta. Ei sivupalkkia, ei sotkua.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Nimiö', 'Osiot'],
+    },
+    portrait: {
+      label: 'Muotokuva',
+      description: 'Täyskorkuinen valokuva täyttää vasemman palstan; henkilötiedot ja kaikki osiot virtaavat oikealla, yhdellä muokattavalla aksenttivärillä. Kuva on itse rakenne, ei koriste — vahvin valinta, jos haluat kasvojesi johtavan.',
+      summaryBadgeLabel: 'Profiili',
+      chips: ['Kuva', 'Osiot'],
     },
   },
 }

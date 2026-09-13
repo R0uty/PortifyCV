@@ -4,6 +4,50 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## New template: Portrait — 2026-09-13
+
+Released as v1.2.21. Second of roadmap A.3's three new templates
+(photo-forward direction). Opens a new structural family the design
+system didn't have: `photo-rail + main` — a full-height, full-bleed photo
+fills the left column (no crop-circle, no border, no text sharing the
+column), while identity and every section flow in the main column. Every
+existing photo-capable template (Executive, Modern Orange, etc.) treats
+the photo as a modest circular avatar (largest today: Portfolio Hybrid's
+7.75rem) alongside rail text — Portrait is the first to make the photo the
+structure itself, not an accent.
+
+- New `src/components/templates/portrait.js` (ATS flat-renderer fallback +
+  `PORTRAIT_DEFAULT_ACCENT_COLOR`) and `PortraitShowcase.jsx`: `rule-under`
+  heading treatment (deliberately quiet, so the photo stays the focal
+  point), one customizable accent used sparingly — role line, section
+  rules — new `quietTeal` swatch set (default `#0f766e`). Same 8-section
+  breadth as Editorial.
+- **No-photo state is a real design, not an omission**: most templates
+  just skip the photo-wrap when there's none; Portrait's whole structure
+  depends on that column, so it falls back to a solid accent-tinted panel
+  carrying a large single-letter monogram instead.
+- **Fixed a real bug found while verifying in the browser**: the photo
+  column initially stretched to match the full document height via CSS
+  Grid's row-stretch, meaning `object-fit: cover` cropped a real photo (or
+  the monogram) down to a barely-visible sliver for any CV longer than
+  about one page — the "A" test monogram was invisible until
+  scrolled to the exact vertical middle of a 2246px-tall column. Fixed by
+  capping the photo/monogram height at one page (`var(--preview-paper-
+  min-height)`, 297mm) with `object-position: 50% 18%` biased toward
+  where a headshot's face usually sits, and letting the rail's own accent
+  background continue as a solid color below the cap for longer CVs —
+  verified by direct `getBoundingClientRect()` measurement before and
+  after, not just eyeballing.
+- Registered like every other bespoke template (9-file pattern); design
+  system's `rule-under` member list and structural-family table both
+  updated with the new family + a distinguishing note vs. `left-rail +
+  main`.
+- Verified: long-name wrap (no overflow, measured directly), the no-photo
+  monogram state (now visible near the top of the page, not buried mid-
+  document), live accent-swatch switching, both locales. `npm run lint`
+  clean, e2e 45/45 (new "choosing a swatch recolors the Portrait preview"
+  test).
+
 ## New template: Editorial — 2026-09-13
 
 Released as v1.2.20. First of roadmap A.3's three new templates (editorial

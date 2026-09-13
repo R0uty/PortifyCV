@@ -18,6 +18,7 @@ import modernOrange from './modernOrange'
 import colorfulCompact from './colorfulCompact'
 import quadrant from './quadrant'
 import editorial from './editorial'
+import portrait from './portrait'
 
 // Map of variant name → template config object
 const templates = {
@@ -37,6 +38,7 @@ const templates = {
   colorfulCompact,
   quadrant,
   editorial,
+  portrait,
 }
 
 // Returns the template config for a given variant string.
@@ -80,6 +82,7 @@ export function prefetchTemplateShowcases() {
   import('./QuadrantShowcase')
   import('./TechExecShowcase')
   import('./EditorialShowcase')
+  import('./PortraitShowcase')
 }
 
 // Export the full map for cases where iteration over all templates is needed

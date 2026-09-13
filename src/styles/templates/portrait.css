@@ -1,0 +1,368 @@
+/* ==========================================================================
+   Portrait Showcase — hand-authored component styles for the Portrait
+   template's non-ATS "showcase" mode. Scoped entirely under
+   `.portrait-showcase`.
+
+   docs/template-design-system.md:
+   - §5 structural family: opens `photo-rail + main` — a full-height,
+     full-bleed photo fills the left column (no crop-circle, no border, no
+     padding, no text sharing the column); identity and every section flow
+     in the main column on the right. Distinct from `left-rail + main`
+     (Executive, Modern Orange), whose rails carry identity/contact/skills
+     text alongside a modest circular photo — this rail carries nothing
+     but the image itself.
+   - §4 heading treatment: `rule-under` — a tracked-uppercase label over an
+     accent hairline, same construction as Executive's. Deliberately quiet
+     so the photo stays the focal point.
+   - §3 colour rule: one ink (`--pt-ink` + two muted steps), one accent
+     (`--tpl-accent`, set inline from the `accentColor` prop with the teal
+     default as the fallback here; `--tpl-accent-soft` is the JS-computed
+     rgba fill) used sparingly — the role line, the section rules, and the
+     no-photo monogram panel.
+   - §2 type ramp: sizes come from `--tpl-*` (the root carries
+     `tpl-density-standard` — the photo column takes a wide share of the
+     page, leaving the main column narrower than a typical right-rail
+     template's).
+   - The name-column width floor (§2's "goes on whichever column holds the
+     name, not automatically the sidebar") applies to `.portrait-showcase
+     __main` here, since the name lives in the main column, not the rail.
+
+   No CSS `filter: blur()` (has hung html2canvas PDF export before); no
+   `color-mix()`/`oklch()` (the export pipeline can't rasterize them, §8).
+   ========================================================================== */
+
+.portrait-showcase {
+  /* Accent — overridden inline per render from the chosen swatch. Kept in
+     sync with PORTRAIT_DEFAULT_ACCENT_COLOR in components/templates/portrait.js. */
+  --tpl-accent: #0f766e;
+  --tpl-accent-soft: rgba(15, 118, 110, 0.12);
+
+  --pt-ink: #1a1a1a;
+  --pt-muted: #52525b;
+  --pt-faint: #71717a;
+  --pt-border: #e4e4e7;
+  /* Deliberately not pure #ffffff — same blank-canvas PDF export guard used
+     by every other Showcase's CSS (see e.g. Classic Professional's). */
+  --pt-bg: #fdfdfd;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.38fr) minmax(210px, 0.62fr);
+  background: var(--pt-bg);
+  color: var(--pt-ink);
+  font-family: var(--font-sans);
+  font-size: var(--tpl-body-size);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.15);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.portrait-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── Photo column: the structure itself — full-bleed, no crop, no text.
+   Capped at one page's height (`--preview-paper-min-height`, not the grid
+   row's full height) rather than stretched to match the main column for
+   a long CV — an uncapped `object-fit: cover` on an arbitrarily tall
+   narrow column crops a real photo down to an unrecognizable sliver once
+   the document runs past one page. A CV longer than that shows the photo
+   anchored to the top of the rail with the accent fill continuing below
+   it, not the photo stretched thin to chase the page count. ── */
+
+.portrait-showcase__photo-col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--tpl-accent);
+}
+
+.portrait-showcase__photo {
+  display: block;
+  width: 100%;
+  height: min(100%, var(--preview-paper-min-height));
+  object-fit: cover;
+  /* Biased toward the top third, where a headshot's face typically sits,
+     rather than a mathematical centre crop. */
+  object-position: 50% 18%;
+}
+
+.portrait-showcase__monogram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: min(100%, var(--preview-paper-min-height));
+  font-size: 6rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ── Main column ── */
+
+.portrait-showcase__main {
+  min-width: 0;
+  padding: 2.5rem 2.75rem 2.75rem;
+}
+
+.portrait-showcase__kicker {
+  font-size: var(--tpl-meta-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--pt-faint);
+}
+
+.portrait-showcase__name {
+  margin-top: 0.5rem;
+  font-size: var(--tpl-name-size);
+  line-height: var(--tpl-name-lh);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+  color: var(--cv-heading-color, var(--pt-ink));
+}
+
+.portrait-showcase__role {
+  margin-top: 0.5rem;
+  font-size: var(--tpl-title-size);
+  font-weight: 600;
+  color: var(--tpl-accent);
+}
+
+.portrait-showcase__meta {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--tpl-meta-size);
+  color: var(--pt-faint);
+  overflow-wrap: break-word;
+}
+
+.portrait-showcase__meta-item + .portrait-showcase__meta-item::before {
+  content: '·';
+  margin-right: 0.4rem;
+  color: var(--pt-faint);
+}
+
+.portrait-showcase__rule {
+  margin-top: 1.5rem;
+  height: 2px;
+  background: var(--pt-border);
+}
+
+/* ── Body: sections, rule-under heading (§4) ── */
+
+.portrait-showcase__body {
+  margin-top: 1.75rem;
+}
+
+.portrait-showcase__section + .portrait-showcase__section {
+  margin-top: 1.75rem;
+}
+
+.portrait-showcase__section-head {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--tpl-accent);
+}
+
+.portrait-showcase__section-title {
+  font-size: var(--tpl-heading-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--cv-heading-color, var(--pt-ink));
+}
+
+.portrait-showcase__empty {
+  margin-top: 0.8rem;
+  font-size: var(--tpl-body-size);
+  color: var(--pt-faint);
+}
+
+/* ── About ── */
+
+.portrait-showcase__intro {
+  margin-top: 0.85rem;
+  font-size: var(--tpl-body-size);
+  line-height: 1.75;
+  color: var(--pt-muted);
+  white-space: pre-line;
+}
+
+/* ── Experience / Education / Projects entries — plain stacked rows ── */
+
+.portrait-showcase__entry-list {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.portrait-showcase__entry-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+}
+
+.portrait-showcase__entry-role {
+  font-size: var(--tpl-entry-title-size);
+  font-weight: 700;
+  color: var(--pt-ink);
+}
+
+.portrait-showcase__entry-dates {
+  font-size: var(--tpl-meta-size);
+  font-weight: 600;
+  color: var(--pt-muted);
+  white-space: nowrap;
+}
+
+.portrait-showcase__entry-meta {
+  margin-top: 0.15rem;
+  font-size: var(--tpl-meta-size);
+  font-style: italic;
+  color: var(--pt-muted);
+}
+
+.portrait-showcase__bullets {
+  margin-top: 0.5rem;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.portrait-showcase__bullets li {
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--pt-ink);
+}
+
+.portrait-showcase__bullets li::marker {
+  color: var(--tpl-accent);
+}
+
+.portrait-showcase__project-desc {
+  margin-top: 0.3rem;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--pt-muted);
+  white-space: pre-line;
+}
+
+/* ── Skills / project tags ── */
+
+.portrait-showcase__tag-row {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.portrait-showcase__tag {
+  border-radius: 4px;
+  border: 1px solid var(--pt-border);
+  padding: 0.3rem 0.7rem;
+  font-size: var(--tpl-meta-size);
+  font-weight: 500;
+  color: var(--pt-ink);
+  background: transparent;
+  overflow-wrap: anywhere;
+}
+
+/* ── Links: plain stacked lines ── */
+
+.portrait-showcase__plain-list {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.portrait-showcase__link-item {
+  font-size: var(--tpl-body-size);
+  font-weight: 600;
+  color: var(--pt-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Languages: inline row separated by a thin middle dot ── */
+
+.portrait-showcase__language-row {
+  margin-top: 0.9rem;
+  font-size: var(--tpl-body-size);
+  color: var(--pt-ink);
+}
+
+.portrait-showcase__language-item {
+  white-space: nowrap;
+}
+
+.portrait-showcase__language-sep {
+  display: inline-block;
+  margin: 0 0.75rem;
+  color: var(--pt-border);
+}
+
+/* ── Certificates: plain stacked lines ── */
+
+.portrait-showcase__cert-item {
+  margin-top: 0.9rem;
+  font-size: var(--tpl-body-size);
+  color: var(--pt-ink);
+}
+
+.portrait-showcase__cert-item + .portrait-showcase__cert-item {
+  margin-top: 0.5rem;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 720px) {
+  .portrait-showcase {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .portrait-showcase__photo-col {
+    min-height: 220px;
+  }
+
+  .portrait-showcase__monogram {
+    min-height: 220px;
+    font-size: 4.5rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .portrait-showcase__main {
+    padding: 1.5rem 1.25rem 1.75rem;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .portrait-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .portrait-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+}

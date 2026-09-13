@@ -100,6 +100,16 @@ export const ACCENT_SWATCH_SETS = {
     { color: '#0f766e', label: { en: 'Teal', fi: 'Sinivihreä' } },
     { color: '#4f46e5', label: { en: 'Indigo', fi: 'Indigo' } },
   ],
+  // Quiet-teal set — teal first/default. Portrait's range: a calm hue that
+  // doesn't compete with a real human photo, plus restrained alternatives.
+  quietTeal: [
+    { color: '#0f766e', label: { en: 'Teal', fi: 'Sinivihreä' } },
+    { color: '#0e7490', label: { en: 'Cyan', fi: 'Syaani' } },
+    { color: '#334155', label: { en: 'Slate', fi: 'Liuske' } },
+    { color: '#4d7c0f', label: { en: 'Moss', fi: 'Sammal' } },
+    { color: '#4f46e5', label: { en: 'Indigo', fi: 'Indigo' } },
+    { color: '#9f1239', label: { en: 'Crimson', fi: 'Karmiini' } },
+  ],
   // Cool set — violet first/default, restrained subtle range.
   // (Originally the Modern Timeline swatches.)
   cool: [

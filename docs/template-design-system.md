@@ -224,7 +224,7 @@ means amending this document, not adding a variant to one template.
 
 | Treatment | What it is | Current members |
 |---|---|---|
-| `rule-under` | Tracked uppercase label with a hairline rule directly beneath, spanning the column. No glyph, no marker. | Classic Professional (centre or left name), Compact, Executive, Tech Executive |
+| `rule-under` | Tracked uppercase label with a hairline rule directly beneath, spanning the column. No glyph, no marker. | Classic Professional (centre or left name), Compact, Executive, Tech Executive, Portrait |
 | `icon-badge` | A small circular/rounded accent-filled badge holding a monochrome stroke glyph (`sectionIcons` in `shared.jsx`), label to its right. | Developer, Modern Professional, Graduate, Modern Orange, Modern Timeline, Navy Professional, Portfolio Hybrid, Quadrant |
 | `left-tick` | A small solid accent mark — a short vertical bar or a dot — immediately left of the label. No glyph. | Colorful Compact (dot form) |
 | `eyebrow-caps` | Small tracked uppercase label, no rule and no marker; separation is whitespace alone. | Minimalist |
@@ -271,6 +271,7 @@ different color" is not a new template.
 | `right-rail + main` | Primary sections on the left, secondary sections in a narrower right column. | Modern Professional, Creative, Graduate, Portfolio Hybrid, Colorful Compact, Tech Executive (with a distinguishing deep-navy masthead + footer band, v1.2.9) |
 | `dark-sidebar + main` | As `left-rail + main`, but the rail is a dark, saturated field with knocked-out white type. | Navy Professional, Developer |
 | `grid` | Neither a rail nor a flow — content partitioned into cells that read at a glance rather than in order. | Quadrant |
+| `photo-rail + main` | A full-height, full-bleed photo fills the left column — no crop-circle, no border, no text sharing the column. Identity and every section flow in the main column. | Portrait |
 
 Notes on the current distribution, for the A.2 triage:
 
@@ -287,6 +288,13 @@ Notes on the current distribution, for the A.2 triage:
   combination named here for the planned editorial one-column template,
   rather than it becoming a seventh right-rail — filled by Editorial
   (v1.2.20, 2026-09-13).
+- **`photo-rail + main` (Portrait, v1.2.21) is not a repaint of
+  `left-rail + main`.** Executive and Modern Orange's rails carry
+  identity/contact/skills text alongside a modest circular photo (largest
+  today, Portfolio Hybrid: 7.75rem); Portrait's rail carries nothing but
+  the image itself — full-bleed, no crop, no text — while identity and
+  every section move into the main column. The photo is the structure,
+  not an accent.
 
 ---
 
