@@ -12,6 +12,7 @@ export default function DirectEditPreview({
   accentColor,
   headingColor,
   classicNameAlignment,
+  previewRef,
 }) {
   const isFinnish = locale === 'fi'
   const isSupported = isDirectEditSupported(selectedTemplate)
@@ -43,6 +44,7 @@ export default function DirectEditPreview({
         headingColor={headingColor}
         classicNameAlignment={classicNameAlignment}
         directEditDispatch={isSupported ? dispatchFormData : null}
+        previewRef={previewRef}
       />
     </div>
   )

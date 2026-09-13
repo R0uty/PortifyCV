@@ -1963,6 +1963,7 @@ function ResumeBuilderPage({
           accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
           headingColor={cvHeadingColor}
           classicNameAlignment={classicNameAlignment}
+          previewRef={previewRef}
         />
       ) : (
         <AppShell
