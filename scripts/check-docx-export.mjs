@@ -540,5 +540,37 @@ console.log('\ndocxExport: archetype dispatch (buildDocxDocument)\n')
   check('accent color 1D4ED8 present', xml.toUpperCase().includes('W:VAL="1D4ED8"'.toUpperCase()) || xml.includes('1D4ED8'))
 }
 
+console.log('\ndocxExport: rail/dark-sidebar archetypes never drop a populated but undeclared section (fix verification)\n')
+
+{
+  // Executive's registry (railTable, railSide 'left') declares:
+  //   primarySections:   about, experience, leadership, projects, achievements, education
+  //   secondarySections: coreStrengths, skills, certificates, languages, memberships, links
+  // 'speaking' is in NEITHER list. Before the fix, mainChildren's predicate
+  // was `primarySet.has(section)`, so a section that's in neither list was
+  // built by nothing and dropped silently — neither cell. demoCvData has
+  // real content in `speaking`, so it must survive and land in the main
+  // cell (everything not declared secondary goes to main).
+  const copy = createExportCopy('en')
+  const doc = await buildDocxDocument(demoCvData, { template: 'executive', locale: 'en' })
+  const buffer = await Packer.toBuffer(doc)
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  const xml = await zip.file('word/document.xml').async('string')
+
+  check(
+    "'speaking' is declared in neither Executive's primarySections nor secondarySections (fixture sanity check)",
+    !['about', 'experience', 'leadership', 'projects', 'achievements', 'education', 'coreStrengths', 'skills', 'certificates', 'languages', 'memberships', 'links'].includes('speaking'),
+  )
+  check(
+    "Speaking section heading survives under Executive despite being undeclared in its registry",
+    xml.includes(copy.speaking.toUpperCase()),
+  )
+  check(
+    "Speaking section's actual content (the demo CV's speaking topic) survives under Executive",
+    xml.includes('Design Systems at Scale'),
+  )
+}
+
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)
 process.exit(failures === 0 ? 0 : 1)

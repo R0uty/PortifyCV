@@ -1,12 +1,22 @@
 // Word (.docx) export — the ATS-friendly, one-column, monochrome document
-// described in docs/superpowers/specs/2026-09-11-word-export-c1-design.md.
-// Every section builder here is a pure function: (snapshot, copy) => a flat
-// array of docx Paragraph/Table objects. No DOM, no screenshot, no template
-// CSS — the document is assembled straight from the same CvData shape every
-// other export reads, via createCvSnapshot. Section coverage, ordering and
-// visibility rules mirror exportCvAsPdfTextFallback in exporters.js exactly
-// (that function is this module's closest sibling — same data walk, aimed
-// at docx objects instead of jsPDF draw calls).
+// described in docs/superpowers/specs/2026-09-11-word-export-c1-design.md,
+// extended in docs/superpowers/specs/2026-09-13-word-export-c2-c3-design.md
+// with per-template archetype layouts. Every section builder here is a pure
+// function: (snapshot, copy) => a flat array of docx Paragraph/Table
+// objects. No DOM, no screenshot, no template CSS — the document is
+// assembled straight from the same CvData shape every other export reads,
+// via createCvSnapshot.
+//
+// Section *coverage* always matches exportCvAsPdfTextFallback in
+// exporters.js exactly — no populated section is ever silently dropped, for
+// any archetype. Section *ordering* now differs by archetype: `oneColumn`
+// and `gridTable` walk the full section list once, in `sectionOrder`;
+// `railTable`/`darkSidebarTable` split into two columns (sections the
+// current template declares as `secondary` go to the rail cell, everything
+// else — declared `primary`, or not declared at all — goes to the main
+// cell, each column internally following `sectionOrder`); `labelGridTable`
+// is scoped to exactly the 8 section types the European template's
+// registry entry supports.
 
 import {
   Document,
@@ -540,7 +550,6 @@ export async function buildDocxDocument(formData, options = {}) {
 
     if (archetypeConfig.archetype === 'railTable' || archetypeConfig.archetype === 'darkSidebarTable') {
       const dark = archetypeConfig.archetype === 'darkSidebarTable'
-      const primarySet = new Set(templateConfig.primarySections)
       const secondarySet = new Set(templateConfig.secondarySections)
       const rendered = new Set()
 
@@ -558,7 +567,12 @@ export async function buildDocxDocument(formData, options = {}) {
         return out
       }
 
-      const mainChildren = buildGroup((section) => primarySet.has(section))
+      // Everything NOT explicitly declared secondary for this template goes
+      // to main — including sections the template's registry never lists
+      // at all (primary and secondary together aren't guaranteed to cover
+      // every section type). Only a declared-secondary section routes to
+      // the rail; nothing is ever dropped for lacking a registry entry.
+      const mainChildren = buildGroup((section) => !secondarySet.has(section))
       const railChildren = dark
         ? withPalette({ ink: 'F5F5F5', inkSubtle: 'D4D4D8', heading: 'FFFFFF' }, () => buildGroup((section) => secondarySet.has(section)))
         : buildGroup((section) => secondarySet.has(section))
