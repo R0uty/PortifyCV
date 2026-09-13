@@ -759,7 +759,11 @@ function ResumeBuilderPage({
 
       if (type === 'docx') {
         const { exportCvAsDocx } = await import('../utils/docxExport')
-        await exportCvAsDocx(formData, exportFileName, { template: selectedTemplate, locale })
+        await exportCvAsDocx(formData, exportFileName, {
+          template: selectedTemplate,
+          locale,
+          accentColor: resolveTemplateAccent(templateAccentColors, selectedTemplate),
+        })
       }
 
       showToast(
@@ -782,7 +786,7 @@ function ResumeBuilderPage({
       }
       dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
     }
-  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate, zoomPercent])
+  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate, templateAccentColors, zoomPercent])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()

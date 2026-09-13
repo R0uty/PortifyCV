@@ -278,13 +278,11 @@ console.log('\ndocxExport: no orphan headings on a partially-filled CV\n')
   check('Interests contributes nothing when empty (no orphan heading)', buildInterestsSection(snapshot, copy).length === 0)
 }
 
-console.log('\ndocxExport: monochrome by design (no stray colors in the generated XML)\n')
+console.log('\ndocxExport: heading color (monochrome by default, accent when provided)\n')
 
 {
-  // document.xml lives inside the .docx ZIP container, typically DEFLATE-
-  // compressed — a raw-byte regex over the packed buffer finds nothing, so
-  // this unzips with JSZip (already a transitive dependency of docx, and
-  // available at node_modules/jszip) and inspects the real XML text.
+  // No accentColor passed — headings stay the two monochrome tokens,
+  // exactly C1's original guarantee.
   const doc = await buildDocxDocument(demoCvData, { template: 'modern', locale: 'en' })
   const buffer = await Packer.toBuffer(doc)
 
@@ -300,11 +298,45 @@ console.log('\ndocxExport: monochrome by design (no stray colors in the generate
 
     check('found at least one w:color in the generated document', colorMatches.length > 0)
     check(
-      'every text color is one of the two monochrome tokens (1A1A1A / 666666) — no stray hues',
+      'with no accentColor, every text color is one of the two monochrome tokens (1A1A1A / 666666)',
       colorsUsed.size > 0 && [...colorsUsed].every((hex) => hex === '1A1A1A' || hex === '666666'),
       `colors found: ${[...colorsUsed].join(', ')}`,
     )
   }
+}
+
+{
+  // accentColor passed — headings use it; body text stays monochrome.
+  const doc = await buildDocxDocument(demoCvData, { template: 'creative', locale: 'en', accentColor: '#e2572a' })
+  const buffer = await Packer.toBuffer(doc)
+
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  const documentXml = await zip.file('word/document.xml').async('string')
+  const colorMatches = [...documentXml.matchAll(/w:color w:val="([0-9A-Fa-f]{6})"/g)]
+  const colorsUsed = new Set(colorMatches.map(([, hex]) => hex.toUpperCase()))
+
+  check('with accentColor #e2572a, the accent hex E2572A appears in the document', colorsUsed.has('E2572A'))
+  check(
+    'with accentColor set, every color is still one of the three expected tokens (1A1A1A / 666666 / E2572A) — no stray hues',
+    [...colorsUsed].every((hex) => hex === '1A1A1A' || hex === '666666' || hex === 'E2572A'),
+    `colors found: ${[...colorsUsed].join(', ')}`,
+  )
+}
+
+{
+  // accent: null template (Modern Professional) — accentColor omitted by
+  // the caller in practice, but confirm passing one anyway has no special
+  // handling needed here (buildDocxDocument doesn't know about the
+  // registry's accent:null — that's ResumeBuilderPage.jsx's job, tested
+  // manually in Task 5). This check just documents the contract: omitting
+  // accentColor is what keeps a template monochrome.
+  const doc = await buildDocxDocument(demoCvData, { template: 'modern', locale: 'en' })
+  const buffer = await Packer.toBuffer(doc)
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  const documentXml = await zip.file('word/document.xml').async('string')
+  check('omitting accentColor entirely still produces a valid document', documentXml.includes('<w:document'))
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)

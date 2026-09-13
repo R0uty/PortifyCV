@@ -37,11 +37,11 @@ import { createExportCopy, cropPhotoDataUrlToSquare, getPhotoDataUrl, getImageFo
 // Monochrome by design (see the spec) — no hue anywhere, just tonal
 // hierarchy within near-black/gray, the same way the PDF text-fallback uses
 // a few shades of one slate tone rather than one flat value.
-const INK = '1A1A1A'
-const INK_SUBTLE = '666666'
+export const INK = '1A1A1A'
+export const INK_SUBTLE = '666666'
 
 // Run sizes are in half-points (docx convention): 21 = 10.5pt.
-const META_SIZE = 20
+export const META_SIZE = 20
 const NAME_SIZE = 40
 const ROLE_SIZE = 24
 const BODY_SIZE = 21
@@ -49,7 +49,29 @@ const SUBHEAD_SIZE = 22
 const HEADING_SIZE = 24
 
 const NO_BORDER = { style: BorderStyle.NONE }
-const NO_CELL_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER }
+export const NO_CELL_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER }
+
+// A small color-override mechanism so buildDocxDocument can recolor
+// section headings (and, later, a whole rail cell's text) to a
+// template's accent without changing any of the 20 section-builder
+// functions below — they all go through sectionHeading/boldLine/
+// plainLine/bulletLines/emptyNotice, which read this instead of the
+// INK/INK_SUBTLE constants directly. Module-level state is safe here
+// only because buildDocxDocument is the sole caller of these helpers
+// and the app's export UI disables every export button while one is
+// in flight (Toolbar.jsx's `disabled={isActionBusy}`), so two calls
+// can never interleave.
+let currentPalette = { ink: INK, inkSubtle: INK_SUBTLE, heading: INK }
+
+export function withPalette(palette, fn) {
+  const previous = currentPalette
+  currentPalette = palette
+  try {
+    return fn()
+  } finally {
+    currentPalette = previous
+  }
+}
 
 function buildIdentityText(snapshot, copy) {
   const nameText = snapshot.fullName || copy.yourName
@@ -139,25 +161,25 @@ export async function buildIdentityBlock(snapshot, copy, includePhoto) {
   ]
 }
 
-function sectionHeading(text) {
+export function sectionHeading(text) {
   return new Paragraph({
     heading: HeadingLevel.HEADING_2,
     spacing: { before: 280, after: 120 },
-    children: [new TextRun({ text: text.toUpperCase(), bold: true, size: HEADING_SIZE, color: INK })],
+    children: [new TextRun({ text: text.toUpperCase(), bold: true, size: HEADING_SIZE, color: currentPalette.heading })],
   })
 }
 
-function boldLine(text, opts = {}) {
+export function boldLine(text, opts = {}) {
   if (!text) {
     return null
   }
   return new Paragraph({
     spacing: { after: opts.after ?? 40 },
-    children: [new TextRun({ text, bold: true, size: opts.size ?? SUBHEAD_SIZE, color: INK })],
+    children: [new TextRun({ text, bold: true, size: opts.size ?? SUBHEAD_SIZE, color: currentPalette.ink })],
   })
 }
 
-function plainLine(text, opts = {}) {
+export function plainLine(text, opts = {}) {
   if (!text) {
     return null
   }
@@ -166,24 +188,24 @@ function plainLine(text, opts = {}) {
     children: [new TextRun({
       text,
       size: opts.size ?? BODY_SIZE,
-      color: opts.subtle ? INK_SUBTLE : INK,
+      color: opts.subtle ? currentPalette.inkSubtle : currentPalette.ink,
       italics: opts.italics ?? false,
     })],
   })
 }
 
-function bulletLines(items) {
+export function bulletLines(items) {
   return items.map((item) => new Paragraph({
     bullet: { level: 0 },
     spacing: { after: 60 },
-    children: [new TextRun({ text: item, size: BODY_SIZE, color: INK })],
+    children: [new TextRun({ text: item, size: BODY_SIZE, color: currentPalette.ink })],
   }))
 }
 
-function emptyNotice(text) {
+export function emptyNotice(text) {
   return new Paragraph({
     spacing: { after: 160 },
-    children: [new TextRun({ text, size: BODY_SIZE, color: INK_SUBTLE, italics: true })],
+    children: [new TextRun({ text, size: BODY_SIZE, color: currentPalette.inkSubtle, italics: true })],
   })
 }
 
@@ -192,7 +214,7 @@ function emptyNotice(text) {
 // Showcase already treats these \n-separated fields — a deliberate
 // improvement over the PDF text-fallback's single-wrapped-paragraph
 // approach (see Global Constraints in the plan).
-function descriptionLines(text) {
+export function descriptionLines(text) {
   if (!text) {
     return []
   }
@@ -462,7 +484,7 @@ export function buildTestimonialsSection(snapshot, copy) {
 const PAGE_MARGIN_MM = { top: 16, right: 16, bottom: 18, left: 16 }
 
 export async function buildDocxDocument(formData, options = {}) {
-  const { template = defaultTemplateId, locale = 'en' } = options
+  const { template = defaultTemplateId, locale = 'en', accentColor } = options
   const snapshot = createCvSnapshot(formData)
   const copy = createExportCopy(locale)
   const templateConfig = getCvTemplate(template)
@@ -471,6 +493,7 @@ export async function buildDocxDocument(formData, options = {}) {
   const sectionOrder = normalizeSectionOrder(formData.sectionOrder, templateSectionOrder)
   const isVisible = (section) => sectionVisibility[section] !== false
   const includePhoto = isPhotoVisibleForTemplate(formData.photoVisibilityByTemplate, templateConfig.id)
+  const headingColor = accentColor ? accentColor.replace('#', '').toUpperCase() : INK
 
   const sectionBuilders = {
     about: () => buildAboutSection(snapshot, copy),
@@ -498,16 +521,17 @@ export async function buildDocxDocument(formData, options = {}) {
   const renderedSections = new Set()
   const children = [...(await buildIdentityBlock(snapshot, copy, includePhoto))]
 
-  const appendSection = (section) => {
-    const build = sectionBuilders[section]
-    if (build && !renderedSections.has(section) && isVisible(section)) {
-      children.push(...build())
-      renderedSections.add(section)
+  withPalette({ ink: INK, inkSubtle: INK_SUBTLE, heading: headingColor }, () => {
+    const appendSection = (section) => {
+      const build = sectionBuilders[section]
+      if (build && !renderedSections.has(section) && isVisible(section)) {
+        children.push(...build())
+        renderedSections.add(section)
+      }
     }
-  }
-
-  sectionOrder.forEach(appendSection)
-  Object.keys(sectionBuilders).forEach(appendSection)
+    sectionOrder.forEach(appendSection)
+    Object.keys(sectionBuilders).forEach(appendSection)
+  })
 
   return new Document({
     sections: [{
