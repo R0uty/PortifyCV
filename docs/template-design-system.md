@@ -226,7 +226,7 @@ means amending this document, not adding a variant to one template.
 |---|---|---|
 | `rule-under` | Tracked uppercase label with a hairline rule directly beneath, spanning the column. No glyph, no marker. | Classic Professional (centre or left name), Compact, Executive, Tech Executive, Portrait |
 | `icon-badge` | A small circular/rounded accent-filled badge holding a monochrome stroke glyph (`sectionIcons` in `shared.jsx`), label to its right. | Developer, Modern Professional, Graduate, Modern Orange, Modern Timeline, Navy Professional, Portfolio Hybrid, Quadrant |
-| `left-tick` | A small solid accent mark — a short vertical bar or a dot — immediately left of the label. No glyph. | Colorful Compact (dot form) |
+| `left-tick` | A small solid accent mark — a short vertical bar or a dot — immediately left of the label. No glyph. | Colorful Compact (dot form), European (dot form) |
 | `eyebrow-caps` | Small tracked uppercase label, no rule and no marker; separation is whitespace alone. | Minimalist |
 | `numbered` | A two-digit ordinal (`01`, `02`, …) in the accent, preceding the label. | Creative, Editorial |
 
@@ -272,6 +272,7 @@ different color" is not a new template.
 | `dark-sidebar + main` | As `left-rail + main`, but the rail is a dark, saturated field with knocked-out white type. | Navy Professional, Developer |
 | `grid` | Neither a rail nor a flow — content partitioned into cells that read at a glance rather than in order. | Quadrant |
 | `photo-rail + main` | A full-height, full-bleed photo fills the left column — no crop-circle, no border, no text sharing the column. Identity and every section flow in the main column. | Portrait |
+| `label-grid` | Content laid out as a persistent label/value table (a date, skill category, link type, or language level in a narrow left column; the content in a wider right column) — a "form" reading pattern, not flowing prose. | European |
 
 Notes on the current distribution, for the A.2 triage:
 
@@ -295,6 +296,18 @@ Notes on the current distribution, for the A.2 triage:
   the image itself — full-bleed, no crop, no text — while identity and
   every section move into the main column. The photo is the structure,
   not an accent.
+- **`label-grid` (European, v1.2.22) is not a repaint of
+  `single-column-flow`.** Minimalist, Classic Professional, Compact and
+  Editorial all read top-to-bottom as prose paragraphs and bordered
+  entries, whatever their density or heading treatment. European's
+  defining move is a persistent label/value table applied to *every*
+  section, not just Experience/Education — About becomes "(blank) |
+  paragraph", Skills becomes "category | items", Links becomes "type |
+  URL", Languages becomes "level | language" — a genuinely different
+  reading pattern, not a variation on flowing prose. One-page fit reuses
+  Compact's measure-and-step technique (the mechanism, not the visual
+  identity, and only 2 tiers — `standard`→`compact` — not Compact's own
+  finer-grained cozy/snug/tight sub-scale).
 
 ---
 

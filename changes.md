@@ -4,6 +4,59 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## New template: European — 2026-09-13
+
+Released as v1.2.22. Third and final of roadmap A.3's new templates
+(European one-page direction, Europass-adjacent). Opens a new `label-grid`
+family: every section reads as a label/value table (a date, skill
+category, link type, or language level in a narrow left column; the
+content in a wider right column) instead of flowing prose — nothing else
+in the app uses this reading pattern. Roadmap A.3 is now complete.
+
+- New `src/components/templates/european.js` (ATS flat-renderer fallback +
+  `EUROPEAN_DEFAULT_ACCENT_COLOR`) and `EuropeanShowcase.jsx`: `left-tick`
+  heading treatment (until now only Colorful Compact), one customizable
+  accent used sparingly — new `civicBlue` swatch set (default `#1d4ed8`).
+  The label/value grid applies to *every* section, not just Experience/
+  Education — About becomes "(blank) | paragraph", Skills becomes
+  "category | items", Links becomes "type | URL", Languages becomes
+  "level | language", Certificates becomes "year | name – issuer".
+  A small square ID-style photo (not the circular avatar every other
+  template uses) is the one deliberate nod to the Europass passport-photo
+  convention. Name deliberately isn't "Europass" itself — that's a
+  specific EU Commission program, not something to imply affiliation with.
+- **One-page auto-fit** reuses Compact's proven measure-and-step
+  technique (own 2-tier scale: `standard` → `compact`, not Compact's own
+  finer-grained cozy/snug/tight sub-scale) — with a quiet "may not fit one
+  page" notice at the floor, matching Compact's own fallback.
+- **Two real bugs found and fixed while verifying in the browser**, both
+  in the auto-fit mechanism:
+  1. The original "reset to standard on content change" guard compared
+     the CV snapshot's object *identity* (copied from Compact's original
+     pattern) — but that identity isn't stable across every re-render on
+     this render path, so the guard kept firing and resetting density
+     back to `standard` before the step-down could stick. Fixed by
+     comparing a cheap content fingerprint (string) instead of reference
+     identity.
+  2. Even after that fix, density still never stepped down: the
+     `useLayoutEffect` is one-shot (runs once per dependency change), but
+     this template is normally reached by selecting it from the gallery
+     modal, whose close transition can still be resizing the preview
+     panel at the exact moment that effect fires — it measured a
+     transient zero-width box (confirmed via direct instrumentation:
+     `scrollHeight: 0`, `clientWidth: 0`, despite real content already in
+     the DOM) and nothing ever re-checked once the panel's width settled.
+     Fixed the same way as this session's earlier `AutoGrowTextarea` bug:
+     a `ResizeObserver` on the root re-triggers the measurement whenever
+     its real box size changes, not just once at mount.
+- Verified end-to-end after the fix: `standard` → `compact` step-down
+  confirmed via direct DOM measurement, and — since the demo CV's 8 links
+  genuinely don't fit even at the tightest tier — the overflow warning
+  correctly appears with its exact intended copy, demonstrating the
+  mechanism degrades honestly instead of silently failing. Long-name wrap
+  verified with no overflow, both locales. `npm run lint` clean, e2e 46/46
+  (new "choosing a swatch recolors the European preview" test).
+
 ## New template: Portrait — 2026-09-13
 
 Released as v1.2.21. Second of roadmap A.3's three new templates

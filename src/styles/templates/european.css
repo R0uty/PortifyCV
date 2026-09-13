@@ -1,0 +1,326 @@
+/* ==========================================================================
+   European Showcase — hand-authored component styles for the European
+   template's non-ATS "showcase" mode. Scoped entirely under
+   `.european-showcase`.
+
+   docs/template-design-system.md:
+   - §5 structural family: opens `label-grid` — every section reads as a
+     label/value table (a narrow left column carrying a date, skill
+     category, link type or language level; a wider right column carrying
+     the content) instead of flowing prose. Distinct from every other
+     `single-column-flow` member (Minimalist, Classic Professional,
+     Compact, Editorial), which all read as prose paragraphs and bordered
+     entries.
+   - §4 heading treatment: `left-tick` — a small solid accent mark before
+     the tracked-uppercase section label. Joins Colorful Compact (a very
+     different colorful template) as the only other member.
+   - §3 colour rule: one ink (`--eu-ink` + two muted steps), one accent
+     (`--tpl-accent`, set inline from the `accentColor` prop with the blue
+     default as the fallback here; `--tpl-accent-soft` is the JS-computed
+     rgba fill) used sparingly — the role line, the row labels, the
+     section ticks and rule.
+   - §2 type ramp: sizes come from `--tpl-*`; the root's density class
+     switches between `tpl-density-standard` and `tpl-density-compact` at
+     runtime (see EuropeanShowcase.jsx's one-page auto-fit, which reuses
+     Compact's measure-and-step technique).
+   - Photo (optional, like every photo-capable template): a small square
+     ID-style photo, not the circular avatar every other template uses —
+     the one deliberate structural nod to the Europass genre's passport-
+     photo convention.
+
+   No CSS `filter: blur()` (has hung html2canvas PDF export before); no
+   `color-mix()`/`oklch()` (the export pipeline can't rasterize them, §8).
+   No decorative animation — matches the genre's sobriety.
+   ========================================================================== */
+
+.european-showcase {
+  /* Accent — overridden inline per render from the chosen swatch. Kept in
+     sync with EUROPEAN_DEFAULT_ACCENT_COLOR in components/templates/european.js. */
+  --tpl-accent: #1d4ed8;
+  --tpl-accent-soft: rgba(29, 78, 216, 0.1);
+
+  --eu-ink: #1a1a1a;
+  --eu-muted: #52525b;
+  --eu-faint: #71717a;
+  --eu-border: #e4e4e7;
+  /* Deliberately not pure #ffffff — same blank-canvas PDF export guard used
+     by every other Showcase's CSS (see e.g. Classic Professional's). */
+  --eu-bg: #fdfdfd;
+
+  position: relative;
+  background: var(--eu-bg);
+  color: var(--eu-ink);
+  font-family: var(--font-sans);
+  font-size: var(--tpl-body-size);
+  border-radius: 4px;
+  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.15);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.european-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── Header ── */
+
+.european-showcase__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 2.25rem 2.5rem 1.25rem;
+}
+
+.european-showcase__kicker {
+  font-size: var(--tpl-meta-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--eu-faint);
+}
+
+.european-showcase__name {
+  margin-top: 0.5rem;
+  font-size: var(--tpl-name-size);
+  line-height: var(--tpl-name-lh);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+  color: var(--cv-heading-color, var(--eu-ink));
+}
+
+.european-showcase__role {
+  margin-top: 0.4rem;
+  font-size: var(--tpl-title-size);
+  font-weight: 600;
+  color: var(--tpl-accent);
+}
+
+.european-showcase__meta {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--tpl-meta-size);
+  color: var(--eu-faint);
+  overflow-wrap: break-word;
+}
+
+.european-showcase__meta-item + .european-showcase__meta-item::before {
+  content: '·';
+  margin-right: 0.4rem;
+  color: var(--eu-faint);
+}
+
+.european-showcase__photo-wrap {
+  flex-shrink: 0;
+}
+
+/* Small square ID-style photo — not the circular avatar every other
+   template uses, the one deliberate nod to the Europass passport-photo
+   convention. */
+.european-showcase__photo {
+  display: block;
+  width: 4.75rem;
+  height: 5.75rem;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--eu-border);
+}
+
+.european-showcase__rule {
+  height: 2px;
+  background: var(--tpl-accent);
+}
+
+/* ── Body: sections, left-tick heading (§4) ── */
+
+.european-showcase__body {
+  padding: 1.5rem 2.5rem 2.5rem;
+}
+
+.european-showcase__section + .european-showcase__section {
+  margin-top: 1.5rem;
+}
+
+.european-showcase__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.85rem;
+}
+
+.european-showcase__section-tick {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--tpl-accent);
+}
+
+.european-showcase__section-title {
+  font-size: var(--tpl-heading-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--cv-heading-color, var(--eu-ink));
+}
+
+.european-showcase__empty {
+  font-size: var(--tpl-body-size);
+  color: var(--eu-faint);
+}
+
+/* ── The label/value row — the template's defining structural device.
+   Repeated for every section: About, Experience, Education, Skills,
+   Projects, Links, Languages, Certificates all use it, not just the
+   dated entries. ── */
+
+.european-showcase__row {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.22fr) 1fr;
+  gap: 0 1rem;
+}
+
+.european-showcase__row + .european-showcase__row {
+  margin-top: 0.9rem;
+}
+
+.european-showcase__row-label {
+  font-size: var(--tpl-meta-size);
+  font-weight: 700;
+  color: var(--tpl-accent);
+}
+
+.european-showcase__row-value {
+  min-width: 0;
+}
+
+/* ── About ── */
+
+.european-showcase__intro {
+  font-size: var(--tpl-body-size);
+  line-height: 1.7;
+  color: var(--eu-muted);
+  white-space: pre-line;
+}
+
+/* ── Experience / Education entries ── */
+
+.european-showcase__entry-role {
+  font-size: var(--tpl-entry-title-size);
+  font-weight: 700;
+  color: var(--eu-ink);
+}
+
+.european-showcase__entry-meta {
+  margin-top: 0.1rem;
+  font-size: var(--tpl-meta-size);
+  font-style: italic;
+  color: var(--eu-muted);
+}
+
+.european-showcase__bullets {
+  margin-top: 0.4rem;
+  padding-left: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.european-showcase__bullets li {
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--eu-ink);
+}
+
+.european-showcase__bullets li::marker {
+  color: var(--tpl-accent);
+}
+
+.european-showcase__project-desc {
+  margin-top: 0.25rem;
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--eu-muted);
+  white-space: pre-line;
+}
+
+.european-showcase__tag-line {
+  margin-top: 0.3rem;
+  font-size: var(--tpl-meta-size);
+  color: var(--eu-faint);
+}
+
+/* ── Skills / Links / Languages / Certificates row values ── */
+
+.european-showcase__skill-items,
+.european-showcase__link-value,
+.european-showcase__language-value,
+.european-showcase__cert-value {
+  font-size: var(--tpl-body-size);
+  color: var(--eu-ink);
+}
+
+.european-showcase__link-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* ── One-page overflow warning (only shown while still overflowing at the
+   tightest shared density tier — see EuropeanShowcase.jsx) ── */
+
+.european-showcase__overflow-warning {
+  margin: 0 2.5rem 1.25rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 0.68rem;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 560px) {
+  .european-showcase__header {
+    padding: 1.5rem 1.25rem 1rem;
+  }
+
+  .european-showcase__body {
+    padding: 1.25rem 1.25rem 1.75rem;
+  }
+
+  .european-showcase__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.2rem 0;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .european-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .european-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+
+  .european-showcase__overflow-warning {
+    display: none !important;
+  }
+}

@@ -349,6 +349,26 @@ const templateMap = {
       chips: ['Photo', 'Sections'],
     },
   },
+  european: {
+    id: 'european',
+    accent: { default: '#1d4ed8', swatchSet: 'civicBlue' },
+    label: 'European',
+    description: 'A Europass-adjacent, genuinely minimal one-page format — every section reads as a label/value table (dates, categories, link types) instead of flowing prose, with one customizable accent. Auto-fits one page.',
+    variant: 'european',
+    layout: 'stacked',
+    primarySections: ['about', 'experience', 'education', 'skills', 'projects', 'links', 'languages', 'certificates'],
+    secondarySections: [],
+    summaryBadgeLabel: 'Profile',
+    thumbnail: {
+      accentClassName: 'bg-blue-700',
+      surfaceClassName: 'bg-gray-50',
+      primaryRatioClassName: 'grid-cols-1',
+      titleWidthClassName: 'w-28',
+      subtitleWidthClassName: 'w-20',
+      blockWidths: ['w-full', 'w-full', 'w-11/12'],
+      chips: ['Table', 'One page'],
+    },
+  },
 }
 
 const templateLocalization = {
@@ -454,6 +474,12 @@ const templateLocalization = {
       description: 'Täyskorkuinen valokuva täyttää vasemman palstan; henkilötiedot ja kaikki osiot virtaavat oikealla, yhdellä muokattavalla aksenttivärillä. Kuva on itse rakenne, ei koriste — vahvin valinta, jos haluat kasvojesi johtavan.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Kuva', 'Osiot'],
+    },
+    european: {
+      label: 'Eurooppalainen',
+      description: 'Europass-henkinen, todella minimalistinen yksisivuinen muoto — jokainen osio esitetään otsikko/arvo-taulukkona (päivämäärät, luokat, linkkityypit) juoksevan tekstin sijaan, yhdellä muokattavalla aksenttivärillä. Sovittuu automaattisesti yhdelle sivulle.',
+      summaryBadgeLabel: 'Profiili',
+      chips: ['Taulukko', 'Yksi sivu'],
     },
   },
 }

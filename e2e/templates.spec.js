@@ -241,6 +241,25 @@ test.describe('Template accent color', () => {
     expect(accent.accent.toLowerCase()).toBe('#334155')
     expect(accent.soft).toBe('rgba(51, 65, 85, 0.12)')
   })
+
+  test('choosing a swatch recolors the European preview', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await selectTemplate(page, 'European')
+
+    await page.getByRole('button', { name: 'Settings' }).first().click()
+    // 'Forest' is the 4th swatch in the 'civicBlue' set (#15803d)
+    await page.getByRole('button', { name: 'Forest', exact: true }).click()
+    await page.getByRole('button', { name: 'Close' }).click()
+
+    const root = page.locator('.european-showcase').first()
+    const accent = await root.evaluate((el) => ({
+      accent: el.style.getPropertyValue('--tpl-accent').trim(),
+      soft: el.style.getPropertyValue('--tpl-accent-soft').trim(),
+    }))
+    expect(accent.accent.toLowerCase()).toBe('#15803d')
+    expect(accent.soft).toBe('rgba(21, 128, 61, 0.12)')
+  })
 })
 
 test.describe('Classic Professional name alignment', () => {

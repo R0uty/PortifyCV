@@ -110,6 +110,17 @@ export const ACCENT_SWATCH_SETS = {
     { color: '#4f46e5', label: { en: 'Indigo', fi: 'Indigo' } },
     { color: '#9f1239', label: { en: 'Crimson', fi: 'Karmiini' } },
   ],
+  // Civic-blue set — blue first/default. European's range: a restrained
+  // institutional blue plus cool alternatives, none of them any other
+  // template's default.
+  civicBlue: [
+    { color: '#1d4ed8', label: { en: 'Blue', fi: 'Sininen' } },
+    { color: '#0369a1', label: { en: 'Sky', fi: 'Taivas' } },
+    { color: '#334155', label: { en: 'Slate', fi: 'Liuske' } },
+    { color: '#15803d', label: { en: 'Forest', fi: 'Metsänvihreä' } },
+    { color: '#6d28d9', label: { en: 'Violet', fi: 'Violetti' } },
+    { color: '#9f1239', label: { en: 'Crimson', fi: 'Karmiini' } },
+  ],
   // Cool set — violet first/default, restrained subtle range.
   // (Originally the Modern Timeline swatches.)
   cool: [

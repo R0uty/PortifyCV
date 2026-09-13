@@ -46,6 +46,7 @@ const QuadrantShowcase = lazy(() => import('./templates/QuadrantShowcase'))
 const TechExecShowcase = lazy(() => import('./templates/TechExecShowcase'))
 const EditorialShowcase = lazy(() => import('./templates/EditorialShowcase'))
 const PortraitShowcase = lazy(() => import('./templates/PortraitShowcase'))
+const EuropeanShowcase = lazy(() => import('./templates/EuropeanShowcase'))
 
 function CVPreview({
   formData,
@@ -58,7 +59,7 @@ function CVPreview({
   // per-template `templateAccentColors` map, falling back to the template
   // registry's default). `timeline`, `modernOrange`, `creative`, `graduate`,
   // `executive`, `compact`, `quadrant`, `techExec`, `portfolio`,
-  // `editorial` and `portrait` consume it.
+  // `editorial`, `portrait` and `european` consume it.
   accentColor,
   // Overrides the name and section-title color for every template except
   // Developer (animated gradient name), Colorful Compact (dark header, own
@@ -403,6 +404,25 @@ function CVPreview({
     return (
       <Suspense fallback={null}>
         <PortraitShowcase
+          formData={formData}
+          locale={locale}
+          previewRef={previewRef}
+          templateConfig={templateConfig}
+          headingColor={headingColor}
+          accentColor={accentColor}
+        />
+      </Suspense>
+    )
+  }
+
+  // ── European Showcase delegation ────────────────────────────────────
+  // The European template's non-ATS look is a label/value table with a
+  // one-page auto-fit — a fully bespoke visual system ATS mode bypasses
+  // entirely, same reasoning as every other bespoke Showcase above.
+  if (variant === 'european' && !atsFriendlyMode) {
+    return (
+      <Suspense fallback={null}>
+        <EuropeanShowcase
           formData={formData}
           locale={locale}
           previewRef={previewRef}
