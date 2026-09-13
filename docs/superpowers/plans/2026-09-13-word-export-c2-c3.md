@@ -899,8 +899,8 @@ export const DOCX_ARCHETYPES = {
   portfolio: { archetype: 'railTable', railSide: 'right' },
   techExec: { archetype: 'railTable', railSide: 'right' },
   colorfulCompact: { archetype: 'railTable', railSide: 'right' },
-  developer: { archetype: 'darkSidebarTable' },
-  navyProfessional: { archetype: 'darkSidebarTable' },
+  developer: { archetype: 'darkSidebarTable', railSide: 'left' },
+  navyProfessional: { archetype: 'darkSidebarTable', railSide: 'left' },
   quadrant: { archetype: 'gridTable' },
   european: { archetype: 'labelGridTable' },
 }
