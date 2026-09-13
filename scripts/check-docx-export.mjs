@@ -57,7 +57,7 @@ const {
 const { createExportCopy } = await importSrc('utils/exporters.js')
 const { demoCvData, createInitialCvData } = await importSrc('utils/cvForm.js')
 const { createCvSnapshot } = await importSrc('utils/cvSnapshot.js')
-const { buildRailTableBody, buildGridTableBody } = await importSrc('utils/docxArchetypes.js')
+const { buildRailTableBody, buildGridTableBody, buildLabelGridBody } = await importSrc('utils/docxArchetypes.js')
 
 let failures = 0
 function check(label, passed, detail = '') {
@@ -410,6 +410,46 @@ console.log('\ndocxArchetypes: buildGridTableBody\n')
   const cell = (text) => [new Paragraph({ children: [new TextRun(text)] })]
   const result = buildGridTableBody([cell('Only content'), [], [], []])
   check('an empty quadrant does not throw and still produces one table', Array.isArray(result) && result.length === 1)
+}
+
+console.log('\ndocxArchetypes: buildLabelGridBody\n')
+
+{
+  const snapshot = createCvSnapshot(demoCvData)
+  const copy = createExportCopy('en')
+  const order = ['about', 'experience', 'education', 'skills', 'projects', 'links', 'languages', 'certificates']
+  const result = buildLabelGridBody(order, snapshot, copy, () => true)
+
+  check('returns a non-empty array', Array.isArray(result) && result.length > 0)
+
+  const xml = await packAndReadDocumentXml(result)
+  check('produced 8 section headings', (xml.match(new RegExp(copy.about.toUpperCase(), 'g')) ?? []).length >= 1)
+  check('produced at least one table (label/value rows)', (xml.match(/<w:tbl>/g) ?? []).length > 0)
+  check('each table row has exactly 2 cells (label + value)', [...xml.matchAll(/<w:tr>[\s\S]*?<\/w:tr>/g)].every((row) => (row[0].match(/<w:tc>/g) ?? []).length === 2))
+}
+
+{
+  // Empty CV — every section must still show its heading + an empty-state
+  // row, matching every other archetype's "no orphan heading, but no
+  // silently-missing section either" behavior from the C1 fix.
+  const snapshot = createCvSnapshot(createInitialCvData())
+  const copy = createExportCopy('en')
+  const order = ['about', 'experience', 'education', 'skills', 'projects', 'links', 'languages', 'certificates']
+  const result = buildLabelGridBody(order, snapshot, copy, () => true)
+  check('an empty CV does not throw', Array.isArray(result))
+
+  const xml = await packAndReadDocumentXml(result)
+  check('empty CV still produces valid document.xml', xml.includes('<w:document'))
+}
+
+{
+  // isVisible predicate is respected — hiding a section drops it entirely.
+  const snapshot = createCvSnapshot(demoCvData)
+  const copy = createExportCopy('en')
+  const order = ['about', 'experience']
+  const result = buildLabelGridBody(order, snapshot, copy, (section) => section !== 'experience')
+  const xml = await packAndReadDocumentXml(result)
+  check('a hidden section is excluded entirely', !xml.includes(copy.experience.toUpperCase()))
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)
