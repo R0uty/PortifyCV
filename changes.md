@@ -6,41 +6,59 @@ notes for each item live in `todo.md`; per-commit detail is in git history.
 
 ## Styled Word export (C2/C3) — 2026-09-13
 
-Released as v1.2.23. Completes the Word-export sub-project (C1 shipped
-one-column, C2/C3 ships styled layout; nothing further is planned in this
-roadmap cycle). Adds per-template `.docx` layouts mirroring the on-screen
-structure, plus accent-color headings matching each template's visual identity.
+Released as v1.2.23. Completes the Word-export sub-project — C1 shipped
+one-column, C2/C3 now ships per-template styled layout; nothing further is
+planned for Word export in this roadmap cycle. Adds table-based layouts
+mirroring each template's on-screen structure, plus the template's accent
+color on section headings.
 
-- **5-archetype mapping** via `DOCX_ARCHETYPES` in `src/utils/docxExport.js`:
-  18 templates mapped to layout families matching A.1's structural archetypes:
-  `oneColumn` (Minimalist, Compact, Editorial, Colorful Compact, Quadrant
-  single-column fallback), `railTable` (left-rail templates: Portfolio Hybrid,
-  Modern Professional, Navy Professional, Modern Timeline, Creative, Tech
-  Executive), `darkSidebarTable` (Developer, Executive), `gridTable` (Quadrant),
-  `labelGridTable` (European). Each layout reflects the template's on-screen
-  organization: main column + sidebar as a 2-cell table, 2×2 grids with borders,
-  label/value pairs per section, or a single column with section breaks.
-- **Color threading via `withPalette` mechanism:** each template's accent color
-  is applied to section headings in the `.docx`, carried by `buildDocxDocument`'s
-  new `palette` parameter (added in Task 1) and dispatched through the 5 layout
-  builders (Tasks 2–4). Heading styles read the accent from the palette; text
-  shaping respects it (e.g., `withPalette(accent)(text)` in section headers).
+- **5-archetype mapping** via `DOCX_ARCHETYPES` in `src/utils/docxArchetypes.js`,
+  covering all 18 templates: `oneColumn` (Minimalist, Compact, Classic
+  Professional, Editorial, Modern Timeline, Portrait — C1's original
+  one-column shape, unchanged), `railTable` (a borderless 2-cell table —
+  left-rail: Executive, Modern Orange; right-rail: Creative, Modern
+  Professional, Graduate, Portfolio Hybrid, Tech Executive, Colorful
+  Compact), `darkSidebarTable` (Developer, Navy Professional — same
+  mechanism as `railTable`, plus a dark cell fill and light rail text),
+  `gridTable` (Quadrant — a 2×2 table, the one archetype that keeps
+  visible borders), `labelGridTable` (European — a label/value table per
+  section, genuinely faithful to its on-screen reading pattern, not an
+  approximation).
+- **Accent color via a `withPalette(palette, fn)` mechanism** in
+  `src/utils/docxExport.js`: a small module-level color-override primitive
+  the existing paragraph-building helpers (`sectionHeading`, `boldLine`,
+  etc.) read instead of hardcoded ink constants, letting `buildDocxDocument`
+  recolor section headings to a template's resolved accent (via
+  `options.accentColor`) without touching any of the 20 existing section
+  builders' signatures or bodies. The 6 `accent: null` templates get no
+  accent threaded and stay monochrome, matching their real on-screen
+  identity.
+- **`parseSkillCategories`-avoidance correction, found during planning**:
+  the design spec's original wording called for European's Skills row to
+  group items by category (reusing `parseSkillCategories`), but that
+  function lives in `src/components/templates/shared.jsx` (JSX) — not
+  importable from the plain-JS `docxArchetypes.js`, nor from the Node-run
+  `check-docx-export.mjs` (no JSX transform in plain Node). European's
+  Skills row uses a flat comma-joined list instead, matching C1's own
+  `buildSkillsSection`.
 - **Two real bugs found and fixed during review:**
-  1. Task 4's `labelGridTable` builder (used by European template) initially
-     left an orphan heading when a section had no items — the "Projects" heading
-     appeared with an empty table below it. Fixed by skipping empty sections
-     entirely before building the label/value grid.
-  2. Task 5's dark-sidebar detection check didn't verify table structure or
-     text-color separation — it only counted tables and checked for cell fill
-     presence. Fixed by adding explicit verification: cell order (left=darker
-     sidebar, right=main content), and contrast between sidebar and main text
-     colors to ensure readability.
-- **Check-script coverage** extended across all five tasks: `npm run check:docx-export`
-  now exercises all 18 templates and all 5 layout archetypes, verifying table
-  structure, cell order, accent color application, empty-section handling, and
-  heading style integrity. No test suite (framework-free Node scripts per project
-  convention), but coverage is comprehensive — every real-world layout path is
-  exercised before a `.docx` export reaches the user.
+  1. `buildLabelGridProjects`'s empty-state branch returned a bare section
+     heading with nothing at all below it when there were no project
+     entries — an orphan heading, the exact defect class already found
+     and fixed once this session in C1's original 20 builders. Fixed to
+     omit the section entirely when empty, matching its sibling functions.
+  2. The `darkSidebarTable` check only verified table count and that the
+     dark-fill hex appeared somewhere in the document — not document
+     order (whether the shaded/rail content genuinely comes before the
+     main content, confirming `railSide: 'left'` through the real
+     dispatch path) or that the rail's text actually uses the light
+     palette needed for legibility against the dark fill. Fixed by adding
+     both assertions.
+- **`scripts/check-docx-export.mjs`** grew checks across all 5 tasks:
+  per-archetype table/cell-structure assertions on real packed-and-unzipped
+  `.docx` XML (via `jszip`), accent-color presence, the two fixes above,
+  and the pre-existing monochrome/heading-color checks from C1 extended
+  for the accent path.
 
 ## New template: European — 2026-09-13
 
