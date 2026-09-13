@@ -68,10 +68,13 @@ export const NO_CELL_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BOR
 // functions below — they all go through sectionHeading/boldLine/
 // plainLine/bulletLines/emptyNotice, which read this instead of the
 // INK/INK_SUBTLE constants directly. Module-level state is safe here
-// only because buildDocxDocument is the sole caller of these helpers
-// and the app's export UI disables every export button while one is
-// in flight (Toolbar.jsx's `disabled={isActionBusy}`), so two calls
-// can never interleave.
+// because every withPalette callback in this file is fully synchronous —
+// no `await` ever happens between setting a palette and restoring it — so
+// no two palette contexts can interleave regardless of what triggers
+// buildDocxDocument, with no dependency on any UI-level guard. The one
+// genuinely async step in this file (buildIdentityBlock's photo decoding)
+// is deliberately awaited OUTSIDE any withPalette call, and that must stay
+// true: never add an `await` inside a withPalette callback.
 let currentPalette = { ink: INK, inkSubtle: INK_SUBTLE, heading: INK }
 
 export function withPalette(palette, fn) {
