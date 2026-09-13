@@ -461,6 +461,8 @@ function App() {
           onExport={headerProps.onExport}
           onCopyShareLink={headerProps.onCopyShareLink}
           onOpenSettings={headerProps.onOpenSettings}
+          builderMode={headerProps.builderMode}
+          onSetBuilderMode={headerProps.onSetBuilderMode}
         />
       )}
 

@@ -39,12 +39,14 @@ import CoverLetterModal from '../components/CoverLetterModal'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
 import CVSuggestionsPanel from '../components/CVSuggestionsPanel'
+import DirectEditPreview from '../components/DirectEditPreview'
 import NavRail from '../components/NavRail'
 import SettingsModal from '../components/SettingsModal'
 import TemplateGalleryModal from '../components/TemplateGalleryModal'
 import ToastStack from '../components/ToastStack'
 import {
   getUiTheme,
+  UI_BUILDER_MODE_STORAGE_KEY,
   UI_LOCALE_STORAGE_KEY,
   UI_NAV_RAIL_COLLAPSED_STORAGE_KEY,
 } from '../utils/designSystem'
@@ -366,6 +368,7 @@ function ResumeBuilderPage({
     cvHeadingColor,
     classicNameAlignment,
     navRailCollapsed,
+    builderMode,
     toasts,
   } = uiState
   const ui = getUiTheme()
@@ -536,6 +539,10 @@ function ResumeBuilderPage({
   useEffect(() => {
     setStorageValue(UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, navRailCollapsed ? 'true' : 'false')
   }, [navRailCollapsed, setStorageValue])
+
+  useEffect(() => {
+    setStorageValue(UI_BUILDER_MODE_STORAGE_KEY, builderMode)
+  }, [builderMode, setStorageValue])
 
   useEffect(() => {
     setStorageValue(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, sessionRestoreEnabled ? 'true' : 'false')
@@ -1003,6 +1010,11 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.TOGGLE_NAV_RAIL_COLLAPSED })
   }, [])
 
+  const handleSetBuilderMode = useCallback(
+    (mode) => dispatchUi({ type: UI_ACTION.SET_BUILDER_MODE, mode }),
+    [dispatchUi],
+  )
+
   const handleOpenSettings = useCallback(() => {
     setIsSettingsOpen(true)
   }, [])
@@ -1264,6 +1276,8 @@ function ResumeBuilderPage({
       isResponsivePreview,
       onToggleResponsivePreview: handleToggleResponsivePreview,
       onOpenSettings: handleOpenSettings,
+      builderMode,
+      onSetBuilderMode: handleSetBuilderMode,
     })
   }, [
     activeExport, isActionBusy, locale,
@@ -1276,6 +1290,7 @@ function ResumeBuilderPage({
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
     handleOpenSettings,
+    builderMode, handleSetBuilderMode,
     onHeaderChange,
   ])
 
@@ -1938,14 +1953,27 @@ function ResumeBuilderPage({
   return (
     <>
       <h1 className="sr-only">{locale === 'fi' ? 'Rakenna CV:si' : 'Build Your CV'}</h1>
-      <AppShell
-        shellStyle={shellStyle}
-        showContentOnMobile={mobilePreviewVisible}
-        nav={navRailContent}
-        sidebar={sidebarContent}
-        content={previewContent}
-        navCollapsed={navRailCollapsed}
-      />
+      {builderMode === 'direct' ? (
+        <DirectEditPreview
+          formData={formData}
+          dispatchFormData={dispatchFormData}
+          selectedTemplate={selectedTemplate}
+          templateConfig={currentTemplate}
+          locale={locale}
+          accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
+          headingColor={cvHeadingColor}
+          classicNameAlignment={classicNameAlignment}
+        />
+      ) : (
+        <AppShell
+          shellStyle={shellStyle}
+          showContentOnMobile={mobilePreviewVisible}
+          nav={navRailContent}
+          sidebar={sidebarContent}
+          content={previewContent}
+          navCollapsed={navRailCollapsed}
+        />
+      )}
 
       {mobileBottomActions}
 

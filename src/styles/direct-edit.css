@@ -115,3 +115,45 @@
   border-color: var(--ds-accent, #0f766e);
   color: var(--ds-accent, #0f766e);
 }
+
+.direct-edit-preview {
+  max-width: var(--preview-paper-width, 56rem);
+  margin: 0 auto;
+}
+
+.direct-edit-preview__notice {
+  margin: 0 0 1rem;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--ds-surface-muted, #fafaf9);
+  border: 1px solid var(--ds-border, #e4e4e7);
+  font-size: 0.8125rem;
+  color: var(--ds-text-secondary, #52525b);
+}
+
+.app-toolbar__mode-switch {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 8px;
+  background: var(--ds-surface-muted, #fafaf9);
+  border: 1px solid var(--ds-border, #e4e4e7);
+}
+
+.app-toolbar__mode-switch-btn {
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ds-text-secondary, #52525b);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.app-toolbar__mode-switch-btn--active {
+  background: var(--ds-surface, #ffffff);
+  color: var(--ds-text-primary, #18181b);
+  box-shadow: 0 0 0 1px var(--ds-border-strong, #d4d4d8);
+}
