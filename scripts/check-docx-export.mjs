@@ -57,7 +57,7 @@ const {
 const { createExportCopy } = await importSrc('utils/exporters.js')
 const { demoCvData, createInitialCvData } = await importSrc('utils/cvForm.js')
 const { createCvSnapshot } = await importSrc('utils/cvSnapshot.js')
-const { buildRailTableBody } = await importSrc('utils/docxArchetypes.js')
+const { buildRailTableBody, buildGridTableBody } = await importSrc('utils/docxArchetypes.js')
 
 let failures = 0
 function check(label, passed, detail = '') {
@@ -384,6 +384,32 @@ async function packAndReadDocumentXml(children) {
   const result = buildRailTableBody(main, rail, { railSide: 'left', dark: true })
   const xml = await packAndReadDocumentXml(result)
   check('dark:true shades the rail cell with the expected fill', xml.includes('w:fill="1F2937"'))
+}
+
+console.log('\ndocxArchetypes: buildGridTableBody\n')
+
+{
+  const cell = (text) => [new Paragraph({ children: [new TextRun(text)] })]
+  const result = buildGridTableBody([cell('TL'), cell('TR'), cell('BL'), cell('BR')])
+
+  check('returns an array with exactly one Table', Array.isArray(result) && result.length === 1)
+
+  const xml = await packAndReadDocumentXml(result)
+  check('produced exactly one table', (xml.match(/<w:tbl>/g) ?? []).length === 1)
+  check('produced exactly 2 rows', (xml.match(/<w:tr>/g) ?? []).length === 2)
+  check('produced exactly 4 cells', (xml.match(/<w:tc>/g) ?? []).length === 4)
+  check('cells have a visible border (unlike railTable)', xml.includes('w:val="single"'))
+
+  const positions = ['TL', 'TR', 'BL', 'BR'].map((label) => xml.indexOf(label))
+  check('all 4 labels present and in reading order (TL, TR, BL, BR)', positions.every((p) => p > -1) && positions[0] < positions[1] && positions[1] < positions[2] && positions[2] < positions[3])
+}
+
+{
+  // An empty cell (a quadrant with no assigned sections) must not throw —
+  // docx.js requires at least one paragraph per cell.
+  const cell = (text) => [new Paragraph({ children: [new TextRun(text)] })]
+  const result = buildGridTableBody([cell('Only content'), [], [], []])
+  check('an empty quadrant does not throw and still produces one table', Array.isArray(result) && result.length === 1)
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)
