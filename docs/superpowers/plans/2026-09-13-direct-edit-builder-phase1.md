@@ -941,29 +941,37 @@ do not reformat or restructure anything else in the file.
   ]
   ```
 
-  Then, in the `t.headerContactMode === 'personal'` branch (the one
-  Minimalist uses — confirm via `src/components/templates/minimal.js`'s
-  `headerContactMode` value before editing; Developer/Creative/Executive/
-  Timeline use `'icons'` and are untouched by this task), replace:
+  Then, in the `t.headerContactMode === 'piped'` branch — **this is the
+  one Minimalist actually uses** (`src/components/templates/minimal.js`
+  sets `headerContactMode: 'piped'`, confirmed directly against the
+  source; `'personal'` is a different, separately-rendered branch used by
+  other templates, not Minimalist — do not edit `'personal'` for this
+  task). Developer/Creative/Executive/Timeline use `'icons'` and are
+  untouched by this task either way. Locate:
 
   ```jsx
-            {t.headerContactMode === 'personal' && personalContactItems.length > 0 ? (
-              <div className={t.headerContactContainerClass || `mt-3 flex flex-wrap ${t.headerContactGap} gap-y-1.5`}>
-                {personalContactItems.map(([key, value]) => (
+            {t.headerContactMode === 'piped' && personalContactItems.length > 0 ? (
+              <p className={`mt-3 flex flex-wrap items-center ${t.headerContactGap} gap-y-1 ${t.headerContactTextSize} leading-5 ${resolvedHeaderContactTextColor}`}>
+                {personalContactItems.map(([key, value], i, arr) => (
+                  <span key={key} className="flex items-center gap-x-2">
+                    <span>{value}</span>
+                    {i < arr.length - 1 ? <span className="text-gray-300">|</span> : null}
+                  </span>
+                ))}
+              </p>
+            ) : null}
   ```
 
-  with a branch that switches source array only when editing:
+  Replace with a version that switches source array only when editing,
+  and wires the inner value through `EditableField` — the pipe-separator
+  logic (`i < arr.length - 1`) is unchanged either way, since
+  `directEditContactFields` also has exactly 3 entries:
 
   ```jsx
-            {t.headerContactMode === 'personal' && (directEditDispatch ? true : personalContactItems.length > 0) ? (
-              <div className={t.headerContactContainerClass || `mt-3 flex flex-wrap ${t.headerContactGap} gap-y-1.5`}>
-                {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
-  ```
-
-  and inside that `.map()`, replace the innermost `<span>{value}</span>`
-  with:
-
-  ```jsx
+            {t.headerContactMode === 'piped' && (directEditDispatch ? true : personalContactItems.length > 0) ? (
+              <p className={`mt-3 flex flex-wrap items-center ${t.headerContactGap} gap-y-1 ${t.headerContactTextSize} leading-5 ${resolvedHeaderContactTextColor}`}>
+                {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel], i, arr) => (
+                  <span key={key} className="flex items-center gap-x-2">
                     {directEditDispatch ? (
                       <EditableField
                         as="span"
@@ -974,6 +982,11 @@ do not reformat or restructure anything else in the file.
                     ) : (
                       <span>{value}</span>
                     )}
+                    {i < arr.length - 1 ? <span className="text-gray-300">|</span> : null}
+                  </span>
+                ))}
+              </p>
+            ) : null}
   ```
 
   (`placeholderLabel` is `undefined` for the `personalContactItems`
