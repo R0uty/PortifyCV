@@ -1,0 +1,24 @@
+/* Direct Edit builder — styles for the inline-editable preview
+   (EditableField/EditableList/EditableChip) and the Sections popover.
+   Scoped to `.direct-edit-*` classes so it never collides with any
+   bespoke Showcase's own `.<template>-showcase__*` classes. */
+
+.direct-edit-field {
+  outline: none;
+  border-radius: 3px;
+  cursor: text;
+}
+
+.direct-edit-field:hover {
+  box-shadow: 0 0 0 1.5px var(--ds-border-strong, #d4d4d8);
+}
+
+.direct-edit-field:focus {
+  box-shadow: 0 0 0 1.5px var(--ds-accent, #0f766e);
+}
+
+.direct-edit-field--empty:not(:focus)::before {
+  content: attr(data-placeholder);
+  color: var(--ds-text-muted, #a1a1aa);
+  pointer-events: none;
+}
