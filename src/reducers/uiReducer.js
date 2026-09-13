@@ -1,6 +1,6 @@
 import { CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, safeStorageGet } from '../utils/cvForm'
 import { defaultTemplateId, getAllTemplateAccents, isValidTemplateId } from '../utils/cvTemplates'
-import { UI_LOCALE_STORAGE_KEY, UI_NAV_RAIL_COLLAPSED_STORAGE_KEY } from '../utils/designSystem'
+import { UI_LOCALE_STORAGE_KEY, UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, UI_BUILDER_MODE_STORAGE_KEY } from '../utils/designSystem'
 import { DEFAULT_CV_FONT_ID } from '../utils/cvFonts'
 import { DEFAULT_CV_HEADING_COLOR } from '../utils/cvHeadingColors'
 
@@ -25,6 +25,7 @@ export const UI_ACTION = {
   SET_CV_HEADING_COLOR: 'SET_CV_HEADING_COLOR',
   TOGGLE_NAV_RAIL_COLLAPSED: 'TOGGLE_NAV_RAIL_COLLAPSED',
   SET_CLASSIC_NAME_ALIGNMENT: 'SET_CLASSIC_NAME_ALIGNMENT',
+  SET_BUILDER_MODE: 'SET_BUILDER_MODE',
 }
 
 // Retired template ids that map onto a surviving template, so an old
@@ -60,6 +61,7 @@ export function createInitialUiState(initialSession) {
   const storedLocale = safeStorageGet(UI_LOCALE_STORAGE_KEY).value
   const storedSessionRestore = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value
   const storedNavRailCollapsed = safeStorageGet(UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, 'false').value
+  const storedBuilderMode = safeStorageGet(UI_BUILDER_MODE_STORAGE_KEY, 'classic').value
 
   return {
     selectedTemplate: readInitialTemplateId(),
@@ -80,6 +82,7 @@ export function createInitialUiState(initialSession) {
     cvHeadingColor: DEFAULT_CV_HEADING_COLOR,
     classicNameAlignment: readInitialClassicNameAlignment(),
     navRailCollapsed: storedNavRailCollapsed === 'true',
+    builderMode: storedBuilderMode === 'direct' ? 'direct' : 'classic',
     toasts: initialSession.initialToast ? [initialSession.initialToast] : [],
   }
 }
@@ -151,6 +154,9 @@ export function uiReducer(state, action) {
 
     case UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT:
       return { ...state, classicNameAlignment: action.alignment === 'left' ? 'left' : 'center' }
+
+    case UI_ACTION.SET_BUILDER_MODE:
+      return { ...state, builderMode: action.mode === 'direct' ? 'direct' : 'classic' }
 
     default:
       return state
