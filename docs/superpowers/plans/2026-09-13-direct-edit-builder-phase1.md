@@ -1257,6 +1257,17 @@ do not reformat or restructure anything else in the file.
 - Create: `src/components/DirectEditPreview.jsx`
 - Modify: `src/components/Toolbar.jsx`
 - Modify: `src/pages/ResumeBuilderPage.jsx`
+- Modify: `src/App.jsx` — **found during implementation, not anticipated
+  when this plan was written:** `<Toolbar>` is not rendered directly in
+  `ResumeBuilderPage.jsx`. It's rendered in `App.jsx`, fed by a pre-existing
+  `headerProps`/`onHeaderChange` bridge object `ResumeBuilderPage.jsx`
+  builds and lifts up — every existing Toolbar prop already flows through
+  that bridge, not a literal `<Toolbar .../>` call in this file. Thread
+  `builderMode`/`onSetBuilderMode` through that same bridge (add them to
+  the `headerProps` object and its effect's dependency array in
+  `ResumeBuilderPage.jsx`), then add the same two prop lines to `App.jsx`'s
+  existing `<Toolbar .../>` call, matching the exact pattern every one of
+  its other dozen props already uses.
 
 **Interfaces:**
 - Consumes: `isDirectEditSupported` (Task 2), `CVPreview` (with the new
