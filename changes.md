@@ -4,6 +4,18 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Portrait: narrower photo column — 2026-09-13
+
+The photo-rail column dominated the page — full page height at ~38% of
+the page width, full-bleed. Narrowed to ~27% (`grid-template-columns`
+`0.38fr`→`0.27fr` on `.portrait-showcase` in
+`src/styles/templates/portrait.css`), with the no-photo monogram's
+`font-size` scaled down to match (`6rem`→`4.5rem`). Still full-height/
+full-bleed — the structural identity that distinguishes Portrait's
+`photo-rail + main` family from Executive/Modern Orange's rail-with-text —
+just a more typical proportion. Mobile's separate breakpoint (fixed
+220px photo band) was already reasonable and is untouched.
+
 ## Styled Word export (C2/C3) — 2026-09-13
 
 Released as v1.2.23. Completes the Word-export sub-project — C1 shipped
