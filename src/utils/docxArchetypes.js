@@ -146,7 +146,7 @@ function buildLabelGridSkills(snapshot, copy) {
 
 function buildLabelGridProjects(snapshot, copy) {
   if (snapshot.projects.length === 0) {
-    return [sectionHeading(copy.projects)]
+    return []
   }
   const rows = snapshot.projects.map((item) => {
     const value = [
