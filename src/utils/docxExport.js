@@ -33,6 +33,7 @@ import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTempla
 import { createCvSnapshot } from './cvSnapshot'
 import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
 import { createExportCopy, cropPhotoDataUrlToSquare, getPhotoDataUrl, getImageFormatFromDataUrl } from './exporters'
+import { DOCX_ARCHETYPES, buildRailTableBody, buildGridTableBody, buildLabelGridBody } from './docxArchetypes'
 
 // Monochrome by design (see the spec) — no hue anywhere, just tonal
 // hierarchy within near-black/gray, the same way the PDF text-fallback uses
@@ -518,20 +519,79 @@ export async function buildDocxDocument(formData, options = {}) {
     testimonials: () => buildTestimonialsSection(snapshot, copy),
   }
 
-  const renderedSections = new Set()
-  const children = [...(await buildIdentityBlock(snapshot, copy, includePhoto))]
+  const archetypeConfig = DOCX_ARCHETYPES[templateConfig.id] ?? { archetype: 'oneColumn' }
+  const identityBlock = await buildIdentityBlock(snapshot, copy, includePhoto)
+  let bodyChildren = []
 
   withPalette({ ink: INK, inkSubtle: INK_SUBTLE, heading: headingColor }, () => {
-    const appendSection = (section) => {
-      const build = sectionBuilders[section]
-      if (build && !renderedSections.has(section) && isVisible(section)) {
-        children.push(...build())
-        renderedSections.add(section)
+    if (archetypeConfig.archetype === 'oneColumn') {
+      const rendered = new Set()
+      const append = (section) => {
+        const build = sectionBuilders[section]
+        if (build && !rendered.has(section) && isVisible(section)) {
+          bodyChildren.push(...build())
+          rendered.add(section)
+        }
       }
+      sectionOrder.forEach(append)
+      Object.keys(sectionBuilders).forEach(append)
+      return
     }
-    sectionOrder.forEach(appendSection)
-    Object.keys(sectionBuilders).forEach(appendSection)
+
+    if (archetypeConfig.archetype === 'railTable' || archetypeConfig.archetype === 'darkSidebarTable') {
+      const dark = archetypeConfig.archetype === 'darkSidebarTable'
+      const primarySet = new Set(templateConfig.primarySections)
+      const secondarySet = new Set(templateConfig.secondarySections)
+      const rendered = new Set()
+
+      const buildGroup = (predicate) => {
+        const out = []
+        const append = (section) => {
+          const build = sectionBuilders[section]
+          if (build && !rendered.has(section) && isVisible(section) && predicate(section)) {
+            out.push(...build())
+            rendered.add(section)
+          }
+        }
+        sectionOrder.forEach(append)
+        Object.keys(sectionBuilders).forEach(append)
+        return out
+      }
+
+      const mainChildren = buildGroup((section) => primarySet.has(section))
+      const railChildren = dark
+        ? withPalette({ ink: 'F5F5F5', inkSubtle: 'D4D4D8', heading: 'FFFFFF' }, () => buildGroup((section) => secondarySet.has(section)))
+        : buildGroup((section) => secondarySet.has(section))
+
+      bodyChildren = buildRailTableBody(mainChildren, railChildren, { railSide: archetypeConfig.railSide, dark })
+      return
+    }
+
+    if (archetypeConfig.archetype === 'gridTable') {
+      const rendered = new Set()
+      const visibleOrdered = [...sectionOrder, ...Object.keys(sectionBuilders)]
+        .filter((section, index, all) => all.indexOf(section) === index)
+        .filter((section) => sectionBuilders[section] && isVisible(section))
+      const quarterSize = Math.max(1, Math.ceil(visibleOrdered.length / 4))
+      const groups = [[], [], [], []]
+
+      visibleOrdered.forEach((section, index) => {
+        if (rendered.has(section)) return
+        const quarterIndex = Math.min(Math.floor(index / quarterSize), 3)
+        groups[quarterIndex].push(...sectionBuilders[section]())
+        rendered.add(section)
+      })
+
+      bodyChildren = buildGridTableBody(groups)
+      return
+    }
+
+    if (archetypeConfig.archetype === 'labelGridTable') {
+      bodyChildren = buildLabelGridBody(sectionOrder, snapshot, copy, isVisible)
+    }
   })
+
+  const children = [...identityBlock, ...bodyChildren]
 
   return new Document({
     sections: [{

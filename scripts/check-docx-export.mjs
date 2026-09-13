@@ -57,7 +57,7 @@ const {
 const { createExportCopy } = await importSrc('utils/exporters.js')
 const { demoCvData, createInitialCvData } = await importSrc('utils/cvForm.js')
 const { createCvSnapshot } = await importSrc('utils/cvSnapshot.js')
-const { buildRailTableBody, buildGridTableBody, buildLabelGridBody } = await importSrc('utils/docxArchetypes.js')
+const { buildRailTableBody, buildGridTableBody, buildLabelGridBody, DOCX_ARCHETYPES } = await importSrc('utils/docxArchetypes.js')
 
 let failures = 0
 function check(label, passed, detail = '') {
@@ -450,6 +450,71 @@ console.log('\ndocxArchetypes: buildLabelGridBody\n')
   const result = buildLabelGridBody(order, snapshot, copy, (section) => section !== 'experience')
   const xml = await packAndReadDocumentXml(result)
   check('a hidden section is excluded entirely', !xml.includes(copy.experience.toUpperCase()))
+}
+
+console.log('\ndocxExport: archetype dispatch (buildDocxDocument)\n')
+
+{
+  check('DOCX_ARCHETYPES has an entry for all 18 known templates', Object.keys(DOCX_ARCHETYPES).length === 18)
+}
+
+{
+  // oneColumn: unchanged shape — no tables at all. (demoCvData.photo is
+  // always '' — buildIdentityBlock only emits a table when a photo is
+  // present, and photo-cropping is DOM-only so it can never be exercised
+  // in this plain-Node check script — so the identity block contributes 0
+  // tables here, not 1.)
+  const doc = await buildDocxDocument(demoCvData, { template: 'minimal', locale: 'en' })
+  const buffer = await Packer.toBuffer(doc)
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  const xml = await zip.file('word/document.xml').async('string')
+  check('oneColumn (minimal) produces exactly 0 tables (no photo in demoCvData, no body tables)', (xml.match(/<w:tbl>/g) ?? []).length === 0)
+}
+
+{
+  // railTable, left (Executive) — 1 table: the rail table (no identity
+  // table — see the oneColumn check above for why).
+  const doc = await buildDocxDocument(demoCvData, { template: 'executive', locale: 'en', accentColor: '#b45309' })
+  const buffer = await Packer.toBuffer(doc)
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  const xml = await zip.file('word/document.xml').async('string')
+  check('railTable (executive) produces exactly 1 table', (xml.match(/<w:tbl>/g) ?? []).length === 1)
+  check('accent color B45309 present', xml.includes('w:val="B45309"') || xml.includes('w:val="b45309"'.toUpperCase()))
+}
+
+{
+  // darkSidebarTable (Developer) — 1 table, and the dark fill present.
+  const doc = await buildDocxDocument(demoCvData, { template: 'developer', locale: 'en' })
+  const buffer = await Packer.toBuffer(doc)
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  const xml = await zip.file('word/document.xml').async('string')
+  check('darkSidebarTable (developer) produces exactly 1 table', (xml.match(/<w:tbl>/g) ?? []).length === 1)
+  check('dark sidebar fill present', xml.includes('w:fill="1F2937"'))
+}
+
+{
+  // gridTable (Quadrant) — 1 table: the 2x2 grid (no identity table).
+  const doc = await buildDocxDocument(demoCvData, { template: 'quadrant', locale: 'en', accentColor: '#0e7490' })
+  const buffer = await Packer.toBuffer(doc)
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  const xml = await zip.file('word/document.xml').async('string')
+  check('gridTable (quadrant) produces exactly 1 table', (xml.match(/<w:tbl>/g) ?? []).length === 1)
+  check('gridTable has 4 cells in its grid', (xml.match(/<w:tc>/g) ?? []).length === 4)
+}
+
+{
+  // labelGridTable (European) — identity table + one table per visible section.
+  const doc = await buildDocxDocument(demoCvData, { template: 'european', locale: 'en', accentColor: '#1d4ed8' })
+  const buffer = await Packer.toBuffer(doc)
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  const xml = await zip.file('word/document.xml').async('string')
+  check('labelGridTable (european) produces more than 2 tables (identity + one per row)', (xml.match(/<w:tbl>/g) ?? []).length > 2)
+  check('accent color 1D4ED8 present', xml.toUpperCase().includes('W:VAL="1D4ED8"'.toUpperCase()) || xml.includes('1D4ED8'))
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)

@@ -15,6 +15,32 @@ const RAIL_WIDTH_PERCENT = 32
 const MAIN_WIDTH_PERCENT = 68
 const DARK_SIDEBAR_FILL = '1F2937'
 
+// Maps every known templateId to the docx layout archetype that renders it.
+// railSide is explicit (not omitted) on developer/navyProfessional because
+// buildRailTableBody's own default railSide is 'right' — leaving it out on
+// these two darkSidebarTable entries would silently put the dark cell on
+// the wrong side.
+export const DOCX_ARCHETYPES = {
+  minimal: { archetype: 'oneColumn' },
+  compact: { archetype: 'oneColumn' },
+  classicProfessional: { archetype: 'oneColumn' },
+  editorial: { archetype: 'oneColumn' },
+  timeline: { archetype: 'oneColumn' },
+  portrait: { archetype: 'oneColumn' },
+  executive: { archetype: 'railTable', railSide: 'left' },
+  modernOrange: { archetype: 'railTable', railSide: 'left' },
+  creative: { archetype: 'railTable', railSide: 'right' },
+  modern: { archetype: 'railTable', railSide: 'right' },
+  graduate: { archetype: 'railTable', railSide: 'right' },
+  portfolio: { archetype: 'railTable', railSide: 'right' },
+  techExec: { archetype: 'railTable', railSide: 'right' },
+  colorfulCompact: { archetype: 'railTable', railSide: 'right' },
+  developer: { archetype: 'darkSidebarTable', railSide: 'left' },
+  navyProfessional: { archetype: 'darkSidebarTable', railSide: 'left' },
+  quadrant: { archetype: 'gridTable' },
+  european: { archetype: 'labelGridTable' },
+}
+
 export function buildRailTableBody(mainChildren, railChildren, { railSide = 'right', dark = false } = {}) {
   const mainCell = new TableCell({
     width: { size: MAIN_WIDTH_PERCENT, type: WidthType.PERCENTAGE },
