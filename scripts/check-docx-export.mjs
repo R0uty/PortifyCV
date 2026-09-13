@@ -58,6 +58,7 @@ const { createExportCopy } = await importSrc('utils/exporters.js')
 const { demoCvData, createInitialCvData } = await importSrc('utils/cvForm.js')
 const { createCvSnapshot } = await importSrc('utils/cvSnapshot.js')
 const { buildRailTableBody, buildGridTableBody, buildLabelGridBody, DOCX_ARCHETYPES } = await importSrc('utils/docxArchetypes.js')
+const { cvTemplates } = await importSrc('utils/cvTemplates.js')
 
 let failures = 0
 function check(label, passed, detail = '') {
@@ -456,6 +457,54 @@ console.log('\ndocxExport: archetype dispatch (buildDocxDocument)\n')
 
 {
   check('DOCX_ARCHETYPES has an entry for all 18 known templates', Object.keys(DOCX_ARCHETYPES).length === 18)
+}
+
+{
+  // A bare count (above) can stay correct while a template id is
+  // misspelled or renamed — buildDocxDocument's `DOCX_ARCHETYPES[id] ??
+  // { archetype: 'oneColumn' }` fallback would then silently downgrade
+  // that one template to the plain one-column layout with no error and no
+  // failing check. Compare the actual key sets instead of just their size.
+  const registryIds = new Set(cvTemplates.map((template) => template.id))
+  const archetypeIds = new Set(Object.keys(DOCX_ARCHETYPES))
+  const missingFromArchetypes = [...registryIds].filter((id) => !archetypeIds.has(id))
+  const unknownInArchetypes = [...archetypeIds].filter((id) => !registryIds.has(id))
+  check(
+    'DOCX_ARCHETYPES keys exactly match the real set of template ids from cvTemplates',
+    registryIds.size === archetypeIds.size && missingFromArchetypes.length === 0 && unknownInArchetypes.length === 0,
+    `missing from DOCX_ARCHETYPES: ${missingFromArchetypes.join(', ') || '(none)'}; unknown ids in DOCX_ARCHETYPES: ${unknownInArchetypes.join(', ') || '(none)'}`,
+  )
+}
+
+{
+  // Every archetype value must be one of the 5 real mechanisms
+  // buildDocxDocument actually dispatches on — a typo here (e.g.
+  // 'railtable') would silently fall through every dispatch branch
+  // (none of the `archetypeConfig.archetype === '...'` checks would
+  // match) and produce a document with only the identity block, no body.
+  const KNOWN_ARCHETYPES = new Set(['oneColumn', 'railTable', 'darkSidebarTable', 'gridTable', 'labelGridTable'])
+  const invalidEntries = Object.entries(DOCX_ARCHETYPES).filter(([, config]) => !KNOWN_ARCHETYPES.has(config.archetype))
+  check(
+    'every DOCX_ARCHETYPES entry has a valid archetype value',
+    invalidEntries.length === 0,
+    `invalid entries: ${invalidEntries.map(([id, config]) => `${id}: ${config.archetype}`).join(', ')}`,
+  )
+}
+
+{
+  // railSide regressed once already during this plan's development (two
+  // darkSidebarTable entries missing it, silently reverting to
+  // buildRailTableBody's own 'right' default). Every rail/dark-sidebar
+  // entry must declare it explicitly.
+  const railEntries = Object.entries(DOCX_ARCHETYPES).filter(
+    ([, config]) => config.archetype === 'railTable' || config.archetype === 'darkSidebarTable',
+  )
+  const missingRailSide = railEntries.filter(([, config]) => config.railSide !== 'left' && config.railSide !== 'right')
+  check(
+    'every railTable/darkSidebarTable entry has an explicit railSide of "left" or "right"',
+    missingRailSide.length === 0,
+    `entries missing a valid railSide: ${missingRailSide.map(([id, config]) => `${id}: ${JSON.stringify(config.railSide)}`).join(', ')}`,
+  )
 }
 
 {
