@@ -60,6 +60,32 @@ color on section headings.
   and the pre-existing monochrome/heading-color checks from C1 extended
   for the accent path.
 
+**Follow-up fix wave — 2026-09-13, v1.2.24.** The final whole-branch review
+caught 3 real defects the per-task reviews missed:
+1. `railTable`/`darkSidebarTable`'s main-column predicate filtered to
+   `primarySections` only, silently dropping any populated section not
+   declared in either `primarySections` or `secondarySections` for the
+   current template — as few as 6 of 20 possible sections survived under
+   some templates. Fixed by inverting the predicate to
+   `!secondarySections.has(section)`, so only declared-secondary content
+   routes to the rail and everything else (declared-primary or
+   undeclared) stays in main — no section is ever dropped again.
+2. `gridTable` (Quadrant) split section keys into quarters by array
+   position before checking which sections actually had content, so a
+   realistic sparse CV could render 2 of 4 grid cells completely empty
+   with visible borders. Fixed by building each section's content first
+   and quarter-splitting only the sections that produced real output.
+3. `DOCX_ARCHETYPES` had no validity check beyond a bare count — a
+   typo'd or renamed template id would silently fall back to plain
+   one-column with no failing check. Added key-set, archetype-name, and
+   `railSide`-presence checks against the real template registry.
+
+Also corrected a stale comment overclaiming ordering parity with the PDF
+export, a safety comment on `withPalette` that cited the wrong reason
+(UI-button disabling instead of the callbacks' actual synchronicity), and
+European's label-grid Experience/Education rows repeating company/school
+text in both the heading and the meta line.
+
 ## New template: European — 2026-09-13
 
 Released as v1.2.22. Third and final of roadmap A.3's new templates
