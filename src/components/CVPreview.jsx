@@ -9,6 +9,8 @@ import { createCvSnapshot } from '../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../utils/cvForm'
 import { getUiTheme } from '../utils/designSystem'
 import { getCvTemplate } from '../utils/cvTemplates'
+import { DirectEditProvider } from './DirectEditContext'
+import EditableField from './EditableField'
 import {
   devIcons,
   contactIcons,
@@ -70,6 +72,14 @@ function CVPreview({
   // 'center' (default) | 'left' — Classic Professional's name-alignment
   // option, folded in from the retired Classic template (v1.2.10).
   classicNameAlignment = 'center',
+  // Direct Edit builder: a dispatch function only when (a) the app is in
+  // Direct Edit mode AND (b) the current template is in
+  // DIRECT_EDIT_SUPPORTED_TEMPLATES (src/utils/directEdit.js) — null in
+  // every other case (Classic mode, PDF/html2canvas export, the
+  // thumbnail gallery, an unsupported template). EditableField/
+  // EditableList/EditableChip read this indirectly via DirectEditContext
+  // — see the wrap in the final return below.
+  directEditDispatch = null,
 }) {
   // ── Theme and template resolution ──────────────────────────────────
   // Resolve the UI theme (dark/light) and the template config (variant, layout, etc.)
@@ -435,7 +445,6 @@ function CVPreview({
   }
 
   const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
   const photo = snapshot.photo
   const showPhoto = Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
@@ -450,6 +459,14 @@ function CVPreview({
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  // Direct Edit needs a slot to click even when the field is empty
+  // (personalContactItems above filters those out for the read-only
+  // render, which is correct there and wrong here).
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
   const skills = snapshot.skills
   const experience = snapshot.experience
   const education = snapshot.education
@@ -1746,6 +1763,7 @@ function CVPreview({
   // ── Document shell ─────────────────────────────────────────────────
   // The outer <article> wraps the entire CV. Style varies by template and ATS mode.
   return (
+    <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
     <article
       ref={previewRef}
       data-export-root="true"
@@ -1787,21 +1805,40 @@ function CVPreview({
               }`}
               style={headingColor ? { color: headingColor } : undefined}
             >
-              {fullName}
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
             </h3>
 
             {/* Professional title / subtitle */}
             <p className={resolvedHeaderSubtitleClasses}>
-              {title}
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
             </p>
 
             {/* Contact info — piped layout (minimal: email/phone/location separated by |,
                 no icons — GitHub/LinkedIn/Portfolio/website stay in the Links section) */}
-            {t.headerContactMode === 'piped' && personalContactItems.length > 0 ? (
+            {t.headerContactMode === 'piped' && (directEditDispatch ? true : personalContactItems.length > 0) ? (
               <p className={`mt-3 flex flex-wrap items-center ${t.headerContactGap} gap-y-1 ${t.headerContactTextSize} leading-5 ${resolvedHeaderContactTextColor}`}>
-                {personalContactItems.map(([key, value], i, arr) => (
+                {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel], i, arr) => (
                   <span key={key} className="flex items-center gap-x-2">
-                    <span>{value}</span>
+                    {directEditDispatch ? (
+                      <EditableField
+                        as="span"
+                        path={{ kind: 'root', field: key }}
+                        value={value}
+                        placeholder={placeholderLabel}
+                      />
+                    ) : (
+                      <span>{value}</span>
+                    )}
                     {i < arr.length - 1 ? <span className="text-gray-300">|</span> : null}
                   </span>
                 ))}
@@ -1952,6 +1989,7 @@ function CVPreview({
         </footer>
       ) : null}
     </article>
+    </DirectEditProvider>
   )
 }
 
