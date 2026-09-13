@@ -29,7 +29,7 @@ registerHooks({
 const srcDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src')
 const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, relativePath)).href)
 
-const { Paragraph, Packer } = await import('docx')
+const { Document, Paragraph, TextRun, Packer } = await import('docx')
 const {
   buildIdentityBlock,
   buildDocxDocument,
@@ -57,6 +57,7 @@ const {
 const { createExportCopy } = await importSrc('utils/exporters.js')
 const { demoCvData, createInitialCvData } = await importSrc('utils/cvForm.js')
 const { createCvSnapshot } = await importSrc('utils/cvSnapshot.js')
+const { buildRailTableBody } = await importSrc('utils/docxArchetypes.js')
 
 let failures = 0
 function check(label, passed, detail = '') {
@@ -337,6 +338,52 @@ console.log('\ndocxExport: heading color (monochrome by default, accent when pro
   const zip = await JSZip.loadAsync(buffer)
   const documentXml = await zip.file('word/document.xml').async('string')
   check('omitting accentColor entirely still produces a valid document', documentXml.includes('<w:document'))
+}
+
+console.log('\ndocxArchetypes: buildRailTableBody\n')
+
+async function packAndReadDocumentXml(children) {
+  const doc = new Document({ sections: [{ children }] })
+  const buffer = await Packer.toBuffer(doc)
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  return zip.file('word/document.xml').async('string')
+}
+
+{
+  const main = [new Paragraph({ children: [new TextRun('Main content')] })]
+  const rail = [new Paragraph({ children: [new TextRun('Rail content')] })]
+
+  const result = buildRailTableBody(main, rail, { railSide: 'left', dark: false })
+  check('returns an array with exactly one Table', Array.isArray(result) && result.length === 1)
+
+  const xml = await packAndReadDocumentXml(result)
+  check('produced exactly one table', (xml.match(/<w:tbl>/g) ?? []).length === 1)
+  check('produced exactly two cells in that table', (xml.match(/<w:tc>/g) ?? []).length === 2)
+  const railIndex = xml.indexOf('Rail content')
+  const mainIndex = xml.indexOf('Main content')
+  check('railSide "left" places rail content before main content in document order', railIndex > -1 && mainIndex > -1 && railIndex < mainIndex)
+}
+
+{
+  const main = [new Paragraph({ children: [new TextRun('Main content')] })]
+  const rail = [new Paragraph({ children: [new TextRun('Rail content')] })]
+
+  const result = buildRailTableBody(main, rail, { railSide: 'right', dark: false })
+  const xml = await packAndReadDocumentXml(result)
+  const railIndex = xml.indexOf('Rail content')
+  const mainIndex = xml.indexOf('Main content')
+  check('railSide "right" places main content before rail content in document order', mainIndex > -1 && railIndex > -1 && mainIndex < railIndex)
+  check('no cell shading when dark is false', !xml.includes('w:fill="1F2937"'))
+}
+
+{
+  const main = [new Paragraph({ children: [new TextRun('Main content')] })]
+  const rail = [new Paragraph({ children: [new TextRun('Rail content')] })]
+
+  const result = buildRailTableBody(main, rail, { railSide: 'left', dark: true })
+  const xml = await packAndReadDocumentXml(result)
+  check('dark:true shades the rail cell with the expected fill', xml.includes('w:fill="1F2937"'))
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)
