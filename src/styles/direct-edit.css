@@ -22,3 +22,96 @@
   color: var(--ds-text-muted, #a1a1aa);
   pointer-events: none;
 }
+
+.direct-edit-entry {
+  position: relative;
+  padding-left: 22px;
+  margin-left: -22px;
+  border-radius: 8px;
+}
+
+.direct-edit-entry:hover {
+  background: var(--ds-surface-muted, #fafaf9);
+}
+
+.direct-edit-entry--dragging {
+  opacity: 0.6;
+}
+
+.direct-edit-entry__handle,
+.direct-edit-entry__remove {
+  position: absolute;
+  top: 2px;
+  border: none;
+  background: transparent;
+  color: var(--ds-text-muted, #a1a1aa);
+  font-size: 13px;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.direct-edit-entry__handle {
+  left: 0;
+  cursor: grab;
+}
+
+.direct-edit-entry__remove {
+  right: 0;
+}
+
+.direct-edit-entry:hover .direct-edit-entry__handle,
+.direct-edit-entry:hover .direct-edit-entry__remove {
+  opacity: 1;
+}
+
+.direct-edit-entry__remove:hover {
+  color: var(--ds-danger, #b3261e);
+}
+
+.direct-edit-add-row {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 7px 11px;
+  border: 1px dashed var(--ds-border-strong, #d4d4d8);
+  border-radius: 7px;
+  background: none;
+  color: var(--ds-text-muted, #71717a);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.direct-edit-add-row:hover {
+  border-color: var(--ds-accent, #0f766e);
+  color: var(--ds-accent, #0f766e);
+}
+
+.direct-edit-chip,
+.direct-edit-chip-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: inherit;
+  font-size: 0.8125rem;
+  padding: 5px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.direct-edit-chip--removable {
+  border: none;
+  background: var(--ds-accent-soft, #e1f5ee);
+  color: var(--ds-accent-ink, #04342c);
+}
+
+.direct-edit-chip-add {
+  border: 1px dashed var(--ds-border-strong, #d4d4d8);
+  background: none;
+  color: var(--ds-text-muted, #71717a);
+}
+
+.direct-edit-chip-add:hover {
+  border-color: var(--ds-accent, #0f766e);
+  color: var(--ds-accent, #0f766e);
+}
