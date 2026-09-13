@@ -1536,25 +1536,46 @@ do not reformat or restructure anything else in the file.
   import { normalizeSectionOrder } from '../utils/cvForm'
   import { FORM_ACTION } from '../reducers/cvFormReducer'
 
+  // Wording here must stay in sync with `sectionVisibilityFieldsEn`/`Fi` in
+  // `src/utils/cvForm.js` (CVForm.jsx's own nav rail source), so the Direct
+  // Edit menu and the Classic "Visible sections" panel never disagree on a
+  // label for the same section key. Note `coreStrengths: 'Core Strengths'`
+  // (capital S) — matches `cvForm.js`'s own field exactly, not a lowercase
+  // guess.
   const SECTION_LABELS_EN = {
     about: 'About', experience: 'Experience', education: 'Education', skills: 'Skills',
     projects: 'Projects', links: 'Links', languages: 'Languages', certificates: 'Certificates',
-    coreStrengths: 'Core strengths', achievements: 'Achievements', interests: 'Interests',
+    coreStrengths: 'Core Strengths', achievements: 'Achievements', interests: 'Interests',
+    openSource: 'Open Source', publications: 'Publications', leadership: 'Leadership Experience',
+    memberships: 'Professional Memberships', speaking: 'Speaking', volunteering: 'Volunteering',
+    internships: 'Internships', caseStudies: 'Case Studies', testimonials: 'Testimonials',
   }
   const SECTION_LABELS_FI = {
     about: 'Esittely', experience: 'Kokemus', education: 'Koulutus', skills: 'Taidot',
     projects: 'Projektit', links: 'Linkit', languages: 'Kielet', certificates: 'Sertifikaatit',
     coreStrengths: 'Vahvuudet', achievements: 'Saavutukset', interests: 'Kiinnostuksen kohteet',
+    openSource: 'Avoin lähdekoodi', publications: 'Julkaisut', leadership: 'Johtamiskokemus',
+    memberships: 'Ammattijäsenyydet', speaking: 'Esiintymiset', volunteering: 'Vapaaehtoistyö',
+    internships: 'Harjoittelut', caseStudies: 'Tapaustutkimukset', testimonials: 'Suositukset',
   }
 
   export default function SectionsMenu({ formData, dispatchFormData, templateConfig, locale }) {
     const [isOpen, setIsOpen] = useState(false)
     const isFinnish = locale === 'fi'
     const labels = isFinnish ? SECTION_LABELS_FI : SECTION_LABELS_EN
-    const sections = normalizeSectionOrder(formData.sectionOrder, [
+    const templateSectionOrder = [
       ...templateConfig.primarySections,
       ...templateConfig.secondarySections,
-    ])
+    ]
+    // normalizeSectionOrder always appends every CV_SECTION_ORDER_KEYS entry
+    // at the end (not just the ones passed as its fallback argument), so —
+    // exactly like CVForm.jsx's own nav rail does — its raw output has to be
+    // filtered back down to the sections this template actually supports.
+    // Skipping this filter would offer toggles for sections the template
+    // never renders at all.
+    const templateSectionKeySet = new Set(templateSectionOrder)
+    const sections = normalizeSectionOrder(formData.sectionOrder, templateSectionOrder)
+      .filter((section) => templateSectionKeySet.has(section))
 
     return (
       <div className="direct-edit-sections">
@@ -1601,6 +1622,12 @@ do not reformat or restructure anything else in the file.
     position: absolute;
     top: 14px;
     right: 14px;
+    /* z-index:auto is not enough here: the CV preview's header content it
+       overlaps is a plain, non-positioned element, yet real-browser paint/
+       hit-testing still puts that content above this popover without an
+       explicit z-index, making the trigger unclickable — verified via
+       elementsFromPoint. */
+    z-index: 5;
   }
 
   .direct-edit-sections__trigger {
