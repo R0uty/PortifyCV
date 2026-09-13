@@ -4,6 +4,22 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Portrait: photo capped to a normal size, not full page height — 2026-09-13
+
+Follow-up to the same-day column-width narrowing below — narrower width
+alone wasn't the fix, since the photo was still stretched the full page
+height and still read as dominating the whole template regardless of
+column width. The real problem was the full-bleed-to-page-bottom
+stretch itself. Changed `.portrait-showcase__photo`/`__monogram` from
+`height: min(100%, var(--preview-paper-min-height))` to
+`aspect-ratio: 3/4` (capped `max-height: 46%` as a safety net) — the
+photo is now a normal portrait-proportioned box anchored to the top of
+the rail, with the rail's own accent-colour background filling the rest
+of the column beneath it (previously that only happened below the
+one-page cap for an overflowing CV; now it's the normal case for every
+CV). Monogram `font-size` reduced again (`4.5rem`→`3rem`) to match the
+now-much-smaller box.
+
 ## Portrait: narrower photo column — 2026-09-13
 
 The photo-rail column dominated the page — full page height at ~38% of

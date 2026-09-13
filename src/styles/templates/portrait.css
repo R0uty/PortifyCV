@@ -4,13 +4,16 @@
    `.portrait-showcase`.
 
    docs/template-design-system.md:
-   - §5 structural family: opens `photo-rail + main` — a full-height,
-     full-bleed photo fills the left column (no crop-circle, no border, no
-     padding, no text sharing the column); identity and every section flow
-     in the main column on the right. Distinct from `left-rail + main`
-     (Executive, Modern Orange), whose rails carry identity/contact/skills
-     text alongside a modest circular photo — this rail carries nothing
-     but the image itself.
+   - §5 structural family: opens `photo-rail + main` — a full-bleed photo
+     fills the top of the left column (no crop-circle, no border, no
+     padding, no text sharing the column, capped to a portrait aspect
+     ratio rather than stretched to the page — see the photo-column
+     comment below), with the rail's own accent colour continuing below
+     it for the rest of the column height. Identity and every section
+     flow in the main column on the right. Distinct from `left-rail +
+     main` (Executive, Modern Orange), whose rails carry identity/contact/
+     skills text alongside a modest circular photo — this rail carries no
+     text, only the image itself.
    - §4 heading treatment: `rule-under` — a tracked-uppercase label over an
      accent hairline, same construction as Executive's. Deliberately quiet
      so the photo stays the focal point.
@@ -66,13 +69,14 @@
 }
 
 /* ── Photo column: the structure itself — full-bleed, no crop, no text.
-   Capped at one page's height (`--preview-paper-min-height`, not the grid
-   row's full height) rather than stretched to match the main column for
-   a long CV — an uncapped `object-fit: cover` on an arbitrarily tall
-   narrow column crops a real photo down to an unrecognizable sliver once
-   the document runs past one page. A CV longer than that shows the photo
-   anchored to the top of the rail with the accent fill continuing below
-   it, not the photo stretched thin to chase the page count. ── */
+   The photo/monogram is a `3/4`-aspect box anchored to the TOP of the
+   column, not stretched to fill the page — a full-page-height photo (the
+   original v1.2.21 design) read as oversized and dominated the whole
+   template regardless of how narrow the column was. The rail's own
+   `background: var(--tpl-accent)` fill (below) shows through as solid
+   colour for the rest of the column's height on every CV, short or long,
+   which is also what already happened below the one-page cap for a long
+   CV — now it's just the normal case, not an overflow case. ── */
 
 .portrait-showcase__photo-col {
   min-width: 0;
@@ -84,7 +88,8 @@
 .portrait-showcase__photo {
   display: block;
   width: 100%;
-  height: min(100%, var(--preview-paper-min-height));
+  aspect-ratio: 3 / 4;
+  max-height: 46%;
   object-fit: cover;
   /* Biased toward the top third, where a headshot's face typically sits,
      rather than a mathematical centre crop. */
@@ -96,8 +101,9 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: min(100%, var(--preview-paper-min-height));
-  font-size: 4.5rem;
+  aspect-ratio: 3 / 4;
+  max-height: 46%;
+  font-size: 3rem;
   font-weight: 800;
   color: rgba(255, 255, 255, 0.92);
 }
