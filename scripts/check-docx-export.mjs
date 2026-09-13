@@ -572,5 +572,57 @@ console.log('\ndocxExport: rail/dark-sidebar archetypes never drop a populated b
   )
 }
 
+console.log('\ndocxExport: gridTable never renders an empty bordered cell for a sparse CV (fix verification)\n')
+
+{
+  // A realistic sparse CV: only about/experience/skills/education/links
+  // (which always render *something*, even a placeholder, so they can
+  // never produce a zero-length section) plus exactly two more populated
+  // sections (projects, languages) — 15 other section types emptied out.
+  // Before the fix, gridTable split ALL ~20 section keys into quarters by
+  // position regardless of content, so 2 of the 4 cells could end up
+  // completely empty despite having visible borders (unlike the borderless
+  // rail archetypes) — a visibly broken empty box, not an approximation.
+  const sparseCvData = {
+    ...demoCvData,
+    interests: [],
+    coreStrengths: [],
+    certificates: [],
+    achievements: [],
+    memberships: [],
+    publications: [],
+    openSource: [],
+    leadership: [],
+    speaking: [],
+    volunteering: [],
+    internships: [],
+    caseStudies: [],
+    testimonials: [],
+  }
+
+  const doc = await buildDocxDocument(sparseCvData, { template: 'quadrant', locale: 'en' })
+  const buffer = await Packer.toBuffer(doc)
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  const xml = await zip.file('word/document.xml').async('string')
+
+  const cellBlocks = xml.match(/<w:tc>[\s\S]*?<\/w:tc>/g) ?? []
+  check('gridTable still produces exactly 4 cells for the sparse fixture', cellBlocks.length === 4)
+
+  const cellHasRealText = (cellXml) => {
+    const textMatches = [...cellXml.matchAll(/<w:t[^>]*>([^<]*)<\/w:t>/g)]
+    return textMatches.some(([, text]) => text.trim().length > 0)
+  }
+  const emptyCellIndexes = cellBlocks
+    .map((cellXml, index) => (cellHasRealText(cellXml) ? -1 : index))
+    .filter((index) => index !== -1)
+
+  check(
+    'no grid cell is empty for a sparse (non-fully-populated) CV — every cell has at least one non-whitespace <w:t> value',
+    emptyCellIndexes.length === 0,
+    `empty cell indexes: ${emptyCellIndexes.join(', ')}`,
+  )
+}
+
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)
 process.exit(failures === 0 ? 0 : 1)

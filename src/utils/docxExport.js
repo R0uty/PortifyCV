@@ -582,18 +582,30 @@ export async function buildDocxDocument(formData, options = {}) {
     }
 
     if (archetypeConfig.archetype === 'gridTable') {
-      const rendered = new Set()
+      // visibleOrdered is already deduplicated (the indexOf-based filter
+      // below), so there's no need for a `rendered` Set here — each section
+      // in this list is built exactly once.
       const visibleOrdered = [...sectionOrder, ...Object.keys(sectionBuilders)]
         .filter((section, index, all) => all.indexOf(section) === index)
         .filter((section) => sectionBuilders[section] && isVisible(section))
-      const quarterSize = Math.max(1, Math.ceil(visibleOrdered.length / 4))
+
+      // Build every section's actual output FIRST and drop the ones that
+      // produce nothing, so quarter boundaries are computed over sections
+      // that genuinely have content — not over the full ~20-key registry,
+      // most of which is typically empty for a real CV. Otherwise this
+      // archetype (which keeps visible borders on every cell, unlike the
+      // borderless rail archetypes) can render obviously-broken empty
+      // bordered boxes for 2 of its 4 cells.
+      const populatedSections = visibleOrdered
+        .map((section) => sectionBuilders[section]())
+        .filter((nodes) => nodes.length > 0)
+
+      const quarterSize = Math.max(1, Math.ceil(populatedSections.length / 4))
       const groups = [[], [], [], []]
 
-      visibleOrdered.forEach((section, index) => {
-        if (rendered.has(section)) return
+      populatedSections.forEach((nodes, index) => {
         const quarterIndex = Math.min(Math.floor(index / quarterSize), 3)
-        groups[quarterIndex].push(...sectionBuilders[section]())
-        rendered.add(section)
+        groups[quarterIndex].push(...nodes)
       })
 
       bodyChildren = buildGridTableBody(groups)
