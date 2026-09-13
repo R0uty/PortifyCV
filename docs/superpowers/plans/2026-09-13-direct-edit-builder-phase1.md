@@ -34,7 +34,7 @@ checks (this project has no unit-test runner — see `CLAUDE.md`).
   `UPDATE_ARRAY_ITEM { section, index, field, value }`,
   `ADD_ARRAY_ITEM { section }`, `REMOVE_ARRAY_ITEM { section, index }`,
   `MOVE_ARRAY_ITEM_TO_INDEX { section, fromIndex, toIndex }`,
-  `ADD_SKILL { skill }`, `REMOVE_SKILL { skill }`,
+  `ADD_SKILL { skill }`, `REMOVE_SKILL { index }`,
   `MOVE_SKILL { index, direction }`, `TOGGLE_SECTION_VISIBILITY { section }`.
 - `builderMode` defaults to `'classic'` and is a real persisted preference
   (`localStorage`, mirroring `UI_NAV_RAIL_COLLAPSED_STORAGE_KEY`'s
@@ -645,8 +645,8 @@ checks (this project has no unit-test runner — see `CLAUDE.md`).
       return null
     }
 
-    const handleRemove = (skill) => {
-      dispatchFormData({ type: FORM_ACTION.REMOVE_SKILL, skill })
+    const handleRemove = (index) => {
+      dispatchFormData({ type: FORM_ACTION.REMOVE_SKILL, index })
     }
 
     const handleAdd = () => {
@@ -656,12 +656,12 @@ checks (this project has no unit-test runner — see `CLAUDE.md`).
 
     return (
       <>
-        {skills.map((skill) => (
+        {skills.map((skill, index) => (
           <button
-            key={skill}
+            key={`${skill}-${index}`}
             type="button"
             className="direct-edit-chip direct-edit-chip--removable"
-            onClick={() => handleRemove(skill)}
+            onClick={() => handleRemove(index)}
           >
             {skill} <span aria-hidden="true">×</span>
           </button>
