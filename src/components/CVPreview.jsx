@@ -11,6 +11,7 @@ import { getUiTheme } from '../utils/designSystem'
 import { getCvTemplate } from '../utils/cvTemplates'
 import { DirectEditProvider } from './DirectEditContext'
 import EditableField from './EditableField'
+import EditableList, { EditableChip } from './EditableList'
 import {
   devIcons,
   contactIcons,
@@ -450,10 +451,6 @@ function CVPreview({
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
-  const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
   const personalContactItems = [
     ['email', snapshot.email],
     ['phone', snapshot.phone],
@@ -694,7 +691,17 @@ function CVPreview({
               ) : null}
             </div>
             <p className={`mt-4 whitespace-pre-line ${aboutTextSize} ${bodyTextClasses}`}>
-              {about}
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
             </p>
           </>
         ),
@@ -706,16 +713,10 @@ function CVPreview({
     // 'clean' is used by minimal, developer, creative, executive, timeline templates.
     // 'timeline' is used by modern, graduate, compact, portfolio templates.
     if (section === 'experience') {
-      return renderSectionCard({
-        section,
-        placement,
-        classes: sectionClasses,
-        children: (
-          <>
-            {renderSectionHeading('experience', isFinnish ? 'Kokemus' : 'Experience')}
-            <div className={`mt-5 ${experienceItemGap}`}>
-              {experience.length > 0 ? (
-                experience.map((item, index) => {
+      // Extracted so both the read-only `.map()` and EditableList's editing
+      // wrapper (below) render identical entry markup — pure extraction,
+      // same body, no behavior change for any of the three layout branches.
+      const renderExperienceEntry = (item, index) => {
                   const dateRange = formatDateRange(
                     item.startDate,
                     item.endDate,
@@ -822,16 +823,44 @@ function CVPreview({
                             <p
                               className={`${experienceTitleSize} font-semibold tracking-tight text-gray-900`}
                             >
-                              {item.role.trim() || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')}
+                              {directEditDispatch ? (
+                                <EditableField
+                                  as="span"
+                                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                                  value={item.role}
+                                  placeholder={isFinnish ? 'Nimeämätön rooli' : 'Untitled role'}
+                                />
+                              ) : (
+                                item.role.trim() || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')
+                              )}
                             </p>
-                            {item.company.trim() ? (
+                            {directEditDispatch || item.company.trim() ? (
                               <p className="text-sm text-gray-500">
-                                {item.company}
+                                {directEditDispatch ? (
+                                  <EditableField
+                                    as="span"
+                                    path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                                    value={item.company}
+                                    placeholder={isFinnish ? 'Yritys' : 'Company'}
+                                  />
+                                ) : (
+                                  item.company
+                                )}
                               </p>
                             ) : null}
-                            {item.description.trim() ? (
+                            {directEditDispatch || item.description.trim() ? (
                               <p className={`mt-2 whitespace-pre-line ${experienceDescSize} ${bodyTextClasses}`}>
-                                {item.description}
+                                {directEditDispatch ? (
+                                  <EditableField
+                                    as="span"
+                                    path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+                                    value={item.description}
+                                    placeholder={isFinnish ? 'Kuvaus' : 'Description'}
+                                    multiline
+                                  />
+                                ) : (
+                                  item.description
+                                )}
                               </p>
                             ) : null}
                             {renderExtras()}
@@ -882,7 +911,22 @@ function CVPreview({
                       </div>
                     </div>
                   )
-                })
+      }
+
+      return renderSectionCard({
+        section,
+        placement,
+        classes: sectionClasses,
+        children: (
+          <>
+            {renderSectionHeading('experience', isFinnish ? 'Kokemus' : 'Experience')}
+            <div className={`mt-5 ${experienceItemGap}`}>
+              {directEditDispatch ? (
+                <EditableList section="experience" items={formData.experience} addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}>
+                  {(item, index) => renderExperienceEntry(item, index)}
+                </EditableList>
+              ) : experience.length > 0 ? (
+                experience.map((item, index) => renderExperienceEntry(item, index))
               ) : (
                 <p className="text-sm text-gray-500">
                   {isFinnish
@@ -1015,11 +1059,14 @@ function CVPreview({
                     {skill}
                   </span>
                 ))
-              ) : (
+              ) : directEditDispatch ? null : (
                 <p className="text-sm text-gray-500">
                   {isFinnish ? 'Lisää taitoja näyttääksesi ne tageina.' : 'Add skills to display them as tags.'}
                 </p>
               )}
+              {directEditDispatch ? (
+                <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+              ) : null}
             </div>
           </>
         ),
