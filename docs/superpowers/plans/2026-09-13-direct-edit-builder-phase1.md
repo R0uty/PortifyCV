@@ -1722,10 +1722,26 @@ do not reformat or restructure anything else in the file.
 
 **Files:**
 - Create: `e2e/direct-edit.spec.js`
+- Modify: `src/components/DirectEditPreview.jsx`, `src/pages/ResumeBuilderPage.jsx`
+  — **found while attempting this task's own spike, not anticipated when
+  this plan was written:** `DirectEditPreview.jsx`'s `<CVPreview>` call
+  never forwarded a `previewRef` prop, unlike Classic mode's call site
+  (`ResumeBuilderPage.jsx`, which does pass `previewRef={previewRef}`).
+  `CVPreview.jsx` defaults `previewRef` to `null` and wires it onto the
+  export-root DOM node via `ref={previewRef}` — so PDF export was
+  completely broken in Direct Edit mode for every user (`exportCvAsPdf`
+  throws immediately when the ref is unpopulated), independent of the
+  spike's own focus-state question. This was a gap in Task 8, not
+  something this task introduced. Fix: thread `previewRef` through both
+  `ResumeBuilderPage.jsx`'s `<DirectEditPreview>` call and
+  `DirectEditPreview.jsx`'s own `<CVPreview>` call, as a prerequisite to
+  running the spike at all.
 
 **Interfaces:**
-- Consumes: the full stack built in Tasks 1-9. This task adds no new
-  production code — verification only.
+- Consumes: the full stack built in Tasks 1-9. Originally scoped as
+  verification-only (no new production code) — amended above once a real,
+  blocking production bug surfaced while attempting to run this task's own
+  spike.
 
 - [ ] **Step 1: html2canvas export risk spike (spec-mandated, do not skip)**
 
