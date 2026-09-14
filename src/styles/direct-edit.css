@@ -138,8 +138,10 @@
   /* The CV itself (an <article>) is a white "paper" card with its own
      shadow, floating on the page's off-white background — this padding
      is what creates that visible gap above (below the toolbar) and below
-     (above the footer), not just internal whitespace. */
-  padding: var(--space-8, 2rem) var(--space-6, 1.5rem);
+     (above the footer), not just internal whitespace. Bottom gets extra
+     room: the footer's own border/text sit right at its top edge, so a
+     gap that reads as "enough" above the card reads as cramped below it. */
+  padding: var(--space-8, 2rem) var(--space-6, 1.5rem) 3.5rem;
   box-sizing: border-box;
 }
 
