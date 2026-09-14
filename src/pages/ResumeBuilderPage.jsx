@@ -666,9 +666,19 @@ function ResumeBuilderPage({
   const handleExport = useCallback(async (type) => {
     dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: type })
 
+    // Direct Edit always renders the bespoke/flat Showcase with ATS mode
+    // forced off (DirectEditPreview hardcodes atsFriendlyMode={false} on its
+    // CVPreview call — see that file) — ATS mode is an export concern, not
+    // an editing surface. So the export must agree: a PDF exported from
+    // Direct Edit always uses the designer/bespoke rendering that's actually
+    // on screen, regardless of the app's real ATS toggle state, or
+    // waitForPreviewModeSync below polls for a `--ats` class the DOM will
+    // never produce and times out every single time.
+    const effectiveAtsFriendlyMode = builderMode === 'direct' ? false : atsFriendlyMode
+
     const exportLabel =
       type === 'pdf-designer'
-        ? atsFriendlyMode
+        ? effectiveAtsFriendlyMode
           ? 'ATS PDF'
           : 'Designer PDF'
         : type === 'html'
@@ -704,7 +714,7 @@ function ResumeBuilderPage({
 
       if (type === 'pdf-designer') {
         const expectedVariant = getCvTemplate(selectedTemplate, locale).variant
-        const exportPdfMode = atsFriendlyMode ? 'ats' : 'designer'
+        const exportPdfMode = effectiveAtsFriendlyMode ? 'ats' : 'designer'
         const didSyncPreviewMode = await waitForPreviewModeSync(
           previewRef.current,
           exportPdfMode,
@@ -751,7 +761,7 @@ function ResumeBuilderPage({
           formData,
           template: selectedTemplate,
           variant: selectedTemplate,
-          atsFriendlyMode,
+          atsFriendlyMode: effectiveAtsFriendlyMode,
           locale,
         })
       }
@@ -793,7 +803,7 @@ function ResumeBuilderPage({
       }
       dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
     }
-  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate, templateAccentColors, zoomPercent])
+  }, [atsFriendlyMode, builderMode, exportFileName, formData, locale, previewRef, selectedTemplate, templateAccentColors, zoomPercent])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()
