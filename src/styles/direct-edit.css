@@ -121,8 +121,18 @@
      mode's preview column shares with PDF export sizing) — Direct Edit
      has no competing form column, so the extra width is free and reads
      better as a full editing surface rather than a narrow page floating
-     in empty space. */
+     in empty space.
+
+     `width: 100%` is required, not decorative: this div is a flex item
+     of `.builder-section` (flex-direction: column). A flex item with
+     `margin: 0 auto` and `width: auto` does NOT stretch to the
+     container's cross size the way a plain block element would — the
+     auto side-margins suppress stretch and the item shrink-wraps to its
+     content's preferred width instead, silently capping this well below
+     max-width regardless of what max-width is set to. An explicit width
+     sidesteps that flex-sizing rule entirely. */
   position: relative;
+  width: 100%;
   max-width: min(100%, 68rem);
   margin: 0 auto;
 }
@@ -212,4 +222,17 @@
 
 .direct-edit-sections__row:hover {
   background: var(--ds-surface-muted, #fafaf9);
+}
+
+/* `.site-footer` (App.jsx) is `position: sticky; bottom: 0` — correct for
+   Classic mode and every static page, where the content above it never
+   grows taller than the viewport (Classic's builder panels scroll inside
+   their own bounded containers). Direct Edit's preview is a normal,
+   unbounded block that can genuinely be taller than the viewport for a
+   real CV, so a sticky footer stays pinned over the bottom of whatever's
+   currently in view for the entire scroll, not just once you reach the
+   true end of the page. Drop back to normal flow here so the footer
+   only ever appears once, after the content actually ends. */
+.one-pager--direct-edit .site-footer {
+  position: static;
 }

@@ -433,7 +433,11 @@ function App() {
   }
 
   return (
-    <div className="one-pager one-pager--builder">
+    <div
+      className={`one-pager one-pager--builder${
+        headerProps?.builderMode === 'direct' ? ' one-pager--direct-edit' : ''
+      }`}
+    >
       {headerProps && (
         <Toolbar
           locale={headerProps.locale}
