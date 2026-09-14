@@ -1964,17 +1964,23 @@ function ResumeBuilderPage({
     <>
       <h1 className="sr-only">{locale === 'fi' ? 'Rakenna CV:si' : 'Build Your CV'}</h1>
       {builderMode === 'direct' ? (
-        <DirectEditPreview
-          formData={formData}
-          dispatchFormData={dispatchFormData}
-          selectedTemplate={selectedTemplate}
-          templateConfig={currentTemplate}
+        <AppErrorBoundary
+          panelTitle={locale === 'fi' ? 'Suoran muokkauksen esikatselu' : 'Direct Edit preview'}
           locale={locale}
-          accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
-          headingColor={cvHeadingColor}
-          classicNameAlignment={classicNameAlignment}
-          previewRef={previewRef}
-        />
+        >
+          <DirectEditPreview
+            formData={formData}
+            dispatchFormData={dispatchFormData}
+            selectedTemplate={selectedTemplate}
+            templateConfig={currentTemplate}
+            locale={locale}
+            accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
+            headingColor={cvHeadingColor}
+            classicNameAlignment={classicNameAlignment}
+            previewRef={previewRef}
+            cvFontId={cvFontId}
+          />
+        </AppErrorBoundary>
       ) : (
         <AppShell
           shellStyle={shellStyle}

@@ -1,6 +1,7 @@
 import CVPreview from './CVPreview'
 import SectionsMenu from './SectionsMenu'
 import { isDirectEditSupported } from '../utils/directEdit'
+import { getCvFontStack } from '../utils/cvFonts'
 
 export default function DirectEditPreview({
   formData,
@@ -13,12 +14,24 @@ export default function DirectEditPreview({
   headingColor,
   classicNameAlignment,
   previewRef,
+  cvFontId,
 }) {
   const isFinnish = locale === 'fi'
   const isSupported = isDirectEditSupported(selectedTemplate)
 
   return (
-    <div className="direct-edit-preview">
+    <div
+      className="direct-edit-preview"
+      style={{
+        // Shadows the --font-sans token (tokens.css) for this subtree only —
+        // matches Classic mode's .preview-zoom-wrapper inline style in
+        // ResumeBuilderPage.jsx. Without this, Direct Edit always falls back
+        // to the global default font regardless of the user's font choice,
+        // and an exported PDF (which captures whatever is in the DOM) would
+        // ignore it too.
+        '--font-sans': getCvFontStack(cvFontId),
+      }}
+    >
       {!isSupported ? (
         <p className="direct-edit-preview__notice">
           {isFinnish
