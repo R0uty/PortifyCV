@@ -4,6 +4,23 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit made the primary builder mode — 2026-09-14
+
+Follow-up to Phase 1 below, per direct feedback: Direct Edit now defaults
+on for a fresh visitor (`builderMode` was `'classic'`, now `'direct'`; an
+explicit stored `'classic'` choice is still respected), the toolbar's
+mode switcher shows Direct Edit first, its preview's max-width grew from
+the printed-page metaphor it shared with Classic/PDF sizing (220mm) to a
+genuinely wider `68rem` now that there's no competing form column to
+share space with, and the mobile bottom action bar (an Editor/Preview/
+Export tab switcher, a Classic-only concept) no longer renders in Direct
+Edit mode, where it was overlapping the preview's content with nothing
+for its own tabs to control. The existing e2e suite predates Direct Edit
+and assumed Classic's form UI was on screen by default — rather than
+touch ~35 call sites across 7 spec files, seeded `builderMode` to
+`'classic'` for the whole test run via Playwright's `storageState`
+instead.
+
 ## Direct Edit builder, Phase 1 — 2026-09-14
 
 New "Direct Edit" toolbar toggle alongside the existing (now "Classic")
