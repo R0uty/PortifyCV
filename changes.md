@@ -4,6 +4,12 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: breathing room around the preview — 2026-09-14
+
+`.direct-edit-preview` had zero padding — the CV's white "paper" card sat
+flush against the toolbar above and the footer below with no gap.
+Added 2rem vertical / 1.5rem horizontal padding on the wrapper.
+
 ## Direct Edit: the width fix didn't actually apply, and a real footer-overlap bug — 2026-09-14
 
 Follow-up to the same-day "primary mode" change below — the user reported
