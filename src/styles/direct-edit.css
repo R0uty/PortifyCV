@@ -135,6 +135,12 @@
   width: 100%;
   max-width: min(100%, 68rem);
   margin: 0 auto;
+  /* The CV itself (an <article>) is a white "paper" card with its own
+     shadow, floating on the page's off-white background — this padding
+     is what creates that visible gap above (below the toolbar) and below
+     (above the footer), not just internal whitespace. */
+  padding: var(--space-8, 2rem) var(--space-6, 1.5rem);
+  box-sizing: border-box;
 }
 
 .direct-edit-preview__notice {
