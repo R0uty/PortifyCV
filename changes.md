@@ -4,6 +4,30 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: the width fix didn't actually apply, and a real footer-overlap bug — 2026-09-14
+
+Follow-up to the same-day "primary mode" change below — the user reported
+the preview still wasn't wider and the footer still overlapped, and both
+turned out to be real bugs the previous fix missed, not the same issues
+described again:
+
+- `.direct-edit-preview`'s `max-width` bump never actually took visual
+  effect. It's a flex item of `.builder-section` (`flex-direction:
+  column`), and a flex item with `margin: 0 auto` + `width: auto` doesn't
+  stretch to the container's cross size the way a plain block element
+  would — the auto side-margins suppress flex stretch and the item
+  shrink-wraps to its content's own preferred width instead, well below
+  whatever `max-width` allows. Fixed with an explicit `width: 100%`
+  alongside the existing `max-width`/`margin: 0 auto`.
+- The overlap wasn't the mobile Editor/Preview/Export tab bar (already
+  fixed) — it was the site-wide footer (`position: sticky; bottom: 0`),
+  correct for Classic mode and every static page where content never
+  grows taller than the viewport, but wrong for Direct Edit's preview,
+  which is an unbounded block that can genuinely exceed viewport height
+  for a real CV — the sticky footer stayed pinned over whatever was in
+  view for the entire scroll, not just at the true end of the page.
+  Dropped to `position: static` specifically in Direct Edit mode.
+
 ## Direct Edit made the primary builder mode — 2026-09-14
 
 Follow-up to Phase 1 below, per direct feedback: Direct Edit now defaults
