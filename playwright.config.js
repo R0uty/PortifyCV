@@ -13,6 +13,23 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173',
     trace: 'on-first-retry',
+    // The whole suite predates the Direct Edit builder mode and assumes
+    // Classic mode's UI (the form rail, its fields and buttons) is what's
+    // on screen after navigating to /cv. Direct Edit is now the app's
+    // default for a fresh visitor (see uiReducer.js's createInitialUiState),
+    // so seed every test's localStorage with the pre-Direct-Edit default
+    // to keep the existing suite's assumptions intact. e2e/direct-edit.spec.js's
+    // own tests are unaffected either way — each one explicitly clicks the
+    // "Direct Edit" tab itself rather than relying on whatever the default is.
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: 'http://localhost:4173',
+          localStorage: [{ name: 'portifycv-builder-mode', value: 'classic' }],
+        },
+      ],
+    },
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
