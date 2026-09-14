@@ -1049,7 +1049,7 @@ function CVPreview({
           <>
             {renderSectionHeading('skills', isFinnish ? 'Taidot' : 'Skills')}
             <div className="mt-4 flex flex-wrap gap-2">
-              {skills.length > 0 ? (
+              {directEditDispatch ? null : skills.length > 0 ? (
                 skills.map((skill) => (
                   <span
                     key={skill}
@@ -1059,7 +1059,7 @@ function CVPreview({
                     {skill}
                   </span>
                 ))
-              ) : directEditDispatch ? null : (
+              ) : (
                 <p className="text-sm text-gray-500">
                   {isFinnish ? 'Lisää taitoja näyttääksesi ne tageina.' : 'Add skills to display them as tags.'}
                 </p>
