@@ -285,7 +285,7 @@ function Toolbar({
 
           <button
             type="button"
-            className="app-toolbar__icon-button lg:hidden"
+            className={`app-toolbar__icon-button${builderMode === 'direct' ? '' : ' lg:hidden'}`}
             onClick={onOpenSettings}
             aria-label={isFinnish ? 'Asetukset' : 'Settings'}
             title={isFinnish ? 'Asetukset' : 'Settings'}
