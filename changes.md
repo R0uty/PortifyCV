@@ -4,6 +4,85 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit builder, Phase 1 — 2026-09-14
+
+New "Direct Edit" toolbar toggle alongside the existing (now "Classic")
+split-pane builder: a single full-width live preview where CV text is
+directly editable in place — click the name, role, About paragraph, an
+experience entry's role/company/description, or a skill, and type. Classic
+mode is untouched and stays the default; Direct Edit is opt-in and its
+choice is remembered (`localStorage`).
+
+Architecturally, both modes read and write the exact same CV data — no
+new reducer actions anywhere in this phase. Every Direct Edit keystroke
+dispatches one of the pre-existing `cvFormReducer` actions Classic mode's
+form already uses (`SET_ROOT_FIELD`, `UPDATE_ARRAY_ITEM`, `ADD_ARRAY_ITEM`,
+`REMOVE_ARRAY_ITEM`, `MOVE_ARRAY_ITEM_TO_INDEX`, `ADD_SKILL`,
+`REMOVE_SKILL`, `TOGGLE_SECTION_VISIBILITY`). The core new primitive,
+`EditableField` (`src/components/EditableField.jsx`), solves a real
+`contentEditable`-in-React correctness problem: passing the field's value
+as JSX children would let React's re-render diff reset the browser's
+caret mid-keystroke, so instead the value is seeded/updated imperatively
+via a `textContent` write that's skipped entirely while the field is
+focused — an external re-render can never clobber an in-progress edit.
+`EditableList`/`EditableChip` extend the same gating (via a
+`DirectEditContext`, inert everywhere except an active Direct Edit render)
+to repeatable entries, reusing this project's existing `@dnd-kit`
+drag-to-reorder machinery rather than a new one. A `SectionsMenu` popover
+handles whole-section show/hide, since a hidden section has no position
+in the live preview to attach an inline control to.
+
+**This is explicitly Phase 1**, wiring the whole mechanism end-to-end
+against exactly one reference template (Minimalist) and 4 section types
+(identity/About/Experience/Skills) — the other 17 templates fall back to
+a read-only preview with a "not available yet" notice, gated by a
+`DIRECT_EDIT_SUPPORTED_TEMPLATES` allowlist (`src/utils/directEdit.js`)
+with its own regression check (`scripts/check-direct-edit.mjs`). The
+remaining templates and section types are deliberate Phase 2/3 scope, not
+gaps.
+
+Built via `superpowers:brainstorming` → `superpowers:writing-plans` →
+`superpowers:subagent-driven-development` (10 tasks, each reviewed
+individually, then one final whole-branch review, one fix wave, one
+scoped re-review — all clean). Real bugs found and fixed along the way,
+almost all caught by implementers verifying the plan's own prescribed
+code against the live codebase rather than transcribing it blindly:
+- A wrong CSS branch reference (Minimalist's contact row uses
+  `headerContactMode: 'piped'`, not `'personal'` as first assumed).
+- A wrong reducer payload shape (`REMOVE_SKILL` takes `{index}`, not
+  `{skill}` — dispatching the latter would have been a silent no-op).
+- A missing section-key filter in `SectionsMenu` that would have listed
+  all 20 possible CV sections instead of just the current template's.
+- A missing `z-index` that made the Sections popover's trigger button
+  genuinely unclickable in the real browser DOM.
+- **Most seriously:** `DirectEditPreview` never forwarded a `previewRef`
+  prop, so PDF export was completely broken in Direct Edit mode for every
+  user — found only because Task 10's own spec-mandated html2canvas
+  export-safety spike couldn't run without a working export.
+- The final whole-branch review then caught two more, both invisible to
+  any single task's own narrow diff: every skill rendered twice (an
+  ungated plain tag list alongside the new removable chips), and PDF
+  export was *separately* broken whenever ATS mode was on while in Direct
+  Edit (the preview always rendered in designer mode but the export
+  pipeline waited for a sync signal from ATS mode, which could never
+  arrive) — plus real gaps in multiline editing (Enter/Shift+Enter
+  inserted nothing, since every editable field is an inline `<span>`),
+  Settings being unreachable on desktop in Direct Edit mode, the chosen
+  CV font not applying to the Direct Edit preview or its exports, and no
+  error boundary around the new full-page preview. All fixed in one
+  consolidated fix wave, re-verified clean.
+- **Deliberately deferred to Phase 2** (documented, not silently
+  dropped): `EditableField`'s read-only branch trimmed to match the old
+  snapshot-based behavior, but `EditableList` still reads raw `formData`
+  rather than respecting a per-item hidden flag from Classic mode's
+  own per-entry visibility toggle; a duplicate-skill-name collision can
+  make "+ Add" silently no-op; and the Skills `'categorized'` layout
+  (used by Developer/Creative/Executive/Timeline) has the same
+  double-render risk the final review's Critical #1 fixed for the `'flat'`
+  layout — unreachable today since only Minimalist is wired up, but a
+  fix to apply proactively whenever the first categorized-layout template
+  joins the rollout.
+
 ## Portrait: photo capped to a normal size, not full page height — 2026-09-13
 
 Follow-up to the same-day column-width narrowing below — narrower width
