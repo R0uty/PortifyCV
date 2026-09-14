@@ -60,7 +60,7 @@ export default function EditableField({
 
   const handleInput = useCallback(
     (event) => {
-      dispatchFormData(buildAction(path, event.currentTarget.textContent ?? ''))
+      dispatchFormData(buildAction(path, event.currentTarget.innerText ?? ''))
     },
     [dispatchFormData, path],
   )
@@ -77,16 +77,21 @@ export default function EditableField({
 
   const handleKeyDown = useCallback(
     (event) => {
-      if (!multiline && event.key === 'Enter') {
+      if (event.key === 'Enter') {
         event.preventDefault()
-        event.currentTarget.blur()
+        if (multiline) {
+          document.execCommand('insertText', false, '\n')
+        } else {
+          event.currentTarget.blur()
+        }
       }
     },
     [multiline],
   )
 
   if (!isEditing) {
-    return <Tag className={className}>{value || placeholder}</Tag>
+    const text = typeof value === 'string' ? value.trim() : value
+    return <Tag className={className}>{text || placeholder}</Tag>
   }
 
   return (
