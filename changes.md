@@ -4,6 +4,14 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: more bottom padding, still read as cramped — 2026-09-14
+
+Follow-up to the padding fix below — 2rem all around wasn't enough
+specifically at the bottom (the site footer has no padding of its own
+above its border/text, so the same gap that read as fine above the card
+read as cramped below it). Bottom padding on `.direct-edit-preview`
+bumped to 3.5rem; top/sides unchanged at 2rem/1.5rem.
+
 ## Direct Edit: breathing room around the preview — 2026-09-14
 
 `.direct-edit-preview` had zero padding — the CV's white "paper" card sat
