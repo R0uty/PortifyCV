@@ -449,7 +449,7 @@ console.log('\nuiReducer\n')
 
 {
   const state = createInitialUiState({})
-  check('createInitialUiState defaults the builder mode to classic', state.builderMode === 'classic')
+  check('createInitialUiState defaults the builder mode to direct', state.builderMode === 'direct')
   const direct = uiReducer(state, { type: UI_ACTION.SET_BUILDER_MODE, mode: 'direct' })
   check('SET_BUILDER_MODE switches to direct', direct.builderMode === 'direct')
   const backClassic = uiReducer(direct, { type: UI_ACTION.SET_BUILDER_MODE, mode: 'classic' })

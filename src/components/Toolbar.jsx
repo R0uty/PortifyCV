@@ -191,20 +191,20 @@ function Toolbar({
               <button
                 type="button"
                 role="tab"
-                aria-selected={builderMode === 'classic'}
-                className={`app-toolbar__mode-switch-btn${builderMode === 'classic' ? ' app-toolbar__mode-switch-btn--active' : ''}`}
-                onClick={() => onSetBuilderMode('classic')}
-              >
-                {locale === 'fi' ? 'Klassinen' : 'Classic'}
-              </button>
-              <button
-                type="button"
-                role="tab"
                 aria-selected={builderMode === 'direct'}
                 className={`app-toolbar__mode-switch-btn${builderMode === 'direct' ? ' app-toolbar__mode-switch-btn--active' : ''}`}
                 onClick={() => onSetBuilderMode('direct')}
               >
                 {locale === 'fi' ? 'Suora muokkaus' : 'Direct Edit'}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={builderMode === 'classic'}
+                className={`app-toolbar__mode-switch-btn${builderMode === 'classic' ? ' app-toolbar__mode-switch-btn--active' : ''}`}
+                onClick={() => onSetBuilderMode('classic')}
+              >
+                {locale === 'fi' ? 'Klassinen' : 'Classic'}
               </button>
             </div>
 

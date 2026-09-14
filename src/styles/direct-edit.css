@@ -117,8 +117,13 @@
 }
 
 .direct-edit-preview {
+  /* Wider than --preview-paper-width (the printed-page metaphor Classic
+     mode's preview column shares with PDF export sizing) — Direct Edit
+     has no competing form column, so the extra width is free and reads
+     better as a full editing surface rather than a narrow page floating
+     in empty space. */
   position: relative;
-  max-width: var(--preview-paper-width, 56rem);
+  max-width: min(100%, 68rem);
   margin: 0 auto;
 }
 

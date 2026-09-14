@@ -1992,7 +1992,7 @@ function ResumeBuilderPage({
         />
       )}
 
-      {mobileBottomActions}
+      {builderMode === 'direct' ? null : mobileBottomActions}
 
       <TemplateGalleryModal
         isOpen={isTemplateGalleryOpen}

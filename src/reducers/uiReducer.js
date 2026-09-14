@@ -61,7 +61,7 @@ export function createInitialUiState(initialSession) {
   const storedLocale = safeStorageGet(UI_LOCALE_STORAGE_KEY).value
   const storedSessionRestore = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value
   const storedNavRailCollapsed = safeStorageGet(UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, 'false').value
-  const storedBuilderMode = safeStorageGet(UI_BUILDER_MODE_STORAGE_KEY, 'classic').value
+  const storedBuilderMode = safeStorageGet(UI_BUILDER_MODE_STORAGE_KEY, 'direct').value
 
   return {
     selectedTemplate: readInitialTemplateId(),
@@ -82,7 +82,7 @@ export function createInitialUiState(initialSession) {
     cvHeadingColor: DEFAULT_CV_HEADING_COLOR,
     classicNameAlignment: readInitialClassicNameAlignment(),
     navRailCollapsed: storedNavRailCollapsed === 'true',
-    builderMode: storedBuilderMode === 'direct' ? 'direct' : 'classic',
+    builderMode: storedBuilderMode === 'classic' ? 'classic' : 'direct',
     toasts: initialSession.initialToast ? [initialSession.initialToast] : [],
   }
 }
