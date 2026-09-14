@@ -1,0 +1,158 @@
+# Direct Edit builder — Phase 2 rollout roadmap
+
+**Status:** planning. Phase 1 (spec:
+`docs/superpowers/specs/2026-09-13-direct-edit-builder-design.md`, plan:
+`docs/superpowers/plans/2026-09-13-direct-edit-builder-phase1.md`) shipped
+one reference template (Minimalist) end-to-end and is live on `v1.3.0`.
+
+## What Phase 2 is
+
+Extend Direct Edit's inline editing to the other 17 templates, and lock
+in two standing rules for every round:
+
+1. **Sections only ever appear if the template actually uses them.**
+   Already true by construction, not new work: `SectionsMenu` takes
+   `templateConfig` as a prop and filters `normalizeSectionOrder(...)`
+   down to `[...primarySections, ...secondarySections]` before rendering
+   a single checkbox — this generalizes to any template automatically,
+   confirmed working for Minimalist's 5-section set in Phase 1. Verify
+   this per template as part of its round, don't re-implement it.
+2. **Every template must be usable in Classic and/or Direct Edit.**
+   Classic already works for all 18 (untouched by this whole effort).
+   "Usable in Direct Edit" means: in `DIRECT_EDIT_SUPPORTED_TEMPLATES`
+   (`src/utils/directEdit.js`), its identity/About/Experience/Skills (at
+   minimum — see scope per round below) are genuinely editable in place,
+   and it has its own e2e test — not just "doesn't crash when selected."
+
+## The real shape of the work (corrected understanding — read before planning a round)
+
+Phase 1's wiring lives in `src/components/CVPreview.jsx`'s **shared flat
+renderer** — the code Task 6/7 touched (`t.experienceLayout === 'clean'`,
+`t.skillsLayout === 'flat'`, `t.headerContactMode === 'piped'`, the
+identity block). That code path is reached by exactly two things:
+
+- Minimalist, whose *only* visual is the flat renderer (no bespoke
+  Showcase file exists for it).
+- ANY template when the app's separate ATS-friendly toggle is on
+  (`!atsFriendlyMode` guards every bespoke branch).
+
+**Every other template has its own bespoke Showcase component**
+(`DeveloperShowcase.jsx`, `CreativeShowcase.jsx`, `ExecutiveShowcase.jsx`,
+…, 17 files) with its own hand-written JSX, reading `snapshot.fullName`/
+`snapshot.about`/etc. directly — none of it shares code with the flat
+renderer's `'clean'`/`'flat'`/`'piped'` branches. Confirmed directly: a
+grep of every template's `experienceLayout`/`skillsLayout`/
+`headerContactMode` config values looked promising at first (many
+templates share `'clean'`/`'flat'` with Minimalist), but those config
+values only govern the flat renderer, and Direct Edit always renders with
+`atsFriendlyMode={false}` (per Phase 1's own spec — Direct Edit shows the
+bespoke look, never the ATS-flat one), so a shared config value does
+**not** mean a template's Direct Edit wiring is any cheaper. There is no
+shortcut here — do not assume a template is "mostly free" without
+opening its actual Showcase file.
+
+**Two structural things need fixing once, not per-template, before or during the first round:**
+
+1. `DirectEditProvider` currently wraps only the flat renderer's own
+   `return` — none of the 17 bespoke-Showcase early-return branches in
+   `CVPreview.jsx` are inside it. `useDirectEdit()` called from inside any
+   bespoke Showcase today gets the inert default
+   (`{isEditing:false, dispatchFormData:null}`) regardless of what's
+   passed in, because no Provider wraps that render path. Move the
+   `DirectEditProvider` wrap to cover the *entire* `CVPreview` return —
+   wrap once, near the top, around every branch — rather than
+   re-wrapping each Showcase individually. Do this as part of whichever
+   round is first; it costs nothing to templates not yet in
+   `DIRECT_EDIT_SUPPORTED_TEMPLATES` (the context stays inert for them,
+   same as today).
+2. None of the 17 bespoke Showcase call sites in `CVPreview.jsx` pass
+   `directEditDispatch` as a prop (confirmed: `DeveloperShowcase`'s call
+   site only passes `formData, locale, previewRef, templateConfig,
+   showcaseConfig`). Each template's round adds this prop to its own
+   call site (mechanical, one line) and threads it into that Showcase's
+   own top-level props.
+
+## Known risk to fix proactively, not rediscover
+
+The final whole-branch review's Critical #1 (every skill rendered twice)
+was specifically a `skillsLayout: 'flat'` bug. Templates using
+`skillsLayout: 'categorized'` (Creative, Tech Executive, Developer,
+Quadrant, Executive) render skills grouped under category headings via
+`parseSkillCategories` — a completely different code shape with no
+`EditableChip` wiring at all yet. The *first* categorized-layout template
+in the rollout needs a categorized-aware chip treatment designed
+deliberately (not a copy-paste of `EditableChip`, which assumes a flat
+list) — budget real design time for it, don't treat it as "the same as
+Skills, just reskinned."
+
+## Rollout order — one structural family at a time
+
+Per `docs/template-design-system.md` §5's archetype table (also the exact
+grouping `DOCX_ARCHETYPES` in `src/utils/docxArchetypes.js` already uses
+for a different feature, C2/C3 — reuse the same mental model, not the
+same code):
+
+| Order | Family | Templates | Why this order |
+|---|---|---|---|
+| 1 | `oneColumn` (5 remaining) | Compact, Classic Professional, Editorial, Modern Timeline, Portrait | Closest visual shape to Minimalist (single column, no rail) — cheapest to verify the "bespoke Showcase, not flat renderer" wiring pattern generalizes correctly before tackling a structurally different family. |
+| 2 | `railTable` (8) | Left rail: Executive, Modern Orange. Right rail: Creative, Modern Professional, Graduate, Portfolio Hybrid, Tech Executive, Colorful Compact | Largest family — once the first one's rail+main wiring pattern is proven, the rest should move faster. Creative and Tech Executive and Executive are also this rollout's first `categorized`-skills templates — sequence one of them early in this family once the categorized-chip design (above) is settled, not last. |
+| 3 | `darkSidebarTable` (2) | Developer, Navy Professional | Same rail mechanism as `railTable` plus a dark-fill/light-text palette swap — do after `railTable` so the rail pattern is already proven, not simultaneously. |
+| 4 | `gridTable` (1) | Quadrant | Structurally distinct (2×2 grid, `categorized` skills) — no family to amortize cost across, budget it as its own round. |
+| 5 | `labelGridTable` (1) | European | Most distinct reading pattern (label/value rows, not flowing prose) — last, and expect it to need the most novel `EditableField` usage of any template so far. |
+
+This order is a recommendation, not a hard rule — if a specific template
+turns out to need design decisions that stall a round, skip to the next
+and come back, the same way this project's earlier template-rework
+batches handled blockers.
+
+## What each round covers (per template or family)
+
+Matching Phase 1's own scope boundary, not expanding it: each round wires
+identity (name/title/contact) + About + Experience + Skills for its
+template(s) — the same 4 section types Phase 1 covered for Minimalist.
+Education/Links/Languages/Certificates/etc. remain read-only across every
+template until a later pass, exactly as they are for Minimalist today —
+this is a deliberate, consistent boundary, not scope creep per round.
+
+Each round:
+1. Adds the template's id to `DIRECT_EDIT_SUPPORTED_TEMPLATES`.
+2. Threads `directEditDispatch` into that template's Showcase call site
+   and component signature.
+3. Wires `EditableField`/`EditableList`/`EditableChip` into that
+   Showcase's own JSX for the 4 section types above, following the exact
+   same no-op-when-not-editing contract Phase 1 established (read the
+   `EditableField.jsx`/`EditableList.jsx`/`SectionsMenu.jsx` header
+   comments — they're already written as the contract for this).
+4. Verifies the trim/no-op/caret-preservation properties hold — these are
+   properties of the shared primitives, not re-proven each time, but
+   confirm the new call sites use the primitives correctly (e.g. don't
+   reintroduce Critical #1's class of bug by leaving a plain read-only
+   render un-gated next to a new `EditableChip`).
+5. Adds one e2e test for that template (mirrors the existing "choosing a
+   swatch recolors the `<template>` preview" one-test-per-template pattern
+   in `e2e/templates.spec.js` — same file, same convention, a Direct Edit
+   equivalent).
+6. Full verification pass (lint, `check:reducers`, `check:direct-edit`,
+   build, full `test:e2e`) before the round is called done.
+
+Get an implementation plan (via `superpowers:writing-plans`) for each
+round before starting it — do not write one plan covering multiple
+templates at once; each is reviewed on its own, matching how Editorial/
+Portrait/European were each their own round in the parent roadmap.
+
+## Standing constraints carried from Phase 1 (still binding for every round)
+
+- No new `cvFormReducer` actions — every new call site dispatches one of
+  the existing `FORM_ACTION` cases Phase 1's primitives already use.
+- Commits carry only the repo's own git identity, no AI/Claude
+  co-authorship trailer.
+- `formData` (raw) vs `snapshot` (trimmed) — `EditableField`'s read-only
+  branch already trims internally (fixed in Phase 1's final review), so
+  passing raw `formData.x` as `value` is correct and safe at every new
+  call site; don't re-derive a trimmed value before passing it in.
+- Two gating-convention styles currently coexist in the codebase
+  (unconditional `<EditableField>` relying on its own no-op vs. explicit
+  `directEditDispatch ? <EditableField/> : (raw)` ternaries) — prefer the
+  unconditional form for new call sites unless the raw fallback needs a
+  materially different expression (e.g. a different source array, as
+  Task 6's contact-row ternary needed).
