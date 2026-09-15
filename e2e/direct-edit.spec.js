@@ -177,4 +177,26 @@ test.describe('Direct Edit builder', () => {
     // ATS mode on — this is the case Fix 2 repairs.
     await exportPdfAndExpectSuccess()
   })
+
+  // First template added to DIRECT_EDIT_SUPPORTED_TEMPLATES after Minimalist
+  // (the Phase 1 reference template) — Phase 2 Round 1. Only needs its own
+  // "does editing actually work" smoke test; the mechanisms above (mode
+  // switching, Sections popover, template-switch survival, etc.) are already
+  // covered generically and don't need re-testing per template.
+  test('Classic Professional: identity, About, Experience, and Skills are editable in Direct Edit mode', async ({ page }) => {
+    await selectTemplate(page, 'Classic Professional')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    // EditableField always renders a contentEditable <span class="direct-edit-field">
+    // in its editing branch; the name wrapper class comes from
+    // src/components/templates/ClassicProfessionalShowcase.jsx's <h1>.
+    const nameField = page.locator('.classic-professional-showcase__name .direct-edit-field')
+    await nameField.click()
+    await page.keyboard.press('Control+A')
+    await page.keyboard.type('Jordan Rivera')
+    await nameField.blur()
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await expect(page.getByLabel('Full name')).toHaveValue('Jordan Rivera')
+  })
 })
