@@ -185,6 +185,31 @@ test.describe('Direct Edit builder', () => {
   // covered generically and don't need re-testing per template.
   test('Classic Professional: name persists, skills render once as chips, and a multi-line description survives editing', async ({ page }) => {
     await selectTemplate(page, 'Classic Professional')
+
+    // Regression guard for the final whole-branch review's Fix 1
+    // (2026-09-15): the Experience description's editing branch referenced
+    // a CSS class (.classic-professional-showcase__bullets--editing) with
+    // no rule, so it inherited `white-space: normal`. EditableField
+    // dispatches via `event.currentTarget.innerText`
+    // (src/components/EditableField.jsx), which reports a literal "\n"
+    // text-node character as collapsed whitespace unless `white-space` is
+    // `pre`/`pre-line` — so the FIRST edit to a field that already had a
+    // multi-line description would silently merge it into one line in
+    // formData. Typing a fresh "line 1, Enter, line 2" via the keyboard
+    // does NOT reproduce this: browsers insert an actual <br> for a typed
+    // Enter (via execCommand), and innerText always reports a <br> as a
+    // break regardless of `white-space`. The real trigger is a description
+    // that already contains a literal "\n" *before* the field is ever
+    // focused — EditableField seeds such fields via a direct
+    // `el.textContent = text` write (EditableField.jsx), not execCommand,
+    // so the "\n" stays a plain text-node character subject to the CSS
+    // bug. Seed the newline through Classic mode's own textarea (which
+    // stores it as a real "\n", same as a user pressing Enter in a plain
+    // <textarea>), then make an edit in Direct Edit mode to force a
+    // dispatch, and confirm both lines survived.
+    const descriptionInput = page.getByLabel('Description', { exact: true }).first()
+    await descriptionInput.fill('Seeded line A\nSeeded line B')
+
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     // Name round-trips to Classic mode's form.
@@ -202,34 +227,22 @@ test.describe('Direct Edit builder', () => {
     await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
     await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
 
-    // Regression guard for the final whole-branch review's Fix 1
-    // (2026-09-15): the Experience description's editing branch referenced
-    // a CSS class with no rule, so newlines collapsed to spaces via
-    // EditableField's innerText-based dispatch — corrupting the user's
-    // actual data, not just the display. Type two lines, switch to Classic
-    // mode, and confirm the textarea (which preserves value verbatim,
-    // unlike a rendered element) still holds both lines.
+    // Force a dispatch against the seeded multi-line description without
+    // disturbing its existing content: focus the field, jump to its true
+    // end (Control+End, not the line-relative End key), and append a
+    // marker. If the CSS regression above is present, innerText at this
+    // point already lost the embedded newline, so the dispatched value
+    // (and everything downstream: Classic mode, PDF/DOCX export, share
+    // links) would come back collapsed to one line.
     const firstEntry = page.locator('[data-export-section="experience"] .direct-edit-entry').first()
     const descriptionField = firstEntry.locator('.direct-edit-field').last()
     await descriptionField.click()
-    await page.keyboard.press('Control+A')
-    await page.keyboard.type('Led the redesign')
-    await page.keyboard.press('Enter')
-    await page.keyboard.type('Shipped it two weeks early')
+    await page.keyboard.press('Control+End')
+    await page.keyboard.type(' X')
     await descriptionField.blur()
 
     await page.getByRole('tab', { name: 'Classic' }).click()
     await expect(page.getByLabel('Full name')).toHaveValue('Jordan Rivera')
-    // getByLabel('Description') alone would also match the unrelated
-    // "Job description" ATS keyword-match textarea (its aria-label contains
-    // "description" and Playwright's default label matching is a
-    // case-insensitive substring) — { exact: true } scopes this to the
-    // FloatingField-labeled textarea only. A trailing "\n" is tolerated:
-    // the contentEditable field's execCommand('insertText', '\n') leaves an
-    // implicit trailing newline in the DOM after the final keystroke, which
-    // is unrelated to the collapsed-to-one-line defect this test guards.
-    await expect(page.getByLabel('Description', { exact: true }).first()).toHaveValue(
-      /^Led the redesign\nShipped it two weeks early\n?$/,
-    )
+    await expect(descriptionInput).toHaveValue('Seeded line A\nSeeded line B X')
   })
 })
