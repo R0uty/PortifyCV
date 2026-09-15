@@ -28,9 +28,67 @@ import {
   formatLinkDisplayValue,
 } from './shared'
 import EditableField from '../EditableField'
+import EditableList from '../EditableList'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+}
+
+function renderExperienceEntry(item, index, { directEditDispatch, copy }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <div key={`${item.role}-${item.company}-${index}`} className="classic-professional-showcase__entry" data-export-card="true">
+      <div className="classic-professional-showcase__entry-row">
+        <p className="classic-professional-showcase__entry-role">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+              value={item.role}
+              placeholder={copy.untitledRole}
+            />
+          ) : (
+            item.role || copy.untitledRole
+          )}
+        </p>
+        <p className="classic-professional-showcase__entry-dates">{dateRange || copy.datesPending}</p>
+      </div>
+      {directEditDispatch || item.company || item.location ? (
+        <p className="classic-professional-showcase__entry-meta">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+              value={item.company}
+              placeholder={copy.company}
+            />
+          ) : (
+            item.company
+          )}
+          {item.location ? `, ${item.location}` : null}
+        </p>
+      ) : null}
+      {directEditDispatch ? (
+        <p className="classic-professional-showcase__bullets classic-professional-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="classic-professional-showcase__bullets">
+          {bullets.map((line, lineIndex) => (
+            <li key={lineIndex}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  )
 }
 
 function Section({ id, children }) {
@@ -80,6 +138,8 @@ export default function ClassicProfessionalShowcase({
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     summary: isFinnish ? 'Yhteenveto' : 'Professional Summary',
     experience: isFinnish ? 'Kokemus' : 'Experience',
     education: isFinnish ? 'Koulutus' : 'Education',
@@ -115,29 +175,16 @@ export default function ClassicProfessionalShowcase({
         <Section key={key} id="experience">
           <h2 className="classic-professional-showcase__heading">{copy.experience}</h2>
           <div className="classic-professional-showcase__entry-list">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-                const metaLine = [item.company, item.location].filter(Boolean).join(', ')
-
-                return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="classic-professional-showcase__entry" data-export-card="true">
-                    <div className="classic-professional-showcase__entry-row">
-                      <p className="classic-professional-showcase__entry-role">{item.role || copy.untitledRole}</p>
-                      <p className="classic-professional-showcase__entry-dates">{dateRange || copy.datesPending}</p>
-                    </div>
-                    {metaLine ? <p className="classic-professional-showcase__entry-meta">{metaLine}</p> : null}
-                    {bullets.length > 0 ? (
-                      <ul className="classic-professional-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy }))
             ) : (
               <p className="classic-professional-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
