@@ -183,20 +183,53 @@ test.describe('Direct Edit builder', () => {
   // "does editing actually work" smoke test; the mechanisms above (mode
   // switching, Sections popover, template-switch survival, etc.) are already
   // covered generically and don't need re-testing per template.
-  test('Classic Professional: identity, About, Experience, and Skills are editable in Direct Edit mode', async ({ page }) => {
+  test('Classic Professional: name persists, skills render once as chips, and a multi-line description survives editing', async ({ page }) => {
     await selectTemplate(page, 'Classic Professional')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
-    // EditableField always renders a contentEditable <span class="direct-edit-field">
-    // in its editing branch; the name wrapper class comes from
-    // src/components/templates/ClassicProfessionalShowcase.jsx's <h1>.
+    // Name round-trips to Classic mode's form.
     const nameField = page.locator('.classic-professional-showcase__name .direct-edit-field')
     await nameField.click()
     await page.keyboard.press('Control+A')
     await page.keyboard.type('Jordan Rivera')
     await nameField.blur()
 
+    // Regression guard for the same Critical #1 class of bug Minimalist
+    // already guards against ('each skill renders exactly once...' above) —
+    // Classic Professional's Skills section has its own separate gating in
+    // ClassicProfessionalShowcase.jsx and needs its own guard.
+    const skillsSection = page.locator('[data-export-section="skills"]')
+    await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
+    await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
+
+    // Regression guard for the final whole-branch review's Fix 1
+    // (2026-09-15): the Experience description's editing branch referenced
+    // a CSS class with no rule, so newlines collapsed to spaces via
+    // EditableField's innerText-based dispatch — corrupting the user's
+    // actual data, not just the display. Type two lines, switch to Classic
+    // mode, and confirm the textarea (which preserves value verbatim,
+    // unlike a rendered element) still holds both lines.
+    const firstEntry = page.locator('[data-export-section="experience"] .direct-edit-entry').first()
+    const descriptionField = firstEntry.locator('.direct-edit-field').last()
+    await descriptionField.click()
+    await page.keyboard.press('Control+A')
+    await page.keyboard.type('Led the redesign')
+    await page.keyboard.press('Enter')
+    await page.keyboard.type('Shipped it two weeks early')
+    await descriptionField.blur()
+
     await page.getByRole('tab', { name: 'Classic' }).click()
     await expect(page.getByLabel('Full name')).toHaveValue('Jordan Rivera')
+    // getByLabel('Description') alone would also match the unrelated
+    // "Job description" ATS keyword-match textarea (its aria-label contains
+    // "description" and Playwright's default label matching is a
+    // case-insensitive substring) — { exact: true } scopes this to the
+    // FloatingField-labeled textarea only. A trailing "\n" is tolerated:
+    // the contentEditable field's execCommand('insertText', '\n') leaves an
+    // implicit trailing newline in the DOM after the final keystroke, which
+    // is unrelated to the collapsed-to-one-line defect this test guards.
+    await expect(page.getByLabel('Description', { exact: true }).first()).toHaveValue(
+      /^Led the redesign\nShipped it two weeks early\n?$/,
+    )
   })
 })
