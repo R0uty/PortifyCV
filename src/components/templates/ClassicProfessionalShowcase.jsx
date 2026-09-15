@@ -235,7 +235,7 @@ export default function ClassicProfessionalShowcase({
               ))
             ) : (
               <p className="classic-professional-showcase__empty">
-                {isFinnish ? 'Taidot näkyvat tässä.' : 'Skills will appear here.'}
+                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
               </p>
             )}
             {directEditDispatch ? (
