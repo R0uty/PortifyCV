@@ -4,6 +4,18 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: Classic Professional is now editable — 2026-09-15
+
+Classic Professional is the second template wired into Direct Edit mode
+(Phase 2 Round 1), with the same scope as Minimalist's Phase 1 wiring:
+identity, About, Experience, and Skills are all inline-editable in the
+live preview. A final whole-branch review of this round also caught and
+fixed two real bugs before it shipped: a missing CSS rule on the
+Experience description's editing state that silently collapsed multi-line
+descriptions into one line (real data loss, not just a rendering glitch),
+and a leading-comma display regression in Classic mode for experience
+entries that have a location but no company.
+
 ## Direct Edit: more bottom padding, still read as cramped — 2026-09-14
 
 Follow-up to the padding fix below — 2rem all around wasn't enough
