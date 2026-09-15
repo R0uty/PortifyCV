@@ -266,17 +266,20 @@ function CVPreview({
   // template's left-aligned letterhead as a Settings option (v1.2.10).
   if (variant === 'classicProfessional' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <ClassicProfessionalShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-          nameAlignment={classicNameAlignment}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <ClassicProfessionalShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            nameAlignment={classicNameAlignment}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 

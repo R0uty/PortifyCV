@@ -27,6 +27,7 @@ import {
   formatDateRange,
   formatLinkDisplayValue,
 } from './shared'
+import EditableField from '../EditableField'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -47,16 +48,10 @@ export default function ClassicProfessionalShowcase({
   templateConfig,
   headingColor = null,
   nameAlignment = 'center',
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
-
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
-  const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
 
   const contactItems = [
     ['phone', snapshot.phone],
@@ -64,6 +59,11 @@ export default function ClassicProfessionalShowcase({
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const linkedinUrl = snapshot.links.linkedin
+  const directEditContactFields = [
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const sectionVisibility = {
     ...createSectionVisibility(),
@@ -93,7 +93,19 @@ export default function ClassicProfessionalShowcase({
       return (
         <Section key={key} id="about">
           <h2 className="classic-professional-showcase__heading">{copy.summary}</h2>
-          <p className="classic-professional-showcase__summary">{about}</p>
+          <p className="classic-professional-showcase__summary">
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'about' }}
+              value={formData.about}
+              placeholder={
+                isFinnish
+                  ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                  : 'Your professional summary will appear here as you fill out the CV form.'
+              }
+              multiline
+            />
+          </p>
         </Section>
       )
     }
@@ -251,14 +263,37 @@ export default function ClassicProfessionalShowcase({
         <p className="classic-professional-showcase__kicker" data-export-ignore="true">
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
-        <h1 className="classic-professional-showcase__name">{fullName}</h1>
-        <p className="classic-professional-showcase__role">{title}</p>
-        {contactItems.length > 0 || linkedinUrl ? (
+        <h1 className="classic-professional-showcase__name">
+          <EditableField
+            as="span"
+            path={{ kind: 'root', field: 'fullName' }}
+            value={formData.fullName}
+            placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+          />
+        </h1>
+        <p className="classic-professional-showcase__role">
+          <EditableField
+            as="span"
+            path={{ kind: 'root', field: 'title' }}
+            value={formData.title}
+            placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+          />
+        </p>
+        {directEditDispatch || contactItems.length > 0 || linkedinUrl ? (
           <div className="classic-professional-showcase__contact">
-            {contactItems.map(([key, value]) => (
+            {(directEditDispatch ? directEditContactFields : contactItems).map(([key, value, placeholderLabel]) => (
               <span key={key} className="classic-professional-showcase__contact-item">
                 <span className="classic-professional-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                {value}
+                {directEditDispatch ? (
+                  <EditableField
+                    as="span"
+                    path={{ kind: 'root', field: key }}
+                    value={value}
+                    placeholder={placeholderLabel}
+                  />
+                ) : (
+                  value
+                )}
               </span>
             ))}
             {linkedinUrl ? (
