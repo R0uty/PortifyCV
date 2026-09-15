@@ -28,7 +28,7 @@ import {
   formatLinkDisplayValue,
 } from './shared'
 import EditableField from '../EditableField'
-import EditableList from '../EditableList'
+import EditableList, { EditableChip } from '../EditableList'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -229,15 +229,18 @@ export default function ClassicProfessionalShowcase({
         <Section key={key} id="skills">
           <h2 className="classic-professional-showcase__heading">{copy.skills}</h2>
           <div className="classic-professional-showcase__tag-row">
-            {snapshot.skills.length > 0 ? (
+            {directEditDispatch ? null : snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill) => (
                 <span key={skill} data-export-skill="true" className="classic-professional-showcase__tag">{skill}</span>
               ))
             ) : (
               <p className="classic-professional-showcase__empty">
-                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+                {isFinnish ? 'Taidot näkyvat tässä.' : 'Skills will appear here.'}
               </p>
             )}
+            {directEditDispatch ? (
+              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+            ) : null}
           </div>
         </Section>
       )
