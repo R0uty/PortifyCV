@@ -34,6 +34,9 @@ function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
 }
 
+// `index` is always formData.experience-relative (only ever read inside
+// directEditDispatch-gated branches below) — never assume it lines up with
+// snapshot.experience's own (filtered) indices in the read-only call site.
 function renderExperienceEntry(item, index, { directEditDispatch, copy }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = item.description ? splitToBullets(item.description) : []
@@ -67,7 +70,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy }) {
           ) : (
             item.company
           )}
-          {item.location ? `, ${item.location}` : null}
+          {item.company && item.location ? ', ' : ''}{item.location}
         </p>
       ) : null}
       {directEditDispatch ? (
