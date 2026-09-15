@@ -4,6 +4,28 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: fixed the footer genuinely overlapping long CVs — 2026-09-15
+
+A real regression that survived an earlier "footer overlap" investigation
+this same week: `.builder-section`'s `flex: 1; min-height: 0` sizing
+(needed so Classic mode's own panels can scroll inside a viewport-bounded
+box) meant Direct Edit's preview — which has no such internal scroll and
+is meant to grow the whole page — never forced its container to actually
+grow past a single viewport height. For any CV long enough to overflow
+one screen (most real CVs), the tail of the preview just overflowed
+visually past `.builder-section`'s boundary, and the footer, positioned
+in normal flow right after that box, ended up sitting partway down the
+page instead of after the real content — visually overlapping straight
+through the rest of the CV, not just its very bottom edge. The earlier
+`position: sticky` → `static` fix on the footer was necessary but not
+sufficient; this is the actual root cause. Fixed by restoring the default
+`min-height: auto` on `.builder-section` for Direct Edit mode specifically
+(`.one-pager--direct-edit .builder-section`), which still lets it grow to
+fill the viewport for a short CV (the standard flexbox sticky-footer
+pattern) while now also growing past one viewport for a longer one.
+Verified live (before/after DOM measurement) and added a permanent e2e
+regression test.
+
 ## Direct Edit: Classic Professional is now editable — 2026-09-15
 
 Classic Professional is the second template wired into Direct Edit mode
