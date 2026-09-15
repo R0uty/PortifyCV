@@ -51,20 +51,31 @@ bespoke look, never the ATS-flat one), so a shared config value does
 shortcut here — do not assume a template is "mostly free" without
 opening its actual Showcase file.
 
-**Two structural things need fixing once, not per-template, before or during the first round:**
+**Two structural things, corrected after actually reading the file (the
+first pass of this roadmap got the right problem but the wrong fix):**
 
 1. `DirectEditProvider` currently wraps only the flat renderer's own
    `return` — none of the 17 bespoke-Showcase early-return branches in
    `CVPreview.jsx` are inside it. `useDirectEdit()` called from inside any
    bespoke Showcase today gets the inert default
    (`{isEditing:false, dispatchFormData:null}`) regardless of what's
-   passed in, because no Provider wraps that render path. Move the
-   `DirectEditProvider` wrap to cover the *entire* `CVPreview` return —
-   wrap once, near the top, around every branch — rather than
-   re-wrapping each Showcase individually. Do this as part of whichever
-   round is first; it costs nothing to templates not yet in
-   `DIRECT_EDIT_SUPPORTED_TEMPLATES` (the context stays inert for them,
-   same as today).
+   passed in, because no Provider wraps that render path.
+   **Originally this doc suggested relocating the wrap to cover the
+   entire `CVPreview` function in one refactor — don't do that.**
+   `CVPreview.jsx` is ~2000 lines with 17 sequential early returns; a
+   single top-level wrap would mean restructuring every one of them
+   (early returns can't sit inside a wrapping element without either
+   converting the whole function to a variable-then-render-once shape,
+   or duplicating the wrap 17 times anyway) — a large, high-blast-radius
+   change touching templates that aren't even part of the round doing
+   it, for a one-time convenience. **Instead: wrap `DirectEditProvider`
+   locally around just the Showcase branch being wired, each round.**
+   It's one JSX element added around one `<Suspense><XShowcase .../></Suspense>`
+   call — cheap, mechanical, and the diff for a round stays scoped to
+   the template that round actually touches, matching this project's
+   own minimal-diff convention. Repeating it 17 times costs one line
+   each; refactoring the whole function to avoid that costs a much
+   larger, riskier diff for no real benefit.
 2. None of the 17 bespoke Showcase call sites in `CVPreview.jsx` pass
    `directEditDispatch` as a prop (confirmed: `DeveloperShowcase`'s call
    site only passes `formData, locale, previewRef, templateConfig,
@@ -94,7 +105,7 @@ same code):
 
 | Order | Family | Templates | Why this order |
 |---|---|---|---|
-| 1 | `oneColumn` (5 remaining) | Compact, Classic Professional, Editorial, Modern Timeline, Portrait | Closest visual shape to Minimalist (single column, no rail) — cheapest to verify the "bespoke Showcase, not flat renderer" wiring pattern generalizes correctly before tackling a structurally different family. |
+| 1 | `oneColumn` (5 remaining) | Classic Professional, Editorial, Portrait, Modern Timeline, then Compact last | Closest visual shape to Minimalist (single column, no rail) — cheapest to verify the "bespoke Showcase, not flat renderer" wiring pattern generalizes correctly before tackling a structurally different family. Checked each Showcase's actual skills rendering directly (config values don't reflect it — see above): Classic Professional/Editorial/Portrait/Modern Timeline all render a genuinely flat `snapshot.skills.map(...)` list, reusable with the existing `EditableChip` unchanged. **Compact is the outlier** — despite `skillsLayout: 'flat'` in its config, `CompactShowcase.jsx` always renders skills grouped via `parseSkillCategories`, the same categorized-chip design problem flagged above. Sequence Compact last in this family, after the categorized-chip design is actually settled (ideally during this family's own work, once a flat-skills round or two has proven the wiring pattern) — not first, where it would force that design decision before anything else has landed. |
 | 2 | `railTable` (8) | Left rail: Executive, Modern Orange. Right rail: Creative, Modern Professional, Graduate, Portfolio Hybrid, Tech Executive, Colorful Compact | Largest family — once the first one's rail+main wiring pattern is proven, the rest should move faster. Creative and Tech Executive and Executive are also this rollout's first `categorized`-skills templates — sequence one of them early in this family once the categorized-chip design (above) is settled, not last. |
 | 3 | `darkSidebarTable` (2) | Developer, Navy Professional | Same rail mechanism as `railTable` plus a dark-fill/light-text palette swap — do after `railTable` so the rail pattern is already proven, not simultaneously. |
 | 4 | `gridTable` (1) | Quadrant | Structurally distinct (2×2 grid, `categorized` skills) — no family to amortize cost across, budget it as its own round. |
