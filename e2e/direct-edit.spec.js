@@ -58,6 +58,39 @@ test.describe('Direct Edit builder', () => {
     await expect(page.locator('.direct-edit-preview [contenteditable="true"]')).toHaveCount(0)
   })
 
+  // Regression guard: `.builder-section` (app-shell.css) is `flex: 1;
+  // min-height: 0` — needed so Classic mode's own AppShell panels can
+  // scroll *inside* a viewport-bounded box instead of growing it. Direct
+  // Edit has no such internal panel, so with `min-height: 0` still in
+  // effect, a CV preview taller than the box's flex-computed share of the
+  // viewport just overflowed visually with `overflow: visible`, never
+  // forcing `.builder-section` (or `.one-pager`) to actually grow —
+  // `.site-footer`, positioned in normal flow right after
+  // `.builder-section`, ended up sitting partway down the page instead of
+  // after the real content, so the tail of a long CV visually overlapped
+  // straight through it. `.one-pager--direct-edit .builder-section` now
+  // overrides back to the default `min-height: auto` (direct-edit.css),
+  // giving the box its content's height as a floor. The demo CV (multiple
+  // experience/education entries) is long enough to overflow one viewport
+  // and reproduce this reliably.
+  test('the footer never overlaps the CV preview in Direct Edit mode', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const preview = page.locator('.direct-edit-preview')
+    const footer = page.locator('.site-footer')
+    await expect(preview).toBeVisible()
+    await expect(footer).toBeVisible()
+
+    await page.mouse.wheel(0, 20000)
+
+    const previewBox = await preview.boundingBox()
+    const footerBox = await footer.boundingBox()
+    // The footer's top edge must be at or below the preview's bottom edge
+    // — i.e. positioned after the content, never over it. A 1px tolerance
+    // absorbs subpixel rounding between the two boundingBox() calls.
+    expect(footerBox.y).toBeGreaterThanOrEqual(previewBox.y + previewBox.height - 1)
+  })
+
   // Regression guard for Fix 1 (final whole-branch review): the Skills
   // section's 'flat' layout used to render every skill twice in Direct Edit
   // mode — once as a plain, non-interactive <span data-export-skill> (never

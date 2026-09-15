@@ -244,3 +244,31 @@
 .one-pager--direct-edit .site-footer {
   position: static;
 }
+
+/* `.builder-section` (app-shell.css) is `flex: 1; min-height: 0` — the
+   `min-height: 0` is what lets Classic mode's own AppShell panels scroll
+   *inside* a viewport-bounded box instead of growing it. Direct Edit has
+   no such internal panel: `.direct-edit-preview` is meant to grow the
+   whole page (see the position:static rule above). But `min-height: 0`
+   also drops the flex item's content-based minimum, so once a real CV's
+   preview is taller than the box's flex-computed share of the viewport,
+   the overflow paints past `.builder-section`'s own boundary with
+   `overflow: visible` — it never forces `.builder-section` (or
+   `.one-pager`) to actually grow. `.site-footer`, positioned in normal
+   flow right after `.builder-section`, ends up sitting at that
+   flex-computed (viewport-sized) height instead of after the real
+   content, so the tail of a long CV visually overlaps straight through
+   it. Restoring the default `min-height: auto` gives `.builder-section`
+   its content's height as a floor: `flex: 1` still grows it to fill the
+   viewport for a short CV (the standard flexbox sticky-footer pattern),
+   but a taller-than-viewport CV now grows the box — and `.one-pager` — to
+   match, so the footer lands genuinely after the content instead of
+   overlapping it. Verified live: without this rule, a demo CV's preview
+   (1619px) sat inside a 554px-tall `.builder-section` box with the
+   footer positioned right after that 554px, overlapping the remaining
+   ~1065px of visible content; with it, `.builder-section` measures the
+   full 1619px and the footer sits flush after it, at the true end of
+   the page. */
+.one-pager--direct-edit .builder-section {
+  min-height: auto;
+}
