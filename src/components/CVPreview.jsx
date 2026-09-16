@@ -397,16 +397,19 @@ function CVPreview({
   // same reasoning as every other bespoke Showcase above.
   if (variant === 'editorial' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <EditorialShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          headingColor={headingColor}
-          accentColor={accentColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <EditorialShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 

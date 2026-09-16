@@ -21,6 +21,7 @@
 
 import { useMemo } from 'react'
 
+import EditableField from '../EditableField'
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import { formatDateRange, formatLinkDisplayValue } from './shared'
@@ -58,16 +59,12 @@ export default function EditorialShowcase({
   templateConfig,
   headingColor = null,
   accentColor = EDITORIAL_DEFAULT_ACCENT_COLOR,
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
   const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
-  const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
   const photo = snapshot.photo
   const showPhoto = Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
@@ -81,6 +78,12 @@ export default function EditorialShowcase({
     ['phone', snapshot.phone],
     ['linkedin', linkedinUrl ? formatLinkDisplayValue(linkedinUrl) : ''],
   ].filter(([, value]) => value)
+
+  const directEditMetaFields = [
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+  ]
 
   const sectionVisibility = {
     ...createSectionVisibility(),
@@ -112,7 +115,19 @@ export default function EditorialShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about" number={sectionNumber(key)} title={copy.about}>
-          <p className="editorial-showcase__intro">{about}</p>
+          <p className="editorial-showcase__intro">
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'about' }}
+              value={formData.about}
+              placeholder={
+                isFinnish
+                  ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                  : 'Your professional summary will appear here as you fill out the CV form.'
+              }
+              multiline
+            />
+          </p>
         </Section>
       )
     }
@@ -318,13 +333,41 @@ export default function EditorialShowcase({
           <p className="editorial-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="editorial-showcase__name">{fullName}</h1>
-          <p className="editorial-showcase__role">{title}</p>
-          {metaItems.length > 0 ? (
+          <h1 className="editorial-showcase__name">
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'fullName' }}
+              value={formData.fullName}
+              placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+            />
+          </h1>
+          <p className="editorial-showcase__role">
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'title' }}
+              value={formData.title}
+              placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+            />
+          </p>
+          {directEditDispatch || metaItems.length > 0 ? (
             <div className="editorial-showcase__meta">
-              {metaItems.map(([key, value]) => (
-                <span key={key} className="editorial-showcase__meta-item">{value}</span>
+              {(directEditDispatch ? directEditMetaFields : metaItems).map(([key, value, placeholderLabel]) => (
+                directEditDispatch ? (
+                  <EditableField
+                    key={key}
+                    as="span"
+                    className="editorial-showcase__meta-item"
+                    path={{ kind: 'root', field: key }}
+                    value={value}
+                    placeholder={placeholderLabel}
+                  />
+                ) : (
+                  <span key={key} className="editorial-showcase__meta-item">{value}</span>
+                )
               ))}
+              {directEditDispatch && linkedinUrl ? (
+                <span className="editorial-showcase__meta-item">{formatLinkDisplayValue(linkedinUrl)}</span>
+              ) : null}
             </div>
           ) : null}
         </div>
