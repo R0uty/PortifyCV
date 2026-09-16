@@ -247,6 +247,15 @@
   color: var(--tpl-accent);
 }
 
+.editorial-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--ed-ink);
+}
+
 .editorial-showcase__project-desc {
   margin-top: 0.3rem;
   max-width: 62ch;
