@@ -257,6 +257,15 @@
   color: var(--tpl-accent);
 }
 
+.portrait-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--pt-ink);
+}
+
 .portrait-showcase__project-desc {
   margin-top: 0.3rem;
   font-size: var(--tpl-body-size);
