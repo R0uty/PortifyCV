@@ -33,6 +33,9 @@ function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
 }
 
+// `index` is always formData.experience-relative (only ever read inside
+// directEditDispatch-gated branches below) — never assume it lines up with
+// snapshot.experience's own (filtered) indices in the read-only call site.
 function renderExperienceEntry(item, index, { directEditDispatch, copy }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = item.description ? splitToBullets(item.description) : []
@@ -247,6 +250,13 @@ export default function EditorialShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" number={sectionNumber(key)} title={copy.skills}>
+          {/* Three-way ternary rather than Classic Professional's persistent
+              .tag-row wrapper: .tag-row's own margin-top (0.9rem) would stack
+              with .empty's margin-top (0.8rem) if the empty state were nested
+              inside it — flex-item margins don't collapse — adding an unwanted
+              extra gap. Keeping the three states as fully separate branches
+              avoids that regression while still guaranteeing mutual exclusion
+              (a single chained ternary can only ever select one branch). */}
           {directEditDispatch ? (
             <div className="editorial-showcase__tag-row">
               <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
@@ -404,14 +414,14 @@ export default function EditorialShowcase({
             <div className="editorial-showcase__meta">
               {(directEditDispatch ? directEditMetaFields : metaItems).map(([key, value, placeholderLabel]) => (
                 directEditDispatch ? (
-                  <EditableField
-                    key={key}
-                    as="span"
-                    className="editorial-showcase__meta-item"
-                    path={{ kind: 'root', field: key }}
-                    value={value}
-                    placeholder={placeholderLabel}
-                  />
+                  <span key={key} className="editorial-showcase__meta-item">
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  </span>
                 ) : (
                   <span key={key} className="editorial-showcase__meta-item">{value}</span>
                 )
