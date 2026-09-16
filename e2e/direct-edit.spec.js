@@ -325,4 +325,35 @@ test.describe('Direct Edit builder', () => {
     await expect(page.getByLabel('Full name')).toHaveValue('Jordan Rivera')
     await expect(descriptionInput).toHaveValue('Seeded line A\nSeeded line B X')
   })
+
+  // Regression guard for the final whole-branch review's Important #1
+  // (2026-09-16): EditorialShowcase.jsx was the only call site in the
+  // codebase passing `className` directly into `EditableField`, which put
+  // `editorial-showcase__meta-item` (this template's own separator rule)
+  // and EditableField's internal `direct-edit-field--empty` class on the
+  // SAME element — two ::before rules collided at equal specificity, and
+  // since direct-edit.css is imported before editorial.css, the separator
+  // silently won, blanking the placeholder label for any empty contact
+  // field. This only shows up on a genuinely empty value (the `--empty`
+  // class is added only then), which every other test in this file never
+  // exercises, since they all load the demo CV first. Checking the
+  // computed ::before content (not just the `data-placeholder` attribute,
+  // which is always present regardless of whether the CSS actually
+  // renders it) is what makes this a real regression guard.
+  test('Editorial: an empty contact field shows its placeholder label, not a stray separator, in Direct Edit mode', async ({ page }) => {
+    await page.getByRole('button', { name: 'Reset form' }).click()
+    await page.getByRole('button', { name: 'Confirm reset' }).click()
+
+    await selectTemplate(page, 'Editorial')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const metaFields = page.locator('.editorial-showcase__meta .direct-edit-field')
+    await expect(metaFields).toHaveCount(3)
+
+    const labels = ['Location', 'Email', 'Phone']
+    for (let i = 0; i < labels.length; i++) {
+      const content = await metaFields.nth(i).evaluate((el) => getComputedStyle(el, '::before').content)
+      expect(content).toContain(labels[i])
+    }
+  })
 })
