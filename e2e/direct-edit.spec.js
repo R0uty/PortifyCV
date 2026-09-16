@@ -356,4 +356,77 @@ test.describe('Direct Edit builder', () => {
       expect(content).toContain(labels[i])
     }
   })
+
+  // Third template added to DIRECT_EDIT_SUPPORTED_TEMPLATES after Classic
+  // Professional and Editorial — Phase 2 Round 3. Combines this round's
+  // own name/skills/multi-line-description checks with the empty-contact-
+  // field placeholder check Round 2's final review added retroactively
+  // (see e2e/direct-edit.spec.js's Editorial test) — Portrait gets it
+  // from the start, since Task 1 already applies the wrapper-span fix
+  // for the className/::before collision that check exists to catch.
+  test('Portrait: name persists, skills render once as chips, a multi-line description survives editing, and an empty contact field shows its placeholder', async ({ page }) => {
+    await selectTemplate(page, 'Portrait')
+
+    const descriptionInput = page.getByLabel('Description', { exact: true }).first()
+    await descriptionInput.fill('Seeded line A\nSeeded line B')
+
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    // Name round-trips to Classic mode's form.
+    const nameField = page.locator('.portrait-showcase__name .direct-edit-field')
+    await nameField.click()
+    await page.keyboard.press('Control+A')
+    await page.keyboard.type('Jordan Rivera')
+    await nameField.blur()
+
+    // Regression guard for the same Critical-bug class Classic
+    // Professional's Round 1 final review found (every skill rendered
+    // twice) — Portrait's Skills section has its own separate gating and
+    // needs its own guard.
+    const skillsSection = page.locator('[data-export-section="skills"]')
+    await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
+    await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
+
+    // Force a dispatch against the seeded multi-line description without
+    // disturbing its existing content: focus the field, jump to its true
+    // end (Control+End, not the line-relative End key), and append a
+    // marker.
+    const firstEntry = page.locator('[data-export-section="experience"] .direct-edit-entry').first()
+    const descriptionField = firstEntry.locator('.direct-edit-field').last()
+    await descriptionField.click()
+    await page.keyboard.press('Control+End')
+    await page.keyboard.type(' X')
+    await descriptionField.blur()
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await expect(page.getByLabel('Full name')).toHaveValue('Jordan Rivera')
+    await expect(descriptionInput).toHaveValue('Seeded line A\nSeeded line B X')
+  })
+
+  // Regression guard for the exact class of bug the final whole-branch
+  // review found in Round 2 (Editorial): passing `className` directly
+  // into `EditableField` collides the template's own class with
+  // EditableField's internal `direct-edit-field--empty` class on the
+  // same element, and two ::before rules (the template's meta-item
+  // separator, direct-edit.css's placeholder text) fight at equal
+  // specificity. Checking the computed ::before content (not just the
+  // `data-placeholder` attribute, which is always present regardless of
+  // whether the CSS actually renders it) is what makes this a real
+  // regression guard.
+  test('Portrait: an empty contact field shows its placeholder label, not a stray separator, in Direct Edit mode', async ({ page }) => {
+    await page.getByRole('button', { name: 'Reset form' }).click()
+    await page.getByRole('button', { name: 'Confirm reset' }).click()
+
+    await selectTemplate(page, 'Portrait')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const metaFields = page.locator('.portrait-showcase__meta .direct-edit-field')
+    await expect(metaFields).toHaveCount(3)
+
+    const labels = ['Location', 'Email', 'Phone']
+    for (let i = 0; i < labels.length; i++) {
+      const content = await metaFields.nth(i).evaluate((el) => getComputedStyle(el, '::before').content)
+      expect(content).toContain(labels[i])
+    }
+  })
 })
