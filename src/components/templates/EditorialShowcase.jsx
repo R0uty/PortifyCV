@@ -22,7 +22,7 @@
 import { useMemo } from 'react'
 
 import EditableField from '../EditableField'
-import EditableList from '../EditableList'
+import EditableList, { EditableChip } from '../EditableList'
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import { formatDateRange, formatLinkDisplayValue } from './shared'
@@ -247,7 +247,11 @@ export default function EditorialShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" number={sectionNumber(key)} title={copy.skills}>
-          {snapshot.skills.length > 0 ? (
+          {directEditDispatch ? (
+            <div className="editorial-showcase__tag-row">
+              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+            </div>
+          ) : snapshot.skills.length > 0 ? (
             <div className="editorial-showcase__tag-row">
               {snapshot.skills.map((skill) => (
                 <span key={skill} data-export-skill="true" className="editorial-showcase__tag">{skill}</span>
