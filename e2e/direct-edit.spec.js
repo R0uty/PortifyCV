@@ -278,4 +278,51 @@ test.describe('Direct Edit builder', () => {
     await expect(page.getByLabel('Full name')).toHaveValue('Jordan Rivera')
     await expect(descriptionInput).toHaveValue('Seeded line A\nSeeded line B X')
   })
+
+  // Second template added to DIRECT_EDIT_SUPPORTED_TEMPLATES after Classic
+  // Professional — Phase 2 Round 2. Mirrors that round's final test shape:
+  // a name round-trip, a Skills-dedup guard (Editorial has its own
+  // separate gating in EditorialShowcase.jsx, needs its own guard), and a
+  // multi-line-description regression guard seeded through Classic mode's
+  // own textarea — NOT typed via Enter in the Direct Edit field itself
+  // (see this plan's Global Constraints for why that doesn't work as a
+  // test).
+  test('Editorial: name persists, skills render once as chips, and a multi-line description survives editing', async ({ page }) => {
+    await selectTemplate(page, 'Editorial')
+
+    const descriptionInput = page.getByLabel('Description', { exact: true }).first()
+    await descriptionInput.fill('Seeded line A\nSeeded line B')
+
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    // Name round-trips to Classic mode's form.
+    const nameField = page.locator('.editorial-showcase__name .direct-edit-field')
+    await nameField.click()
+    await page.keyboard.press('Control+A')
+    await page.keyboard.type('Jordan Rivera')
+    await nameField.blur()
+
+    // Regression guard for the same Critical-bug class Classic
+    // Professional's Round 1 final review found (every skill rendered
+    // twice) — Editorial's Skills section has its own separate gating and
+    // needs its own guard.
+    const skillsSection = page.locator('[data-export-section="skills"]')
+    await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
+    await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
+
+    // Force a dispatch against the seeded multi-line description without
+    // disturbing its existing content: focus the field, jump to its true
+    // end (Control+End, not the line-relative End key), and append a
+    // marker.
+    const firstEntry = page.locator('[data-export-section="experience"] .direct-edit-entry').first()
+    const descriptionField = firstEntry.locator('.direct-edit-field').last()
+    await descriptionField.click()
+    await page.keyboard.press('Control+End')
+    await page.keyboard.type(' X')
+    await descriptionField.blur()
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await expect(page.getByLabel('Full name')).toHaveValue('Jordan Rivera')
+    await expect(descriptionInput).toHaveValue('Seeded line A\nSeeded line B X')
+  })
 })
