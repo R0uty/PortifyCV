@@ -4,6 +4,13 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: Editorial is now editable — 2026-09-16
+
+Editorial is the third template wired into Direct Edit mode (Phase 2
+Round 2), with the same scope every prior round has used: identity,
+About, Experience, and Skills are all inline-editable in the live
+preview. LinkedIn stays read-only, matching every prior round.
+
 ## Direct Edit: fixed the footer genuinely overlapping long CVs — 2026-09-15
 
 A real regression that survived an earlier "footer overlap" investigation
