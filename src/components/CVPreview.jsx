@@ -419,16 +419,19 @@ function CVPreview({
   // as every other bespoke Showcase above.
   if (variant === 'portrait' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <PortraitShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          headingColor={headingColor}
-          accentColor={accentColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <PortraitShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
