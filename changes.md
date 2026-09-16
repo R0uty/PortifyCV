@@ -4,6 +4,14 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: Portrait is now editable — 2026-09-16
+
+Portrait is the fourth template wired into Direct Edit mode (Phase 2
+Round 3), with the same scope every prior round has used: identity,
+About, Experience, and Skills are all inline-editable in the live
+preview. LinkedIn stays read-only, matching every prior round. The
+photo/monogram rail is unaffected — it's out of this round's scope.
+
 ## Direct Edit: Editorial is now editable — 2026-09-16
 
 Editorial is the third template wired into Direct Edit mode (Phase 2
