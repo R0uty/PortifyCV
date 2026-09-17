@@ -21,6 +21,7 @@ import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import EditableField from '../EditableField'
 import {
   contactIcons,
   devIcons,
@@ -101,6 +102,7 @@ export default function TimelineShowcase({
   accentColor = TIMELINE_DEFAULT_ACCENT_COLOR,
   atsFriendlyMode = false,
   headingColor = null,
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -117,22 +119,21 @@ export default function TimelineShowcase({
   const spaceIndex = fullName.indexOf(' ')
   const nameFirst = spaceIndex === -1 ? fullName : fullName.slice(0, spaceIndex)
   const nameRest = spaceIndex === -1 ? '' : fullName.slice(spaceIndex)
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
-  const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
-
   const personalContactItems = [
     ['phone', snapshot.phone],
     ['email', snapshot.email],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditPersonalFields = [
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
   const linkContactItems = [
     ['linkedin', snapshot.links.linkedin],
     ['website', snapshot.links.website],
@@ -169,7 +170,19 @@ export default function TimelineShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about" icon="about" title={copy.profile}>
-          <p className="timeline-showcase__summary">{about}</p>
+          <p className="timeline-showcase__summary">
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'about' }}
+              value={formData.about}
+              placeholder={
+                isFinnish
+                  ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                  : 'Your professional summary will appear here as you fill out the CV form.'
+              }
+              multiline
+            />
+          </p>
         </Section>
       )
     }
@@ -406,16 +419,41 @@ export default function TimelineShowcase({
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
           <h1 className="timeline-showcase__name">
-            {nameFirst}<span className="timeline-showcase__name-accent">{nameRest}</span>
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : (
+              <>{nameFirst}<span className="timeline-showcase__name-accent">{nameRest}</span></>
+            )}
           </h1>
-          <p className="timeline-showcase__role">{title}</p>
+          <p className="timeline-showcase__role">
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'title' }}
+              value={formData.title}
+              placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+            />
+          </p>
 
-          {personalContactItems.length > 0 ? (
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="timeline-showcase__contact">
-              {personalContactItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditPersonalFields : personalContactItems).map(([key, value, placeholderLabel]) => (
                 <span key={key} className="timeline-showcase__contact-item">
                   <span className="timeline-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  {value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : (
+                    value
+                  )}
                 </span>
               ))}
             </div>

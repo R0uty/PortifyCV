@@ -182,18 +182,21 @@ function CVPreview({
   // a different template."
   if (variant === 'timeline') {
     return (
-      <Suspense fallback={null}>
-        <TimelineShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          accentColor={accentColor}
-          atsFriendlyMode={atsFriendlyMode}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <TimelineShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            accentColor={accentColor}
+            atsFriendlyMode={atsFriendlyMode}
+            headingColor={headingColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
