@@ -313,15 +313,18 @@ test.describe('Direct Edit builder', () => {
   // actually renders it) is what makes this a real regression guard.
   //
   // `labelOrder` deviates from the brief's literal hardcoded
-  // `['Location', 'Email', 'Phone']`: each template's `directEditContactFields`
-  // array (the source of the rendered field order) is authored per
-  // template, not shared, and Classic Professional / Modern Timeline
-  // both order theirs Phone, Email, Location (see
+  // `['Location', 'Email', 'Phone']`: each template's own field-order
+  // array (`directEditContactFields` in Classic Professional/Modern
+  // Timeline, built inline in Editorial/Portrait) is authored per
+  // template, not shared — Classic Professional and Modern Timeline both
+  // order theirs Phone, Email, Location (see
   // ClassicProfessionalShowcase.jsx / TimelineShowcase.jsx), the reverse
   // of Editorial / Portrait. Hardcoding one order made this a false
   // failure for both `__contact`-suffix templates, checking the wrong
   // position's ::before text rather than the CSS-collision bug this
-  // guard exists to catch — see task-6-report.md for the investigation.
+  // guard exists to catch — see
+  // docs/superpowers/plans/2026-09-17-direct-edit-modern-timeline.md for
+  // the full investigation.
   function runDirectEditEmptyPlaceholderCheck(label, classPrefix, contactRowSuffix = 'meta', labelOrder = ['Location', 'Email', 'Phone']) {
     test(`${label}: an empty contact field shows its placeholder label, not a stray separator, in Direct Edit mode`, async ({ page }) => {
       await page.getByRole('button', { name: 'Reset form' }).click()

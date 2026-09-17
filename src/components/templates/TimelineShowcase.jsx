@@ -188,7 +188,7 @@ export default function TimelineShowcase({
     ['email', snapshot.email],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
-  const directEditPersonalFields = [
+  const directEditContactFields = [
     ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
     ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
     ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
@@ -508,7 +508,7 @@ export default function TimelineShowcase({
 
           {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="timeline-showcase__contact">
-              {(directEditDispatch ? directEditPersonalFields : personalContactItems).map(([key, value, placeholderLabel]) => (
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
                 <span key={key} className="timeline-showcase__contact-item">
                   <span className="timeline-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
                   {directEditDispatch ? (

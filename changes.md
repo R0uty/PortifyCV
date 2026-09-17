@@ -6,8 +6,8 @@ notes for each item live in `todo.md`; per-commit detail is in git history.
 
 ## Direct Edit: Modern Timeline is now editable, and a shared pattern replaces three near-identical copies — 2026-09-17
 
-Modern Timeline is the fourth template wired into Direct Edit mode
-(Phase 2 Round 4), with the same scope every prior round has used:
+Modern Timeline is now editable in Direct Edit mode (Phase 2 Round 4),
+with the same scope every prior round has used:
 identity, About, Experience, and Skills are all inline-editable in the
 live preview. Its Experience entries render inside a distinct
 `TimelineRow` component (a vertical-timeline visual with the date in its
