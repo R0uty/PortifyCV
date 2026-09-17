@@ -343,20 +343,59 @@ test.describe('Direct Edit builder', () => {
     })
   }
 
+  // Compact-only regression guard: EditableCategorizedChip groups skills by
+  // a DERIVED category (parseSkillCategories buckets by regex against each
+  // skill's own text) but must still dispatch REMOVE_SKILL against each
+  // skill's ORIGINAL formData.skills index. The demo CV's 6 default skills
+  // (DEMO_SKILLS) all land in one "Other" group, so this test adds a skill
+  // that regexes into a DIFFERENT group ("Docker" -> devops) via Classic
+  // mode's Skill tags input, removes specifically that chip in Direct Edit
+  // mode, and confirms all 6 original skills survive untouched — proving
+  // the index mapping is correct, not just that a chip disappeared.
+  test('Compact: removing a categorized skill chip removes the correct skill, not a same-category neighbor', async ({ page }) => {
+    await selectTemplate(page, 'Compact')
+
+    const skillsInput = page.getByLabel('Skill tags', { exact: true })
+    await skillsInput.fill('Docker')
+    await skillsInput.press('Enter')
+
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const skillsSection = page.locator('[data-export-section="skills"]')
+    await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length + 1)
+
+    await skillsSection.getByRole('button', { name: /^Docker/ }).click()
+
+    await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    // Scoped to #section-skills, not the whole page: Compact is the first
+    // Direct-Edit-supported template whose primarySections include
+    // 'projects', and each project entry has its own tech-stack TagsInput
+    // sharing the same .tags-input__tag class — an unscoped locator here
+    // picks up those tags too and produces a false failure.
+    const remainingTags = (await page.locator('#section-skills .tags-input__tag').allTextContents()).map((text) => text.trim())
+    expect(remainingTags).toEqual(DEMO_SKILLS)
+  })
+
   // One row per Direct-Edit-supported oneColumn-family template.
   // `contactRowSuffix` defaults to 'meta' (Editorial, Portrait); Classic
-  // Professional and Modern Timeline both name their contact-row wrapper
-  // class `__contact` instead — a naming choice from each template's
-  // original (pre-Direct-Edit) authoring, unrelated to this rollout.
-  // `labelOrder` defaults to Location/Email/Phone (Editorial, Portrait);
-  // Classic Professional and Modern Timeline both render Phone/Email/
-  // Location instead — see the comment above
-  // `runDirectEditEmptyPlaceholderCheck`.
+  // Professional, Modern Timeline, and Compact all name their contact-row
+  // wrapper class `__contact` instead — a naming choice from each
+  // template's original (pre-Direct-Edit) authoring, unrelated to this
+  // rollout. `labelOrder` defaults to Location/Email/Phone (Editorial,
+  // Portrait); Classic Professional and Modern Timeline both render Phone/
+  // Email/Location instead — see the comment above
+  // `runDirectEditEmptyPlaceholderCheck`. Compact renders a THIRD distinct
+  // order, Email/Phone/Location (its own `directEditContactFields` array
+  // in CompactShowcase.jsx), confirmed directly against the component
+  // rather than assumed.
   const DIRECT_EDIT_TEMPLATES = [
     { label: 'Classic Professional', classPrefix: 'classic-professional-showcase', contactRowSuffix: 'contact', labelOrder: ['Phone', 'Email', 'Location'] },
     { label: 'Editorial', classPrefix: 'editorial-showcase' },
     { label: 'Portrait', classPrefix: 'portrait-showcase' },
     { label: 'Modern Timeline', classPrefix: 'timeline-showcase', contactRowSuffix: 'contact', labelOrder: ['Phone', 'Email', 'Location'] },
+    { label: 'Compact', classPrefix: 'compact-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
   ]
 
   for (const { label, classPrefix, contactRowSuffix, labelOrder } of DIRECT_EDIT_TEMPLATES) {

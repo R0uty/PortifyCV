@@ -4,6 +4,23 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: Compact is now editable, with a new categorized-skills chip design — 2026-09-17
+
+Compact is now editable in Direct Edit mode (Phase 2 Round 5, the last
+`oneColumn`-family template), with the same scope every prior round has
+used: identity, About, Experience, and Skills are all inline-editable in
+the live preview. Compact is this rollout's first genuinely categorized-
+skills template — its Skills section groups skills under derived category
+headings (Languages, Frameworks, Databases, Cloud, DevOps, Security,
+Other) rather than one flat list, so this round adds a new shared
+primitive, `EditableCategorizedChip`, alongside the existing flat
+`EditableChip`: chips render grouped for display while still removing the
+correct skill from the underlying flat array regardless of which group
+it's shown under. Compact's Experience entries also get their own local
+renderer rather than the three-template shared module from Round 4 —
+role, company, and location render together in one row (not two), a
+genuinely different shape from Classic Professional/Editorial/Portrait.
+
 ## Direct Edit: Modern Timeline is now editable, and a shared pattern replaces three near-identical copies — 2026-09-17
 
 Modern Timeline is now editable in Direct Edit mode (Phase 2 Round 4),
