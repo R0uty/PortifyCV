@@ -27,7 +27,7 @@ import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTempla
 import { accentSoftFill } from '../../utils/templateAccents'
 import { COMPACT_DEFAULT_ACCENT_COLOR } from './compact'
 import EditableField from '../EditableField'
-import EditableList from '../EditableList'
+import EditableList, { EditableCategorizedChip } from '../EditableList'
 import {
   devIcons,
   contactIcons,
@@ -168,6 +168,23 @@ export default function CompactShowcase({
     () => parseSkillCategories(snapshot.skills, isFinnish),
     [snapshot.skills, isFinnish],
   )
+  // Editing-branch-only: the same categorization, but computed off the raw
+  // formData.skills array (not the trimmed snapshot) and with each item's
+  // ORIGINAL flat-array index attached, so EditableCategorizedChip can
+  // dispatch REMOVE_SKILL against the right entry regardless of which
+  // category group it renders under. Safe to map a skill's text back to
+  // its index via a plain Map: ADD_SKILL already rejects a skill whose
+  // text case-insensitively matches an existing one, so skill strings are
+  // always unique within formData.skills at any point in time.
+  const editableSkillCategories = useMemo(() => {
+    const grouped = parseSkillCategories(formData.skills, isFinnish)
+    const indexByText = new Map(formData.skills.map((skill, index) => [skill, index]))
+
+    return grouped.map((cat) => ({
+      ...cat,
+      items: cat.items.map((skill) => ({ skill, index: indexByText.get(skill) })),
+    }))
+  }, [formData.skills, isFinnish])
 
   const sectionVisibility = {
     ...createSectionVisibility(),
@@ -240,7 +257,7 @@ export default function CompactShowcase({
       return (
         <section key={key} className="compact-showcase__section" data-export-section="skills" data-export-placement="main">
           <h2 className="compact-showcase__section-title">{copy.skills}</h2>
-          {skillCategories.length > 0 ? (
+          {directEditDispatch ? null : skillCategories.length > 0 ? (
             <div className="compact-showcase__skill-groups">
               {skillCategories.map((cat) => (
                 <p key={cat.key} className="compact-showcase__skill-group" data-export-skill="true">
@@ -254,6 +271,14 @@ export default function CompactShowcase({
               {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
             </p>
           )}
+          {directEditDispatch ? (
+            <div className="compact-showcase__skill-groups compact-showcase__skill-groups--editing">
+              <EditableCategorizedChip
+                categories={editableSkillCategories}
+                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+              />
+            </div>
+          ) : null}
         </section>
       )
     }

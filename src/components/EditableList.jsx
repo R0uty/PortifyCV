@@ -134,3 +134,57 @@ export function EditableChip({ skills, addLabel = '+ Add' }) {
     </>
   )
 }
+
+// Categorized sibling of EditableChip above, for templates whose Skills
+// display groups skills by a DERIVED category (parseSkillCategories in
+// templates/shared.jsx buckets by regex against each skill's own text —
+// there is no stored per-skill category field). `categories` items carry
+// each skill's ORIGINAL formData.skills index (computed by the caller,
+// since categorization loses positional order) so REMOVE_SKILL always
+// targets the correct flat-array entry regardless of which group it's
+// displayed under. One shared "+ Add" button for the whole section, not
+// one per category — a newly added skill is appended to the end of the
+// flat array and re-categorized on the next render, so a per-category add
+// button would misleadingly imply the new chip lands in that group.
+export function EditableCategorizedChip({ categories, addLabel = '+ Add' }) {
+  const { isEditing, dispatchFormData } = useDirectEdit()
+
+  if (!isEditing) {
+    return null
+  }
+
+  const handleRemove = (index) => {
+    dispatchFormData({ type: FORM_ACTION.REMOVE_SKILL, index })
+  }
+
+  const handleAdd = () => {
+    const totalSkills = categories.reduce((sum, cat) => sum + cat.items.length, 0)
+    const nextLabel = `New skill ${totalSkills + 1}`
+    dispatchFormData({ type: FORM_ACTION.ADD_SKILL, skill: nextLabel })
+  }
+
+  return (
+    <>
+      {categories.map((cat) => (
+        <div key={cat.key} className="direct-edit-chip-group">
+          <span className="direct-edit-chip-group__label">{cat.label}</span>
+          <div className="direct-edit-chip-group__chips">
+            {cat.items.map(({ skill, index }) => (
+              <button
+                key={`${skill}:${index}`}
+                type="button"
+                className="direct-edit-chip direct-edit-chip--removable"
+                onClick={() => handleRemove(index)}
+              >
+                {skill} <span aria-hidden="true">×</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+      <button type="button" className="direct-edit-chip-add" onClick={handleAdd}>
+        {addLabel}
+      </button>
+    </>
+  )
+}

@@ -116,6 +116,27 @@
   color: var(--ds-accent, #0f766e);
 }
 
+.direct-edit-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.direct-edit-chip-group__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ds-text-muted, #71717a);
+  margin-right: 2px;
+}
+
+.direct-edit-chip-group__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .direct-edit-preview {
   /* Wider than --preview-paper-width (the printed-page metaphor Classic
      mode's preview column shares with PDF export sizing) — Direct Edit

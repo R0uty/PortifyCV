@@ -327,6 +327,13 @@
   color: var(--cp-ink);
 }
 
+.compact-showcase__skill-groups--editing .direct-edit-chip-group__label {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--tpl-meta-size);
+  color: var(--cp-ink);
+}
+
 .compact-showcase__skill-items {
   color: var(--cp-ink-muted);
 }
