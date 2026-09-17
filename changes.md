@@ -4,6 +4,36 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: Modern Timeline is now editable, and a shared pattern replaces three near-identical copies — 2026-09-17
+
+Modern Timeline is the fourth template wired into Direct Edit mode
+(Phase 2 Round 4), with the same scope every prior round has used:
+identity, About, Experience, and Skills are all inline-editable in the
+live preview. Its Experience entries render inside a distinct
+`TimelineRow` component (a vertical-timeline visual with the date in its
+own column), so this round also extracted the `renderExperienceEntry`
+pattern — previously copied nearly identically across Classic
+Professional, Editorial, and Portrait — into one shared function those
+three templates now call, and collapsed five near-duplicate e2e "smoke
+tests" into two shared, parameterized checks covering all four
+templates (Modern Timeline included). Classic Professional's contact
+row gains automated empty-placeholder coverage it never had, as a side
+effect of the shared test shape.
+
+Writing that shared test shape surfaced a genuine, pre-existing bug:
+Modern Timeline's name and title fields sit inside elements styled
+`text-transform: uppercase`, and `EditableField` dispatches a field's
+new value from `event.currentTarget.innerText`, which (unlike
+`textContent`) reports CSS-transformed text — so editing the name in
+Direct Edit mode was silently saving it in all caps into formData (and
+from there into Classic mode, exports, and share links). Fixed by
+overriding `text-transform: none` on the live `.direct-edit-field` span
+only (`src/styles/templates/timeline.css`); the read-only, all-caps
+look is unchanged everywhere Direct Edit isn't active. Classic
+Professional's title field uses the same uppercase-styling pattern and
+is a candidate for the same latent bug, but no current test exercises
+it — flagged separately rather than fixed here.
+
 ## Direct Edit: Portrait is now editable — 2026-09-16
 
 Portrait is the fourth template wired into Direct Edit mode (Phase 2
