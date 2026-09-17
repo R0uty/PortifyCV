@@ -270,6 +270,10 @@
   color: var(--tpl-accent);
 }
 
+.compact-showcase__bullets--editing {
+  white-space: pre-line;
+}
+
 .compact-showcase__metric {
   color: var(--tpl-accent);
   font-weight: 700;
