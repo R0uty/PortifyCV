@@ -369,11 +369,13 @@ test.describe('Direct Edit builder', () => {
     await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
 
     await page.getByRole('tab', { name: 'Classic' }).click()
-    // Scoped to #section-skills, not the whole page: Compact is the first
-    // Direct-Edit-supported template whose primarySections include
-    // 'projects', and each project entry has its own tech-stack TagsInput
-    // sharing the same .tags-input__tag class — an unscoped locator here
-    // picks up those tags too and produces a false failure.
+    // Scoped to #section-skills, not the whole page: the Experience section's
+    // "Technologies" field (CVForm.jsx) is also a TagsInput sharing the same
+    // .tags-input__tag class, and it's present on every Direct-Edit template
+    // already, not just Compact. The demo CV's two experience entries each
+    // carry a technologies array, so an unscoped locator here picks up those
+    // tags too and produces a false failure — this scoping is required
+    // regardless of which template is under test.
     const remainingTags = (await page.locator('#section-skills .tags-input__tag').allTextContents()).map((text) => text.trim())
     expect(remainingTags).toEqual(DEMO_SKILLS)
   })
