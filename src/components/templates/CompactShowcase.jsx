@@ -172,17 +172,30 @@ export default function CompactShowcase({
   // formData.skills array (not the trimmed snapshot) and with each item's
   // ORIGINAL flat-array index attached, so EditableCategorizedChip can
   // dispatch REMOVE_SKILL against the right entry regardless of which
-  // category group it renders under. Safe to map a skill's text back to
-  // its index via a plain Map: ADD_SKILL already rejects a skill whose
-  // text case-insensitively matches an existing one, so skill strings are
-  // always unique within formData.skills at any point in time.
+  // category group it renders under. ADD_SKILL and the TagsInput UI both
+  // reject a skill whose text case-insensitively matches an existing one,
+  // but formData.skills can still contain duplicate-text entries via other
+  // entry points (e.g. JSON import through parseImportedCvData, which does
+  // not dedup) — so we can't just map text -> a single index. Instead build
+  // a per-text QUEUE of indices in encounter order and shift() one off per
+  // occurrence as parseSkillCategories walks the (deterministic, order-
+  // preserving) grouped output, giving each duplicate-text entry its own
+  // distinct original index.
   const editableSkillCategories = useMemo(() => {
     const grouped = parseSkillCategories(formData.skills, isFinnish)
-    const indexByText = new Map(formData.skills.map((skill, index) => [skill, index]))
+    const indexQueueByText = new Map()
+    formData.skills.forEach((skill, index) => {
+      const queue = indexQueueByText.get(skill)
+      if (queue) {
+        queue.push(index)
+      } else {
+        indexQueueByText.set(skill, [index])
+      }
+    })
 
     return grouped.map((cat) => ({
       ...cat,
-      items: cat.items.map((skill) => ({ skill, index: indexByText.get(skill) })),
+      items: cat.items.map((skill) => ({ skill, index: indexQueueByText.get(skill).shift() })),
     }))
   }, [formData.skills, isFinnish])
 

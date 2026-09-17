@@ -142,10 +142,17 @@ export function EditableChip({ skills, addLabel = '+ Add' }) {
 // each skill's ORIGINAL formData.skills index (computed by the caller,
 // since categorization loses positional order) so REMOVE_SKILL always
 // targets the correct flat-array entry regardless of which group it's
-// displayed under. One shared "+ Add" button for the whole section, not
-// one per category — a newly added skill is appended to the end of the
-// flat array and re-categorized on the next render, so a per-category add
-// button would misleadingly imply the new chip lands in that group.
+// displayed under. This component just consumes the {skill, index} pairs
+// it's given — it does no text->index lookup itself. Skill text is NOT
+// guaranteed unique within formData.skills (ADD_SKILL and the TagsInput UI
+// both dedup on that entry path, but JSON import via parseImportedCvData
+// does not), so the caller assigns indices positionally via a per-text
+// queue in encounter order, giving each duplicate-text entry its own
+// distinct index rather than collapsing them. One shared "+ Add" button
+// for the whole section, not one per category — a newly added skill is
+// appended to the end of the flat array and re-categorized on the next
+// render, so a per-category add button would misleadingly imply the new
+// chip lands in that group.
 export function EditableCategorizedChip({ categories, addLabel = '+ Add' }) {
   const { isEditing, dispatchFormData } = useDirectEdit()
 
