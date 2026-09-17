@@ -29,70 +29,7 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
-
-// `index` is always formData.experience-relative (only ever read inside
-// directEditDispatch-gated branches below) — never assume it lines up with
-// snapshot.experience's own (filtered) indices in the read-only call site.
-function renderExperienceEntry(item, index, { directEditDispatch, copy }) {
-  const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
-
-  return (
-    <div key={`${item.role}-${item.company}-${index}`} className="classic-professional-showcase__entry" data-export-card="true">
-      <div className="classic-professional-showcase__entry-row">
-        <p className="classic-professional-showcase__entry-role">
-          {directEditDispatch ? (
-            <EditableField
-              as="span"
-              path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
-              value={item.role}
-              placeholder={copy.untitledRole}
-            />
-          ) : (
-            item.role || copy.untitledRole
-          )}
-        </p>
-        <p className="classic-professional-showcase__entry-dates">{dateRange || copy.datesPending}</p>
-      </div>
-      {directEditDispatch || item.company || item.location ? (
-        <p className="classic-professional-showcase__entry-meta">
-          {directEditDispatch ? (
-            <EditableField
-              as="span"
-              path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
-              value={item.company}
-              placeholder={copy.company}
-            />
-          ) : (
-            item.company
-          )}
-          {item.company && item.location ? ', ' : ''}{item.location}
-        </p>
-      ) : null}
-      {directEditDispatch ? (
-        <p className="classic-professional-showcase__bullets classic-professional-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
-      ) : bullets.length > 0 ? (
-        <ul className="classic-professional-showcase__bullets">
-          {bullets.map((line, lineIndex) => (
-            <li key={lineIndex}>{line}</li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
-  )
-}
+import { renderExperienceEntry } from './directEditExperienceEntry'
 
 function Section({ id, children }) {
   return (
@@ -184,10 +121,20 @@ export default function ClassicProfessionalShowcase({
                 items={formData.experience}
                 addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
               >
-                {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  classPrefix: 'classic-professional-showcase',
+                  separator: ', ',
+                })}
               </EditableList>
             ) : snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy }))
+              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
+                directEditDispatch,
+                copy,
+                classPrefix: 'classic-professional-showcase',
+                separator: ', ',
+              }))
             ) : (
               <p className="classic-professional-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}

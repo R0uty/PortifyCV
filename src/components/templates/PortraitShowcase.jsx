@@ -31,67 +31,7 @@ import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTempla
 import { formatDateRange, formatLinkDisplayValue } from './shared'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { PORTRAIT_DEFAULT_ACCENT_COLOR } from './portrait'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
-
-function renderExperienceEntry(item, index, { directEditDispatch, copy }) {
-  const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
-
-  return (
-    <div key={`${item.role}-${item.company}-${index}`} className="portrait-showcase__entry" data-export-card="true">
-      <div className="portrait-showcase__entry-row">
-        <p className="portrait-showcase__entry-role">
-          {directEditDispatch ? (
-            <EditableField
-              as="span"
-              path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
-              value={item.role}
-              placeholder={copy.untitledRole}
-            />
-          ) : (
-            item.role || copy.untitledRole
-          )}
-        </p>
-        <p className="portrait-showcase__entry-dates">{dateRange || copy.datesPending}</p>
-      </div>
-      {directEditDispatch || item.company || item.location ? (
-        <p className="portrait-showcase__entry-meta">
-          {directEditDispatch ? (
-            <EditableField
-              as="span"
-              path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
-              value={item.company}
-              placeholder={copy.company}
-            />
-          ) : (
-            item.company
-          )}
-          {item.company && item.location ? ` · ${item.location}` : item.location || null}
-        </p>
-      ) : null}
-      {directEditDispatch ? (
-        <p className="portrait-showcase__bullets portrait-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
-      ) : bullets.length > 0 ? (
-        <ul className="portrait-showcase__bullets">
-          {bullets.map((line, lineIndex) => (
-            <li key={lineIndex}>{line}</li>
-          ))}
-        </ul>
-      ) : null}
-    </div>
-  )
-}
+import { renderExperienceEntry } from './directEditExperienceEntry'
 
 function SectionHead({ title }) {
   return (
@@ -202,10 +142,18 @@ export default function PortraitShowcase({
                 items={formData.experience}
                 addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
               >
-                {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  classPrefix: 'portrait-showcase',
+                })}
               </EditableList>
             ) : snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy }))
+              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
+                directEditDispatch,
+                copy,
+                classPrefix: 'portrait-showcase',
+              }))
             ) : (
               <p className="portrait-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -247,6 +195,14 @@ export default function PortraitShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" title={copy.skills}>
+          {/* Three-way ternary rather than one persistent .tag-row wrapper:
+              .tag-row's own margin-top (0.9rem) would stack with .empty's
+              margin-top (0.8rem) if the empty state were nested inside it —
+              flex-item margins don't collapse — adding an unwanted extra
+              gap. Keeping the three states as fully separate branches
+              avoids that regression while still guaranteeing mutual
+              exclusion (a single chained ternary can only ever select one
+              branch). */}
           {directEditDispatch ? (
             <div className="portrait-showcase__tag-row">
               <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
