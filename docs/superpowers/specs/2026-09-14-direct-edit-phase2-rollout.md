@@ -96,6 +96,32 @@ deliberately (not a copy-paste of `EditableChip`, which assumes a flat
 list) — budget real design time for it, don't treat it as "the same as
 Skills, just reskinned."
 
+Round 4's final whole-branch review found a second standing risk, of the
+same "will recur unless checked proactively" shape: `EditableField`
+(`src/components/EditableField.jsx`) dispatches a field's edited value
+via `event.currentTarget.innerText`, and `innerText` — unlike
+`textContent` — reflects CSS `text-transform`. Any template whose new
+`EditableField` sits inside an element styled `text-transform: uppercase`
+(or any other transform) with no override will silently SAVE the
+transformed text instead of what the user actually typed, corrupting
+`formData` on the very first edit — not a display bug, a data-loss bug,
+and the original casing is unrecoverable once overwritten. Confirmed
+live in production twice already: Modern Timeline's name/title (Round 4,
+caught and fixed) and Classic Professional's title (shipped since
+Round 1, undetected for three rounds because no e2e test had ever
+round-tripped a *title* field, only names — fixed in Round 4's final fix
+wave once found). **Before wiring any identity/title field in any future
+round, grep that template's stylesheet for `text-transform` on the class
+hosting the new `EditableField`, in the SAME task that wires it** —
+exactly parallel to the existing "style the CSS class in the same task"
+rule above for the categorized-skills case. The `railTable` family
+(Executive, Modern Orange, Creative, Modern Professional, Graduate,
+Portfolio Hybrid, Tech Executive, Colorful Compact) uses uppercase
+kickers/rail labels heavily — expect this to recur there specifically.
+Fix pattern, already proven twice: `.template__field .direct-edit-field
+{ text-transform: none; }`, scoped to the editable span only so the
+read-only render (Classic mode, exports, share links) is untouched.
+
 ## Rollout order — one structural family at a time
 
 Per `docs/template-design-system.md` §5's archetype table (also the exact
