@@ -248,6 +248,28 @@ test.describe('Direct Edit builder', () => {
       await page.keyboard.type('Jordan Rivera')
       await nameField.blur()
 
+      // Regression guard for this round's own Fix (2026-09-17, Modern
+      // Timeline): a template whose title field is styled with
+      // `text-transform` and whose EditableField isn't overridden to
+      // `text-transform: none` will silently save an all-caps version
+      // of whatever the user actually typed — EditableField dispatches
+      // via `innerText`, which (unlike `textContent`) reflects CSS
+      // text-transform. The name check above alone doesn't exercise
+      // this: it never existed on any template's name field except
+      // Modern Timeline's, which this round's Fix already covers. This
+      // check covers the title field on every Direct-Edit-supported
+      // template uniformly, since the bug already shipped once
+      // (Modern Timeline) and is independently confirmed still present,
+      // unfixed, on Classic Professional as of this same round's own
+      // final review — this test exists specifically so neither
+      // template can regress, and so a future template can't ship the
+      // same bug silently again.
+      const titleField = page.locator(`.${classPrefix}__role .direct-edit-field`)
+      await titleField.click()
+      await page.keyboard.press('Control+A')
+      await page.keyboard.type('Staff Engineer')
+      await titleField.blur()
+
       // Regression guard for Critical #1 (final whole-branch review,
       // Phase 1): every skill used to render twice in Direct Edit mode —
       // once as a plain, non-interactive span (never gated on
@@ -271,6 +293,7 @@ test.describe('Direct Edit builder', () => {
 
       await page.getByRole('tab', { name: 'Classic' }).click()
       await expect(page.getByLabel('Full name')).toHaveValue('Jordan Rivera')
+      await expect(page.getByLabel('Professional title')).toHaveValue('Staff Engineer')
       await expect(descriptionInput).toHaveValue('Seeded line A\nSeeded line B X')
     })
   }
