@@ -275,6 +275,15 @@
   color: var(--tpl-accent);
 }
 
+.timeline-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--tl-text);
+}
+
 /* ── Projects: clean horizontal cards ── */
 
 .timeline-showcase__project-grid {

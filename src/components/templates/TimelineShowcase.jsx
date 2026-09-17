@@ -22,6 +22,7 @@ import { useMemo } from 'react'
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import EditableField from '../EditableField'
+import EditableList from '../EditableList'
 import {
   contactIcons,
   devIcons,
@@ -93,6 +94,64 @@ function TimelineRow({ date, isLast, children }) {
   )
 }
 
+function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <TimelineRow
+      key={`${item.role}-${item.company}-${index}`}
+      date={dateRange || copy.datesPending}
+      isLast={isLast}
+    >
+      <p className="timeline-showcase__entry-role">
+        {directEditDispatch ? (
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+            value={item.role}
+            placeholder={copy.untitledRole}
+          />
+        ) : (
+          item.role || copy.untitledRole
+        )}
+      </p>
+      {directEditDispatch || item.company || item.location ? (
+        <p className="timeline-showcase__entry-meta">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+              value={item.company}
+              placeholder={copy.company}
+            />
+          ) : (
+            item.company
+          )}
+          {item.company && item.location ? ` · ${item.location}` : item.location || null}
+        </p>
+      ) : null}
+      {directEditDispatch ? (
+        <p className="timeline-showcase__bullets timeline-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="timeline-showcase__bullets">
+          {bullets.map((line, lineIndex) => (
+            <li key={lineIndex}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
+    </TimelineRow>
+  )
+}
+
 export default function TimelineShowcase({
   formData,
   locale = 'en',
@@ -155,6 +214,8 @@ export default function TimelineShowcase({
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     profile: isFinnish ? 'Profiili' : 'Profile',
     experience: isFinnish ? 'Kokemus' : 'Experience',
     education: isFinnish ? 'Koulutus' : 'Education',
@@ -191,30 +252,24 @@ export default function TimelineShowcase({
       return (
         <Section key={key} id="experience" icon="experience" title={copy.experience}>
           <div className="timeline-showcase__timeline">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-                const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
-
-                return (
-                  <TimelineRow
-                    key={`${item.role}-${item.company}-${index}`}
-                    date={dateRange || copy.datesPending}
-                    isLast={index === snapshot.experience.length - 1}
-                  >
-                    <p className="timeline-showcase__entry-role">{item.role || copy.untitledRole}</p>
-                    {metaLine ? <p className="timeline-showcase__entry-meta">{metaLine}</p> : null}
-                    {bullets.length > 0 ? (
-                      <ul className="timeline-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </TimelineRow>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
+                directEditDispatch,
+                copy,
+                isLast: index === snapshot.experience.length - 1,
+              }))
             ) : (
               <p className="timeline-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
