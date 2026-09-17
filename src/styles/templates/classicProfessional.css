@@ -87,6 +87,21 @@
   color: var(--cp-muted);
 }
 
+/* Direct Edit data-integrity fix (same bug class as Modern Timeline's,
+   fixed in timeline.css during Phase 2 Round 4, Task 6 — see that
+   file's own comment for the full mechanism): EditableField dispatches
+   a field's new value from `innerText`, which reflects CSS
+   `text-transform` unlike `textContent` — so with the uppercase rule
+   above still in effect on the live contentEditable span, typing a
+   mixed-case title here didn't just *display* as uppercase, it got
+   *saved* as uppercase into formData (and from there into share links,
+   PDF/DOCX export). Undoing the transform on the editable span only —
+   the read-only render is untouched, so the all-caps look is unchanged
+   everywhere Direct Edit isn't actively on. */
+.classic-professional-showcase__role .direct-edit-field {
+  text-transform: none;
+}
+
 .classic-professional-showcase__contact {
   margin-top: 1.4rem;
   display: flex;
