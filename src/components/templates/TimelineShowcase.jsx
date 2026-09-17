@@ -22,7 +22,7 @@ import { useMemo } from 'react'
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import EditableField from '../EditableField'
-import EditableList from '../EditableList'
+import EditableList, { EditableChip } from '../EditableList'
 import {
   contactIcons,
   devIcons,
@@ -355,17 +355,29 @@ export default function TimelineShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" icon="skills" title={copy.skills}>
-          <div className="timeline-showcase__tag-row">
-            {snapshot.skills.length > 0 ? (
-              snapshot.skills.map((skill) => (
+          {/* Three-way ternary rather than one persistent .tag-row wrapper:
+              .tag-row's own margin-top (1rem) would stack with .empty's
+              margin-top (0.8rem) if the empty state were nested inside it —
+              flex-item margins don't collapse — adding an unwanted extra
+              gap. Keeping the three states as fully separate branches
+              avoids that regression while still guaranteeing mutual
+              exclusion (a single chained ternary can only ever select one
+              branch), same pattern Round 2/3 used for Editorial/Portrait. */}
+          {directEditDispatch ? (
+            <div className="timeline-showcase__tag-row">
+              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+            </div>
+          ) : snapshot.skills.length > 0 ? (
+            <div className="timeline-showcase__tag-row">
+              {snapshot.skills.map((skill) => (
                 <span key={skill} data-export-skill="true" className="timeline-showcase__tag">{skill}</span>
-              ))
-            ) : (
-              <p className="timeline-showcase__empty">
-                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
-              </p>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="timeline-showcase__empty">
+              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+            </p>
+          )}
         </Section>
       )
     }
