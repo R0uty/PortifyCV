@@ -26,6 +26,7 @@ import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { COMPACT_DEFAULT_ACCENT_COLOR } from './compact'
+import EditableField from '../EditableField'
 import {
   devIcons,
   contactIcons,
@@ -63,6 +64,7 @@ export default function CompactShowcase({
   showcaseConfig = {},
   headingColor = null,
   accentColor = COMPACT_DEFAULT_ACCENT_COLOR,
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -89,6 +91,11 @@ export default function CompactShowcase({
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
@@ -399,15 +406,40 @@ export default function CompactShowcase({
           <p className="compact-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="compact-showcase__name">{fullName}</h1>
-          <p className="compact-showcase__role">{title}</p>
-          {personalContactItems.length > 0 ? (
+          <h1 className="compact-showcase__name">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : fullName}
+          </h1>
+          <p className="compact-showcase__role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+          </p>
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="compact-showcase__contact">
-              {personalContactItems.map(([key, value], index) => (
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel], index) => (
                 <span key={key} className="compact-showcase__contact-item">
                   {index > 0 ? <span className="compact-showcase__contact-sep" aria-hidden="true">|</span> : null}
                   <span className="compact-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  {value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : value}
                 </span>
               ))}
             </div>
@@ -426,10 +458,24 @@ export default function CompactShowcase({
         ) : null}
       </header>
 
-      {about ? (
+      {directEditDispatch || about ? (
         <section className="compact-showcase__section compact-showcase__section--summary" data-export-section="about" data-export-placement="main">
           <h2 className="compact-showcase__section-title">{copy.summary}</h2>
-          <p className="compact-showcase__summary">{about}</p>
+          <p className="compact-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </section>
       ) : null}
 

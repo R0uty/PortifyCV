@@ -226,17 +226,20 @@ function CVPreview({
   // system that ATS mode bypasses entirely.
   if (variant === 'compact' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <CompactShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-          accentColor={accentColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <CompactShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
