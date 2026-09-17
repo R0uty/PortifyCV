@@ -83,7 +83,7 @@ function Section({ id, icon, title, children }) {
 
 function TimelineRow({ date, isLast, children }) {
   return (
-    <div className="timeline-showcase__row" data-export-card="true">
+    <div className={`timeline-showcase__row${isLast ? ' timeline-showcase__row--last' : ''}`} data-export-card="true">
       <p className="timeline-showcase__row-date">{date}</p>
       <div className="timeline-showcase__row-rail">
         <span className="timeline-showcase__row-marker" aria-hidden="true" />
