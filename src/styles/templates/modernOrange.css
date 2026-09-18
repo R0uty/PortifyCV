@@ -393,12 +393,6 @@
   margin-bottom: 1.25rem;
 }
 
-.modern-orange-showcase__exp-row:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-  padding-bottom: 0;
-}
-
 /* Direct Edit mode wraps every entry in EditableList's `.direct-edit-entry`
    wrapper, and — since EditableList's DndContext never passes an
    `accessibility.container` — dnd-kit also mounts two unclassed, un-portaled
