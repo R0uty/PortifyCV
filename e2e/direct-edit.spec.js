@@ -153,7 +153,7 @@ test.describe('Direct Edit builder', () => {
   // this fix wave: the existing coverage only exercises a *mode* switch
   // (Direct Edit <-> Classic), not a *template* switch while staying in
   // Direct Edit the whole time. An edit must survive a round-trip through
-  // an unsupported template (Executive, not in DIRECT_EDIT_SUPPORTED_TEMPLATES
+  // an unsupported template (Developer, not in DIRECT_EDIT_SUPPORTED_TEMPLATES
   // — see src/utils/directEdit.js) and back to Minimalist.
   test('an edit in Direct Edit mode survives switching to an unsupported template and back', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
