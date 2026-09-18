@@ -198,33 +198,49 @@
   border-bottom: 1px solid var(--ex-border);
 }
 
-.executive-showcase__entry:not(:first-child) {
+/* Position-based defaults — Leadership and Education only. Both reuse this
+   exact class from their own separate, read-only-only render code, are
+   never wrapped by EditableList, and have no Direct Edit wiring of their
+   own, so true DOM position is a correct signal for them.
+   `:not(.executive-showcase__entry--wired)` excludes Experience's entries
+   (see below) so the two mechanisms are fully partitioned — mutually
+   exclusive by selector, not by specificity or source-order tie-breaking,
+   which is fragile and easy to silently invert with a later edit. */
+.executive-showcase__entry:not(:first-child):not(.executive-showcase__entry--wired) {
   padding-top: 1.25rem;
 }
 
-.executive-showcase__entry:last-child {
+.executive-showcase__entry:last-child:not(.executive-showcase__entry--wired) {
   border-bottom: none;
   padding-bottom: 0;
 }
 
-/* Direct Edit mode wraps every entry in a `.direct-edit-entry` wrapper
-   (drag handle + remove button + the entry itself), which makes every
-   `.executive-showcase__entry` the 3rd child of its own wrapper — so the
-   `:not(:first-child)`/`:last-child` rules above never match correctly
-   there. Re-anchor the same positional logic onto the wrapper instead,
-   using :first-of-type/:last-of-type since EditableList also renders a
-   trailing `.direct-edit-add-row` button as the list's final sibling. */
-.executive-showcase__entry-list .direct-edit-entry .executive-showcase__entry {
-  padding-top: 0;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--ex-border);
-}
-
-.executive-showcase__entry-list .direct-edit-entry:not(:first-of-type) .executive-showcase__entry {
+/* `--wired` is added unconditionally to EVERY Experience entry (never to
+   Leadership/Education, which don't go through `renderExperienceEntry` in
+   ExecutiveShowcase.jsx) specifically to opt out of the position-based
+   rules above — Direct Edit mode wraps every entry in `EditableList`'s own
+   `.direct-edit-entry` div (drag handle + remove button + the entry
+   itself), which makes every `.executive-showcase__entry` the 3rd/last
+   child of ITS OWN wrapper regardless of overall list position, so
+   `:not(:first-child)`/`:last-child` would otherwise match EVERY
+   Experience entry once wrapped, not just the true first/last one. A
+   wrapper-anchored `:first-of-type`/`:last-of-type` re-fix (this file's
+   earlier, now-abandoned attempt) doesn't work either: `EditableList`'s
+   `DndContext` (no `accessibility.container` configured) mounts an
+   un-portaled accessibility live-region — two more untyped `<div>`
+   siblings — after the last `.direct-edit-entry` once mounted, so the
+   true-last wrapper is never actually `:last-of-type` among `div`-tag
+   siblings. `--not-first`/`--last` (from the `isFirst`/`isLast` params
+   `renderExperienceEntry` now takes) are JS-driven modifier classes,
+   robust against whatever `EditableList`/dnd-kit renders around an entry
+   — same fix shape as `.modern-orange-showcase__exp-row--last` (Direct
+   Edit Phase 2 Round 7, where this identical bug class was independently
+   found and fixed). */
+.executive-showcase__entry--wired.executive-showcase__entry--not-first {
   padding-top: 1.25rem;
 }
 
-.executive-showcase__entry-list .direct-edit-entry:last-of-type .executive-showcase__entry {
+.executive-showcase__entry--wired.executive-showcase__entry--last {
   border-bottom: none;
   padding-bottom: 0;
 }

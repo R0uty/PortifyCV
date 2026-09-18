@@ -4,6 +4,36 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Fix Executive's Experience divider — the same EditableList/dnd-kit bug Modern Orange just hit, already shipped — 2026-09-19
+
+Round 6 (Executive)'s own Experience-divider fix, already shipped and
+pushed, had the identical bug Round 7 (Modern Orange) independently
+rediscovered and fixed: the `:last-of-type`-on-`.direct-edit-entry`
+selector never matches once `EditableList`'s uncontained `DndContext`
+mounts its un-portaled accessibility live-region (two extra untyped
+`<div>` siblings) after the last entry. Worse, Executive's *original*
+unqualified `:not(:first-child)`/`:last-child` rules were also still
+present, and — because they have no wrapper-position awareness at
+all — matched every wrapped entry, not just the boundary ones, so in
+practice every entry kept its divider in Direct Edit mode (the opposite
+symptom from Modern Orange's interim state, same root cause).
+
+Fixed with the same `isLast`-driven modifier-class mechanism Modern
+Orange landed on, but partitioned more carefully this time: Leadership
+and Education both reuse `.executive-showcase__entry` from their own
+separate, still-read-only render code (never wrapped, never passed an
+index), so the original position-based CSS rules had to stay — the fix
+adds an unconditional `--wired` marker class to every *Experience* entry
+specifically, and scopes the position-based rules to exclude it
+(`:not(.executive-showcase__entry--wired)`), so the two mechanisms are
+mutually exclusive by selector rather than competing on specificity or
+source-order ties. Verified with a real Playwright script (not just
+`getComputedStyle` in isolation) against a live dev server: 3 Experience
+entries correctly keep/lose their divider in the right places, Leadership
+and Education's own single-entry lists are unaffected, and the full e2e
+suite (70 tests, one pre-existing unrelated flake re-confirmed in
+isolation) plus lint/build/check:* all stay clean.
+
 ## Direct Edit: Modern Orange is now editable, and the Experience-divider CSS bug took two rounds to actually fix — 2026-09-18
 
 Modern Orange is now editable in Direct Edit mode (Phase 2 Round 7, the

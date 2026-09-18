@@ -72,12 +72,41 @@ function highlightMetrics(text, showMetrics) {
 // `index` is always formData.experience-relative (only ever read inside
 // directEditDispatch-gated branches below) — never assume it lines up with
 // snapshot.experience's own (filtered) indices in the read-only call site.
-function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics }) {
+//
+// `isFirst`/`isLast` drive the entry's top-padding/bottom-divider via CSS
+// modifier classes, not the `:not(:first-child)`/`:last-child` positional
+// selectors this file used to rely on. Direct Edit mode wraps every entry
+// in `EditableList`'s own `.direct-edit-entry` div (drag handle + remove
+// button + the entry itself), which makes every `.executive-showcase__entry`
+// the 3rd/last child of ITS OWN wrapper regardless of overall list
+// position — so an unqualified `:last-child` matches every entry, not just
+// the true-last one. A wrapper-anchored `:last-of-type` re-fix doesn't work
+// either: `EditableList`'s `DndContext` (no `accessibility.container`
+// configured) mounts an un-portaled accessibility live-region — two more
+// untyped `<div>` siblings — after the last `.direct-edit-entry` once
+// mounted, so the true-last wrapper is never actually `:last-of-type`
+// among `div`-tag siblings. Both positional-selector approaches were tried
+// and found broken (see the Direct Edit Phase 2 Round 7 changes.md entry,
+// where the identical bug class was found and fixed on Modern Orange) —
+// modifier classes driven by the already-correct JS index are the only
+// mechanism proven robust against whatever `EditableList`/dnd-kit renders
+// around an entry.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics, isFirst, isLast }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = item.description ? splitToBullets(item.description) : []
+  const entryClassName = [
+    'executive-showcase__entry',
+    // Unconditional marker opting this entry out of executive.css's
+    // position-based `:not(:first-child)`/`:last-child` rules (correct
+    // only for Leadership/Education, which never go through this
+    // function) — see the CSS file's own comment above `--wired` for why.
+    'executive-showcase__entry--wired',
+    !isFirst ? 'executive-showcase__entry--not-first' : null,
+    isLast ? 'executive-showcase__entry--last' : null,
+  ].filter(Boolean).join(' ')
 
   return (
-    <div key={`${item.role}-${item.company}-${index}`} className="executive-showcase__entry" data-export-card="true">
+    <div key={`${item.role}-${item.company}-${index}`} className={entryClassName} data-export-card="true">
       <div className="executive-showcase__entry-row">
         <div className="min-w-0">
           <p className="executive-showcase__entry-role">
@@ -267,10 +296,22 @@ export default function ExecutiveShowcase({
                 items={formData.experience}
                 addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
               >
-                {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics })}
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  showMetrics,
+                  isFirst: index === 0,
+                  isLast: index === formData.experience.length - 1,
+                })}
               </EditableList>
             ) : snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics }))
+              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
+                directEditDispatch,
+                copy,
+                showMetrics,
+                isFirst: index === 0,
+                isLast: index === snapshot.experience.length - 1,
+              }))
             ) : (
               <p className="executive-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
