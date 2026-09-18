@@ -399,22 +399,22 @@
   padding-bottom: 0;
 }
 
-/* Direct Edit mode wraps every entry in a `.direct-edit-entry` wrapper
-   (drag handle + remove button + the entry itself), which makes every
-   `.modern-orange-showcase__exp-row` the 3rd (last) child of its own
-   wrapper — so the `:last-child` rule above would strip the divider from
-   EVERY entry, not just the true last one, once EditableList is in play.
-   Re-anchor the same divider rules onto the wrapper itself, using
-   `:last-of-type` (not `:last-child`) because EditableList also renders a
-   trailing `.direct-edit-add-row` button as the list's final sibling,
-   which would make `:last-child` on `.direct-edit-entry` match nothing. */
-.modern-orange-showcase__exp-list .direct-edit-entry .modern-orange-showcase__exp-row {
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid var(--mo-border);
-  margin-bottom: 1.25rem;
-}
-
-.modern-orange-showcase__exp-list .direct-edit-entry:last-of-type .modern-orange-showcase__exp-row {
+/* Direct Edit mode wraps every entry in EditableList's `.direct-edit-entry`
+   wrapper, and — since EditableList's DndContext never passes an
+   `accessibility.container` — dnd-kit also mounts two unclassed, un-portaled
+   `<div>`s (its hidden-text + live-region a11y nodes) as trailing siblings
+   after the last entry and the "add" button. That defeats ANY positional
+   selector here: `:last-child` would match every entry's own wrapper div
+   inside `.direct-edit-entry` (since exp-row is always the last child of
+   ITS wrapper), and re-anchoring to `.direct-edit-entry:last-of-type` still
+   fails because the true last `div`-tag sibling is one of dnd-kit's a11y
+   divs, not any `.direct-edit-entry`. So this is driven from the `isLast`
+   prop (already computed as `index === items.length - 1` by both call
+   sites, editing and read-only) via an explicit modifier class instead —
+   see ExperienceRow in ModernOrangeShowcase.jsx. Robust regardless of what
+   EditableList/dnd-kit renders around the entry, same pattern as
+   `.timeline-showcase__row--last`. */
+.modern-orange-showcase__exp-row--last {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;

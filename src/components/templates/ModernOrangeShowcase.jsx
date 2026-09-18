@@ -122,7 +122,7 @@ function SidebarBlock({ title, children }) {
 
 function ExperienceRow({ date, isLast, children }) {
   return (
-    <div className="modern-orange-showcase__exp-row" data-export-card="true">
+    <div className={`modern-orange-showcase__exp-row${isLast ? ' modern-orange-showcase__exp-row--last' : ''}`} data-export-card="true">
       <p className="modern-orange-showcase__exp-date">{date}</p>
       <div className="modern-orange-showcase__exp-rail">
         <span className="modern-orange-showcase__exp-marker" aria-hidden="true" />
