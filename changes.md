@@ -4,6 +4,54 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: Modern Orange is now editable, and the Experience-divider CSS bug took two rounds to actually fix — 2026-09-18
+
+Modern Orange is now editable in Direct Edit mode (Phase 2 Round 7, the
+second `railTable`-family template), with the same scope every prior
+round has used: identity, About, Experience, and Skills are all
+inline-editable in the live preview. Skills stay flat here (unlike
+Compact/Executive's categorized display), so this round reuses the plain
+`EditableChip` from Round 1 unchanged. This round is the rollout's first
+concrete hit on the `text-transform` bug class the roadmap predicted for
+this family — the title field sits inside a badge styled `text-transform:
+uppercase` with no override — fixed proactively (`.modern-orange-showcase__title-badge
+.direct-edit-field { text-transform: none; }`) in the same task that wired
+identity, before shipping, rather than discovered afterward.
+
+It's also the second concrete hit on the positional-CSS-selector risk
+Round 6's final review found on Executive, and this time the fix needed
+two corrective passes to actually land, which is worth recording so a
+future round doesn't assume "copy Round 6's pattern" is a one-shot
+operation. Modern Orange's Experience rows already carried a pre-existing,
+unqualified `.modern-orange-showcase__exp-row:last-child` rule from before
+this rollout (harmless in the template's original read-only rendering).
+The first fix attempt, when Experience was wired for editing, re-anchored
+divider removal onto `.direct-edit-entry:last-of-type` — reasoning that
+`EditableList` wraps every entry in its own `.direct-edit-entry`, which
+makes `exp-row` the last child of *that* wrapper and defeats plain
+`:last-child`. That attempt was itself broken: `EditableList`'s
+`DndContext` never sets an `accessibility.container`, so `dnd-kit` mounts
+two unclassed, un-portaled `<div>`s (its hidden-text and live-region
+a11y nodes) as trailing siblings after the last entry and the "add" row
+button — so the *true* last `.direct-edit-entry:last-of-type` selector
+never matched what the code assumed. The second pass replaced the
+positional selector entirely with an `isLast`-prop-driven
+`.modern-orange-showcase__exp-row--last` modifier class (the same pattern
+Modern Timeline's Round 4 fix established), which is robust regardless of
+what `EditableList`/`dnd-kit` renders around the entry. Even after that
+fix landed, the *original* pre-existing unqualified `:last-child` rule was
+still sitting in the stylesheet, unqualified and un-scoped to Direct
+Edit — and because it's a more specific/later-declared selector in some
+paint orders it kept stripping the divider from every entry once Direct
+Edit wrapped them, not just the true last one. A live manual browser check
+(3+ Experience entries, Direct Edit mode) caught this concretely: every
+row lost its divider, the opposite of the intended behavior. Only deleting
+that stale original rule, leaving the `isLast`-driven modifier class as
+the sole source of truth, actually fixed it — confirmed afterward via
+`getComputedStyle` on all three rows (first and middle keep
+`border-bottom: solid` / `margin-bottom: 20px`; only the true last row,
+carrying the `--last` class, has neither).
+
 ## Direct Edit: Executive is now editable, reusing Round 5's categorized-chip design — 2026-09-18
 
 Executive is now editable in Direct Edit mode (Phase 2 Round 6, the first

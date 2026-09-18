@@ -226,7 +226,7 @@ test.describe('Direct Edit builder', () => {
   // NAME claimed both checks but whose body only contained the demo-data
   // ones — this split is the fix, and the reason it's a hard split, not
   // a style preference.)
-  function runDirectEditDemoDataChecks(label, classPrefix) {
+  function runDirectEditDemoDataChecks(label, classPrefix, titleFieldSuffix = 'role', skillsSectionSelector = '[data-export-section="skills"]') {
     // Regression guard for the final whole-branch review's Fix 1
     // (2026-09-15, Classic Professional): the Experience description's
     // editing branch can reference a CSS class with no `white-space:
@@ -270,7 +270,7 @@ test.describe('Direct Edit builder', () => {
       // final review — this test exists specifically so neither
       // template can regress, and so a future template can't ship the
       // same bug silently again.
-      const titleField = page.locator(`.${classPrefix}__role .direct-edit-field`)
+      const titleField = page.locator(`.${classPrefix}__${titleFieldSuffix} .direct-edit-field`)
       await titleField.click()
       await page.keyboard.press('Control+A')
       await page.keyboard.type('Staff Engineer')
@@ -282,7 +282,7 @@ test.describe('Direct Edit builder', () => {
       // directEditDispatch) and once as a removable chip. Each
       // Direct-Edit-supported template has its own separate Skills
       // gating and needs its own guard.
-      const skillsSection = page.locator('[data-export-section="skills"]')
+      const skillsSection = page.locator(skillsSectionSelector)
       await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
       await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
 
@@ -401,6 +401,29 @@ test.describe('Direct Edit builder', () => {
   // Location order and `__contact` suffix, confirmed directly against
   // ExecutiveShowcase.jsx's own `directEditContactFields` array rather
   // than this round's plan's guess (which happened to match).
+  //
+  // `titleFieldSuffix` defaults to 'role': every Direct-Edit-supported
+  // template through Round 6 wraps the header's professional-title field
+  // in a `<prefix>__role` element (confirmed across every *Showcase.jsx in
+  // the repo, not just the supported ones). Modern Orange (Round 7) is the
+  // first to break that convention — its title renders as a pill inside
+  // `<span className="modern-orange-showcase__title-badge">`, a more
+  // accurate name for what's visually a badge, not a regression — so its
+  // row overrides `titleFieldSuffix` to `'title-badge'` rather than
+  // assuming the universal-until-now `__role` default still applies.
+  //
+  // `skillsSectionSelector` defaults to `[data-export-section="skills"]`:
+  // every other template's Skills block renders through a `Section`-style
+  // wrapper that carries `data-export-section` regardless of whether it's
+  // visually in the main column or a sidebar. Modern Orange's Skills block
+  // instead renders through `SidebarBlock` (also used for its Languages
+  // and Education sidebar blocks), which carries no `data-export-section`
+  // at all — a pre-existing gap in that component from the template's
+  // original (pre-Direct-Edit) authoring, unrelated to this rollout, and
+  // not one this task's file list permits fixing in
+  // ModernOrangeShowcase.jsx. Its row overrides the selector to the
+  // skill-list's own class instead, which still correctly scopes the "no
+  // duplicate skill rendering" assertion.
   const DIRECT_EDIT_TEMPLATES = [
     { label: 'Classic Professional', classPrefix: 'classic-professional-showcase', contactRowSuffix: 'contact', labelOrder: ['Phone', 'Email', 'Location'] },
     { label: 'Editorial', classPrefix: 'editorial-showcase' },
@@ -408,10 +431,11 @@ test.describe('Direct Edit builder', () => {
     { label: 'Modern Timeline', classPrefix: 'timeline-showcase', contactRowSuffix: 'contact', labelOrder: ['Phone', 'Email', 'Location'] },
     { label: 'Compact', classPrefix: 'compact-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
     { label: 'Executive', classPrefix: 'executive-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
+    { label: 'Modern Orange', classPrefix: 'modern-orange-showcase', contactRowSuffix: 'contact-list', labelOrder: ['Location', 'Email', 'Phone'], titleFieldSuffix: 'title-badge', skillsSectionSelector: '.modern-orange-showcase__skill-list' },
   ]
 
-  for (const { label, classPrefix, contactRowSuffix, labelOrder } of DIRECT_EDIT_TEMPLATES) {
-    runDirectEditDemoDataChecks(label, classPrefix)
+  for (const { label, classPrefix, contactRowSuffix, labelOrder, titleFieldSuffix, skillsSectionSelector } of DIRECT_EDIT_TEMPLATES) {
+    runDirectEditDemoDataChecks(label, classPrefix, titleFieldSuffix, skillsSectionSelector)
     runDirectEditEmptyPlaceholderCheck(label, classPrefix, contactRowSuffix, labelOrder)
   }
 })
