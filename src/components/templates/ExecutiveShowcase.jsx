@@ -24,6 +24,7 @@ import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import EditableField from '../EditableField'
+import EditableList from '../EditableList'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { EXECUTIVE_DEFAULT_ACCENT_COLOR } from './executive'
@@ -55,6 +56,70 @@ function highlightMetrics(text, showMetrics) {
       ? <strong key={index} className="executive-showcase__metric">{part}</strong>
       : part
   ))
+}
+
+// Executive's own Experience-entry renderer — deliberately NOT
+// directEditExperienceEntry.jsx (the shared module for Classic
+// Professional/Editorial/Portrait). Executive's read-only shape nests
+// role AND the company/location meta line together inside one `min-w-0`
+// div, with dates as a sibling of THAT div (not of role directly) — a
+// real structural difference from the shared module's flat two-children
+// entry-row, even though the visual result looks similar. Only role and
+// company are independently editable, matching the shared module's own
+// precedent — location stays read-only-appended text.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <div key={`${item.role}-${item.company}-${index}`} className="executive-showcase__entry" data-export-card="true">
+      <div className="executive-showcase__entry-row">
+        <div className="min-w-0">
+          <p className="executive-showcase__entry-role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                value={item.role}
+                placeholder={copy.untitledRole}
+              />
+            ) : item.role || copy.untitledRole}
+          </p>
+          {directEditDispatch || item.company || item.location ? (
+            <p className="executive-showcase__entry-meta">
+              {directEditDispatch ? (
+                <EditableField
+                  as="span"
+                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                  value={item.company}
+                  placeholder={copy.company}
+                />
+              ) : item.company}
+              {item.company && item.location ? ` · ${item.location}` : item.location || null}
+            </p>
+          ) : null}
+        </div>
+        <p className="executive-showcase__entry-dates">{dateRange || copy.datesPending}</p>
+      </div>
+      {directEditDispatch ? (
+        <p className="executive-showcase__bullets executive-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="executive-showcase__bullets">
+          {bullets.map((line, lineIndex) => (
+            <li key={lineIndex}>{highlightMetrics(line, showMetrics)}</li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  )
 }
 
 function SectionHead({ title }) {
@@ -139,6 +204,8 @@ export default function ExecutiveShowcase({
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
     profile: isFinnish ? 'Johtajaprofiili' : 'Executive Profile',
     experience: isFinnish ? 'Työkokemus' : 'Professional Experience',
@@ -181,34 +248,16 @@ export default function ExecutiveShowcase({
       return (
         <Section key={key} id="experience" placement="main" title={copy.experience}>
           <div className="executive-showcase__entry-list">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-
-                return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="executive-showcase__entry" data-export-card="true">
-                    <div className="executive-showcase__entry-row">
-                      <div className="min-w-0">
-                        <p className="executive-showcase__entry-role">{item.role || copy.untitledRole}</p>
-                        {item.company || item.location ? (
-                          <p className="executive-showcase__entry-meta">
-                            {[item.company, item.location].filter(Boolean).join(' · ')}
-                          </p>
-                        ) : null}
-                      </div>
-                      <p className="executive-showcase__entry-dates">{dateRange || copy.datesPending}</p>
-                    </div>
-                    {bullets.length > 0 ? (
-                      <ul className="executive-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{highlightMetrics(line, showMetrics)}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics }))
             ) : (
               <p className="executive-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
