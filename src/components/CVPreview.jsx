@@ -158,17 +158,20 @@ function CVPreview({
   // bespoke "boardroom" visual system that ATS mode bypasses entirely.
   if (variant === 'executive' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <ExecutiveShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-          accentColor={accentColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <ExecutiveShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 

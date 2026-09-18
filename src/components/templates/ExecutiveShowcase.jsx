@@ -23,6 +23,7 @@
 import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
+import EditableField from '../EditableField'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { EXECUTIVE_DEFAULT_ACCENT_COLOR } from './executive'
@@ -81,6 +82,7 @@ export default function ExecutiveShowcase({
   showcaseConfig = {},
   headingColor = null,
   accentColor = EXECUTIVE_DEFAULT_ACCENT_COLOR,
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -108,6 +110,11 @@ export default function ExecutiveShowcase({
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
@@ -151,7 +158,21 @@ export default function ExecutiveShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about" placement="main" title={copy.profile}>
-          <p className="executive-showcase__summary">{about}</p>
+          <p className="executive-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your executive summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </Section>
       )
     }
@@ -498,15 +519,40 @@ export default function ExecutiveShowcase({
           <p className="executive-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="executive-showcase__name">{fullName}</h1>
-          <p className="executive-showcase__role">{title}</p>
+          <h1 className="executive-showcase__name">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : fullName}
+          </h1>
+          <p className="executive-showcase__role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+          </p>
           {tagline ? <p className="executive-showcase__tagline">{tagline}</p> : null}
-          {personalContactItems.length > 0 ? (
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="executive-showcase__contact">
-              {personalContactItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
                 <span key={key} className="executive-showcase__contact-item">
                   <span className="executive-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  {value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : value}
                 </span>
               ))}
             </div>
