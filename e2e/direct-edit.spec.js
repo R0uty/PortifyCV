@@ -226,7 +226,7 @@ test.describe('Direct Edit builder', () => {
   // NAME claimed both checks but whose body only contained the demo-data
   // ones — this split is the fix, and the reason it's a hard split, not
   // a style preference.)
-  function runDirectEditDemoDataChecks(label, classPrefix, titleFieldSuffix = 'role', skillsSectionSelector = '[data-export-section="skills"]') {
+  function runDirectEditDemoDataChecks(label, classPrefix, titleFieldSuffix = 'role', skillsSectionSelector = '[data-export-section="skills"]', entrySelector = null) {
     // Regression guard for the final whole-branch review's Fix 1
     // (2026-09-15, Classic Professional): the Experience description's
     // editing branch can reference a CSS class with no `white-space:
@@ -285,6 +285,24 @@ test.describe('Direct Edit builder', () => {
       const skillsSection = page.locator(skillsSectionSelector)
       await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
       await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
+
+      // Regression guard for the final whole-branch review's Important #3
+      // (2026-09-18, Modern Orange final review): the Experience-divider
+      // CSS bug — a stale positional selector (or a same-specificity
+      // modifier class losing to one) silently strips the divider from
+      // every entry, or leaves it on the true-last entry, in Direct Edit
+      // mode. Shipped broken twice (Modern Orange Round 7, retroactively
+      // found on Executive Round 6) with no automated coverage catching
+      // either. `entrySelector` is opt-in per template (default `null`
+      // skips this check) since not every template's entries follow this
+      // exact divider pattern.
+      if (entrySelector) {
+        const entries = page.locator(entrySelector)
+        const firstBorderStyle = await entries.first().evaluate((el) => getComputedStyle(el).borderBottomStyle)
+        expect(firstBorderStyle).toBe('solid')
+        const lastBorderStyle = await entries.last().evaluate((el) => getComputedStyle(el).borderBottomStyle)
+        expect(lastBorderStyle).toBe('none')
+      }
 
       // Force a dispatch against the seeded multi-line description
       // without disturbing its existing content: focus the field, jump
@@ -430,12 +448,12 @@ test.describe('Direct Edit builder', () => {
     { label: 'Portrait', classPrefix: 'portrait-showcase' },
     { label: 'Modern Timeline', classPrefix: 'timeline-showcase', contactRowSuffix: 'contact', labelOrder: ['Phone', 'Email', 'Location'] },
     { label: 'Compact', classPrefix: 'compact-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
-    { label: 'Executive', classPrefix: 'executive-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
-    { label: 'Modern Orange', classPrefix: 'modern-orange-showcase', contactRowSuffix: 'contact-list', labelOrder: ['Location', 'Email', 'Phone'], titleFieldSuffix: 'title-badge', skillsSectionSelector: '.modern-orange-showcase__skill-list' },
+    { label: 'Executive', classPrefix: 'executive-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'], entrySelector: '.executive-showcase__entry' },
+    { label: 'Modern Orange', classPrefix: 'modern-orange-showcase', contactRowSuffix: 'contact-list', labelOrder: ['Location', 'Email', 'Phone'], titleFieldSuffix: 'title-badge', skillsSectionSelector: '.modern-orange-showcase__skill-list', entrySelector: '.modern-orange-showcase__exp-row' },
   ]
 
-  for (const { label, classPrefix, contactRowSuffix, labelOrder, titleFieldSuffix, skillsSectionSelector } of DIRECT_EDIT_TEMPLATES) {
-    runDirectEditDemoDataChecks(label, classPrefix, titleFieldSuffix, skillsSectionSelector)
+  for (const { label, classPrefix, contactRowSuffix, labelOrder, titleFieldSuffix, skillsSectionSelector, entrySelector } of DIRECT_EDIT_TEMPLATES) {
+    runDirectEditDemoDataChecks(label, classPrefix, titleFieldSuffix, skillsSectionSelector, entrySelector)
     runDirectEditEmptyPlaceholderCheck(label, classPrefix, contactRowSuffix, labelOrder)
   }
 })

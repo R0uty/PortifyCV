@@ -128,17 +128,45 @@ risk of the same shape: `EditableList` wraps every entry in a
 its entry class with `:first-child`/`:last-child` (the wrapper, not the
 entry, is now the positional sibling) — silently killing inter-entry
 dividers/spacing in Direct Edit mode while read-only mode still looks
-correct. **Before wiring `EditableList` into any future template, grep
-its stylesheet for `:first-child`/`:last-child`/`:first-of-type`/
+correct.
+
+**The originally-recommended fix here — re-anchoring onto
+`.direct-edit-entry` with `:first-of-type`/`:last-of-type` — does NOT
+work and has now shipped broken twice (Modern Orange Round 7, and
+retroactively found already-shipped on Executive Round 6).**
+`EditableList`'s `DndContext` (no `accessibility.container` configured)
+mounts an un-portaled accessibility live-region — two extra untyped
+`<div>` siblings (`HiddenText`, `LiveRegion` from
+`@dnd-kit/accessibility`) — after the last `.direct-edit-entry` once
+mounted, so `:last-of-type` never actually matches the true-last
+wrapper. Do not use this pattern.
+
+**Correct fix**: drive "is this the first/last entry" from the JS
+`isFirst`/`isLast` index computation (already correct, computed the
+same way every round: `index === 0` / `index === items.length - 1`) via
+a CSS **modifier class** applied directly in the component's
+`className` — never a CSS positional pseudo-class.
+
+**Partition requirement (found on Executive)**: if the entry's CSS
+class is *also* used by another, still-unwired (read-only-only) section
+on the same template (Executive's case: Leadership and Education both
+reuse `.executive-showcase__entry`), the modifier-class approach needs
+an explicit "opt-out" marker — e.g. a `--wired` class applied
+unconditionally to every entry that goes through the wired render
+function — so the position-based rules can be scoped to exclude it
+(`:not(.entry--wired)`). The two mechanisms must be mutually exclusive
+by selector, not by relying on CSS specificity or source-order
+tie-breaking, which is fragile.
+
+**Before wiring `EditableList` into any future template, grep its
+stylesheet for `:first-child`/`:last-child`/`:first-of-type`/
 `:last-of-type` on the entry class, in the same task**, and re-anchor
-any match onto `.direct-edit-entry` using `:first-of-type`/
-`:last-of-type` (EditableList also renders a trailing
-`.direct-edit-add-row` button, so plain `:last-child` on the wrapper
-itself never matches). At least two upcoming `railTable` templates have
-this exact pattern already: `src/styles/templates/navyProfessional.css`
-uses the identical `:first-child`/`:last-child` pair on its own entry
-class, and `src/styles/templates/modernOrange.css` has a similar
-positional pattern on different class names.
+any match onto the entry class itself using an `isFirst`/`isLast`
+modifier class (per above), not a positional pseudo-class on any
+wrapper. `src/styles/templates/navyProfessional.css` is a confirmed,
+not-yet-fixed instance of this same risk — it carries the identical
+`:not(:first-child)`/`:last-child` pair on its own entry class — flagged
+for whichever round wires Navy Professional next.
 
 ## Rollout order — one structural family at a time
 

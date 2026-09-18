@@ -71,9 +71,12 @@ Modern Timeline's Round 4 fix established), which is robust regardless of
 what `EditableList`/`dnd-kit` renders around the entry. Even after that
 fix landed, the *original* pre-existing unqualified `:last-child` rule was
 still sitting in the stylesheet, unqualified and un-scoped to Direct
-Edit — and because it's a more specific/later-declared selector in some
-paint orders it kept stripping the divider from every entry once Direct
-Edit wrapped them, not just the true last one. A live manual browser check
+Edit — and because `.exp-row:last-child` (one class plus one
+pseudo-class) has higher CSS specificity than the new `--last` modifier
+class alone (one class), the stale rule won deterministically, every
+time, not intermittently — it kept stripping the divider from every
+entry once Direct Edit wrapped them, not just the true last one. A live
+manual browser check
 (3+ Experience entries, Direct Edit mode) caught this concretely: every
 row lost its divider, the opposite of the intended behavior. Only deleting
 that stale original rule, leaving the `isLast`-driven modifier class as

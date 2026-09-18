@@ -550,6 +550,13 @@ names `modernOrange.css` as a template expected to hit this).
 Add to `src/styles/templates/modernOrange.css`, directly below the existing
 `.modern-orange-showcase__exp-row:last-child` rule:
 
+> **SUPERSEDED during execution**: the `:last-of-type`-on-wrapper approach
+> below was found broken (see `changes.md`'s 2026-09-18 entry and the
+> comment above `.modern-orange-showcase__exp-row--last` in
+> `modernOrange.css`) — `EditableList`'s `DndContext` mounts extra
+> unclassed `<div>` siblings that defeat `:last-of-type`. The shipped
+> code uses an `isLast`-driven modifier class instead.
+
 ```css
 .modern-orange-showcase__exp-list .direct-edit-entry .modern-orange-showcase__exp-row {
   padding-bottom: 1.25rem;

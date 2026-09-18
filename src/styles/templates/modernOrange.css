@@ -407,8 +407,15 @@
    sites, editing and read-only) via an explicit modifier class instead —
    see ExperienceRow in ModernOrangeShowcase.jsx. Robust regardless of what
    EditableList/dnd-kit renders around the entry, same pattern as
-   `.timeline-showcase__row--last`. */
-.modern-orange-showcase__exp-row--last {
+   `.timeline-showcase__row--last`.
+
+   The selector below doubles the class (`.exp-row.exp-row--last`) for
+   higher, order-independent specificity, matching Executive's fix —
+   there is no restored positional base rule here to actually conflict
+   with (the base `.exp-row` rule above is unqualified and this is the
+   only override), so this is precautionary consistency, not a live
+   specificity bug. */
+.modern-orange-showcase__exp-row.modern-orange-showcase__exp-row--last {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
@@ -476,7 +483,12 @@
 }
 
 .modern-orange-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
   white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--mo-text);
 }
 
 .modern-orange-showcase__bullets li {
