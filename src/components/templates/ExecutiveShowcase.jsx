@@ -24,7 +24,7 @@ import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import EditableField from '../EditableField'
-import EditableList from '../EditableList'
+import EditableList, { EditableCategorizedChip } from '../EditableList'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { EXECUTIVE_DEFAULT_ACCENT_COLOR } from './executive'
@@ -186,6 +186,29 @@ export default function ExecutiveShowcase({
     () => parseSkillCategories(snapshot.skills, isFinnish),
     [snapshot.skills, isFinnish],
   )
+  // Editing-branch-only: the same categorization, but computed off the raw
+  // formData.skills array (not the trimmed snapshot) and with each item's
+  // ORIGINAL flat-array index attached via a per-text QUEUE (not a plain
+  // Map — a Map collapses duplicate skill text to one index, which Round
+  // 5's final review found reachable via the app's JSON-import feature
+  // and fixed; this task reuses that fix, not the earlier, unsafe version).
+  const editableSkillCategories = useMemo(() => {
+    const grouped = parseSkillCategories(formData.skills, isFinnish)
+    const indexQueueByText = new Map()
+    formData.skills.forEach((skill, index) => {
+      const queue = indexQueueByText.get(skill)
+      if (queue) {
+        queue.push(index)
+      } else {
+        indexQueueByText.set(skill, [index])
+      }
+    })
+
+    return grouped.map((cat) => ({
+      ...cat,
+      items: cat.items.map((skill) => ({ skill, index: indexQueueByText.get(skill).shift() })),
+    }))
+  }, [formData.skills, isFinnish])
 
   const sectionVisibility = {
     ...createSectionVisibility(),
@@ -410,7 +433,7 @@ export default function ExecutiveShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" placement="side" title={copy.skills}>
-          {skillCategories.length > 0 ? (
+          {directEditDispatch ? null : skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="executive-showcase__skill-group">
                 <p className="executive-showcase__skill-group-label">{cat.label}</p>
@@ -426,6 +449,14 @@ export default function ExecutiveShowcase({
               {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
             </p>
           )}
+          {directEditDispatch ? (
+            <div className="executive-showcase__skill-group">
+              <EditableCategorizedChip
+                categories={editableSkillCategories}
+                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+              />
+            </div>
+          ) : null}
         </Section>
       )
     }
