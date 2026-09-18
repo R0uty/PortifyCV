@@ -399,6 +399,27 @@
   padding-bottom: 0;
 }
 
+/* Direct Edit mode wraps every entry in a `.direct-edit-entry` wrapper
+   (drag handle + remove button + the entry itself), which makes every
+   `.modern-orange-showcase__exp-row` the 3rd (last) child of its own
+   wrapper — so the `:last-child` rule above would strip the divider from
+   EVERY entry, not just the true last one, once EditableList is in play.
+   Re-anchor the same divider rules onto the wrapper itself, using
+   `:last-of-type` (not `:last-child`) because EditableList also renders a
+   trailing `.direct-edit-add-row` button as the list's final sibling,
+   which would make `:last-child` on `.direct-edit-entry` match nothing. */
+.modern-orange-showcase__exp-list .direct-edit-entry .modern-orange-showcase__exp-row {
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--mo-border);
+  margin-bottom: 1.25rem;
+}
+
+.modern-orange-showcase__exp-list .direct-edit-entry:last-of-type .modern-orange-showcase__exp-row {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
 .modern-orange-showcase__exp-date {
   flex-shrink: 0;
   width: 6rem;
@@ -458,6 +479,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+}
+
+.modern-orange-showcase__bullets--editing {
+  white-space: pre-line;
 }
 
 .modern-orange-showcase__bullets li {

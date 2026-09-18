@@ -23,6 +23,7 @@ import { useMemo } from 'react'
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import EditableField from '../EditableField'
+import EditableList from '../EditableList'
 import {
   contactIcons,
   devIcons,
@@ -144,6 +145,71 @@ function EducationRow({ isLast, children }) {
   )
 }
 
+// Modern Orange's own Experience-entry renderer — reuses the existing
+// ExperienceRow wrapper (the rail marker + connecting line), which already
+// takes `isLast` as an explicit prop rather than relying on CSS position —
+// safe for EditableList's own reordering/removal, since `isLast` is
+// recomputed from `index === items.length - 1` on every render regardless
+// of DOM wrapping. Only role and company are independently editable —
+// location and dates stay read-only-appended text, matching every other
+// template's Experience wiring in this rollout. `index` here is always
+// formData.experience-relative (only ever read inside directEditDispatch-
+// gated branches or the React key) — never assume it lines up with
+// snapshot.experience's own (filtered) indices in the read-only call site.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <ExperienceRow
+      key={`${item.role}-${item.company}-${index}`}
+      date={dateRange || copy.datesPending}
+      isLast={isLast}
+    >
+      <p className="modern-orange-showcase__exp-role">
+        {directEditDispatch ? (
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+            value={item.role}
+            placeholder={copy.untitledRole}
+          />
+        ) : item.role || copy.untitledRole}
+      </p>
+      {directEditDispatch || item.company || item.location ? (
+        <p className="modern-orange-showcase__exp-meta">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+              value={item.company}
+              placeholder={copy.company}
+            />
+          ) : item.company}
+          {item.company && item.location ? ` · ${item.location}` : item.location || null}
+        </p>
+      ) : null}
+      {directEditDispatch ? (
+        <p className="modern-orange-showcase__bullets modern-orange-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="modern-orange-showcase__bullets">
+          {bullets.map((line, lineIndex) => (
+            <li key={lineIndex}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
+    </ExperienceRow>
+  )
+}
+
 export default function ModernOrangeShowcase({
   formData,
   locale = 'en',
@@ -211,6 +277,8 @@ export default function ModernOrangeShowcase({
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     personalInfo: isFinnish ? 'Henkilötiedot' : 'Personal Info',
     profile: isFinnish ? 'Profiili' : 'Profile',
@@ -250,30 +318,24 @@ export default function ModernOrangeShowcase({
       return (
         <Section key={key} id="experience" icon="experience" title={copy.experience}>
           <div className="modern-orange-showcase__exp-list">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-                const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
-
-                return (
-                  <ExperienceRow
-                    key={`${item.role}-${item.company}-${index}`}
-                    date={dateRange || copy.datesPending}
-                    isLast={index === snapshot.experience.length - 1}
-                  >
-                    <p className="modern-orange-showcase__exp-role">{item.role || copy.untitledRole}</p>
-                    {metaLine ? <p className="modern-orange-showcase__exp-meta">{metaLine}</p> : null}
-                    {bullets.length > 0 ? (
-                      <ul className="modern-orange-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </ExperienceRow>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
+                directEditDispatch,
+                copy,
+                isLast: index === snapshot.experience.length - 1,
+              }))
             ) : (
               <p className="modern-orange-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
