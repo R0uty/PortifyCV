@@ -323,6 +323,10 @@
   overflow-wrap: break-word;
 }
 
+.modern-orange-showcase__title-badge .direct-edit-field {
+  text-transform: none;
+}
+
 .modern-orange-showcase__header-divider {
   height: 2px;
   margin-top: 1.5rem;

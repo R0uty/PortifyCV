@@ -325,18 +325,21 @@ function CVPreview({
   // Professional. Its accent color is user-customizable, same as Timeline.
   if (variant === 'modernOrange') {
     return (
-      <Suspense fallback={null}>
-        <ModernOrangeShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          accentColor={accentColor}
-          atsFriendlyMode={atsFriendlyMode}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <ModernOrangeShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            accentColor={accentColor}
+            atsFriendlyMode={atsFriendlyMode}
+            headingColor={headingColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
   // ── Colorful Compact Showcase delegation ──────────────────────────────

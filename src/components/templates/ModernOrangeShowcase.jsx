@@ -22,6 +22,7 @@ import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import EditableField from '../EditableField'
 import {
   contactIcons,
   devIcons,
@@ -152,6 +153,7 @@ export default function ModernOrangeShowcase({
   accentColor = MODERN_ORANGE_DEFAULT_ACCENT_COLOR,
   atsFriendlyMode = false,
   headingColor = null,
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -185,6 +187,11 @@ export default function ModernOrangeShowcase({
     ['email', snapshot.email],
     ['phone', snapshot.phone],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+  ]
   const websiteUrl = snapshot.links.website
   const linkedinUrl = snapshot.links.linkedin
 
@@ -220,7 +227,21 @@ export default function ModernOrangeShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about" icon="about" title={copy.profile}>
-          <p className="modern-orange-showcase__summary">{about}</p>
+          <p className="modern-orange-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </Section>
       )
     }
@@ -439,15 +460,35 @@ export default function ModernOrangeShowcase({
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
         <h1 className="modern-orange-showcase__name">
-          <span className="modern-orange-showcase__name-first">{nameFirst}</span>
-          {nameRest ? (
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'fullName' }}
+              value={formData.fullName}
+              placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+            />
+          ) : (
             <>
-              <br />
-              <span className="modern-orange-showcase__name-last">{nameRest}</span>
+              <span className="modern-orange-showcase__name-first">{nameFirst}</span>
+              {nameRest ? (
+                <>
+                  <br />
+                  <span className="modern-orange-showcase__name-last">{nameRest}</span>
+                </>
+              ) : null}
             </>
-          ) : null}
+          )}
         </h1>
-        <span className="modern-orange-showcase__title-badge">{title}</span>
+        <span className="modern-orange-showcase__title-badge">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'title' }}
+              value={formData.title}
+              placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+            />
+          ) : title}
+        </span>
       </header>
 
       <aside className="modern-orange-showcase__sidebar" data-export-secondary="true">
@@ -462,13 +503,22 @@ export default function ModernOrangeShowcase({
           </div>
         ) : null}
 
-        {personalItems.length > 0 || websiteUrl || linkedinUrl ? (
+        {directEditDispatch || personalItems.length > 0 || websiteUrl || linkedinUrl ? (
           <SidebarBlock title={copy.personalInfo}>
             <div className="modern-orange-showcase__contact-list">
-              {personalItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditContactFields : personalItems).map(([key, value, placeholderLabel]) => (
                 <div key={key} className="modern-orange-showcase__contact-item">
                   <span className="modern-orange-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  <span>{value}</span>
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : (
+                    <span>{value}</span>
+                  )}
                 </div>
               ))}
               {websiteUrl ? (
