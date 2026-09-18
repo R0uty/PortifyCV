@@ -53,7 +53,10 @@ test.describe('Direct Edit builder', () => {
 
   test('an unsupported template shows the read-only notice and no crash', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'Executive')
+    // Executive was this test's original example template, but Round 6
+    // added it to DIRECT_EDIT_SUPPORTED_TEMPLATES, so it no longer shows
+    // the read-only notice. Developer remains genuinely unsupported.
+    await selectTemplate(page, 'Developer')
     await expect(page.locator('.direct-edit-preview__notice')).toBeVisible()
     await expect(page.locator('.direct-edit-preview [contenteditable="true"]')).toHaveCount(0)
   })
@@ -161,7 +164,10 @@ test.describe('Direct Edit builder', () => {
     await page.keyboard.type('Jordan Rivera')
     await nameField.blur()
 
-    await selectTemplate(page, 'Executive')
+    // Executive was this test's original example template, but Round 6
+    // added it to DIRECT_EDIT_SUPPORTED_TEMPLATES, so it no longer shows
+    // the read-only notice. Developer remains genuinely unsupported.
+    await selectTemplate(page, 'Developer')
     await expect(page.locator('.direct-edit-preview__notice')).toBeVisible()
 
     await selectTemplate(page, 'Minimalist')
@@ -391,13 +397,17 @@ test.describe('Direct Edit builder', () => {
   // `runDirectEditEmptyPlaceholderCheck`. Compact renders a THIRD distinct
   // order, Email/Phone/Location (its own `directEditContactFields` array
   // in CompactShowcase.jsx), confirmed directly against the component
-  // rather than assumed.
+  // rather than assumed. Executive (Round 6) shares Compact's Email/Phone/
+  // Location order and `__contact` suffix, confirmed directly against
+  // ExecutiveShowcase.jsx's own `directEditContactFields` array rather
+  // than this round's plan's guess (which happened to match).
   const DIRECT_EDIT_TEMPLATES = [
     { label: 'Classic Professional', classPrefix: 'classic-professional-showcase', contactRowSuffix: 'contact', labelOrder: ['Phone', 'Email', 'Location'] },
     { label: 'Editorial', classPrefix: 'editorial-showcase' },
     { label: 'Portrait', classPrefix: 'portrait-showcase' },
     { label: 'Modern Timeline', classPrefix: 'timeline-showcase', contactRowSuffix: 'contact', labelOrder: ['Phone', 'Email', 'Location'] },
     { label: 'Compact', classPrefix: 'compact-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
+    { label: 'Executive', classPrefix: 'executive-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
   ]
 
   for (const { label, classPrefix, contactRowSuffix, labelOrder } of DIRECT_EDIT_TEMPLATES) {

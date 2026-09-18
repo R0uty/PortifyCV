@@ -4,6 +4,22 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: Executive is now editable, reusing Round 5's categorized-chip design — 2026-09-18
+
+Executive is now editable in Direct Edit mode (Phase 2 Round 6, the first
+`railTable`-family template), with the same scope every prior round has
+used: identity, About, Experience, and Skills are all inline-editable in
+the live preview. Executive's read-only Skills section already rendered
+as grouped chips, so this round reuses `EditableCategorizedChip` (built
+for Compact in Round 5) completely unchanged — the first proof that
+component generalizes across templates as intended. Executive's
+Experience entries needed their own local renderer rather than the
+three-template shared module, since its DOM nests role and the company/
+location line together inside one wrapper div, with dates as a sibling
+of that wrapper rather than of role directly — a real structural
+difference from the shared module's flat layout, even though the two
+look similar on screen.
+
 ## Direct Edit: Compact is now editable, with a new categorized-skills chip design — 2026-09-17
 
 Compact is now editable in Direct Edit mode (Phase 2 Round 5, the last
