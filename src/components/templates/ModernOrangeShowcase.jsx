@@ -23,7 +23,7 @@ import { useMemo } from 'react'
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import EditableField from '../EditableField'
-import EditableList from '../EditableList'
+import EditableList, { EditableChip } from '../EditableList'
 import {
   contactIcons,
   devIcons,
@@ -423,7 +423,7 @@ export default function ModernOrangeShowcase({
       return (
         <SidebarBlock key={key} title={copy.skills}>
           <div className="modern-orange-showcase__skill-list">
-            {snapshot.skills.length > 0 ? (
+            {directEditDispatch ? null : snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill, index) => (
                 <div key={skill} data-export-skill="true" className="modern-orange-showcase__skill-row">
                   <span className="modern-orange-showcase__skill-name">{skill}</span>
@@ -435,6 +435,9 @@ export default function ModernOrangeShowcase({
                 {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
               </p>
             )}
+            {directEditDispatch ? (
+              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+            ) : null}
           </div>
         </SidebarBlock>
       )
