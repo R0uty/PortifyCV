@@ -207,6 +207,28 @@
   padding-bottom: 0;
 }
 
+/* Direct Edit mode wraps every entry in a `.direct-edit-entry` wrapper
+   (drag handle + remove button + the entry itself), which makes every
+   `.executive-showcase__entry` the 3rd child of its own wrapper — so the
+   `:not(:first-child)`/`:last-child` rules above never match correctly
+   there. Re-anchor the same positional logic onto the wrapper instead,
+   using :first-of-type/:last-of-type since EditableList also renders a
+   trailing `.direct-edit-add-row` button as the list's final sibling. */
+.executive-showcase__entry-list .direct-edit-entry .executive-showcase__entry {
+  padding-top: 0;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--ex-border);
+}
+
+.executive-showcase__entry-list .direct-edit-entry:not(:first-of-type) .executive-showcase__entry {
+  padding-top: 1.25rem;
+}
+
+.executive-showcase__entry-list .direct-edit-entry:last-of-type .executive-showcase__entry {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
 .executive-showcase__entry-row {
   display: flex;
   flex-wrap: wrap;
@@ -409,6 +431,14 @@
   letter-spacing: 0.08em;
   color: var(--ex-ink-faint);
   margin-bottom: 0.5rem;
+}
+
+.executive-showcase__skill-group .direct-edit-chip-group__label {
+  font-size: var(--tpl-meta-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ex-ink-faint);
 }
 
 .executive-showcase__tag-row {

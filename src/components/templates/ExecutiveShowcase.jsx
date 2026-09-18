@@ -32,6 +32,7 @@ import {
   devIcons,
   contactIcons,
   parseSkillCategories,
+  buildEditableSkillCategories,
   formatDateRange,
   formatLinkLabel,
   formatLinkDisplayValue,
@@ -67,6 +68,10 @@ function highlightMetrics(text, showMetrics) {
 // entry-row, even though the visual result looks similar. Only role and
 // company are independently editable, matching the shared module's own
 // precedent — location stays read-only-appended text.
+//
+// `index` is always formData.experience-relative (only ever read inside
+// directEditDispatch-gated branches below) — never assume it lines up with
+// snapshot.experience's own (filtered) indices in the read-only call site.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = item.description ? splitToBullets(item.description) : []
@@ -188,27 +193,12 @@ export default function ExecutiveShowcase({
   )
   // Editing-branch-only: the same categorization, but computed off the raw
   // formData.skills array (not the trimmed snapshot) and with each item's
-  // ORIGINAL flat-array index attached via a per-text QUEUE (not a plain
-  // Map — a Map collapses duplicate skill text to one index, which Round
-  // 5's final review found reachable via the app's JSON-import feature
-  // and fixed; this task reuses that fix, not the earlier, unsafe version).
-  const editableSkillCategories = useMemo(() => {
-    const grouped = parseSkillCategories(formData.skills, isFinnish)
-    const indexQueueByText = new Map()
-    formData.skills.forEach((skill, index) => {
-      const queue = indexQueueByText.get(skill)
-      if (queue) {
-        queue.push(index)
-      } else {
-        indexQueueByText.set(skill, [index])
-      }
-    })
-
-    return grouped.map((cat) => ({
-      ...cat,
-      items: cat.items.map((skill) => ({ skill, index: indexQueueByText.get(skill).shift() })),
-    }))
-  }, [formData.skills, isFinnish])
+  // ORIGINAL flat-array index attached — see buildEditableSkillCategories
+  // in shared.jsx for why a per-text queue is used instead of a plain Map.
+  const editableSkillCategories = useMemo(
+    () => buildEditableSkillCategories(formData.skills, isFinnish),
+    [formData.skills, isFinnish],
+  )
 
   const sectionVisibility = {
     ...createSectionVisibility(),

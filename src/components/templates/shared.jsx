@@ -308,6 +308,29 @@ function parseSkillCategories(skills, isFinnish) {
   }))
 }
 
+// Editing-branch-only sibling of parseSkillCategories: the same categorization,
+// but with each item's ORIGINAL flat-array index attached via a per-text QUEUE
+// (not a plain Map — a Map collapses duplicate skill text to one index, which
+// Round 5's final review found reachable via the app's JSON-import feature and
+// fixed). Used by every categorized-skills template's Direct Edit wiring.
+function buildEditableSkillCategories(skills, isFinnish) {
+  const grouped = parseSkillCategories(skills, isFinnish)
+  const indexQueueByText = new Map()
+  skills.forEach((skill, index) => {
+    const queue = indexQueueByText.get(skill)
+    if (queue) {
+      queue.push(index)
+    } else {
+      indexQueueByText.set(skill, [index])
+    }
+  })
+
+  return grouped.map((cat) => ({
+    ...cat,
+    items: cat.items.map((skill) => ({ skill, index: indexQueueByText.get(skill).shift() })),
+  }))
+}
+
 // Renders a <section> wrapper element with data-export attributes for PDF/ATS export.
 // Used by all section renderers (about, experience, education, skills, links).
 function renderSectionCard({ section, placement, children, classes }) {
@@ -329,6 +352,7 @@ export {
   contactIcons,        // Icons for the header personal contact line (email/phone/location)
   sectionIcons,        // Monochrome glyphs for the circular section icon badge
   parseSkillCategories, // Skill categorization function
+  buildEditableSkillCategories, // parseSkillCategories + original-index mapping, for Direct Edit
   previewSectionTitleClasses, // Base CSS for section titles
   renderSectionCard,   // Section wrapper component
   formatDateRange,     // Re-exported from utils/shared

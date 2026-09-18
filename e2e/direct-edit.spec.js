@@ -217,8 +217,8 @@ test.describe('Direct Edit builder', () => {
     await exportPdfAndExpectSuccess()
   })
 
-  // Shared smoke-test shape for every Direct-Edit-supported oneColumn-
-  // family template. Two separate test functions, not one combined test:
+  // Shared smoke-test shape for every Direct-Edit-supported template.
+  // Two separate test functions, not one combined test:
   // the demo-data checks (name/skills/description) need the beforeEach's
   // already-loaded demo CV, while the placeholder check needs a
   // genuinely empty form — the two states can't coexist in a single
@@ -386,7 +386,7 @@ test.describe('Direct Edit builder', () => {
     expect(remainingTags).toEqual(DEMO_SKILLS)
   })
 
-  // One row per Direct-Edit-supported oneColumn-family template.
+  // One row per Direct-Edit-supported template.
   // `contactRowSuffix` defaults to 'meta' (Editorial, Portrait); Classic
   // Professional, Modern Timeline, and Compact all name their contact-row
   // wrapper class `__contact` instead — a naming choice from each

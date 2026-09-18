@@ -122,6 +122,24 @@ Fix pattern, already proven twice: `.template__field .direct-edit-field
 { text-transform: none; }`, scoped to the editable span only so the
 read-only render (Classic mode, exports, share links) is untouched.
 
+Executive's final whole-branch review (Round 6) found a third standing
+risk of the same shape: `EditableList` wraps every entry in a
+`.direct-edit-entry` div, which breaks any stylesheet rule that targets
+its entry class with `:first-child`/`:last-child` (the wrapper, not the
+entry, is now the positional sibling) — silently killing inter-entry
+dividers/spacing in Direct Edit mode while read-only mode still looks
+correct. **Before wiring `EditableList` into any future template, grep
+its stylesheet for `:first-child`/`:last-child`/`:first-of-type`/
+`:last-of-type` on the entry class, in the same task**, and re-anchor
+any match onto `.direct-edit-entry` using `:first-of-type`/
+`:last-of-type` (EditableList also renders a trailing
+`.direct-edit-add-row` button, so plain `:last-child` on the wrapper
+itself never matches). At least two upcoming `railTable` templates have
+this exact pattern already: `src/styles/templates/navyProfessional.css`
+uses the identical `:first-child`/`:last-child` pair on its own entry
+class, and `src/styles/templates/modernOrange.css` has a similar
+positional pattern on different class names.
+
 ## Rollout order — one structural family at a time
 
 Per `docs/template-design-system.md` §5's archetype table (also the exact
