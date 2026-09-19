@@ -1,11 +1,10 @@
-// Templates wired for Direct Edit's inline-editable preview. Grows one
-// entry at a time as Phase 2 rolls the shared EditableField/EditableList
-// primitives out to each remaining template — see
-// docs/superpowers/specs/2026-09-13-direct-edit-builder-design.md.
-// A template NOT in this list still renders in Direct Edit mode, just
-// read-only, until it's added here.
-export const DIRECT_EDIT_SUPPORTED_TEMPLATES = ['minimal', 'classicProfessional', 'editorial', 'portrait', 'timeline', 'compact', 'executive', 'modernOrange', 'creative']
+// Templates that additionally support INLINE editing — clicking text in
+// the preview and typing in place. Popup editing (the hover pencil and
+// section editor) works on every template regardless of this list, so a
+// template missing from it is not read-only; it simply lacks the inline
+// bonus layer.
+export const INLINE_EDIT_SUPPORTED_TEMPLATES = ['minimal', 'classicProfessional', 'editorial', 'portrait', 'timeline', 'compact', 'executive', 'modernOrange', 'creative']
 
-export function isDirectEditSupported(templateId) {
-  return DIRECT_EDIT_SUPPORTED_TEMPLATES.includes(templateId)
+export function isInlineEditSupported(templateId) {
+  return INLINE_EDIT_SUPPORTED_TEMPLATES.includes(templateId)
 }

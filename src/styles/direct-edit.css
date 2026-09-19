@@ -166,16 +166,6 @@
   box-sizing: border-box;
 }
 
-.direct-edit-preview__notice {
-  margin: 0 0 1rem;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: var(--ds-surface-muted, #fafaf9);
-  border: 1px solid var(--ds-border, #e4e4e7);
-  font-size: 0.8125rem;
-  color: var(--ds-text-secondary, #52525b);
-}
-
 .app-toolbar__mode-switch {
   display: inline-flex;
   padding: 3px;

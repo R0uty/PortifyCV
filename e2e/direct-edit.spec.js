@@ -199,14 +199,15 @@ test.describe('Direct Edit builder', () => {
     await expect(page.locator('.direct-edit-preview .direct-edit-entry')).toHaveCount(before + 1)
   })
 
-  test('an unsupported template shows the read-only notice and no crash', async ({ page }) => {
+  test('an inline-unwired template is still fully editable through the popup', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    // Executive was this test's original example template, but Round 6
-    // added it to DIRECT_EDIT_SUPPORTED_TEMPLATES, so it no longer shows
-    // the read-only notice. Developer remains genuinely unsupported.
-    await selectTemplate(page, 'Developer')
-    await expect(page.locator('.direct-edit-preview__notice')).toBeVisible()
-    await expect(page.locator('.direct-edit-preview [contenteditable="true"]')).toHaveCount(0)
+    await selectTemplate(page, 'Quadrant')
+
+    await expect(page.locator('.direct-edit-preview__notice')).toHaveCount(0)
+
+    await page.locator('[data-export-section="experience"]').first().hover()
+    await page.locator('.direct-edit-pencil').click()
+    await expect(page.locator('.direct-edit-popup')).toBeVisible()
   })
 
   // Regression guard: `.builder-section` (app-shell.css) is `flex: 1;
@@ -301,9 +302,10 @@ test.describe('Direct Edit builder', () => {
   // this fix wave: the existing coverage only exercises a *mode* switch
   // (Direct Edit <-> Classic), not a *template* switch while staying in
   // Direct Edit the whole time. An edit must survive a round-trip through
-  // an unsupported template (Developer, not in DIRECT_EDIT_SUPPORTED_TEMPLATES
-  // — see src/utils/directEdit.js) and back to Minimalist.
-  test('an edit in Direct Edit mode survives switching to an unsupported template and back', async ({ page }) => {
+  // a template without the inline bonus layer (Developer, not in
+  // INLINE_EDIT_SUPPORTED_TEMPLATES — see src/utils/directEdit.js) and
+  // back to Minimalist.
+  test('an edit in Direct Edit mode survives switching to an inline-unwired template and back', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     const nameField = page.locator('.direct-edit-preview h3 .direct-edit-field')
@@ -312,11 +314,10 @@ test.describe('Direct Edit builder', () => {
     await page.keyboard.type('Jordan Rivera')
     await nameField.blur()
 
-    // Executive was this test's original example template, but Round 6
-    // added it to DIRECT_EDIT_SUPPORTED_TEMPLATES, so it no longer shows
-    // the read-only notice. Developer remains genuinely unsupported.
+    // Developer is not in INLINE_EDIT_SUPPORTED_TEMPLATES, so it has no
+    // inline contentEditable fields, but it's still fully editable via the
+    // popup — this test only checks the edit survives the round-trip.
     await selectTemplate(page, 'Developer')
-    await expect(page.locator('.direct-edit-preview__notice')).toBeVisible()
 
     await selectTemplate(page, 'Minimalist')
     const nameFieldAgain = page.locator('.direct-edit-preview h3 .direct-edit-field')

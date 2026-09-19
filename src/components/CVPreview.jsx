@@ -75,9 +75,9 @@ function CVPreview({
   classicNameAlignment = 'center',
   // Direct Edit builder: a dispatch function only when (a) the app is in
   // Direct Edit mode AND (b) the current template is in
-  // DIRECT_EDIT_SUPPORTED_TEMPLATES (src/utils/directEdit.js) — null in
+  // INLINE_EDIT_SUPPORTED_TEMPLATES (src/utils/directEdit.js) — null in
   // every other case (Classic mode, PDF/html2canvas export, the
-  // thumbnail gallery, an unsupported template). EditableField/
+  // thumbnail gallery, a template without the inline bonus layer). EditableField/
   // EditableList/EditableChip read this indirectly via DirectEditContext
   // — see the wrap in the final return below.
   directEditDispatch = null,

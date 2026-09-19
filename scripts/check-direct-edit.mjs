@@ -23,7 +23,7 @@ registerHooks({
 const srcDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src')
 const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, relativePath)).href)
 
-const { DIRECT_EDIT_SUPPORTED_TEMPLATES, isDirectEditSupported } = await importSrc('utils/directEdit.js')
+const { INLINE_EDIT_SUPPORTED_TEMPLATES, isInlineEditSupported } = await importSrc('utils/directEdit.js')
 const { cvTemplates } = await importSrc('utils/cvTemplates.js')
 
 let failures = 0
@@ -37,18 +37,18 @@ console.log('\ndirectEdit: supported-template allowlist\n')
 
 {
   const registryIds = new Set(cvTemplates.map((template) => template.id))
-  const unknownIds = DIRECT_EDIT_SUPPORTED_TEMPLATES.filter((id) => !registryIds.has(id))
+  const unknownIds = INLINE_EDIT_SUPPORTED_TEMPLATES.filter((id) => !registryIds.has(id))
   check(
-    'every id in DIRECT_EDIT_SUPPORTED_TEMPLATES is a real template id',
+    'every id in INLINE_EDIT_SUPPORTED_TEMPLATES is a real template id',
     unknownIds.length === 0,
     `unknown ids: ${unknownIds.join(', ')}`,
   )
   check(
-    'DIRECT_EDIT_SUPPORTED_TEMPLATES has no duplicate entries',
-    new Set(DIRECT_EDIT_SUPPORTED_TEMPLATES).size === DIRECT_EDIT_SUPPORTED_TEMPLATES.length,
+    'INLINE_EDIT_SUPPORTED_TEMPLATES has no duplicate entries',
+    new Set(INLINE_EDIT_SUPPORTED_TEMPLATES).size === INLINE_EDIT_SUPPORTED_TEMPLATES.length,
   )
-  check('Minimalist (the Phase 1 reference template) is supported', isDirectEditSupported('minimal'))
-  check('an unknown template id is not supported', isDirectEditSupported('not-a-real-template') === false)
+  check('Minimalist (the Phase 1 reference template) is supported', isInlineEditSupported('minimal'))
+  check('an unknown template id is not supported', isInlineEditSupported('not-a-real-template') === false)
 }
 
 console.log(`\n${failures === 0 ? 'All direct-edit checks passed.' : `${failures} check(s) failed.`}`)

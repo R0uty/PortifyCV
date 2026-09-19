@@ -1,7 +1,7 @@
 import CVPreview from './CVPreview'
 import SectionsMenu from './SectionsMenu'
 import SectionEditOverlay from './SectionEditOverlay'
-import { isDirectEditSupported } from '../utils/directEdit'
+import { isInlineEditSupported } from '../utils/directEdit'
 import { getCvFontStack } from '../utils/cvFonts'
 
 export default function DirectEditPreview({
@@ -17,8 +17,7 @@ export default function DirectEditPreview({
   previewRef,
   cvFontId,
 }) {
-  const isFinnish = locale === 'fi'
-  const isSupported = isDirectEditSupported(selectedTemplate)
+  const isInlineSupported = isInlineEditSupported(selectedTemplate)
 
   return (
     <div
@@ -33,21 +32,12 @@ export default function DirectEditPreview({
         '--font-sans': getCvFontStack(cvFontId),
       }}
     >
-      {!isSupported ? (
-        <p className="direct-edit-preview__notice">
-          {isFinnish
-            ? `Suora muokkaus ei ole vielä käytössä pohjalle "${templateConfig.label}". Vaihda Classic-tilaan muokataksesi, tai valitse toinen pohja.`
-            : `Direct Edit isn't available yet for "${templateConfig.label}". Switch to Classic to edit, or pick a different template.`}
-        </p>
-      ) : null}
-      {isSupported ? (
-        <SectionsMenu
-          formData={formData}
-          dispatchFormData={dispatchFormData}
-          templateConfig={templateConfig}
-          locale={locale}
-        />
-      ) : null}
+      <SectionsMenu
+        formData={formData}
+        dispatchFormData={dispatchFormData}
+        templateConfig={templateConfig}
+        locale={locale}
+      />
       <CVPreview
         formData={formData}
         theme={theme}
@@ -57,7 +47,7 @@ export default function DirectEditPreview({
         accentColor={accentColor}
         headingColor={headingColor}
         classicNameAlignment={classicNameAlignment}
-        directEditDispatch={isSupported ? dispatchFormData : null}
+        directEditDispatch={isInlineSupported ? dispatchFormData : null}
         previewRef={previewRef}
       />
       <SectionEditOverlay
