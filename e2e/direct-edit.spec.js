@@ -112,6 +112,27 @@ test.describe('Direct Edit builder', () => {
     await expect(firstEntry).not.toHaveClass(/direct-edit-popup__entry--hidden/)
   })
 
+  test('the popup edits header fields including tagline, which no template wires inline', async ({ page }) => {
+    // Creative is the only Direct-Edit-supported template that renders
+    // `tagline` at all, and even there it is a plain read-only <p> off
+    // `snapshot.tagline` (CreativeShowcase.jsx), never an EditableField —
+    // i.e. no template lets a user type a tagline inline. The default
+    // Minimalist template (CVPreview.jsx's shared flat renderer) has no
+    // tagline slot anywhere in its header, so this test selects Creative
+    // to have somewhere in the DOM to observe the popup's edit land.
+    await selectTemplate(page, 'Creative')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await page.locator('[data-export-header]').first().hover()
+    await page.locator('.direct-edit-pencil').click()
+
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+
+    await popup.locator('input[data-field="tagline"]').fill('Popup tagline')
+    await expect(page.locator('[data-export-header]').first()).toContainText('Popup tagline')
+  })
+
   test('adding an experience entry in Direct Edit mode adds one to the form', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
     const before = await page.locator('.direct-edit-preview .direct-edit-entry').count()

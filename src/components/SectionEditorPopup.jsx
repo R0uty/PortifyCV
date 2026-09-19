@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { SECTION_SHAPE, getSectionSchema } from '../utils/sectionSchema'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
+import { isPhotoVisibleForTemplate } from '../utils/cvForm'
 
 // The popup editor for one section. Renders real <input>/<textarea>
 // elements and reads formData directly — never the DOM and never
@@ -56,7 +57,6 @@ export default function SectionEditorPopup({
   sectionKey,
   formData,
   dispatchFormData,
-  // eslint-disable-next-line no-unused-vars
   templateConfig,
   locale,
   onClose,
@@ -180,10 +180,79 @@ export default function SectionEditorPopup({
     )
   }
 
+  const renderRootGroup = () => (
+    <>
+      {schema.fields.map((field) => (
+        <FieldInput
+          key={field.key}
+          field={field}
+          value={formData[field.key]}
+          isFinnish={isFinnish}
+          onChange={(value) =>
+            dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: field.key, value })
+          }
+        />
+      ))}
+      {formData.photo ? (
+        <label className="direct-edit-popup__field direct-edit-popup__field--inline">
+          <input
+            type="checkbox"
+            className="direct-edit-popup__input"
+            data-field="photoVisible"
+            checked={isPhotoVisibleForTemplate(formData.photoVisibilityByTemplate, templateConfig.id)}
+            onChange={() =>
+              dispatchFormData({ type: FORM_ACTION.TOGGLE_PHOTO_VISIBILITY, template: templateConfig.id })
+            }
+          />
+          <span className="direct-edit-popup__label">
+            {isFinnish ? 'Näytä valokuva' : 'Show photo'}
+          </span>
+        </label>
+      ) : null}
+    </>
+  )
+
+  const renderRootScalar = () => {
+    const field = schema.fields[0]
+
+    return (
+      <FieldInput
+        field={field}
+        value={formData[field.key]}
+        isFinnish={isFinnish}
+        onChange={(value) =>
+          dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: field.key, value })
+        }
+      />
+    )
+  }
+
+  const renderLinkMap = () => (
+    <>
+      {schema.fields.map((field) => (
+        <FieldInput
+          key={field.key}
+          field={field}
+          value={formData.links?.[field.key]}
+          isFinnish={isFinnish}
+          onChange={(value) =>
+            dispatchFormData({ type: FORM_ACTION.SET_LINK_FIELD, field: field.key, value })
+          }
+        />
+      ))}
+    </>
+  )
+
   const renderBody = () => {
     switch (schema.shape) {
       case SECTION_SHAPE.recordArray:
         return renderRecordArray()
+      case SECTION_SHAPE.rootGroup:
+        return renderRootGroup()
+      case SECTION_SHAPE.rootScalar:
+        return renderRootScalar()
+      case SECTION_SHAPE.linkMap:
+        return renderLinkMap()
       default:
         return (
           <p className="direct-edit-popup__empty">
