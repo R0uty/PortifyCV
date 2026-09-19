@@ -298,3 +298,25 @@ export const SECTION_SCHEMA = {
 export function getSectionSchema(sectionKey) {
   return SECTION_SCHEMA[sectionKey]
 }
+
+// Returns the section key that sits `direction` away from `sectionKey`
+// WITHIN ITS OWN COLUMN, or null at the end of that column.
+//
+// sectionOrder is one flat array, but a rail template splits it into a
+// main column (primarySections) and a sidebar (secondarySections). The
+// flat neighbour of a sidebar section is frequently a main-column section,
+// so moving toward it looks like nothing happened. Callers must pass the
+// key returned here as MOVE_SECTION_ORDER's `toSection`.
+export function getColumnNeighbourSection(sectionKey, direction, orderedSections, templateConfig) {
+  const primary = new Set(templateConfig.primarySections)
+  const column = primary.has(sectionKey)
+    ? orderedSections.filter((key) => primary.has(key))
+    : orderedSections.filter((key) => new Set(templateConfig.secondarySections).has(key))
+  const position = column.indexOf(sectionKey)
+
+  if (position < 0) {
+    return null
+  }
+
+  return column[position + direction] ?? null
+}

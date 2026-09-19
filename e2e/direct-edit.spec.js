@@ -154,6 +154,44 @@ test.describe('Direct Edit builder', () => {
     await expect(popup.locator('.direct-edit-popup__notice')).toBeVisible()
   })
 
+  test('moving a sidebar section up swaps it with its own column neighbour, not a main-column section', async ({ page }) => {
+    await selectTemplate(page, 'Creative')
+
+    // Interleave a main-column section into the flat sectionOrder before
+    // testing the popup's move-up. Fresh demo data's sectionOrder is []
+    // (see cvForm.js's createSectionOrder), which normalizes to
+    // primarySections-then-secondarySections — already column-contiguous,
+    // so a naive flat-neighbour move would coincidentally land on the
+    // right key and this test would pass either way. Classic mode's
+    // "Visible sections" panel moves flat neighbours with no column
+    // awareness (moveSectionByDirection in CVForm.jsx, correct for that
+    // one-list nav rail), so pushing Skills up once here swaps it with
+    // Projects (main column) in the flat array while leaving both
+    // columns' own visual order unchanged — exactly the state where a
+    // naive popup move would silently do nothing.
+    await page.getByRole('button', { name: 'Visible sections' }).click()
+    await page.getByRole('button', { name: 'Move Skills up' }).click()
+
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const sidebarOrderBefore = await page
+      .locator('[data-export-secondary="true"] [data-export-section]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-export-section')))
+
+    expect(sidebarOrderBefore.length).toBeGreaterThan(1)
+    const target = sidebarOrderBefore[1]
+
+    await page.locator(`[data-export-section="${target}"]`).first().hover()
+    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-popup__move-up').click()
+
+    const sidebarOrderAfter = await page
+      .locator('[data-export-secondary="true"] [data-export-section]')
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-export-section')))
+
+    expect(sidebarOrderAfter[0]).toBe(target)
+  })
+
   test('adding an experience entry in Direct Edit mode adds one to the form', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
     const before = await page.locator('.direct-edit-preview .direct-edit-entry').count()

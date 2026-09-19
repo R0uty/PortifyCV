@@ -226,3 +226,25 @@
   font-size: 11px;
   opacity: 0.8;
 }
+
+.direct-edit-popup__section-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.direct-edit-popup__section-controls button {
+  border: 1px solid var(--color-border, #d4d4d8);
+  border-radius: 6px;
+  background: none;
+  padding: 0.15rem 0.4rem;
+  font-size: 11px;
+  cursor: pointer;
+  color: inherit;
+}
+
+.direct-edit-popup__section-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

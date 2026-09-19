@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { SECTION_SHAPE, getSectionSchema } from '../utils/sectionSchema'
+import { SECTION_SHAPE, getSectionSchema, getColumnNeighbourSection } from '../utils/sectionSchema'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
-import { isPhotoVisibleForTemplate } from '../utils/cvForm'
+import { isPhotoVisibleForTemplate, normalizeSectionOrder } from '../utils/cvForm'
 
 // The popup editor for one section. Renders real <input>/<textarea>
 // elements and reads formData directly — never the DOM and never
@@ -81,6 +81,36 @@ export default function SectionEditorPopup({
   if (!schema) {
     return null
   }
+
+  // identity is not a sectionOrder section, so it has no neighbours and
+  // cannot be hidden — the header always renders.
+  const isOrderableSection = sectionKey !== 'identity'
+  const templateSectionOrder = [
+    ...templateConfig.primarySections,
+    ...templateConfig.secondarySections,
+  ]
+  const orderedSections = normalizeSectionOrder(formData.sectionOrder, templateSectionOrder)
+    .filter((key) => templateSectionOrder.includes(key))
+
+  const moveSection = (direction) => {
+    const toSection = getColumnNeighbourSection(sectionKey, direction, orderedSections, templateConfig)
+
+    if (!toSection) {
+      return
+    }
+
+    dispatchFormData({
+      type: FORM_ACTION.MOVE_SECTION_ORDER,
+      fromSection: sectionKey,
+      toSection,
+      fallbackOrder: templateSectionOrder,
+    })
+  }
+
+  const canMoveUp =
+    isOrderableSection && Boolean(getColumnNeighbourSection(sectionKey, -1, orderedSections, templateConfig))
+  const canMoveDown =
+    isOrderableSection && Boolean(getColumnNeighbourSection(sectionKey, 1, orderedSections, templateConfig))
 
   const renderRecordArray = () => {
     const items = Array.isArray(formData[sectionKey]) ? formData[sectionKey] : []
@@ -360,6 +390,38 @@ export default function SectionEditorPopup({
         <span className="direct-edit-popup__title">
           {isFinnish ? schema.labelFi : schema.labelEn}
         </span>
+        {isOrderableSection ? (
+          <div className="direct-edit-popup__section-controls">
+            <button
+              type="button"
+              className="direct-edit-popup__move-up"
+              onClick={() => moveSection(-1)}
+              disabled={!canMoveUp}
+              aria-label={isFinnish ? 'Siirrä osiota ylös' : 'Move section up'}
+            >
+              &uarr;
+            </button>
+            <button
+              type="button"
+              className="direct-edit-popup__move-down"
+              onClick={() => moveSection(1)}
+              disabled={!canMoveDown}
+              aria-label={isFinnish ? 'Siirrä osiota alas' : 'Move section down'}
+            >
+              &darr;
+            </button>
+            <button
+              type="button"
+              className="direct-edit-popup__hide-section"
+              onClick={() => {
+                dispatchFormData({ type: FORM_ACTION.TOGGLE_SECTION_VISIBILITY, section: sectionKey })
+                onClose()
+              }}
+            >
+              {isFinnish ? 'Piilota' : 'Hide'}
+            </button>
+          </div>
+        ) : null}
         <button
           type="button"
           className="direct-edit-popup__close"
