@@ -174,3 +174,55 @@
   cursor: pointer;
   color: inherit;
 }
+
+.direct-edit-popup__skill {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 12px;
+}
+
+.direct-edit-popup__skill-text {
+  margin-right: auto;
+  overflow-wrap: anywhere;
+}
+
+.direct-edit-popup__skill button {
+  border: 1px solid var(--color-border, #d4d4d8);
+  border-radius: 6px;
+  background: none;
+  padding: 0.1rem 0.35rem;
+  font-size: 11px;
+  cursor: pointer;
+  color: inherit;
+}
+
+.direct-edit-popup__skill button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.direct-edit-popup__skill-row {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.direct-edit-popup__skill-add {
+  border: 1px solid var(--color-border, #d4d4d8);
+  border-radius: 6px;
+  background: none;
+  padding: 0.3rem 0.6rem;
+  font-size: 12px;
+  cursor: pointer;
+  color: inherit;
+}
+
+.direct-edit-popup__skill-add:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.direct-edit-popup__notice {
+  font-size: 11px;
+  opacity: 0.8;
+}

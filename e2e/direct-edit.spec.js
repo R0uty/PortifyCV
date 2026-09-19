@@ -133,6 +133,27 @@ test.describe('Direct Edit builder', () => {
     await expect(page.locator('[data-export-header]').first()).toContainText('Popup tagline')
   })
 
+  test('the popup adds, reorders and removes skills, and refuses duplicates', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await page.locator('[data-export-section="skills"]').first().hover()
+    await page.locator('.direct-edit-pencil').click()
+
+    const popup = page.locator('.direct-edit-popup')
+    const rows = popup.locator('.direct-edit-popup__skill')
+    const countBefore = await rows.count()
+
+    await popup.locator('.direct-edit-popup__skill-input').fill('Popup Skill')
+    await popup.locator('.direct-edit-popup__skill-add').click()
+    await expect(rows).toHaveCount(countBefore + 1)
+
+    // A duplicate is rejected by the reducer and reported, not silently dropped.
+    await popup.locator('.direct-edit-popup__skill-input').fill('popup skill')
+    await popup.locator('.direct-edit-popup__skill-add').click()
+    await expect(rows).toHaveCount(countBefore + 1)
+    await expect(popup.locator('.direct-edit-popup__notice')).toBeVisible()
+  })
+
   test('adding an experience entry in Direct Edit mode adds one to the form', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
     const before = await page.locator('.direct-edit-preview .direct-edit-entry').count()

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { SECTION_SHAPE, getSectionSchema } from '../utils/sectionSchema'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 import { isPhotoVisibleForTemplate } from '../utils/cvForm'
@@ -63,6 +63,8 @@ export default function SectionEditorPopup({
 }) {
   const isFinnish = locale === 'fi'
   const schema = getSectionSchema(sectionKey)
+  const [draftSkill, setDraftSkill] = useState('')
+  const [notice, setNotice] = useState('')
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -243,6 +245,89 @@ export default function SectionEditorPopup({
     </>
   )
 
+  const renderStringArray = () => {
+    const items = Array.isArray(formData[sectionKey]) ? formData[sectionKey] : []
+
+    const handleAdd = () => {
+      const candidate = draftSkill.trim()
+
+      if (!candidate) {
+        return
+      }
+
+      const isDuplicate = items.some((skill) => skill.toLowerCase() === candidate.toLowerCase())
+
+      if (isDuplicate) {
+        setNotice(isFinnish ? 'Tämä taito on jo listalla.' : 'That skill is already listed.')
+        return
+      }
+
+      dispatchFormData({ type: FORM_ACTION.ADD_SKILL, skill: candidate })
+      setDraftSkill('')
+      setNotice('')
+    }
+
+    return (
+      <>
+        {items.map((skill, index) => (
+          <div key={`${skill}-${index}`} className="direct-edit-popup__skill">
+            <span className="direct-edit-popup__skill-text">{skill}</span>
+            <button
+              type="button"
+              onClick={() => dispatchFormData({ type: FORM_ACTION.MOVE_SKILL, index, direction: -1 })}
+              disabled={index === 0}
+              aria-label={isFinnish ? 'Siirrä ylös' : 'Move up'}
+            >
+              &uarr;
+            </button>
+            <button
+              type="button"
+              onClick={() => dispatchFormData({ type: FORM_ACTION.MOVE_SKILL, index, direction: 1 })}
+              disabled={index === items.length - 1}
+              aria-label={isFinnish ? 'Siirrä alas' : 'Move down'}
+            >
+              &darr;
+            </button>
+            <button
+              type="button"
+              onClick={() => dispatchFormData({ type: FORM_ACTION.REMOVE_SKILL, index })}
+              aria-label={isFinnish ? 'Poista' : 'Remove'}
+            >
+              &times;
+            </button>
+          </div>
+        ))}
+        <div className="direct-edit-popup__skill-row">
+          <input
+            type="text"
+            className="direct-edit-popup__input direct-edit-popup__skill-input"
+            value={draftSkill}
+            placeholder={isFinnish ? 'Uusi taito' : 'New skill'}
+            onChange={(event) => {
+              setDraftSkill(event.target.value)
+              setNotice('')
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault()
+                handleAdd()
+              }
+            }}
+          />
+          <button
+            type="button"
+            className="direct-edit-popup__skill-add"
+            onClick={handleAdd}
+            disabled={!draftSkill.trim()}
+          >
+            {isFinnish ? 'Lisää' : 'Add'}
+          </button>
+        </div>
+        {notice ? <p className="direct-edit-popup__notice">{notice}</p> : null}
+      </>
+    )
+  }
+
   const renderBody = () => {
     switch (schema.shape) {
       case SECTION_SHAPE.recordArray:
@@ -253,6 +338,8 @@ export default function SectionEditorPopup({
         return renderRootScalar()
       case SECTION_SHAPE.linkMap:
         return renderLinkMap()
+      case SECTION_SHAPE.stringArray:
+        return renderStringArray()
       default:
         return (
           <p className="direct-edit-popup__empty">
