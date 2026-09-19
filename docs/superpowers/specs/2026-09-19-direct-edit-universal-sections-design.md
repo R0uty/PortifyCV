@@ -79,9 +79,14 @@ Four new files, five modified, **zero template files touched in Phase A**:
 - New: `SectionEditOverlay.jsx`, `SectionEditorPopup.jsx`,
   `src/utils/sectionSchema.js`, `scripts/check-section-schema.mjs`.
 - Modified: `DirectEditPreview.jsx` (mounts the overlay, drops the
-  "not available yet" notice), `SectionsMenu.jsx`, `src/utils/directEdit.js`,
-  `e2e/direct-edit.spec.js`, `package.json` (the new check script and a
-  patch version bump).
+  "not available yet" notice), `src/utils/directEdit.js`,
+  `scripts/check-direct-edit.mjs`, `e2e/direct-edit.spec.js`,
+  `src/index.css`, `package.json` (the new check script and a patch
+  version bump).
+
+`SectionsMenu.jsx` is **unchanged**: the popup's hide control dispatches
+the same `TOGGLE_SECTION_VISIBILITY` the menu already uses, and section
+reordering lives in the popup, so nothing in that file needs to move.
 
 ### `src/components/SectionEditOverlay.jsx` (new)
 
@@ -132,10 +137,12 @@ It also encodes each section's shape. There are exactly five:
 **No new `cvFormReducer` actions.** Every action above already exists —
 the same constraint that has held for all 8 rounds of the inline rollout.
 
-### `src/components/SectionsMenu.jsx` (modified)
+### `src/components/SectionsMenu.jsx` (unchanged)
 
-Keeps its bulk show/hide checkbox list unchanged. Section *reordering*
-lives in the popup instead, at the point of use.
+Keeps its bulk show/hide checkbox list exactly as shipped. Section
+*reordering* lives in the popup instead, at the point of use, and the
+popup's hide control dispatches the same `TOGGLE_SECTION_VISIBILITY`
+action the menu already uses — so no edit to this file is required.
 
 ### `src/utils/directEdit.js` (modified)
 
