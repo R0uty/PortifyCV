@@ -31,7 +31,7 @@ import { parseSkillCategories, formatDateRange, formatLinkDisplayValue } from '.
 import { accentSoftFill } from '../../utils/templateAccents'
 import { CREATIVE_DEFAULT_ACCENT_COLOR } from './creative'
 import EditableField from '../EditableField'
-import EditableList from '../EditableList'
+import EditableList, { EditableChip } from '../EditableList'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -308,19 +308,22 @@ export default function CreativeShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" placement="side" number={sectionNumber(key)} title={copy.skills}>
-          {flatSkills.length > 0 ? (
-            <div className="creative-showcase__pill-row">
-              {flatSkills.map((skill) => (
+          <div className="creative-showcase__pill-row">
+            {directEditDispatch ? null : flatSkills.length > 0 ? (
+              flatSkills.map((skill) => (
                 <span key={skill} data-export-skill="true" className="creative-showcase__pill">
                   {skill}
                 </span>
-              ))}
-            </div>
-          ) : (
-            <p className="creative-showcase__empty">
-              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
-            </p>
-          )}
+              ))
+            ) : (
+              <p className="creative-showcase__empty">
+                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              </p>
+            )}
+            {directEditDispatch ? (
+              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+            ) : null}
+          </div>
         </Section>
       )
     }
