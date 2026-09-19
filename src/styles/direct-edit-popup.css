@@ -1,0 +1,92 @@
+/* Overlay host: covers the preview so hover can be delegated, but is
+   pointer-transparent itself — only the pencil and popup take pointer
+   events, so inline contentEditable editing underneath still works. */
+.direct-edit-overlay-host {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.direct-edit-overlay-host > * {
+  pointer-events: auto;
+}
+
+.direct-edit-pencil {
+  position: absolute;
+  transform: translate(-100%, 0);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border, #d4d4d8);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-ink, #18181b);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.4);
+}
+
+.direct-edit-pencil:hover,
+.direct-edit-pencil:focus-visible {
+  background: var(--color-surface-strong, #f4f4f5);
+}
+
+.direct-edit-popup-anchor {
+  position: absolute;
+  transform: translate(-100%, 0);
+  max-width: min(420px, 90vw);
+}
+
+.direct-edit-popup {
+  width: 380px;
+  max-width: 90vw;
+  max-height: 70vh;
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid var(--color-border, #d4d4d8);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-ink, #18181b);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.5);
+}
+
+.direct-edit-popup__header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  border-bottom: 1px solid var(--color-border, #d4d4d8);
+  background: inherit;
+}
+
+.direct-edit-popup__title {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.direct-edit-popup__close {
+  border: 0;
+  background: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: inherit;
+}
+
+.direct-edit-popup__body {
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.direct-edit-popup__empty {
+  font-size: 12px;
+  opacity: 0.7;
+}

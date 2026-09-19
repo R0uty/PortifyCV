@@ -11,6 +11,7 @@
 @import './styles/app-shell.css';
 @import './styles/utilities.css';
 @import './styles/direct-edit.css';
+@import './styles/direct-edit-popup.css';
 @import './styles/templates/_system.css';
 @import './styles/templates/developer.css';
 @import './styles/templates/creative.css';

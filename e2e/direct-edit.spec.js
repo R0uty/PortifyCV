@@ -44,6 +44,27 @@ test.describe('Direct Edit builder', () => {
     await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Jordan Rivera')
   })
 
+  test('hovering a section in Direct Edit reveals a pencil that opens the section popup', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const aboutSection = page.locator('[data-export-section="about"]').first()
+    await expect(aboutSection).toBeVisible()
+
+    await aboutSection.hover()
+
+    const pencil = page.locator('.direct-edit-pencil')
+    await expect(pencil).toBeVisible()
+
+    await pencil.click()
+
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+    await expect(popup).toContainText('About')
+
+    await page.keyboard.press('Escape')
+    await expect(popup).toHaveCount(0)
+  })
+
   test('adding an experience entry in Direct Edit mode adds one to the form', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
     const before = await page.locator('.direct-edit-preview .direct-edit-entry').count()

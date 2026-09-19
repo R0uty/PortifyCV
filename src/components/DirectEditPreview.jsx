@@ -1,5 +1,6 @@
 import CVPreview from './CVPreview'
 import SectionsMenu from './SectionsMenu'
+import SectionEditOverlay from './SectionEditOverlay'
 import { isDirectEditSupported } from '../utils/directEdit'
 import { getCvFontStack } from '../utils/cvFonts'
 
@@ -58,6 +59,12 @@ export default function DirectEditPreview({
         classicNameAlignment={classicNameAlignment}
         directEditDispatch={isSupported ? dispatchFormData : null}
         previewRef={previewRef}
+      />
+      <SectionEditOverlay
+        formData={formData}
+        dispatchFormData={dispatchFormData}
+        templateConfig={templateConfig}
+        locale={locale}
       />
     </div>
   )
