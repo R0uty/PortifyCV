@@ -4,6 +4,23 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: Creative is now editable, and clean on both standing CSS risks — 2026-09-19
+
+Creative is now editable in Direct Edit mode (Phase 2 Round 8, the third
+`railTable`-family template and the first of its right-rail templates),
+with the same scope every prior round has used: identity, About,
+Experience, and Skills are all inline-editable in the live preview.
+Creative's config claims `skillsLayout: 'categorized'`, but its actual
+Showcase deliberately flattens skills with no category labels (confirmed
+by reading the real file, not the config) — so this round reuses the
+plain `EditableChip` from Round 1, not the categorized component built
+for Compact/Executive. Creative is also the first `railTable` template
+confirmed clean on both of this family's standing CSS risks: no
+`text-transform` on any field this round wires, and — unlike Executive
+and Modern Orange — no positional CSS selector on its Experience entries
+at all (spacing is `flex; gap`-based, not divider-removal-based), so no
+proactive CSS fix was needed this round.
+
 ## Fix Executive's Experience divider — the same EditableList/dnd-kit bug Modern Orange just hit, already shipped — 2026-09-19
 
 Round 6 (Executive)'s own Experience-divider fix, already shipped and
