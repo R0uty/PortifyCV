@@ -4,6 +4,26 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: every section on every template is now editable — 2026-09-19
+
+Direct Edit gains a section editor: hovering any section in the live
+preview reveals a pencil, and clicking it opens a popup with every field
+that section holds — including fields a template never displays (the
+`tagline`, an education `location`), which no amount of inline wiring
+could reach. It works on all 18 templates with no per-template code,
+because it hangs off the `data-export-section`/`data-export-header`
+attributes every template already carried for the PDF exporter. Sections
+can be reordered within their column and hidden from the same popup, and
+entries can be added, duplicated, removed, reordered and individually
+hidden. Because the popup uses real form inputs rather than
+`contentEditable`, it is structurally immune to the three bug classes the
+inline rollout kept hitting — `text-transform` corrupting saved text,
+multi-line descriptions collapsing, and `EditableList`'s wrapper breaking
+positional CSS. It also fixes a bug parked since Phase 1: entries hidden
+in Classic mode are now listed in the popup with an explicit visibility
+toggle instead of silently reappearing. The "Direct Edit isn't available
+yet for this template" notice is gone, because it is no longer true.
+
 ## Direct Edit: Creative is now editable, and clean on both standing CSS risks — 2026-09-19
 
 Creative is now editable in Direct Edit mode (Phase 2 Round 8, the third

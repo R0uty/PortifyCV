@@ -1,5 +1,15 @@
 # Direct Edit builder — Phase 2 rollout roadmap
 
+**Status update (2026-09-19):** the per-template inline rollout this doc
+plans is no longer the critical path for editability — the universal
+popup section editor (spec:
+`docs/superpowers/specs/2026-09-19-direct-edit-universal-sections-design.md`)
+reaches every field on all 18 templates with zero per-template code.
+This doc's plan and its per-template inline wiring remain a valid
+incremental enhancement (inline editing feels lighter-weight than a
+popup for the fields it covers), but nothing here is required for a
+template to be fully editable.
+
 **Status:** planning. Phase 1 (spec:
 `docs/superpowers/specs/2026-09-13-direct-edit-builder-design.md`, plan:
 `docs/superpowers/plans/2026-09-13-direct-edit-builder-phase1.md`) shipped
@@ -87,14 +97,26 @@ first pass of this roadmap got the right problem but the wrong fix):**
 
 The final whole-branch review's Critical #1 (every skill rendered twice)
 was specifically a `skillsLayout: 'flat'` bug. Templates using
-`skillsLayout: 'categorized'` (Creative, Tech Executive, Developer,
-Quadrant, Executive) render skills grouped under category headings via
+`skillsLayout: 'categorized'` (Tech Executive, Developer, Quadrant,
+Executive) render skills grouped under category headings via
 `parseSkillCategories` — a completely different code shape with no
-`EditableChip` wiring at all yet. The *first* categorized-layout template
-in the rollout needs a categorized-aware chip treatment designed
-deliberately (not a copy-paste of `EditableChip`, which assumes a flat
-list) — budget real design time for it, don't treat it as "the same as
-Skills, just reskinned."
+`EditableChip` wiring at all yet. (Creative's config also says
+`'categorized'`, but Round 8 confirmed its Showcase actually renders
+skills flat — see the lesson below; it does not belong in this list.
+**Tech Executive stays in this list on the strength of its config value
+alone — its actual rendering has not been independently confirmed and
+must be read from `TechExecutiveShowcase.jsx` before planning any round
+that touches it, not assumed from this doc or from `skillsLayout`.**)
+The *first* categorized-layout template in the rollout needs a
+categorized-aware chip treatment designed deliberately (not a copy-paste
+of `EditableChip`, which assumes a flat list) — budget real design time
+for it, don't treat it as "the same as Skills, just reskinned."
+
+A template's `skillsLayout` config value has now been proven wrong in
+BOTH directions: Compact's config said `'flat'` while its Showcase
+rendered categorized, and Creative's said `'categorized'` while its
+Showcase renders flat. The config value predicts nothing about a bespoke
+Showcase — always read the actual Showcase file before planning a round.
 
 Round 4's final whole-branch review found a second standing risk, of the
 same "will recur unless checked proactively" shape: `EditableField`

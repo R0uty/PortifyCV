@@ -15,6 +15,19 @@ async function selectTemplate(page, label) {
 // hardcode a count that would silently go stale if the seed data changes.
 const DEMO_SKILLS = ['Product Strategy', 'Design Systems', 'User Research', 'Figma', 'Accessibility', 'Prototyping']
 
+// Lifted to file scope (was a local closure inside the "PDF export
+// succeeds..." test) so the export-safety test below can share it too.
+// Behaviour is unchanged — `page` is now a parameter instead of a closed-
+// over variable.
+async function exportPdfAndExpectSuccess(page) {
+  await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('menuitem', { name: 'PDF' }).click()
+  const download = await downloadPromise
+  expect(download.suggestedFilename()).toMatch(/\.pdf$/)
+  await expect(page.getByRole('alert')).toHaveCount(0)
+}
+
 test.describe('Direct Edit builder', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/cv')
@@ -338,17 +351,8 @@ test.describe('Direct Edit builder', () => {
   test('PDF export succeeds in Direct Edit mode with ATS mode off and on', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
-    async function exportPdfAndExpectSuccess() {
-      await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
-      const downloadPromise = page.waitForEvent('download')
-      await page.getByRole('menuitem', { name: 'PDF' }).click()
-      const download = await downloadPromise
-      expect(download.suggestedFilename()).toMatch(/\.pdf$/)
-      await expect(page.getByRole('alert')).toHaveCount(0)
-    }
-
     // ATS mode off (the default).
-    await exportPdfAndExpectSuccess()
+    await exportPdfAndExpectSuccess(page)
 
     // Settings is reachable on desktop specifically in Direct Edit mode
     // thanks to Fix 5 — toggle ATS mode on from there. Click the
@@ -363,7 +367,31 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('button', { name: 'Close' }).click()
 
     // ATS mode on — this is the case Fix 2 repairs.
-    await exportPdfAndExpectSuccess()
+    await exportPdfAndExpectSuccess(page)
+  })
+
+  // Regression guard: the Direct Edit overlay (pencil + popup) is rendered
+  // in a portal outside the element `previewRef` points at (the export
+  // root html2canvas snapshots), specifically so it can never be captured
+  // into a PDF. This test proves that structurally, then proves it live
+  // with a real export while a popup could plausibly be open.
+  test('the popup overlay never appears in an exported PDF', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await page.locator('[data-export-section="about"]').first().hover()
+    await expect(page.locator('.direct-edit-pencil')).toBeVisible()
+
+    // The overlay must live outside the element previewRef points at, or
+    // html2canvas captures the pencil and popup chrome into the PDF.
+    const overlayIsInsideExportRoot = await page.evaluate(() => {
+      const root = document.querySelector('[data-export-root="true"]')
+      const overlay = document.querySelector('.direct-edit-overlay-host')
+      return Boolean(root && overlay && root.contains(overlay))
+    })
+
+    expect(overlayIsInsideExportRoot).toBe(false)
+
+    await exportPdfAndExpectSuccess(page)
   })
 
   // Shared smoke-test shape for every Direct-Edit-supported template.
@@ -606,4 +634,61 @@ test.describe('Direct Edit builder', () => {
     runDirectEditDemoDataChecks(label, classPrefix, titleFieldSuffix, skillsSectionSelector, entrySelector)
     runDirectEditEmptyPlaceholderCheck(label, classPrefix, contactRowSuffix, labelOrder)
   }
+
+  // The popup is template-agnostic (it hangs off data-export-section /
+  // data-export-header, which every template already carries for the PDF
+  // exporter), so coverage inverts from one-test-per-template into one
+  // loop across every gallery entry. Labels are copied verbatim from the
+  // gallery's real labels in src/utils/cvTemplates.js (checked against
+  // every `label:` field there, not guessed) — all 18 templates carry
+  // 'experience' in their `primarySections`, so no substitution was
+  // needed for any row.
+  const ALL_TEMPLATE_LABELS = [
+    'Minimalist', 'Classic Professional', 'Editorial', 'Portrait', 'Modern Timeline',
+    'Compact', 'Executive', 'Modern Orange', 'Creative', 'Modern Professional',
+    'Graduate', 'Portfolio Hybrid', 'Tech Executive', 'Colorful Compact',
+    'Developer', 'Navy Professional', 'Quadrant', 'European',
+  ]
+
+  for (const label of ALL_TEMPLATE_LABELS) {
+    test(`${label}: a section pencil opens a working popup editor`, async ({ page }) => {
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
+      await selectTemplate(page, label)
+
+      const section = page.locator('[data-export-section="experience"]').first()
+      await expect(section).toBeVisible()
+
+      await section.hover()
+      await page.locator('.direct-edit-pencil').click()
+
+      const popup = page.locator('.direct-edit-popup')
+      await expect(popup).toBeVisible()
+
+      const roleInput = popup.locator('input[data-field="role"]').first()
+      await roleInput.fill(`${label} popup role`)
+      await expect(section).toContainText(`${label} popup role`)
+    })
+  }
+})
+
+test.describe('Direct Edit popup on an empty CV', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/cv')
+  })
+
+  test('a section with no entries can still be edited and given its first entry', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const section = page.locator('[data-export-section="experience"]').first()
+    await expect(section).toBeVisible()
+
+    await section.hover()
+    await page.locator('.direct-edit-pencil').click()
+
+    const popup = page.locator('.direct-edit-popup')
+    await popup.locator('.direct-edit-popup__add').click()
+    await popup.locator('input[data-field="role"]').first().fill('First ever role')
+
+    await expect(section).toContainText('First ever role')
+  })
 })
