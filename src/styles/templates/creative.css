@@ -327,6 +327,15 @@
   color: var(--tpl-accent);
 }
 
+.creative-showcase__exp-desc--editing {
+  white-space: pre-line;
+  display: block;
+  padding-left: 0;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--cr-ink-muted);
+}
+
 /* ── Projects (plain-border cards, soft accent tag pills) ── */
 
 .creative-showcase__project-grid {
