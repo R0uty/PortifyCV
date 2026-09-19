@@ -25,9 +25,12 @@ These were settled during brainstorming and are binding for the plan.
 
 1. **Hybrid editing, not replacement.** Inline `contentEditable` editing
    stays exactly as shipped on the 9 wired templates. The popup is added
-   as the *complete* editor for every section — including fields a
-   template never displays. Inline serves quick typo fixes; the popup
-   serves complete record editing.
+   as the editor for every section's scalar fields — including fields a
+   template never displays. Array sub-fields (`experience.achievements`,
+   `experience.technologies`, `projects.image`) are intentionally out of
+   scope for Phase A and need their own sub-editor in a later phase.
+   Inline serves quick typo fixes; the popup serves complete record
+   editing of everything it covers.
 2. **Hover-revealed pencils, two levels.** A section shows a pencil on
    hover; the pencil is its own hit target, so it never competes with an
    inline click on the text. Entry-level pencils are Phase B (below).
@@ -108,14 +111,27 @@ during PDF export.
 
 ### `src/components/SectionEditorPopup.jsx` (new)
 
-The popup editor. Anchors beside its section and flips side when it would
-cover the content being edited. Renders inputs from the schema and reads
+The popup editor. Anchors beside its section; the anchor position is
+clamped to stay inside the preview container (so it can't open with its
+bottom below the fold or its left edge off-screen), and the popup calls
+`scrollIntoView({ block: 'nearest' })` on open. That is a cheap
+mitigation, not true side-flipping — flipping to whichever side actually
+has room is deferred to Phase B. Renders inputs from the schema and reads
 `formData[sectionKey]` **directly** — never from the DOM, never from
 `snapshot`.
 
 Uses real `<input>`/`<textarea>` elements, not `contentEditable`.
 
 Dismissal: Escape, click-outside, or an explicit Done button.
+
+**Known gap — keyboard accessibility.** The pencil reveals only on
+`pointerover`, so the popup editor is not keyboard-reachable at all, and
+the popup itself has no focus trap and no `aria-modal`. This matches the
+pre-existing state of the inline `contentEditable` editing layer (already
+a documented Phase 3 item there) — this project does not regress
+anything, but the gap is real and needs writing down rather than left
+silent. Fixing it (a keyboard-triggerable pencil, focus trap, `aria-modal`
+on the popup) is Phase B work, alongside side-flipping above.
 
 ### `src/utils/sectionSchema.js` (new)
 
@@ -316,6 +332,14 @@ yet" notice, and both test layers.
 
 ### Phase B — later, optional
 
+- True side-flipping for the popup (open on whichever side actually has
+  room), replacing the clamp-and-scroll mitigation Phase A ships with.
+- Keyboard accessibility for the popup editor: a keyboard-triggerable
+  pencil (today it only reveals on `pointerover`), a focus trap, and
+  `aria-modal` on the popup.
+- A sub-editor for array fields the popup currently excludes
+  (`experience.achievements`, `experience.technologies`,
+  `projects.image`).
 - Per-entry pencils: add `data-direct-edit-index={index}` alongside the
   existing `data-export-card` in each template (mechanical, ~1 line × 17
   files) so hovering one job opens the popup focused on that entry.

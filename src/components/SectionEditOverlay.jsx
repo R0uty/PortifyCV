@@ -31,8 +31,10 @@ export default function SectionEditOverlay({
   locale,
 }) {
   const containerRef = useRef(null)
+  const popupAnchorRef = useRef(null)
   const [hovered, setHovered] = useState(null)
   const [openSectionKey, setOpenSectionKey] = useState(null)
+  const [popupPosition, setPopupPosition] = useState(null)
 
   // Measured in container coordinates (sectionRect - containerRect), not
   // viewport coordinates: the overlay and the preview scroll together, so
@@ -131,12 +133,20 @@ export default function SectionEditOverlay({
 
   // Content reflows as the user types, so re-measure the active section
   // after every formData change to keep the pencil attached to it.
+  //
+  // The lookup must go through the HOST's parent, not the host itself:
+  // containerRef points at .direct-edit-overlay-host, which only ever
+  // contains the pencil and popup anchor, never a [data-export-section] —
+  // the same reason the pointer listeners above are attached to
+  // parentElement (.direct-edit-preview) rather than the host.
+  // querySelector on the host itself always returns null here, silently
+  // turning this whole effect into a no-op.
   useLayoutEffect(() => {
     if (!hovered) {
       return
     }
 
-    const container = containerRef.current
+    const container = containerRef.current?.parentElement
     const selector =
       hovered.sectionKey === 'identity'
         ? '[data-export-header]'
@@ -144,7 +154,7 @@ export default function SectionEditOverlay({
     const element = container?.querySelector(selector)
     const next = measure(element, hovered.sectionKey)
 
-    if (next && (next.top !== hovered.top || next.right !== hovered.right)) {
+    if (next && (next.top !== hovered.top || next.left !== hovered.left || next.right !== hovered.right)) {
       setHovered(next)
     }
   }, [formData, hovered, measure])
@@ -153,6 +163,56 @@ export default function SectionEditOverlay({
     setOpenSectionKey(null)
     setHovered(null)
   }, [])
+
+  // Clamp the popup so it stays inside the container instead of opening
+  // off-screen: a section low in a long CV would otherwise anchor a
+  // popup (up to 70vh tall) entirely below the fold, and a narrow
+  // left-sidebar section can push `left` negative. This is the cheap
+  // mitigation — clamping, not side-flipping. True side-flipping (opening
+  // on whichever side actually has room) is deferred to a later phase.
+  //
+  // `top` is a plain CSS value here (no transform), so it clamps
+  // directly. `left` is the anchor's CSS "left", which the stylesheet
+  // shifts by translate(-100%, 0) to make it the popup's *right* edge —
+  // so clamping the popup's visual left edge to >= 0 means clamping this
+  // value to >= the popup's own measured width, not to >= 0.
+  useLayoutEffect(() => {
+    // No reset-to-null branch here: popupPosition is only read from the
+    // render below while `openSectionKey && hovered` is true, so a stale
+    // value while closed is harmless, and this effect recomputes a fresh
+    // one as soon as a popup opens again.
+    if (!openSectionKey || !hovered) {
+      return
+    }
+
+    const container = containerRef.current
+    const anchor = popupAnchorRef.current
+
+    if (!container || !anchor) {
+      return
+    }
+
+    const containerHeight = container.clientHeight
+    const popupWidth = anchor.offsetWidth
+    const popupHeight = anchor.offsetHeight
+
+    const top = Math.max(0, Math.min(hovered.top, containerHeight - popupHeight))
+    const left = Math.max(hovered.right, popupWidth)
+
+    setPopupPosition((prev) => (prev && prev.top === top && prev.left === left ? prev : { top, left }))
+  }, [openSectionKey, hovered])
+
+  // Bring the popup fully into view once it opens (e.g. a section near
+  // the bottom of a long, scrollable preview) — complements the clamp
+  // above, which only keeps it inside the container's own bounds.
+  useEffect(() => {
+    if (!openSectionKey) {
+      return
+    }
+
+    const popupEl = popupAnchorRef.current?.querySelector('.direct-edit-popup')
+    popupEl?.scrollIntoView({ block: 'nearest' })
+  }, [openSectionKey])
 
   return (
     <div ref={containerRef} className="direct-edit-overlay-host">
@@ -171,8 +231,12 @@ export default function SectionEditOverlay({
 
       {openSectionKey && hovered ? (
         <div
+          ref={popupAnchorRef}
           className="direct-edit-popup-anchor"
-          style={{ top: `${hovered.top}px`, left: `${hovered.right}px` }}
+          style={{
+            top: `${popupPosition ? popupPosition.top : hovered.top}px`,
+            left: `${popupPosition ? popupPosition.left : hovered.right}px`,
+          }}
         >
           <SectionEditorPopup
             sectionKey={openSectionKey}

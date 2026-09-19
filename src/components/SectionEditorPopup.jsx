@@ -11,9 +11,13 @@ import { isPhotoVisibleForTemplate, normalizeSectionOrder } from '../utils/cvFor
 
 function FieldInput({ field, value, isFinnish, onChange }) {
   const label = isFinnish ? field.labelFi : field.labelEn
+  // No <label htmlFor> or anything else references these ids (labels wrap
+  // their inputs instead), and a record-array section renders one
+  // FieldInput per entry, so a stable id-per-field would duplicate across
+  // entries — invalid HTML. Leave data-field (used by tests and geometry
+  // lookups) as the only identifier.
   const shared = {
     'data-field': field.key,
-    id: `direct-edit-field-${field.key}`,
     className: 'direct-edit-popup__input',
   }
 
@@ -44,7 +48,16 @@ function FieldInput({ field, value, isFinnish, onChange }) {
       ) : (
         <input
           {...shared}
-          type={field.type === 'month' ? 'month' : field.type === 'url' ? 'url' : 'text'}
+          // Schema type "month" is a semantic marker, not an HTML input
+          // type: this app stores dates as free text ("Jan 2022", "2014"),
+          // never ISO YYYY-MM, and <input type="month"> rejects any value
+          // that isn't that exact shape — it would render empty for every
+          // real CV and silently rewrite the field to ISO on first edit.
+          // Render it as text with the same placeholder Classic mode uses
+          // (CVForm.jsx's date inputs) instead. Do not "fix" this back to
+          // type="month" without also changing how dates are stored.
+          type={field.type === 'url' ? 'url' : 'text'}
+          placeholder={field.type === 'month' ? (isFinnish ? 'esim. tammikuu 2022' : 'e.g. Jan 2022') : undefined}
           value={value ?? ''}
           onChange={(event) => onChange(event.target.value)}
         />
@@ -259,21 +272,55 @@ export default function SectionEditorPopup({
     )
   }
 
-  const renderLinkMap = () => (
-    <>
-      {schema.fields.map((field) => (
-        <FieldInput
-          key={field.key}
-          field={field}
-          value={formData.links?.[field.key]}
-          isFinnish={isFinnish}
-          onChange={(value) =>
-            dispatchFormData({ type: FORM_ACTION.SET_LINK_FIELD, field: field.key, value })
-          }
-        />
-      ))}
-    </>
-  )
+  const renderLinkMap = () => {
+    // links has genuine per-key visibility (Classic dispatches
+    // TOGGLE_SECTION_ITEM_VISIBILITY keyed by link key, and
+    // createCvSnapshot filters on it — see cvSnapshot.js) that
+    // renderRecordArray already exposes for array sections. Mirror the
+    // same Hide/Show control here, keyed by field.key instead of an
+    // array index, so a link hidden in Classic doesn't look editable
+    // (and re-typeable, with no visible effect) in the popup.
+    const itemVisibility = formData.sectionItemVisibility?.links ?? {}
+
+    return (
+      <>
+        {schema.fields.map((field) => {
+          const isHidden = itemVisibility[field.key] === false
+
+          return (
+            <div
+              key={field.key}
+              className={`direct-edit-popup__entry${isHidden ? ' direct-edit-popup__entry--hidden' : ''}`}
+            >
+              <div className="direct-edit-popup__entry-bar">
+                <button
+                  type="button"
+                  className="direct-edit-popup__entry-visibility"
+                  onClick={() =>
+                    dispatchFormData({
+                      type: FORM_ACTION.TOGGLE_SECTION_ITEM_VISIBILITY,
+                      section: 'links',
+                      itemKey: field.key,
+                    })
+                  }
+                >
+                  {isHidden ? (isFinnish ? 'Näytä' : 'Show') : (isFinnish ? 'Piilota' : 'Hide')}
+                </button>
+              </div>
+              <FieldInput
+                field={field}
+                value={formData.links?.[field.key]}
+                isFinnish={isFinnish}
+                onChange={(value) =>
+                  dispatchFormData({ type: FORM_ACTION.SET_LINK_FIELD, field: field.key, value })
+                }
+              />
+            </div>
+          )
+        })}
+      </>
+    )
+  }
 
   const renderStringArray = () => {
     const items = Array.isArray(formData[sectionKey]) ? formData[sectionKey] : []

@@ -125,6 +125,35 @@ test.describe('Direct Edit builder', () => {
     await expect(firstEntry).not.toHaveClass(/direct-edit-popup__entry--hidden/)
   })
 
+  test('the experience popup shows the real stored date text, not a blank month picker', async ({ page }) => {
+    // Regression test for a Critical bug: schema type "month" used to be
+    // rendered as <input type="month">, which only accepts YYYY-MM and
+    // silently renders empty for the free-text dates this app actually
+    // stores ("Jan 2022", "2014", ...) — see sectionSchema.js's `month`
+    // helper and the demo CV's seed data in cvForm.js. The existing
+    // all-template popup loop only ever fills the `role` field, so it
+    // never caught this; assert the date input directly against the
+    // demo CV's known seed value instead of assuming a shape for it.
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await page.locator('[data-export-section="experience"]').first().hover()
+    await page.locator('.direct-edit-pencil').click()
+
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+
+    const startDateInput = popup.locator('.direct-edit-popup__entry').first().locator('input[data-field="startDate"]')
+    await expect(startDateInput).toHaveValue('Jan 2022')
+
+    // Editing it round-trips back to Classic mode as plain text, not an
+    // ISO YYYY-MM value.
+    await startDateInput.fill('Mar 2020')
+    await page.keyboard.press('Escape')
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await expect(page.getByPlaceholder('e.g. Jan 2022').first()).toHaveValue('Mar 2020')
+  })
+
   test('the popup edits header fields including tagline, which no template wires inline', async ({ page }) => {
     // Creative is the only Direct-Edit-supported template that renders
     // `tagline` at all, and even there it is a plain read-only <p> off

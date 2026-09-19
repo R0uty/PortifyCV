@@ -7,10 +7,15 @@ notes for each item live in `todo.md`; per-commit detail is in git history.
 ## Direct Edit: every section on every template is now editable — 2026-09-19
 
 Direct Edit gains a section editor: hovering any section in the live
-preview reveals a pencil, and clicking it opens a popup with every field
-that section holds — including fields a template never displays (the
-`tagline`, an education `location`), which no amount of inline wiring
-could reach. It works on all 18 templates with no per-template code,
+preview reveals a pencil, and clicking it opens a popup with every scalar
+field that section holds — including fields a template never displays
+(the `tagline`, an education `location`), which no amount of inline
+wiring could reach. Array fields that hold their own sub-structure
+(`experience.achievements`, `experience.technologies`,
+`projects.image`) are intentionally excluded for now — a later-phase
+sub-editor is needed for those, since an entry created from the popup
+currently can't get bullets. It works on all 18 templates with no
+per-template code,
 because it hangs off the `data-export-section`/`data-export-header`
 attributes every template already carried for the PDF exporter. Sections
 can be reordered within their column and hidden from the same popup, and
