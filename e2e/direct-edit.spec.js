@@ -65,6 +65,53 @@ test.describe('Direct Edit builder', () => {
     await expect(popup).toHaveCount(0)
   })
 
+  test('the popup edits an experience entry and lists hidden entries with a visibility toggle', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await page.locator('[data-export-section="experience"]').first().hover()
+    await page.locator('.direct-edit-pencil').click()
+
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+
+    // Every entry is listed, including any hidden via sectionItemVisibility.
+    const entries = popup.locator('.direct-edit-popup__entry')
+    await expect(entries.first()).toBeVisible()
+
+    const roleInput = entries.first().locator('input[data-field="role"]')
+    await roleInput.fill('Popup Edited Role')
+
+    // The live preview behind the popup reflects the edit immediately.
+    await expect(
+      page.locator('[data-export-section="experience"]').first(),
+    ).toContainText('Popup Edited Role')
+
+    // Adding an entry appends one row.
+    const countBefore = await entries.count()
+    await popup.locator('.direct-edit-popup__add').click()
+    await expect(entries).toHaveCount(countBefore + 1)
+
+    // Hiding an entry KEEPS it listed in the popup, marked hidden. That
+    // is the fix for the bug parked since Phase 1: a Classic-hidden entry
+    // used to reappear as editable in Direct Edit with no way to see or
+    // change its hidden state.
+    //
+    // Deliberately NOT asserted here: that the entry vanishes from the
+    // preview. On inline-wired templates EditableList renders raw
+    // formData (unfiltered by sectionItemVisibility) by design, so in
+    // Direct Edit the entry stays visible — a documented, accepted
+    // trade-off since Phase 1 that this task does not change. Asserting
+    // otherwise would encode a false expectation and fail.
+    const firstEntry = entries.first()
+    await firstEntry.locator('.direct-edit-popup__entry-visibility').click()
+    await expect(firstEntry).toHaveClass(/direct-edit-popup__entry--hidden/)
+    await expect(entries).toHaveCount(countBefore + 1)
+
+    // And it round-trips back to visible.
+    await firstEntry.locator('.direct-edit-popup__entry-visibility').click()
+    await expect(firstEntry).not.toHaveClass(/direct-edit-popup__entry--hidden/)
+  })
+
   test('adding an experience entry in Direct Edit mode adds one to the form', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
     const before = await page.locator('.direct-edit-preview .direct-edit-entry').count()
