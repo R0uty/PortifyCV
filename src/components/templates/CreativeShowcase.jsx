@@ -30,6 +30,7 @@ import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTempla
 import { parseSkillCategories, formatDateRange, formatLinkDisplayValue } from './shared'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { CREATIVE_DEFAULT_ACCENT_COLOR } from './creative'
+import EditableField from '../EditableField'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -62,6 +63,7 @@ export default function CreativeShowcase({
   templateConfig,
   headingColor = null,
   accentColor = CREATIVE_DEFAULT_ACCENT_COLOR,
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -84,6 +86,11 @@ export default function CreativeShowcase({
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
   // Flattened, not grouped by category — the "Toolkit" pill row has no
@@ -131,7 +138,21 @@ export default function CreativeShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about" placement="main" number={sectionNumber(key)} title={copy.about}>
-          <p className="creative-showcase__intro">{about}</p>
+          <p className="creative-showcase__intro">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
           {snapshot.coreStrengths.length > 0 ? (
             <div className="creative-showcase__pill-row">
               {snapshot.coreStrengths.slice(0, 3).map((item, index) => (
@@ -389,13 +410,40 @@ export default function CreativeShowcase({
           <p className="creative-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="creative-showcase__name">{fullName}</h1>
-          <p className="creative-showcase__role">{title}</p>
+          <h1 className="creative-showcase__name">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : fullName}
+          </h1>
+          <p className="creative-showcase__role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+          </p>
           {tagline ? <p className="creative-showcase__tagline">{tagline}</p> : null}
-          {personalContactItems.length > 0 ? (
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="creative-showcase__contact">
-              {personalContactItems.map(([key, value]) => (
-                <span key={key} className="creative-showcase__contact-item">{value}</span>
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
+                <span key={key} className="creative-showcase__contact-item">
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : value}
+                </span>
               ))}
             </div>
           ) : null}
