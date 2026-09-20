@@ -1962,3 +1962,137 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 - Responsive layout is handled (breakpoints at 1023 / 860 / 560px).
 - The builder's three-pane layout, live preview, and zoom controls read well.
+
+## Next session — handoff, 2026-09-20
+
+**State:** the Direct Edit universal section editor shipped as v1.2.47 and is
+pushed to `origin/v1.3.0` at `a1b9527`. Working tree clean, full suite green
+(98/98 e2e, lint, build, `check:reducers`, `check:share`, `check:direct-edit`,
+`check:section-schema`). `main` untouched, no PR — same as the whole branch.
+
+Source of truth for what shipped and why:
+`docs/superpowers/specs/2026-09-19-direct-edit-universal-sections-design.md`
+(design + known gaps) and `docs/superpowers/plans/2026-09-19-direct-edit-universal-sections.md`
+(the 8-task plan as executed). Read the spec's "Known gap" notes before
+planning anything in this area.
+
+### START HERE — profile photo upload in Direct Edit (designed, NOT approved, NOT built)
+
+- [ ] **55. You cannot add a profile photo in Direct Edit.** The header popup
+      (`renderRootGroup` in `src/components/SectionEditorPopup.jsx`) renders a
+      photo *visibility* checkbox only when `formData.photo` already exists —
+      so on a CV with no photo there is no control at all, and the only way to
+      add one is to switch to Classic mode. The design below was worked out and
+      presented on 2026-09-19 but **was not approved and not implemented** —
+      confirm the user still wants it before building, then implement it
+      directly (it is a bounded change; it does not need an implementation-plan
+      document).
+
+      **Scope decision already made by the user:** profile photo only. Project
+      images (`projects.image`) stay out — they remain in
+      `INTENTIONALLY_EXCLUDED` in `scripts/check-section-schema.mjs`.
+
+      **1. Extract the upload helper.** `buildProfilePhotoDataUrl` lives as a
+      local function in `src/components/CVForm.jsx:63`, together with
+      `localizePhotoErrorMessage` (`:98`), the private helpers
+      `readFileAsDataUrl` (`:45`) / `loadImageElement` (`:54`), and the
+      constants `MAX_PROFILE_PHOTO_SIZE_BYTES` / `MAX_PROFILE_PHOTO_EDGE_PX` /
+      `MAX_PROFILE_PHOTO_DATA_URL_LENGTH` (`:41-43`). Move all of it to a new
+      `src/utils/profilePhoto.js`; have `CVForm.jsx` import from there and
+      delete its local copies. This is a behaviour-neutral refactor — Classic
+      uses the same function for both the profile photo and project images, so
+      both keep working. Extract rather than duplicate: the function does MIME
+      validation, a 2MB check, a canvas resize to 480px, a JPEG re-encode *and*
+      a post-encode 450KB ceiling, and a second copy would drift until the
+      popup accepted images Classic rejects.
+
+      **2. Add the control to `renderRootGroup`.** Always show a "Choose image"
+      / "Valitse kuva" button driving a hidden
+      `<input type="file" accept="image/png,image/jpeg,image/jpg">`, plus the
+      same "JPG or PNG, up to 2MB" hint Classic shows. When `formData.photo`
+      exists, additionally show a small preview, a "Remove image" button
+      (dispatching `SET_ROOT_FIELD` with `''`), and the existing visibility
+      checkbox — keep that one gated on a photo existing, since toggling
+      nothing is meaningless. Upload errors go through
+      `localizePhotoErrorMessage` into the popup's existing `notice` state (the
+      same state the skills editor already uses).
+
+      Dispatch is `SET_ROOT_FIELD { field: 'photo', value }` — the action every
+      other identity field already uses. **No new `cvFormReducer` action.**
+
+      **3. Known caveat, do not engineer around it.** A photo only appears on
+      templates that render one, and only when that template's visibility flag
+      is on, so on a photo-less template uploading will look like nothing
+      happened. Classic behaves identically. Keep the visibility checkbox next
+      to the upload control and leave it there.
+
+      **4. Testing.** Add an e2e test to `e2e/direct-edit.spec.js`: open the
+      header popup on a photo-rendering template, upload via `setInputFiles`
+      with an **in-memory PNG buffer** (`{name, mimeType, buffer}`) — no
+      fixture file is needed and `e2e/` has no fixtures directory today —
+      then assert both the popup preview and the rendered header `<img>`
+      appear. Also assert Classic's own upload still works after the
+      extraction. Note photo upload has never been e2e-tested at all;
+      `setInputFiles` appears nowhere in `e2e/` today.
+
+      **Files:** `src/utils/profilePhoto.js` (new), `src/components/CVForm.jsx`,
+      `src/components/SectionEditorPopup.jsx`,
+      `src/styles/direct-edit-popup.css`, `e2e/direct-edit.spec.js`.
+
+### Known gaps in the shipped editor — deliberately deferred, recorded in the spec
+
+- [ ] **56. Direct Edit is entirely keyboard-inaccessible.** The hover pencil
+      renders only in response to `pointerover`, so there is no way to reach
+      the popup editor by keyboard on any of the 18 templates, and the popup
+      itself has no focus trap and no `aria-modal`. This matches the
+      pre-existing inline `contentEditable` layer (a documented Phase 3 gap
+      there), so nothing regressed — but given the product aim ("the most
+      editable CV builder"), this is the most significant thing still missing.
+      A `focus-within`-triggered reveal, or a per-section visually-hidden
+      "Edit <section>" button, would close it without design cost.
+
+- [ ] **57. Array sub-fields are editable nowhere in Direct Edit.**
+      `experience.achievements` (the bullet list — most of a work entry's
+      substance), `experience.technologies` and `projects.image` are excluded
+      from the popup schema and are not inline-editable on any template either,
+      so an Experience entry created from the popup can never get bullets
+      without switching to Classic. Needs its own array sub-editor. The
+      exclusions are recorded deliberately in
+      `scripts/check-section-schema.mjs`'s `INTENTIONALLY_EXCLUDED`.
+
+- [ ] **58. Entry-level pencils (hover one job, not the whole section).**
+      Would need a `data-direct-edit-index={index}` attribute added next to the
+      existing `data-export-card` in each of the 17 Showcase files —
+      mechanical, ~1 line each. Deliberately deferred as Phase B; the
+      section-level pencil already covers full editability.
+
+- [ ] **59. Popup side-flipping.** The popup clamps its position inside the
+      preview container and calls `scrollIntoView({ block: 'nearest' })`, but
+      does not flip to whichever side actually has room. The spec was corrected
+      to describe what ships rather than the flip it originally promised.
+
+- [ ] **60. Sections cannot move between columns.** Column placement comes from
+      `templateConfig.primarySections`/`secondarySections` (template config,
+      not user data), so moving Skills from a sidebar into the main column
+      would need per-template override state plus changes to all 17 Showcase
+      files. Reordering *within* a column works.
+
+### Conventions for whoever picks this up
+
+- Commits carry **only** `r0uty <yasa.sheva@gmail.com>` — never an AI/Claude
+  co-authorship trailer, and never mention AI in the message.
+- Bump `package.json`'s patch version once per unit of work, in its own
+  standalone commit.
+- This branch pushes straight to `origin/v1.3.0` — no PR, no merge to `main`,
+  because the Direct Edit feature branch is still mid-development. Confirm with
+  the user before pushing anyway.
+- Full verification before calling anything done: `npm run lint`,
+  `check:reducers`, `check:share`, `check:direct-edit`, `check:section-schema`,
+  `npm run build`, `npm run test:e2e`.
+- There is a known pre-existing flake in `'the footer never overlaps the CV
+  preview in Direct Edit mode'` that appears only under parallel workers —
+  re-run it with `--workers=1` to confirm, don't treat it as a regression, and
+  don't paper over any *other* failure.
+- The per-template inline rollout (`docs/superpowers/specs/2026-09-14-direct-edit-phase2-rollout.md`)
+  is **no longer the path to editability** — the popup covers all 18 templates.
+  Those remaining rounds are optional polish now.
