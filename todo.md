@@ -1976,17 +1976,24 @@ Source of truth for what shipped and why:
 (the 8-task plan as executed). Read the spec's "Known gap" notes before
 planning anything in this area.
 
-### START HERE — profile photo upload in Direct Edit (designed, NOT approved, NOT built)
+### DONE — profile photo upload in Direct Edit (shipped 2026-09-21, v1.2.48)
 
-- [ ] **55. You cannot add a profile photo in Direct Edit.** The header popup
+- [x] **55. You cannot add a profile photo in Direct Edit.** DONE 2026-09-21
+      (v1.2.48). Shipped as designed below: `src/utils/profilePhoto.js`
+      extracted and shared with Classic, always-present "Choose image" plus
+      preview/remove in `renderRootGroup`, visibility checkbox still gated on
+      a photo existing, errors into the popup's `notice`, no new reducer
+      action, `projects.image` still excluded. Two new e2e tests in
+      `e2e/direct-edit.spec.js` (popup upload/preview/remove, and a Classic
+      upload guard for the extraction) — 100/100 green.
+
+      The original design follows, kept as the record of what was built and why.
+
+      **The problem it fixed.** The header popup
       (`renderRootGroup` in `src/components/SectionEditorPopup.jsx`) renders a
       photo *visibility* checkbox only when `formData.photo` already exists —
       so on a CV with no photo there is no control at all, and the only way to
-      add one is to switch to Classic mode. The design below was worked out and
-      presented on 2026-09-19 but **was not approved and not implemented** —
-      confirm the user still wants it before building, then implement it
-      directly (it is a bounded change; it does not need an implementation-plan
-      document).
+      add one was to switch to Classic mode.
 
       **Scope decision already made by the user:** profile photo only. Project
       images (`projects.image`) stay out — they remain in

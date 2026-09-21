@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SECTION_SHAPE, getSectionSchema, getColumnNeighbourSection } from '../utils/sectionSchema'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 import { isPhotoVisibleForTemplate, normalizeSectionOrder } from '../utils/cvForm'
+import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/profilePhoto'
 
 // The popup editor for one section. Renders real <input>/<textarea>
 // elements and reads formData directly — never the DOM and never
@@ -78,6 +79,7 @@ export default function SectionEditorPopup({
   const schema = getSectionSchema(sectionKey)
   const [draftSkill, setDraftSkill] = useState('')
   const [notice, setNotice] = useState('')
+  const photoInputRef = useRef(null)
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -225,6 +227,32 @@ export default function SectionEditorPopup({
     )
   }
 
+  // Same pipeline Classic mode uses (src/utils/profilePhoto.js), so an
+  // image accepted here is accepted there and vice versa. Errors land in
+  // the popup's shared `notice` state rather than the app-level toast
+  // Classic uses, because the popup owns its own footer line already.
+  const handlePhotoUpload = async (event) => {
+    const [file] = event.target.files ?? []
+    event.target.value = ''
+
+    if (!file) {
+      return
+    }
+
+    setNotice('')
+
+    try {
+      const photoDataUrl = await buildProfilePhotoDataUrl(file)
+      dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'photo', value: photoDataUrl })
+    } catch (error) {
+      setNotice(
+        error instanceof Error
+          ? localizePhotoErrorMessage(error.message, locale)
+          : isFinnish ? 'Profiilikuvan lataus epäonnistui.' : 'Could not upload profile image.',
+      )
+    }
+  }
+
   const renderRootGroup = () => (
     <>
       {schema.fields.map((field) => (
@@ -238,22 +266,76 @@ export default function SectionEditorPopup({
           }
         />
       ))}
-      {formData.photo ? (
-        <label className="direct-edit-popup__field direct-edit-popup__field--inline">
-          <input
-            type="checkbox"
-            className="direct-edit-popup__input"
-            data-field="photoVisible"
-            checked={isPhotoVisibleForTemplate(formData.photoVisibilityByTemplate, templateConfig.id)}
-            onChange={() =>
-              dispatchFormData({ type: FORM_ACTION.TOGGLE_PHOTO_VISIBILITY, template: templateConfig.id })
-            }
-          />
-          <span className="direct-edit-popup__label">
-            {isFinnish ? 'Näytä valokuva' : 'Show photo'}
-          </span>
-        </label>
-      ) : null}
+      {/* Deliberately not a <label> wrapping the hidden file input (the
+          same reasoning as CVForm.jsx's profile block): a label would turn
+          every click on the hint text or the preview into a file dialog.
+          The upload button always renders — a photo-less CV used to get no
+          control here at all, forcing a trip to Classic mode. */}
+      <div className="direct-edit-popup__photo">
+        <span className="direct-edit-popup__label">
+          {isFinnish ? 'Profiilikuva' : 'Profile image'}
+        </span>
+        <input
+          ref={photoInputRef}
+          type="file"
+          className="direct-edit-popup__photo-input"
+          accept="image/png,image/jpeg,image/jpg"
+          aria-label={isFinnish ? 'Profiilikuva' : 'Profile image'}
+          onChange={handlePhotoUpload}
+        />
+        <button
+          type="button"
+          className="direct-edit-popup__photo-choose"
+          onClick={() => photoInputRef.current?.click()}
+        >
+          {isFinnish ? 'Valitse kuva' : 'Choose image'}
+        </button>
+        <p className="direct-edit-popup__photo-hint">
+          {isFinnish
+            ? 'JPG tai PNG, enintään 2 Mt.'
+            : 'JPG or PNG, up to 2MB.'}
+        </p>
+        {formData.photo ? (
+          <div className="direct-edit-popup__photo-row">
+            <img
+              src={formData.photo}
+              alt={isFinnish ? 'Profiilin esikatselu' : 'Profile preview'}
+              className="direct-edit-popup__photo-preview"
+            />
+            <button
+              type="button"
+              className="direct-edit-popup__photo-remove"
+              onClick={() => {
+                setNotice('')
+                dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'photo', value: '' })
+              }}
+            >
+              {isFinnish ? 'Poista kuva' : 'Remove image'}
+            </button>
+          </div>
+        ) : null}
+        {/* Gated on a photo existing: toggling the visibility of nothing is
+            meaningless. Kept beside the upload control on purpose — a
+            template that renders no photo, or one whose flag is off, will
+            look like the upload did nothing, exactly as Classic behaves. */}
+        {formData.photo ? (
+          <label className="direct-edit-popup__field direct-edit-popup__field--inline">
+            <input
+              type="checkbox"
+              className="direct-edit-popup__input"
+              data-field="photoVisible"
+              checked={isPhotoVisibleForTemplate(formData.photoVisibilityByTemplate, templateConfig.id)}
+              onChange={() =>
+                dispatchFormData({ type: FORM_ACTION.TOGGLE_PHOTO_VISIBILITY, template: templateConfig.id })
+              }
+            />
+            <span className="direct-edit-popup__label">
+              {isFinnish ? 'Näytä valokuva' : 'Show photo'}
+            </span>
+          </label>
+        ) : null}
+      </div>
+      {notice ? <p className="direct-edit-popup__notice">{notice}</p> : null}
     </>
   )
 

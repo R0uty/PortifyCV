@@ -15,6 +15,14 @@ async function selectTemplate(page, label) {
 // hardcode a count that would silently go stale if the seed data changes.
 const DEMO_SKILLS = ['Product Strategy', 'Design Systems', 'User Research', 'Figma', 'Accessibility', 'Prototyping']
 
+// A 1x1 PNG, inlined rather than committed as a fixture: e2e/ has no
+// fixtures directory, and buildProfilePhotoDataUrl only needs bytes the
+// browser can decode into an <img> before the canvas resize/re-encode.
+const PNG_1X1 = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64',
+)
+
 // Lifted to file scope (was a local closure inside the "PDF export
 // succeeds..." test) so the export-safety test below can share it too.
 // Behaviour is unchanged — `page` is now a parameter instead of a closed-
@@ -173,6 +181,54 @@ test.describe('Direct Edit builder', () => {
 
     await popup.locator('input[data-field="tagline"]').fill('Popup tagline')
     await expect(page.locator('[data-export-header]').first()).toContainText('Popup tagline')
+  })
+
+  test('the header popup uploads, previews and removes a profile photo on a CV that has none', async ({ page }) => {
+    // Portfolio Hybrid is a photo-rendering template (portfolio.js's
+    // `showPhoto: true`, and PortfolioShowcase.jsx renders the <img
+    // data-export-photo>), so the upload has somewhere visible to land.
+    // The demo CV ships with no `photo`, which is exactly the state that
+    // used to offer no control at all in Direct Edit.
+    await selectTemplate(page, 'Portfolio Hybrid')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await expect(page.locator('[data-export-photo]')).toHaveCount(0)
+
+    await page.locator('[data-export-header]').first().hover()
+    await page.locator('.direct-edit-pencil').click()
+
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+
+    // No fixture file: e2e/ has no fixtures directory, and Playwright
+    // accepts an in-memory buffer for setInputFiles.
+    await popup.locator('input[type="file"]').setInputFiles({
+      name: 'profile.png',
+      mimeType: 'image/png',
+      buffer: PNG_1X1,
+    })
+
+    await expect(popup.locator('.direct-edit-popup__photo-preview')).toBeVisible()
+    await expect(page.locator('[data-export-photo]').first()).toBeVisible()
+
+    await popup.locator('.direct-edit-popup__photo-remove').click()
+    await expect(popup.locator('.direct-edit-popup__photo-preview')).toHaveCount(0)
+    await expect(page.locator('[data-export-photo]')).toHaveCount(0)
+  })
+
+  test('Classic mode still uploads a profile photo', async ({ page }) => {
+    // Guards the extraction of buildProfilePhotoDataUrl out of CVForm.jsx
+    // into src/utils/profilePhoto.js: Classic and the Direct Edit popup
+    // share that one implementation, so this asserts the move stayed
+    // behaviour-neutral. Photo upload had no e2e coverage before.
+    await selectTemplate(page, 'Portfolio Hybrid')
+
+    await page
+      .getByLabel('Profile image (optional)')
+      .setInputFiles({ name: 'profile.png', mimeType: 'image/png', buffer: PNG_1X1 })
+
+    await expect(page.getByAltText('Profile preview')).toBeVisible()
+    await expect(page.locator('[data-export-photo]').first()).toBeVisible()
   })
 
   test('the popup adds, reorders and removes skills, and refuses duplicates', async ({ page }) => {

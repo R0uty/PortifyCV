@@ -4,6 +4,24 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: you can add a profile photo without leaving it — 2026-09-21
+
+The header popup used to render a photo *visibility* checkbox only when
+the CV already had a photo, so a photo-less CV got no control at all and
+the only way to add one was to switch back to Classic mode. The popup now
+always offers "Choose image", plus a preview and "Remove image" once a
+photo exists; the visibility checkbox stays gated on a photo existing,
+since toggling nothing is meaningless. The upload pipeline moved out of
+`CVForm.jsx` into `src/utils/profilePhoto.js` and is now shared rather
+than duplicated — MIME validation, the 2MB source check, the 480px canvas
+resize, the JPEG re-encode and the 450KB post-encode ceiling are one
+implementation, so the popup can never accept an image Classic rejects.
+No new reducer action: it dispatches the same `SET_ROOT_FIELD` every other
+identity field uses. Project images (`projects.image`) stay out of scope.
+A photo still only appears on templates that render one, with that
+template's visibility flag on — identical to Classic. Photo upload also
+gained its first e2e coverage, on both surfaces.
+
 ## Direct Edit: every section on every template is now editable — 2026-09-19
 
 Direct Edit gains a section editor: hovering any section in the live
