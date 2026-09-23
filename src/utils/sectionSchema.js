@@ -22,6 +22,19 @@ const area = (key, labelEn, labelFi) => ({ key, labelEn, labelFi, type: 'textare
 const month = (key, labelEn, labelFi) => ({ key, labelEn, labelFi, type: 'month' })
 const url = (key, labelEn, labelFi) => ({ key, labelEn, labelFi, type: 'url' })
 const check = (key, labelEn, labelFi) => ({ key, labelEn, labelFi, type: 'checkbox' })
+// A string[] living INSIDE a record-array entry (only experience has any:
+// achievements and technologies). Rendered as a small add/remove list
+// rather than one input, and written back through UPDATE_ARRAY_ITEM with
+// the whole next array - exactly what Classic's ReorderableListInput and
+// TagsInput already do for these same two fields.
+const list = (key, labelEn, labelFi, itemLabelEn, itemLabelFi) => ({
+  key,
+  labelEn,
+  labelFi,
+  type: 'list',
+  itemLabelEn,
+  itemLabelFi,
+})
 
 export const SECTION_SCHEMA = {
   // Synthetic section: the header block, which has no sectionOrder entry
@@ -93,6 +106,8 @@ export const SECTION_SCHEMA = {
       month('endDate', 'End date', 'Lopetuspäivä'),
       check('isCurrent', 'Current role', 'Nykyinen rooli'),
       area('description', 'Description', 'Kuvaus'),
+      list('achievements', 'Achievements', 'Saavutukset', 'Achievement', 'Saavutus'),
+      list('technologies', 'Technologies', 'Teknologiat', 'Technology', 'Teknologia'),
     ],
   },
 

@@ -34,6 +34,56 @@ function FieldInput({ field, value, isFinnish, onChange }) {
     className: 'direct-edit-popup__input',
   }
 
+  // A string[] sub-editor: one row per item plus an Add row. It writes
+  // the WHOLE next array through the caller's onChange, which in a record
+  // array lands as a normal UPDATE_ARRAY_ITEM - the same action and the
+  // same shape Classic's ReorderableListInput/TagsInput already produce
+  // for these two fields, so no new reducer action is needed.
+  if (field.type === 'list') {
+    const items = Array.isArray(value) ? value : []
+    const itemLabel = isFinnish ? field.itemLabelFi : field.itemLabelEn
+
+    return (
+      <div className="direct-edit-popup__field">
+        <span className="direct-edit-popup__label">{label}</span>
+        <div className="direct-edit-popup__list" data-field={field.key}>
+          {items.map((item, index) => (
+            // Keyed by index on purpose: these are plain strings with no
+            // stable identity, and keying by value would remount every
+            // row that shares text with another (and lose the caret while
+            // typing a duplicate).
+            <div className="direct-edit-popup__list-item" key={index}>
+              <input
+                type="text"
+                className="direct-edit-popup__input"
+                aria-label={`${itemLabel} ${index + 1}`}
+                value={item ?? ''}
+                onChange={(event) =>
+                  onChange(items.map((entry, i) => (i === index ? event.target.value : entry)))
+                }
+              />
+              <button
+                type="button"
+                className="direct-edit-popup__list-remove"
+                onClick={() => onChange(items.filter((_, i) => i !== index))}
+                aria-label={isFinnish ? `Poista: ${itemLabel} ${index + 1}` : `Remove ${itemLabel} ${index + 1}`}
+              >
+                &times;
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="direct-edit-popup__list-add"
+            onClick={() => onChange([...items, ''])}
+          >
+            {isFinnish ? `+ Lisää: ${itemLabel}` : `+ Add ${itemLabel.toLowerCase()}`}
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (field.type === 'checkbox') {
     return (
       <label className="direct-edit-popup__field direct-edit-popup__field--inline">

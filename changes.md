@@ -4,6 +4,25 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: Experience bullets and technologies are editable — 2026-09-23
+
+`experience.achievements` — the bullet list that carries most of a work
+entry's substance — and `experience.technologies` were editable nowhere
+in Direct Edit: excluded from the popup schema and not inline-editable on
+any template either, so an entry created from the popup could never get
+bullets without a trip to Classic mode. Both are now schema fields of a
+new `list` type, rendered as a small add/remove sub-editor inside the
+entry. They are the only two array-typed fields in the whole data model
+(`internships.technologies` and `caseStudies.technologies` are plain
+strings), so this closes the sub-field gap rather than chipping at it.
+The sub-editor writes the whole next array through the existing
+`UPDATE_ARRAY_ITEM` action — the same action and the same shape Classic's
+`ReorderableListInput`/`TagsInput` already produced for these two fields —
+so no new reducer action, and edits round-trip between the two modes.
+`check:section-schema` now validates the `list` type and its per-item
+labels; only `projects.image` remains intentionally excluded, by an
+explicit scope decision, since it is an image upload rather than an array.
+
 ## Direct Edit: the section editor is reachable by keyboard — 2026-09-23
 
 The hover pencil rendered only in response to `pointerover`, so there was

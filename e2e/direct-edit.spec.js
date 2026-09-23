@@ -183,6 +183,63 @@ test.describe('Direct Edit builder', () => {
     await expect(page.locator('[data-export-header]').first()).toContainText('Popup tagline')
   })
 
+  test('the popup lists, adds and removes experience achievements', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await page.locator('[data-export-section="experience"]').first().hover()
+    await page.locator('.direct-edit-pencil').click()
+
+    const popup = page.locator('.direct-edit-popup')
+    const firstEntry = popup.locator('.direct-edit-popup__entry').first()
+    const list = firstEntry.locator('.direct-edit-popup__list[data-field="achievements"]')
+
+    // achievements is the bullet list that carries most of a work entry's
+    // substance; until now it was editable nowhere in Direct Edit, so a
+    // popup-created entry could never get bullets without Classic mode.
+    await expect(list).toBeVisible()
+
+    // The demo entry's existing bullets are shown, not just an empty box.
+    const rows = list.locator('.direct-edit-popup__list-item')
+    const countBefore = await rows.count()
+    expect(countBefore).toBeGreaterThan(0)
+
+    await list.locator('.direct-edit-popup__list-add').click()
+    await expect(rows).toHaveCount(countBefore + 1)
+
+    await list.locator('input').last().fill('Cut build times by 40%')
+    await expect(
+      page.locator('[data-export-section="experience"]').first(),
+    ).toContainText('Cut build times by 40%')
+
+    await list.locator('.direct-edit-popup__list-remove').last().click()
+    await expect(rows).toHaveCount(countBefore)
+    await expect(
+      page.locator('[data-export-section="experience"]').first(),
+    ).not.toContainText('Cut build times by 40%')
+  })
+
+  test('a technology added in the popup reaches Classic mode', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await page.locator('[data-export-section="experience"]').first().hover()
+    await page.locator('.direct-edit-pencil').click()
+
+    const popup = page.locator('.direct-edit-popup')
+    const list = popup
+      .locator('.direct-edit-popup__entry')
+      .first()
+      .locator('.direct-edit-popup__list[data-field="technologies"]')
+
+    await list.locator('.direct-edit-popup__list-add').click()
+    await list.locator('input').last().fill('Rust')
+    await page.keyboard.press('Escape')
+
+    // Both surfaces write the same field through the same
+    // UPDATE_ARRAY_ITEM action, so Classic's TagsInput shows it.
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await expect(page.locator('.tags-input__tag', { hasText: 'Rust' }).first()).toBeVisible()
+  })
+
   test('the section popup is reachable and openable by keyboard alone', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 

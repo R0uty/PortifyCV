@@ -57,7 +57,9 @@ const FACTORY_BY_SECTION = {
 // decision: experience.achievements/technologies are nested arrays needing
 // their own sub-editor, and *.image is an upload, not a text field.
 const INTENTIONALLY_EXCLUDED = {
-  experience: ['achievements', 'technologies'],
+  // experience.achievements/technologies used to live here; they are now
+  // schema fields of type "list". projects.image stays out by an explicit
+  // scope decision - it is an image upload, not an array sub-field.
   projects: ['image'],
 }
 
@@ -89,11 +91,22 @@ for (const [section, entry] of Object.entries(SECTION_SCHEMA)) {
   for (const field of entry.fields) {
     check(typeof field.key === 'string' && field.key.length > 0, `section "${section}" has a field with no key`)
     check(
-      ['text', 'textarea', 'month', 'url', 'checkbox'].includes(field.type),
+      ['text', 'textarea', 'month', 'url', 'checkbox', 'list'].includes(field.type),
       `section "${section}" field "${field.key}" has unknown type "${field.type}"`,
     )
     check(typeof field.labelEn === 'string' && field.labelEn.length > 0, `section "${section}" field "${field.key}" missing labelEn`)
     check(typeof field.labelFi === 'string' && field.labelFi.length > 0, `section "${section}" field "${field.key}" missing labelFi`)
+
+    if (field.type === 'list') {
+      check(
+        typeof field.itemLabelEn === 'string' && field.itemLabelEn.length > 0,
+        `section "${section}" list field "${field.key}" missing itemLabelEn`,
+      )
+      check(
+        typeof field.itemLabelFi === 'string' && field.itemLabelFi.length > 0,
+        `section "${section}" list field "${field.key}" missing itemLabelFi`,
+      )
+    }
   }
 }
 

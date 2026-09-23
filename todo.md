@@ -2066,7 +2066,18 @@ planning anything in this area.
       A `focus-within`-triggered reveal, or a per-section visually-hidden
       "Edit <section>" button, would close it without design cost.
 
-- [ ] **57. Array sub-fields are editable nowhere in Direct Edit.**
+- [x] **57. Array sub-fields are editable nowhere in Direct Edit.** DONE
+      2026-09-23 (v1.2.50). Added a `list` field type to
+      `src/utils/sectionSchema.js` and an add/remove sub-editor to the popup's
+      `FieldInput`, covering `experience.achievements` and
+      `experience.technologies` — verified to be the only two array-typed
+      fields in the entire data model. Writes go through the existing
+      `UPDATE_ARRAY_ITEM`, so no new reducer action and Classic round-trips.
+      `check:section-schema` validates the new type; `projects.image` stays in
+      `INTENTIONALLY_EXCLUDED` by an explicit scope decision (it is an image
+      upload, not an array sub-field). Two e2e tests. Original text follows.
+
+      **Original:**
       `experience.achievements` (the bullet list — most of a work entry's
       substance), `experience.technologies` and `projects.image` are excluded
       from the popup schema and are not inline-editable on any template either,

@@ -358,3 +358,43 @@
   outline: 2px solid var(--color-accent, #2563eb);
   outline-offset: 2px;
 }
+
+.direct-edit-popup__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.direct-edit-popup__list-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.direct-edit-popup__list-item .direct-edit-popup__input {
+  flex: 1;
+  min-width: 0;
+}
+
+.direct-edit-popup__list-remove {
+  flex: none;
+  border: 1px solid var(--color-border, #d4d4d8);
+  border-radius: 6px;
+  background: none;
+  padding: 0.1rem 0.4rem;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+  color: inherit;
+}
+
+.direct-edit-popup__list-add {
+  align-self: flex-start;
+  border: 1px solid var(--color-border, #d4d4d8);
+  border-radius: 6px;
+  background: none;
+  padding: 0.25rem 0.5rem;
+  font-size: 11px;
+  cursor: pointer;
+  color: inherit;
+}
