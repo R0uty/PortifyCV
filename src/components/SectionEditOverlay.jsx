@@ -24,6 +24,14 @@ function resolveSectionKey(target) {
   return 'identity'
 }
 
+function sectionSelectorFor(sectionKey) {
+  // identity is synthetic — it is the header block, which carries
+  // data-export-header rather than a data-export-section of its own.
+  return sectionKey === 'identity'
+    ? '[data-export-header]'
+    : `[data-export-section="${sectionKey}"]`
+}
+
 export default function SectionEditOverlay({
   formData,
   dispatchFormData,
@@ -35,6 +43,10 @@ export default function SectionEditOverlay({
   const [hovered, setHovered] = useState(null)
   const [openSectionKey, setOpenSectionKey] = useState(null)
   const [popupPosition, setPopupPosition] = useState(null)
+  // Editable sections in DOM order, used only to render the keyboard
+  // triggers below. Derived from the same attributes the pointer path
+  // uses, so it stays template-agnostic.
+  const [sections, setSections] = useState([])
 
   // Measured in container coordinates (sectionRect - containerRect), not
   // viewport coordinates: the overlay and the preview scroll together, so
@@ -57,6 +69,30 @@ export default function SectionEditOverlay({
       width: rect.width,
     }
   }, [])
+
+  // The lookup goes through the HOST's parent: containerRef points at
+  // .direct-edit-overlay-host, which only ever contains the overlay's own
+  // chrome, never a [data-export-section].
+  const findSectionElement = useCallback(
+    (sectionKey) =>
+      containerRef.current?.parentElement?.querySelector(sectionSelectorFor(sectionKey)) ?? null,
+    [],
+  )
+
+  // Shared by the keyboard triggers: point the pencil at a section
+  // without a pointer ever touching it.
+  const focusSection = useCallback(
+    (sectionKey) => {
+      const measured = measure(findSectionElement(sectionKey), sectionKey)
+
+      if (measured) {
+        setHovered(measured)
+      }
+
+      return measured
+    },
+    [findSectionElement, measure],
+  )
 
   // The listener goes on the PARENT (.direct-edit-preview), not on this
   // overlay host. Two reasons, both fatal to the obvious approach:
@@ -147,11 +183,7 @@ export default function SectionEditOverlay({
     }
 
     const container = containerRef.current?.parentElement
-    const selector =
-      hovered.sectionKey === 'identity'
-        ? '[data-export-header]'
-        : `[data-export-section="${hovered.sectionKey}"]`
-    const element = container?.querySelector(selector)
+    const element = container?.querySelector(sectionSelectorFor(hovered.sectionKey))
     const next = measure(element, hovered.sectionKey)
 
     if (next && (next.top !== hovered.top || next.left !== hovered.left || next.right !== hovered.right)) {
@@ -159,10 +191,68 @@ export default function SectionEditOverlay({
     }
   }, [formData, hovered, measure])
 
+  // Enumerate the editable sections so each can get a real focusable
+  // trigger. Re-runs on content and template changes because a template
+  // swap renders a different set of sections entirely.
+  useLayoutEffect(() => {
+    const parent = containerRef.current?.parentElement
+
+    if (!parent) {
+      return
+    }
+
+    const found = []
+    const seen = new Set()
+
+    for (const element of parent.querySelectorAll(SECTION_SELECTOR)) {
+      const sectionKey = element.hasAttribute('data-export-section')
+        ? element.getAttribute('data-export-section')
+        : 'identity'
+
+      if (!sectionKey || seen.has(sectionKey) || !getSectionSchema(sectionKey)) {
+        continue
+      }
+
+      seen.add(sectionKey)
+      found.push(sectionKey)
+    }
+
+    setSections((prev) =>
+      prev.length === found.length && prev.every((key, index) => key === found[index])
+        ? prev
+        : found,
+    )
+  }, [formData, templateConfig])
+
+  const openSection = useCallback(
+    (sectionKey) => {
+      // The popup renders only while `hovered` describes its section, so
+      // measure before opening rather than relying on a pointer having
+      // already done it.
+      if (focusSection(sectionKey)) {
+        setOpenSectionKey(sectionKey)
+      }
+    },
+    [focusSection],
+  )
+
+  // Return focus to the trigger that opened the popup, so a keyboard user
+  // lands back where they were instead of at the top of the document.
+  // Only this path restores focus: the click-outside handler closes by
+  // setting state directly, and yanking focus out from under a mouse user
+  // who just clicked elsewhere would be wrong.
   const handleClose = useCallback(() => {
+    const previousKey = openSectionKey
+
     setOpenSectionKey(null)
     setHovered(null)
-  }, [])
+
+    if (previousKey) {
+      containerRef.current
+        ?.querySelector(`[data-direct-edit-trigger="${previousKey}"]`)
+        ?.focus()
+    }
+  }, [openSectionKey])
 
   // Clamp the popup so it stays inside the container instead of opening
   // off-screen: a section low in a long CV would otherwise anchor a
@@ -216,6 +306,34 @@ export default function SectionEditOverlay({
 
   return (
     <div ref={containerRef} className="direct-edit-overlay-host">
+      {/* The pencil below reveals on pointerover only, which left the whole
+          editor unreachable without a pointer. These are real buttons,
+          visually hidden until focused (the skip-link pattern), so Tab
+          walks the editable sections on every template with no
+          per-template code. Focusing one also points the pencil at its
+          section, so a sighted keyboard user sees where they are. */}
+      {sections.length ? (
+        <div className="direct-edit-keyboard-triggers">
+          {sections.map((sectionKey) => {
+            const schema = getSectionSchema(sectionKey)
+            const label = locale === 'fi' ? schema.labelFi : schema.labelEn
+
+            return (
+              <button
+                key={sectionKey}
+                type="button"
+                className="direct-edit-keyboard-trigger"
+                data-direct-edit-trigger={sectionKey}
+                onFocus={() => focusSection(sectionKey)}
+                onClick={() => openSection(sectionKey)}
+              >
+                {locale === 'fi' ? `Muokkaa osiota ${label}` : `Edit ${label} section`}
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
+
       {hovered && !openSectionKey ? (
         <button
           type="button"

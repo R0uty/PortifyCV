@@ -4,6 +4,23 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: the section editor is reachable by keyboard — 2026-09-23
+
+The hover pencil rendered only in response to `pointerover`, so there was
+no way to reach the popup editor without a pointer on any of the 18
+templates, and the popup itself had no focus management. The overlay now
+also renders one real "Edit <section>" button per editable section —
+visually hidden until focused, the skip-link pattern — so Tab walks the
+editable sections of whatever template is on screen. Focusing one points
+the visible pencil at its section, so a sighted keyboard user can see
+where they are. The popup gained `aria-modal`, takes focus when it opens,
+traps Tab and Shift+Tab (without which Tab walked straight out into the
+`contentEditable` CV behind it, silently landing the user in a different
+editing surface), and returns focus to the trigger on Escape. Closing by
+clicking outside deliberately does not move focus. Section enumeration
+reads the same `data-export-section`/`data-export-header` attributes the
+rest of the overlay uses, so this needed no per-template code either.
+
 ## Direct Edit: you can add a profile photo without leaving it — 2026-09-21
 
 The header popup used to render a photo *visibility* checkbox only when

@@ -183,6 +183,62 @@ test.describe('Direct Edit builder', () => {
     await expect(page.locator('[data-export-header]').first()).toContainText('Popup tagline')
   })
 
+  test('the section popup is reachable and openable by keyboard alone', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    // The hover pencil renders only in response to pointerover, so a
+    // keyboard user had no way in at all. The overlay now also renders one
+    // real, focusable "Edit <section>" button per editable section, hidden
+    // until focused — the same pattern as a skip link.
+    const trigger = page.getByRole('button', { name: 'Edit About section' })
+    await trigger.focus()
+    await expect(trigger).toBeFocused()
+
+    await page.keyboard.press('Enter')
+
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+    await expect(popup).toContainText('About')
+  })
+
+  test('opening the popup by keyboard moves focus into it, traps it, and restores it on Escape', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const trigger = page.getByRole('button', { name: 'Edit About section' })
+    await trigger.focus()
+    await page.keyboard.press('Enter')
+
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+    await expect(popup).toHaveAttribute('aria-modal', 'true')
+
+    const focusIsInPopup = () =>
+      page.evaluate(() => Boolean(document.activeElement?.closest('.direct-edit-popup')))
+
+    // Focus lands inside the popup rather than being left behind on a
+    // trigger that is no longer rendered.
+    expect(await focusIsInPopup()).toBe(true)
+
+    // Tabbing cycles within the popup instead of escaping into the page
+    // behind it. 30 presses comfortably exceeds the popup's own focusable
+    // count, so an untrapped popup would have walked out long before this.
+    for (let i = 0; i < 30; i += 1) {
+      await page.keyboard.press('Tab')
+    }
+
+    expect(await focusIsInPopup()).toBe(true)
+
+    // Shift+Tab wraps backwards without escaping either.
+    await page.keyboard.press('Shift+Tab')
+    expect(await focusIsInPopup()).toBe(true)
+
+    await page.keyboard.press('Escape')
+    await expect(popup).toHaveCount(0)
+
+    // Focus returns to the control that opened it, not to <body>.
+    await expect(trigger).toBeFocused()
+  })
+
   test('the header popup uploads, previews and removes a profile photo on a CV that has none', async ({ page }) => {
     // Portfolio Hybrid is a photo-rendering template (portfolio.js's
     // `showPhoto: true`, and PortfolioShowcase.jsx renders the <img

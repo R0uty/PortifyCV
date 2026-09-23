@@ -2048,7 +2048,15 @@ planning anything in this area.
 
 ### Known gaps in the shipped editor — deliberately deferred, recorded in the spec
 
-- [ ] **56. Direct Edit is entirely keyboard-inaccessible.** The hover pencil
+- [x] **56. Direct Edit is entirely keyboard-inaccessible.** DONE 2026-09-23
+      (v1.2.49). Closed with the per-section visually-hidden "Edit <section>"
+      button suggested below, rendered from the overlay's own DOM enumeration
+      (no per-template code), plus `aria-modal`, initial focus on the dialog,
+      a Tab/Shift+Tab trap and focus restore to the trigger on Escape.
+      Click-outside close deliberately leaves focus alone. Two e2e tests in
+      `e2e/direct-edit.spec.js`. Original text follows.
+
+      The hover pencil
       renders only in response to `pointerover`, so there is no way to reach
       the popup editor by keyboard on any of the 18 templates, and the popup
       itself has no focus trap and no `aria-modal`. This matches the

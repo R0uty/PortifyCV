@@ -10,6 +10,18 @@ import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/pr
 // sectionItemVisibility, so DOM order diverges from formData order and
 // any index derived from the DOM would target the wrong record.
 
+// Everything inside the popup that can take focus, in DOM order. The
+// profile-photo file input is sr-only rather than display:none precisely
+// so it stays in this list.
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled]):not([type="hidden"])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ')
+
 function FieldInput({ field, value, isFinnish, onChange }) {
   const label = isFinnish ? field.labelFi : field.labelEn
   // No <label htmlFor> or anything else references these ids (labels wrap
@@ -80,6 +92,7 @@ export default function SectionEditorPopup({
   const [draftSkill, setDraftSkill] = useState('')
   const [notice, setNotice] = useState('')
   const photoInputRef = useRef(null)
+  const dialogRef = useRef(null)
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -92,6 +105,14 @@ export default function SectionEditorPopup({
 
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
+
+  // Move focus into the dialog on open. The container itself takes it
+  // (tabIndex={-1}) rather than the first field, so screen readers
+  // announce the dialog and its label before its contents, and Tab then
+  // walks the fields in order.
+  useEffect(() => {
+    dialogRef.current?.focus()
+  }, [])
 
   if (!schema) {
     return null
@@ -487,6 +508,48 @@ export default function SectionEditorPopup({
     )
   }
 
+  // Focus trap. Without it, Tab walks straight out of the popup into the
+  // CV behind it — which is contentEditable on the inline-wired templates,
+  // so a keyboard user would silently land in a different editing surface.
+  const handleDialogKeyDown = (event) => {
+    if (event.key !== 'Tab') {
+      return
+    }
+
+    const dialog = dialogRef.current
+
+    if (!dialog) {
+      return
+    }
+
+    const focusables = Array.from(dialog.querySelectorAll(FOCUSABLE_SELECTOR))
+
+    if (focusables.length === 0) {
+      return
+    }
+
+    const first = focusables[0]
+    const last = focusables[focusables.length - 1]
+    const active = document.activeElement
+
+    if (event.shiftKey) {
+      // Backwards off the first element — or off the dialog container
+      // itself, which holds focus immediately after opening — wraps to
+      // the last.
+      if (active === first || active === dialog || !dialog.contains(active)) {
+        event.preventDefault()
+        last.focus()
+      }
+
+      return
+    }
+
+    if (active === last) {
+      event.preventDefault()
+      first.focus()
+    }
+  }
+
   const renderBody = () => {
     switch (schema.shape) {
       case SECTION_SHAPE.recordArray:
@@ -510,10 +573,14 @@ export default function SectionEditorPopup({
 
   return (
     <div
+      ref={dialogRef}
       className="direct-edit-popup"
       role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
       aria-label={isFinnish ? schema.labelFi : schema.labelEn}
       onPointerDown={(event) => event.stopPropagation()}
+      onKeyDown={handleDialogKeyDown}
     >
       <div className="direct-edit-popup__header">
         <span className="direct-edit-popup__title">
