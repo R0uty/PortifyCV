@@ -254,18 +254,20 @@ export default function SectionEditOverlay({
     }
   }, [openSectionKey])
 
-  // Clamp the popup so it stays inside the container instead of opening
-  // off-screen: a section low in a long CV would otherwise anchor a
-  // popup (up to 70vh tall) entirely below the fold, and a narrow
-  // left-sidebar section can push `left` negative. This is the cheap
-  // mitigation — clamping, not side-flipping. True side-flipping (opening
-  // on whichever side actually has room) is deferred to a later phase.
+  // Place the popup beside the section it edits, on whichever side has
+  // room, and keep it inside the container.
   //
   // `top` is a plain CSS value here (no transform), so it clamps
   // directly. `left` is the anchor's CSS "left", which the stylesheet
   // shifts by translate(-100%, 0) to make it the popup's *right* edge —
-  // so clamping the popup's visual left edge to >= 0 means clamping this
-  // value to >= the popup's own measured width, not to >= 0.
+  // so every `left` below reads as "where the popup's RIGHT edge goes",
+  // and keeping its visual left edge >= 0 means keeping this value >= the
+  // popup's own measured width, not >= 0.
+  //
+  // Right first, then left, then overlap. The overlap fallback is not
+  // dead code: on a full-width template the section nearly fills the
+  // container (~765px of 1088 with a 380px popup), so neither side fits
+  // and covering part of the section is the only option left.
   useLayoutEffect(() => {
     // No reset-to-null branch here: popupPosition is only read from the
     // render below while `openSectionKey && hovered` is true, so a stale
@@ -282,12 +284,32 @@ export default function SectionEditOverlay({
       return
     }
 
+    const containerWidth = container.clientWidth
     const containerHeight = container.clientHeight
     const popupWidth = anchor.offsetWidth
     const popupHeight = anchor.offsetHeight
 
     const top = Math.max(0, Math.min(hovered.top, containerHeight - popupHeight))
-    const left = Math.max(hovered.right, popupWidth)
+
+    // hovered.left/right are already container-relative, so these are the
+    // gaps between the section and the container's own edges.
+    const roomRight = containerWidth - hovered.right
+    const roomLeft = hovered.left
+
+    let left
+
+    if (roomRight >= popupWidth) {
+      // Popup's left edge sits on the section's right edge.
+      left = hovered.right + popupWidth
+    } else if (roomLeft >= popupWidth) {
+      // Popup's right edge sits on the section's left edge. This is the
+      // case that matters most: a narrow sidebar section (Creative's rail
+      // is ~248px) used to be covered outright by the popup editing it,
+      // with the whole main column sitting free to its left.
+      left = hovered.left
+    } else {
+      left = Math.max(hovered.right, popupWidth)
+    }
 
     setPopupPosition((prev) => (prev && prev.top === top && prev.left === left ? prev : { top, left }))
   }, [openSectionKey, hovered])

@@ -36,6 +36,29 @@ async function exportPdfAndExpectSuccess(page) {
   await expect(page.getByRole('alert')).toHaveCount(0)
 }
 
+// Geometry of an open popup relative to the section it edits and the
+// preview container, in container-relative terms — the same coordinate
+// space SectionEditOverlay measures in.
+async function popupGeometry(page, sectionKey) {
+  return page.evaluate((key) => {
+    const popup = document.querySelector('.direct-edit-popup').getBoundingClientRect()
+    const section = document.querySelector(`[data-export-section="${key}"]`).getBoundingClientRect()
+    const container = document.querySelector('.direct-edit-preview').getBoundingClientRect()
+
+    return {
+      popupWidth: popup.width,
+      popupLeft: popup.left,
+      popupRight: popup.right,
+      sectionLeft: section.left,
+      sectionRight: section.right,
+      containerLeft: container.left,
+      containerRight: container.right,
+      roomLeft: section.left - container.left,
+      roomRight: container.right - section.right,
+    }
+  }, sectionKey)
+}
+
 test.describe('Direct Edit builder', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/cv')
@@ -181,6 +204,53 @@ test.describe('Direct Edit builder', () => {
 
     await popup.locator('input[data-field="tagline"]').fill('Popup tagline')
     await expect(page.locator('[data-export-header]').first()).toContainText('Popup tagline')
+  })
+
+  test('the popup opens beside a sidebar section instead of covering it', async ({ page }) => {
+    // Creative's right rail holds narrow sections (~248px) with the whole
+    // main column free to their left, so this is the case where the old
+    // right-align-to-the-section placement put the popup squarely on top
+    // of the very content being edited.
+    await selectTemplate(page, 'Creative')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const section = page.locator('[data-export-secondary="true"] [data-export-section]').first()
+    const sectionKey = await section.getAttribute('data-export-section')
+
+    await section.hover()
+    await page.locator('.direct-edit-pencil').click()
+    await expect(page.locator('.direct-edit-popup')).toBeVisible()
+
+    const geo = await popupGeometry(page, sectionKey)
+
+    // Precondition: this really is a "no room right, plenty left" section.
+    // Asserted rather than assumed so a template change that invalidates
+    // the premise fails loudly instead of passing vacuously.
+    expect(geo.roomRight).toBeLessThan(geo.popupWidth)
+    expect(geo.roomLeft).toBeGreaterThanOrEqual(geo.popupWidth)
+
+    // Flipped to the left: clear of the section, still inside the preview.
+    expect(geo.popupRight).toBeLessThanOrEqual(geo.sectionLeft + 1)
+    expect(geo.popupLeft).toBeGreaterThanOrEqual(geo.containerLeft - 1)
+  })
+
+  test('the popup stays inside the preview when neither side has room', async ({ page }) => {
+    // The default template's sections nearly fill the container, so no
+    // flip is possible and the old clamp is still the right answer. Guards
+    // the fallback against the flip logic introduced above.
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await page.locator('[data-export-section="experience"]').first().hover()
+    await page.locator('.direct-edit-pencil').click()
+    await expect(page.locator('.direct-edit-popup')).toBeVisible()
+
+    const geo = await popupGeometry(page, 'experience')
+
+    expect(geo.roomRight).toBeLessThan(geo.popupWidth)
+    expect(geo.roomLeft).toBeLessThan(geo.popupWidth)
+
+    expect(geo.popupLeft).toBeGreaterThanOrEqual(geo.containerLeft - 1)
+    expect(geo.popupRight).toBeLessThanOrEqual(geo.containerRight + 1)
   })
 
   test('the popup lists, adds and removes experience achievements', async ({ page }) => {

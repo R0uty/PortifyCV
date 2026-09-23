@@ -4,6 +4,19 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: the popup opens beside a section, not on top of it — 2026-09-23
+
+The section popup anchored its right edge to the section's right edge and
+only clamped itself inside the preview, so on a sidebar template it
+covered the very content being edited: Creative's right rail is ~248px
+wide and the popup is 380px, leaving the whole section hidden behind it
+while the ~680px main column sat empty. It now picks a side — right of
+the section if that fits inside the preview, otherwise left — and keeps
+the old clamped overlap only when neither side has room, which is the
+normal case on a full-width template (a ~765px section in a ~1088px
+preview leaves ~160px either way, so a 380px popup cannot help but
+overlap). No change to the vertical clamp or to `scrollIntoView`.
+
 ## Direct Edit: Experience bullets and technologies are editable — 2026-09-23
 
 `experience.achievements` — the bullet list that carries most of a work

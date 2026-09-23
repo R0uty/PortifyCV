@@ -2092,7 +2092,17 @@ planning anything in this area.
       mechanical, ~1 line each. Deliberately deferred as Phase B; the
       section-level pencil already covers full editability.
 
-- [ ] **59. Popup side-flipping.** The popup clamps its position inside the
+- [x] **59. Popup side-flipping.** DONE 2026-09-23 (v1.2.51). The popup now
+      places itself right of the section when that fits inside the preview,
+      else left, else the old clamped overlap. The win case is a sidebar
+      template: Creative's ~248px rail was entirely covered by the 380px
+      popup while ~680px sat free to its left. The overlap fallback stays and
+      is still exercised — a full-width template's section leaves ~160px
+      either side, too little for the popup. Two e2e tests (flip, and the
+      fallback guard), both asserting their own preconditions so a template
+      change cannot make them pass vacuously. Original text follows.
+
+      **Original:** The popup clamps its position inside the
       preview container and calls `scrollIntoView({ block: 'nearest' })`, but
       does not flip to whichever side actually has room. The spec was corrected
       to describe what ships rather than the flip it originally promised.
