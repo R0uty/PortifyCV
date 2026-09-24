@@ -1963,155 +1963,85 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 - Responsive layout is handled (breakpoints at 1023 / 860 / 560px).
 - The builder's three-pane layout, live preview, and zoom controls read well.
 
-## Next session — handoff, 2026-09-20
+## Next session — handoff, 2026-09-24
 
-**State:** the Direct Edit universal section editor shipped as v1.2.47 and is
-pushed to `origin/v1.3.0` at `a1b9527`. Working tree clean, full suite green
-(98/98 e2e, lint, build, `check:reducers`, `check:share`, `check:direct-edit`,
-`check:section-schema`). `main` untouched, no PR — same as the whole branch.
+**State:** branch `v1.3.0` at `040395a`, version **1.2.51**, pushed to
+`origin/v1.3.0`. Working tree clean (only an untracked `.claude/`). Full suite
+green: **106/106 e2e**, lint, build, `check:reducers`, `check:share`,
+`check:direct-edit`, `check:section-schema`. `main` untouched at `0f5261f`, no
+PR — same as the whole branch.
 
-Source of truth for what shipped and why:
+Source of truth for the Direct Edit editor's design and its known gaps:
 `docs/superpowers/specs/2026-09-19-direct-edit-universal-sections-design.md`
-(design + known gaps) and `docs/superpowers/plans/2026-09-19-direct-edit-universal-sections.md`
-(the 8-task plan as executed). Read the spec's "Known gap" notes before
-planning anything in this area.
+and `docs/superpowers/plans/2026-09-19-direct-edit-universal-sections.md`.
+`changes.md` carries a narrative entry per shipped item, newest first.
 
-### DONE — profile photo upload in Direct Edit (shipped 2026-09-21, v1.2.48)
+**Four of the six deferred gaps are now closed** (items 55, 56, 57, 59 — see
+"Shipped since the 2026-09-20 handoff" below). Two remain, and neither is on
+the critical path: the popup already gives full editability of every section
+on all 18 templates, by keyboard as well as pointer.
 
-- [x] **55. You cannot add a profile photo in Direct Edit.** DONE 2026-09-21
-      (v1.2.48). Shipped as designed below: `src/utils/profilePhoto.js`
-      extracted and shared with Classic, always-present "Choose image" plus
-      preview/remove in `renderRootGroup`, visibility checkbox still gated on
-      a photo existing, errors into the popup's `notice`, no new reducer
-      action, `projects.image` still excluded. Two new e2e tests in
-      `e2e/direct-edit.spec.js` (popup upload/preview/remove, and a Classic
-      upload guard for the extraction) — 100/100 green.
-
-      The original design follows, kept as the record of what was built and why.
-
-      **The problem it fixed.** The header popup
-      (`renderRootGroup` in `src/components/SectionEditorPopup.jsx`) renders a
-      photo *visibility* checkbox only when `formData.photo` already exists —
-      so on a CV with no photo there is no control at all, and the only way to
-      add one was to switch to Classic mode.
-
-      **Scope decision already made by the user:** profile photo only. Project
-      images (`projects.image`) stay out — they remain in
-      `INTENTIONALLY_EXCLUDED` in `scripts/check-section-schema.mjs`.
-
-      **1. Extract the upload helper.** `buildProfilePhotoDataUrl` lives as a
-      local function in `src/components/CVForm.jsx:63`, together with
-      `localizePhotoErrorMessage` (`:98`), the private helpers
-      `readFileAsDataUrl` (`:45`) / `loadImageElement` (`:54`), and the
-      constants `MAX_PROFILE_PHOTO_SIZE_BYTES` / `MAX_PROFILE_PHOTO_EDGE_PX` /
-      `MAX_PROFILE_PHOTO_DATA_URL_LENGTH` (`:41-43`). Move all of it to a new
-      `src/utils/profilePhoto.js`; have `CVForm.jsx` import from there and
-      delete its local copies. This is a behaviour-neutral refactor — Classic
-      uses the same function for both the profile photo and project images, so
-      both keep working. Extract rather than duplicate: the function does MIME
-      validation, a 2MB check, a canvas resize to 480px, a JPEG re-encode *and*
-      a post-encode 450KB ceiling, and a second copy would drift until the
-      popup accepted images Classic rejects.
-
-      **2. Add the control to `renderRootGroup`.** Always show a "Choose image"
-      / "Valitse kuva" button driving a hidden
-      `<input type="file" accept="image/png,image/jpeg,image/jpg">`, plus the
-      same "JPG or PNG, up to 2MB" hint Classic shows. When `formData.photo`
-      exists, additionally show a small preview, a "Remove image" button
-      (dispatching `SET_ROOT_FIELD` with `''`), and the existing visibility
-      checkbox — keep that one gated on a photo existing, since toggling
-      nothing is meaningless. Upload errors go through
-      `localizePhotoErrorMessage` into the popup's existing `notice` state (the
-      same state the skills editor already uses).
-
-      Dispatch is `SET_ROOT_FIELD { field: 'photo', value }` — the action every
-      other identity field already uses. **No new `cvFormReducer` action.**
-
-      **3. Known caveat, do not engineer around it.** A photo only appears on
-      templates that render one, and only when that template's visibility flag
-      is on, so on a photo-less template uploading will look like nothing
-      happened. Classic behaves identically. Keep the visibility checkbox next
-      to the upload control and leave it there.
-
-      **4. Testing.** Add an e2e test to `e2e/direct-edit.spec.js`: open the
-      header popup on a photo-rendering template, upload via `setInputFiles`
-      with an **in-memory PNG buffer** (`{name, mimeType, buffer}`) — no
-      fixture file is needed and `e2e/` has no fixtures directory today —
-      then assert both the popup preview and the rendered header `<img>`
-      appear. Also assert Classic's own upload still works after the
-      extraction. Note photo upload has never been e2e-tested at all;
-      `setInputFiles` appears nowhere in `e2e/` today.
-
-      **Files:** `src/utils/profilePhoto.js` (new), `src/components/CVForm.jsx`,
-      `src/components/SectionEditorPopup.jsx`,
-      `src/styles/direct-edit-popup.css`, `e2e/direct-edit.spec.js`.
-
-### Known gaps in the shipped editor — deliberately deferred, recorded in the spec
-
-- [x] **56. Direct Edit is entirely keyboard-inaccessible.** DONE 2026-09-23
-      (v1.2.49). Closed with the per-section visually-hidden "Edit <section>"
-      button suggested below, rendered from the overlay's own DOM enumeration
-      (no per-template code), plus `aria-modal`, initial focus on the dialog,
-      a Tab/Shift+Tab trap and focus restore to the trigger on Escape.
-      Click-outside close deliberately leaves focus alone. Two e2e tests in
-      `e2e/direct-edit.spec.js`. Original text follows.
-
-      The hover pencil
-      renders only in response to `pointerover`, so there is no way to reach
-      the popup editor by keyboard on any of the 18 templates, and the popup
-      itself has no focus trap and no `aria-modal`. This matches the
-      pre-existing inline `contentEditable` layer (a documented Phase 3 gap
-      there), so nothing regressed — but given the product aim ("the most
-      editable CV builder"), this is the most significant thing still missing.
-      A `focus-within`-triggered reveal, or a per-section visually-hidden
-      "Edit <section>" button, would close it without design cost.
-
-- [x] **57. Array sub-fields are editable nowhere in Direct Edit.** DONE
-      2026-09-23 (v1.2.50). Added a `list` field type to
-      `src/utils/sectionSchema.js` and an add/remove sub-editor to the popup's
-      `FieldInput`, covering `experience.achievements` and
-      `experience.technologies` — verified to be the only two array-typed
-      fields in the entire data model. Writes go through the existing
-      `UPDATE_ARRAY_ITEM`, so no new reducer action and Classic round-trips.
-      `check:section-schema` validates the new type; `projects.image` stays in
-      `INTENTIONALLY_EXCLUDED` by an explicit scope decision (it is an image
-      upload, not an array sub-field). Two e2e tests. Original text follows.
-
-      **Original:**
-      `experience.achievements` (the bullet list — most of a work entry's
-      substance), `experience.technologies` and `projects.image` are excluded
-      from the popup schema and are not inline-editable on any template either,
-      so an Experience entry created from the popup can never get bullets
-      without switching to Classic. Needs its own array sub-editor. The
-      exclusions are recorded deliberately in
-      `scripts/check-section-schema.mjs`'s `INTENTIONALLY_EXCLUDED`.
+### START HERE — pick one of the two remaining gaps (both optional polish)
 
 - [ ] **58. Entry-level pencils (hover one job, not the whole section).**
       Would need a `data-direct-edit-index={index}` attribute added next to the
       existing `data-export-card` in each of the 17 Showcase files —
-      mechanical, ~1 line each. Deliberately deferred as Phase B; the
-      section-level pencil already covers full editability.
-
-- [x] **59. Popup side-flipping.** DONE 2026-09-23 (v1.2.51). The popup now
-      places itself right of the section when that fits inside the preview,
-      else left, else the old clamped overlap. The win case is a sidebar
-      template: Creative's ~248px rail was entirely covered by the 380px
-      popup while ~680px sat free to its left. The overlap fallback stays and
-      is still exercised — a full-width template's section leaves ~160px
-      either side, too little for the popup. Two e2e tests (flip, and the
-      fallback guard), both asserting their own preconditions so a template
-      change cannot make them pass vacuously. Original text follows.
-
-      **Original:** The popup clamps its position inside the
-      preview container and calls `scrollIntoView({ block: 'nearest' })`, but
-      does not flip to whichever side actually has room. The spec was corrected
-      to describe what ships rather than the flip it originally promised.
+      mechanical, ~1 line each — plus overlay logic to resolve it and open the
+      popup scrolled to that entry. Wide but shallow. Deliberately deferred as
+      Phase B; the section-level pencil already covers full editability, so
+      this is an ergonomics win on long Experience lists, not a capability one.
 
 - [ ] **60. Sections cannot move between columns.** Column placement comes from
       `templateConfig.primarySections`/`secondarySections` (template config,
       not user data), so moving Skills from a sidebar into the main column
       would need per-template override state plus changes to all 17 Showcase
-      files. Reordering *within* a column works.
+      files. Reordering *within* a column works. This is the large one — worth
+      a design pass before any code.
+
+If neither appeals, the branch is in a good state to stop: consider whether
+v1.3.0 is ready to merge to `main` instead (it has never been merged and the
+feature is now complete and tested).
+
+### Shipped since the 2026-09-20 handoff — do NOT re-plan these
+
+Full reasoning per item is in `changes.md`; per-commit detail is in git.
+
+- [x] **55. Profile photo upload in Direct Edit** — v1.2.48, commit `c4d02dc`.
+      Extracted the shared image pipeline to `src/utils/profilePhoto.js`
+      (Classic imports it too, so the two surfaces can't drift); the header
+      popup's `renderRootGroup` always offers "Choose image", with
+      preview/Remove once a photo exists and the visibility checkbox still
+      gated on one existing. `projects.image` stays out of scope by an
+      explicit user decision and remains in `INTENTIONALLY_EXCLUDED`.
+
+- [x] **56. Keyboard access to the section editor** — v1.2.49, commit
+      `7fc37ee`. The overlay enumerates its editable sections from the same
+      `data-export-section`/`data-export-header` attributes the pointer path
+      uses and renders one visually-hidden-until-focused "Edit <section>"
+      button each (still zero per-template code). The popup gained
+      `aria-modal`, initial focus on the dialog, a Tab/Shift+Tab trap and
+      focus restore to the trigger on Escape; click-outside close deliberately
+      leaves focus alone. NOTE: the inline `contentEditable` layer's own
+      keyboard gap is untouched — only the popup editor is reachable.
+
+- [x] **57. Array sub-fields** — v1.2.50, commit `b0707a9`. New `list` field
+      type in `sectionSchema.js` plus an add/remove sub-editor in the popup's
+      `FieldInput`, covering `experience.achievements` and
+      `experience.technologies`. Writes go through the existing
+      `UPDATE_ARRAY_ITEM`, so no new reducer action and edits round-trip with
+      Classic. **Worth knowing:** those two are the ONLY array-typed fields in
+      the entire data model — `internships.technologies` and
+      `caseStudies.technologies` are plain strings — so this closed the gap
+      outright; no further sub-editors are pending.
+
+- [x] **59. Popup side-flipping** — v1.2.51, commit `7d9aa9e`. The popup now
+      opens right of its section when that fits inside the preview, else left,
+      else the old clamped overlap. **Measured geometry at a 1280px viewport,
+      useful for any future popup work:** preview container ~1088px, a
+      full-width template's section ~765px, Creative's sidebar rail ~248px,
+      popup 380px. So full-width templates leave ~160px either side and
+      legitimately still overlap — the fallback is not dead code. The win case
+      was the sidebar rail, which the popup used to cover outright.
 
 ### Conventions for whoever picks this up
 
@@ -2132,3 +2062,26 @@ planning anything in this area.
 - The per-template inline rollout (`docs/superpowers/specs/2026-09-14-direct-edit-phase2-rollout.md`)
   is **no longer the path to editability** — the popup covers all 18 templates.
   Those remaining rounds are optional polish now.
+- Work TDD: write the failing e2e test first and watch it fail for the right
+  reason. Where a test guards a refactor rather than new behaviour (e.g. "Classic
+  upload still works"), say so — it will pass before and after, and pretending
+  otherwise is the one way to fake a red.
+- Add a `changes.md` entry per unit of work, newest first, and mark the todo
+  item done in place rather than deleting it.
+
+### Gotchas learned the hard way (2026-09-23)
+
+- **`react-hooks/set-state-in-effect` is touchy.** Routing the overlay's
+  re-measure effect through a `useCallback` DOM-lookup helper instead of an
+  inline `querySelector` made the rule start firing on a previously-clean
+  effect. The inline lookup in that effect is deliberate — don't "tidy" it.
+- **The in-app browser tool does not activate a focused button** with Enter or
+  Space (it dispatches the key but not the browser's default click). Escape and
+  other plain keydown listeners work fine. Verify button activation with
+  Playwright or a programmatic `.click()`, and don't read this as a product bug.
+- **Popup geometry is measured, not guessed** — see item 59's numbers above
+  before changing any popup placement logic.
+- **The e2e config seeds `portifycv-builder-mode: classic`** into localStorage
+  for every test (see `playwright.config.js`), because the suite predates
+  Direct Edit. Any standalone Playwright script you write for measurement must
+  do the same or it will not find Classic's "Load demo CV" button.
