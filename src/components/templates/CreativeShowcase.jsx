@@ -50,7 +50,7 @@ function splitToBullets(text) {
 // directEditDispatch-gated branches below) — never assume it lines up
 // with snapshot.experience's own (filtered) indices in the read-only
 // call site.
-function renderExperienceEntry(item, index, { directEditDispatch, copy }) {
+function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = item.description ? splitToBullets(item.description) : []
 
@@ -59,6 +59,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy }) {
       key={`${item.role}-${item.company}-${index}`}
       className="creative-showcase__exp-card"
       data-export-card="true"
+      data-direct-edit-index={sourceIndex}
     >
       <div className="creative-showcase__exp-row">
         <div className="min-w-0">
@@ -232,7 +233,7 @@ export default function CreativeShowcase({
             <div className="creative-showcase__pill-row">
               {snapshot.coreStrengths.slice(0, 3).map((item, index) => (
                 item.title ? (
-                  <span key={`${item.title}-${index}`} className="creative-showcase__pill">
+                  <span key={`${item.title}-${index}`} className="creative-showcase__pill" data-direct-edit-index={snapshot.sourceIndices.coreStrengths[index]}>
                     {item.title}
                   </span>
                 ) : null
@@ -256,7 +257,13 @@ export default function CreativeShowcase({
                 {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
               </EditableList>
             ) : snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy }))
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="creative-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -278,7 +285,7 @@ export default function CreativeShowcase({
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="creative-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="creative-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="creative-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="creative-showcase__project-desc">{item.description}</p> : null}
                     {tags.length > 0 ? (
@@ -334,7 +341,7 @@ export default function CreativeShowcase({
           <div className="creative-showcase__plain-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
-                <div key={`${item.school}-${index}`} className="creative-showcase__plain-item" data-export-card="true">
+                <div key={`${item.school}-${index}`} className="creative-showcase__plain-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                   <p className="creative-showcase__plain-title">{item.degree}</p>
                   {item.school || item.location ? (
                     <p className="creative-showcase__plain-meta">
@@ -360,7 +367,7 @@ export default function CreativeShowcase({
           <div className="creative-showcase__plain-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="creative-showcase__plain-item" data-export-card="true">
+                <div key={`${item.name}-${index}`} className="creative-showcase__plain-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {item.name ? <p className="creative-showcase__plain-title">{item.name}</p> : null}
                   {item.issuer || item.year ? (
                     <p className="creative-showcase__plain-meta">
@@ -406,7 +413,7 @@ export default function CreativeShowcase({
           <div className="creative-showcase__plain-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <p key={`${item.language}-${index}`} className="creative-showcase__lang-row">
+                <p key={`${item.language}-${index}`} className="creative-showcase__lang-row" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   {item.language}
                   {item.level ? <span className="creative-showcase__lang-level"> {item.level}</span> : null}
                 </p>
@@ -427,7 +434,7 @@ export default function CreativeShowcase({
           <div className="creative-showcase__pill-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span key={`${item.name}-${index}`} className="creative-showcase__tag">
+                <span key={`${item.name}-${index}`} className="creative-showcase__tag" data-direct-edit-index={snapshot.sourceIndices.interests[index]}>
                   {item.name}
                 </span>
               ))

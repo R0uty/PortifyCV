@@ -281,4 +281,6 @@ export interface CvSnapshot {
   internships: CvInternshipItem[]
   caseStudies: CvCaseStudyItem[]
   testimonials: CvTestimonialItem[]
+  /** Per record-array section, the formData index of each entry kept above. */
+  sourceIndices: Record<string, number[]>
 }

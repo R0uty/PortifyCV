@@ -35,6 +35,30 @@ export function createCvSnapshot(formData) {
   const isSectionItemVisible = (section, itemKey) =>
     sectionItemVisibility[section]?.[String(itemKey)] !== false
 
+  // formData index of every entry that survives the filter below, per
+  // record-array section. Templates render these filtered arrays, so their
+  // own map index is snapshot-relative; Direct Edit's entry pencils need
+  // the formData index the popup (and every reducer action) addresses.
+  const sourceIndices = {
+    experience: [],
+    education: [],
+    coreStrengths: [],
+    certificates: [],
+    projects: [],
+    languages: [],
+    interests: [],
+    achievements: [],
+    openSource: [],
+    publications: [],
+    leadership: [],
+    memberships: [],
+    speaking: [],
+    volunteering: [],
+    internships: [],
+    caseStudies: [],
+    testimonials: [],
+  }
+
   return {
     fullName: trimValue(formData.fullName),
     title: trimValue(formData.title),
@@ -91,6 +115,7 @@ export function createCvSnapshot(formData) {
         normalizedItem.technologies.length > 0
       ) {
         next.push(normalizedItem)
+        sourceIndices.experience.push(index)
       }
 
       return next
@@ -122,6 +147,7 @@ export function createCvSnapshot(formData) {
         normalizedItem.grade
       ) {
         next.push(normalizedItem)
+        sourceIndices.education.push(index)
       }
 
       return next
@@ -143,6 +169,7 @@ export function createCvSnapshot(formData) {
 
       if (normalizedItem.title || normalizedItem.description) {
         next.push(normalizedItem)
+        sourceIndices.coreStrengths.push(index)
       }
 
       return next
@@ -168,6 +195,7 @@ export function createCvSnapshot(formData) {
         normalizedItem.expiry
       ) {
         next.push(normalizedItem)
+        sourceIndices.certificates.push(index)
       }
 
       return next
@@ -205,6 +233,7 @@ export function createCvSnapshot(formData) {
         normalizedItem.image
       ) {
         next.push(normalizedItem)
+        sourceIndices.projects.push(index)
       }
 
       return next
@@ -221,6 +250,7 @@ export function createCvSnapshot(formData) {
 
       if (normalizedItem.language || normalizedItem.level) {
         next.push(normalizedItem)
+        sourceIndices.languages.push(index)
       }
 
       return next
@@ -234,6 +264,7 @@ export function createCvSnapshot(formData) {
 
       if (normalizedItem.name) {
         next.push(normalizedItem)
+        sourceIndices.interests.push(index)
       }
 
       return next
@@ -251,6 +282,7 @@ export function createCvSnapshot(formData) {
 
       if (normalizedItem.title || normalizedItem.description || normalizedItem.year) {
         next.push(normalizedItem)
+        sourceIndices.achievements.push(index)
       }
 
       return next
@@ -278,6 +310,7 @@ export function createCvSnapshot(formData) {
         normalizedItem.url
       ) {
         next.push(normalizedItem)
+        sourceIndices.openSource.push(index)
       }
 
       return next
@@ -301,6 +334,7 @@ export function createCvSnapshot(formData) {
         normalizedItem.url
       ) {
         next.push(normalizedItem)
+        sourceIndices.publications.push(index)
       }
 
       return next
@@ -326,6 +360,7 @@ export function createCvSnapshot(formData) {
         normalizedItem.endDate
       ) {
         next.push(normalizedItem)
+        sourceIndices.leadership.push(index)
       }
 
       return next
@@ -343,6 +378,7 @@ export function createCvSnapshot(formData) {
 
       if (normalizedItem.organization || normalizedItem.role || normalizedItem.year) {
         next.push(normalizedItem)
+        sourceIndices.memberships.push(index)
       }
 
       return next
@@ -366,6 +402,7 @@ export function createCvSnapshot(formData) {
         normalizedItem.date
       ) {
         next.push(normalizedItem)
+        sourceIndices.speaking.push(index)
       }
 
       return next
@@ -383,6 +420,7 @@ export function createCvSnapshot(formData) {
 
       if (normalizedItem.organization || normalizedItem.role || normalizedItem.description) {
         next.push(normalizedItem)
+        sourceIndices.volunteering.push(index)
       }
 
       return next
@@ -412,6 +450,7 @@ export function createCvSnapshot(formData) {
         normalizedItem.technologies
       ) {
         next.push(normalizedItem)
+        sourceIndices.internships.push(index)
       }
 
       return next
@@ -439,6 +478,7 @@ export function createCvSnapshot(formData) {
         normalizedItem.lessons
       ) {
         next.push(normalizedItem)
+        sourceIndices.caseStudies.push(index)
       }
 
       return next
@@ -456,10 +496,12 @@ export function createCvSnapshot(formData) {
 
       if (normalizedItem.quote || normalizedItem.author || normalizedItem.role) {
         next.push(normalizedItem)
+        sourceIndices.testimonials.push(index)
       }
 
       return next
     }, []),
+    sourceIndices,
   }
 }
 

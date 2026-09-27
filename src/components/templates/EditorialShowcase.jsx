@@ -151,6 +151,7 @@ export default function EditorialShowcase({
             ) : snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
                 directEditDispatch,
+                sourceIndex: snapshot.sourceIndices.experience[index],
                 copy,
                 classPrefix: 'editorial-showcase',
               }))
@@ -173,7 +174,7 @@ export default function EditorialShowcase({
                 const metaLine = [item.school, item.location].filter(Boolean).join(' · ')
 
                 return (
-                  <div key={`${item.school}-${index}`} className="editorial-showcase__entry" data-export-card="true">
+                  <div key={`${item.school}-${index}`} className="editorial-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                     <div className="editorial-showcase__entry-row">
                       <p className="editorial-showcase__entry-role">{item.degree || copy.untitledRole}</p>
                       <p className="editorial-showcase__entry-dates">{formatDateRange(item.startDate, item.endDate)}</p>
@@ -232,7 +233,7 @@ export default function EditorialShowcase({
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="editorial-showcase__entry" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="editorial-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="editorial-showcase__entry-role">{item.name}</p> : null}
                     {item.description ? <p className="editorial-showcase__project-desc">{item.description}</p> : null}
                     {tags.length > 0 ? (
@@ -283,7 +284,7 @@ export default function EditorialShowcase({
           {snapshot.languages.length > 0 ? (
             <p className="editorial-showcase__language-row">
               {snapshot.languages.map((item, index) => (
-                <span key={`${item.language}-${index}`} className="editorial-showcase__language-item">
+                <span key={`${item.language}-${index}`} className="editorial-showcase__language-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   {index > 0 ? <span className="editorial-showcase__language-sep" aria-hidden="true">·</span> : null}
                   {item.language}
                   {item.level ? <> – {item.level}</> : null}
@@ -305,7 +306,7 @@ export default function EditorialShowcase({
           <div className="editorial-showcase__plain-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <p key={`${item.name}-${index}`} className="editorial-showcase__cert-item">
+                <p key={`${item.name}-${index}`} className="editorial-showcase__cert-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {[item.name, item.issuer].filter(Boolean).join(' – ')}
                 </p>
               ))

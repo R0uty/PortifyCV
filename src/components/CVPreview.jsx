@@ -740,7 +740,10 @@ function CVPreview({
       // Extracted so both the read-only `.map()` and EditableList's editing
       // wrapper (below) render identical entry markup — pure extraction,
       // same body, no behavior change for any of the three layout branches.
-      const renderExperienceEntry = (item, index) => {
+      // `sourceIndex` feeds Direct Edit's entry pencil and must be the
+      // formData index: EditableList already iterates formData, the
+      // read-only map passes snapshot.sourceIndices.experience[index].
+      const renderExperienceEntry = (item, index, sourceIndex = index) => {
                   const dateRange = formatDateRange(
                     item.startDate,
                     item.endDate,
@@ -794,6 +797,7 @@ function CVPreview({
                         key={`${item.role}-${item.company}-${index}`}
                         className={`relative ${experienceItemBorder} ${experienceItemPadding} ${resolvedTimelineBorderClasses}`}
                         data-export-card="true"
+                        data-direct-edit-index={sourceIndex}
                       >
                         <span
                           className={`absolute ${experienceItemDot} top-1 rounded-full border-4 shadow-sm ${resolvedTimelineDotClasses}`}
@@ -841,6 +845,7 @@ function CVPreview({
                         key={`${item.role}-${item.company}-${index}`}
                         className="relative pl-0"
                         data-export-card="true"
+                        data-direct-edit-index={sourceIndex}
                       >
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0 flex-1">
@@ -904,6 +909,7 @@ function CVPreview({
                       key={`${item.role}-${item.company}-${index}`}
                       className={`relative ${experienceItemBorder} ${experienceItemPadding} ${resolvedTimelineBorderClasses}`}
                       data-export-card="true"
+                      data-direct-edit-index={sourceIndex}
                     >
                       <span
                         className={`absolute ${experienceItemDot} top-1 rounded-full border-4 shadow-sm ${resolvedTimelineDotClasses}`}
@@ -950,7 +956,7 @@ function CVPreview({
                   {(item, index) => renderExperienceEntry(item, index)}
                 </EditableList>
               ) : experience.length > 0 ? (
-                experience.map((item, index) => renderExperienceEntry(item, index))
+                experience.map((item, index) => renderExperienceEntry(item, index, snapshot.sourceIndices.experience[index]))
               ) : (
                 <p className="text-sm text-gray-500">
                   {isFinnish
@@ -979,6 +985,7 @@ function CVPreview({
               {education.length > 0 ? (
                 education.map((item, index) => (
                   <div
+                    data-direct-edit-index={snapshot.sourceIndices.education[index]}
                     key={`${item.school}-${item.degree}-${index}`}
                     className={resolvedEducationCardClasses}
                     data-export-card="true"
@@ -1217,7 +1224,7 @@ function CVPreview({
             <div className="mt-4 space-y-4">
               {coreStrengths.length > 0 ? (
                 coreStrengths.map((item, index) => (
-                  <div key={`${item.title}-${index}`} className="flex items-start gap-3" data-export-card="true">
+                  <div key={`${item.title}-${index}`} className="flex items-start gap-3" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.coreStrengths[index]}>
                     <span
                       className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${resolvedSectionIconBg} ${resolvedSectionIconColor}`}
                       aria-hidden="true"
@@ -1259,6 +1266,7 @@ function CVPreview({
               <ul className="mt-4 space-y-2">
                 {certificates.map((item, index) => (
                   <li
+                    data-direct-edit-index={snapshot.sourceIndices.certificates[index]}
                     key={`${item.name}-${index}`}
                     className={`flex items-start gap-2 text-sm ${supportingTextClasses}`}
                     data-export-card="true"
@@ -1305,7 +1313,7 @@ function CVPreview({
             <div className="mt-4 space-y-4">
               {projects.length > 0 ? (
                 projects.map((item, index) => (
-                  <div key={`${item.name}-${index}`} data-export-card="true">
+                  <div key={`${item.name}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.image ? (
                       <img
                         src={item.image}
@@ -1360,6 +1368,7 @@ function CVPreview({
               {languages.length > 0 ? (
                 languages.map((item, index) => (
                   <p
+                    data-direct-edit-index={snapshot.sourceIndices.languages[index]}
                     key={`${item.language}-${index}`}
                     className={`text-sm ${supportingTextClasses}`}
                     data-export-card="true"
@@ -1393,6 +1402,7 @@ function CVPreview({
               {interests.length > 0 ? (
                 interests.map((item, index) => (
                   <span
+                    data-direct-edit-index={snapshot.sourceIndices.interests[index]}
                     key={`${item.name}-${index}`}
                     className={`inline-flex items-center gap-1.5 text-sm ${supportingTextClasses}`}
                     data-export-card="true"
@@ -1427,7 +1437,7 @@ function CVPreview({
             <div className="mt-4 space-y-4">
               {achievements.length > 0 ? (
                 achievements.map((item, index) => (
-                  <div key={`${item.title}-${index}`} data-export-card="true">
+                  <div key={`${item.title}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                     <div className="flex items-start justify-between gap-4">
                       {item.title ? (
                         <p className="text-sm font-semibold tracking-tight text-gray-900">{item.title}</p>
@@ -1472,7 +1482,7 @@ function CVPreview({
                   ].filter(Boolean)
 
                   return (
-                    <div key={`${item.name}-${index}`} data-export-card="true">
+                    <div key={`${item.name}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.openSource[index]}>
                       {item.name ? (
                         <p className={`text-sm font-semibold tracking-tight ${accentTextClasses}`}>{item.name}</p>
                       ) : null}
@@ -1514,7 +1524,7 @@ function CVPreview({
             <div className="mt-4 space-y-4">
               {publications.length > 0 ? (
                 publications.map((item, index) => (
-                  <div key={`${item.title}-${index}`} data-export-card="true">
+                  <div key={`${item.title}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.publications[index]}>
                     {item.title ? (
                       <p className="text-sm font-semibold tracking-tight text-gray-900">{item.title}</p>
                     ) : null}
@@ -1556,7 +1566,7 @@ function CVPreview({
                   const dateRange = formatDateRange(item.startDate, item.endDate)
 
                   return (
-                    <div key={`${item.role}-${item.organization}-${index}`} data-export-card="true">
+                    <div key={`${item.role}-${item.organization}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.leadership[index]}>
                       <div className="flex items-start justify-between gap-4">
                         {heading ? (
                           <p className="text-sm font-semibold tracking-tight text-gray-900">{heading}</p>
@@ -1595,7 +1605,7 @@ function CVPreview({
             <div className="mt-4 space-y-3">
               {memberships.length > 0 ? (
                 memberships.map((item, index) => (
-                  <div key={`${item.organization}-${index}`} data-export-card="true">
+                  <div key={`${item.organization}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.memberships[index]}>
                     {item.organization ? (
                       <p className="text-sm font-semibold tracking-tight text-gray-900">{item.organization}</p>
                     ) : null}
@@ -1630,7 +1640,7 @@ function CVPreview({
             <div className="mt-4 space-y-4">
               {speaking.length > 0 ? (
                 speaking.map((item, index) => (
-                  <div key={`${item.conference}-${item.topic}-${index}`} data-export-card="true">
+                  <div key={`${item.conference}-${item.topic}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.speaking[index]}>
                     {item.topic ? (
                       <p className="text-sm font-semibold tracking-tight text-gray-900">{item.topic}</p>
                     ) : null}
@@ -1671,7 +1681,7 @@ function CVPreview({
                   const heading = [item.role, item.organization].filter(Boolean).join(' — ')
 
                   return (
-                    <div key={`${item.role}-${item.organization}-${index}`} data-export-card="true">
+                    <div key={`${item.role}-${item.organization}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.volunteering[index]}>
                       {heading ? (
                         <p className="text-sm font-semibold tracking-tight text-gray-900">{heading}</p>
                       ) : null}
@@ -1710,7 +1720,7 @@ function CVPreview({
                   const dateRange = formatDateRange(item.startDate, item.endDate)
 
                   return (
-                    <div key={`${item.role}-${item.company}-${index}`} data-export-card="true">
+                    <div key={`${item.role}-${item.company}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.internships[index]}>
                       <div className="flex items-start justify-between gap-4">
                         <p className="text-sm font-semibold tracking-tight text-gray-900">{heading}</p>
                         {dateRange ? (
@@ -1765,7 +1775,7 @@ function CVPreview({
                   ].filter(([, value]) => value)
 
                   return (
-                    <div key={`${item.title}-${index}`} data-export-card="true">
+                    <div key={`${item.title}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.caseStudies[index]}>
                       {item.title ? (
                         <p className="text-sm font-semibold tracking-tight text-gray-900">{item.title}</p>
                       ) : null}
@@ -1807,7 +1817,7 @@ function CVPreview({
                   const meta = [item.author, item.role].filter(Boolean).join(', ')
 
                   return (
-                    <div key={`${item.author}-${index}`} data-export-card="true">
+                    <div key={`${item.author}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.testimonials[index]}>
                       {item.quote ? (
                         <p className={`whitespace-pre-line text-xs italic leading-6 ${bodyTextClasses}`}>&ldquo;{item.quote}&rdquo;</p>
                       ) : null}

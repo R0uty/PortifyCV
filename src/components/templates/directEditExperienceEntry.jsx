@@ -24,12 +24,16 @@ function splitToBullets(text) {
 // `index` is always formData.experience-relative (only ever read inside
 // directEditDispatch-gated branches below) — never assume it lines up with
 // snapshot.experience's own (filtered) indices in the read-only call site.
-export function renderExperienceEntry(item, index, { directEditDispatch, copy, classPrefix, separator = ' · ' }) {
+//
+// `sourceIndex` is what Direct Edit's entry pencil reads, so it must be the
+// formData index: the default covers the EditableList call site, and the
+// snapshot call site passes snapshot.sourceIndices.experience[index].
+export function renderExperienceEntry(item, index, { directEditDispatch, copy, classPrefix, separator = ' · ', sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = item.description ? splitToBullets(item.description) : []
 
   return (
-    <div key={`${item.role}-${item.company}-${index}`} className={`${classPrefix}__entry`} data-export-card="true">
+    <div key={`${item.role}-${item.company}-${index}`} className={`${classPrefix}__entry`} data-export-card="true" data-direct-edit-index={sourceIndex}>
       <div className={`${classPrefix}__entry-row`}>
         <p className={`${classPrefix}__entry-role`}>
           {directEditDispatch ? (

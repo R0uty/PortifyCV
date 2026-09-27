@@ -54,9 +54,9 @@ function SectionHead({ title }) {
   )
 }
 
-function Row({ label, children }) {
+function Row({ label, entryIndex, children }) {
   return (
-    <div className="european-showcase__row">
+    <div className="european-showcase__row" data-direct-edit-index={entryIndex}>
       <div className="european-showcase__row-label">{label}</div>
       <div className="european-showcase__row-value">{children}</div>
     </div>
@@ -217,7 +217,7 @@ export default function EuropeanShowcase({
               const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
 
               return (
-                <div key={`${item.role}-${item.company}-${index}`} data-export-card="true">
+                <div key={`${item.role}-${item.company}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.experience[index]}>
                   <Row label={dateRange || copy.datesPending}>
                     <p className="european-showcase__entry-role">{item.role || copy.untitledRole}</p>
                     {metaLine ? <p className="european-showcase__entry-meta">{metaLine}</p> : null}
@@ -251,7 +251,7 @@ export default function EuropeanShowcase({
               const metaLine = [item.school, item.location].filter(Boolean).join(' · ')
 
               return (
-                <div key={`${item.school}-${index}`} data-export-card="true">
+                <div key={`${item.school}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                   <Row label={formatDateRange(item.startDate, item.endDate) || copy.datesPending}>
                     <p className="european-showcase__entry-role">{item.degree || copy.untitledRole}</p>
                     {metaLine ? <p className="european-showcase__entry-meta">{metaLine}</p> : null}
@@ -300,7 +300,7 @@ export default function EuropeanShowcase({
                 : []
 
               return (
-                <div key={`${item.name}-${index}`} data-export-card="true">
+                <div key={`${item.name}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                   <Row label={item.date || ''}>
                     {item.name ? <p className="european-showcase__entry-role">{item.name}</p> : null}
                     {item.description ? <p className="european-showcase__project-desc">{item.description}</p> : null}
@@ -351,7 +351,7 @@ export default function EuropeanShowcase({
         <Section key={key} id="languages" title={copy.languages}>
           {snapshot.languages.length > 0 ? (
             snapshot.languages.map((item, index) => (
-              <Row key={`${item.language}-${index}`} label={item.level || ''}>
+              <Row key={`${item.language}-${index}`} label={item.level || ''} entryIndex={snapshot.sourceIndices.languages[index]}>
                 <p className="european-showcase__language-value">{item.language}</p>
               </Row>
             ))
@@ -371,7 +371,7 @@ export default function EuropeanShowcase({
         <Section key={key} id="certificates" title={copy.certificates}>
           {snapshot.certificates.length > 0 ? (
             snapshot.certificates.map((item, index) => (
-              <Row key={`${item.name}-${index}`} label={item.year || ''}>
+              <Row key={`${item.name}-${index}`} label={item.year || ''} entryIndex={snapshot.sourceIndices.certificates[index]}>
                 <p className="european-showcase__cert-value">
                   {[item.name, item.issuer].filter(Boolean).join(' – ')}
                 </p>

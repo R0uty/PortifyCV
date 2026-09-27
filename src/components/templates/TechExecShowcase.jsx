@@ -139,7 +139,7 @@ export default function TechExecShowcase({
                 const bullets = item.description ? splitToBullets(item.description) : []
 
                 return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="tech-exec-showcase__entry" data-export-card="true">
+                  <div key={`${item.role}-${item.company}-${index}`} className="tech-exec-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.experience[index]}>
                     <div className="tech-exec-showcase__entry-row">
                       <p className="tech-exec-showcase__entry-role">{item.role || copy.untitledRole}</p>
                       <p className="tech-exec-showcase__entry-dates">{dateRange || copy.datesPending}</p>
@@ -175,7 +175,7 @@ export default function TechExecShowcase({
           <div className="tech-exec-showcase__entry-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
-                <div key={`${item.school}-${index}`} className="tech-exec-showcase__entry" data-export-card="true">
+                <div key={`${item.school}-${index}`} className="tech-exec-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                   <div className="tech-exec-showcase__entry-row">
                     <p className="tech-exec-showcase__entry-role">{item.degree || copy.untitledRole}</p>
                     <p className="tech-exec-showcase__entry-dates">{formatDateRange(item.startDate, item.endDate)}</p>
@@ -228,7 +228,7 @@ export default function TechExecShowcase({
           <div className="tech-exec-showcase__strength-list">
             {snapshot.coreStrengths.length > 0 ? (
               snapshot.coreStrengths.map((item, index) => (
-                <div key={`${item.title}-${index}`} className="tech-exec-showcase__strength-item">
+                <div key={`${item.title}-${index}`} className="tech-exec-showcase__strength-item" data-direct-edit-index={snapshot.sourceIndices.coreStrengths[index]}>
                   {item.title ? <p className="tech-exec-showcase__strength-title">{item.title}</p> : null}
                   {item.description ? <p className="tech-exec-showcase__strength-desc">{item.description}</p> : null}
                 </div>
@@ -249,7 +249,7 @@ export default function TechExecShowcase({
           <ul className="tech-exec-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <li key={`${item.name}-${index}`} className="tech-exec-showcase__cert-item">
+                <li key={`${item.name}-${index}`} className="tech-exec-showcase__cert-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   <span className="tech-exec-showcase__cert-dot" aria-hidden="true" />
                   <div className="min-w-0">
                     {item.name ? <p className="tech-exec-showcase__cert-name">{item.name}</p> : null}
@@ -287,7 +287,7 @@ export default function TechExecShowcase({
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="tech-exec-showcase__project" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="tech-exec-showcase__project" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="tech-exec-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="tech-exec-showcase__project-desc">{item.description}</p> : null}
                     {tags.length > 0 ? (
@@ -336,7 +336,7 @@ export default function TechExecShowcase({
           <ul className="tech-exec-showcase__inline-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <li key={`${item.language}-${index}`} className="tech-exec-showcase__inline-item">
+                <li key={`${item.language}-${index}`} className="tech-exec-showcase__inline-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span>{item.language}</span>
                   {item.level ? <span className="tech-exec-showcase__inline-meta"> — {item.level}</span> : null}
                 </li>

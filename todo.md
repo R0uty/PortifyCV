@@ -1983,13 +1983,15 @@ on all 18 templates, by keyboard as well as pointer.
 
 ### START HERE — pick one of the two remaining gaps (both optional polish)
 
-- [ ] **58. Entry-level pencils (hover one job, not the whole section).**
-      Would need a `data-direct-edit-index={index}` attribute added next to the
-      existing `data-export-card` in each of the 17 Showcase files —
-      mechanical, ~1 line each — plus overlay logic to resolve it and open the
-      popup scrolled to that entry. Wide but shallow. Deliberately deferred as
-      Phase B; the section-level pencil already covers full editability, so
-      this is an ergonomics win on long Experience lists, not a capability one.
+- [x] **58. Entry-level pencils (hover one job, not the whole section).**
+      DONE 2026-09-27, v1.2.52. Every entry of every record-array section on
+      all 18 templates carries `data-direct-edit-index`; hovering one shows a
+      small gutter pencil that opens the section popup beside that entry,
+      outlined, with its first field focused. **Not one line per template as
+      planned above:** templates render the visibility-filtered snapshot, so
+      their map index is not the formData index. `createCvSnapshot` now
+      returns `sourceIndices` and every site writes the mapped value. See
+      `changes.md` for the full reasoning.
 
 - [ ] **60. Sections cannot move between columns.** Column placement comes from
       `templateConfig.primarySections`/`secondarySections` (template config,

@@ -131,7 +131,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
                 const metaLine = [item.company, item.location].filter(Boolean).join(', ')
 
                 return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="navy-professional-showcase__entry" data-export-card="true">
+                  <div key={`${item.role}-${item.company}-${index}`} className="navy-professional-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.experience[index]}>
                     <div className="navy-professional-showcase__entry-row">
                       <p className="navy-professional-showcase__entry-role">{item.role || copy.untitledRole}</p>
                       <p className="navy-professional-showcase__entry-dates">{dateRange || copy.datesPending}</p>
@@ -166,7 +166,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
                 const metaLine = [item.school, item.location].filter(Boolean).join(', ')
 
                 return (
-                  <div key={`${item.school}-${index}`} className="navy-professional-showcase__entry" data-export-card="true">
+                  <div key={`${item.school}-${index}`} className="navy-professional-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                     <div className="navy-professional-showcase__entry-row">
                       <p className="navy-professional-showcase__entry-role">{item.degree || copy.untitledRole}</p>
                       <p className="navy-professional-showcase__entry-dates">{formatDateRange(item.startDate, item.endDate)}</p>
@@ -191,7 +191,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
           <ul className="navy-professional-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <li key={`${item.name}-${index}`} className="navy-professional-showcase__cert-item">
+                <li key={`${item.name}-${index}`} className="navy-professional-showcase__cert-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   <span className="navy-professional-showcase__cert-dot" aria-hidden="true" />
                   <span>{[item.name, item.issuer].filter(Boolean).join(' – ')}</span>
                 </li>
@@ -234,7 +234,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
           <ul className="navy-professional-showcase__language-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <li key={`${item.language}-${index}`} className="navy-professional-showcase__language-item">
+                <li key={`${item.language}-${index}`} className="navy-professional-showcase__language-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span>{item.language}</span>
                   {item.level ? <span className="navy-professional-showcase__language-level"> – {item.level}</span> : null}
                 </li>

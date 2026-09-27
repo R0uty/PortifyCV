@@ -193,7 +193,7 @@ export default function DeveloperShowcase({
           <SectionHeading icon="certificates" label={isFinnish ? 'Sertifikaatit' : 'Certificates'} tone="sidebar" />
           {snapshot.certificates.length > 0 ? (
             snapshot.certificates.map((item, index) => (
-              <div key={`${item.name}-${index}`} data-export-card="true" className="dev-showcase__cert-card">
+              <div key={`${item.name}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.certificates[index]} className="dev-showcase__cert-card">
                 {item.name ? <p className="dev-showcase__cert-name">{item.name}</p> : null}
                 {item.issuer || item.year ? (
                   <p className="dev-showcase__cert-meta">
@@ -227,7 +227,7 @@ export default function DeveloperShowcase({
           <SectionHeading icon="education" label={isFinnish ? 'Koulutus' : 'Education'} tone="sidebar" />
           {snapshot.education.length > 0 ? (
             snapshot.education.map((item, index) => (
-              <div key={`${item.school}-${index}`} data-export-card="true" className="dev-showcase__edu-item">
+              <div key={`${item.school}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]} className="dev-showcase__edu-item">
                 {item.degree ? <p className="dev-showcase__edu-degree">{item.degree}</p> : null}
                 {item.school || item.location ? (
                   <p className="dev-showcase__edu-meta">
@@ -254,7 +254,7 @@ export default function DeveloperShowcase({
           <SectionHeading icon="languages" label={isFinnish ? 'Kielet' : 'Languages'} tone="sidebar" />
           {snapshot.languages.length > 0 ? (
             snapshot.languages.map((item, index) => (
-              <div key={`${item.language}-${index}`} className="dev-showcase__lang-item">
+              <div key={`${item.language}-${index}`} className="dev-showcase__lang-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                 <span className="dev-showcase__lang-dot" aria-hidden="true" />
                 <span>{item.language}</span>
                 {item.level ? <span className="dev-showcase__lang-level"> — {item.level}</span> : null}
@@ -294,6 +294,7 @@ export default function DeveloperShowcase({
 
                 return (
                   <div
+                    data-direct-edit-index={snapshot.sourceIndices.experience[index]}
                     key={`${item.role}-${item.company}-${index}`}
                     className="dev-showcase__timeline-item"
                     data-export-card="true"
@@ -349,7 +350,7 @@ export default function DeveloperShowcase({
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="dev-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="dev-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="dev-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="dev-showcase__project-desc">{item.description}</p> : null}
                     {chips.length > 0 ? (
@@ -405,7 +406,7 @@ export default function DeveloperShowcase({
           <div className="dev-showcase__card-grid">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
-                <div key={`${item.title}-${index}`} className="dev-showcase__achievement-card" data-export-card="true">
+                <div key={`${item.title}-${index}`} className="dev-showcase__achievement-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                   <span className="dev-showcase__trophy-icon" aria-hidden="true">{sectionIcons.achievements}</span>
                   <div className="min-w-0">
                     <div className="dev-showcase__achievement-title-row">
@@ -435,7 +436,7 @@ export default function DeveloperShowcase({
           <div className="dev-showcase__card-grid">
             {snapshot.openSource.length > 0 ? (
               snapshot.openSource.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="dev-showcase__opensource-card" data-export-card="true">
+                <div key={`${item.name}-${index}`} className="dev-showcase__opensource-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.openSource[index]}>
                   {item.name ? <p className="dev-showcase__opensource-name">{item.name}</p> : null}
                   {item.language || item.stars || item.forks ? (
                     <div className="dev-showcase__opensource-meta">
@@ -477,7 +478,7 @@ export default function DeveloperShowcase({
           <div className="dev-showcase__card-grid">
             {snapshot.publications.length > 0 ? (
               snapshot.publications.map((item, index) => (
-                <div key={`${item.title}-${index}`} className="dev-showcase__publication-item" data-export-card="true">
+                <div key={`${item.title}-${index}`} className="dev-showcase__publication-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.publications[index]}>
                   {item.title ? <p className="dev-showcase__publication-title">{item.title}</p> : null}
                   {item.publisher || item.year ? (
                     <p className="dev-showcase__publication-meta">

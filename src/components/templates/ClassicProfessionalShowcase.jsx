@@ -131,6 +131,7 @@ export default function ClassicProfessionalShowcase({
             ) : snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
                 directEditDispatch,
+                sourceIndex: snapshot.sourceIndices.experience[index],
                 copy,
                 classPrefix: 'classic-professional-showcase',
                 separator: ', ',
@@ -155,7 +156,7 @@ export default function ClassicProfessionalShowcase({
                 const metaLine = [item.school, item.location].filter(Boolean).join(', ')
 
                 return (
-                  <div key={`${item.school}-${index}`} className="classic-professional-showcase__entry" data-export-card="true">
+                  <div key={`${item.school}-${index}`} className="classic-professional-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                     <div className="classic-professional-showcase__entry-row">
                       <p className="classic-professional-showcase__entry-role">{item.degree || copy.untitledRole}</p>
                       <p className="classic-professional-showcase__entry-dates">{formatDateRange(item.startDate, item.endDate)}</p>
@@ -203,7 +204,7 @@ export default function ClassicProfessionalShowcase({
           {snapshot.languages.length > 0 ? (
             <p className="classic-professional-showcase__language-row">
               {snapshot.languages.map((item, index) => (
-                <span key={`${item.language}-${index}`} className="classic-professional-showcase__language-item">
+                <span key={`${item.language}-${index}`} className="classic-professional-showcase__language-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   {index > 0 ? <span className="classic-professional-showcase__language-sep" aria-hidden="true">|</span> : null}
                   {item.language}
                   {item.level ? <> – {item.level}</> : null}
@@ -226,7 +227,7 @@ export default function ClassicProfessionalShowcase({
           <div className="classic-professional-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <p key={`${item.name}-${index}`} className="classic-professional-showcase__cert-item">
+                <p key={`${item.name}-${index}`} className="classic-professional-showcase__cert-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {[item.name, item.issuer].filter(Boolean).join(' – ')}
                 </p>
               ))

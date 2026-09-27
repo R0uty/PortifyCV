@@ -67,12 +67,12 @@ function highlightMetrics(text) {
 // for its own local copy. Location is read-only-appended text, never its
 // own EditableField, matching the shared module's own precedent (only
 // role and company are independently editable there too).
-function renderExperienceEntry(item, index, { directEditDispatch, copy }) {
+function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = item.description ? splitToBullets(item.description) : []
 
   return (
-    <div key={`${item.role}-${item.company}-${index}`} className="compact-showcase__entry" data-export-card="true">
+    <div key={`${item.role}-${item.company}-${index}`} className="compact-showcase__entry" data-export-card="true" data-direct-edit-index={sourceIndex}>
       <div className="compact-showcase__entry-row">
         <div className="min-w-0">
           <span className="compact-showcase__entry-role">
@@ -292,7 +292,13 @@ export default function CompactShowcase({
                 {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
               </EditableList>
             ) : snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy }))
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="compact-showcase__empty">
                 {isFinnish ? 'Kokemus näkyy tässä.' : 'Experience will appear here.'}
@@ -316,7 +322,7 @@ export default function CompactShowcase({
                   .join('  ·  ')
 
                 return (
-                  <div key={`${item.name}-${index}`} className="compact-showcase__project" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="compact-showcase__project" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     <span className="compact-showcase__entry-role">{item.name}</span>
                     {item.description ? <span className="compact-showcase__project-desc"> — {item.description}</span> : null}
                     {item.stack ? <p className="compact-showcase__project-stack">{item.stack}</p> : null}
@@ -344,7 +350,7 @@ export default function CompactShowcase({
                 const dateRange = formatDateRange(item.startDate, item.endDate)
 
                 return (
-                  <div key={`${item.school}-${index}`} className="compact-showcase__entry-row" data-export-card="true">
+                  <div key={`${item.school}-${index}`} className="compact-showcase__entry-row" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                     <div className="min-w-0">
                       <span className="compact-showcase__entry-role">{item.degree}</span>
                       {item.school ? <span className="compact-showcase__entry-company"> · {item.school}</span> : null}
@@ -370,7 +376,7 @@ export default function CompactShowcase({
           <div className="compact-showcase__entry-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="compact-showcase__entry-row" data-export-card="true">
+                <div key={`${item.name}-${index}`} className="compact-showcase__entry-row" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   <span className="compact-showcase__entry-role">{item.name}</span>
                   <span className="compact-showcase__entry-dates">
                     {[item.issuer, item.year].filter(Boolean).join(' · ')}
@@ -394,7 +400,7 @@ export default function CompactShowcase({
           {snapshot.languages.length > 0 ? (
             <p className="compact-showcase__inline-list">
               {snapshot.languages.map((item, index) => (
-                <span key={`${item.language}-${index}`}>
+                <span key={`${item.language}-${index}`} data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   {index > 0 ? '  ·  ' : ''}
                   {item.language}{item.level ? ` — ${item.level}` : ''}
                 </span>
@@ -439,7 +445,7 @@ export default function CompactShowcase({
           {snapshot.interests.length > 0 ? (
             <p className="compact-showcase__inline-list">
               {snapshot.interests.map((item, index) => (
-                <span key={`${item.name}-${index}`}>{index > 0 ? '  ·  ' : ''}{item.name}</span>
+                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`}>{index > 0 ? '  ·  ' : ''}{item.name}</span>
               ))}
             </p>
           ) : (

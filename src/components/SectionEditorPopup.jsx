@@ -135,6 +135,7 @@ export default function SectionEditorPopup({
   dispatchFormData,
   templateConfig,
   locale,
+  focusEntryIndex = null,
   onClose,
 }) {
   const isFinnish = locale === 'fi'
@@ -160,8 +161,30 @@ export default function SectionEditorPopup({
   // (tabIndex={-1}) rather than the first field, so screen readers
   // announce the dialog and its label before its contents, and Tab then
   // walks the fields in order.
+  //
+  // Opened from an entry pencil, the user already said which entry they
+  // want, so that entry's first field takes focus instead, scrolled to the
+  // top of the popup's own scroll box. Only that box scrolls: the
+  // element's scrollIntoView would scroll the page too, and the overlay
+  // already brings the popup itself into view. Mount-only, like the plain
+  // case: re-focusing on every render would steal the caret while typing.
   useEffect(() => {
-    dialogRef.current?.focus()
+    const dialog = dialogRef.current
+    const entry =
+      focusEntryIndex === null ? null : dialog?.querySelector(`[data-entry-index="${focusEntryIndex}"]`)
+
+    if (!entry) {
+      dialog?.focus()
+      return
+    }
+
+    // The sticky header overlaps the top of the scroll box, so land the
+    // entry just below it rather than underneath it.
+    const headerHeight = dialog.querySelector('.direct-edit-popup__header')?.offsetHeight ?? 0
+    dialog.scrollTop +=
+      entry.getBoundingClientRect().top - dialog.getBoundingClientRect().top - headerHeight - 8
+    entry.querySelector('input, textarea')?.focus({ preventScroll: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (!schema) {
@@ -213,7 +236,10 @@ export default function SectionEditorPopup({
           return (
             <div
               key={index}
-              className={`direct-edit-popup__entry${isHidden ? ' direct-edit-popup__entry--hidden' : ''}`}
+              data-entry-index={index}
+              className={`direct-edit-popup__entry${isHidden ? ' direct-edit-popup__entry--hidden' : ''}${
+                index === focusEntryIndex ? ' direct-edit-popup__entry--focused' : ''
+              }`}
             >
               <div className="direct-edit-popup__entry-bar">
                 <span className="direct-edit-popup__entry-index">#{index + 1}</span>

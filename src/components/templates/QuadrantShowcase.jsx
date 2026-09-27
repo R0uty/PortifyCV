@@ -162,7 +162,7 @@ export default function QuadrantShowcase({
                 const bullets = item.description ? splitToBullets(item.description) : []
 
                 return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="quadrant-showcase__entry" data-export-card="true">
+                  <div key={`${item.role}-${item.company}-${index}`} className="quadrant-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.experience[index]}>
                     <div className="quadrant-showcase__entry-row">
                       <div className="min-w-0">
                         <p className="quadrant-showcase__entry-role">{item.role || copy.untitledRole}</p>
@@ -205,7 +205,7 @@ export default function QuadrantShowcase({
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="quadrant-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="quadrant-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="quadrant-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="quadrant-showcase__project-desc">{item.description}</p> : null}
                     {chips.length > 0 ? (
@@ -238,7 +238,7 @@ export default function QuadrantShowcase({
           <div className="quadrant-showcase__list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
-                <div key={`${item.school}-${index}`} className="quadrant-showcase__list-item">
+                <div key={`${item.school}-${index}`} className="quadrant-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                   {item.degree ? <p className="quadrant-showcase__list-title">{item.degree}</p> : null}
                   {item.school || item.location ? (
                     <p className="quadrant-showcase__list-meta">
@@ -264,7 +264,7 @@ export default function QuadrantShowcase({
           <div className="quadrant-showcase__list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="quadrant-showcase__list-item">
+                <div key={`${item.name}-${index}`} className="quadrant-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {item.name ? <p className="quadrant-showcase__list-title">{item.name}</p> : null}
                   {item.issuer || item.year ? (
                     <p className="quadrant-showcase__list-meta">
@@ -294,7 +294,7 @@ export default function QuadrantShowcase({
           <div className="quadrant-showcase__list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="quadrant-showcase__list-item quadrant-showcase__list-item--row">
+                <div key={`${item.language}-${index}`} className="quadrant-showcase__list-item quadrant-showcase__list-item--row" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span>{item.language}</span>
                   {item.level ? <span className="quadrant-showcase__list-meta">{item.level}</span> : null}
                 </div>

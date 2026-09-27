@@ -91,7 +91,7 @@ function highlightMetrics(text, showMetrics) {
 // modifier classes driven by the already-correct JS index are the only
 // mechanism proven robust against whatever `EditableList`/dnd-kit renders
 // around an entry.
-function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics, isFirst, isLast }) {
+function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics, isFirst, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = item.description ? splitToBullets(item.description) : []
   const entryClassName = [
@@ -106,7 +106,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetr
   ].filter(Boolean).join(' ')
 
   return (
-    <div key={`${item.role}-${item.company}-${index}`} className={entryClassName} data-export-card="true">
+    <div key={`${item.role}-${item.company}-${index}`} className={entryClassName} data-export-card="true" data-direct-edit-index={sourceIndex}>
       <div className="executive-showcase__entry-row">
         <div className="min-w-0">
           <p className="executive-showcase__entry-role">
@@ -307,6 +307,7 @@ export default function ExecutiveShowcase({
             ) : snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
                 directEditDispatch,
+                sourceIndex: snapshot.sourceIndices.experience[index],
                 copy,
                 showMetrics,
                 isFirst: index === 0,
@@ -334,7 +335,7 @@ export default function ExecutiveShowcase({
               const bullets = item.description ? splitToBullets(item.description) : []
 
               return (
-                <div key={`${item.role}-${item.organization}-${index}`} className="executive-showcase__entry" data-export-card="true">
+                <div key={`${item.role}-${item.organization}-${index}`} className="executive-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.leadership[index]}>
                   <div className="executive-showcase__entry-row">
                     <p className="executive-showcase__entry-role">{heading || copy.untitledRole}</p>
                     <p className="executive-showcase__entry-dates">{dateRange}</p>
@@ -360,7 +361,7 @@ export default function ExecutiveShowcase({
           <div className="executive-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="executive-showcase__project-card" data-export-card="true">
+                <div key={`${item.name}-${index}`} className="executive-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                   {item.name ? <p className="executive-showcase__project-name">{item.name}</p> : null}
                   {item.organization ? <p className="executive-showcase__project-org">{item.organization}</p> : null}
                   {item.description ? <p className="executive-showcase__project-desc">{item.description}</p> : null}
@@ -385,7 +386,7 @@ export default function ExecutiveShowcase({
           <ul className="executive-showcase__award-list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
-                <li key={`${item.title}-${index}`} className="executive-showcase__award-item">
+                <li key={`${item.title}-${index}`} className="executive-showcase__award-item" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                   <span className="executive-showcase__award-dot" aria-hidden="true" />
                   <div className="min-w-0">
                     <div className="executive-showcase__award-row">
@@ -412,7 +413,7 @@ export default function ExecutiveShowcase({
           <div className="executive-showcase__entry-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
-                <div key={`${item.school}-${index}`} className="executive-showcase__entry" data-export-card="true">
+                <div key={`${item.school}-${index}`} className="executive-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                   <div className="executive-showcase__entry-row">
                     <div className="min-w-0">
                       {item.degree ? <p className="executive-showcase__entry-role">{item.degree}</p> : null}
@@ -446,7 +447,7 @@ export default function ExecutiveShowcase({
           <div className="executive-showcase__strength-list">
             {snapshot.coreStrengths.length > 0 ? (
               snapshot.coreStrengths.map((item, index) => (
-                <div key={`${item.title}-${index}`} className="executive-showcase__strength-item">
+                <div key={`${item.title}-${index}`} className="executive-showcase__strength-item" data-direct-edit-index={snapshot.sourceIndices.coreStrengths[index]}>
                   {item.title ? <p className="executive-showcase__strength-title">{item.title}</p> : null}
                   {item.description ? <p className="executive-showcase__strength-desc">{item.description}</p> : null}
                 </div>
@@ -498,7 +499,7 @@ export default function ExecutiveShowcase({
           <div className="executive-showcase__list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="executive-showcase__list-item">
+                <div key={`${item.name}-${index}`} className="executive-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {item.name ? <p className="executive-showcase__list-title">{item.name}</p> : null}
                   {item.issuer || item.year ? (
                     <p className="executive-showcase__list-meta">
@@ -528,7 +529,7 @@ export default function ExecutiveShowcase({
           <div className="executive-showcase__list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="executive-showcase__list-item executive-showcase__list-item--row">
+                <div key={`${item.language}-${index}`} className="executive-showcase__list-item executive-showcase__list-item--row" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span>{item.language}</span>
                   {item.level ? <span className="executive-showcase__list-meta">{item.level}</span> : null}
                 </div>
@@ -549,7 +550,7 @@ export default function ExecutiveShowcase({
           <div className="executive-showcase__list">
             {snapshot.memberships.length > 0 ? (
               snapshot.memberships.map((item, index) => (
-                <div key={`${item.organization}-${index}`} className="executive-showcase__list-item">
+                <div key={`${item.organization}-${index}`} className="executive-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.memberships[index]}>
                   {item.organization ? <p className="executive-showcase__list-title">{item.organization}</p> : null}
                   {item.role || item.year ? (
                     <p className="executive-showcase__list-meta">

@@ -8,6 +8,12 @@ import { getSectionSchema } from '../utils/sectionSchema'
 // overlay reach all 18 templates without touching a single template file.
 const SECTION_SELECTOR = '[data-export-section], [data-export-header]'
 
+// One entry of a record-array section. Unlike the section attributes this
+// one exists only for Direct Edit, and its value is always a formData
+// index (templates map snapshot-relative indices through
+// snapshot.sourceIndices), so it can go straight to the popup.
+const ENTRY_SELECTOR = '[data-direct-edit-index]'
+
 function resolveSectionKey(target) {
   const match = target.closest?.(SECTION_SELECTOR)
 
@@ -41,7 +47,13 @@ export default function SectionEditOverlay({
   const containerRef = useRef(null)
   const popupAnchorRef = useRef(null)
   const [hovered, setHovered] = useState(null)
+  const [hoveredEntry, setHoveredEntry] = useState(null)
   const [openSectionKey, setOpenSectionKey] = useState(null)
+  // The entry an entry pencil opened the popup on, or null when it was
+  // opened for the whole section. Its top is captured at click time so the
+  // popup opens beside that entry rather than at the section's top, which
+  // on a long Experience list can be a whole screen above it.
+  const [focusEntry, setFocusEntry] = useState(null)
   const [popupPosition, setPopupPosition] = useState(null)
   // Editable sections in DOM order, used only to render the keyboard
   // triggers below. Derived from the same attributes the pointer path
@@ -134,11 +146,33 @@ export default function SectionEditOverlay({
       }
 
       setHovered(measure(element, sectionKey))
+
+      // The entry must belong to THIS section: a section nested inside
+      // another's wrapper would otherwise pick up its parent's entries.
+      const entryElement = event.target.closest?.(ENTRY_SELECTOR)
+      const entryIndex = Number(entryElement?.getAttribute('data-direct-edit-index'))
+
+      if (
+        entryElement &&
+        element.contains(entryElement) &&
+        entryElement.closest(SECTION_SELECTOR) === element &&
+        Number.isInteger(entryIndex)
+      ) {
+        const measured = measure(entryElement, sectionKey)
+        setHoveredEntry((prev) =>
+          prev && prev.index === entryIndex && prev.top === measured.top && prev.right === measured.right
+            ? prev
+            : { ...measured, index: entryIndex },
+        )
+      } else {
+        setHoveredEntry(null)
+      }
     }
 
     const handlePointerLeave = () => {
       if (!openSectionKey) {
         setHovered(null)
+        setHoveredEntry(null)
       }
     }
 
@@ -154,6 +188,7 @@ export default function SectionEditOverlay({
 
       setOpenSectionKey(null)
       setHovered(null)
+      setHoveredEntry(null)
     }
 
     parent.addEventListener('pointerover', handlePointerOver)
@@ -230,6 +265,7 @@ export default function SectionEditOverlay({
       // measure before opening rather than relying on a pointer having
       // already done it.
       if (focusSection(sectionKey)) {
+        setFocusEntry(null)
         setOpenSectionKey(sectionKey)
       }
     },
@@ -246,6 +282,7 @@ export default function SectionEditOverlay({
 
     setOpenSectionKey(null)
     setHovered(null)
+    setHoveredEntry(null)
 
     if (previousKey) {
       containerRef.current
@@ -289,7 +326,8 @@ export default function SectionEditOverlay({
     const popupWidth = anchor.offsetWidth
     const popupHeight = anchor.offsetHeight
 
-    const top = Math.max(0, Math.min(hovered.top, containerHeight - popupHeight))
+    const anchorTop = focusEntry ? focusEntry.top : hovered.top
+    const top = Math.max(0, Math.min(anchorTop, containerHeight - popupHeight))
 
     // hovered.left/right are already container-relative, so these are the
     // gaps between the section and the container's own edges.
@@ -312,7 +350,7 @@ export default function SectionEditOverlay({
     }
 
     setPopupPosition((prev) => (prev && prev.top === top && prev.left === left ? prev : { top, left }))
-  }, [openSectionKey, hovered])
+  }, [openSectionKey, hovered, focusEntry])
 
   // Bring the popup fully into view once it opens (e.g. a section near
   // the bottom of a long, scrollable preview) — complements the clamp
@@ -362,8 +400,34 @@ export default function SectionEditOverlay({
           className="direct-edit-pencil"
           style={{ top: `${hovered.top}px`, left: `${hovered.right}px` }}
           onPointerDown={(event) => event.stopPropagation()}
-          onClick={() => setOpenSectionKey(hovered.sectionKey)}
+          onClick={() => {
+            setFocusEntry(null)
+            setOpenSectionKey(hovered.sectionKey)
+          }}
           aria-label={locale === 'fi' ? 'Muokkaa osiota' : 'Edit section'}
+        >
+          &#9998;
+        </button>
+      ) : null}
+
+      {/* Pointer-only on purpose: the section's keyboard trigger already
+          reaches every entry, and one extra tab stop per entry would bury
+          the section triggers on a long CV. */}
+      {hovered && hoveredEntry && !openSectionKey ? (
+        <button
+          type="button"
+          className="direct-edit-entry-pencil"
+          style={{ top: `${hoveredEntry.top}px`, left: `${hoveredEntry.right}px` }}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={() => {
+            setFocusEntry({ index: hoveredEntry.index, top: hoveredEntry.top })
+            setOpenSectionKey(hoveredEntry.sectionKey)
+          }}
+          aria-label={
+            locale === 'fi'
+              ? `Muokkaa kohdetta ${hoveredEntry.index + 1}`
+              : `Edit entry ${hoveredEntry.index + 1}`
+          }
         >
           &#9998;
         </button>
@@ -374,7 +438,7 @@ export default function SectionEditOverlay({
           ref={popupAnchorRef}
           className="direct-edit-popup-anchor"
           style={{
-            top: `${popupPosition ? popupPosition.top : hovered.top}px`,
+            top: `${popupPosition ? popupPosition.top : (focusEntry ? focusEntry.top : hovered.top)}px`,
             left: `${popupPosition ? popupPosition.left : hovered.right}px`,
           }}
         >
@@ -384,6 +448,7 @@ export default function SectionEditOverlay({
             dispatchFormData={dispatchFormData}
             templateConfig={templateConfig}
             locale={locale}
+            focusEntryIndex={focusEntry ? focusEntry.index : null}
             onClose={handleClose}
           />
         </div>

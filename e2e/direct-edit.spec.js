@@ -491,6 +491,119 @@ test.describe('Direct Edit builder', () => {
     await expect(page.locator('.direct-edit-popup')).toBeVisible()
   })
 
+  test('hovering one experience entry reveals an entry pencil that opens the popup on that entry', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await selectTemplate(page, 'Quadrant')
+
+    const secondEntry = page.locator('[data-export-section="experience"] [data-direct-edit-index="1"]').first()
+    await secondEntry.hover()
+
+    const entryPencil = page.locator('.direct-edit-entry-pencil')
+    await expect(entryPencil).toBeVisible()
+    await entryPencil.click()
+
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+
+    const focusedEntry = popup.locator('.direct-edit-popup__entry--focused')
+    await expect(focusedEntry).toHaveCount(1)
+    await expect(focusedEntry.locator('.direct-edit-popup__entry-index')).toHaveText('#2')
+    await expect(focusedEntry.locator('input[data-field="company"]')).toHaveValue('Atlas Labs')
+    await expect(focusedEntry.locator('input[data-field="role"]')).toBeFocused()
+  })
+
+  // Anchored at the section's top instead, the popup for a lower entry on
+  // a long section opened a screen above it and the focused field ended
+  // up scrolled under the sticky toolbar.
+  test('an entry pencil opens the popup beside that entry with its first field visible', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const secondEntry = page.locator('[data-export-section="experience"] [data-direct-edit-index="1"]').first()
+    await secondEntry.scrollIntoViewIfNeeded()
+    await secondEntry.hover()
+    await page.locator('.direct-edit-entry-pencil').click()
+
+    // Both measured after opening: bringing the popup into view may
+    // scroll the page, which moves the entry and the popup together.
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+    expect(Math.abs((await popup.boundingBox()).y - (await secondEntry.boundingBox()).y)).toBeLessThan(4)
+
+    // Visible means actually hit-testable, not merely inside the viewport:
+    // the toolbar is sticky and would still cover a field scrolled under it.
+    const roleInput = popup.locator('.direct-edit-popup__entry--focused input[data-field="role"]')
+    await expect(roleInput).toBeFocused()
+    const isOnTop = await roleInput.evaluate((input) => {
+      const rect = input.getBoundingClientRect()
+      return document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2) === input
+    })
+    expect(isOnTop).toBe(true)
+  })
+
+  // The trap this guards: Showcases render createCvSnapshot's output,
+  // which drops hidden (and blank) entries, so a template's own map index
+  // is NOT the formData index the popup edits. With entry #1 hidden, the
+  // first card rendered on a snapshot-driven template is formData #2.
+  test('an entry pencil still targets the right entry when an earlier entry is hidden', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await selectTemplate(page, 'Quadrant')
+
+    await page.locator('[data-export-section="experience"]').first().hover()
+    await page.locator('.direct-edit-pencil').click()
+    const popup = page.locator('.direct-edit-popup')
+    await popup.locator('.direct-edit-popup__entry').first().locator('.direct-edit-popup__entry-visibility').click()
+    await page.keyboard.press('Escape')
+    await expect(popup).toHaveCount(0)
+
+    const firstRendered = page.locator('[data-export-section="experience"] [data-direct-edit-index]').first()
+    await expect(firstRendered).toContainText('Atlas Labs')
+    await firstRendered.hover()
+    await page.locator('.direct-edit-entry-pencil').click()
+
+    const focusedEntry = popup.locator('.direct-edit-popup__entry--focused')
+    await expect(focusedEntry.locator('.direct-edit-popup__entry-index')).toHaveText('#2')
+    await expect(focusedEntry.locator('input[data-field="company"]')).toHaveValue('Atlas Labs')
+  })
+
+  // Every template, with entry #1 hidden so snapshot-driven templates
+  // (filtered indices) and inline-wired ones (raw formData indices) both
+  // get exercised: each experience card's data-direct-edit-index must name
+  // the formData entry whose company it actually shows.
+  test('every template tags each experience entry with its formData index', async ({ page }) => {
+    test.setTimeout(120_000)
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await page.locator('[data-export-section="experience"]').first().hover()
+    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-popup__entry').first().locator('.direct-edit-popup__entry-visibility').click()
+    await page.keyboard.press('Escape')
+
+    const companies = ['Studio North', 'Atlas Labs']
+    const templates = [
+      'Minimalist', 'Developer', 'Creative', 'Modern Professional', 'Executive', 'Modern Timeline',
+      'Graduate', 'Compact', 'Portfolio Hybrid', 'Tech Executive', 'Classic Professional',
+      'Navy Professional', 'Modern Orange', 'Colorful Compact', 'Quadrant', 'Editorial', 'Portrait', 'European',
+    ]
+
+    for (const label of templates) {
+      await selectTemplate(page, label)
+      await expect(page.locator('[data-export-section="experience"]').first()).toBeVisible()
+
+      const tagged = await page.evaluate(() =>
+        Array.from(
+          document.querySelectorAll('.direct-edit-preview [data-export-section="experience"] [data-direct-edit-index]'),
+          (element) => ({ index: Number(element.getAttribute('data-direct-edit-index')), text: element.textContent }),
+        ),
+      )
+
+      expect(tagged.length, `${label}: tagged experience entries`).toBeGreaterThan(0)
+
+      for (const { index, text } of tagged) {
+        expect(text, `${label}: entry tagged ${index}`).toContain(companies[index])
+      }
+    }
+  })
+
   // Regression guard: `.builder-section` (app-shell.css) is `flex: 1;
   // min-height: 0` — needed so Classic mode's own AppShell panels can
   // scroll *inside* a viewport-bounded box instead of growing it. Direct

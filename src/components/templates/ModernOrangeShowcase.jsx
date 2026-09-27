@@ -120,9 +120,9 @@ function SidebarBlock({ title, children }) {
   )
 }
 
-function ExperienceRow({ date, isLast, children }) {
+function ExperienceRow({ date, isLast, entryIndex, children }) {
   return (
-    <div className={`modern-orange-showcase__exp-row${isLast ? ' modern-orange-showcase__exp-row--last' : ''}`} data-export-card="true">
+    <div className={`modern-orange-showcase__exp-row${isLast ? ' modern-orange-showcase__exp-row--last' : ''}`} data-export-card="true" data-direct-edit-index={entryIndex}>
       <p className="modern-orange-showcase__exp-date">{date}</p>
       <div className="modern-orange-showcase__exp-rail">
         <span className="modern-orange-showcase__exp-marker" aria-hidden="true" />
@@ -133,9 +133,9 @@ function ExperienceRow({ date, isLast, children }) {
   )
 }
 
-function EducationRow({ isLast, children }) {
+function EducationRow({ isLast, entryIndex, children }) {
   return (
-    <div className="modern-orange-showcase__edu-row" data-export-card="true">
+    <div className="modern-orange-showcase__edu-row" data-export-card="true" data-direct-edit-index={entryIndex}>
       <div className="modern-orange-showcase__edu-rail">
         <span className="modern-orange-showcase__edu-marker" aria-hidden="true" />
         {!isLast ? <span className="modern-orange-showcase__edu-line" aria-hidden="true" /> : null}
@@ -156,7 +156,7 @@ function EducationRow({ isLast, children }) {
 // formData.experience-relative (only ever read inside directEditDispatch-
 // gated branches or the React key) — never assume it lines up with
 // snapshot.experience's own (filtered) indices in the read-only call site.
-function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast }) {
+function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = item.description ? splitToBullets(item.description) : []
 
@@ -165,6 +165,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast }
       key={`${item.role}-${item.company}-${index}`}
       date={dateRange || copy.datesPending}
       isLast={isLast}
+      entryIndex={sourceIndex}
     >
       <p className="modern-orange-showcase__exp-role">
         {directEditDispatch ? (
@@ -333,6 +334,7 @@ export default function ModernOrangeShowcase({
             ) : snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
                 directEditDispatch,
+                sourceIndex: snapshot.sourceIndices.experience[index],
                 copy,
                 isLast: index === snapshot.experience.length - 1,
               }))
@@ -358,7 +360,7 @@ export default function ModernOrangeShowcase({
                 const projectUrl = item.demoUrl || item.githubUrl
 
                 return (
-                  <div key={`${item.name}-${index}`} className="modern-orange-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="modern-orange-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     <span className="modern-orange-showcase__project-icon" aria-hidden="true">
                       {sectionIcons.projects}
                     </span>
@@ -395,7 +397,7 @@ export default function ModernOrangeShowcase({
           <ul className="modern-orange-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <li key={`${item.name}-${index}`} className="modern-orange-showcase__cert-item" data-export-card="true">
+                <li key={`${item.name}-${index}`} className="modern-orange-showcase__cert-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   <div className="modern-orange-showcase__cert-row">
                     <div className="modern-orange-showcase__cert-text">
                       {item.name ? <p className="modern-orange-showcase__cert-name">{item.name}</p> : null}
@@ -449,7 +451,7 @@ export default function ModernOrangeShowcase({
           <div className="modern-orange-showcase__lang-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="modern-orange-showcase__lang-row">
+                <div key={`${item.language}-${index}`} className="modern-orange-showcase__lang-row" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <div className="modern-orange-showcase__lang-head">
                     <span className="modern-orange-showcase__lang-name">{item.language}</span>
                     {item.level ? <span className="modern-orange-showcase__lang-level">{item.level}</span> : null}
@@ -476,7 +478,11 @@ export default function ModernOrangeShowcase({
                 const metaLine = [item.school, item.location].filter(Boolean).join(', ')
 
                 return (
-                  <EducationRow key={`${item.school}-${index}`} isLast={index === snapshot.education.length - 1}>
+                  <EducationRow
+                    key={`${item.school}-${index}`}
+                    isLast={index === snapshot.education.length - 1}
+                    entryIndex={snapshot.sourceIndices.education[index]}
+                  >
                     <p className="modern-orange-showcase__edu-dates">{formatDateRange(item.startDate, item.endDate)}</p>
                     <p className="modern-orange-showcase__edu-degree">{item.degree || copy.untitledRole}</p>
                     {metaLine ? <p className="modern-orange-showcase__edu-meta">{metaLine}</p> : null}

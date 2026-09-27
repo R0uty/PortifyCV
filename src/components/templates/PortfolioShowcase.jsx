@@ -187,7 +187,7 @@ export default function PortfolioShowcase({
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="portfolio-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="portfolio-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="portfolio-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="portfolio-showcase__project-desc">{item.description}</p> : null}
                     {item.impact ? (
@@ -244,7 +244,7 @@ export default function PortfolioShowcase({
                 const bullets = item.description ? splitToBullets(item.description) : []
 
                 return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="portfolio-showcase__timeline-item" data-export-card="true">
+                  <div key={`${item.role}-${item.company}-${index}`} className="portfolio-showcase__timeline-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.experience[index]}>
                     <div className="portfolio-showcase__timeline-rail">
                       <span className="portfolio-showcase__timeline-marker" aria-hidden="true" />
                       <span className="portfolio-showcase__timeline-line" aria-hidden="true" />
@@ -297,7 +297,7 @@ export default function PortfolioShowcase({
                 ].filter(([, value]) => value)
 
                 return (
-                  <div key={`${item.title}-${index}`} className="portfolio-showcase__case-card" data-export-card="true">
+                  <div key={`${item.title}-${index}`} className="portfolio-showcase__case-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.caseStudies[index]}>
                     {item.title ? <p className="portfolio-showcase__project-name">{item.title}</p> : null}
                     <div className="portfolio-showcase__case-rows">
                       {rows.map(([label, value]) => (
@@ -333,7 +333,7 @@ export default function PortfolioShowcase({
                 ].filter(Boolean)
 
                 return (
-                  <div key={`${item.name}-${index}`} className="portfolio-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="portfolio-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.openSource[index]}>
                     {item.name ? <p className="portfolio-showcase__project-name">{item.name}</p> : null}
                     {meta.length > 0 ? (
                       <p className="portfolio-showcase__project-meta">{meta.join('   ')}</p>
@@ -361,7 +361,7 @@ export default function PortfolioShowcase({
           <div className="portfolio-showcase__edu-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
-                <div key={`${item.school}-${index}`} className="portfolio-showcase__edu-item" data-export-card="true">
+                <div key={`${item.school}-${index}`} className="portfolio-showcase__edu-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                   <p className="portfolio-showcase__project-name">{item.degree}</p>
                   {item.school || item.location ? (
                     <p className="portfolio-showcase__project-meta">
@@ -393,7 +393,7 @@ export default function PortfolioShowcase({
               const meta = [item.author, item.role].filter(Boolean).join(', ')
 
               return (
-                <div key={`${item.author}-${index}`} className="portfolio-showcase__testimonial-card" data-export-card="true">
+                <div key={`${item.author}-${index}`} className="portfolio-showcase__testimonial-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.testimonials[index]}>
                   {item.quote ? <p className="portfolio-showcase__testimonial-quote">&ldquo;{item.quote}&rdquo;</p> : null}
                   {meta ? <p className="portfolio-showcase__testimonial-meta">{meta}</p> : null}
                 </div>
@@ -443,7 +443,7 @@ export default function PortfolioShowcase({
           <div className="portfolio-showcase__list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="portfolio-showcase__list-item">
+                <div key={`${item.name}-${index}`} className="portfolio-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {item.name ? <p className="portfolio-showcase__list-title">{item.name}</p> : null}
                   {item.issuer || item.year ? (
                     <p className="portfolio-showcase__list-meta">
@@ -497,7 +497,7 @@ export default function PortfolioShowcase({
           <div className="portfolio-showcase__list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="portfolio-showcase__list-item portfolio-showcase__list-item--row">
+                <div key={`${item.language}-${index}`} className="portfolio-showcase__list-item portfolio-showcase__list-item--row" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span>{item.language}</span>
                   {item.level ? <span className="portfolio-showcase__list-meta">{item.level}</span> : null}
                 </div>
@@ -518,7 +518,7 @@ export default function PortfolioShowcase({
           <div className="portfolio-showcase__list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
-                <div key={`${item.title}-${index}`} className="portfolio-showcase__list-item">
+                <div key={`${item.title}-${index}`} className="portfolio-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                   <div className="portfolio-showcase__list-item-row">
                     {item.title ? <p className="portfolio-showcase__list-title">{item.title}</p> : null}
                     {item.year ? <p className="portfolio-showcase__list-meta">{item.year}</p> : null}
@@ -542,7 +542,7 @@ export default function PortfolioShowcase({
           <div className="portfolio-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span key={`${item.name}-${index}`} className="portfolio-showcase__interest-chip">{item.name}</span>
+                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`} className="portfolio-showcase__interest-chip">{item.name}</span>
               ))
             ) : (
               <p className="portfolio-showcase__empty">

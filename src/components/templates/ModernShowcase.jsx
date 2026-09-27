@@ -165,7 +165,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
                 const bullets = item.description ? splitToBullets(item.description) : []
 
                 return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="modern-showcase__timeline-item" data-export-card="true">
+                  <div key={`${item.role}-${item.company}-${index}`} className="modern-showcase__timeline-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.experience[index]}>
                     {showTimeline ? (
                       <div className="modern-showcase__timeline-rail">
                         <span className="modern-showcase__timeline-marker" aria-hidden="true" />
@@ -211,7 +211,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
           <div className="modern-showcase__edu-grid">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
-                <div key={`${item.school}-${index}`} className="modern-showcase__edu-card" data-export-card="true">
+                <div key={`${item.school}-${index}`} className="modern-showcase__edu-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                   {item.degree ? <p className="modern-showcase__edu-degree">{item.degree}</p> : null}
                   {item.school || item.location ? (
                     <p className="modern-showcase__edu-meta">
@@ -244,7 +244,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="modern-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="modern-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="modern-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="modern-showcase__project-desc">{item.description}</p> : null}
                     {stackTags.length > 0 ? (
@@ -276,7 +276,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
           <ul className="modern-showcase__achievement-list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
-                <li key={`${item.title}-${index}`} className="modern-showcase__achievement-item">
+                <li key={`${item.title}-${index}`} className="modern-showcase__achievement-item" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                   <span className="modern-showcase__achievement-dot" aria-hidden="true" />
                   <div className="min-w-0">
                     <div className="modern-showcase__achievement-row">
@@ -330,7 +330,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
           <div className="modern-showcase__lang-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="modern-showcase__lang-item">
+                <div key={`${item.language}-${index}`} className="modern-showcase__lang-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span>{item.language}</span>
                   {item.level ? <span className="modern-showcase__lang-level">{item.level}</span> : null}
                 </div>
@@ -351,7 +351,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
           <div className="modern-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="modern-showcase__cert-item">
+                <div key={`${item.name}-${index}`} className="modern-showcase__cert-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {item.name ? <p className="modern-showcase__cert-name">{item.name}</p> : null}
                   {item.issuer || item.year ? (
                     <p className="modern-showcase__cert-meta">
@@ -405,7 +405,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
           <div className="modern-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span key={`${item.name}-${index}`} className="modern-showcase__interest-chip">
+                <span key={`${item.name}-${index}`} className="modern-showcase__interest-chip" data-direct-edit-index={snapshot.sourceIndices.interests[index]}>
                   <InterestGlyph />
                   {item.name}
                 </span>

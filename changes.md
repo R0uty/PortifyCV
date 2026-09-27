@@ -4,6 +4,32 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: pencils for single entries, not just whole sections — 2026-09-27
+
+Hovering one entry of a list section (one job, one certificate, one
+language) now reveals a small pencil of its own, hung in the gutter just
+right of the entry. It opens the same section popup, but beside that entry,
+with the entry outlined and its first field focused, so a long Experience
+list no longer means opening the section and scrolling through it to find
+the job you pointed at. The section pencil and keyboard triggers are
+unchanged. Entry pencils are pointer-only on purpose: the section trigger
+already reaches every entry, and one extra tab stop per entry would bury
+the section triggers.
+
+The handoff pictured this as a one-line `data-direct-edit-index={index}`
+per template. That would have been wrong on any CV with a hidden or blank
+entry. Templates render `createCvSnapshot`'s output, which drops those, so
+a template's own map index counts only surviving entries while the popup
+and every reducer action address formData. The snapshot now carries
+`sourceIndices` (per record-array section, the formData index of each entry
+it kept), and every render site across all 18 templates writes the mapped
+value. The inline-wired Experience renderers already iterate raw formData
+in Direct Edit, so they take a `sourceIndex` option that defaults to
+`index` and only the snapshot call site passes the mapped value. An e2e
+sweep hides entry #1 and checks on every template that each tagged
+Experience entry shows the company of the formData entry its index names.
+No reducer changes and no new actions.
+
 ## Direct Edit: the popup opens beside a section, not on top of it — 2026-09-23
 
 The section popup anchored its right edge to the section's right edge and

@@ -148,6 +148,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
                 return (
                   <div
+                    data-direct-edit-index={snapshot.sourceIndices.experience[index]}
                     key={`${item.role}-${item.company}-${index}`}
                     className="colorful-compact-showcase__exp-row"
                     data-export-card="true"
@@ -192,7 +193,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="colorful-compact-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="colorful-compact-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="colorful-compact-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="colorful-compact-showcase__project-desc">{item.description}</p> : null}
                     {tags.length > 0 ? (
@@ -258,7 +259,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
                 const dateRange = formatDateRange(item.startDate, item.endDate)
 
                 return (
-                  <div key={`${item.school}-${index}`} className="colorful-compact-showcase__plain-item" data-export-card="true">
+                  <div key={`${item.school}-${index}`} className="colorful-compact-showcase__plain-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                     <p className="colorful-compact-showcase__plain-title">{item.degree || copy.untitledRole}</p>
                     {metaLine || dateRange ? (
                       <p className="colorful-compact-showcase__plain-meta">
@@ -284,7 +285,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
           <div className="colorful-compact-showcase__lang-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="colorful-compact-showcase__lang-row">
+                <div key={`${item.language}-${index}`} className="colorful-compact-showcase__lang-row" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span className="colorful-compact-showcase__lang-name">{item.language}</span>
                   {item.level ? (
                     <span
@@ -331,7 +332,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
           <div className="colorful-compact-showcase__plain-list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
-                <p key={`${item.title}-${index}`} className="colorful-compact-showcase__extra-line">
+                <p key={`${item.title}-${index}`} className="colorful-compact-showcase__extra-line" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                   {item.description ? `${item.title} — ${item.description}` : item.title}
                 </p>
               ))

@@ -158,7 +158,7 @@ export default function GraduateShowcase({
                 const metaLine = [item.grade, item.coursework].filter(Boolean).join(' · ')
 
                 return (
-                  <div key={`${item.school}-${index}`} className="graduate-showcase__edu-card" data-export-card="true">
+                  <div key={`${item.school}-${index}`} className="graduate-showcase__edu-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                     <div className="graduate-showcase__edu-row">
                       <div className="min-w-0">
                         <p className="graduate-showcase__edu-degree">{item.degree}</p>
@@ -200,7 +200,7 @@ export default function GraduateShowcase({
                 const metaLine = [item.teamSize, item.contribution].filter(Boolean).join(' · ')
 
                 return (
-                  <div key={`${item.name}-${index}`} className="graduate-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="graduate-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="graduate-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="graduate-showcase__project-desc">{item.description}</p> : null}
                     {metaLine ? <p className="graduate-showcase__project-meta">{metaLine}</p> : null}
@@ -261,7 +261,7 @@ export default function GraduateShowcase({
                 const bullets = item.description ? splitToBullets(item.description) : []
 
                 return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="graduate-showcase__timeline-item" data-export-card="true">
+                  <div key={`${item.role}-${item.company}-${index}`} className="graduate-showcase__timeline-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.internships[index]}>
                     <div className="graduate-showcase__timeline-rail">
                       <span className="graduate-showcase__timeline-marker" aria-hidden="true" />
                       <span className="graduate-showcase__timeline-line" aria-hidden="true" />
@@ -310,7 +310,7 @@ export default function GraduateShowcase({
                 const bullets = item.description ? splitToBullets(item.description) : []
 
                 return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="graduate-showcase__edu-card" data-export-card="true">
+                  <div key={`${item.role}-${item.company}-${index}`} className="graduate-showcase__edu-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.experience[index]}>
                     <div className="graduate-showcase__edu-row">
                       <div className="min-w-0">
                         <p className="graduate-showcase__edu-degree">{item.role}</p>
@@ -346,7 +346,7 @@ export default function GraduateShowcase({
           <div className="graduate-showcase__edu-list">
             {snapshot.publications.length > 0 ? (
               snapshot.publications.map((item, index) => (
-                <div key={`${item.title}-${index}`} className="graduate-showcase__edu-card" data-export-card="true">
+                <div key={`${item.title}-${index}`} className="graduate-showcase__edu-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.publications[index]}>
                   {item.title ? <p className="graduate-showcase__edu-degree">{item.title}</p> : null}
                   {item.publisher || item.year ? (
                     <p className="graduate-showcase__edu-meta">
@@ -373,7 +373,7 @@ export default function GraduateShowcase({
               snapshot.volunteering.map((item, index) => {
                 const heading = [item.role, item.organization].filter(Boolean).join(' — ')
                 return (
-                  <div key={`${item.role}-${item.organization}-${index}`} className="graduate-showcase__edu-card" data-export-card="true">
+                  <div key={`${item.role}-${item.organization}-${index}`} className="graduate-showcase__edu-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.volunteering[index]}>
                     {heading ? <p className="graduate-showcase__edu-degree">{heading}</p> : null}
                     {item.description ? <p className="graduate-showcase__project-desc">{item.description}</p> : null}
                   </div>
@@ -422,7 +422,7 @@ export default function GraduateShowcase({
           <div className="graduate-showcase__list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="graduate-showcase__list-item graduate-showcase__list-item--row">
+                <div key={`${item.language}-${index}`} className="graduate-showcase__list-item graduate-showcase__list-item--row" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span>{item.language}</span>
                   {item.level ? <span className="graduate-showcase__list-meta">{item.level}</span> : null}
                 </div>
@@ -443,7 +443,7 @@ export default function GraduateShowcase({
           <div className="graduate-showcase__list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="graduate-showcase__list-item">
+                <div key={`${item.name}-${index}`} className="graduate-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {item.name ? <p className="graduate-showcase__list-title">{item.name}</p> : null}
                   {item.issuer || item.year ? (
                     <p className="graduate-showcase__list-meta">
@@ -502,7 +502,7 @@ export default function GraduateShowcase({
           <div className="graduate-showcase__list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
-                <div key={`${item.title}-${index}`} className="graduate-showcase__list-item">
+                <div key={`${item.title}-${index}`} className="graduate-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                   <div className="graduate-showcase__list-item-row">
                     {item.title ? <p className="graduate-showcase__list-title">{item.title}</p> : null}
                     {item.year ? <p className="graduate-showcase__list-meta">{item.year}</p> : null}
@@ -526,7 +526,7 @@ export default function GraduateShowcase({
           <div className="graduate-showcase__list">
             {snapshot.memberships.length > 0 ? (
               snapshot.memberships.map((item, index) => (
-                <div key={`${item.organization}-${index}`} className="graduate-showcase__list-item">
+                <div key={`${item.organization}-${index}`} className="graduate-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.memberships[index]}>
                   {item.organization ? <p className="graduate-showcase__list-title">{item.organization}</p> : null}
                   {item.role || item.year ? (
                     <p className="graduate-showcase__list-meta">
@@ -551,7 +551,7 @@ export default function GraduateShowcase({
           <div className="graduate-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span key={`${item.name}-${index}`} className="graduate-showcase__interest-chip">{item.name}</span>
+                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`} className="graduate-showcase__interest-chip">{item.name}</span>
               ))
             ) : (
               <p className="graduate-showcase__empty">
