@@ -36,6 +36,7 @@ const templateMap = {
     description: 'Dark sidebar with project and achievement cards — a strong fit if your work is naturally project-based.',
     variant: 'developer',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'projects', 'achievements', 'openSource', 'publications'],
     secondarySections: ['skills', 'links', 'certificates', 'education', 'languages'],
     summaryBadgeLabel: 'Focus',

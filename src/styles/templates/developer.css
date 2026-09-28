@@ -886,3 +886,35 @@
   }
 }
 
+
+/* ── Sections moved between columns (Direct Edit, sectionColumns.js) ──
+   A moved section keeps its home markup. Its heading tone already follows
+   the real placement (SectionHeading's `tone`); these rules cover the
+   rail-only text colours of a sidebar section moved onto the light main
+   column. Same mapping the print block above uses to put the rail on
+   white: light text to --dev-primary, the rail's #94a3b8 meta to the main
+   column's own muted slate, the rail's bright link teal to --dev-teal.
+   Main sections moved onto the rail need nothing here: their cards carry
+   their own white background. */
+.dev-showcase__main [data-moved-from='side'] .dev-showcase__link-value,
+.dev-showcase__main [data-moved-from='side'] .dev-showcase__cert-name,
+.dev-showcase__main [data-moved-from='side'] .dev-showcase__edu-degree,
+.dev-showcase__main [data-moved-from='side'] .dev-showcase__lang-item {
+  color: var(--dev-primary);
+}
+
+.dev-showcase__main [data-moved-from='side'] .dev-showcase__skill-group-label,
+.dev-showcase__main [data-moved-from='side'] .dev-showcase__link-label,
+.dev-showcase__main [data-moved-from='side'] .dev-showcase__cert-meta,
+.dev-showcase__main [data-moved-from='side'] .dev-showcase__edu-meta,
+.dev-showcase__main [data-moved-from='side'] .dev-showcase__lang-level {
+  color: #64748b;
+}
+
+.dev-showcase__main [data-moved-from='side'] .dev-showcase__cert-link {
+  color: var(--dev-teal);
+}
+
+.dev-showcase__main [data-moved-from='side'] .dev-showcase__cert-card {
+  border-bottom-color: var(--dev-border);
+}

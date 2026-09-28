@@ -4,6 +4,32 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Section column moves open on Developer — 2026-09-28
+
+Developer is the first template that needed real adaptation, because its
+sidebar is a dark gradient and its sidebar markup is written for it. The
+sweep caught this immediately: Skills moved onto the light main column
+read at 1.10, light text on light.
+
+Two fixes. First, `SectionHeading`'s tone was a hard-coded `tone="sidebar"`
+prop on each sidebar section, applied as an inline colour that CSS cannot
+reach, so every heading now derives its tone from the real placement, the
+same way `Section`'s tone class already did. At home nothing changes.
+Second, a scoped `[data-moved-from='side']` block in `developer.css` maps
+the rail's text colours onto the main column's palette. It is the same
+mapping the template's print styles already use to put the rail on white:
+light text to `--dev-primary`, the rail's `#94a3b8` meta to the main
+column's slate, the rail's bright link teal to `--dev-teal`. Every moved
+sidebar section now reads at 4.76 at worst, up from 1.10. Main-column
+sections moved onto the rail (Projects, Achievements) needed nothing
+beyond the heading: their cards carry their own white background and read
+exactly as at home.
+
+Checked by eye both ways, and with a PDF export with Certificates moved
+to main and Projects to the rail: the page break falls after Publications,
+the moved Certificates section lands whole on page 2, and nothing is
+sliced mid-card.
+
 ## Section column moves open on Portfolio Hybrid, Tech Executive and Colorful Compact — 2026-09-28
 
 Same conversion again. Colorful Compact's renderers also take a
