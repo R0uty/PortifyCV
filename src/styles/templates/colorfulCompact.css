@@ -405,12 +405,18 @@
   font-weight: 700;
 }
 
-.colorful-compact-showcase__skill-pill--pink { background: var(--cc-pink); color: #fff; }
-.colorful-compact-showcase__skill-pill--orange { background: var(--cc-orange); color: #fff; }
-.colorful-compact-showcase__skill-pill--green { background: var(--cc-green); color: #052e12; }
-.colorful-compact-showcase__skill-pill--teal { background: var(--cc-teal); color: #fff; }
-.colorful-compact-showcase__skill-pill--blue { background: var(--cc-blue); color: #fff; }
-.colorful-compact-showcase__skill-pill--purple { background: var(--cc-purple); color: #fff; }
+/* Filled with each hue's deep `-text` shade, not the bright swatch: white
+   on the bright swatches measured 2.49 (teal) to 3.96 (purple), below
+   WCAG AA's 4.5:1 for text this small, and green had to fall back to dark
+   text to pass at all. On the deep shades white reads 5.0–7.0:1 for every
+   hue, all six pills share one pattern, and each pill matches its
+   section's own heading colour. */
+.colorful-compact-showcase__skill-pill--pink { background: var(--cc-pink-text); color: #fff; }
+.colorful-compact-showcase__skill-pill--orange { background: var(--cc-orange-text); color: #fff; }
+.colorful-compact-showcase__skill-pill--green { background: var(--cc-green-text); color: #fff; }
+.colorful-compact-showcase__skill-pill--teal { background: var(--cc-teal-text); color: #fff; }
+.colorful-compact-showcase__skill-pill--blue { background: var(--cc-blue-text); color: #fff; }
+.colorful-compact-showcase__skill-pill--purple { background: var(--cc-purple-text); color: #fff; }
 
 /* ── Sidebar: plain stacked lists (Education, Links, Extras) ── */
 

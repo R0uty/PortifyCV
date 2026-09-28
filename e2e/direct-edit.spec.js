@@ -828,11 +828,12 @@ test.describe('Direct Edit builder', () => {
   // the template already ships in the target column (its native sections'
   // lowest text contrast there), capped at 3:1. Both escape hatches are
   // needed: Creative's accent numerals sit at 2.97 on its own tan rail, so
-  // Projects moved there legitimately drops from 3.35; Colorful Compact's
-  // white-on-teal skill pills are 2.49 at home, so Skills moved to main
-  // cannot be expected to beat the main column's 3. Those are pre-existing
-  // design matters, not move bugs. White text landing on a white column
-  // still fails both (seen caught at 1.04 during development).
+  // Projects moved there legitimately drops from 3.35. And a section whose
+  // own design sits below its target column's cannot be expected to beat
+  // it: Colorful Compact's white-on-teal skill pills read 2.49 at home
+  // until v1.2.61 deepened them. Those are pre-existing design matters, not
+  // move bugs. White text landing on a white column still fails both (seen
+  // caught at 1.04 during development).
   test('every opted-in template moves each movable section into a readable column', async ({ page }) => {
     test.setTimeout(240_000)
     await page.getByRole('tab', { name: 'Direct Edit' }).click()

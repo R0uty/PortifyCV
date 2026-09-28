@@ -4,6 +4,25 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Colorful Compact skill pills pass WCAG AA contrast — 2026-09-28
+
+The skill pills put white text on each section's bright swatch, and five
+of the six hues failed WCAG AA's 4.5:1 for text this small: teal 2.49,
+orange 2.80, pink 3.53, blue 3.68, purple 3.96. Green only passed because
+it had already fallen back to dark text. Found while building the
+section column moves, whose contrast sweep had to carve out an exception
+for these pills. The pills are now filled with each hue's deep `-text`
+shade, the colour the section's own heading already uses, with white text:
+5.02 (green) to 6.98 (purple). All six follow one pattern again, each pill
+matches its section's heading, and no new colour enters the template's
+capped six-hue palette.
+
+The other colour-cycled elements (tags, language badges, section titles,
+dates) were measured too and already pass at 4.52 or better, so they are
+unchanged. A new e2e test renders one pill per colour variant inside the
+live preview, since any one CV only shows a couple of them, and holds each
+to 4.5:1. It failed on pink at 3.53 before the change.
+
 ## Section column moves open on Modern Orange — 2026-09-28
 
 The last template. Same wrapper conversion as Navy (`Section` and

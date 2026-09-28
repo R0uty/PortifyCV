@@ -315,3 +315,49 @@ test.describe('Link URL formatting', () => {
     }
   })
 })
+
+// Colorful Compact colours each section by its running position through
+// six hues, so any one CV shows only a couple of skill-pill colours. This
+// renders one pill per colour variant inside the live preview, styled by
+// the shipped stylesheet, and holds every one to WCAG AA for normal text:
+// the pills are small bold labels, so the large-text 3:1 allowance does
+// not apply. White text on the old bright fills measured 2.49 (teal) to
+// 3.96 (purple).
+test.describe('Colorful Compact skill pills', () => {
+  test('every colour variant reads at 4.5:1 or better', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await selectTemplate(page, 'Colorful Compact')
+    await expect(page.locator('.colorful-compact-showcase').first()).toBeVisible()
+
+    const ratios = await page.evaluate(() => {
+      const luminance = (value) => {
+        const [r, g, b] = value.match(/[\d.]+/g).map(Number)
+        const channel = (v) => {
+          const c = v / 255
+          return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+        }
+        return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+      }
+      const host = document.querySelector('.colorful-compact-showcase')
+
+      return Object.fromEntries(
+        ['pink', 'orange', 'green', 'teal', 'blue', 'purple'].map((color) => {
+          const pill = document.createElement('span')
+          pill.className = `colorful-compact-showcase__skill-pill colorful-compact-showcase__skill-pill--${color}`
+          pill.textContent = 'Figma'
+          host.appendChild(pill)
+          const style = getComputedStyle(pill)
+          const fg = luminance(style.color)
+          const bg = luminance(style.backgroundColor)
+          pill.remove()
+          return [color, (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05)]
+        }),
+      )
+    })
+
+    for (const [color, ratio] of Object.entries(ratios)) {
+      expect(ratio, `${color} pill`).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+})
