@@ -13,6 +13,7 @@
     "check:docx-export": "node scripts/check-docx-export.mjs",
     "check:direct-edit": "node scripts/check-direct-edit.mjs",
     "check:section-schema": "node scripts/check-section-schema.mjs",
+    "check:section-columns": "node scripts/check-section-columns.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "worker:dev": "wrangler dev",
