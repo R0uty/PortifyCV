@@ -61,9 +61,9 @@ function SectionHead({ title, color }) {
   )
 }
 
-function Section({ id, placement, title, color, children }) {
+function Section({ id, placement, movedFrom = null, title, color, children }) {
   return (
-    <section className="colorful-compact-showcase__section" data-export-section={id} data-export-placement={placement}>
+    <section className="colorful-compact-showcase__section" data-export-section={id} data-export-placement={placement} data-moved-from={movedFrom ?? undefined}>
       <SectionHead title={title} color={color} />
       {children}
     </section>
@@ -127,10 +127,10 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     achievements: isFinnish ? 'Lisätiedot' : 'Extras',
   }
 
-  const renderMainSection = (key, color) => {
+  const renderMainSection = (key, color, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" placement="main" title={copy.about} color={color}>
+        <Section key={key} id="about" placement={placement} movedFrom={movedFrom} title={copy.about} color={color}>
           <p className="colorful-compact-showcase__summary">{about}</p>
         </Section>
       )
@@ -138,7 +138,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main" title={copy.experience} color={color}>
+        <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} title={copy.experience} color={color}>
           <div className="colorful-compact-showcase__exp-list">
             {snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => {
@@ -184,7 +184,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="main" title={copy.projects} color={color}>
+        <Section key={key} id="projects" placement={placement} movedFrom={movedFrom} title={copy.projects} color={color}>
           <div className="colorful-compact-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -224,10 +224,10 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     return null
   }
 
-  const renderSidebarSection = (key, color) => {
+  const renderSidebarSection = (key, color, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side" title={copy.skills} color={color}>
+        <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} title={copy.skills} color={color}>
           {snapshot.skills.length > 0 ? (
             <div className="colorful-compact-showcase__skill-row">
               {snapshot.skills.map((skill) => (
@@ -251,7 +251,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="side" title={copy.education} color={color}>
+        <Section key={key} id="education" placement={placement} movedFrom={movedFrom} title={copy.education} color={color}>
           <div className="colorful-compact-showcase__plain-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => {
@@ -281,7 +281,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" title={copy.languages} color={color}>
+        <Section key={key} id="languages" placement={placement} movedFrom={movedFrom} title={copy.languages} color={color}>
           <div className="colorful-compact-showcase__lang-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -308,7 +308,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" title={copy.links} color={color}>
+        <Section key={key} id="links" placement={placement} movedFrom={movedFrom} title={copy.links} color={color}>
           <div className="colorful-compact-showcase__plain-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -328,7 +328,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
     if (key === 'achievements') {
       return (
-        <Section key={key} id="achievements" placement="side" title={copy.achievements} color={color}>
+        <Section key={key} id="achievements" placement={placement} movedFrom={movedFrom} title={copy.achievements} color={color}>
           <div className="colorful-compact-showcase__plain-list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
@@ -347,6 +347,23 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     }
 
     return null
+  }
+
+
+  // A section always renders through its HOME renderer — the column the
+  // template designed it for — even when the user moved it to the other
+  // column. Placement comes from where it actually is (the PDF exporter
+  // paginates by it); movedFrom is the CSS hook that adapts it. The
+  // per-section colour still comes from the running index in the column
+  // the section actually sits in, so the rainbow stays in order.
+  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
+  const renderSection = (key, color, placement) => {
+    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
+    const movedFrom = homePlacement === placement ? null : homePlacement
+
+    return homePlacement === 'side'
+      ? renderSidebarSection(key, color, placement, movedFrom)
+      : renderMainSection(key, color, placement, movedFrom)
   }
 
   return (
@@ -399,12 +416,12 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
       <div className="colorful-compact-showcase__body" data-export-content="true">
         <main className="colorful-compact-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key, index) => renderMainSection(key, colorAt(SECTION_COLORS, index)))}
+          {mainSectionKeys.map((key, index) => renderSection(key, colorAt(SECTION_COLORS, index), 'main'))}
         </main>
 
         <aside className="colorful-compact-showcase__sidebar" data-export-secondary="true">
           {sidebarSectionKeys.map((key, index) =>
-            renderSidebarSection(key, colorAt(SECTION_COLORS, mainSectionKeys.length + index)))}
+            renderSection(key, colorAt(SECTION_COLORS, mainSectionKeys.length + index), 'side'))}
         </aside>
       </div>
 

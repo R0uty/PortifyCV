@@ -42,9 +42,9 @@ function SectionHead({ title }) {
   )
 }
 
-function Section({ id, placement, title, children }) {
+function Section({ id, placement, movedFrom = null, title, children }) {
   return (
-    <section className="tech-exec-showcase__section" data-export-section={id} data-export-placement={placement}>
+    <section className="tech-exec-showcase__section" data-export-section={id} data-export-placement={placement} data-moved-from={movedFrom ?? undefined}>
       <SectionHead title={title} />
       {children}
     </section>
@@ -120,10 +120,10 @@ export default function TechExecShowcase({
     interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" placement="main" title={copy.profile}>
+        <Section key={key} id="about" placement={placement} movedFrom={movedFrom} title={copy.profile}>
           <p className="tech-exec-showcase__summary">{about}</p>
         </Section>
       )
@@ -131,7 +131,7 @@ export default function TechExecShowcase({
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main" title={copy.experience}>
+        <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} title={copy.experience}>
           <div className="tech-exec-showcase__entry-list">
             {snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => {
@@ -171,7 +171,7 @@ export default function TechExecShowcase({
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="main" title={copy.education}>
+        <Section key={key} id="education" placement={placement} movedFrom={movedFrom} title={copy.education}>
           <div className="tech-exec-showcase__entry-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
@@ -199,7 +199,7 @@ export default function TechExecShowcase({
 
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="main" title={copy.skills}>
+        <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} title={copy.skills}>
           {skillCategories.length > 0 ? (
             <div className="tech-exec-showcase__skill-groups">
               {skillCategories.map((cat) => (
@@ -221,10 +221,10 @@ export default function TechExecShowcase({
     return null
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'coreStrengths') {
       return (
-        <Section key={key} id="coreStrengths" placement="side" title={copy.coreStrengths}>
+        <Section key={key} id="coreStrengths" placement={placement} movedFrom={movedFrom} title={copy.coreStrengths}>
           <div className="tech-exec-showcase__strength-list">
             {snapshot.coreStrengths.length > 0 ? (
               snapshot.coreStrengths.map((item, index) => (
@@ -245,7 +245,7 @@ export default function TechExecShowcase({
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" placement="side" title={copy.certificates}>
+        <Section key={key} id="certificates" placement={placement} movedFrom={movedFrom} title={copy.certificates}>
           <ul className="tech-exec-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -278,7 +278,7 @@ export default function TechExecShowcase({
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="side" title={copy.projects}>
+        <Section key={key} id="projects" placement={placement} movedFrom={movedFrom} title={copy.projects}>
           <div className="tech-exec-showcase__project-list">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -308,7 +308,7 @@ export default function TechExecShowcase({
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" title={copy.links}>
+        <Section key={key} id="links" placement={placement} movedFrom={movedFrom} title={copy.links}>
           <div className="tech-exec-showcase__link-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -332,7 +332,7 @@ export default function TechExecShowcase({
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" title={copy.languages}>
+        <Section key={key} id="languages" placement={placement} movedFrom={movedFrom} title={copy.languages}>
           <ul className="tech-exec-showcase__inline-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -353,7 +353,7 @@ export default function TechExecShowcase({
 
     if (key === 'interests') {
       return (
-        <Section key={key} id="interests" placement="side" title={copy.interests}>
+        <Section key={key} id="interests" placement={placement} movedFrom={movedFrom} title={copy.interests}>
           {snapshot.interests.length > 0 ? (
             <p className="tech-exec-showcase__interests">
               {snapshot.interests.map((item) => item.name).filter(Boolean).join(' · ')}
@@ -368,6 +368,21 @@ export default function TechExecShowcase({
     }
 
     return null
+  }
+
+
+  // A section always renders through its HOME renderer — the column the
+  // template designed it for — even when the user moved it to the other
+  // column. Placement comes from where it actually is (the PDF exporter
+  // paginates by it); movedFrom is the CSS hook that adapts it.
+  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
+  const renderSection = (key, placement) => {
+    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
+    const movedFrom = homePlacement === placement ? null : homePlacement
+
+    return homePlacement === 'side'
+      ? renderSidebarSection(key, placement, movedFrom)
+      : renderMainSection(key, placement, movedFrom)
   }
 
   return (
@@ -420,11 +435,11 @@ export default function TechExecShowcase({
 
       <div className="tech-exec-showcase__body">
         <main className="tech-exec-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key) => renderMainSection(key))}
+          {mainSectionKeys.map((key) => renderSection(key, 'main'))}
         </main>
 
         <aside className="tech-exec-showcase__sidebar" data-export-secondary="true">
-          {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+          {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
         </aside>
       </div>
 

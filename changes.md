@@ -4,6 +4,27 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Section column moves open on Portfolio Hybrid, Tech Executive and Colorful Compact — 2026-09-28
+
+Same conversion again. Colorful Compact's renderers also take a
+per-section colour, so its router passes the colour through, and the colour
+still comes from the running index in the column the section actually
+sits in, which keeps the rainbow in order across both columns. None of the
+three needed CSS. Checked by eye (Certificates and Education on Portfolio
+Hybrid, Projects and Education on Tech Executive, Skills and Projects on
+Colorful Compact) and by the sweep.
+
+The sweep's contrast bar was refined here. Colorful Compact's skill pills
+are white on teal at 2.49 at home, so Skills moved into main could not
+meet the main column's baseline. Meanwhile Creative's Projects legitimately
+drops from 3.35 to 2.97 in its tan rail, because that is exactly what
+Creative's own sidebar sections show. A moved section must now read no
+worse than it did at home, or no worse than what the template already ships
+in the target column, capped at 3:1. A deliberately broken rule (white text
+on moved sections) is still caught at 1.04. The white-on-teal pills are a
+pre-existing contrast issue in Colorful Compact, flagged separately and
+not changed here.
+
 ## Section column moves open on Modern Professional, Executive and Graduate — 2026-09-28
 
 These three follow Creative: their `Section` already took a placement, so

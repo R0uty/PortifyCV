@@ -81,9 +81,9 @@ function SectionHead({ icon, title, subtitle }) {
   )
 }
 
-function Section({ id, placement, icon, title, subtitle, children }) {
+function Section({ id, placement, movedFrom = null, icon, title, subtitle, children }) {
   return (
-    <section className="portfolio-showcase__section" data-export-section={id} data-export-placement={placement}>
+    <section className="portfolio-showcase__section" data-export-section={id} data-export-placement={placement} data-moved-from={movedFrom ?? undefined}>
       <SectionHead icon={icon} title={title} subtitle={subtitle} />
       {children}
     </section>
@@ -167,10 +167,10 @@ export default function PortfolioShowcase({
     lessons: isFinnish ? 'Opitut asiat' : 'Lessons Learned',
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" placement="main" icon="about" title={copy.about} subtitle={copy.aboutSub}>
+        <Section key={key} id="about" placement={placement} movedFrom={movedFrom} icon="about" title={copy.about} subtitle={copy.aboutSub}>
           <p className="portfolio-showcase__summary">{about}</p>
         </Section>
       )
@@ -178,7 +178,7 @@ export default function PortfolioShowcase({
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="main" icon="projects" title={copy.projects} subtitle={copy.projectsSub}>
+        <Section key={key} id="projects" placement={placement} movedFrom={movedFrom} icon="projects" title={copy.projects} subtitle={copy.projectsSub}>
           <div className="portfolio-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -236,7 +236,7 @@ export default function PortfolioShowcase({
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main" icon="experience" title={copy.experience}>
+        <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} icon="experience" title={copy.experience}>
           <div className="portfolio-showcase__timeline">
             {snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => {
@@ -284,7 +284,7 @@ export default function PortfolioShowcase({
 
     if (key === 'caseStudies') {
       return (
-        <Section key={key} id="caseStudies" placement="main" icon="caseStudies" title={copy.caseStudies}>
+        <Section key={key} id="caseStudies" placement={placement} movedFrom={movedFrom} icon="caseStudies" title={copy.caseStudies}>
           <div className="portfolio-showcase__case-list">
             {snapshot.caseStudies.length > 0 ? (
               snapshot.caseStudies.map((item, index) => {
@@ -322,7 +322,7 @@ export default function PortfolioShowcase({
 
     if (key === 'openSource') {
       return (
-        <Section key={key} id="openSource" placement="main" icon="openSource" title={copy.openSource}>
+        <Section key={key} id="openSource" placement={placement} movedFrom={movedFrom} icon="openSource" title={copy.openSource}>
           <div className="portfolio-showcase__project-grid">
             {snapshot.openSource.length > 0 ? (
               snapshot.openSource.map((item, index) => {
@@ -357,7 +357,7 @@ export default function PortfolioShowcase({
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="main" icon="education" title={copy.education}>
+        <Section key={key} id="education" placement={placement} movedFrom={movedFrom} icon="education" title={copy.education}>
           <div className="portfolio-showcase__edu-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
@@ -387,7 +387,7 @@ export default function PortfolioShowcase({
       if (snapshot.testimonials.length === 0) return null
 
       return (
-        <Section key={key} id="testimonials" placement="main" icon="testimonials" title={copy.testimonials}>
+        <Section key={key} id="testimonials" placement={placement} movedFrom={movedFrom} icon="testimonials" title={copy.testimonials}>
           <div className="portfolio-showcase__testimonial-list">
             {snapshot.testimonials.map((item, index) => {
               const meta = [item.author, item.role].filter(Boolean).join(', ')
@@ -407,10 +407,10 @@ export default function PortfolioShowcase({
     return null
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side" icon="skills" title={copy.skills}>
+        <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} icon="skills" title={copy.skills}>
           {skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="portfolio-showcase__skill-group">
@@ -439,7 +439,7 @@ export default function PortfolioShowcase({
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" placement="side" icon="certificates" title={copy.certificates}>
+        <Section key={key} id="certificates" placement={placement} movedFrom={movedFrom} icon="certificates" title={copy.certificates}>
           <div className="portfolio-showcase__list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -469,7 +469,7 @@ export default function PortfolioShowcase({
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" icon="links" title={copy.links}>
+        <Section key={key} id="links" placement={placement} movedFrom={movedFrom} icon="links" title={copy.links}>
           <div className="portfolio-showcase__link-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -493,7 +493,7 @@ export default function PortfolioShowcase({
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" icon="languages" title={copy.languages}>
+        <Section key={key} id="languages" placement={placement} movedFrom={movedFrom} icon="languages" title={copy.languages}>
           <div className="portfolio-showcase__list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -514,7 +514,7 @@ export default function PortfolioShowcase({
 
     if (key === 'achievements') {
       return (
-        <Section key={key} id="achievements" placement="side" icon="achievements" title={copy.achievements}>
+        <Section key={key} id="achievements" placement={placement} movedFrom={movedFrom} icon="achievements" title={copy.achievements}>
           <div className="portfolio-showcase__list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
@@ -538,7 +538,7 @@ export default function PortfolioShowcase({
 
     if (key === 'interests') {
       return (
-        <Section key={key} id="interests" placement="side" icon="interests" title={copy.interests}>
+        <Section key={key} id="interests" placement={placement} movedFrom={movedFrom} icon="interests" title={copy.interests}>
           <div className="portfolio-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
@@ -555,6 +555,21 @@ export default function PortfolioShowcase({
     }
 
     return null
+  }
+
+
+  // A section always renders through its HOME renderer — the column the
+  // template designed it for — even when the user moved it to the other
+  // column. Placement comes from where it actually is (the PDF exporter
+  // paginates by it); movedFrom is the CSS hook that adapts it.
+  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
+  const renderSection = (key, placement) => {
+    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
+    const movedFrom = homePlacement === placement ? null : homePlacement
+
+    return homePlacement === 'side'
+      ? renderSidebarSection(key, placement, movedFrom)
+      : renderMainSection(key, placement, movedFrom)
   }
 
   return (
@@ -615,11 +630,11 @@ export default function PortfolioShowcase({
         style={!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
       >
         <main className="portfolio-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key) => renderMainSection(key))}
+          {mainSectionKeys.map((key) => renderSection(key, 'main'))}
         </main>
         {showSidebar ? (
           <aside className="portfolio-showcase__sidebar" data-export-secondary="true">
-            {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+            {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
           </aside>
         ) : null}
       </div>
