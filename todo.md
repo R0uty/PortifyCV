@@ -179,6 +179,16 @@ after.
       more structural, cross-template pattern than the Executive/Graduate fix
       and would need its own follow-up if the gallery still feels
       insufficiently distinct after this fix.
+      **Resolved 2026-09-28, no change needed (checked in the running app and
+      the template gallery):** both notes were overtaken by later restyles.
+      Modern Professional was restyled 2026-08-23 and is now rose (rose
+      timeline, section icons and dates), nothing like Tech Executive's
+      deep-navy masthead band. Modern Timeline's name is already two-tone,
+      with the last name in its purple accent. Modern Professional's name
+      is dark navy by design, with the rose carried by its timeline, icons
+      and dates. In the gallery, the five templates this item grouped as
+      "pale blue" now read as rose, navy band, purple, bronze-on-cream and
+      lavender band.
 - [x] **13. `creative` template's description promises "one accent colour you
       can change"** — checked 2026-08-14: false, no such control exists. The
       Settings modal (`ResumeBuilderPage.jsx`) has exactly two controls —
@@ -1970,16 +1980,16 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
-**State (refreshed 2026-09-28):** branch `v1.3.0`, version **1.2.62**,
-pushed to `origin/v1.3.0` (run `git log -1` for the exact commit; it is
-deliberately not recorded here, because every refresh commit would make it
-stale). Latest work: section column moves (v1.2.53–v1.2.60), the Colorful
-Compact skill-pill contrast fix (v1.2.61) and the footer-test flake fix
-(v1.2.62). Working tree clean (only an untracked `.claude/`). Full suite
-green with no known flakes: **124/124 e2e**, lint, build, `check:reducers`,
-`check:share`, `check:direct-edit`, `check:section-schema`,
-`check:section-columns`. `main` untouched at `0f5261f`, no PR — the user
-said explicitly on 2026-09-28 NOT to merge yet.
+**State (refreshed 2026-09-28):** branch `v1.3.0`, version **1.2.64**,
+pushed to `origin/v1.3.0` with CI green there (run `git log -1` for the exact
+commit; it is deliberately not recorded here, because every refresh commit
+would make it stale). Latest work: section column moves (v1.2.53–v1.2.60),
+the Colorful Compact skill-pill contrast fix (v1.2.61), the footer-test
+flake fix (v1.2.62), CI running on this branch with all seven check scripts
+(v1.2.63), and nine review fixes (v1.2.64). Working tree clean (only an
+untracked `.claude/`). Full suite green with no known flakes: **126/126
+e2e**, lint, build and all seven `check:*` scripts. `main` untouched at
+`0f5261f`, no PR — the user said explicitly on 2026-09-28 NOT to merge yet.
 
 Source of truth for the Direct Edit editor's design and its known gaps:
 `docs/superpowers/specs/2026-09-19-direct-edit-universal-sections-design.md`
