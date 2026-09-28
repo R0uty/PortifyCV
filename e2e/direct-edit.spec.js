@@ -941,14 +941,22 @@ test.describe('Direct Edit builder', () => {
     await expect(preview).toBeVisible()
     await expect(footer).toBeVisible()
 
-    await page.mouse.wheel(0, 20000)
-
-    const previewBox = await preview.boundingBox()
-    const footerBox = await footer.boundingBox()
+    // Both edges come from ONE evaluate, in the same frame. This used to
+    // scroll with page.mouse.wheel and then take two separate boundingBox()
+    // calls, but the wheel starts an asynchronous smooth scroll: when the
+    // scroll landed between the two calls, the preview was measured before
+    // it (bottom ~1732) and the footer after it (~668), so a correct layout
+    // failed about half the time under parallel load. The footer's position
+    // relative to the preview doesn't depend on scroll, so no scroll is
+    // needed at all.
+    const edges = await page.evaluate(() => ({
+      previewBottom: document.querySelector('.direct-edit-preview').getBoundingClientRect().bottom,
+      footerTop: document.querySelector('.site-footer').getBoundingClientRect().top,
+    }))
     // The footer's top edge must be at or below the preview's bottom edge
     // — i.e. positioned after the content, never over it. A 1px tolerance
-    // absorbs subpixel rounding between the two boundingBox() calls.
-    expect(footerBox.y).toBeGreaterThanOrEqual(previewBox.y + previewBox.height - 1)
+    // absorbs subpixel rounding.
+    expect(edges.footerTop).toBeGreaterThanOrEqual(edges.previewBottom - 1)
   })
 
   // Regression guard for Fix 1 (final whole-branch review): the Skills

@@ -4,6 +4,24 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## The Direct Edit footer test no longer flakes — 2026-09-28
+
+`'the footer never overlaps the CV preview in Direct Edit mode'` failed
+often enough to be treated as noise: re-run with one worker and moved on.
+It failed 15 of 30 under parallel load, and occasionally on one worker.
+Every failure reported the same two numbers (footer at 668, preview bottom
+at 1732), which pointed to a specific state rather than jitter. The layout
+was always correct. The test scrolled with `page.mouse.wheel`, which starts
+an asynchronous smooth scroll, and then measured the preview and the
+footer in two separate `boundingBox()` calls, so when the scroll landed
+between them the preview was measured before it and the footer after.
+
+Both edges are now read in a single `evaluate`, in the same frame, and the
+scroll is gone: the footer's position relative to the preview doesn't
+depend on scroll. The test now passes 30/30 with parallel workers and 30/30
+on one worker. It still catches the regression it guards: with the
+`min-height: auto` override in `direct-edit.css` removed, it fails 5/5.
+
 ## Colorful Compact skill pills pass WCAG AA contrast — 2026-09-28
 
 The skill pills put white text on each section's bright swatch, and five
