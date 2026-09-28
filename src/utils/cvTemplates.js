@@ -56,6 +56,7 @@ const templateMap = {
     description: 'Editorial two-column layout with numbered section headings, a full-width header, and a single customizable accent color. Suits any creative profession.',
     variant: 'creative',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'projects'],
     secondarySections: ['skills', 'education', 'certificates', 'links', 'languages', 'interests'],
     summaryBadgeLabel: 'Notes',

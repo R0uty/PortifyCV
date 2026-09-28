@@ -59,6 +59,97 @@ async function popupGeometry(page, sectionKey) {
   }, sectionKey)
 }
 
+// Templates that have opted into section column moves (cvTemplates.js
+// `columnMoves: true`). The sweep test below walks every one of them;
+// each template's rollout task appends its label here.
+const COLUMN_MOVE_TEMPLATES = ['Creative']
+
+// Where a section currently renders: inside the sidebar container
+// (every two-column template marks it data-export-secondary) or not,
+// plus the placement the PDF exporter will read.
+async function sectionColumnState(page, sectionKey) {
+  return page.evaluate((key) => {
+    const section = document.querySelector(`.direct-edit-preview [data-export-section="${key}"]`)
+
+    if (!section) {
+      return null
+    }
+
+    return {
+      inSidebar: Boolean(section.closest('[data-export-secondary]')),
+      placement: section.getAttribute('data-export-placement'),
+      movedFrom: section.getAttribute('data-moved-from'),
+      height: section.getBoundingClientRect().height,
+    }
+  }, sectionKey)
+}
+
+// The lowest text/background contrast ratio across every piece of text in
+// a section, measured against the nearest opaque (or gradient) background.
+// Used by the column-move sweep to compare a moved section against the
+// sections the template itself designs for that column.
+async function minTextContrast(page, selector) {
+  return page.evaluate((sel) => {
+    const parse = (value) => {
+      const parts = value.match(/[\d.]+/g).map(Number)
+      return { r: parts[0], g: parts[1], b: parts[2], a: parts[3] ?? 1 }
+    }
+    const backgroundOf = (element) => {
+      for (let node = element; node; node = node.parentElement) {
+        const style = getComputedStyle(node)
+        const gradient = style.backgroundImage.includes('gradient')
+          ? style.backgroundImage.match(/rgba?\([^)]+\)/)
+          : null
+
+        if (gradient) {
+          return parse(gradient[0])
+        }
+
+        const color = parse(style.backgroundColor)
+
+        if (color.a >= 0.9) {
+          return color
+        }
+      }
+
+      return { r: 255, g: 255, b: 255, a: 1 }
+    }
+    const luminance = ({ r, g, b }) => {
+      const channel = (v) => {
+        const c = v / 255
+        return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+      }
+      return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+    }
+    const ratio = (element) => {
+      const fg = luminance(parse(getComputedStyle(element).color))
+      const bg = luminance(backgroundOf(element))
+      return (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05)
+    }
+
+    let lowest = Infinity
+
+    for (const section of document.querySelectorAll(sel)) {
+      const walker = document.createTreeWalker(section, NodeFilter.SHOW_TEXT, {
+        acceptNode: (node) => (node.textContent.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP),
+      })
+
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        lowest = Math.min(lowest, ratio(node.parentElement))
+      }
+    }
+
+    return lowest
+  }, selector)
+}
+
+// Opens a section's popup through its keyboard trigger, which exists for
+// every section whether or not a pointer can reach it.
+async function openSectionPopup(page, sectionKey) {
+  await page.locator(`[data-direct-edit-trigger="${sectionKey}"]`).evaluate((button) => button.click())
+  await expect(page.locator('.direct-edit-popup')).toBeVisible()
+}
+
 test.describe('Direct Edit builder', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/cv')
@@ -634,6 +725,157 @@ test.describe('Direct Edit builder', () => {
     }
   })
 
+  test('Creative: Skills moves to the main column from the popup and back', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await selectTemplate(page, 'Creative')
+
+    expect(await sectionColumnState(page, 'skills')).toMatchObject({ inSidebar: true, placement: 'side' })
+
+    await openSectionPopup(page, 'skills')
+    const group = page.getByRole('group', { name: 'Column' })
+    await expect(group.getByRole('button', { name: 'Sidebar' })).toHaveAttribute('aria-pressed', 'true')
+
+    await group.getByRole('button', { name: 'Main' }).click()
+    await expect(group.getByRole('button', { name: 'Main' })).toHaveAttribute('aria-pressed', 'true')
+    await expect(group.getByRole('button', { name: 'Main' })).toBeFocused()
+    expect(await sectionColumnState(page, 'skills')).toMatchObject({
+      inSidebar: false,
+      placement: 'main',
+      movedFrom: 'side',
+    })
+
+    // The popup stays open on the moved section.
+    await expect(page.locator('.direct-edit-popup')).toBeVisible()
+
+    await group.getByRole('button', { name: 'Sidebar' }).click()
+    expect(await sectionColumnState(page, 'skills')).toMatchObject({
+      inSidebar: true,
+      placement: 'side',
+      movedFrom: null,
+    })
+  })
+
+  test('Creative: section ↑/↓ follow a moved section into its new column', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await selectTemplate(page, 'Creative')
+
+    await openSectionPopup(page, 'skills')
+    await page.getByRole('group', { name: 'Column' }).getByRole('button', { name: 'Main' }).click()
+
+    // The demo CV's sectionOrder is empty, so the order falls back to the
+    // effective template order, where a moved section joins the END of its
+    // new column. Moving it up must swap it with projects, a MAIN-column
+    // neighbour, not with the sidebar section that follows it in the flat
+    // order.
+    const mainOrder = () =>
+      page.evaluate(() =>
+        Array.from(
+          document.querySelectorAll('.direct-edit-preview [data-export-primary] [data-export-section]'),
+          (el) => el.getAttribute('data-export-section'),
+        ),
+      )
+    expect(await mainOrder()).toEqual(['about', 'experience', 'projects', 'skills'])
+    await expect(page.locator('.direct-edit-popup__move-down')).toBeDisabled()
+
+    await page.locator('.direct-edit-popup__move-up').click()
+    expect(await mainOrder()).toEqual(['about', 'experience', 'skills', 'projects'])
+  })
+
+  test('Creative: a column move survives switching to Classic and back', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await selectTemplate(page, 'Creative')
+
+    await openSectionPopup(page, 'education')
+    await page.getByRole('group', { name: 'Column' }).getByRole('button', { name: 'Main' }).click()
+    await page.keyboard.press('Escape')
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    expect(await sectionColumnState(page, 'education')).toMatchObject({ inSidebar: false, placement: 'main' })
+  })
+
+  test('Creative: PDF export succeeds with a section moved to the main column', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await selectTemplate(page, 'Creative')
+
+    await openSectionPopup(page, 'skills')
+    await page.getByRole('group', { name: 'Column' }).getByRole('button', { name: 'Main' }).click()
+    await page.keyboard.press('Escape')
+
+    await exportPdfAndExpectSuccess(page)
+  })
+
+  test('no column control for sections that cannot move', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await selectTemplate(page, 'Creative')
+
+    await openSectionPopup(page, 'experience')
+    await expect(page.getByRole('group', { name: 'Column' })).toHaveCount(0)
+    await page.keyboard.press('Escape')
+
+    await selectTemplate(page, 'Minimalist')
+    await openSectionPopup(page, 'skills')
+    await expect(page.getByRole('group', { name: 'Column' })).toHaveCount(0)
+  })
+
+
+  // Walks every opted-in template and every section its popup offers to
+  // move, in both directions. The contrast check is the automated guard
+  // against the one thing reusing home markup can get wrong: text styled
+  // for one column's surface landing unreadable on the other's. The bar is
+  // the template's OWN design for the target column (its home sections'
+  // lowest text contrast), capped at 3:1 — a move may not read worse than
+  // what the template already ships there, but a template whose own sidebar
+  // sits below 3:1 (Creative's accent numerals on the tan rail, 2.97) is a
+  // pre-existing design matter, not a move bug.
+  test('every opted-in template moves each movable section into a readable column', async ({ page }) => {
+    test.setTimeout(240_000)
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    for (const label of COLUMN_MOVE_TEMPLATES) {
+      await selectTemplate(page, label)
+      const keys = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('[data-direct-edit-trigger]'), (b) => b.dataset.directEditTrigger),
+      )
+      const baseline = {
+        sidebar: await minTextContrast(page, '.direct-edit-preview [data-export-secondary] [data-export-section]'),
+        main: await minTextContrast(page, '.direct-edit-preview [data-export-primary] [data-export-section]'),
+      }
+      let movedAny = false
+
+      for (const key of keys) {
+        await openSectionPopup(page, key)
+        const group = page.locator('.direct-edit-popup__columns')
+
+        if ((await group.count()) === 0) {
+          await page.keyboard.press('Escape')
+          continue
+        }
+
+        movedAny = true
+        const before = await sectionColumnState(page, key)
+        const target = before.inSidebar ? 'main' : 'sidebar'
+        await group.locator(`[data-column="${target}"]`).click()
+
+        const after = await sectionColumnState(page, key)
+        const where = `${label} / ${key} -> ${target}`
+        expect(after.inSidebar, `${where}: container`).toBe(target === 'sidebar')
+        expect(after.placement, `${where}: placement`).toBe(target === 'sidebar' ? 'side' : 'main')
+        expect(after.height, `${where}: height`).toBeGreaterThan(0)
+
+        const contrast = await minTextContrast(page, `.direct-edit-preview [data-export-section="${key}"]`)
+        expect(contrast, `${where}: text contrast`).toBeGreaterThanOrEqual(Math.min(3, baseline[target]) - 0.01)
+
+        // Put it back so the next section starts from the template default.
+        await group.locator(`[data-column="${before.inSidebar ? 'sidebar' : 'main'}"]`).click()
+        await page.keyboard.press('Escape')
+      }
+
+      expect(movedAny, `${label}: offered at least one move`).toBe(true)
+    }
+  })
+
   // Regression guard: `.builder-section` (app-shell.css) is `flex: 1;
   // min-height: 0` — needed so Classic mode's own AppShell panels can
   // scroll *inside* a viewport-bounded box instead of growing it. Direct
@@ -1101,5 +1343,24 @@ test.describe('Direct Edit popup on an empty CV', () => {
     await popup.locator('input[data-field="role"]').first().fill('First ever role')
 
     await expect(section).toContainText('First ever role')
+  })
+})
+
+test.describe('Direct Edit column control in Finnish', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => localStorage.setItem('ui-locale', 'fi'))
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Lataa demo-CV' }).first().click()
+  })
+
+  test('the column control is labelled in Finnish', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Suora muokkaus' }).click()
+    await page.getByRole('button', { name: /^Valitse pohja:/ }).click()
+    await page.getByRole('dialog', { name: 'Pohjagalleria' }).getByText('Luova', { exact: true }).click()
+
+    await openSectionPopup(page, 'skills')
+    const group = page.getByRole('group', { name: 'Sarake' })
+    await expect(group.getByRole('button', { name: 'Pääsarake' })).toBeVisible()
+    await expect(group.getByRole('button', { name: 'Sivupalkki' })).toHaveAttribute('aria-pressed', 'true')
   })
 })

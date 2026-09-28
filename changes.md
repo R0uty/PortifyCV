@@ -4,6 +4,37 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: move a section between the main column and the sidebar (Creative first) — 2026-09-28
+
+On a two-column template, the section popup now has a Column row (Main /
+Sidebar, fi: Pääsarake / Sivupalkki). It shows where the section lives and
+moves it with one click, which is one undo step through the existing
+`SET_ROOT_FIELD`. The row appears only where the move is allowed: any
+sidebar section can move into the main column, and a main-column section
+can move into the sidebar only if some template already designs it for one
+(skills, links, certificates, education, languages, interests, core
+strengths, memberships, achievements, projects). Experience and About stay
+put. The popup stays open on the moved section, and ↑/↓ follow it into its
+new column.
+
+A moved section keeps its home column's markup. Its
+`data-export-placement` comes from the column it actually sits in, so the
+PDF exporter paginates it correctly, and a `data-moved-from` attribute
+gives each template's CSS a hook to adapt it. Each template opts in with
+`columnMoves: true` in `cvTemplates.js`, so the rollout goes one template
+at a time. Creative is first and needed no CSS adaptation either way: its
+Skills chips read cleanly on the page and its Projects card fits the tan
+rail.
+
+A sweep test walks every opted-in template and moves each movable section
+both ways. It checks the section's container, its placement, that it has
+height, and its text contrast. The contrast bar is the template's own
+design for the target column (the lowest text contrast among the sections
+it puts there), capped at 3:1, because Creative's own sidebar headings sit
+at 2.97 by design, which a fixed 3:1 bar would have mis-flagged as a move
+bug. A deliberately broken rule (white text on moved sections) was caught
+at 1.04, so the guard has been seen failing.
+
 ## Section column moves: the data model and plumbing (no visible change yet) — 2026-09-28
 
 Groundwork for item 60, moving a section between a two-column template's

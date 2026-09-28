@@ -121,9 +121,14 @@ function SectionHead({ number, title }) {
   )
 }
 
-function Section({ id, placement, number, title, children }) {
+function Section({ id, placement, movedFrom = null, number, title, children }) {
   return (
-    <section className="creative-showcase__section" data-export-section={id} data-export-placement={placement}>
+    <section
+      className="creative-showcase__section"
+      data-export-section={id}
+      data-export-placement={placement}
+      data-moved-from={movedFrom ?? undefined}
+    >
       <SectionHead number={number} title={title} />
       {children}
     </section>
@@ -210,10 +215,10 @@ export default function CreativeShowcase({
     interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" placement="main" number={sectionNumber(key)} title={copy.about}>
+        <Section key={key} id="about" placement={placement} movedFrom={movedFrom} number={sectionNumber(key)} title={copy.about}>
           <p className="creative-showcase__intro">
             {directEditDispatch ? (
               <EditableField
@@ -246,7 +251,7 @@ export default function CreativeShowcase({
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main" number={sectionNumber(key)} title={copy.experience}>
+        <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} number={sectionNumber(key)} title={copy.experience}>
           <div className="creative-showcase__exp-list">
             {directEditDispatch ? (
               <EditableList
@@ -276,7 +281,7 @@ export default function CreativeShowcase({
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="main" number={sectionNumber(key)} title={copy.projects}>
+        <Section key={key} id="projects" placement={placement} movedFrom={movedFrom} number={sectionNumber(key)} title={copy.projects}>
           <div className="creative-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -311,10 +316,10 @@ export default function CreativeShowcase({
     return null
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side" number={sectionNumber(key)} title={copy.skills}>
+        <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} number={sectionNumber(key)} title={copy.skills}>
           <div className="creative-showcase__pill-row">
             {directEditDispatch ? null : flatSkills.length > 0 ? (
               flatSkills.map((skill) => (
@@ -337,7 +342,7 @@ export default function CreativeShowcase({
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="side" number={sectionNumber(key)} title={copy.education}>
+        <Section key={key} id="education" placement={placement} movedFrom={movedFrom} number={sectionNumber(key)} title={copy.education}>
           <div className="creative-showcase__plain-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
@@ -363,7 +368,7 @@ export default function CreativeShowcase({
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" placement="side" number={sectionNumber(key)} title={copy.certificates}>
+        <Section key={key} id="certificates" placement={placement} movedFrom={movedFrom} number={sectionNumber(key)} title={copy.certificates}>
           <div className="creative-showcase__plain-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -388,7 +393,7 @@ export default function CreativeShowcase({
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" number={sectionNumber(key)} title={copy.links}>
+        <Section key={key} id="links" placement={placement} movedFrom={movedFrom} number={sectionNumber(key)} title={copy.links}>
           <div className="creative-showcase__arrow-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -409,7 +414,7 @@ export default function CreativeShowcase({
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" number={sectionNumber(key)} title={copy.languages}>
+        <Section key={key} id="languages" placement={placement} movedFrom={movedFrom} number={sectionNumber(key)} title={copy.languages}>
           <div className="creative-showcase__plain-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -430,7 +435,7 @@ export default function CreativeShowcase({
 
     if (key === 'interests') {
       return (
-        <Section key={key} id="interests" placement="side" number={sectionNumber(key)} title={copy.interests}>
+        <Section key={key} id="interests" placement={placement} movedFrom={movedFrom} number={sectionNumber(key)} title={copy.interests}>
           <div className="creative-showcase__pill-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
@@ -449,6 +454,21 @@ export default function CreativeShowcase({
     }
 
     return null
+  }
+
+
+  // A section always renders through its HOME renderer — the column the
+  // template designed it for — even when the user moved it to the other
+  // column. Placement comes from where it actually is (the PDF exporter
+  // paginates by it); movedFrom is the CSS hook that adapts it.
+  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
+  const renderSection = (key, placement) => {
+    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
+    const movedFrom = homePlacement === placement ? null : homePlacement
+
+    return homePlacement === 'side'
+      ? renderSidebarSection(key, placement, movedFrom)
+      : renderMainSection(key, placement, movedFrom)
   }
 
   return (
@@ -531,11 +551,11 @@ export default function CreativeShowcase({
 
       <div className="creative-showcase__body" data-export-content="true">
         <main className="creative-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key) => renderMainSection(key))}
+          {mainSectionKeys.map((key) => renderSection(key, 'main'))}
         </main>
 
         <aside className="creative-showcase__sidebar" data-export-secondary="true">
-          {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+          {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
         </aside>
       </div>
     </article>

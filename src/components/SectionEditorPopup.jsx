@@ -3,6 +3,7 @@ import { SECTION_SHAPE, getSectionSchema, getColumnNeighbourSection } from '../u
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 import { isPhotoVisibleForTemplate, normalizeSectionOrder } from '../utils/cvForm'
 import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/profilePhoto'
+import { canMoveSection, getSectionColumn, setSectionColumn } from '../utils/sectionColumns'
 
 // The popup editor for one section. Renders real <input>/<textarea>
 // elements and reads formData directly — never the DOM and never
@@ -220,6 +221,25 @@ export default function SectionEditorPopup({
     isOrderableSection && Boolean(getColumnNeighbourSection(sectionKey, -1, orderedSections, templateConfig))
   const canMoveDown =
     isOrderableSection && Boolean(getColumnNeighbourSection(sectionKey, 1, orderedSections, templateConfig))
+
+  // Moving between columns is decided against the template's UNMODIFIED
+  // config (see sectionColumns.js); templateConfig here is the effective
+  // one, which carries it as baseConfig.
+  const baseTemplateConfig = templateConfig.baseConfig ?? templateConfig
+  const showColumnControl = isOrderableSection && canMoveSection(baseTemplateConfig, sectionKey)
+  const currentColumn = getSectionColumn(templateConfig, sectionKey)
+
+  const moveToColumn = (column) => {
+    if (column === currentColumn) {
+      return
+    }
+
+    dispatchFormData({
+      type: FORM_ACTION.SET_ROOT_FIELD,
+      field: 'sectionColumnsByTemplate',
+      value: setSectionColumn(formData.sectionColumnsByTemplate, baseTemplateConfig, sectionKey, column),
+    })
+  }
 
   const renderRecordArray = () => {
     const items = Array.isArray(formData[sectionKey]) ? formData[sectionKey] : []
@@ -703,6 +723,36 @@ export default function SectionEditorPopup({
           &times;
         </button>
       </div>
+      {/* Hidden rather than disabled where a section cannot move: on the 7
+          single-column templates (and Quadrant's fixed grid) that would be
+          a dead control on every section. Main/Sidebar, never left/right — sidebars sit on
+          different sides in different templates. */}
+      {showColumnControl ? (
+        <div
+          className="direct-edit-popup__columns"
+          role="group"
+          aria-label={isFinnish ? 'Sarake' : 'Column'}
+        >
+          <span className="direct-edit-popup__columns-label" aria-hidden="true">
+            {isFinnish ? 'Sarake' : 'Column'}
+          </span>
+          {[
+            ['main', 'Main', 'Pääsarake'],
+            ['sidebar', 'Sidebar', 'Sivupalkki'],
+          ].map(([column, labelEn, labelFi]) => (
+            <button
+              key={column}
+              type="button"
+              className="direct-edit-popup__column-option"
+              data-column={column}
+              aria-pressed={currentColumn === column}
+              onClick={() => moveToColumn(column)}
+            >
+              {isFinnish ? labelFi : labelEn}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div className="direct-edit-popup__body">{renderBody()}</div>
     </div>
   )
