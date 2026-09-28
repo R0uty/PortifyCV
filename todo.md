@@ -1965,14 +1965,16 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
-**State (refreshed 2026-09-28):** branch `v1.3.0` at `c78b856`, version
-**1.2.61** (Colorful Compact skill-pill contrast fix on top of the column
-moves), pushed to `origin/v1.3.0`. Working tree clean (only an untracked
-`.claude/`). Full suite green apart from the footer flake below: **124 e2e**,
-lint, build,
-`check:reducers`, `check:share`, `check:direct-edit`, `check:section-schema`,
-`check:section-columns` (new). `main` untouched at `0f5261f`, no PR — the
-user said explicitly on 2026-09-28 NOT to merge yet.
+**State (refreshed 2026-09-28):** branch `v1.3.0`, version **1.2.62**,
+pushed to `origin/v1.3.0` (run `git log -1` for the exact commit; it is
+deliberately not recorded here, because every refresh commit would make it
+stale). Latest work: section column moves (v1.2.53–v1.2.60), the Colorful
+Compact skill-pill contrast fix (v1.2.61) and the footer-test flake fix
+(v1.2.62). Working tree clean (only an untracked `.claude/`). Full suite
+green with no known flakes: **124/124 e2e**, lint, build, `check:reducers`,
+`check:share`, `check:direct-edit`, `check:section-schema`,
+`check:section-columns`. `main` untouched at `0f5261f`, no PR — the user
+said explicitly on 2026-09-28 NOT to merge yet.
 
 Source of truth for the Direct Edit editor's design and its known gaps:
 `docs/superpowers/specs/2026-09-19-direct-edit-universal-sections-design.md`
