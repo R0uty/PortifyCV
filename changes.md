@@ -4,6 +4,29 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Section column moves open on Modern Orange — 2026-09-28
+
+The last template. Same wrapper conversion as Navy (`Section` and
+`SidebarBlock` take the real placement and a `movedFrom` hook), but
+Modern Orange's cream rail is light enough that both directions read
+without recolouring. Both its columns space their children uniformly, so
+Navy's div/section spacing trap does not apply either (gaps measured before
+and after a move each way). Its ATS render, which reuses this Showcase,
+is covered by the same ATS-mode guard as Navy, with Certificates moved
+into the sidebar.
+
+One adaptation was needed, and only screenshots found it. The skill list
+is a column stack sized for the rail. Classic's skill rows (name plus dot
+rating) are meant to span it, but Direct Edit's inline chips stretched into
+full-width bars in the wider main column. There they now flow and wrap
+like every other template's tags. Executive and Creative, the other
+inline-wired two-column templates, were checked and already size their
+chips to content.
+
+With this, item 60 is done: 10 two-column templates offer the move.
+Quadrant is deliberately excluded, since its fixed 2x2 grid has no main
+column and sidebar to move between.
+
 ## Section column moves open on Navy Professional — 2026-09-28
 
 Navy was the template this plan was most worried about, and rightly:

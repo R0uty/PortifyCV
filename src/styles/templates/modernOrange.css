@@ -703,3 +703,16 @@
     box-shadow: none !important;
   }
 }
+
+/* ── Sections moved between columns (Direct Edit, sectionColumns.js) ──
+   A moved section keeps its home markup. Modern Orange's cream rail is
+   light enough that both directions read without recolouring, and both
+   columns space their children uniformly, so the only adaptation is the
+   skill list: a column stack sized for the narrow rail. Its Classic
+   skill-rows (name + dot rating) are meant to span the list, but Direct
+   Edit's inline chips stretched into full-width bars in the wider main
+   column, so there they flow and wrap instead. */
+.modern-orange-showcase__main [data-moved-from='side'] .modern-orange-showcase__skill-list:has(> .direct-edit-chip) {
+  flex-direction: row;
+  flex-wrap: wrap;
+}

@@ -102,9 +102,14 @@ function SectionHead({ icon, title }) {
   )
 }
 
-function Section({ id, icon, title, children }) {
+function Section({ id, icon, title, placement = 'main', movedFrom = null, children }) {
   return (
-    <section className="modern-orange-showcase__section" data-export-section={id} data-export-placement="main">
+    <section
+      className="modern-orange-showcase__section"
+      data-export-section={id}
+      data-export-placement={placement}
+      data-moved-from={movedFrom ?? undefined}
+    >
       <SectionHead icon={icon} title={title} />
       {children}
     </section>
@@ -114,12 +119,13 @@ function Section({ id, icon, title, children }) {
 // `id` is set only for real CV sections: it is what the PDF exporter and
 // Direct Edit's overlay find a section by. The personal-info block passes none
 // and stays untagged.
-function SidebarBlock({ id, title, children }) {
+function SidebarBlock({ id, title, placement = 'side', movedFrom = null, children }) {
   return (
     <div
       className="modern-orange-showcase__sidebar-block"
       data-export-section={id}
-      data-export-placement={id ? 'side' : undefined}
+      data-export-placement={id ? placement : undefined}
+      data-moved-from={movedFrom ?? undefined}
     >
       <p className="modern-orange-showcase__sidebar-heading">{title}</p>
       {children}
@@ -299,10 +305,10 @@ export default function ModernOrangeShowcase({
     viewProject: isFinnish ? 'Näytä projekti' : 'View project',
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" icon="about" title={copy.profile}>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="about" icon="about" title={copy.profile}>
           <p className="modern-orange-showcase__summary">
             {directEditDispatch ? (
               <EditableField
@@ -324,7 +330,7 @@ export default function ModernOrangeShowcase({
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" icon="experience" title={copy.experience}>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="experience" icon="experience" title={copy.experience}>
           <div className="modern-orange-showcase__exp-list">
             {directEditDispatch ? (
               <EditableList
@@ -357,7 +363,7 @@ export default function ModernOrangeShowcase({
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" icon="projects" title={copy.projects}>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="projects" icon="projects" title={copy.projects}>
           <div className="modern-orange-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -400,7 +406,7 @@ export default function ModernOrangeShowcase({
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" icon="certificates" title={copy.certificates}>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="certificates" icon="certificates" title={copy.certificates}>
           <ul className="modern-orange-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -427,10 +433,10 @@ export default function ModernOrangeShowcase({
     return null
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
-        <SidebarBlock key={key} id="skills" title={copy.skills}>
+        <SidebarBlock key={key} placement={placement} movedFrom={movedFrom} id="skills" title={copy.skills}>
           <div className="modern-orange-showcase__skill-list">
             {directEditDispatch ? null : snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill, index) => (
@@ -454,7 +460,7 @@ export default function ModernOrangeShowcase({
 
     if (key === 'languages') {
       return (
-        <SidebarBlock key={key} id="languages" title={copy.languages}>
+        <SidebarBlock key={key} placement={placement} movedFrom={movedFrom} id="languages" title={copy.languages}>
           <div className="modern-orange-showcase__lang-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -478,7 +484,7 @@ export default function ModernOrangeShowcase({
 
     if (key === 'education') {
       return (
-        <SidebarBlock key={key} id="education" title={copy.education}>
+        <SidebarBlock key={key} placement={placement} movedFrom={movedFrom} id="education" title={copy.education}>
           <div className="modern-orange-showcase__edu-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => {
@@ -507,6 +513,21 @@ export default function ModernOrangeShowcase({
     }
 
     return null
+  }
+
+
+  // A section always renders through its HOME renderer — the column the
+  // template designed it for — even when the user moved it to the other
+  // column. Placement comes from where it actually is (the PDF exporter
+  // paginates by it); movedFrom is the CSS hook that adapts it.
+  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
+  const renderSection = (key, placement) => {
+    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
+    const movedFrom = homePlacement === placement ? null : homePlacement
+
+    return homePlacement === 'side'
+      ? renderSidebarSection(key, placement, movedFrom)
+      : renderMainSection(key, placement, movedFrom)
   }
 
   return (
@@ -615,13 +636,13 @@ export default function ModernOrangeShowcase({
           </SidebarBlock>
         ) : null}
 
-        {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+        {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
       </aside>
 
       <main className="modern-orange-showcase__main" data-export-primary="true">
         <div className="modern-orange-showcase__header-divider" aria-hidden="true" />
 
-        {mainSectionKeys.map((key) => renderMainSection(key))}
+        {mainSectionKeys.map((key) => renderSection(key, 'main'))}
       </main>
     </article>
   )

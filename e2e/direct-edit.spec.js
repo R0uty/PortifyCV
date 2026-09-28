@@ -62,7 +62,7 @@ async function popupGeometry(page, sectionKey) {
 // Templates that have opted into section column moves (cvTemplates.js
 // `columnMoves: true`). The sweep test below walks every one of them;
 // each template's rollout task appends its label here.
-const COLUMN_MOVE_TEMPLATES = ['Creative', 'Modern Professional', 'Executive', 'Graduate', 'Portfolio Hybrid', 'Tech Executive', 'Colorful Compact', 'Developer', 'Navy Professional']
+const COLUMN_MOVE_TEMPLATES = ['Creative', 'Modern Professional', 'Executive', 'Graduate', 'Portfolio Hybrid', 'Tech Executive', 'Colorful Compact', 'Developer', 'Navy Professional', 'Modern Orange']
 
 // Where a section currently renders: inside the sidebar container
 // (every two-column template marks it data-export-secondary) or not,
@@ -891,7 +891,7 @@ test.describe('Direct Edit builder', () => {
   // itself always renders the designer layout (DirectEditPreview passes
   // atsFriendlyMode={false}), so ATS mode is checked in Classic's preview,
   // which a move made in Direct Edit carries into.
-  for (const [label, sectionKey] of [['Navy Professional', 'education']]) {
+  for (const [label, sectionKey] of [['Navy Professional', 'education'], ['Modern Orange', 'certificates']]) {
     test(`${label}: a section moved to the sidebar stays readable in ATS mode`, async ({ page }) => {
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
       await selectTemplate(page, label)

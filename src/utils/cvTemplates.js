@@ -264,6 +264,7 @@ const templateMap = {
     description: 'Premium two-column layout with a warm cream sidebar, orange accents, dot-rated skills, and timelines for education and experience — suits almost any profession.',
     variant: 'modernOrange',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'projects', 'certificates'],
     secondarySections: ['skills', 'languages', 'education'],
     summaryBadgeLabel: 'Profile',
