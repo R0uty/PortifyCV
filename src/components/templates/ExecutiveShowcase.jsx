@@ -164,9 +164,9 @@ function SectionHead({ title }) {
   )
 }
 
-function Section({ id, placement, title, children }) {
+function Section({ id, placement, movedFrom = null, title, children }) {
   return (
-    <section className="executive-showcase__section" data-export-section={id} data-export-placement={placement}>
+    <section className="executive-showcase__section" data-export-section={id} data-export-placement={placement} data-moved-from={movedFrom ?? undefined}>
       <SectionHead title={title} />
       {children}
     </section>
@@ -263,10 +263,10 @@ export default function ExecutiveShowcase({
     links: isFinnish ? 'Linkit' : 'Links',
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" placement="main" title={copy.profile}>
+        <Section key={key} id="about" placement={placement} movedFrom={movedFrom} title={copy.profile}>
           <p className="executive-showcase__summary">
             {directEditDispatch ? (
               <EditableField
@@ -288,7 +288,7 @@ export default function ExecutiveShowcase({
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main" title={copy.experience}>
+        <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} title={copy.experience}>
           <div className="executive-showcase__entry-list">
             {directEditDispatch ? (
               <EditableList
@@ -327,7 +327,7 @@ export default function ExecutiveShowcase({
       if (snapshot.leadership.length === 0) return null
 
       return (
-        <Section key={key} id="leadership" placement="main" title={copy.leadership}>
+        <Section key={key} id="leadership" placement={placement} movedFrom={movedFrom} title={copy.leadership}>
           <div className="executive-showcase__entry-list">
             {snapshot.leadership.map((item, index) => {
               const heading = [item.role, item.organization].filter(Boolean).join(' — ')
@@ -357,7 +357,7 @@ export default function ExecutiveShowcase({
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="main" title={copy.projects}>
+        <Section key={key} id="projects" placement={placement} movedFrom={movedFrom} title={copy.projects}>
           <div className="executive-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => (
@@ -382,7 +382,7 @@ export default function ExecutiveShowcase({
 
     if (key === 'achievements') {
       return (
-        <Section key={key} id="achievements" placement="main" title={copy.achievements}>
+        <Section key={key} id="achievements" placement={placement} movedFrom={movedFrom} title={copy.achievements}>
           <ul className="executive-showcase__award-list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
@@ -409,7 +409,7 @@ export default function ExecutiveShowcase({
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="main" title={copy.education}>
+        <Section key={key} id="education" placement={placement} movedFrom={movedFrom} title={copy.education}>
           <div className="executive-showcase__entry-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
@@ -440,10 +440,10 @@ export default function ExecutiveShowcase({
     return null
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'coreStrengths') {
       return (
-        <Section key={key} id="coreStrengths" placement="side" title={copy.coreStrengths}>
+        <Section key={key} id="coreStrengths" placement={placement} movedFrom={movedFrom} title={copy.coreStrengths}>
           <div className="executive-showcase__strength-list">
             {snapshot.coreStrengths.length > 0 ? (
               snapshot.coreStrengths.map((item, index) => (
@@ -464,7 +464,7 @@ export default function ExecutiveShowcase({
 
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side" title={copy.skills}>
+        <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} title={copy.skills}>
           {directEditDispatch ? null : skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="executive-showcase__skill-group">
@@ -495,7 +495,7 @@ export default function ExecutiveShowcase({
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" placement="side" title={copy.certificates}>
+        <Section key={key} id="certificates" placement={placement} movedFrom={movedFrom} title={copy.certificates}>
           <div className="executive-showcase__list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -525,7 +525,7 @@ export default function ExecutiveShowcase({
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" title={copy.languages}>
+        <Section key={key} id="languages" placement={placement} movedFrom={movedFrom} title={copy.languages}>
           <div className="executive-showcase__list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -546,7 +546,7 @@ export default function ExecutiveShowcase({
 
     if (key === 'memberships') {
       return (
-        <Section key={key} id="memberships" placement="side" title={copy.memberships}>
+        <Section key={key} id="memberships" placement={placement} movedFrom={movedFrom} title={copy.memberships}>
           <div className="executive-showcase__list">
             {snapshot.memberships.length > 0 ? (
               snapshot.memberships.map((item, index) => (
@@ -571,7 +571,7 @@ export default function ExecutiveShowcase({
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" title={copy.links}>
+        <Section key={key} id="links" placement={placement} movedFrom={movedFrom} title={copy.links}>
           <div className="executive-showcase__link-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -594,6 +594,21 @@ export default function ExecutiveShowcase({
     }
 
     return null
+  }
+
+
+  // A section always renders through its HOME renderer — the column the
+  // template designed it for — even when the user moved it to the other
+  // column. Placement comes from where it actually is (the PDF exporter
+  // paginates by it); movedFrom is the CSS hook that adapts it.
+  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
+  const renderSection = (key, placement) => {
+    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
+    const movedFrom = homePlacement === placement ? null : homePlacement
+
+    return homePlacement === 'side'
+      ? renderSidebarSection(key, placement, movedFrom)
+      : renderMainSection(key, placement, movedFrom)
   }
 
   return (
@@ -674,13 +689,13 @@ export default function ExecutiveShowcase({
         {showSidebar ? (
           <>
             <div className="executive-showcase__sidebar-divider" aria-hidden="true" />
-            {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+            {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
           </>
         ) : null}
       </aside>
 
       <main className="executive-showcase__main" data-export-primary="true">
-        {mainSectionKeys.map((key) => renderMainSection(key))}
+        {mainSectionKeys.map((key) => renderSection(key, 'main'))}
       </main>
     </article>
   )

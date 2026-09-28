@@ -62,7 +62,7 @@ async function popupGeometry(page, sectionKey) {
 // Templates that have opted into section column moves (cvTemplates.js
 // `columnMoves: true`). The sweep test below walks every one of them;
 // each template's rollout task appends its label here.
-const COLUMN_MOVE_TEMPLATES = ['Creative']
+const COLUMN_MOVE_TEMPLATES = ['Creative', 'Modern Professional', 'Executive', 'Graduate']
 
 // Where a section currently renders: inside the sidebar container
 // (every two-column template marks it data-export-secondary) or not,

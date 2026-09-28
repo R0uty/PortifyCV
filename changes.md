@@ -4,6 +4,19 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Section column moves open on Modern Professional, Executive and Graduate — 2026-09-28
+
+These three follow Creative: their `Section` already took a placement, so
+each got the same conversion. The renderers take the real placement and a
+`movedFrom` hook, a `renderSection` router sends each section through its
+home renderer, and `columnMoves: true` switches them on. None needed CSS
+adaptation. Checked by eye with one section moved each way per template
+(Skills and Education on Modern Professional, Certificates and Projects on
+Executive, Languages and Education on Graduate), and by the sweep test,
+which now covers all four templates. Modern's `showSidebar` gate was
+checked too: every template that has it hard-codes it to `true`, so no
+configuration can hide a section moved into the sidebar.
+
 ## Direct Edit: move a section between the main column and the sidebar (Creative first) — 2026-09-28
 
 On a two-column template, the section popup now has a Column row (Main /

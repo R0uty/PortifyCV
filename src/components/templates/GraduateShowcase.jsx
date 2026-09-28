@@ -52,12 +52,13 @@ function SectionHead({ icon, title }) {
   )
 }
 
-function Section({ id, placement, icon, title, children }) {
+function Section({ id, placement, movedFrom = null, icon, title, children }) {
   return (
     <section
       className="graduate-showcase__section"
       data-export-section={id}
       data-export-placement={placement}
+      data-moved-from={movedFrom ?? undefined}
     >
       <SectionHead icon={icon} title={title} />
       {children}
@@ -136,12 +137,12 @@ export default function GraduateShowcase({
     memberships: isFinnish ? 'Ylimääräinen toiminta' : 'Extracurricular Activities',
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       if (!about) return null
 
       return (
-        <Section key={key} id="about" placement="main" icon="about" title={copy.about}>
+        <Section key={key} id="about" placement={placement} movedFrom={movedFrom} icon="about" title={copy.about}>
           <p className="graduate-showcase__summary">{about}</p>
         </Section>
       )
@@ -149,7 +150,7 @@ export default function GraduateShowcase({
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="main" icon="education" title={copy.education}>
+        <Section key={key} id="education" placement={placement} movedFrom={movedFrom} icon="education" title={copy.education}>
           <div className="graduate-showcase__edu-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => {
@@ -190,7 +191,7 @@ export default function GraduateShowcase({
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="main" icon="projects" title={copy.projects}>
+        <Section key={key} id="projects" placement={placement} movedFrom={movedFrom} icon="projects" title={copy.projects}>
           <div className="graduate-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -253,7 +254,7 @@ export default function GraduateShowcase({
 
     if (key === 'internships') {
       return (
-        <Section key={key} id="internships" placement="main" icon="experience" title={copy.internships}>
+        <Section key={key} id="internships" placement={placement} movedFrom={movedFrom} icon="experience" title={copy.internships}>
           <div className="graduate-showcase__timeline">
             {snapshot.internships.length > 0 ? (
               snapshot.internships.map((item, index) => {
@@ -302,7 +303,7 @@ export default function GraduateShowcase({
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main" icon="experience" title={copy.experience}>
+        <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} icon="experience" title={copy.experience}>
           <div className="graduate-showcase__edu-list">
             {snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => {
@@ -342,7 +343,7 @@ export default function GraduateShowcase({
 
     if (key === 'publications') {
       return (
-        <Section key={key} id="publications" placement="main" icon="publications" title={copy.publications}>
+        <Section key={key} id="publications" placement={placement} movedFrom={movedFrom} icon="publications" title={copy.publications}>
           <div className="graduate-showcase__edu-list">
             {snapshot.publications.length > 0 ? (
               snapshot.publications.map((item, index) => (
@@ -367,7 +368,7 @@ export default function GraduateShowcase({
 
     if (key === 'volunteering') {
       return (
-        <Section key={key} id="volunteering" placement="main" icon="volunteering" title={copy.volunteering}>
+        <Section key={key} id="volunteering" placement={placement} movedFrom={movedFrom} icon="volunteering" title={copy.volunteering}>
           <div className="graduate-showcase__edu-list">
             {snapshot.volunteering.length > 0 ? (
               snapshot.volunteering.map((item, index) => {
@@ -392,10 +393,10 @@ export default function GraduateShowcase({
     return null
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side" icon="skills" title={copy.skills}>
+        <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} icon="skills" title={copy.skills}>
           {skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="graduate-showcase__skill-group">
@@ -418,7 +419,7 @@ export default function GraduateShowcase({
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" icon="languages" title={copy.languages}>
+        <Section key={key} id="languages" placement={placement} movedFrom={movedFrom} icon="languages" title={copy.languages}>
           <div className="graduate-showcase__list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -439,7 +440,7 @@ export default function GraduateShowcase({
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" placement="side" icon="certificates" title={copy.certificates}>
+        <Section key={key} id="certificates" placement={placement} movedFrom={movedFrom} icon="certificates" title={copy.certificates}>
           <div className="graduate-showcase__list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -474,7 +475,7 @@ export default function GraduateShowcase({
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" icon="links" title={copy.links}>
+        <Section key={key} id="links" placement={placement} movedFrom={movedFrom} icon="links" title={copy.links}>
           <div className="graduate-showcase__link-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -498,7 +499,7 @@ export default function GraduateShowcase({
 
     if (key === 'achievements') {
       return (
-        <Section key={key} id="achievements" placement="side" icon="achievements" title={copy.achievements}>
+        <Section key={key} id="achievements" placement={placement} movedFrom={movedFrom} icon="achievements" title={copy.achievements}>
           <div className="graduate-showcase__list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
@@ -522,7 +523,7 @@ export default function GraduateShowcase({
 
     if (key === 'memberships') {
       return (
-        <Section key={key} id="memberships" placement="side" icon="memberships" title={copy.memberships}>
+        <Section key={key} id="memberships" placement={placement} movedFrom={movedFrom} icon="memberships" title={copy.memberships}>
           <div className="graduate-showcase__list">
             {snapshot.memberships.length > 0 ? (
               snapshot.memberships.map((item, index) => (
@@ -547,7 +548,7 @@ export default function GraduateShowcase({
 
     if (key === 'interests') {
       return (
-        <Section key={key} id="interests" placement="side" icon="interests" title={copy.interests}>
+        <Section key={key} id="interests" placement={placement} movedFrom={movedFrom} icon="interests" title={copy.interests}>
           <div className="graduate-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
@@ -564,6 +565,21 @@ export default function GraduateShowcase({
     }
 
     return null
+  }
+
+
+  // A section always renders through its HOME renderer — the column the
+  // template designed it for — even when the user moved it to the other
+  // column. Placement comes from where it actually is (the PDF exporter
+  // paginates by it); movedFrom is the CSS hook that adapts it.
+  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
+  const renderSection = (key, placement) => {
+    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
+    const movedFrom = homePlacement === placement ? null : homePlacement
+
+    return homePlacement === 'side'
+      ? renderSidebarSection(key, placement, movedFrom)
+      : renderMainSection(key, placement, movedFrom)
   }
 
   return (
@@ -622,11 +638,11 @@ export default function GraduateShowcase({
         style={!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
       >
         <main className="graduate-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key) => renderMainSection(key))}
+          {mainSectionKeys.map((key) => renderSection(key, 'main'))}
         </main>
         {showSidebar ? (
           <aside className="graduate-showcase__sidebar" data-export-secondary="true">
-            {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+            {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
           </aside>
         ) : null}
       </div>

@@ -74,9 +74,9 @@ function SectionHead({ icon, title }) {
   )
 }
 
-function Section({ id, placement, icon, title, children }) {
+function Section({ id, placement, movedFrom = null, icon, title, children }) {
   return (
-    <section className="modern-showcase__section" data-export-section={id} data-export-placement={placement}>
+    <section className="modern-showcase__section" data-export-section={id} data-export-placement={placement} data-moved-from={movedFrom ?? undefined}>
       <SectionHead icon={icon} title={title} />
       <div className="modern-showcase__section-divider" aria-hidden="true" />
       {children}
@@ -146,10 +146,10 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
     interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" placement="main" icon="about" title={copy.summary}>
+        <Section key={key} id="about" placement={placement} movedFrom={movedFrom} icon="about" title={copy.summary}>
           <p className="modern-showcase__summary">{about}</p>
         </Section>
       )
@@ -157,7 +157,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main" icon="experience" title={copy.experience}>
+        <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} icon="experience" title={copy.experience}>
           <div className="modern-showcase__timeline">
             {snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => {
@@ -207,7 +207,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="main" icon="education" title={copy.education}>
+        <Section key={key} id="education" placement={placement} movedFrom={movedFrom} icon="education" title={copy.education}>
           <div className="modern-showcase__edu-grid">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
@@ -235,7 +235,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="main" icon="projects" title={copy.projects}>
+        <Section key={key} id="projects" placement={placement} movedFrom={movedFrom} icon="projects" title={copy.projects}>
           <div className="modern-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -272,7 +272,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'achievements') {
       return (
-        <Section key={key} id="achievements" placement="main" icon="achievements" title={copy.achievements}>
+        <Section key={key} id="achievements" placement={placement} movedFrom={movedFrom} icon="achievements" title={copy.achievements}>
           <ul className="modern-showcase__achievement-list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
@@ -300,10 +300,10 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
     return null
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side" icon="skills" title={copy.skills}>
+        <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} icon="skills" title={copy.skills}>
           {skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="modern-showcase__skill-group">
@@ -326,7 +326,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" icon="languages" title={copy.languages}>
+        <Section key={key} id="languages" placement={placement} movedFrom={movedFrom} icon="languages" title={copy.languages}>
           <div className="modern-showcase__lang-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -347,7 +347,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" placement="side" icon="certificates" title={copy.certificates}>
+        <Section key={key} id="certificates" placement={placement} movedFrom={movedFrom} icon="certificates" title={copy.certificates}>
           <div className="modern-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -377,7 +377,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" icon="links" title={copy.links}>
+        <Section key={key} id="links" placement={placement} movedFrom={movedFrom} icon="links" title={copy.links}>
           <div className="modern-showcase__link-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -401,7 +401,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'interests') {
       return (
-        <Section key={key} id="interests" placement="side" icon="interests" title={copy.interests}>
+        <Section key={key} id="interests" placement={placement} movedFrom={movedFrom} icon="interests" title={copy.interests}>
           <div className="modern-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
@@ -421,6 +421,21 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
     }
 
     return null
+  }
+
+
+  // A section always renders through its HOME renderer — the column the
+  // template designed it for — even when the user moved it to the other
+  // column. Placement comes from where it actually is (the PDF exporter
+  // paginates by it); movedFrom is the CSS hook that adapts it.
+  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
+  const renderSection = (key, placement) => {
+    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
+    const movedFrom = homePlacement === placement ? null : homePlacement
+
+    return homePlacement === 'side'
+      ? renderSidebarSection(key, placement, movedFrom)
+      : renderMainSection(key, placement, movedFrom)
   }
 
   return (
@@ -476,11 +491,11 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
         style={!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
       >
         <main className="modern-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key) => renderMainSection(key))}
+          {mainSectionKeys.map((key) => renderSection(key, 'main'))}
         </main>
         {showSidebar ? (
           <aside className="modern-showcase__sidebar" data-export-secondary="true">
-            {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+            {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
           </aside>
         ) : null}
       </div>
