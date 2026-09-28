@@ -1965,11 +1965,10 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
-**State (refreshed 2026-09-28):** branch `v1.3.0` at `884a907`+, version
-**1.2.60**. Commits after `99bb145` (v1.2.52) are NOT yet pushed unless the
-user has since said so. Working tree clean (only an untracked `.claude/`).
-Full suite green: **123/123 e2e**, lint, build, `check:reducers`,
-`check:share`, `check:direct-edit`, `check:section-schema`,
+**State (refreshed 2026-09-28):** branch `v1.3.0` at `25d9400`, version
+**1.2.60**, pushed to `origin/v1.3.0`. Working tree clean (only an untracked
+`.claude/`). Full suite green: **123/123 e2e**, lint, build,
+`check:reducers`, `check:share`, `check:direct-edit`, `check:section-schema`,
 `check:section-columns` (new). `main` untouched at `0f5261f`, no PR — the
 user said explicitly on 2026-09-28 NOT to merge yet.
 
