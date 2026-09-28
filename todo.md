@@ -585,6 +585,11 @@ rename pass.
 - [ ] **23. Lock the new Playwright e2e suite into branch protection** now
       that it's in CI (`.github/workflows/ci.yml`), so it actually gates
       merges rather than just running.
+      **Update 2026-09-28:** CI now runs on pushes to `v1.3.0` too and
+      covers all seven `check:*` scripts. Branch protection itself is still
+      open: it is a GitHub repository setting on `main` for the user to
+      turn on, and should list both CI jobs ("Lint, build, and regression
+      checks" and "End-to-end smoke tests") as required.
 - [x] **24. Optional session-only "restore last session" via `sessionStorage`**
       — done 2026-08-15. Added a fourth Settings row, off by default:
       "Restore last session." When on, a debounced effect in

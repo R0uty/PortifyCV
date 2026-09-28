@@ -4,6 +4,17 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## CI now runs on the v1.3.0 branch and covers every check script — 2026-09-28
+
+`.github/workflows/ci.yml` only ran on pushes to `main` and on pull
+requests. `v1.3.0` pushes directly, with no PR, so none of its 263 commits
+had ever run CI. The workflow also ran only three of the seven check
+scripts, so the checks written for Direct Edit (`check:direct-edit`,
+`check:section-schema`, `check:section-columns`) and the Word export check
+(`check:docx-export`) guarded nothing in CI, even after a merge. CI now
+triggers on pushes to `v1.3.0` as well as `main`, and the checks job runs
+all seven scripts. The e2e job is unchanged.
+
 ## The Direct Edit footer test no longer flakes — 2026-09-28
 
 `'the footer never overlaps the CV preview in Direct Edit mode'` failed

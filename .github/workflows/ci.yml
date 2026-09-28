@@ -2,7 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # v1.3.0 is the long-lived Direct Edit branch; it pushes directly rather
+    # than through a PR, so without this its commits never ran CI at all.
+    branches: [main, v1.3.0]
   pull_request:
 
 jobs:
@@ -34,6 +36,18 @@ jobs:
 
       - name: CV feedback regression checks
         run: npm run check:feedback
+
+      - name: Word export regression checks
+        run: npm run check:docx-export
+
+      - name: Direct Edit template allowlist checks
+        run: npm run check:direct-edit
+
+      - name: Direct Edit section schema checks
+        run: npm run check:section-schema
+
+      - name: Section column-move rules checks
+        run: npm run check:section-columns
 
   e2e:
     name: End-to-end smoke tests
