@@ -1965,11 +1965,13 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
-**State:** branch `v1.3.0` at `040395a`, version **1.2.51**, pushed to
-`origin/v1.3.0`. Working tree clean (only an untracked `.claude/`). Full suite
-green: **106/106 e2e**, lint, build, `check:reducers`, `check:share`,
-`check:direct-edit`, `check:section-schema`. `main` untouched at `0f5261f`, no
-PR — same as the whole branch.
+**State (refreshed 2026-09-28):** branch `v1.3.0` at `884a907`+, version
+**1.2.60**. Commits after `99bb145` (v1.2.52) are NOT yet pushed unless the
+user has since said so. Working tree clean (only an untracked `.claude/`).
+Full suite green: **123/123 e2e**, lint, build, `check:reducers`,
+`check:share`, `check:direct-edit`, `check:section-schema`,
+`check:section-columns` (new). `main` untouched at `0f5261f`, no PR — the
+user said explicitly on 2026-09-28 NOT to merge yet.
 
 Source of truth for the Direct Edit editor's design and its known gaps:
 `docs/superpowers/specs/2026-09-19-direct-edit-universal-sections-design.md`
@@ -1981,7 +1983,7 @@ and `docs/superpowers/plans/2026-09-19-direct-edit-universal-sections.md`.
 the critical path: the popup already gives full editability of every section
 on all 18 templates, by keyboard as well as pointer.
 
-### START HERE — pick one of the two remaining gaps (both optional polish)
+### START HERE — both remaining gaps are now closed (items 58, 60; see below)
 
 - [x] **58. Entry-level pencils (hover one job, not the whole section).**
       DONE 2026-09-27, v1.2.52. Every entry of every record-array section on
@@ -1998,12 +2000,23 @@ on all 18 templates, by keyboard as well as pointer.
       `data-export-section`; it now takes an optional `id`. Found while
       designing item 60.
 
-- [ ] **60. Sections cannot move between columns.** Column placement comes from
-      `templateConfig.primarySections`/`secondarySections` (template config,
-      not user data), so moving Skills from a sidebar into the main column
-      would need per-template override state plus changes to all 17 Showcase
-      files. Reordering *within* a column works. This is the large one — worth
-      a design pass before any code.
+- [x] **60. Sections cannot move between columns.**
+      DONE 2026-09-28, v1.2.53–v1.2.60. Spec
+      `docs/superpowers/specs/2026-09-27-section-column-moves-design.md`, plan
+      `docs/superpowers/plans/2026-09-27-section-column-moves.md`. The Direct
+      Edit popup has a Main/Sidebar row on **10** two-column templates.
+      Quadrant is excluded because it is a fixed 2x2 grid, not main plus
+      sidebar. Moves are per-template overrides in
+      `formData.sectionColumnsByTemplate`, carried by JSON, session restore
+      and share links (key `sc`). **Five** template resolvers apply them
+      through `getEffectiveCvTemplate`, not one as the spec assumed. A moved
+      section renders through its home renderer with its real placement and
+      a `data-moved-from` CSS hook. Guarded by `check:section-columns`, an
+      e2e sweep that moves every movable section on every opted-in template
+      both ways (column, placement, height, text contrast), and an ATS-mode
+      guard for Navy and Modern Orange, which reuse their Showcase in ATS
+      mode. CSS was needed only on Developer, Navy and Modern Orange; see
+      `changes.md` for what and why.
 
 If neither appeals, the branch is in a good state to stop: consider whether
 v1.3.0 is ready to merge to `main` instead (it has never been merged and the

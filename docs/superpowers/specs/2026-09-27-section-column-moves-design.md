@@ -1,6 +1,12 @@
 # Direct Edit: moving sections between columns — design spec
 
-**Status:** approved design, not yet planned or implemented.
+**Status:** implemented (v1.2.53–v1.2.60). Three deviations are recorded in
+the plan's "Corrections to the spec" (five template resolvers rather than
+one, Quadrant excluded, share links covered by `check:share`). A fourth
+surfaced during implementation: the sweep's contrast bar became "no worse
+than at home, or no worse than the template's own target column, capped at
+3:1", not a fixed 3:1, because Creative's and Colorful Compact's own
+designs sit below 3:1 (see `changes.md`).
 **Date:** 2026-09-27
 **Closes:** `todo.md` item 60. Also closes a pre-existing gap found during
 design: Navy Professional's and Modern Orange's sidebar sections have no
