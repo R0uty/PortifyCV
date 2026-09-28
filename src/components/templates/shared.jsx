@@ -346,6 +346,30 @@ function renderSectionCard({ section, placement, children, classes }) {
   )
 }
 
+// Section column moves (Direct Edit, utils/sectionColumns.js): a section
+// always renders through its HOME renderer — the column the template
+// designed it for — even when the user moved it to the other column, so no
+// template needs bespoke markup per column. Placement is where the section
+// actually sits (the PDF exporter paginates by it), and movedFrom is the
+// hook each template's CSS uses to adapt a moved section to its new
+// surface. Extra arguments (Colorful Compact's per-section colour) pass
+// straight through to the renderer.
+//
+// Renderers take (key, placement, movedFrom, ...extra). The config's
+// defaultSecondarySections is the template's untouched sidebar; gallery
+// thumbnails pass a plain config without it, hence the fallback.
+function createSectionRouter(templateConfig, renderMainSection, renderSidebarSection) {
+  const homeSidebar = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
+
+  return (key, placement, ...extra) => {
+    const homePlacement = homeSidebar.has(key) ? 'side' : 'main'
+    const movedFrom = homePlacement === placement ? null : homePlacement
+    const render = homePlacement === 'side' ? renderSidebarSection : renderMainSection
+
+    return render(key, placement, movedFrom, ...extra)
+  }
+}
+
 // Export all shared utilities for use by CVPreview.jsx and template configs
 export {
   devIcons,            // SVG icon components for link types
@@ -359,4 +383,5 @@ export {
   formatLinkLabel,     // Re-exported from utils/shared
   formatLinkDisplayValue, // Re-exported from utils/shared
   getSafeHref,         // Re-exported from utils/shared
+  createSectionRouter, // Home-renderer routing for section column moves
 }

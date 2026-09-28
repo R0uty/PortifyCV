@@ -31,6 +31,7 @@ import {
   formatLinkLabel,
   formatLinkDisplayValue,
   getSafeHref,
+  createSectionRouter,
 } from './shared'
 
 // Small outline glyph for interest chips — a single shared glyph rather than
@@ -424,19 +425,9 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
   }
 
 
-  // A section always renders through its HOME renderer — the column the
-  // template designed it for — even when the user moved it to the other
-  // column. Placement comes from where it actually is (the PDF exporter
-  // paginates by it); movedFrom is the CSS hook that adapts it.
-  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
-  const renderSection = (key, placement) => {
-    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
-    const movedFrom = homePlacement === placement ? null : homePlacement
-
-    return homePlacement === 'side'
-      ? renderSidebarSection(key, placement, movedFrom)
-      : renderMainSection(key, placement, movedFrom)
-  }
+  // Each section renders through its home renderer in whichever column the
+  // user put it — see createSectionRouter in ./shared.
+  const renderSection = createSectionRouter(templateConfig, renderMainSection, renderSidebarSection)
 
   return (
     <article

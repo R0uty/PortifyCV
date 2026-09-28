@@ -548,9 +548,11 @@
   border-bottom-color: var(--np-navy-line);
 }
 
-.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__cert-dot,
-.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__bullets li::marker {
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__cert-dot {
   background: var(--np-blue-light);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__bullets li::marker {
   color: var(--np-blue-light);
 }
 

@@ -28,7 +28,7 @@ import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
-import { formatDateRange, formatLinkDisplayValue } from './shared'
+import { formatDateRange, formatLinkDisplayValue, createSectionRouter } from './shared'
 
 // The capped, named palette (design-system §3). Assigned by running section
 // position (main sections first, then sidebar), wrapping after six. Order
@@ -127,7 +127,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     achievements: isFinnish ? 'Lisätiedot' : 'Extras',
   }
 
-  const renderMainSection = (key, color, placement = 'main', movedFrom = null) => {
+  const renderMainSection = (key, placement, movedFrom, color) => {
     if (key === 'about') {
       return (
         <Section key={key} id="about" placement={placement} movedFrom={movedFrom} title={copy.about} color={color}>
@@ -224,7 +224,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     return null
   }
 
-  const renderSidebarSection = (key, color, placement = 'side', movedFrom = null) => {
+  const renderSidebarSection = (key, placement, movedFrom, color) => {
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} title={copy.skills} color={color}>
@@ -350,21 +350,9 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
   }
 
 
-  // A section always renders through its HOME renderer — the column the
-  // template designed it for — even when the user moved it to the other
-  // column. Placement comes from where it actually is (the PDF exporter
-  // paginates by it); movedFrom is the CSS hook that adapts it. The
-  // per-section colour still comes from the running index in the column
-  // the section actually sits in, so the rainbow stays in order.
-  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
-  const renderSection = (key, color, placement) => {
-    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
-    const movedFrom = homePlacement === placement ? null : homePlacement
-
-    return homePlacement === 'side'
-      ? renderSidebarSection(key, color, placement, movedFrom)
-      : renderMainSection(key, color, placement, movedFrom)
-  }
+  // Each section renders through its home renderer in whichever column the
+  // user put it — see createSectionRouter in ./shared.
+  const renderSection = createSectionRouter(templateConfig, renderMainSection, renderSidebarSection)
 
   return (
     <article
@@ -416,12 +404,12 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
       <div className="colorful-compact-showcase__body" data-export-content="true">
         <main className="colorful-compact-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key, index) => renderSection(key, colorAt(SECTION_COLORS, index), 'main'))}
+          {mainSectionKeys.map((key, index) => renderSection(key, 'main', colorAt(SECTION_COLORS, index)))}
         </main>
 
         <aside className="colorful-compact-showcase__sidebar" data-export-secondary="true">
           {sidebarSectionKeys.map((key, index) =>
-            renderSection(key, colorAt(SECTION_COLORS, mainSectionKeys.length + index), 'side'))}
+            renderSection(key, 'side', colorAt(SECTION_COLORS, mainSectionKeys.length + index)))}
         </aside>
       </div>
 

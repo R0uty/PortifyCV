@@ -27,7 +27,7 @@ import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
-import { parseSkillCategories, formatDateRange, formatLinkDisplayValue } from './shared'
+import { parseSkillCategories, formatDateRange, formatLinkDisplayValue, createSectionRouter } from './shared'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { CREATIVE_DEFAULT_ACCENT_COLOR } from './creative'
 import EditableField from '../EditableField'
@@ -457,19 +457,9 @@ export default function CreativeShowcase({
   }
 
 
-  // A section always renders through its HOME renderer — the column the
-  // template designed it for — even when the user moved it to the other
-  // column. Placement comes from where it actually is (the PDF exporter
-  // paginates by it); movedFrom is the CSS hook that adapts it.
-  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
-  const renderSection = (key, placement) => {
-    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
-    const movedFrom = homePlacement === placement ? null : homePlacement
-
-    return homePlacement === 'side'
-      ? renderSidebarSection(key, placement, movedFrom)
-      : renderMainSection(key, placement, movedFrom)
-  }
+  // Each section renders through its home renderer in whichever column the
+  // user put it — see createSectionRouter in ./shared.
+  const renderSection = createSectionRouter(templateConfig, renderMainSection, renderSidebarSection)
 
   return (
     <article
