@@ -8,7 +8,7 @@ import { lazy, memo, Suspense, useMemo } from 'react'
 import { createCvSnapshot } from '../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../utils/cvForm'
 import { getUiTheme } from '../utils/designSystem'
-import { getCvTemplate } from '../utils/cvTemplates'
+import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { DirectEditProvider } from './DirectEditContext'
 import EditableField from './EditableField'
 import EditableList, { EditableChip } from './EditableList'
@@ -86,7 +86,12 @@ function CVPreview({
   // Resolve the UI theme (dark/light) and the template config (variant, layout, etc.)
   const ui = useMemo(() => getUiTheme(theme), [theme])
   const isDark = ui.isDark
-  const templateConfig = useMemo(() => getCvTemplate(template, locale), [locale, template])
+  const templateConfig = useMemo(
+    () => getEffectiveCvTemplate(template, locale, formData),
+    // Only the column overrides matter here, not every keystroke in formData.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locale, template, formData.sectionColumnsByTemplate],
+  )
   const t = getTemplateConfig(templateConfig.variant)
   const variant = templateConfig.variant
   const isFinnish = locale === 'fi'

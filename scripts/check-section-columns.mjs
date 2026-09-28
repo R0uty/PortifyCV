@@ -123,5 +123,38 @@ console.log('\nsectionColumns: getSectionColumn\n')
   check('reports null for an unsupported section', columns.getSectionColumn(moved, 'interests') === null)
 }
 
+console.log('\nsectionColumns: JSON import\n')
+{
+  const { parseImportedCvData, createInitialCvData } = await importSrc('utils/cvForm.js')
+
+  check('a fresh CV defaults to an empty map',
+    JSON.stringify(createInitialCvData().sectionColumnsByTemplate) === '{}')
+
+  const imported = parseImportedCvData({
+    ...createInitialCvData(),
+    sectionColumnsByTemplate: { creative: { skills: 'main' } },
+  })
+  check('a valid map imports unchanged',
+    JSON.stringify(imported.sectionColumnsByTemplate) === JSON.stringify({ creative: { skills: 'main' } }))
+
+  const { sectionColumnsByTemplate: _omit, ...legacy } = createInitialCvData()
+  check('a file without the field imports as an empty map',
+    JSON.stringify(parseImportedCvData(legacy).sectionColumnsByTemplate) === '{}')
+
+  for (const [label, value] of [
+    ['a non-object map', 'main'],
+    ['a non-object template entry', { creative: 'main' }],
+    ['an unknown column value', { creative: { skills: 'left' } }],
+  ]) {
+    let message = null
+    try {
+      parseImportedCvData({ ...createInitialCvData(), sectionColumnsByTemplate: value })
+    } catch (error) {
+      message = error.message
+    }
+    check(`import rejects ${label}`, Boolean(message), 'no error was thrown')
+  }
+}
+
 console.log(failures === 0 ? '\nAll section-columns checks passed.' : `\n${failures} section-columns check(s) FAILED.`)
 process.exit(failures === 0 ? 0 : 1)

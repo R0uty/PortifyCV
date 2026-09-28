@@ -70,6 +70,7 @@ import {
   getCvTemplate,
   resolveTemplateAccent,
 } from '../utils/cvTemplates'
+import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
 import { APP_VERSION_RAW } from '../utils/appVersion'
@@ -425,8 +426,10 @@ function ResumeBuilderPage({
 
   const exportFileName = createExportFileName(formData) || 'cv'
   const currentTemplate = useMemo(
-    () => getCvTemplate(selectedTemplate, locale),
-    [locale, selectedTemplate],
+    () => getEffectiveCvTemplate(selectedTemplate, locale, formData),
+    // Only the column overrides matter here, not every keystroke in formData.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locale, selectedTemplate, formData.sectionColumnsByTemplate],
   )
   const templates = useMemo(() => getCvTemplates(locale), [locale])
   const shellStyle = {}

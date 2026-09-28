@@ -4,6 +4,29 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Section column moves: the data model and plumbing (no visible change yet) — 2026-09-28
+
+Groundwork for item 60, moving a section between a two-column template's
+main column and its sidebar. formData gains `sectionColumnsByTemplate`, a
+per-template map of overrides only (default `{}`), following the pattern
+of `photoVisibilityByTemplate`. JSON import checks its shape, share links
+carry it under a new short key `sc`, and session restore needed nothing,
+since it round-trips the whole formData through the same import parser.
+
+The rules live in one pure module, `src/utils/sectionColumns.js`, with
+its own `check:section-columns` script. It covers which sections may move,
+the next override map for a move (moving a section home deletes its entry
+rather than storing the default), and a template config with the overrides
+folded in. Invalid or stale entries are ignored at render time rather than
+rejected at import, so a rule changing later never makes an old file
+unreadable.
+
+The design spec assumed one place resolved the template config, but five
+do: the builder, CVPreview, CVForm, and both exporters each looked a
+template up by id. All five now call `getEffectiveCvTemplate`, so a move is
+seen everywhere at once. No template has opted in yet (`columnMoves`), so
+nothing changes visibly.
+
 ## Direct Edit: Navy Professional and Modern Orange sidebar sections get a pencil — 2026-09-28
 
 The Direct Edit overlay finds sections by `data-export-section`, and the

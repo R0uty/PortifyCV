@@ -104,6 +104,18 @@ const imagesBack = share.decodeCvStateFromUrl(imageEncoded)
 check('images decode to the schema default', imagesBack.photo === '' && imagesBack.projects[0].image === '')
 check('text is unaffected by dropping images', imagesBack.fullName === withImages.fullName)
 
+// sectionColumnsByTemplate travels under its own short key ('sc').
+const withColumns = parseImportedCvData({
+  ...structuredClone(demoCvData),
+  sectionColumnsByTemplate: { creative: { skills: 'main' }, developer: { education: 'main' } },
+})
+const columnsBack = share.decodeCvStateFromUrl(share.encodeCvStateForUrl(withColumns))
+check('sectionColumnsByTemplate survives the round trip',
+  JSON.stringify(columnsBack.sectionColumnsByTemplate) === JSON.stringify(withColumns.sectionColumnsByTemplate),
+  JSON.stringify(columnsBack.sectionColumnsByTemplate))
+check('an empty sectionColumnsByTemplate adds nothing to the payload',
+  share.encodeCvStateForUrl(demo) === demoEncoded)
+
 for (const [label, value] of [
   ['unparseable input', '!!!not-base64!!!'],
   ['an empty string', ''],

@@ -244,6 +244,18 @@ function compressCvData(formData) {
     }
   }
 
+  if (isPlainObject(formData.sectionColumnsByTemplate)) {
+    const moved = Object.fromEntries(
+      Object.entries(formData.sectionColumnsByTemplate).filter(
+        ([, columns]) => isPlainObject(columns) && Object.keys(columns).length > 0,
+      ),
+    )
+
+    if (Object.keys(moved).length > 0) {
+      data.sc = moved
+    }
+  }
+
   return { v: SHARE_PAYLOAD_VERSION, d: data }
 }
 
@@ -286,6 +298,10 @@ function expandCurrentPayload(data) {
 
   if (data.pv !== undefined) {
     formData.photoVisibilityByTemplate = data.pv
+  }
+
+  if (data.sc !== undefined) {
+    formData.sectionColumnsByTemplate = data.sc
   }
 
   return formData

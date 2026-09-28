@@ -25,7 +25,7 @@ import ReorderableListInput from './fields/ReorderableListInput'
 import TagsInput from './fields/TagsInput'
 import ToggleSwitch from './fields/ToggleSwitch'
 import { getUiTheme } from '../utils/designSystem'
-import { getCvTemplate } from '../utils/cvTemplates'
+import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import {
   createSectionVisibility,
   createSectionItemVisibility,
@@ -89,7 +89,7 @@ function CVForm({
   const ui = getUiTheme(theme)
   const isFinnish = locale === 'fi'
   const sectionVisibilityFields = getSectionVisibilityFields(locale)
-  const templateConfig = getCvTemplate(selectedTemplate, locale)
+  const templateConfig = getEffectiveCvTemplate(selectedTemplate, locale, formData)
   const templateSectionOrder = [
     ...templateConfig.primarySections,
     ...templateConfig.secondarySections,

@@ -38,7 +38,8 @@ import {
 // the same default-import-then-destructure shape as exporters.js.
 import fileSaverPkg from 'file-saver'
 const { saveAs } = fileSaverPkg
-import { defaultTemplateId, getCvTemplate } from './cvTemplates'
+import { defaultTemplateId } from './cvTemplates'
+import { getEffectiveCvTemplate } from './sectionColumns'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
 import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
@@ -501,7 +502,8 @@ export async function buildDocxDocument(formData, options = {}) {
   const { template = defaultTemplateId, locale = 'en', accentColor } = options
   const snapshot = createCvSnapshot(formData)
   const copy = createExportCopy(locale)
-  const templateConfig = getCvTemplate(template)
+  // Only section lists are read here, so the locale is irrelevant.
+  const templateConfig = getEffectiveCvTemplate(template, 'en', formData)
   const sectionVisibility = { ...createSectionVisibility(), ...(formData.sectionVisibility ?? {}) }
   const templateSectionOrder = [...templateConfig.primarySections, ...templateConfig.secondarySections]
   const sectionOrder = normalizeSectionOrder(formData.sectionOrder, templateSectionOrder)

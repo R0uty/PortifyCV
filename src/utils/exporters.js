@@ -3,7 +3,8 @@
 // the default-import-then-destructure shape instead.
 import fileSaverPkg from 'file-saver'
 const { saveAs } = fileSaverPkg
-import { defaultTemplateId, getCvTemplate } from './cvTemplates'
+import { defaultTemplateId } from './cvTemplates'
+import { getEffectiveCvTemplate } from './sectionColumns'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
 import { formatDateRange, formatLinkLabel } from './shared'
@@ -1713,7 +1714,8 @@ async function exportCvAsPdfTextFallback(
   })
   const snapshot = createCvSnapshot(formData)
   const copy = createExportCopy(locale)
-  const templateConfig = getCvTemplate(templateId)
+  // Only section lists are read here, so the locale is irrelevant.
+  const templateConfig = getEffectiveCvTemplate(templateId, 'en', formData)
   const sectionVisibility = {
     about: true,
     experience: true,
