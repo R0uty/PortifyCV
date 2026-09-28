@@ -29,6 +29,7 @@ import {
   formatLinkLabel,
   formatLinkDisplayValue,
   getSafeHref,
+  createSectionRouter,
 } from './shared'
 
 // The fixed cool-spectrum gradient — Developer's one accent form. Used for
@@ -39,12 +40,16 @@ function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
 }
 
-function SectionHeading({ icon, label, tone }) {
+// Takes the section's real placement, the same fact Section derives its
+// tone class from, so a section moved between columns gets the heading
+// colour of the surface it now sits on (light on the dark rail, primary on
+// the page) without every call site restating the mapping.
+function SectionHeading({ icon, label, placement }) {
   return (
     <div>
       <h2
         className="dev-showcase__section-title"
-        style={{ color: tone === 'sidebar' ? '#f1f5f9' : 'var(--dev-primary)' }}
+        style={{ color: placement === 'side' ? '#f1f5f9' : 'var(--dev-primary)' }}
       >
         <span
           className="dev-showcase__section-icon"
@@ -131,6 +136,7 @@ export default function DeveloperShowcase({
   const secondarySet = new Set(templateConfig.secondarySections)
   const mainSectionKeys = orderedSections.filter((key) => primarySet.has(key) && sectionVisibility[key])
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
+  const hasSidebar = showSidebar && sidebarSectionKeys.length > 0
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
@@ -142,7 +148,7 @@ export default function DeveloperShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="skills" label={isFinnish ? 'Taidot' : 'Skills'} tone={placement === 'side' ? 'sidebar' : undefined} />
+          <SectionHeading icon="skills" label={isFinnish ? 'Taidot' : 'Skills'} placement={placement} />
           {skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="dev-showcase__skill-group">
@@ -168,7 +174,7 @@ export default function DeveloperShowcase({
     if (key === 'links') {
       return (
         <Section key={key} id="links" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="links" label={isFinnish ? 'Linkit' : 'Links'} tone={placement === 'side' ? 'sidebar' : undefined} />
+          <SectionHeading icon="links" label={isFinnish ? 'Linkit' : 'Links'} placement={placement} />
           {linkEntries.length > 0 ? (
             linkEntries.map(([linkKey, value]) => (
               <div key={linkKey} data-export-card="true" className="dev-showcase__link-card">
@@ -191,7 +197,7 @@ export default function DeveloperShowcase({
     if (key === 'certificates') {
       return (
         <Section key={key} id="certificates" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="certificates" label={isFinnish ? 'Sertifikaatit' : 'Certificates'} tone={placement === 'side' ? 'sidebar' : undefined} />
+          <SectionHeading icon="certificates" label={isFinnish ? 'Sertifikaatit' : 'Certificates'} placement={placement} />
           {snapshot.certificates.length > 0 ? (
             snapshot.certificates.map((item, index) => (
               <div key={`${item.name}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.certificates[index]} className="dev-showcase__cert-card">
@@ -225,7 +231,7 @@ export default function DeveloperShowcase({
     if (key === 'education') {
       return (
         <Section key={key} id="education" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="education" label={isFinnish ? 'Koulutus' : 'Education'} tone={placement === 'side' ? 'sidebar' : undefined} />
+          <SectionHeading icon="education" label={isFinnish ? 'Koulutus' : 'Education'} placement={placement} />
           {snapshot.education.length > 0 ? (
             snapshot.education.map((item, index) => (
               <div key={`${item.school}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]} className="dev-showcase__edu-item">
@@ -252,7 +258,7 @@ export default function DeveloperShowcase({
     if (key === 'languages') {
       return (
         <Section key={key} id="languages" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="languages" label={isFinnish ? 'Kielet' : 'Languages'} tone={placement === 'side' ? 'sidebar' : undefined} />
+          <SectionHeading icon="languages" label={isFinnish ? 'Kielet' : 'Languages'} placement={placement} />
           {snapshot.languages.length > 0 ? (
             snapshot.languages.map((item, index) => (
               <div key={`${item.language}-${index}`} className="dev-showcase__lang-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
@@ -277,7 +283,7 @@ export default function DeveloperShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="about" label={isFinnish ? 'Yhteenveto' : 'Summary'} tone={placement === 'side' ? 'sidebar' : undefined} />
+          <SectionHeading icon="about" label={isFinnish ? 'Yhteenveto' : 'Summary'} placement={placement} />
           <p className="dev-showcase__summary">{about}</p>
         </Section>
       )
@@ -286,7 +292,7 @@ export default function DeveloperShowcase({
     if (key === 'experience') {
       return (
         <Section key={key} id="experience" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="experience" label={isFinnish ? 'Kokemus' : 'Experience'} tone={placement === 'side' ? 'sidebar' : undefined} />
+          <SectionHeading icon="experience" label={isFinnish ? 'Kokemus' : 'Experience'} placement={placement} />
           <div className="dev-showcase__timeline">
             {snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => {
@@ -342,7 +348,7 @@ export default function DeveloperShowcase({
     if (key === 'projects') {
       return (
         <Section key={key} id="projects" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="projects" label={isFinnish ? 'Projektit' : 'Projects'} tone={placement === 'side' ? 'sidebar' : undefined} />
+          <SectionHeading icon="projects" label={isFinnish ? 'Projektit' : 'Projects'} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -403,7 +409,7 @@ export default function DeveloperShowcase({
     if (key === 'achievements') {
       return (
         <Section key={key} id="achievements" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="achievements" label={isFinnish ? 'Saavutukset' : 'Achievements'} tone={placement === 'side' ? 'sidebar' : undefined} />
+          <SectionHeading icon="achievements" label={isFinnish ? 'Saavutukset' : 'Achievements'} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
@@ -433,7 +439,7 @@ export default function DeveloperShowcase({
     if (key === 'openSource') {
       return (
         <Section key={key} id="openSource" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="openSource" label={isFinnish ? 'Avoin lähdekoodi' : 'Open Source'} tone={placement === 'side' ? 'sidebar' : undefined} />
+          <SectionHeading icon="openSource" label={isFinnish ? 'Avoin lähdekoodi' : 'Open Source'} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.openSource.length > 0 ? (
               snapshot.openSource.map((item, index) => (
@@ -475,7 +481,7 @@ export default function DeveloperShowcase({
     if (key === 'publications') {
       return (
         <Section key={key} id="publications" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="publications" label={isFinnish ? 'Julkaisut' : 'Publications'} tone={placement === 'side' ? 'sidebar' : undefined} />
+          <SectionHeading icon="publications" label={isFinnish ? 'Julkaisut' : 'Publications'} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.publications.length > 0 ? (
               snapshot.publications.map((item, index) => (
@@ -502,20 +508,9 @@ export default function DeveloperShowcase({
   }
 
 
-  // A section always renders through its HOME renderer — the column the
-  // template designed it for — even when the user moved it to the other
-  // column. Placement comes from where it actually is (the PDF exporter
-  // paginates by it, and Section derives its light/dark tone from it);
-  // movedFrom is the CSS hook for anything the tone class doesn't cover.
-  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
-  const renderSection = (key, placement) => {
-    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
-    const movedFrom = homePlacement === placement ? null : homePlacement
-
-    return homePlacement === 'side'
-      ? renderSidebarSection(key, placement, movedFrom)
-      : renderMainSection(key, placement, movedFrom)
-  }
+  // Each section renders through its home renderer in whichever column the
+  // user put it — see createSectionRouter in ./shared.
+  const renderSection = createSectionRouter(templateConfig, renderMainSection, renderSidebarSection)
 
   return (
     <article
@@ -575,18 +570,26 @@ export default function DeveloperShowcase({
         ) : null}
       </header>
 
+      {/* The body grid reserves a narrow first track for the rail, so it
+          must collapse to one track whenever the rail isn't rendered —
+          either because this variant has no sidebar, or because the user
+          moved every sidebar section into main, which would otherwise
+          squeeze the whole CV into that narrow track. Sidebar sections that
+          flow into main for want of a rail render with placement 'main',
+          where they actually are, so their heading tone, the PDF exporter's
+          pagination and the moved-section CSS all agree. */}
       <div
         className="dev-showcase__body"
         data-export-content="true"
-        style={!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
+        style={!hasSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
       >
-        {showSidebar && sidebarSectionKeys.length > 0 ? (
+        {hasSidebar ? (
           <aside className="dev-showcase__sidebar" data-export-secondary="true">
             {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
           </aside>
         ) : null}
         <main className="dev-showcase__main" data-export-primary="true">
-          {!showSidebar ? sidebarSectionKeys.map((key) => renderSection(key, 'side')) : null}
+          {!showSidebar ? sidebarSectionKeys.map((key) => renderSection(key, 'main')) : null}
           {mainSectionKeys.map((key) => renderSection(key, 'main'))}
         </main>
       </div>

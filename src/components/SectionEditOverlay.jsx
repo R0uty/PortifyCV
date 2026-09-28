@@ -226,6 +226,25 @@ export default function SectionEditOverlay({
     }
   }, [formData, hovered, measure])
 
+  // Same for the entry an entry pencil opened the popup on: the popup is
+  // anchored to its top, so when the entry moves (the section changed
+  // column, or content above it reflowed) the anchor has to move with it.
+  // The lookup is inline for the same reason as above.
+  useLayoutEffect(() => {
+    if (!focusEntry || !openSectionKey) {
+      return
+    }
+
+    const element = containerRef.current?.parentElement?.querySelector(
+      `${sectionSelectorFor(openSectionKey)} [data-direct-edit-index="${focusEntry.index}"]`,
+    )
+    const next = measure(element, openSectionKey)
+
+    if (next && next.top !== focusEntry.top) {
+      setFocusEntry({ index: focusEntry.index, top: next.top })
+    }
+  }, [formData, focusEntry, openSectionKey, measure])
+
   // Enumerate the editable sections so each can get a real focusable
   // trigger. Re-runs on content and template changes because a template
   // swap renders a different set of sections entirely.

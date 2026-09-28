@@ -59,9 +59,17 @@ async function popupGeometry(page, sectionKey) {
   }, sectionKey)
 }
 
-// Templates that have opted into section column moves (cvTemplates.js
-// `columnMoves: true`). The sweep test below walks every one of them;
-// each template's rollout task appends its label here.
+// Every template in the gallery, by its English label.
+const ALL_TEMPLATES = [
+  'Minimalist', 'Developer', 'Creative', 'Modern Professional', 'Executive', 'Modern Timeline',
+  'Graduate', 'Compact', 'Portfolio Hybrid', 'Tech Executive', 'Classic Professional',
+  'Navy Professional', 'Modern Orange', 'Colorful Compact', 'Quadrant', 'Editorial', 'Portrait', 'European',
+]
+
+// The templates that must offer section column moves (cvTemplates.js
+// `columnMoves: true`). The sweep below walks ALL_TEMPLATES and asserts the
+// Column control appears on exactly these, so a template flagged in
+// cvTemplates.js but missing here fails loudly instead of going untested.
 const COLUMN_MOVE_TEMPLATES = ['Creative', 'Modern Professional', 'Executive', 'Graduate', 'Portfolio Hybrid', 'Tech Executive', 'Colorful Compact', 'Developer', 'Navy Professional', 'Modern Orange']
 
 // Where a section currently renders: inside the sidebar container
@@ -700,13 +708,8 @@ test.describe('Direct Edit builder', () => {
     await page.keyboard.press('Escape')
 
     const companies = ['Studio North', 'Atlas Labs']
-    const templates = [
-      'Minimalist', 'Developer', 'Creative', 'Modern Professional', 'Executive', 'Modern Timeline',
-      'Graduate', 'Compact', 'Portfolio Hybrid', 'Tech Executive', 'Classic Professional',
-      'Navy Professional', 'Modern Orange', 'Colorful Compact', 'Quadrant', 'Editorial', 'Portrait', 'European',
-    ]
 
-    for (const label of templates) {
+    for (const label of ALL_TEMPLATES) {
       await selectTemplate(page, label)
       await expect(page.locator('[data-export-section="experience"]').first()).toBeVisible()
 
@@ -835,10 +838,10 @@ test.describe('Direct Edit builder', () => {
   // move bugs. White text landing on a white column still fails both (seen
   // caught at 1.04 during development).
   test('every opted-in template moves each movable section into a readable column', async ({ page }) => {
-    test.setTimeout(240_000)
+    test.setTimeout(360_000)
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
-    for (const label of COLUMN_MOVE_TEMPLATES) {
+    for (const label of ALL_TEMPLATES) {
       await selectTemplate(page, label)
       const keys = await page.evaluate(() =>
         Array.from(document.querySelectorAll('[data-direct-edit-trigger]'), (b) => b.dataset.directEditTrigger),
@@ -881,8 +884,58 @@ test.describe('Direct Edit builder', () => {
         await page.keyboard.press('Escape')
       }
 
-      expect(movedAny, `${label}: offered at least one move`).toBe(true)
+      expect(movedAny, `${label}: offers column moves exactly when listed in COLUMN_MOVE_TEMPLATES`).toBe(
+        COLUMN_MOVE_TEMPLATES.includes(label),
+      )
     }
+  })
+
+  // Developer only renders its sidebar when the sidebar has sections, but
+  // its body grid always reserved a narrow first track for it, so moving
+  // every sidebar section into main squeezed the whole CV into that track.
+  test('Developer: moving every sidebar section to main keeps the main column full width', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await selectTemplate(page, 'Developer')
+
+    for (const key of ['skills', 'links', 'certificates', 'education', 'languages']) {
+      await openSectionPopup(page, key)
+      await page.getByRole('group', { name: 'Column' }).getByRole('button', { name: 'Main' }).click()
+      await page.keyboard.press('Escape')
+    }
+
+    await expect(page.locator('.dev-showcase__sidebar')).toHaveCount(0)
+    const widths = await page.evaluate(() => ({
+      body: document.querySelector('.dev-showcase__body').getBoundingClientRect().width,
+      main: document.querySelector('.dev-showcase__main').getBoundingClientRect().width,
+    }))
+    expect(widths.main).toBeGreaterThan(widths.body * 0.95)
+  })
+
+  // A popup opened from an entry pencil anchors beside that entry. When the
+  // section then moves column, it must follow the entry to its new place,
+  // not stay at the height the entry used to have.
+  test('an entry-opened popup follows its entry when the section changes column', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await selectTemplate(page, 'Graduate')
+
+    const entry = page.locator('[data-export-section="education"] [data-direct-edit-index="0"]').first()
+    await entry.scrollIntoViewIfNeeded()
+    await entry.hover()
+    await page.locator('.direct-edit-entry-pencil').click()
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+
+    await page.getByRole('group', { name: 'Column' }).getByRole('button', { name: 'Sidebar' }).click()
+    expect(await sectionColumnState(page, 'education')).toMatchObject({ inSidebar: true })
+
+    // Both measured in one frame: the popup may scroll itself into view.
+    const tops = await page.evaluate(() => ({
+      popup: document.querySelector('.direct-edit-popup').getBoundingClientRect().top,
+      entry: document
+        .querySelector('[data-export-section="education"] [data-direct-edit-index="0"]')
+        .getBoundingClientRect().top,
+    }))
+    expect(Math.abs(tops.popup - tops.entry)).toBeLessThan(4)
   })
 
   // Navy Professional and Modern Orange render the SAME Showcase in ATS

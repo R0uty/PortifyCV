@@ -621,6 +621,38 @@ console.log('\ndocxExport: rail/dark-sidebar archetypes never drop a populated b
   )
 }
 
+console.log('\ndocxExport: section column moves reach the Word export\n')
+
+{
+  // formData.sectionColumnsByTemplate is applied through
+  // getEffectiveCvTemplate, so a section the user moved in Direct Edit must
+  // land in the same column in the .docx. Developer's darkSidebarTable puts
+  // the rail FIRST in document order (railSide 'left', checked above), so a
+  // section's position relative to Experience (always main) says which
+  // cell it is in. Skills is home in the rail and Projects in main; both
+  // are moved to the other side here.
+  const copy = createExportCopy('en')
+  const formData = {
+    ...structuredClone(demoCvData),
+    sectionColumnsByTemplate: { developer: { skills: 'main', projects: 'sidebar' } },
+  }
+  const doc = await buildDocxDocument(formData, { template: 'developer', locale: 'en' })
+  const buffer = await Packer.toBuffer(doc)
+  const { default: JSZip } = await import('jszip')
+  const zip = await JSZip.loadAsync(buffer)
+  const xml = await zip.file('word/document.xml').async('string')
+
+  const skillsIndex = xml.indexOf(copy.skills.toUpperCase())
+  const projectsIndex = xml.indexOf(copy.projects.toUpperCase())
+  const experienceIndex = xml.indexOf(copy.experience.toUpperCase())
+  check('Skills moved to main lands after Experience (in the main cell)',
+    skillsIndex > -1 && experienceIndex > -1 && skillsIndex > experienceIndex, `${skillsIndex} vs ${experienceIndex}`)
+  check('Projects moved to the sidebar lands before Experience (in the rail)',
+    projectsIndex > -1 && projectsIndex < experienceIndex, `${projectsIndex} vs ${experienceIndex}`)
+  check('Projects on the rail takes the rail\'s light palette',
+    xml.slice(projectsIndex, experienceIndex).includes('w:val="F5F5F5"'))
+}
+
 console.log('\ndocxExport: gridTable never renders an empty bordered cell for a sparse CV (fix verification)\n')
 
 {

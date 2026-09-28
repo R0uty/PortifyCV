@@ -4,6 +4,45 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Review fixes for the section column moves — 2026-09-28
+
+A high-effort review of everything since v1.2.52 found nine issues; all
+are fixed.
+
+**Bugs.**
+- Developer only renders its sidebar when it has sections, but its body
+  grid always reserved a narrow first track for it. Moving all five
+  sidebar sections into main therefore squeezed the whole CV into that
+  track (247px of 829). The grid now collapses to one track whenever the
+  rail isn't rendered.
+- A popup opened from an entry pencil kept the entry's original height as
+  its anchor, so after the section changed column it sat 153px away from
+  the entry it edits. The overlay now re-measures the focused entry on
+  every change, as it already did for the section.
+- In Developer's no-sidebar variant path, sidebar sections flowing in main
+  were rendered with the rail's placement and light heading. They now
+  render as main content. No current configuration takes that path, so
+  this one has no test.
+
+**Tests.**
+- `check:docx-export` now exports Developer with Skills moved to main and
+  Projects onto the rail, and checks where each lands and that Projects
+  takes the rail's palette. It fails if the exporter ignores overrides.
+- The column-move sweep walks all 18 templates and asserts the Column
+  control appears on exactly the expected ten. A template flagged
+  `columnMoves` but missing from the list now fails loudly (proven by
+  temporarily dropping Modern Orange) instead of silently going untested.
+
+**Cleanups.**
+- The ten copy-pasted column routers became one `createSectionRouter` in
+  `templates/shared.jsx`. Colorful Compact's colour now travels as a
+  trailing argument, so it needs no variant.
+- Developer's `SectionHeading` takes the section's placement and derives
+  its tone once, instead of eleven call sites restating the mapping.
+- Navy's rule mixing a dot background and a list-marker colour was split
+  into two rules, one per selector.
+- `CLAUDE.md` now documents all seven check scripts and what triggers CI.
+
 ## CI now runs on the v1.3.0 branch and covers every check script — 2026-09-28
 
 `.github/workflows/ci.yml` only ran on pushes to `main` and on pull
