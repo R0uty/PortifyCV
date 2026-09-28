@@ -1965,9 +1965,11 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
-**State (refreshed 2026-09-28):** branch `v1.3.0` at `25d9400`, version
-**1.2.60**, pushed to `origin/v1.3.0`. Working tree clean (only an untracked
-`.claude/`). Full suite green: **123/123 e2e**, lint, build,
+**State (refreshed 2026-09-28):** branch `v1.3.0` at `c78b856`, version
+**1.2.61** (Colorful Compact skill-pill contrast fix on top of the column
+moves), pushed to `origin/v1.3.0`. Working tree clean (only an untracked
+`.claude/`). Full suite green apart from the footer flake below: **124 e2e**,
+lint, build,
 `check:reducers`, `check:share`, `check:direct-edit`, `check:section-schema`,
 `check:section-columns` (new). `main` untouched at `0f5261f`, no PR — the
 user said explicitly on 2026-09-28 NOT to merge yet.
@@ -2075,9 +2077,15 @@ Full reasoning per item is in `changes.md`; per-commit detail is in git.
   `check:reducers`, `check:share`, `check:direct-edit`, `check:section-schema`,
   `npm run build`, `npm run test:e2e`.
 - There is a known pre-existing flake in `'the footer never overlaps the CV
-  preview in Direct Edit mode'` that appears only under parallel workers —
-  re-run it with `--workers=1` to confirm, don't treat it as a regression, and
-  don't paper over any *other* failure.
+  preview in Direct Edit mode'`. It is a timing race, NOT parallel-only as
+  this note used to say: it failed once in 3 runs on a single worker on
+  2026-09-28 (then passed 10/10), though parallel load makes it much more
+  likely. The test measures boxes right after switching to Direct Edit
+  without waiting for lazy Showcase chunks or web fonts to settle. Re-run it
+  with `--workers=1 --repeat-each=3` to confirm, don't treat it as a
+  regression, and don't paper over any *other* failure. A de-flake task
+  (wait for layout to settle, then prove it stable over many repeats) was
+  flagged but not yet done.
 - The per-template inline rollout (`docs/superpowers/specs/2026-09-14-direct-edit-phase2-rollout.md`)
   is **no longer the path to editability** — the popup covers all 18 templates.
   Those remaining rounds are optional polish now.
