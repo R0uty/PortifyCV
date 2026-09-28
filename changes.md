@@ -4,6 +4,34 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Section column moves open on Navy Professional — 2026-09-28
+
+Navy was the template this plan was most worried about, and rightly:
+its sidebar is solid navy and its sidebar sections are `SidebarBlock`
+`<div>`s rather than the main column's `<section>`s. Both wrappers now take
+the real placement and a `movedFrom` hook (its main `Section` used to
+hard-code `data-export-placement="main"`).
+
+The sweep found both directions unreadable at first. Sidebar markup on the
+white page read at 1.02 (white pills and language text), and main markup
+on the rail read at 1.07 (dark entry text). A scoped block in
+`navyProfessional.css` fixes each direction. Sidebar → main reuses the
+recolouring the template's own ATS block already applies to put the rail
+on white, except that the heading takes the main column's blue and honours
+the user's heading colour, like its neighbours. Main → sidebar reuses the
+rail's own palette: white text, translucent-white meta, light-blue
+accents, the rail's divider line.
+
+Two traps were caught along the way. First, Navy reuses this same
+Showcase in ATS mode with a white sidebar, so rail-coloured text would
+land white-on-white there. A new e2e guard, which moves a section in
+Direct Edit and then checks Classic's ATS render (Direct Edit itself
+always renders the designer layout), failed at 1.02 before the colour
+rules were scoped away from ATS mode, and passes after. Second, spacing:
+the rail spaces its `<div>`s and the main column its `<section>`s by
+element type, so a moved section sat flush against its neighbour until
+two spacing rules, applied in both modes, filled the gap.
+
 ## Section column moves open on Developer — 2026-09-28
 
 Developer is the first template that needed real adaptation, because its

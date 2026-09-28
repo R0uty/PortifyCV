@@ -484,3 +484,85 @@
     box-shadow: none !important;
   }
 }
+
+/* ── Sections moved between columns (Direct Edit, sectionColumns.js) ──
+   A moved section keeps its home markup; these rules adapt it to the
+   surface it now sits on. Sidebar markup is written for the navy rail,
+   main markup for the white page.
+
+   Every rule is scoped to the designer render. ATS mode reuses this same
+   Showcase with a transparent sidebar and its own monochrome block above,
+   which already recolours every sidebar class for white; white rail text
+   applied there would land white-on-white (caught by the ATS e2e guard).
+
+   Sidebar → main: the same recolouring the ATS block above uses to put
+   the rail's pills, languages and headings on white, except the heading,
+   which matches its main-column neighbours' blue (and honours the user's
+   heading colour the same way they do). */
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__sidebar-heading {
+  color: var(--cv-heading-color, var(--np-blue));
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__tag {
+  border-color: var(--np-border);
+  background: transparent;
+  color: var(--np-text);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__language-item {
+  color: var(--np-text);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__language-item::before {
+  background: var(--np-blue);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__language-level,
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__empty--sidebar {
+  color: var(--np-muted);
+}
+
+/* Main → sidebar: main-column text recoloured with the rail's own
+   palette (white body text, translucent-white meta, light-blue accents,
+   the rail's own divider line). */
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__section-title {
+  color: var(--np-blue-light);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-role {
+  color: #ffffff;
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__cert-item,
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__bullets li {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-dates,
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-meta,
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__empty {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry {
+  border-bottom-color: var(--np-navy-line);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__cert-dot,
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__bullets li::marker {
+  background: var(--np-blue-light);
+  color: var(--np-blue-light);
+}
+
+/* Spacing, in both renders: the rail spaces its SidebarBlock <div>s with
+   .sidebar-block's own margin, and the main column spaces its <section>s
+   with `section + section`. A moved section is the other element type, so
+   neither rule reaches it (or the section after it) without these. */
+.navy-professional-showcase__sidebar [data-moved-from='main'] {
+  margin-top: 1.75rem;
+}
+
+.navy-professional-showcase__main [data-moved-from='side'],
+.navy-professional-showcase__main [data-moved-from='side'] + .navy-professional-showcase__section {
+  margin-top: 2rem;
+}

@@ -243,6 +243,7 @@ const templateMap = {
     description: 'Modern two-column layout with a dark navy sidebar and blue accents — professional and ATS-friendly.',
     variant: 'navyProfessional',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'education', 'certificates'],
     secondarySections: ['skills', 'languages'],
     summaryBadgeLabel: 'Profile',

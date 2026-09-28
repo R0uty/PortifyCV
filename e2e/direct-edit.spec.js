@@ -62,7 +62,7 @@ async function popupGeometry(page, sectionKey) {
 // Templates that have opted into section column moves (cvTemplates.js
 // `columnMoves: true`). The sweep test below walks every one of them;
 // each template's rollout task appends its label here.
-const COLUMN_MOVE_TEMPLATES = ['Creative', 'Modern Professional', 'Executive', 'Graduate', 'Portfolio Hybrid', 'Tech Executive', 'Colorful Compact', 'Developer']
+const COLUMN_MOVE_TEMPLATES = ['Creative', 'Modern Professional', 'Executive', 'Graduate', 'Portfolio Hybrid', 'Tech Executive', 'Colorful Compact', 'Developer', 'Navy Professional']
 
 // Where a section currently renders: inside the sidebar container
 // (every two-column template marks it data-export-secondary) or not,
@@ -883,6 +883,39 @@ test.describe('Direct Edit builder', () => {
       expect(movedAny, `${label}: offered at least one move`).toBe(true)
     }
   })
+
+  // Navy Professional and Modern Orange render the SAME Showcase in ATS
+  // mode, recoloured to monochrome with a transparent sidebar. Their
+  // moved-section CSS recolours main-column markup for a dark rail, which
+  // must not follow it into ATS mode, where that rail is white. Direct Edit
+  // itself always renders the designer layout (DirectEditPreview passes
+  // atsFriendlyMode={false}), so ATS mode is checked in Classic's preview,
+  // which a move made in Direct Edit carries into.
+  for (const [label, sectionKey] of [['Navy Professional', 'education']]) {
+    test(`${label}: a section moved to the sidebar stays readable in ATS mode`, async ({ page }) => {
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
+      await selectTemplate(page, label)
+
+      await openSectionPopup(page, sectionKey)
+      await page.getByRole('group', { name: 'Column' }).getByRole('button', { name: 'Sidebar' }).click()
+      await page.keyboard.press('Escape')
+
+      await page.getByRole('button', { name: 'Settings' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Settings' })
+      await dialog.locator('.settings-row', { hasText: 'ATS-friendly mode' }).locator('.toggle-switch').click()
+      await expect(dialog.locator('.settings-row', { hasText: 'ATS-friendly mode' }).getByRole('checkbox')).toBeChecked()
+      await page.getByRole('button', { name: 'Close' }).click()
+
+      await page.getByRole('tab', { name: 'Classic' }).click()
+      const section = page.locator(`[data-export-section="${sectionKey}"]`).first()
+      await expect(section).toBeVisible()
+      // Sanity: this really is the ATS render, with the move carried over.
+      await expect(page.locator('[class*="showcase--ats"]').first()).toBeVisible()
+      expect(await section.evaluate((el) => Boolean(el.closest('[data-export-secondary]')))).toBe(true)
+
+      expect(await minTextContrast(page, `[data-export-section="${sectionKey}"]`)).toBeGreaterThanOrEqual(4.5)
+    })
+  }
 
   // Regression guard: `.builder-section` (app-shell.css) is `flex: 1;
   // min-height: 0` — needed so Classic mode's own AppShell panels can

@@ -42,9 +42,14 @@ function SectionHead({ icon, title }) {
   )
 }
 
-function Section({ id, icon, title, children }) {
+function Section({ id, icon, title, placement = 'main', movedFrom = null, children }) {
   return (
-    <section className="navy-professional-showcase__section" data-export-section={id} data-export-placement="main">
+    <section
+      className="navy-professional-showcase__section"
+      data-export-section={id}
+      data-export-placement={placement}
+      data-moved-from={movedFrom ?? undefined}
+    >
       <SectionHead icon={icon} title={title} />
       {children}
     </section>
@@ -54,12 +59,13 @@ function Section({ id, icon, title, children }) {
 // `id` is set only for real CV sections: it is what the PDF exporter and
 // Direct Edit's overlay find a section by. The contact block passes none
 // and stays untagged.
-function SidebarBlock({ id, title, children }) {
+function SidebarBlock({ id, title, placement = 'side', movedFrom = null, children }) {
   return (
     <div
       className="navy-professional-showcase__sidebar-block"
       data-export-section={id}
-      data-export-placement={id ? 'side' : undefined}
+      data-export-placement={id ? placement : undefined}
+      data-moved-from={movedFrom ?? undefined}
     >
       <p className="navy-professional-showcase__sidebar-heading">{title}</p>
       {children}
@@ -118,10 +124,10 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
     languages: isFinnish ? 'Kielet' : 'Languages',
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" icon="about" title={copy.profile}>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="about" icon="about" title={copy.profile}>
           <p className="navy-professional-showcase__summary">{about}</p>
         </Section>
       )
@@ -129,7 +135,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" icon="experience" title={copy.experience}>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="experience" icon="experience" title={copy.experience}>
           <div className="navy-professional-showcase__entry-list">
             {snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => {
@@ -166,7 +172,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" icon="education" title={copy.education}>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="education" icon="education" title={copy.education}>
           <div className="navy-professional-showcase__entry-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => {
@@ -194,7 +200,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" icon="certificates" title={copy.certificates}>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="certificates" icon="certificates" title={copy.certificates}>
           <ul className="navy-professional-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -216,10 +222,10 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
     return null
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
-        <SidebarBlock key={key} id="skills" title={copy.skills}>
+        <SidebarBlock key={key} placement={placement} movedFrom={movedFrom} id="skills" title={copy.skills}>
           <div className="navy-professional-showcase__tag-row">
             {snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill) => (
@@ -237,7 +243,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
 
     if (key === 'languages') {
       return (
-        <SidebarBlock key={key} id="languages" title={copy.languages}>
+        <SidebarBlock key={key} placement={placement} movedFrom={movedFrom} id="languages" title={copy.languages}>
           <ul className="navy-professional-showcase__language-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -257,6 +263,21 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
     }
 
     return null
+  }
+
+
+  // A section always renders through its HOME renderer — the column the
+  // template designed it for — even when the user moved it to the other
+  // column. Placement comes from where it actually is (the PDF exporter
+  // paginates by it); movedFrom is the CSS hook that adapts it.
+  const homeSidebarSet = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
+  const renderSection = (key, placement) => {
+    const homePlacement = homeSidebarSet.has(key) ? 'side' : 'main'
+    const movedFrom = homePlacement === placement ? null : homePlacement
+
+    return homePlacement === 'side'
+      ? renderSidebarSection(key, placement, movedFrom)
+      : renderMainSection(key, placement, movedFrom)
   }
 
   return (
@@ -323,11 +344,11 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
           </SidebarBlock>
         ) : null}
 
-        {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+        {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
       </aside>
 
       <main className="navy-professional-showcase__main" data-export-primary="true">
-        {mainSectionKeys.map((key) => renderMainSection(key))}
+        {mainSectionKeys.map((key) => renderSection(key, 'main'))}
       </main>
     </article>
   )
