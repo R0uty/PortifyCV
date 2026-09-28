@@ -51,9 +51,16 @@ function Section({ id, icon, title, children }) {
   )
 }
 
-function SidebarBlock({ title, children }) {
+// `id` is set only for real CV sections: it is what the PDF exporter and
+// Direct Edit's overlay find a section by. The contact block passes none
+// and stays untagged.
+function SidebarBlock({ id, title, children }) {
   return (
-    <div className="navy-professional-showcase__sidebar-block">
+    <div
+      className="navy-professional-showcase__sidebar-block"
+      data-export-section={id}
+      data-export-placement={id ? 'side' : undefined}
+    >
       <p className="navy-professional-showcase__sidebar-heading">{title}</p>
       {children}
     </div>
@@ -212,7 +219,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
   const renderSidebarSection = (key) => {
     if (key === 'skills') {
       return (
-        <SidebarBlock key={key} title={copy.skills}>
+        <SidebarBlock key={key} id="skills" title={copy.skills}>
           <div className="navy-professional-showcase__tag-row">
             {snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill) => (
@@ -230,7 +237,7 @@ export default function NavyProfessionalShowcase({ formData, locale = 'en', prev
 
     if (key === 'languages') {
       return (
-        <SidebarBlock key={key} title={copy.languages}>
+        <SidebarBlock key={key} id="languages" title={copy.languages}>
           <ul className="navy-professional-showcase__language-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (

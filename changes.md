@@ -4,6 +4,21 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit: Navy Professional and Modern Orange sidebar sections get a pencil — 2026-09-28
+
+The Direct Edit overlay finds sections by `data-export-section`, and the
+sidebar wrapper these two templates use, `SidebarBlock`, rendered none. So
+Navy's Skills and Languages and Modern Orange's Skills, Languages and
+Education had no pencil and no keyboard trigger, which contradicted the
+claim that every section on every template was editable. `SidebarBlock`
+now takes an optional `id` and renders `data-export-section` plus
+`data-export-placement="side"`, like every other template's sidebar
+sections. The contact block (Navy) and personal-info block (Modern
+Orange) pass no `id` and stay untagged, because they are not CV sections.
+A PDF export test on both templates guards the change. It passes before
+and after, since the exporter treats these as sidebar content either way.
+Found while designing the section column moves (item 60).
+
 ## Direct Edit: pencils for single entries, not just whole sections — 2026-09-27
 
 Hovering one entry of a list section (one job, one certificate, one

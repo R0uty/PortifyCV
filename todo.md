@@ -1993,6 +1993,11 @@ on all 18 templates, by keyboard as well as pointer.
       returns `sourceIndices` and every site writes the mapped value. See
       `changes.md` for the full reasoning.
 
+- [x] **61. Navy/Modern Orange sidebar sections had no Direct Edit pencil.**
+      DONE 2026-09-28, v1.2.53. `SidebarBlock` rendered no
+      `data-export-section`; it now takes an optional `id`. Found while
+      designing item 60.
+
 - [ ] **60. Sections cannot move between columns.** Column placement comes from
       `templateConfig.primarySections`/`secondarySections` (template config,
       not user data), so moving Skills from a sidebar into the main column

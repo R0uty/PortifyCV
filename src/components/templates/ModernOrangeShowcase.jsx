@@ -111,9 +111,16 @@ function Section({ id, icon, title, children }) {
   )
 }
 
-function SidebarBlock({ title, children }) {
+// `id` is set only for real CV sections: it is what the PDF exporter and
+// Direct Edit's overlay find a section by. The personal-info block passes none
+// and stays untagged.
+function SidebarBlock({ id, title, children }) {
   return (
-    <div className="modern-orange-showcase__sidebar-block">
+    <div
+      className="modern-orange-showcase__sidebar-block"
+      data-export-section={id}
+      data-export-placement={id ? 'side' : undefined}
+    >
       <p className="modern-orange-showcase__sidebar-heading">{title}</p>
       {children}
     </div>
@@ -423,7 +430,7 @@ export default function ModernOrangeShowcase({
   const renderSidebarSection = (key) => {
     if (key === 'skills') {
       return (
-        <SidebarBlock key={key} title={copy.skills}>
+        <SidebarBlock key={key} id="skills" title={copy.skills}>
           <div className="modern-orange-showcase__skill-list">
             {directEditDispatch ? null : snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill, index) => (
@@ -447,7 +454,7 @@ export default function ModernOrangeShowcase({
 
     if (key === 'languages') {
       return (
-        <SidebarBlock key={key} title={copy.languages}>
+        <SidebarBlock key={key} id="languages" title={copy.languages}>
           <div className="modern-orange-showcase__lang-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
@@ -471,7 +478,7 @@ export default function ModernOrangeShowcase({
 
     if (key === 'education') {
       return (
-        <SidebarBlock key={key} title={copy.education}>
+        <SidebarBlock key={key} id="education" title={copy.education}>
           <div className="modern-orange-showcase__edu-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => {

@@ -491,6 +491,36 @@ test.describe('Direct Edit builder', () => {
     await expect(page.locator('.direct-edit-popup')).toBeVisible()
   })
 
+  // SidebarBlock in these two templates rendered no data-export-section,
+  // so the overlay (which finds sections by that attribute) gave their
+  // sidebar sections no pencil at all.
+  for (const [label, sectionKey, title] of [
+    ['Navy Professional', 'skills', 'Skills'],
+    ['Navy Professional', 'languages', 'Languages'],
+    ['Modern Orange', 'education', 'Education'],
+  ]) {
+    test(`${label}'s sidebar ${sectionKey} section opens the popup`, async ({ page }) => {
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
+      await selectTemplate(page, label)
+
+      await page.locator(`[data-export-section="${sectionKey}"]`).first().hover()
+      await page.locator('.direct-edit-pencil').click()
+
+      const popup = page.locator('.direct-edit-popup')
+      await expect(popup).toBeVisible()
+      await expect(popup.locator('.direct-edit-popup__title')).toHaveText(title)
+    })
+  }
+
+  test('Navy Professional and Modern Orange still export to PDF with tagged sidebar sections', async ({ page }) => {
+    test.setTimeout(90_000)
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    for (const label of ['Navy Professional', 'Modern Orange']) {
+      await selectTemplate(page, label)
+      await exportPdfAndExpectSuccess(page)
+    }
+  })
+
   test('hovering one experience entry reveals an entry pencil that opens the popup on that entry', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
     await selectTemplate(page, 'Quadrant')
