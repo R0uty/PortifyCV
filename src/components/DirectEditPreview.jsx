@@ -1,7 +1,6 @@
 import CVPreview from './CVPreview'
 import SectionsMenu from './SectionsMenu'
 import SectionEditOverlay from './SectionEditOverlay'
-import { isInlineEditSupported } from '../utils/directEdit'
 import { getCvFontStack } from '../utils/cvFonts'
 
 export default function DirectEditPreview({
@@ -17,8 +16,6 @@ export default function DirectEditPreview({
   previewRef,
   cvFontId,
 }) {
-  const isInlineSupported = isInlineEditSupported(selectedTemplate)
-
   return (
     <div
       className="direct-edit-preview"
@@ -47,7 +44,7 @@ export default function DirectEditPreview({
         accentColor={accentColor}
         headingColor={headingColor}
         classicNameAlignment={classicNameAlignment}
-        directEditDispatch={isInlineSupported ? dispatchFormData : null}
+        directEditDispatch={dispatchFormData}
         previewRef={previewRef}
       />
       <SectionEditOverlay

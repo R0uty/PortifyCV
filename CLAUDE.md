@@ -15,7 +15,6 @@ npm run check:share        # round-trips a full CV through shareLinks.js encode/
 npm run check:reducers     # exercises every cvFormReducer/uiReducer action
 npm run check:feedback     # exercises evaluateCvFeedback (src/utils/cvFeedback.js)
 npm run check:docx-export  # exercises the Word export builders and archetypes (src/utils/docxExport.js)
-npm run check:direct-edit  # validates the inline Direct Edit template allowlist (src/utils/directEdit.js)
 npm run check:section-schema   # validates the Direct Edit popup's section schema (src/utils/sectionSchema.js)
 npm run check:section-columns  # exercises the section column-move rules (src/utils/sectionColumns.js)
 
@@ -31,12 +30,12 @@ The `check:*` scripts are framework-free Node scripts (`scripts/*.mjs`), not
 a test runner — run the matching one directly after touching the share-link
 codec (`check:share`), the CV schema/reducers (`check:reducers`), the
 rule-based feedback engine (`check:feedback`), the Word exporter
-(`check:docx-export`), the Direct Edit allowlist or popup schema
-(`check:direct-edit`, `check:section-schema`), or the section column-move
+(`check:docx-export`), the Direct Edit popup schema
+(`check:section-schema`), or the section column-move
 rules and their import validation (`check:section-columns`). A mistyped
 short key in `shareLinks.js` silently drops a field from every link the app
 generates, so `check:share` in particular is cheap insurance. CI
-(`.github/workflows/ci.yml`) runs all seven on every push to `main` and
+(`.github/workflows/ci.yml`) runs all six on every push to `main` and
 `v1.3.0` and on every pull request.
 
 `test:e2e` builds and serves the app first (`playwright.config.js`'s

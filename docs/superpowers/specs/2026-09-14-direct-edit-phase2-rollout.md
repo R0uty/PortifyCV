@@ -10,8 +10,10 @@ incremental enhancement (inline editing feels lighter-weight than a
 popup for the fields it covers), but nothing here is required for a
 template to be fully editable.
 
-**Status (2026-09-29): complete.** All 18 templates are in
-`INLINE_EDIT_SUPPORTED_TEMPLATES` as of v1.2.73. The sections below are
+**Status (2026-09-29): complete.** All 18 templates were in
+`INLINE_EDIT_SUPPORTED_TEMPLATES` as of v1.2.73, and the allowlist itself
+(with its `check:direct-edit` script) was removed in v1.2.78, since it no
+longer excluded anything. The sections below are
 kept as the record of how each round was planned and what it hit.
 
 **Original status:** planning. Phase 1 (spec:

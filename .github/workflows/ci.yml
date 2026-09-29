@@ -40,9 +40,6 @@ jobs:
       - name: Word export regression checks
         run: npm run check:docx-export
 
-      - name: Direct Edit template allowlist checks
-        run: npm run check:direct-edit
-
       - name: Direct Edit section schema checks
         run: npm run check:section-schema
 

@@ -12,7 +12,7 @@ import { dirname, resolve as resolvePath } from 'node:path'
 
 // src/ modules import siblings without file extensions; Node's ESM
 // resolver needs this shim to follow them. Same preamble as
-// scripts/check-direct-edit.mjs.
+// scripts/check-section-columns.mjs.
 registerHooks({
   resolve(specifier, context, nextResolve) {
     try {

@@ -4,6 +4,21 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## The inline-edit allowlist is gone — 2026-09-29
+
+With every template inline-editable since v1.2.73,
+`INLINE_EDIT_SUPPORTED_TEMPLATES` (`src/utils/directEdit.js`) listed all
+18 and no longer excluded anything. It is removed, and
+`DirectEditPreview` now passes the dispatch to `CVPreview` in Direct Edit
+unconditionally. Classic mode, exports and gallery thumbnails still get
+no dispatch, because they never render through `DirectEditPreview`.
+
+Its regression script, `check:direct-edit`, only validated that list, so
+it is removed too, from `package.json`, CI and `CLAUDE.md`: there are now
+six check scripts. Inline editing on all 18 templates stays covered by
+the e2e suite's per-template tests, which pass unchanged; they guard this
+refactor rather than new behaviour, so there was no failing test first.
+
 ## Executive's secondary text meets AA contrast — 2026-09-29
 
 Executive's tagline and contact details read 4.37:1 on its rail, under

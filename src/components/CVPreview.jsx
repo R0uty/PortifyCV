@@ -73,11 +73,10 @@ function CVPreview({
   // 'center' (default) | 'left' — Classic Professional's name-alignment
   // option, folded in from the retired Classic template (v1.2.10).
   classicNameAlignment = 'center',
-  // Direct Edit builder: a dispatch function only when (a) the app is in
-  // Direct Edit mode AND (b) the current template is in
-  // INLINE_EDIT_SUPPORTED_TEMPLATES (src/utils/directEdit.js) — null in
-  // every other case (Classic mode, PDF/html2canvas export, the
-  // thumbnail gallery, a template without the inline bonus layer). EditableField/
+  // Direct Edit builder: a dispatch function only when the app is in
+  // Direct Edit mode (every template supports inline editing since
+  // v1.2.73) — null in every other case (Classic mode, PDF/html2canvas
+  // export, the thumbnail gallery). EditableField/
   // EditableList/EditableChip read this indirectly via DirectEditContext
   // — see the wrap in the final return below.
   directEditDispatch = null,

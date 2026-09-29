@@ -1980,7 +1980,7 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
-**State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.77**,
+**State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.78**,
 pushed to `origin/v1.3.0` with CI green there (run `git log -1` for the exact
 commit; it is deliberately not recorded here, because every refresh commit
 would make it stale). Latest work: section column moves (v1.2.53–v1.2.60),
@@ -1990,19 +1990,21 @@ flake fix (v1.2.62), CI running on this branch with all seven check scripts
 Compact (v1.2.65), Modern Professional (v1.2.66), Graduate (v1.2.67),
 Portfolio Hybrid (v1.2.68), Navy Professional (v1.2.69), Developer
 (v1.2.70), Quadrant (v1.2.71), Tech Executive (v1.2.72) and European
-(v1.2.73). **The inline rollout is complete: all 18 templates are in
-`INLINE_EDIT_SUPPORTED_TEMPLATES`.** Comma-joined skills (Tech Executive,
-European) use option A, grouped chips while editing only, agreed with the
-user 2026-09-29. Pre-existing design matters noticed and left alone:
-Contrast fixes after the rollout: kicker labels on Tech Executive
-(v1.2.75) and Creative/Executive (v1.2.76), and Executive's whole
-secondary-text token `--ex-ink-faint` (v1.2.77, which changes exported
-Executive PDFs slightly). Portfolio's measured 1.00:1 kicker was an
-artifact (really 4.82:1+). European's 0px entry spacing was fixed in
-v1.2.74. No known contrast issues remain open. The allowlist now names every template, so it could be retired;
-not done, since nothing asked for it. Working tree clean (only an
-untracked `.claude/`). Full suite green with no known flakes:
-**178/178 e2e**, lint, build and all seven `check:*` scripts. `main` untouched at
+(v1.2.73). **The inline rollout is complete: every template is
+inline-editable**, and the per-template allowlist
+(`INLINE_EDIT_SUPPORTED_TEMPLATES`, `src/utils/directEdit.js`) and its
+`check:direct-edit` script were removed in v1.2.78, at the user's
+request — there are now **six** check scripts. Comma-joined skills (Tech
+Executive, European) use option A, grouped chips while editing only,
+agreed with the user 2026-09-29. After the rollout: European's 0px entry
+spacing was fixed (v1.2.74), and contrast was fixed for the kicker labels
+on Tech Executive (v1.2.75) and Creative/Executive (v1.2.76) and for
+Executive's secondary-text token `--ex-ink-faint` (v1.2.77, which changes
+exported Executive PDFs slightly). Portfolio's measured 1.00:1 kicker was
+an artifact (really 4.82:1+). No known contrast issues remain open.
+Working tree clean (only an untracked `.claude/`). Full suite green with
+no known flakes: **178/178 e2e**, lint, build and all six `check:*`
+scripts. `main` untouched at
 `0f5261f`, no PR — the user said explicitly on 2026-09-28 NOT to merge yet.
 
 Source of truth for the Direct Edit editor's design and its known gaps:
@@ -2104,9 +2106,11 @@ Full reasoning per item is in `changes.md`; per-commit detail is in git.
 - This branch pushes straight to `origin/v1.3.0` — no PR, no merge to `main`,
   because the Direct Edit feature branch is still mid-development. Confirm with
   the user before pushing anyway.
-- Full verification before calling anything done: `npm run lint`,
-  `check:reducers`, `check:share`, `check:direct-edit`, `check:section-schema`,
-  `npm run build`, `npm run test:e2e`.
+- Full verification before calling anything done: `npm run lint`, all six
+  check scripts (`check:reducers`, `check:share`, `check:feedback`,
+  `check:docx-export`, `check:section-schema`, `check:section-columns`),
+  `npm run build`, `npm run test:e2e`. (`check:direct-edit` was removed in
+  v1.2.78 along with the allowlist it checked.)
 - The old flake in `'the footer never overlaps the CV preview in Direct Edit
   mode'` is FIXED (v1.2.62, 2026-09-28). It was the test, not the layout:
   `page.mouse.wheel` starts an asynchronous smooth scroll, and the test took
