@@ -4,6 +4,23 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## European entries are spaced apart again — 2026-09-29
+
+European's Experience, Education and Projects entries sat 0px apart in
+every mode, exports included. The template spaces its label/value rows
+with `.row + .row`, but each dated entry wraps its row in its own card
+`div`, so the rule never reached from one entry to the next. That has
+been true since the template was added. The entries in each of those
+sections now sit in a flex column with a 0.9rem gap, the same rhythm as
+the other rows. A gap spaces whatever the list's children are, so it also
+holds in Direct Edit, where `EditableList` adds its own wrapper around
+each Experience entry.
+
+This changes the exported PDF: entries gain 14.4px each, so a CV right at
+the one-page limit may now step down to European's compact density
+sooner. A new test measures the gap in Classic and Direct Edit; it failed
+at 0px before the fix.
+
 ## Inline editing on European — every template is now inline-editable — 2026-09-29
 
 European is the eighteenth and last template to get inline editing, so

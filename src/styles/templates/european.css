@@ -193,6 +193,17 @@
   margin-top: 0.9rem;
 }
 
+/* Dated entries (Experience, Education, Projects) each wrap their row in
+   a card div, so `.row + .row` above never reaches from one entry to the
+   next — they used to sit 0px apart. A flex gap on the list spaces the
+   entries whatever wraps them, including EditableList's per-entry wrapper
+   in Direct Edit. Same 0.9rem rhythm as the rows. */
+.european-showcase__entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
 .european-showcase__row-label {
   font-size: var(--tpl-meta-size);
   font-weight: 700;

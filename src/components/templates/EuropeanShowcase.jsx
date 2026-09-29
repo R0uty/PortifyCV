@@ -300,29 +300,31 @@ export default function EuropeanShowcase({
     if (key === 'experience') {
       return (
         <Section key={key} id="experience" title={copy.experience}>
-          {directEditDispatch ? (
-            <EditableList
-              section="experience"
-              items={formData.experience}
-              addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
-            >
-              {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
-            </EditableList>
-          ) : snapshot.experience.length > 0 ? (
-            snapshot.experience.map((item, index) =>
-              renderExperienceEntry(item, index, {
-                directEditDispatch,
-                copy,
-                sourceIndex: snapshot.sourceIndices.experience[index],
-              }),
-            )
-          ) : (
-            <Row label="">
-              <p className="european-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
-              </p>
-            </Row>
-          )}
+          <div className="european-showcase__entry-list">
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
+            ) : (
+              <Row label="">
+                <p className="european-showcase__empty">
+                  {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                </p>
+              </Row>
+            )}
+          </div>
         </Section>
       )
     }
@@ -330,26 +332,28 @@ export default function EuropeanShowcase({
     if (key === 'education') {
       return (
         <Section key={key} id="education" title={copy.education}>
-          {snapshot.education.length > 0 ? (
-            snapshot.education.map((item, index) => {
-              const metaLine = [item.school, item.location].filter(Boolean).join(' · ')
+          <div className="european-showcase__entry-list">
+            {snapshot.education.length > 0 ? (
+              snapshot.education.map((item, index) => {
+                const metaLine = [item.school, item.location].filter(Boolean).join(' · ')
 
-              return (
-                <div key={`${item.school}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
-                  <Row label={formatDateRange(item.startDate, item.endDate) || copy.datesPending}>
-                    <p className="european-showcase__entry-role">{item.degree || copy.untitledRole}</p>
-                    {metaLine ? <p className="european-showcase__entry-meta">{metaLine}</p> : null}
-                  </Row>
-                </div>
-              )
-            })
-          ) : (
-            <Row label="">
-              <p className="european-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
-              </p>
-            </Row>
-          )}
+                return (
+                  <div key={`${item.school}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
+                    <Row label={formatDateRange(item.startDate, item.endDate) || copy.datesPending}>
+                      <p className="european-showcase__entry-role">{item.degree || copy.untitledRole}</p>
+                      {metaLine ? <p className="european-showcase__entry-meta">{metaLine}</p> : null}
+                    </Row>
+                  </div>
+                )
+              })
+            ) : (
+              <Row label="">
+                <p className="european-showcase__empty">
+                  {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                </p>
+              </Row>
+            )}
+          </div>
         </Section>
       )
     }
@@ -389,31 +393,33 @@ export default function EuropeanShowcase({
     if (key === 'projects') {
       return (
         <Section key={key} id="projects" title={copy.projects}>
-          {snapshot.projects.length > 0 ? (
-            snapshot.projects.map((item, index) => {
-              const tags = item.stack
-                ? item.stack.split(',').map((tag) => tag.trim()).filter(Boolean)
-                : []
+          <div className="european-showcase__entry-list">
+            {snapshot.projects.length > 0 ? (
+              snapshot.projects.map((item, index) => {
+                const tags = item.stack
+                  ? item.stack.split(',').map((tag) => tag.trim()).filter(Boolean)
+                  : []
 
-              return (
-                <div key={`${item.name}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
-                  <Row label={item.date || ''}>
-                    {item.name ? <p className="european-showcase__entry-role">{item.name}</p> : null}
-                    {item.description ? <p className="european-showcase__project-desc">{item.description}</p> : null}
-                    {tags.length > 0 ? (
-                      <p className="european-showcase__tag-line">{tags.join(', ')}</p>
-                    ) : null}
-                  </Row>
-                </div>
-              )
-            })
-          ) : (
-            <Row label="">
-              <p className="european-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
-              </p>
-            </Row>
-          )}
+                return (
+                  <div key={`${item.name}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
+                    <Row label={item.date || ''}>
+                      {item.name ? <p className="european-showcase__entry-role">{item.name}</p> : null}
+                      {item.description ? <p className="european-showcase__project-desc">{item.description}</p> : null}
+                      {tags.length > 0 ? (
+                        <p className="european-showcase__tag-line">{tags.join(', ')}</p>
+                      ) : null}
+                    </Row>
+                  </div>
+                )
+              })
+            ) : (
+              <Row label="">
+                <p className="european-showcase__empty">
+                  {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                </p>
+              </Row>
+            )}
+          </div>
         </Section>
       )
     }

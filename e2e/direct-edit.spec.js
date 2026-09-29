@@ -1488,6 +1488,26 @@ test.describe('Direct Edit builder', () => {
     })
   }
 
+  // European's rows are spaced by `.row + .row`, but every dated entry
+  // (Experience, Education, Projects) wraps its row in its own card div, so
+  // that rule never applied between entries: they sat 0px apart in every
+  // mode, exports included. Measured in both modes, since Direct Edit adds
+  // EditableList's wrapper around each Experience card.
+  test('European: experience entries are spaced apart in Classic and Direct Edit', async ({ page }) => {
+    await selectTemplate(page, 'European')
+
+    const gapBetweenCards = (scope) => page.evaluate((sel) => {
+      const cards = document.querySelectorAll(`${sel} [data-export-section="experience"] [data-export-card]`)
+      return cards[1].getBoundingClientRect().top - cards[0].getBoundingClientRect().bottom
+    }, scope)
+
+    expect(await gapBetweenCards('.european-showcase')).toBeGreaterThanOrEqual(14)
+
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await expect(page.locator('.direct-edit-preview .european-showcase')).toBeVisible()
+    expect(await gapBetweenCards('.direct-edit-preview .european-showcase')).toBeGreaterThanOrEqual(14)
+  })
+
   // Graduate hides an empty Career Objective section entirely, which in
   // Direct Edit would leave nothing to click into. While editing it shows
   // with a placeholder instead.
