@@ -4,6 +4,38 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Inline editing on Navy Professional — 2026-09-29
+
+Navy Professional is the fourteenth inline-wired template, and the first
+whose name, title and contact details sit in a dark sidebar rather than a
+header. The name, title, contact list (phone, email, location, and
+LinkedIn as a link field), Profile, Experience (role, company,
+description, drag to reorder, add) and Skills chips are editable in place.
+
+Four things needed more than wiring, each caught by a failing test:
+- **The title would have been saved in capitals.** The role line is
+  `text-transform: uppercase`, and `EditableField` saves `innerText`, which
+  reflects the transform: typing "Staff Engineer" stored "STAFF
+  ENGINEER". The editable span now resets the transform, as on Classic
+  Professional and Modern Timeline; the title still shows in capitals
+  outside editing.
+- **The "+ Add" skill chip was hard to read on the navy sidebar**
+  (3.25:1), since Direct Edit's generic chip is styled for a white page.
+  It now takes a light border and text inside the sidebar. A new test
+  checks every piece of sidebar text stays at 4.5:1 or better while
+  editing.
+- **Entry spacing and dividers used `:not(:first-child)`/`:last-child`**
+  on a class Experience shares with Education. Rather than a partition
+  marker (Executive's approach), both sections now set `--first`/`--last`
+  classes and the positional rules are gone.
+- **The description's editing element needed `white-space: pre-line`.**
+  The title failure masked this test, so it was proven separately by
+  removing the rule and watching it fail.
+
+The provider wraps Navy unconditionally, as it does Modern Timeline,
+because Navy's Showcase also renders in ATS mode; outside Direct Edit it
+stays inert. The existing Navy ATS-mode guards still pass.
+
 ## Inline editing on Portfolio Hybrid — 2026-09-29
 
 Portfolio Hybrid is the thirteenth inline-wired template, and the last

@@ -318,19 +318,26 @@ function CVPreview({
   // the one thing this app's own ATS claims ("no columns") specifically
   // promise to remove — while keeping every section in the same relative
   // order and everything else about the layout intact.
+  //
+  // Wrapped in DirectEditProvider unconditionally, as Timeline is: Direct
+  // Edit always renders with atsFriendlyMode={false}, and in Classic/ATS
+  // directEditDispatch is null, so the provider stays inert there.
   if (variant === 'navyProfessional') {
     return (
-      <Suspense fallback={null}>
-        <NavyProfessionalShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          atsFriendlyMode={atsFriendlyMode}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <NavyProfessionalShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            atsFriendlyMode={atsFriendlyMode}
+            headingColor={headingColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
   // ── Modern Orange Showcase delegation ─────────────────────────────────

@@ -105,6 +105,20 @@
   color: var(--np-blue-light);
 }
 
+/* The role is styled uppercase. EditableField saves innerText, which
+   reflects text-transform, so without this an inline edit would save the
+   title in capitals. Scoped to the editable span only. */
+.navy-professional-showcase__role .direct-edit-field {
+  text-transform: none;
+}
+
+/* Direct Edit's "+ Add" chip is styled for a white page (grey text, no
+   fill), which reads at ~3:1 on the navy sidebar. */
+.navy-professional-showcase__sidebar .direct-edit-chip-add {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .navy-professional-showcase__sidebar-divider {
   height: 1px;
   margin: 1.75rem 0;
@@ -275,15 +289,19 @@
 }
 
 .navy-professional-showcase__entry {
-  padding: 0 0 1.2rem;
+  padding: 1.2rem 0;
   border-bottom: 1px solid var(--np-border);
 }
 
-.navy-professional-showcase__entry:not(:first-child) {
-  padding-top: 1.2rem;
+/* First/last come from JS modifier classes that both Experience and
+   Education set, not :first-child/:last-child: in Direct Edit, EditableList
+   wraps each Experience entry in its own .direct-edit-entry div, making
+   every entry both. Doubled class for order-independent specificity. */
+.navy-professional-showcase__entry.navy-professional-showcase__entry--first {
+  padding-top: 0;
 }
 
-.navy-professional-showcase__entry:last-child {
+.navy-professional-showcase__entry.navy-professional-showcase__entry--last {
   border-bottom: none;
   padding-bottom: 0;
 }
@@ -322,6 +340,18 @@
   display: flex;
   flex-direction: column;
   gap: 0.32rem;
+}
+
+/* Direct Edit's description is one multi-line field, not a flex <ul>.
+   pre-line is load-bearing: EditableField saves innerText, which collapses
+   a stored "\n" to a space under white-space: normal. */
+.navy-professional-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--np-text);
 }
 
 .navy-professional-showcase__bullets li {

@@ -208,10 +208,13 @@ stylesheet for `:first-child`/`:last-child`/`:first-of-type`/
 `:last-of-type` on the entry class, in the same task**, and re-anchor
 any match onto the entry class itself using an `isFirst`/`isLast`
 modifier class (per above), not a positional pseudo-class on any
-wrapper. `src/styles/templates/navyProfessional.css` is a confirmed,
-not-yet-fixed instance of this same risk — it carries the identical
-`:not(:first-child)`/`:last-child` pair on its own entry class — flagged
-for whichever round wires Navy Professional next.
+wrapper. `src/styles/templates/navyProfessional.css` carried the identical
+`:not(:first-child)`/`:last-child` pair on an entry class shared with
+Education; fixed in the Navy Professional round (v1.2.69) without a
+partition marker, by having BOTH sections set `--first`/`--last` and
+deleting the positional rules outright. When every user of a shared entry
+class can compute its own index, that is simpler than Executive's
+`--wired` opt-out.
 
 ## Rollout order — one structural family at a time
 
@@ -224,7 +227,7 @@ same code):
 |---|---|---|---|
 | 1 | `oneColumn` (5 remaining) | Classic Professional, Editorial, Portrait, Modern Timeline, then Compact last | Closest visual shape to Minimalist (single column, no rail) — cheapest to verify the "bespoke Showcase, not flat renderer" wiring pattern generalizes correctly before tackling a structurally different family. Checked each Showcase's actual skills rendering directly (config values don't reflect it — see above): Classic Professional/Editorial/Portrait/Modern Timeline all render a genuinely flat `snapshot.skills.map(...)` list, reusable with the existing `EditableChip` unchanged. **Compact is the outlier** — despite `skillsLayout: 'flat'` in its config, `CompactShowcase.jsx` always renders skills grouped via `parseSkillCategories`, the same categorized-chip design problem flagged above. Sequence Compact last in this family, after the categorized-chip design is actually settled (ideally during this family's own work, once a flat-skills round or two has proven the wiring pattern) — not first, where it would force that design decision before anything else has landed. |
 | 2 | `railTable` (8) | Left rail: Executive, Modern Orange. Right rail: Creative, Modern Professional, Graduate, Portfolio Hybrid, Tech Executive, Colorful Compact | Largest family — once the first one's rail+main wiring pattern is proven, the rest should move faster. Done so far: Executive, Modern Orange, Creative, Colorful Compact, Modern Professional, Graduate, Portfolio Hybrid. Modern Professional and Portfolio Hybrid both needed the timeline connector's `:last-child` replaced with a `--last` class (Graduate's rail is on Internships, so it never hit this). The one remaining, Tech Executive, renders comma-joined text that needs its own design decision — see the verified table above. |
-| 3 | `darkSidebarTable` (2) | Developer, Navy Professional | Same rail mechanism as `railTable` plus a dark-fill/light-text palette swap — do after `railTable` so the rail pattern is already proven, not simultaneously. |
+| 3 | `darkSidebarTable` (2) | Developer, Navy Professional | Same rail mechanism as `railTable` plus a dark-fill/light-text palette swap — do after `railTable` so the rail pattern is already proven, not simultaneously. Navy Professional done (v1.2.69): its identity and contact live on the dark sidebar, and Direct Edit's generic "+ Add" chip needed a light override there (it read ~3:1); its uppercase role needed the `text-transform: none` override. Check Developer's dark rail for both. |
 | 4 | `gridTable` (1) | Quadrant | Structurally distinct (2×2 grid, `categorized` skills) — no family to amortize cost across, budget it as its own round. |
 | 5 | `labelGridTable` (1) | European | Most distinct reading pattern (label/value rows, not flowing prose) — last, and expect it to need the most novel `EditableField` usage of any template so far. |
 

@@ -1388,7 +1388,7 @@ test.describe('Direct Edit builder', () => {
   // Skills is the one inline-edited section that can change column. Moved
   // into main, it renders through its home (sidebar) renderer, and its
   // chips must still be there and still remove the right skill.
-  for (const label of ['Colorful Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid']) {
+  for (const label of ['Colorful Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid', 'Navy Professional']) {
     test(`${label}: Skills moved to the main column is still inline-editable`, async ({ page }) => {
       await selectTemplate(page, label)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
@@ -1410,6 +1410,31 @@ test.describe('Direct Edit builder', () => {
       expect(remainingTags).toEqual(DEMO_SKILLS.filter((skill) => skill !== 'Figma'))
     })
   }
+
+  // Navy's identity, contact and skills all sit on the dark sidebar, where
+  // Direct Edit's generic chrome (the "+ Add" chip, placeholders) was
+  // designed for a white page.
+  test('Navy Professional: every inline sidebar control stays readable on the dark sidebar', async ({ page }) => {
+    await selectTemplate(page, 'Navy Professional')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await expect(page.locator('.navy-professional-showcase__sidebar .direct-edit-chip-add')).toHaveCount(1)
+    const contrast = await minTextContrast(page, '.direct-edit-preview .navy-professional-showcase__sidebar')
+    expect(contrast).toBeGreaterThanOrEqual(4.5)
+  })
+
+  // The entry spacing used :not(:first-child)/:last-child, which
+  // EditableList's per-entry wrapper defeats (every entry is both).
+  test('Navy Professional: experience entries keep their edge spacing in Direct Edit', async ({ page }) => {
+    await selectTemplate(page, 'Navy Professional')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const entries = page.locator('.direct-edit-preview [data-export-section="experience"] .navy-professional-showcase__entry')
+    await expect(entries).toHaveCount(2)
+    expect(await entries.first().evaluate((el) => getComputedStyle(el).paddingTop)).toBe('0px')
+    expect(await entries.last().evaluate((el) => getComputedStyle(el).paddingTop)).not.toBe('0px')
+    expect(await entries.last().evaluate((el) => getComputedStyle(el).paddingBottom)).toBe('0px')
+  })
 
   // Graduate hides an empty Career Objective section entirely, which in
   // Direct Edit would leave nothing to click into. While editing it shows
@@ -1496,12 +1521,16 @@ test.describe('Direct Edit builder', () => {
     { label: 'Executive', classPrefix: 'executive-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'], entrySelector: '.executive-showcase__entry' },
     { label: 'Modern Orange', classPrefix: 'modern-orange-showcase', contactRowSuffix: 'contact-list', labelOrder: ['Location', 'Email', 'Phone'], titleFieldSuffix: 'title-badge', skillsSectionSelector: '.modern-orange-showcase__skill-list', entrySelector: '.modern-orange-showcase__exp-row' },
     { label: 'Creative', classPrefix: 'creative-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
+    { label: 'Modern Professional', classPrefix: 'modern-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
+    // Navy's contact list sits in the sidebar (Phone, Email, Location, plus
+    // LinkedIn as a link field). Its entry class is shared with Education,
+    // so the divider check is scoped to Experience.
+    { label: 'Navy Professional', classPrefix: 'navy-professional-showcase', contactRowSuffix: 'contact-list', labelOrder: ['Phone', 'Email', 'Location', 'LinkedIn'], entrySelector: '[data-export-section="experience"] .navy-professional-showcase__entry' },
+    { label: 'Portfolio Hybrid', classPrefix: 'portfolio-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
+    { label: 'Graduate', classPrefix: 'graduate-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
     // Colorful Compact's header contact line carries a fourth item, the
     // website (links.website), in the read-only order Email, Location,
     // Phone, Website.
-    { label: 'Modern Professional', classPrefix: 'modern-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
-    { label: 'Portfolio Hybrid', classPrefix: 'portfolio-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
-    { label: 'Graduate', classPrefix: 'graduate-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
     { label: 'Colorful Compact', classPrefix: 'colorful-compact-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Location', 'Phone', 'Website'], entrySelector: '.colorful-compact-showcase__exp-row' },
   ]
 
