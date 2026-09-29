@@ -1302,7 +1302,8 @@ test.describe('Direct Edit builder', () => {
     })
   }
 
-  // Compact-only regression guard: EditableCategorizedChip groups skills by
+  // Categorized-skills regression guard (one row per inline-wired template
+  // that uses EditableCategorizedChip): the chip groups skills by
   // a DERIVED category (parseSkillCategories buckets by regex against each
   // skill's own text) but must still dispatch REMOVE_SKILL against each
   // skill's ORIGINAL formData.skills index. The demo CV's 6 default skills
@@ -1311,33 +1312,35 @@ test.describe('Direct Edit builder', () => {
   // mode's Skill tags input, removes specifically that chip in Direct Edit
   // mode, and confirms all 6 original skills survive untouched — proving
   // the index mapping is correct, not just that a chip disappeared.
-  test('Compact: removing a categorized skill chip removes the correct skill, not a same-category neighbor', async ({ page }) => {
-    await selectTemplate(page, 'Compact')
+  for (const label of ['Compact', 'Modern Professional']) {
+    test(`${label}: removing a categorized skill chip removes the correct skill, not a same-category neighbor`, async ({ page }) => {
+      await selectTemplate(page, label)
 
-    const skillsInput = page.getByLabel('Skill tags', { exact: true })
-    await skillsInput.fill('Docker')
-    await skillsInput.press('Enter')
+      const skillsInput = page.getByLabel('Skill tags', { exact: true })
+      await skillsInput.fill('Docker')
+      await skillsInput.press('Enter')
 
-    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
-    const skillsSection = page.locator('[data-export-section="skills"]')
-    await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length + 1)
+      const skillsSection = page.locator('[data-export-section="skills"]')
+      await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length + 1)
 
-    await skillsSection.getByRole('button', { name: /^Docker/ }).click()
+      await skillsSection.getByRole('button', { name: /^Docker/ }).click()
 
-    await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
+      await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
 
-    await page.getByRole('tab', { name: 'Classic' }).click()
-    // Scoped to #section-skills, not the whole page: the Experience section's
-    // "Technologies" field (CVForm.jsx) is also a TagsInput sharing the same
-    // .tags-input__tag class, and it's present on every Direct-Edit template
-    // already, not just Compact. The demo CV's two experience entries each
-    // carry a technologies array, so an unscoped locator here picks up those
-    // tags too and produces a false failure — this scoping is required
-    // regardless of which template is under test.
-    const remainingTags = (await page.locator('#section-skills .tags-input__tag').allTextContents()).map((text) => text.trim())
-    expect(remainingTags).toEqual(DEMO_SKILLS)
-  })
+      await page.getByRole('tab', { name: 'Classic' }).click()
+      // Scoped to #section-skills, not the whole page: the Experience section's
+      // "Technologies" field (CVForm.jsx) is also a TagsInput sharing the same
+      // .tags-input__tag class, and it's present on every Direct-Edit template
+      // already, not just Compact. The demo CV's two experience entries each
+      // carry a technologies array, so an unscoped locator here picks up those
+      // tags too and produces a false failure — this scoping is required
+      // regardless of which template is under test.
+      const remainingTags = (await page.locator('#section-skills .tags-input__tag').allTextContents()).map((text) => text.trim())
+      expect(remainingTags).toEqual(DEMO_SKILLS)
+    })
+  }
 
   // Colorful Compact's header is dark and its name's white comes from the
   // two split spans (name-lead / name-accent), not from the <h1>, which
@@ -1385,26 +1388,46 @@ test.describe('Direct Edit builder', () => {
   // Skills is the one inline-edited section that can change column. Moved
   // into main, it renders through its home (sidebar) renderer, and its
   // chips must still be there and still remove the right skill.
-  test('Colorful Compact: Skills moved to the main column is still inline-editable', async ({ page }) => {
-    await selectTemplate(page, 'Colorful Compact')
-    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+  for (const label of ['Colorful Compact', 'Modern Professional']) {
+    test(`${label}: Skills moved to the main column is still inline-editable`, async ({ page }) => {
+      await selectTemplate(page, label)
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
-    await openSectionPopup(page, 'skills')
-    await page.locator('.direct-edit-popup__columns [data-column="main"]').click()
-    await page.keyboard.press('Escape')
-    expect((await sectionColumnState(page, 'skills')).inSidebar).toBe(false)
+      await openSectionPopup(page, 'skills')
+      await page.locator('.direct-edit-popup__columns [data-column="main"]').click()
+      await page.keyboard.press('Escape')
+      expect((await sectionColumnState(page, 'skills')).inSidebar).toBe(false)
 
-    const skillsSection = page.locator('.direct-edit-preview [data-export-section="skills"]')
-    await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
-    await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
+      const skillsSection = page.locator('.direct-edit-preview [data-export-section="skills"]')
+      await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
+      await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
 
-    await skillsSection.getByRole('button', { name: /^Figma/ }).click()
-    await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length - 1)
+      await skillsSection.getByRole('button', { name: /^Figma/ }).click()
+      await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length - 1)
 
-    await page.getByRole('tab', { name: 'Classic' }).click()
-    const remainingTags = (await page.locator('#section-skills .tags-input__tag').allTextContents()).map((text) => text.trim())
-    expect(remainingTags).toEqual(DEMO_SKILLS.filter((skill) => skill !== 'Figma'))
-  })
+      await page.getByRole('tab', { name: 'Classic' }).click()
+      const remainingTags = (await page.locator('#section-skills .tags-input__tag').allTextContents()).map((text) => text.trim())
+      expect(remainingTags).toEqual(DEMO_SKILLS.filter((skill) => skill !== 'Figma'))
+    })
+  }
+
+  // A timeline rail's connector line runs from each marker down to the
+  // next and is hidden on the last entry. That used :last-child, which
+  // EditableList's per-entry wrapper defeats — every item becomes a last
+  // child and every connector vanishes in Direct Edit.
+  for (const { label, classPrefix } of [
+    { label: 'Modern Professional', classPrefix: 'modern-showcase' },
+  ]) {
+    test(`${label}: the timeline connector joins entries and stops at the last one in Direct Edit`, async ({ page }) => {
+      await selectTemplate(page, label)
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+      const lines = page.locator(`.direct-edit-preview .${classPrefix}__timeline-line`)
+      await expect(lines).toHaveCount(2)
+      expect(await lines.first().evaluate((el) => getComputedStyle(el).display)).not.toBe('none')
+      expect(await lines.last().evaluate((el) => getComputedStyle(el).display)).toBe('none')
+    })
+  }
 
   // One row per Direct-Edit-supported template.
   // `contactRowSuffix` defaults to 'meta' (Editorial, Portrait); Classic
@@ -1456,6 +1479,7 @@ test.describe('Direct Edit builder', () => {
     // Colorful Compact's header contact line carries a fourth item, the
     // website (links.website), in the read-only order Email, Location,
     // Phone, Website.
+    { label: 'Modern Professional', classPrefix: 'modern-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
     { label: 'Colorful Compact', classPrefix: 'colorful-compact-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Location', 'Phone', 'Website'], entrySelector: '.colorful-compact-showcase__exp-row' },
   ]
 

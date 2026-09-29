@@ -267,7 +267,10 @@
   background: var(--ms-border);
 }
 
-.modern-showcase__timeline-item:last-child .modern-showcase__timeline-line {
+/* `--last` is set in JS, not matched with :last-child: in Direct Edit,
+   EditableList wraps each item in its own .direct-edit-entry div, which
+   made every item a last child and hid every connector. */
+.modern-showcase__timeline-item--last .modern-showcase__timeline-line {
   display: none;
 }
 
@@ -319,6 +322,18 @@
 
 .modern-showcase__bullets li::marker {
   color: var(--ms-blush);
+}
+
+/* Direct Edit's description is one multi-line field, not a flex <ul>.
+   pre-line is load-bearing: EditableField saves innerText, which collapses
+   a stored "\n" to a space under white-space: normal. */
+.modern-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--ms-text);
 }
 
 .modern-showcase__metric {

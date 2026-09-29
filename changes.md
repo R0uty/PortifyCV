@@ -4,6 +4,34 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Inline editing on Modern Professional — 2026-09-29
+
+Modern Professional is the eleventh inline-wired template. The name,
+title, contact line (email, phone, location), Professional Summary,
+Experience (role, company, description, drag to reorder, add) and Skills
+are editable in place. It is the first right-rail template with grouped
+skills, and reuses `EditableCategorizedChip`, built in the Compact round,
+unchanged.
+
+Two things needed more than wiring, each caught by a test that failed
+first:
+- **The timeline connector vanished in Direct Edit.** The line joining
+  each entry's marker to the next was hidden on the last entry with
+  `:last-child`, which `EditableList`'s per-entry wrapper makes true for
+  every entry. The last entry now carries a `--last` modifier class set
+  in JS, in both modes. The connector's reach into the gap is unchanged
+  (measured: it stops 0.3rem above the next marker in both modes).
+- **The description's editing element needed `white-space: pre-line`**,
+  and `display: block` to undo the flex column the bullet list uses.
+
+Bold metric highlighting in the bullets shows only when not editing,
+since the description is one plain-text field while editing.
+
+Tests: the categorized-chip removal test (Compact only until now) and the
+moved-Skills test (Colorful Compact) became loops that include Modern
+Professional, and a new timeline-connector test is written as a loop so
+Graduate and Portfolio Hybrid, which share the rail, can join it.
+
 ## Inline editing on Colorful Compact — 2026-09-29
 
 Colorful Compact joins the inline-edit allowlist, the tenth template where

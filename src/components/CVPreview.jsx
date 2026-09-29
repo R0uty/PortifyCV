@@ -148,16 +148,19 @@ function CVPreview({
   // "premium executive" visual system that ATS mode bypasses entirely.
   if (variant === 'modern' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <ModernShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <ModernShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
