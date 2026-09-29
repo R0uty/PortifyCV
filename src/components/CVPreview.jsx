@@ -266,17 +266,20 @@ function CVPreview({
   // condensed into a résumé" visual system that ATS mode bypasses entirely.
   if (variant === 'portfolio' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <PortfolioShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          accentColor={accentColor}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <PortfolioShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            accentColor={accentColor}
+            headingColor={headingColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 

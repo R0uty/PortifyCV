@@ -4,6 +4,31 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Inline editing on Portfolio Hybrid — 2026-09-29
+
+Portfolio Hybrid is the thirteenth inline-wired template, and the last
+right-rail template with grouped chips. The name, title, contact line
+(email, phone, location), About Me, Professional Experience (role,
+company, description, drag to reorder, add) and Tech Stack (grouped chips,
+via `EditableCategorizedChip`) are editable in place. The tagline stays
+popup-only.
+
+Its Experience has the same timeline rail as Modern Professional, and the
+same two fixes were needed, each caught by a test that failed first:
+- The connector line was hidden on the last entry with `:last-child`,
+  which hid every connector once `EditableList` wrapped the entries. It
+  now uses a `--last` modifier class set in JS, in both modes. Measured in
+  the browser: the line stops 0.3rem above the next marker, as it does
+  outside editing.
+- The description's editing element needed `white-space: pre-line` and
+  `display: block` against the bullet list's flex column.
+
+As on Modern Professional, bold metric highlighting in the bullets shows
+only when not editing.
+
+Tests: Portfolio Hybrid joined the per-template loop, the connector loop,
+and the categorized-removal and moved-Skills loops.
+
 ## Inline editing on Graduate — 2026-09-29
 
 Graduate is the twelfth inline-wired template. The name, title, contact

@@ -392,7 +392,10 @@
   background: linear-gradient(180deg, var(--tpl-accent), var(--pf-border));
 }
 
-.portfolio-showcase__timeline-item:last-child .portfolio-showcase__timeline-line {
+/* `--last` is set in JS, not matched with :last-child: in Direct Edit,
+   EditableList wraps each item in its own .direct-edit-entry div, which
+   made every item a last child and hid every connector. */
+.portfolio-showcase__timeline-item--last .portfolio-showcase__timeline-line {
   display: none;
 }
 
@@ -438,6 +441,18 @@
 }
 
 .portfolio-showcase__bullets li {
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--pf-text);
+}
+
+/* Direct Edit's description is one multi-line field, not a flex <ul>.
+   pre-line is load-bearing: EditableField saves innerText, which collapses
+   a stored "\n" to a space under white-space: normal. */
+.portfolio-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
   font-size: var(--tpl-body-size);
   line-height: 1.55;
   color: var(--pf-text);

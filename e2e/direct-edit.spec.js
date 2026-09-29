@@ -1312,7 +1312,7 @@ test.describe('Direct Edit builder', () => {
   // mode's Skill tags input, removes specifically that chip in Direct Edit
   // mode, and confirms all 6 original skills survive untouched — proving
   // the index mapping is correct, not just that a chip disappeared.
-  for (const label of ['Compact', 'Modern Professional', 'Graduate']) {
+  for (const label of ['Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid']) {
     test(`${label}: removing a categorized skill chip removes the correct skill, not a same-category neighbor`, async ({ page }) => {
       await selectTemplate(page, label)
 
@@ -1388,7 +1388,7 @@ test.describe('Direct Edit builder', () => {
   // Skills is the one inline-edited section that can change column. Moved
   // into main, it renders through its home (sidebar) renderer, and its
   // chips must still be there and still remove the right skill.
-  for (const label of ['Colorful Compact', 'Modern Professional', 'Graduate']) {
+  for (const label of ['Colorful Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid']) {
     test(`${label}: Skills moved to the main column is still inline-editable`, async ({ page }) => {
       await selectTemplate(page, label)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
@@ -1436,6 +1436,7 @@ test.describe('Direct Edit builder', () => {
   // child and every connector vanishes in Direct Edit.
   for (const { label, classPrefix } of [
     { label: 'Modern Professional', classPrefix: 'modern-showcase' },
+    { label: 'Portfolio Hybrid', classPrefix: 'portfolio-showcase' },
   ]) {
     test(`${label}: the timeline connector joins entries and stops at the last one in Direct Edit`, async ({ page }) => {
       await selectTemplate(page, label)
@@ -1499,6 +1500,7 @@ test.describe('Direct Edit builder', () => {
     // website (links.website), in the read-only order Email, Location,
     // Phone, Website.
     { label: 'Modern Professional', classPrefix: 'modern-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
+    { label: 'Portfolio Hybrid', classPrefix: 'portfolio-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
     { label: 'Graduate', classPrefix: 'graduate-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
     { label: 'Colorful Compact', classPrefix: 'colorful-compact-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Location', 'Phone', 'Website'], entrySelector: '.colorful-compact-showcase__exp-row' },
   ]
