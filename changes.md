@@ -4,6 +4,22 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Tech Executive's masthead label meets AA contrast — 2026-09-29
+
+The "Tech Executive Template" kicker on the navy masthead was `#94a3b8`,
+4.13:1 against `#163d7a`, under WCAG AA's 4.5:1 for text that small. It
+is now `#a8b5c8`, 5.1:1, still dimmer than the contact line (7.1:1) so it
+reads as a secondary label. The kicker is preview-only (left out of
+exports), so PDFs are unchanged. A new test checks it; it failed at 4.13
+first.
+
+A throwaway sweep of every template's kicker while making this change
+found three more below 4.5:1, left alone because they were not asked
+about: Creative (3.35:1), Executive (4.37:1), and Portfolio Hybrid, which
+measured 1.00:1. That last figure is probably an artifact of how the
+sweep resolved its background, and needs a proper look before it is
+trusted.
+
 ## European entries are spaced apart again — 2026-09-29
 
 European's Experience, Education and Projects entries sat 0px apart in

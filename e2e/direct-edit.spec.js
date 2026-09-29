@@ -1342,10 +1342,9 @@ test.describe('Direct Edit builder', () => {
   //
   // Tech Executive's navy masthead sets its name's white on the <h1> itself,
   // so it never had this bug; it is here as a guard for its dark header.
-  // Only the inline fields are measured: the template's own kicker label
-  // ("<Template> Template", preview-only, excluded from exports) reads
-  // 4.13:1 on that masthead in every mode, a pre-existing design matter.
-  // Colorful Compact's original failure was the name field itself.
+  // Only the inline fields are measured here (Colorful Compact's original
+  // failure was the name field itself); the kicker label has its own test
+  // below.
   for (const { label, classPrefix, headerSuffix } of [
     { label: 'Colorful Compact', classPrefix: 'colorful-compact-showcase', headerSuffix: 'header' },
     { label: 'Tech Executive', classPrefix: 'tech-exec-showcase', headerSuffix: 'masthead' },
@@ -1417,6 +1416,17 @@ test.describe('Direct Edit builder', () => {
       expect(remainingTags).toEqual(DEMO_SKILLS.filter((skill) => skill !== 'Figma'))
     })
   }
+
+  // Tech Executive's kicker label ("Tech Executive Template") read 4.13:1
+  // on its navy masthead in every mode, below WCAG AA's 4.5:1 for text
+  // this small. It is preview-only (excluded from exports), but it is what
+  // a user reads first.
+  test('Tech Executive: the masthead kicker label meets 4.5:1 contrast', async ({ page }) => {
+    await selectTemplate(page, 'Tech Executive')
+    const kicker = '.preview-document--designer .tech-exec-showcase__kicker'
+    await expect(page.locator(kicker).first()).toBeVisible()
+    expect(await minTextContrast(page, kicker)).toBeGreaterThanOrEqual(4.5)
+  })
 
   // Dark-sidebar templates put inline controls on a dark rail, where
   // Direct Edit's generic chrome (the "+ Add" chip, chip-group labels) was

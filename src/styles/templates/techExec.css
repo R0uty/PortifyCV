@@ -59,12 +59,15 @@
   background: var(--te-navy);
 }
 
+/* #a8b5c8 reads 5.1:1 on --te-navy (the old #94a3b8 was 4.13:1, under
+   WCAG AA's 4.5:1), and stays dimmer than the contact line's #cbd5e1
+   (7.1:1) so the label still reads as secondary. */
 .tech-exec-showcase__kicker {
   font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: #94a3b8;
+  color: #a8b5c8;
 }
 
 .tech-exec-showcase__name {
