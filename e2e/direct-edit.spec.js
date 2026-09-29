@@ -581,7 +581,7 @@ test.describe('Direct Edit builder', () => {
 
   test('an inline-unwired template is still fully editable through the popup', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'Quadrant')
+    await selectTemplate(page, 'Tech Executive')
 
     await expect(page.locator('.direct-edit-preview__notice')).toHaveCount(0)
 
@@ -673,9 +673,15 @@ test.describe('Direct Edit builder', () => {
   // which drops hidden (and blank) entries, so a template's own map index
   // is NOT the formData index the popup edits. With entry #1 hidden, the
   // first card rendered on a snapshot-driven template is formData #2.
+  //
+  // Needs a template that renders from the snapshot, i.e. one NOT in
+  // INLINE_EDIT_SUPPORTED_TEMPLATES: inline-wired templates render every
+  // entry through EditableList, hidden ones included (an accepted trade-off
+  // since Phase 1), so there the first card stays formData #1. Their
+  // indices are covered by the every-template test below.
   test('an entry pencil still targets the right entry when an earlier entry is hidden', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'Quadrant')
+    await selectTemplate(page, 'Tech Executive')
 
     await page.locator('[data-export-section="experience"]').first().hover()
     await page.locator('.direct-edit-pencil').click()
@@ -1083,10 +1089,10 @@ test.describe('Direct Edit builder', () => {
     await page.keyboard.type('Jordan Rivera')
     await nameField.blur()
 
-    // Quadrant is not in INLINE_EDIT_SUPPORTED_TEMPLATES, so it has no
+    // Tech Executive is not in INLINE_EDIT_SUPPORTED_TEMPLATES, so it has no
     // inline contentEditable fields, but it's still fully editable via the
     // popup — this test only checks the edit survives the round-trip.
-    await selectTemplate(page, 'Quadrant')
+    await selectTemplate(page, 'Tech Executive')
 
     await selectTemplate(page, 'Minimalist')
     const nameFieldAgain = page.locator('.direct-edit-preview h3 .direct-edit-field')
@@ -1312,7 +1318,7 @@ test.describe('Direct Edit builder', () => {
   // mode's Skill tags input, removes specifically that chip in Direct Edit
   // mode, and confirms all 6 original skills survive untouched — proving
   // the index mapping is correct, not just that a chip disappeared.
-  for (const label of ['Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid', 'Developer']) {
+  for (const label of ['Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid', 'Developer', 'Quadrant']) {
     test(`${label}: removing a categorized skill chip removes the correct skill, not a same-category neighbor`, async ({ page }) => {
       await selectTemplate(page, label)
 
@@ -1441,16 +1447,21 @@ test.describe('Direct Edit builder', () => {
 
   // The entry spacing used :not(:first-child)/:last-child, which
   // EditableList's per-entry wrapper defeats (every entry is both).
-  test('Navy Professional: experience entries keep their edge spacing in Direct Edit', async ({ page }) => {
-    await selectTemplate(page, 'Navy Professional')
-    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+  for (const { label, classPrefix } of [
+    { label: 'Navy Professional', classPrefix: 'navy-professional-showcase' },
+    { label: 'Quadrant', classPrefix: 'quadrant-showcase' },
+  ]) {
+    test(`${label}: experience entries keep their edge spacing in Direct Edit`, async ({ page }) => {
+      await selectTemplate(page, label)
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
-    const entries = page.locator('.direct-edit-preview [data-export-section="experience"] .navy-professional-showcase__entry')
-    await expect(entries).toHaveCount(2)
-    expect(await entries.first().evaluate((el) => getComputedStyle(el).paddingTop)).toBe('0px')
-    expect(await entries.last().evaluate((el) => getComputedStyle(el).paddingTop)).not.toBe('0px')
-    expect(await entries.last().evaluate((el) => getComputedStyle(el).paddingBottom)).toBe('0px')
-  })
+      const entries = page.locator(`.direct-edit-preview [data-export-section="experience"] .${classPrefix}__entry`)
+      await expect(entries).toHaveCount(2)
+      expect(await entries.first().evaluate((el) => getComputedStyle(el).paddingTop)).toBe('0px')
+      expect(await entries.last().evaluate((el) => getComputedStyle(el).paddingTop)).not.toBe('0px')
+      expect(await entries.last().evaluate((el) => getComputedStyle(el).paddingBottom)).toBe('0px')
+    })
+  }
 
   // Graduate hides an empty Career Objective section entirely, which in
   // Direct Edit would leave nothing to click into. While editing it shows
@@ -1543,6 +1554,7 @@ test.describe('Direct Edit builder', () => {
     // LinkedIn as a link field). Its entry class is shared with Education,
     // so the divider check is scoped to Experience.
     { label: 'Navy Professional', classPrefix: 'navy-professional-showcase', contactRowSuffix: 'contact-list', labelOrder: ['Phone', 'Email', 'Location', 'LinkedIn'], entrySelector: '[data-export-section="experience"] .navy-professional-showcase__entry' },
+    { label: 'Quadrant', classPrefix: 'quadrant-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'], entrySelector: '[data-export-section="experience"] .quadrant-showcase__entry' },
     { label: 'Developer', classPrefix: 'dev-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
     { label: 'Portfolio Hybrid', classPrefix: 'portfolio-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
     { label: 'Graduate', classPrefix: 'graduate-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },

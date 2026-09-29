@@ -398,17 +398,20 @@ function CVPreview({
   // every other bespoke Showcase above.
   if (variant === 'quadrant' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <QuadrantShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-          accentColor={accentColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <QuadrantShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 

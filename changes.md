@@ -4,6 +4,31 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Inline editing on Quadrant — 2026-09-29
+
+Quadrant is the sixteenth inline-wired template. The name, title, contact
+line (email, phone, location), Profile, Experience (role, company,
+description, drag to reorder, add) and Skills (grouped chips, via
+`EditableCategorizedChip`) are editable in place, each in its fixed grid
+cell. Quadrant has no column moves, so there is no moved-section case.
+
+Two fixes were needed, each caught by a failing test:
+- **Experience spacing and dividers used `:not(:first-child)`/
+  `:last-child`**, which `EditableList`'s per-entry wrapper makes true for
+  every entry. They now come from `--first`/`--last` classes.
+- **The description's editing element needed `white-space: pre-line`**
+  (and `display: block` against the bullet list's flex column).
+
+Three existing tests used Quadrant as their example of a template without
+inline editing, and now use Tech Executive, which still renders from the
+snapshot. One of them, "an entry pencil still targets the right entry
+when an earlier entry is hidden", failed once Quadrant was wired: it
+hides entry #1 and expects the first card to be entry #2. That only holds
+on a snapshot-rendered template; inline-wired templates show hidden
+entries while editing (the accepted Phase 1 trade-off), and their indices
+stay correct (checked by the every-template index test). The test now
+says so in its comment.
+
 ## Inline editing on Developer — 2026-09-29
 
 Developer is the fifteenth inline-wired template. The name, title,
