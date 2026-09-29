@@ -119,7 +119,7 @@ unreliable; it governs the flat ATS renderer, not the Showcase):
 | Portfolio Hybrid | categorized badges | `flat` | `EditableCategorizedChip` |
 | Developer | categorized chips | `categorized` | `EditableCategorizedChip` |
 | Quadrant | categorized chips | `categorized` | `EditableCategorizedChip` |
-| Tech Executive | categorized **comma-joined text**, one `Label: a, b, c` line per group, no chips | `categorized` | neither fits as-is (see below) |
+| Tech Executive | categorized **comma-joined text**, one `Label: a, b, c` line per group, no chips | `categorized` | `EditableCategorizedChip` while editing only (option A, v1.2.72) |
 | European | categorized **comma-joined text** in label/value rows, no chips | `flat` | neither fits as-is (see below) |
 | Navy Professional | flat chips | `flat` | `EditableChip` |
 | Colorful Compact | flat chips | `flat` | `EditableChip` |
@@ -134,6 +134,14 @@ decide between editing each group's text as a delimited field (which
 cannot map back onto `formData.skills` cleanly, since categories are
 derived by regex, not stored) and showing chips only while editing. Budget
 real design time for that one; it is not "the same as Skills, reskinned."
+
+**Decided 2026-09-29 (option A):** while editing, the comma lines are
+replaced by the shared `EditableCategorizedChip` (same categories, same
+order); outside editing the comma lines are unchanged. Rejected: editing
+each group's text in place (a typed skill can re-bucket into another
+group mid-edit, and writing a line back needs a burst of REMOVE/ADD
+dispatches, with messy undo) and leaving Skills popup-only. Tech
+Executive shipped this in v1.2.72; European's round should reuse it.
 
 A template's `skillsLayout` config value has been proven wrong in BOTH
 directions (Compact and four others: said `'flat'`, render categorized;
@@ -226,7 +234,7 @@ same code):
 | Order | Family | Templates | Why this order |
 |---|---|---|---|
 | 1 | `oneColumn` (5 remaining) | Classic Professional, Editorial, Portrait, Modern Timeline, then Compact last | Closest visual shape to Minimalist (single column, no rail) — cheapest to verify the "bespoke Showcase, not flat renderer" wiring pattern generalizes correctly before tackling a structurally different family. Checked each Showcase's actual skills rendering directly (config values don't reflect it — see above): Classic Professional/Editorial/Portrait/Modern Timeline all render a genuinely flat `snapshot.skills.map(...)` list, reusable with the existing `EditableChip` unchanged. **Compact is the outlier** — despite `skillsLayout: 'flat'` in its config, `CompactShowcase.jsx` always renders skills grouped via `parseSkillCategories`, the same categorized-chip design problem flagged above. Sequence Compact last in this family, after the categorized-chip design is actually settled (ideally during this family's own work, once a flat-skills round or two has proven the wiring pattern) — not first, where it would force that design decision before anything else has landed. |
-| 2 | `railTable` (8) | Left rail: Executive, Modern Orange. Right rail: Creative, Modern Professional, Graduate, Portfolio Hybrid, Tech Executive, Colorful Compact | Largest family — once the first one's rail+main wiring pattern is proven, the rest should move faster. Done so far: Executive, Modern Orange, Creative, Colorful Compact, Modern Professional, Graduate, Portfolio Hybrid. Modern Professional and Portfolio Hybrid both needed the timeline connector's `:last-child` replaced with a `--last` class (Graduate's rail is on Internships, so it never hit this). The one remaining, Tech Executive, renders comma-joined text that needs its own design decision — see the verified table above. |
+| 2 | `railTable` (8) | Left rail: Executive, Modern Orange. Right rail: Creative, Modern Professional, Graduate, Portfolio Hybrid, Tech Executive, Colorful Compact | Largest family — once the first one's rail+main wiring pattern is proven, the rest should move faster. Done so far: Executive, Modern Orange, Creative, Colorful Compact, Modern Professional, Graduate, Portfolio Hybrid. Modern Professional and Portfolio Hybrid both needed the timeline connector's `:last-child` replaced with a `--last` class (Graduate's rail is on Internships, so it never hit this). Tech Executive (v1.2.72) completes the family: its comma-joined skills show as grouped chips while editing (option A below). |
 | 3 | `darkSidebarTable` (2) | Developer, Navy Professional | Same rail mechanism as `railTable` plus a dark-fill/light-text palette swap — do after `railTable` so the rail pattern is already proven, not simultaneously. Navy Professional done (v1.2.69): its identity and contact live on the dark sidebar, and Direct Edit's generic "+ Add" chip needed a light override there (it read ~3:1); its uppercase role needed the `text-transform: none` override. Developer done (v1.2.70): its dark rail needed the same "+ Add" override plus one for the chip-group labels, and its gradient-text name (`color: transparent`) left the inline field with an invisible caret until given a `caret-color`. |
 | 4 | `gridTable` (1) | Quadrant | Structurally distinct (2×2 grid, `categorized` skills) — no family to amortize cost across, budget it as its own round. Done (v1.2.71): each section stays in its fixed cell (no column router), so it needed only the usual entry `--first`/`--last` and `pre-line` fixes. |
 | 5 | `labelGridTable` (1) | European | Most distinct reading pattern (label/value rows, not flowing prose) — last, and expect it to need the most novel `EditableField` usage of any template so far. |

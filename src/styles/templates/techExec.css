@@ -86,6 +86,13 @@
   color: #bfdbfe;
 }
 
+/* The role is styled uppercase. EditableField saves innerText, which
+   reflects text-transform, so without this an inline edit would save the
+   title in capitals. Scoped to the editable span only. */
+.tech-exec-showcase__role .direct-edit-field {
+  text-transform: none;
+}
+
 .tech-exec-showcase__contact {
   margin-top: 1rem;
   display: flex;
@@ -187,15 +194,19 @@
 }
 
 .tech-exec-showcase__entry {
-  padding: 0 0 1.1rem;
+  padding: 1.1rem 0;
   border-bottom: 1px solid var(--te-border);
 }
 
-.tech-exec-showcase__entry:not(:first-child) {
-  padding-top: 1.1rem;
+/* First/last come from JS modifier classes that both Experience and
+   Education set, not :first-child/:last-child: in Direct Edit, EditableList
+   wraps each Experience entry in its own .direct-edit-entry div, making
+   every entry both. Doubled class for order-independent specificity. */
+.tech-exec-showcase__entry.tech-exec-showcase__entry--first {
+  padding-top: 0;
 }
 
-.tech-exec-showcase__entry:last-child {
+.tech-exec-showcase__entry.tech-exec-showcase__entry--last {
   border-bottom: none;
   padding-bottom: 0;
 }
@@ -234,6 +245,18 @@
   display: flex;
   flex-direction: column;
   gap: 0.3rem;
+}
+
+/* Direct Edit's description is one multi-line field, not a flex <ul>.
+   pre-line is load-bearing: EditableField saves innerText, which collapses
+   a stored "\n" to a space under white-space: normal. */
+.tech-exec-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--te-ink-muted);
 }
 
 .tech-exec-showcase__bullets li {

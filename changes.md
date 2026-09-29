@@ -4,6 +4,45 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Inline editing on Tech Executive — 2026-09-29
+
+Tech Executive is the seventeenth inline-wired template. The name,
+title, contact line (email, phone, location), Profile, Experience (role,
+company, description, drag to reorder, add) and Technical Skills are
+editable in place.
+
+**Skills: chips while editing (the agreed option A).** Tech Executive
+shows skills as one comma-joined line per category, which no chip
+reproduces. While editing, that section shows the shared grouped chips
+instead (same categories, same order); outside editing the comma lines
+are unchanged. Editing each line's text in place was rejected: a typed
+skill can jump to another group mid-edit, since groups are worked out
+from each skill's text, and writing a line back would need a burst of
+remove/add actions.
+
+Three fixes were needed, each caught by a failing test:
+- **The title would have been saved in capitals** (the role line is
+  `text-transform: uppercase`): "Staff Engineer" was stored as "STAFF
+  ENGINEER". The editable span now resets the transform.
+- **Entry spacing and dividers used `:not(:first-child)`/`:last-child`**
+  on a class shared with Education; both sections now set
+  `--first`/`--last` classes, as on Navy Professional.
+- **The description's editing element needed `white-space: pre-line`.**
+
+Test changes:
+- The dark-header contrast test (Colorful Compact) is now a loop that also
+  covers Tech Executive's navy masthead, and measures only the inline
+  fields. It failed at 4.13:1 on the template's own "Tech Executive
+  Template" kicker label, which reads the same in every mode and is left
+  out of exports. That label is a pre-existing design matter, not an
+  editing one, so it is noted here and left as is. The narrowed test still
+  fails at 1.02:1 if Colorful Compact's name fix is removed.
+- The moved-Skills test works in either direction, since Tech Executive's
+  Skills start in the main column.
+- A new guard checks the comma lines are back outside editing.
+- The three tests that need a template without inline editing now use
+  European, the last one left.
+
 ## Inline editing on Quadrant — 2026-09-29
 
 Quadrant is the sixteenth inline-wired template. The name, title, contact

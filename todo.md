@@ -1980,7 +1980,7 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
-**State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.71**,
+**State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.72**,
 pushed to `origin/v1.3.0` with CI green there (run `git log -1` for the exact
 commit; it is deliberately not recorded here, because every refresh commit
 would make it stale). Latest work: section column moves (v1.2.53–v1.2.60),
@@ -1989,14 +1989,17 @@ flake fix (v1.2.62), CI running on this branch with all seven check scripts
 (v1.2.63), nine review fixes (v1.2.64), and inline editing on Colorful
 Compact (v1.2.65), Modern Professional (v1.2.66), Graduate (v1.2.67),
 Portfolio Hybrid (v1.2.68), Navy Professional (v1.2.69), Developer
-(v1.2.70) and Quadrant (v1.2.71), making 16 of 18 inline-wired; the
-rollout doc's skills table was corrected first. Not yet wired: Tech
-Executive and European, both of which render skills as comma-joined text
-rather than chips, so they need a design decision before a round. Tests
-that need a snapshot-rendered (not inline-wired) template now use Tech
-Executive; wiring it means finding them another. Working tree clean (only
+(v1.2.70), Quadrant (v1.2.71) and Tech Executive (v1.2.72), making 17 of
+18 inline-wired; the rollout doc's skills table was corrected first.
+Comma-joined skills use option A (grouped chips while editing only),
+agreed with the user 2026-09-29. Not yet wired: European (label/value
+rows, comma-joined skills; reuse option A). Three tests need a
+snapshot-rendered (not inline-wired) template and now use European;
+wiring European means rewriting them (plan: hide an entry in Classic and
+check what renders/exports). Pre-existing, unfixed: Tech Executive's
+kicker label reads 4.13:1 on its navy masthead. Working tree clean (only
 an untracked `.claude/`). Full suite green with no known flakes:
-**163/163 e2e**, lint, build and all seven `check:*` scripts. `main` untouched at
+**170/170 e2e**, lint, build and all seven `check:*` scripts. `main` untouched at
 `0f5261f`, no PR — the user said explicitly on 2026-09-28 NOT to merge yet.
 
 Source of truth for the Direct Edit editor's design and its known gaps:

@@ -24,15 +24,91 @@ import {
   devIcons,
   contactIcons,
   parseSkillCategories,
+  buildEditableSkillCategories,
   formatDateRange,
   formatLinkLabel,
   formatLinkDisplayValue,
   getSafeHref,
   createSectionRouter,
 } from './shared'
+import EditableField from '../EditableField'
+import EditableList, { EditableCategorizedChip } from '../EditableList'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+}
+
+// Experience and Education share the `entry` class, whose spacing and
+// divider depend on position. Both pass isFirst/isLast from their own
+// index — never :first-child/:last-child, which EditableList's per-entry
+// wrapper defeats in Direct Edit (every entry becomes both).
+function entryClassName(isFirst, isLast) {
+  return [
+    'tech-exec-showcase__entry',
+    isFirst ? 'tech-exec-showcase__entry--first' : '',
+    isLast ? 'tech-exec-showcase__entry--last' : '',
+  ].filter(Boolean).join(' ')
+}
+
+// Tech Executive's own Experience-entry renderer: role and dates share the
+// first row, company/location sit on their own line below. Only role and
+// company are editable inline; location stays read-only-appended text.
+// `index` is formData-relative in the directEditDispatch branch
+// (EditableList's own index); the read-only call site passes the
+// snapshot's `sourceIndex`.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst, isLast, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <div key={`${item.role}-${item.company}-${index}`} className={entryClassName(isFirst, isLast)} data-export-card="true" data-direct-edit-index={sourceIndex}>
+      <div className="tech-exec-showcase__entry-row">
+        <p className="tech-exec-showcase__entry-role">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+              value={item.role}
+              placeholder={copy.untitledRole}
+            />
+          ) : item.role || copy.untitledRole}
+        </p>
+        <p className="tech-exec-showcase__entry-dates">{dateRange || copy.datesPending}</p>
+      </div>
+      {directEditDispatch ? (
+        <p className="tech-exec-showcase__entry-meta">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+            value={item.company}
+            placeholder={copy.company}
+          />
+          {item.location ? ` · ${item.location}` : null}
+        </p>
+      ) : item.company || item.location ? (
+        <p className="tech-exec-showcase__entry-meta">
+          {[item.company, item.location].filter(Boolean).join(' · ')}
+        </p>
+      ) : null}
+      {directEditDispatch ? (
+        <p className="tech-exec-showcase__bullets tech-exec-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="tech-exec-showcase__bullets">
+          {bullets.map((line, lineIndex) => (
+            <li key={lineIndex}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  )
 }
 
 function SectionHead({ title }) {
@@ -60,6 +136,7 @@ export default function TechExecShowcase({
   showcaseConfig = {},
   headingColor = null,
   accentColor = TECHEXEC_DEFAULT_ACCENT_COLOR,
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -84,11 +161,22 @@ export default function TechExecShowcase({
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
     () => parseSkillCategories(snapshot.skills, isFinnish),
     [snapshot.skills, isFinnish],
+  )
+  // Editing branch only: the same grouping over formData.skills, each chip
+  // carrying its ORIGINAL flat-array index so removal hits the right skill.
+  const editableSkillCategories = useMemo(
+    () => buildEditableSkillCategories(formData.skills, isFinnish),
+    [formData.skills, isFinnish],
   )
 
   const sectionVisibility = {
@@ -107,6 +195,8 @@ export default function TechExecShowcase({
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
     profile: isFinnish ? 'Profiili' : 'Profile',
@@ -125,7 +215,21 @@ export default function TechExecShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about" placement={placement} movedFrom={movedFrom} title={copy.profile}>
-          <p className="tech-exec-showcase__summary">{about}</p>
+          <p className="tech-exec-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your executive summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </Section>
       )
     }
@@ -134,32 +238,29 @@ export default function TechExecShowcase({
       return (
         <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} title={copy.experience}>
           <div className="tech-exec-showcase__entry-list">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-
-                return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="tech-exec-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.experience[index]}>
-                    <div className="tech-exec-showcase__entry-row">
-                      <p className="tech-exec-showcase__entry-role">{item.role || copy.untitledRole}</p>
-                      <p className="tech-exec-showcase__entry-dates">{dateRange || copy.datesPending}</p>
-                    </div>
-                    {item.company || item.location ? (
-                      <p className="tech-exec-showcase__entry-meta">
-                        {[item.company, item.location].filter(Boolean).join(' · ')}
-                      </p>
-                    ) : null}
-                    {bullets.length > 0 ? (
-                      <ul className="tech-exec-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  isFirst: index === 0,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  isFirst: index === 0,
+                  isLast: index === snapshot.experience.length - 1,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="tech-exec-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -176,7 +277,12 @@ export default function TechExecShowcase({
           <div className="tech-exec-showcase__entry-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
-                <div key={`${item.school}-${index}`} className="tech-exec-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
+                <div
+                  key={`${item.school}-${index}`}
+                  className={entryClassName(index === 0, index === snapshot.education.length - 1)}
+                  data-export-card="true"
+                  data-direct-edit-index={snapshot.sourceIndices.education[index]}
+                >
                   <div className="tech-exec-showcase__entry-row">
                     <p className="tech-exec-showcase__entry-role">{item.degree || copy.untitledRole}</p>
                     <p className="tech-exec-showcase__entry-dates">{formatDateRange(item.startDate, item.endDate)}</p>
@@ -201,7 +307,18 @@ export default function TechExecShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} title={copy.skills}>
-          {skillCategories.length > 0 ? (
+          {directEditDispatch ? (
+            // The read-only look is one comma-joined line per category,
+            // which no chip component reproduces. While editing, the section
+            // shows the shared grouped chips instead (same categories, same
+            // order); the comma lines return as soon as editing ends.
+            <div className="tech-exec-showcase__skill-groups">
+              <EditableCategorizedChip
+                categories={editableSkillCategories}
+                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+              />
+            </div>
+          ) : skillCategories.length > 0 ? (
             <div className="tech-exec-showcase__skill-groups">
               {skillCategories.map((cat) => (
                 <p key={cat.key} className="tech-exec-showcase__skill-group" data-export-skill="true">
@@ -398,14 +515,39 @@ export default function TechExecShowcase({
           <p className="tech-exec-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="tech-exec-showcase__name">{fullName}</h1>
-          <p className="tech-exec-showcase__role">{title}</p>
-          {personalContactItems.length > 0 ? (
+          <h1 className="tech-exec-showcase__name">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : fullName}
+          </h1>
+          <p className="tech-exec-showcase__role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+          </p>
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="tech-exec-showcase__contact">
-              {personalContactItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
                 <span key={key} className="tech-exec-showcase__contact-item">
                   <span className="tech-exec-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  {value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : value}
                 </span>
               ))}
             </div>
