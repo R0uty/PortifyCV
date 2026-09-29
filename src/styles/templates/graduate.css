@@ -292,6 +292,18 @@
   color: var(--tpl-accent);
 }
 
+/* Direct Edit's description is one multi-line field, not a flex <ul>.
+   pre-line is load-bearing: EditableField saves innerText, which collapses
+   a stored "\n" to a space under white-space: normal. */
+.graduate-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--gr-ink-muted);
+}
+
 /* ── Academic Projects — plain entries, hairline between ── */
 
 .graduate-showcase__project-grid {

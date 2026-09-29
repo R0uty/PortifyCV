@@ -4,6 +4,35 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Inline editing on Graduate — 2026-09-29
+
+Graduate is the twelfth inline-wired template. The name, title, contact
+line (email, phone, location), Career Objective, Work Experience (role,
+company, description, drag to reorder, add) and Technical Skills (grouped
+chips, via `EditableCategorizedChip`) are editable in place. The tagline
+stays popup-only.
+
+Two template-specific points:
+- **An empty Career Objective now shows while editing inline.** Graduate
+  is the only template that drops the section entirely when it's empty,
+  which left nothing to click into. Outside editing it still disappears.
+- **No positional-selector fix was needed.** Work Experience reuses
+  Education's accent-ruled cards, spaced by the list's gap. Graduate's
+  timeline rail, whose connector does use `:last-child`, belongs to
+  Internships, which stays popup-only.
+
+The description's editing element needed `white-space: pre-line` (and
+`display: block` against the bullet list's flex column), caught by the
+multi-line test failing first.
+
+Tests: a Graduate row in the per-template loop, Graduate added to the
+categorized-removal and moved-Skills loops, and a new test that writes an
+empty Career Objective inline.
+
+The rollout doc's note on Portfolio Hybrid was corrected: its rail is on
+Experience, like Modern Professional's, so its round needs the same
+`--last` fix.
+
 ## Inline editing on Modern Professional — 2026-09-29
 
 Modern Professional is the eleventh inline-wired template. The name,

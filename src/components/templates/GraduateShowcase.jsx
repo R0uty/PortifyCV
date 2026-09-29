@@ -24,12 +24,15 @@ import {
   contactIcons,
   sectionIcons,
   parseSkillCategories,
+  buildEditableSkillCategories,
   formatDateRange,
   formatLinkLabel,
   formatLinkDisplayValue,
   getSafeHref,
   createSectionRouter,
 } from './shared'
+import EditableField from '../EditableField'
+import EditableList, { EditableCategorizedChip } from '../EditableList'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -40,6 +43,69 @@ function splitToBullets(text) {
 // per the spec's "Highlight expected graduation if still studying."
 function isInProgress(endDate) {
   return /present|expected|ongoing/i.test(endDate || '')
+}
+
+// Graduate's own Experience-entry renderer. Work experience deliberately
+// reuses Education's accent-ruled card (edu-card/edu-row/edu-degree), so it
+// can't share directEditExperienceEntry.jsx's classes. Spacing is the list's
+// flex gap, not a positional divider, so EditableList's per-entry wrapper
+// needs no first/last handling here. Only role and company are editable
+// inline; location stays read-only-appended text. `index` is
+// formData-relative in the directEditDispatch branch (EditableList's own
+// index); the read-only call site passes the snapshot's `sourceIndex`.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <div key={`${item.role}-${item.company}-${index}`} className="graduate-showcase__edu-card" data-export-card="true" data-direct-edit-index={sourceIndex}>
+      <div className="graduate-showcase__edu-row">
+        <div className="min-w-0">
+          <p className="graduate-showcase__edu-degree">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                value={item.role}
+                placeholder={copy.role}
+              />
+            ) : item.role}
+          </p>
+          {directEditDispatch ? (
+            <p className="graduate-showcase__edu-meta">
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                value={item.company}
+                placeholder={copy.company}
+              />
+              {item.location ? ` · ${item.location}` : null}
+            </p>
+          ) : item.company || item.location ? (
+            <p className="graduate-showcase__edu-meta">
+              {[item.company, item.location].filter(Boolean).join(' · ')}
+            </p>
+          ) : null}
+        </div>
+        <p className="graduate-showcase__edu-dates">{dateRange || copy.datesPending}</p>
+      </div>
+      {directEditDispatch ? (
+        <p className="graduate-showcase__bullets graduate-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="graduate-showcase__bullets">
+          {bullets.map((line, lineIndex) => <li key={lineIndex}>{line}</li>)}
+        </ul>
+      ) : null}
+    </div>
+  )
 }
 
 function SectionHead({ icon, title }) {
@@ -75,6 +141,7 @@ export default function GraduateShowcase({
   showcaseConfig = {},
   headingColor = null,
   accentColor = GRADUATE_DEFAULT_ACCENT_COLOR,
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -97,11 +164,22 @@ export default function GraduateShowcase({
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
     () => parseSkillCategories(snapshot.skills, isFinnish),
     [snapshot.skills, isFinnish],
+  )
+  // Editing branch only: the same grouping over formData.skills, each chip
+  // carrying its ORIGINAL flat-array index so removal hits the right skill.
+  const editableSkillCategories = useMemo(
+    () => buildEditableSkillCategories(formData.skills, isFinnish),
+    [formData.skills, isFinnish],
   )
 
   const sectionVisibility = {
@@ -120,6 +198,9 @@ export default function GraduateShowcase({
 
   const copy = {
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
+    role: isFinnish ? 'Rooli' : 'Role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     inProgress: isFinnish ? 'Opiskelee parhaillaan' : 'Currently studying',
     viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
     about: isFinnish ? 'Uratavoite' : 'Career Objective',
@@ -140,11 +221,27 @@ export default function GraduateShowcase({
 
   const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
-      if (!about) return null
+      // An empty objective hides the section, except while editing inline:
+      // there it shows with a placeholder so there is something to type into.
+      if (!about && !directEditDispatch) return null
 
       return (
         <Section key={key} id="about" placement={placement} movedFrom={movedFrom} icon="about" title={copy.about}>
-          <p className="graduate-showcase__summary">{about}</p>
+          <p className="graduate-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Kerro lyhyesti, millaista roolia tavoittelet.'
+                    : 'Say briefly what kind of role you are aiming for.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </Section>
       )
     }
@@ -306,32 +403,22 @@ export default function GraduateShowcase({
       return (
         <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} icon="experience" title={copy.experience}>
           <div className="graduate-showcase__edu-list">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-
-                return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="graduate-showcase__edu-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.experience[index]}>
-                    <div className="graduate-showcase__edu-row">
-                      <div className="min-w-0">
-                        <p className="graduate-showcase__edu-degree">{item.role}</p>
-                        {item.company || item.location ? (
-                          <p className="graduate-showcase__edu-meta">
-                            {[item.company, item.location].filter(Boolean).join(' · ')}
-                          </p>
-                        ) : null}
-                      </div>
-                      <p className="graduate-showcase__edu-dates">{dateRange || copy.datesPending}</p>
-                    </div>
-                    {bullets.length > 0 ? (
-                      <ul className="graduate-showcase__bullets">
-                        {bullets.map((line, lineIndex) => <li key={lineIndex}>{line}</li>)}
-                      </ul>
-                    ) : null}
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="graduate-showcase__empty">
                 {isFinnish ? 'Työkokemus näkyy tässä.' : 'Work experience will appear here.'}
@@ -398,7 +485,16 @@ export default function GraduateShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} icon="skills" title={copy.skills}>
-          {skillCategories.length > 0 ? (
+          {directEditDispatch ? (
+            // Chips replace the read-only tags outright (never both, or
+            // every skill renders twice).
+            <div className="graduate-showcase__skill-group">
+              <EditableCategorizedChip
+                categories={editableSkillCategories}
+                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+              />
+            </div>
+          ) : skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="graduate-showcase__skill-group">
                 <p className="graduate-showcase__skill-group-label">{cat.label}</p>
@@ -596,15 +692,40 @@ export default function GraduateShowcase({
           <p className="graduate-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="graduate-showcase__name">{fullName}</h1>
-          <p className="graduate-showcase__role">{title}</p>
+          <h1 className="graduate-showcase__name">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : fullName}
+          </h1>
+          <p className="graduate-showcase__role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+          </p>
           {tagline ? <p className="graduate-showcase__tagline">{tagline}</p> : null}
-          {personalContactItems.length > 0 ? (
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="graduate-showcase__contact">
-              {personalContactItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
                 <span key={key} className="graduate-showcase__contact-item">
                   <span className="graduate-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  {value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : value}
                 </span>
               ))}
             </div>
