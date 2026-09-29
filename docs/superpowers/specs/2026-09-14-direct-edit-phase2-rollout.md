@@ -29,7 +29,7 @@ in two standing rules for every round:
    this per template as part of its round, don't re-implement it.
 2. **Every template must be usable in Classic and/or Direct Edit.**
    Classic already works for all 18 (untouched by this whole effort).
-   "Usable in Direct Edit" means: in `DIRECT_EDIT_SUPPORTED_TEMPLATES`
+   "Usable in Direct Edit" means: in `INLINE_EDIT_SUPPORTED_TEMPLATES`
    (`src/utils/directEdit.js`), its identity/About/Experience/Skills (at
    minimum — see scope per round below) are genuinely editable in place,
    and it has its own e2e test — not just "doesn't crash when selected."
@@ -96,27 +96,50 @@ first pass of this roadmap got the right problem but the wrong fix):**
 ## Known risk to fix proactively, not rediscover
 
 The final whole-branch review's Critical #1 (every skill rendered twice)
-was specifically a `skillsLayout: 'flat'` bug. Templates using
-`skillsLayout: 'categorized'` (Tech Executive, Developer, Quadrant,
-Executive) render skills grouped under category headings via
-`parseSkillCategories` — a completely different code shape with no
-`EditableChip` wiring at all yet. (Creative's config also says
-`'categorized'`, but Round 8 confirmed its Showcase actually renders
-skills flat — see the lesson below; it does not belong in this list.
-**Tech Executive stays in this list on the strength of its config value
-alone — its actual rendering has not been independently confirmed and
-must be read from `TechExecutiveShowcase.jsx` before planning any round
-that touches it, not assumed from this doc or from `skillsLayout`.**)
-The *first* categorized-layout template in the rollout needs a
-categorized-aware chip treatment designed deliberately (not a copy-paste
-of `EditableChip`, which assumes a flat list) — budget real design time
-for it, don't treat it as "the same as Skills, just reskinned."
+was specifically a flat-skills bug. A Showcase that renders skills grouped
+under category headings via `parseSkillCategories` has a different code
+shape, and the categorized-aware chip it needs **already exists**:
+`EditableCategorizedChip` (`src/components/EditableList.jsx`), designed in
+Round 5 (Compact) and reused in Round 6 (Executive). It groups chips for
+display and dispatches against each skill's original `formData.skills`
+index via `buildEditableSkillCategories` (`templates/shared.jsx`). A new
+categorized round reuses it rather than designing a new one.
 
-A template's `skillsLayout` config value has now been proven wrong in
-BOTH directions: Compact's config said `'flat'` while its Showcase
-rendered categorized, and Creative's said `'categorized'` while its
-Showcase renders flat. The config value predicts nothing about a bespoke
-Showcase — always read the actual Showcase file before planning a round.
+**Actual skills rendering, verified 2026-09-29 by reading each Showcase
+file** (the `skillsLayout` config value is shown only to prove it is
+unreliable; it governs the flat ATS renderer, not the Showcase):
+
+| Template | Showcase renders | Config says | Inline chip to reuse |
+|---|---|---|---|
+| Compact (wired) | categorized chips | `flat` | `EditableCategorizedChip` |
+| Executive (wired) | categorized chips | `categorized` | `EditableCategorizedChip` |
+| Creative (wired) | **flat** (categories used only for display order) | `categorized` | `EditableChip` |
+| Modern Professional | categorized chips | `flat` | `EditableCategorizedChip` |
+| Graduate | categorized chips | `flat` | `EditableCategorizedChip` |
+| Portfolio Hybrid | categorized badges | `flat` | `EditableCategorizedChip` |
+| Developer | categorized chips | `categorized` | `EditableCategorizedChip` |
+| Quadrant | categorized chips | `categorized` | `EditableCategorizedChip` |
+| Tech Executive | categorized **comma-joined text**, one `Label: a, b, c` line per group, no chips | `categorized` | neither fits as-is (see below) |
+| European | categorized **comma-joined text** in label/value rows, no chips | `flat` | neither fits as-is (see below) |
+| Navy Professional | flat chips | `flat` | `EditableChip` |
+| Colorful Compact | flat chips | `flat` | `EditableChip` |
+
+So the earlier version of this section had it wrong in two ways: Creative
+is flat (Round 8), and Modern Professional, Graduate, Portfolio Hybrid and
+European all render categorized despite a `flat` config. **Tech Executive
+and European are the genuinely new design problem**: their skills are
+plain comma-separated text, not chips, so dropping `EditableCategorizedChip`
+in would change the read-only look of the section. Their round has to
+decide between editing each group's text as a delimited field (which
+cannot map back onto `formData.skills` cleanly, since categories are
+derived by regex, not stored) and showing chips only while editing. Budget
+real design time for that one; it is not "the same as Skills, reskinned."
+
+A template's `skillsLayout` config value has been proven wrong in BOTH
+directions (Compact and four others: said `'flat'`, render categorized;
+Creative: said `'categorized'`, renders flat). The config value predicts
+nothing about a bespoke Showcase — always read the actual Showcase file
+before planning a round, and re-check this table against it.
 
 Round 4's final whole-branch review found a second standing risk, of the
 same "will recur unless checked proactively" shape: `EditableField`
@@ -200,7 +223,7 @@ same code):
 | Order | Family | Templates | Why this order |
 |---|---|---|---|
 | 1 | `oneColumn` (5 remaining) | Classic Professional, Editorial, Portrait, Modern Timeline, then Compact last | Closest visual shape to Minimalist (single column, no rail) — cheapest to verify the "bespoke Showcase, not flat renderer" wiring pattern generalizes correctly before tackling a structurally different family. Checked each Showcase's actual skills rendering directly (config values don't reflect it — see above): Classic Professional/Editorial/Portrait/Modern Timeline all render a genuinely flat `snapshot.skills.map(...)` list, reusable with the existing `EditableChip` unchanged. **Compact is the outlier** — despite `skillsLayout: 'flat'` in its config, `CompactShowcase.jsx` always renders skills grouped via `parseSkillCategories`, the same categorized-chip design problem flagged above. Sequence Compact last in this family, after the categorized-chip design is actually settled (ideally during this family's own work, once a flat-skills round or two has proven the wiring pattern) — not first, where it would force that design decision before anything else has landed. |
-| 2 | `railTable` (8) | Left rail: Executive, Modern Orange. Right rail: Creative, Modern Professional, Graduate, Portfolio Hybrid, Tech Executive, Colorful Compact | Largest family — once the first one's rail+main wiring pattern is proven, the rest should move faster. Creative and Tech Executive and Executive are also this rollout's first `categorized`-skills templates — sequence one of them early in this family once the categorized-chip design (above) is settled, not last. |
+| 2 | `railTable` (8) | Left rail: Executive, Modern Orange. Right rail: Creative, Modern Professional, Graduate, Portfolio Hybrid, Tech Executive, Colorful Compact | Largest family — once the first one's rail+main wiring pattern is proven, the rest should move faster. Done so far: Executive, Modern Orange, Creative. Of the remaining five, Modern Professional, Graduate and Portfolio Hybrid render categorized chips (reuse `EditableCategorizedChip`), Colorful Compact renders flat chips (reuse `EditableChip`), and Tech Executive renders comma-joined text that needs its own design decision — see the verified table above. |
 | 3 | `darkSidebarTable` (2) | Developer, Navy Professional | Same rail mechanism as `railTable` plus a dark-fill/light-text palette swap — do after `railTable` so the rail pattern is already proven, not simultaneously. |
 | 4 | `gridTable` (1) | Quadrant | Structurally distinct (2×2 grid, `categorized` skills) — no family to amortize cost across, budget it as its own round. |
 | 5 | `labelGridTable` (1) | European | Most distinct reading pattern (label/value rows, not flowing prose) — last, and expect it to need the most novel `EditableField` usage of any template so far. |
@@ -220,7 +243,9 @@ template until a later pass, exactly as they are for Minimalist today —
 this is a deliberate, consistent boundary, not scope creep per round.
 
 Each round:
-1. Adds the template's id to `DIRECT_EDIT_SUPPORTED_TEMPLATES`.
+1. Adds the template's id to `INLINE_EDIT_SUPPORTED_TEMPLATES` (named
+   `DIRECT_EDIT_SUPPORTED_TEMPLATES` when this doc was written; renamed
+   in v1.2.47 once the popup made every template editable).
 2. Threads `directEditDispatch` into that template's Showcase call site
    and component signature.
 3. Wires `EditableField`/`EditableList`/`EditableChip` into that
