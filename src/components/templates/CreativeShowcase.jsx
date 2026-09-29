@@ -28,7 +28,7 @@ import { useMemo } from 'react'
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import { parseSkillCategories, formatDateRange, formatLinkDisplayValue, createSectionRouter } from './shared'
-import { accentSoftFill } from '../../utils/templateAccents'
+import { accentSoftFill, accentInkMix } from '../../utils/templateAccents'
 import { CREATIVE_DEFAULT_ACCENT_COLOR } from './creative'
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
@@ -470,6 +470,9 @@ export default function CreativeShowcase({
       style={{
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, CREATIVE_DEFAULT_ACCENT_COLOR),
+        // The kicker's accent, darkened 25% toward --cr-ink (#1a1a1a) so every
+        // swatch clears 4.5:1 on the peach page — see creative.css.
+        '--cr-kicker': accentInkMix(accentColor, '#1a1a1a', 0.25, CREATIVE_DEFAULT_ACCENT_COLOR),
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),
       }}
     >

@@ -4,6 +4,41 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Creative and Executive kicker labels meet AA contrast — 2026-09-29
+
+The follow-up to the Tech Executive fix. Each template's "<Template>
+Template" kicker is preview-only (left out of exports), and two more sat
+under WCAG AA's 4.5:1:
+- **Creative, 3.35:1.** The kicker is the user's accent, and the default
+  Coral is too light on the peach page; the other five swatches already
+  passed. It now uses the accent darkened 25% toward the template's ink:
+  Coral reads 4.97:1, the rest 6.3–7.8:1. The darkening is computed in
+  JS by a new `accentInkMix` helper (`src/utils/templateAccents.js`,
+  beside `accentSoftFill`) and passed as `--cr-kicker`, because the
+  templates' stylesheets rule out CSS `color-mix()` (the PDF pipeline
+  can't rasterize it).
+- **Executive, 4.37:1** on its rail. The kicker now has its own
+  `#6b645e` (5.3:1) instead of the shared `--ex-ink-faint`.
+
+**Portfolio Hybrid needed nothing.** The earlier sweep's 1.00:1 was a
+measurement artifact: its header gradient starts with a translucent tint,
+which the sweep read as the background. Computed properly, its kicker is
+5.29:1 at the default Emerald and 4.82:1 at its weakest swatch.
+
+**A test-helper bug surfaced and was fixed.** `minTextContrast` (in
+`e2e/direct-edit.spec.js`) parsed every colour as 0–255, but Chrome
+reports a `color-mix()` result as `color(srgb r g b)` in 0–1, which it
+read as near-black, so a first attempt using `color-mix()` passed
+falsely. The helper now scales that form. No other test was affected:
+nothing else in the templates used `color-mix()`.
+
+The Tech Executive kicker test is now a loop over all three templates;
+Creative's and Executive's rows failed first, at 3.35 and 4.37.
+
+**Still open, not changed:** Executive's tagline and contact details,
+which are real CV content and do get exported, use the same
+`--ex-ink-faint` on the same rail, so they also read 4.37:1.
+
 ## Tech Executive's masthead label meets AA contrast — 2026-09-29
 
 The "Tech Executive Template" kicker on the navy masthead was `#94a3b8`,

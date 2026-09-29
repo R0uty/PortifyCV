@@ -150,3 +150,22 @@ export function accentSoftFill(hex, alpha, fallbackHex) {
   const b = parseInt(full.slice(4, 6), 16)
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
+
+// A user-chosen accent darkened toward the template's ink, as plain hex —
+// for accent-coloured text that must clear a contrast floor on a light
+// surface whatever swatch is picked. Computed here, not with CSS
+// color-mix(), because the PDF export pipeline can't rasterize color-mix()
+// (design system §8). `inkShare` is the ink's share, 0–1.
+export function accentInkMix(hex, inkHex, inkShare, fallbackHex) {
+  const toRgb = (value, fallback) => {
+    const match = typeof value === 'string' && value.trim().match(/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i)
+    const raw = match ? match[1] : String(fallback ?? '#000000').replace('#', '')
+    const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw
+    return [0, 2, 4].map((offset) => parseInt(full.slice(offset, offset + 2), 16))
+  }
+  const accent = toRgb(hex, fallbackHex)
+  const ink = toRgb(inkHex, '#000000')
+  return `#${accent
+    .map((channel, index) => Math.round(channel * (1 - inkShare) + ink[index] * inkShare).toString(16).padStart(2, '0'))
+    .join('')}`
+}

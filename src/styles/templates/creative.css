@@ -101,12 +101,16 @@
   padding: 2.5rem 2.75rem 1.5rem;
 }
 
+/* --cr-kicker is the accent darkened 25% toward the ink (computed in JS by
+   accentInkMix, not color-mix(), per the rule above), so every warmCoral
+   swatch clears WCAG AA's 4.5:1 on the peach page — the default Coral read
+   3.35:1 as plain accent (now 4.97:1; the rest land 6.3–7.8:1). */
 .creative-showcase__kicker {
   font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: var(--tpl-accent);
+  color: var(--cr-kicker, var(--tpl-accent));
 }
 
 .creative-showcase__name {

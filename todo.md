@@ -1980,7 +1980,7 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
-**State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.75**,
+**State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.76**,
 pushed to `origin/v1.3.0` with CI green there (run `git log -1` for the exact
 commit; it is deliberately not recorded here, because every refresh commit
 would make it stale). Latest work: section column moves (v1.2.53–v1.2.60),
@@ -1994,13 +1994,14 @@ Portfolio Hybrid (v1.2.68), Navy Professional (v1.2.69), Developer
 `INLINE_EDIT_SUPPORTED_TEMPLATES`.** Comma-joined skills (Tech Executive,
 European) use option A, grouped chips while editing only, agreed with the
 user 2026-09-29. Pre-existing design matters noticed and left alone:
-other templates' kicker labels below WCAG AA — Creative 3.35:1,
-Executive 4.37:1, Portfolio Hybrid measured 1.00:1 (likely a measurement
-artifact, unverified). Tech Executive's (was 4.13:1) was fixed in
-v1.2.75, and European's 0px entry spacing in v1.2.74. The allowlist now names every template, so it could be retired;
+Executive's tagline and contact details (exported CV content) read
+4.37:1 on its rail via `--ex-ink-faint`. Kicker contrast was fixed for
+Tech Executive (v1.2.75) and Creative/Executive (v1.2.76); Portfolio's
+measured 1.00:1 was an artifact (really 4.82:1+). European's 0px entry
+spacing was fixed in v1.2.74. The allowlist now names every template, so it could be retired;
 not done, since nothing asked for it. Working tree clean (only an
 untracked `.claude/`). Full suite green with no known flakes:
-**175/175 e2e**, lint, build and all seven `check:*` scripts. `main` untouched at
+**177/177 e2e**, lint, build and all seven `check:*` scripts. `main` untouched at
 `0f5261f`, no PR — the user said explicitly on 2026-09-28 NOT to merge yet.
 
 Source of truth for the Direct Edit editor's design and its known gaps:

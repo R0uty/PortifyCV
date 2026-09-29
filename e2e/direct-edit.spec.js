@@ -98,9 +98,12 @@ async function sectionColumnState(page, sectionKey) {
 // sections the template itself designs for that column.
 async function minTextContrast(page, selector) {
   return page.evaluate((sel) => {
+    // Colours arrive as rgb()/rgba() in 0-255, except color-mix() results,
+    // which Chrome reports as `color(srgb r g b [/ a])` in 0-1.
     const parse = (value) => {
       const parts = value.match(/[\d.]+/g).map(Number)
-      return { r: parts[0], g: parts[1], b: parts[2], a: parts[3] ?? 1 }
+      const scale = value.startsWith('color(srgb') ? 255 : 1
+      return { r: parts[0] * scale, g: parts[1] * scale, b: parts[2] * scale, a: parts[3] ?? 1 }
     }
     const backgroundOf = (element) => {
       for (let node = element; node; node = node.parentElement) {
@@ -1417,16 +1420,26 @@ test.describe('Direct Edit builder', () => {
     })
   }
 
-  // Tech Executive's kicker label ("Tech Executive Template") read 4.13:1
-  // on its navy masthead in every mode, below WCAG AA's 4.5:1 for text
-  // this small. It is preview-only (excluded from exports), but it is what
-  // a user reads first.
-  test('Tech Executive: the masthead kicker label meets 4.5:1 contrast', async ({ page }) => {
-    await selectTemplate(page, 'Tech Executive')
-    const kicker = '.preview-document--designer .tech-exec-showcase__kicker'
-    await expect(page.locator(kicker).first()).toBeVisible()
-    expect(await minTextContrast(page, kicker)).toBeGreaterThanOrEqual(4.5)
-  })
+  // Each template's kicker label ("<Template> Template") is preview-only
+  // (excluded from exports), but it is the first thing a user reads, and
+  // three sat under WCAG AA's 4.5:1 for text this small: Tech Executive
+  // 4.13:1 on its navy masthead, Creative 3.35:1 (its default Coral accent
+  // on the peach page) and Executive 4.37:1 on its rail. Portfolio Hybrid
+  // passes (4.82:1 at its weakest swatch) but is not listed here:
+  // minTextContrast reads a gradient's first stop as the background, and
+  // Portfolio's header gradient starts with a translucent accent tint.
+  for (const { label, kicker } of [
+    { label: 'Tech Executive', kicker: '.tech-exec-showcase__kicker' },
+    { label: 'Creative', kicker: '.creative-showcase__kicker' },
+    { label: 'Executive', kicker: '.executive-showcase__kicker' },
+  ]) {
+    test(`${label}: the kicker label meets 4.5:1 contrast`, async ({ page }) => {
+      await selectTemplate(page, label)
+      const selector = `.preview-document--designer ${kicker}`
+      await expect(page.locator(selector).first()).toBeVisible()
+      expect(await minTextContrast(page, selector)).toBeGreaterThanOrEqual(4.5)
+    })
+  }
 
   // Dark-sidebar templates put inline controls on a dark rail, where
   // Direct Edit's generic chrome (the "+ Add" chip, chip-group labels) was

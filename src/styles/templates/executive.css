@@ -83,12 +83,15 @@
   border: 3px solid var(--tpl-accent);
 }
 
+/* Its own colour rather than --ex-ink-faint, which reads 4.37:1 on the
+   rail (under WCAG AA's 4.5:1); #6b645e reads 5.3:1 and stays lighter
+   than --ex-ink-muted, so the label still reads as secondary. */
 .executive-showcase__kicker {
   font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: var(--ex-ink-faint);
+  color: #6b645e;
 }
 
 .executive-showcase__name {
