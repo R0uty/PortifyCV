@@ -1980,7 +1980,7 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
-**State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.72**,
+**State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.73**,
 pushed to `origin/v1.3.0` with CI green there (run `git log -1` for the exact
 commit; it is deliberately not recorded here, because every refresh commit
 would make it stale). Latest work: section column moves (v1.2.53–v1.2.60),
@@ -1989,17 +1989,17 @@ flake fix (v1.2.62), CI running on this branch with all seven check scripts
 (v1.2.63), nine review fixes (v1.2.64), and inline editing on Colorful
 Compact (v1.2.65), Modern Professional (v1.2.66), Graduate (v1.2.67),
 Portfolio Hybrid (v1.2.68), Navy Professional (v1.2.69), Developer
-(v1.2.70), Quadrant (v1.2.71) and Tech Executive (v1.2.72), making 17 of
-18 inline-wired; the rollout doc's skills table was corrected first.
-Comma-joined skills use option A (grouped chips while editing only),
-agreed with the user 2026-09-29. Not yet wired: European (label/value
-rows, comma-joined skills; reuse option A). Three tests need a
-snapshot-rendered (not inline-wired) template and now use European;
-wiring European means rewriting them (plan: hide an entry in Classic and
-check what renders/exports). Pre-existing, unfixed: Tech Executive's
-kicker label reads 4.13:1 on its navy masthead. Working tree clean (only
-an untracked `.claude/`). Full suite green with no known flakes:
-**170/170 e2e**, lint, build and all seven `check:*` scripts. `main` untouched at
+(v1.2.70), Quadrant (v1.2.71), Tech Executive (v1.2.72) and European
+(v1.2.73). **The inline rollout is complete: all 18 templates are in
+`INLINE_EDIT_SUPPORTED_TEMPLATES`.** Comma-joined skills (Tech Executive,
+European) use option A, grouped chips while editing only, agreed with the
+user 2026-09-29. Pre-existing design matters noticed and left alone:
+Tech Executive's kicker label reads 4.13:1 on its navy masthead, and
+European's Experience/Education entries have 0px between them in every
+mode. The allowlist now names every template, so it could be retired;
+not done, since nothing asked for it. Working tree clean (only an
+untracked `.claude/`). Full suite green with no known flakes:
+**173/173 e2e**, lint, build and all seven `check:*` scripts. `main` untouched at
 `0f5261f`, no PR — the user said explicitly on 2026-09-28 NOT to merge yet.
 
 Source of truth for the Direct Edit editor's design and its known gaps:

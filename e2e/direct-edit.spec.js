@@ -579,17 +579,6 @@ test.describe('Direct Edit builder', () => {
     await expect(page.locator('.direct-edit-preview .direct-edit-entry')).toHaveCount(before + 1)
   })
 
-  test('an inline-unwired template is still fully editable through the popup', async ({ page }) => {
-    await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'European')
-
-    await expect(page.locator('.direct-edit-preview__notice')).toHaveCount(0)
-
-    await page.locator('[data-export-section="experience"]').first().hover()
-    await page.locator('.direct-edit-pencil').click()
-    await expect(page.locator('.direct-edit-popup')).toBeVisible()
-  })
-
   // SidebarBlock in these two templates rendered no data-export-section,
   // so the overlay (which finds sections by that attribute) gave their
   // sidebar sections no pencil at all.
@@ -672,32 +661,32 @@ test.describe('Direct Edit builder', () => {
   // The trap this guards: Showcases render createCvSnapshot's output,
   // which drops hidden (and blank) entries, so a template's own map index
   // is NOT the formData index the popup edits. With entry #1 hidden, the
-  // first card rendered on a snapshot-driven template is formData #2.
+  // first card rendered from the snapshot is formData #2.
   //
-  // Needs a template that renders from the snapshot, i.e. one NOT in
-  // INLINE_EDIT_SUPPORTED_TEMPLATES: inline-wired templates render every
-  // entry through EditableList, hidden ones included (an accepted trade-off
-  // since Phase 1), so there the first card stays formData #1. Their
-  // indices are covered by the every-template test below.
+  // Experience no longer shows this anywhere: every template now edits it
+  // inline through EditableList, which renders hidden entries too (an
+  // accepted trade-off since Phase 1). Every other record section still
+  // renders from the snapshot on every template, so this uses
+  // Certificates, which the demo CV gives two entries.
   test('an entry pencil still targets the right entry when an earlier entry is hidden', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
     await selectTemplate(page, 'European')
 
-    await page.locator('[data-export-section="experience"]').first().hover()
+    await page.locator('[data-export-section="certificates"]').first().hover()
     await page.locator('.direct-edit-pencil').click()
     const popup = page.locator('.direct-edit-popup')
     await popup.locator('.direct-edit-popup__entry').first().locator('.direct-edit-popup__entry-visibility').click()
     await page.keyboard.press('Escape')
     await expect(popup).toHaveCount(0)
 
-    const firstRendered = page.locator('[data-export-section="experience"] [data-direct-edit-index]').first()
-    await expect(firstRendered).toContainText('Atlas Labs')
+    const firstRendered = page.locator('[data-export-section="certificates"] [data-direct-edit-index]').first()
+    await expect(firstRendered).toContainText('Google UX Design')
     await firstRendered.hover()
     await page.locator('.direct-edit-entry-pencil').click()
 
     const focusedEntry = popup.locator('.direct-edit-popup__entry--focused')
     await expect(focusedEntry.locator('.direct-edit-popup__entry-index')).toHaveText('#2')
-    await expect(focusedEntry.locator('input[data-field="company"]')).toHaveValue('Atlas Labs')
+    await expect(focusedEntry.locator('input[data-field="name"]')).toHaveValue('Google UX Design Professional Certificate')
   })
 
   // Every template, with entry #1 hidden so snapshot-driven templates
@@ -1077,10 +1066,10 @@ test.describe('Direct Edit builder', () => {
   // this fix wave: the existing coverage only exercises a *mode* switch
   // (Direct Edit <-> Classic), not a *template* switch while staying in
   // Direct Edit the whole time. An edit must survive a round-trip through
-  // a template without the inline bonus layer (Developer, not in
-  // INLINE_EDIT_SUPPORTED_TEMPLATES — see src/utils/directEdit.js) and
-  // back to Minimalist.
-  test('an edit in Direct Edit mode survives switching to an inline-unwired template and back', async ({ page }) => {
+  // another template and back to Minimalist, and show up inline in both.
+  // (This used to go through a template without inline editing; since
+  // v1.2.73 every template has it.)
+  test('an edit in Direct Edit mode survives switching template and back', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     const nameField = page.locator('.direct-edit-preview h3 .direct-edit-field')
@@ -1089,10 +1078,8 @@ test.describe('Direct Edit builder', () => {
     await page.keyboard.type('Jordan Rivera')
     await nameField.blur()
 
-    // European is not in INLINE_EDIT_SUPPORTED_TEMPLATES, so it has no
-    // inline contentEditable fields, but it's still fully editable via the
-    // popup — this test only checks the edit survives the round-trip.
     await selectTemplate(page, 'European')
+    await expect(page.locator('.european-showcase__name .direct-edit-field')).toHaveText('Jordan Rivera')
 
     await selectTemplate(page, 'Minimalist')
     const nameFieldAgain = page.locator('.direct-edit-preview h3 .direct-edit-field')
@@ -1318,7 +1305,7 @@ test.describe('Direct Edit builder', () => {
   // mode's Skill tags input, removes specifically that chip in Direct Edit
   // mode, and confirms all 6 original skills survive untouched — proving
   // the index mapping is correct, not just that a chip disappeared.
-  for (const label of ['Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid', 'Developer', 'Quadrant', 'Tech Executive']) {
+  for (const label of ['Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid', 'Developer', 'Quadrant', 'Tech Executive', 'European']) {
     test(`${label}: removing a categorized skill chip removes the correct skill, not a same-category neighbor`, async ({ page }) => {
       await selectTemplate(page, label)
 
@@ -1478,23 +1465,28 @@ test.describe('Direct Edit builder', () => {
     })
   }
 
-  // Tech Executive's skills are one comma-joined line per category, which
-  // no chip reproduces, so Direct Edit shows grouped chips in their place
-  // (the agreed "chips while editing" option). A guard, not a bug test:
-  // the comma lines must be back as soon as editing ends.
-  test('Tech Executive: skills show as chips while editing and comma lines otherwise', async ({ page }) => {
-    await selectTemplate(page, 'Tech Executive')
-    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+  // Tech Executive and European show skills as one comma-joined line per
+  // category, which no chip reproduces, so Direct Edit shows grouped chips
+  // in their place (the agreed "chips while editing" option). A guard, not
+  // a bug test: the comma lines must be back as soon as editing ends.
+  for (const { label, commaSelector } of [
+    { label: 'Tech Executive', commaSelector: '.tech-exec-showcase__skill-items' },
+    { label: 'European', commaSelector: '.european-showcase__skill-items' },
+  ]) {
+    test(`${label}: skills show as chips while editing and comma lines otherwise`, async ({ page }) => {
+      await selectTemplate(page, label)
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
-    const editingSkills = page.locator('.direct-edit-preview [data-export-section="skills"]')
-    await expect(editingSkills.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
-    await expect(editingSkills.locator('.tech-exec-showcase__skill-items')).toHaveCount(0)
+      const editingSkills = page.locator('.direct-edit-preview [data-export-section="skills"]')
+      await expect(editingSkills.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
+      await expect(editingSkills.locator(commaSelector)).toHaveCount(0)
 
-    await page.getByRole('tab', { name: 'Classic' }).click()
-    const classicSkills = page.locator('[data-export-section="skills"]').first()
-    await expect(classicSkills.locator('.tech-exec-showcase__skill-items').first()).toContainText(DEMO_SKILLS[0])
-    await expect(classicSkills.locator('.direct-edit-chip')).toHaveCount(0)
-  })
+      await page.getByRole('tab', { name: 'Classic' }).click()
+      const classicSkills = page.locator('[data-export-section="skills"]').first()
+      await expect(classicSkills.locator(commaSelector).first()).toContainText(DEMO_SKILLS[0])
+      await expect(classicSkills.locator('.direct-edit-chip')).toHaveCount(0)
+    })
+  }
 
   // Graduate hides an empty Career Objective section entirely, which in
   // Direct Edit would leave nothing to click into. While editing it shows
@@ -1587,6 +1579,10 @@ test.describe('Direct Edit builder', () => {
     // LinkedIn as a link field). Its entry class is shared with Education,
     // so the divider check is scoped to Experience.
     { label: 'Navy Professional', classPrefix: 'navy-professional-showcase', contactRowSuffix: 'contact-list', labelOrder: ['Phone', 'Email', 'Location', 'LinkedIn'], entrySelector: '[data-export-section="experience"] .navy-professional-showcase__entry' },
+    // European's contact line is `__meta` (Location, Email, Phone, and
+    // LinkedIn as a link field), separated by a CSS ::before — the
+    // Editorial collision case, so this row's placeholder check matters.
+    { label: 'European', classPrefix: 'european-showcase', labelOrder: ['Location', 'Email', 'Phone', 'LinkedIn'] },
     { label: 'Tech Executive', classPrefix: 'tech-exec-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'], entrySelector: '[data-export-section="experience"] .tech-exec-showcase__entry' },
     { label: 'Quadrant', classPrefix: 'quadrant-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'], entrySelector: '[data-export-section="experience"] .quadrant-showcase__entry' },
     { label: 'Developer', classPrefix: 'dev-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },

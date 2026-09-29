@@ -35,7 +35,9 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
-import { formatDateRange, formatLinkLabel, formatLinkDisplayValue, parseSkillCategories } from './shared'
+import { formatDateRange, formatLinkLabel, formatLinkDisplayValue, parseSkillCategories, buildEditableSkillCategories } from './shared'
+import EditableField from '../EditableField'
+import EditableList, { EditableCategorizedChip } from '../EditableList'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { EUROPEAN_DEFAULT_ACCENT_COLOR } from './european'
 
@@ -63,6 +65,63 @@ function Row({ label, entryIndex, children }) {
   )
 }
 
+// European's own Experience-entry renderer: the date range sits in the
+// row's label column, role/company/description in its value column. Only
+// role and company are editable inline; location stays read-only-appended
+// text, and the dates stay popup-only. `index` is formData-relative in the
+// directEditDispatch branch (EditableList's own index); the read-only call
+// site passes the snapshot's `sourceIndex`.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+  const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
+
+  return (
+    <div key={`${item.role}-${item.company}-${index}`} data-export-card="true" data-direct-edit-index={sourceIndex}>
+      <Row label={dateRange || copy.datesPending}>
+        <p className="european-showcase__entry-role">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+              value={item.role}
+              placeholder={copy.untitledRole}
+            />
+          ) : item.role || copy.untitledRole}
+        </p>
+        {directEditDispatch ? (
+          <p className="european-showcase__entry-meta">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+              value={item.company}
+              placeholder={copy.company}
+            />
+            {item.location ? ` · ${item.location}` : null}
+          </p>
+        ) : metaLine ? <p className="european-showcase__entry-meta">{metaLine}</p> : null}
+        {directEditDispatch ? (
+          <p className="european-showcase__bullets european-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+        ) : bullets.length > 0 ? (
+          <ul className="european-showcase__bullets">
+            {bullets.map((line, lineIndex) => (
+              <li key={lineIndex}>{line}</li>
+            ))}
+          </ul>
+        ) : null}
+      </Row>
+    </div>
+  )
+}
+
 function Section({ id, title, children }) {
   return (
     <section className="european-showcase__section" data-export-section={id} data-export-placement="main">
@@ -79,6 +138,7 @@ export default function EuropeanShowcase({
   templateConfig,
   headingColor = null,
   accentColor = EUROPEAN_DEFAULT_ACCENT_COLOR,
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -108,10 +168,24 @@ export default function EuropeanShowcase({
     ['phone', snapshot.phone],
     ['linkedin', linkedinUrl ? formatLinkDisplayValue(linkedinUrl) : ''],
   ].filter(([, value]) => value)
+  // Direct Edit shows every contact slot, empty or not, in the read-only
+  // order. LinkedIn is a link field (links.linkedin), not a root one.
+  const directEditMetaFields = [
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location', 'root'],
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email', 'root'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone', 'root'],
+    ['linkedin', formData.links.linkedin, 'LinkedIn', 'link'],
+  ]
 
   const skillCategories = useMemo(
     () => parseSkillCategories(snapshot.skills, isFinnish),
     [snapshot.skills, isFinnish],
+  )
+  // Editing branch only: the same grouping over formData.skills, each chip
+  // carrying its ORIGINAL flat-array index so removal hits the right skill.
+  const editableSkillCategories = useMemo(
+    () => buildEditableSkillCategories(formData.skills, isFinnish),
+    [formData.skills, isFinnish],
   )
 
   const sectionVisibility = {
@@ -128,6 +202,8 @@ export default function EuropeanShowcase({
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     about: isFinnish ? 'Esittely' : 'About',
     experience: isFinnish ? 'Kokemus' : 'Experience',
@@ -201,7 +277,21 @@ export default function EuropeanShowcase({
       return (
         <Section key={key} id="about" title={copy.about}>
           <Row label="">
-            <p className="european-showcase__intro">{about}</p>
+            <p className="european-showcase__intro">
+              {directEditDispatch ? (
+                <EditableField
+                  as="span"
+                  path={{ kind: 'root', field: 'about' }}
+                  value={formData.about}
+                  placeholder={
+                    isFinnish
+                      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                      : 'Your professional summary will appear here as you fill out the CV form.'
+                  }
+                  multiline
+                />
+              ) : about}
+            </p>
           </Row>
         </Section>
       )
@@ -210,28 +300,22 @@ export default function EuropeanShowcase({
     if (key === 'experience') {
       return (
         <Section key={key} id="experience" title={copy.experience}>
-          {snapshot.experience.length > 0 ? (
-            snapshot.experience.map((item, index) => {
-              const dateRange = formatDateRange(item.startDate, item.endDate)
-              const bullets = item.description ? splitToBullets(item.description) : []
-              const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
-
-              return (
-                <div key={`${item.role}-${item.company}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.experience[index]}>
-                  <Row label={dateRange || copy.datesPending}>
-                    <p className="european-showcase__entry-role">{item.role || copy.untitledRole}</p>
-                    {metaLine ? <p className="european-showcase__entry-meta">{metaLine}</p> : null}
-                    {bullets.length > 0 ? (
-                      <ul className="european-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </Row>
-                </div>
-              )
-            })
+          {directEditDispatch ? (
+            <EditableList
+              section="experience"
+              items={formData.experience}
+              addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+            >
+              {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
+            </EditableList>
+          ) : snapshot.experience.length > 0 ? (
+            snapshot.experience.map((item, index) =>
+              renderExperienceEntry(item, index, {
+                directEditDispatch,
+                copy,
+                sourceIndex: snapshot.sourceIndices.experience[index],
+              }),
+            )
           ) : (
             <Row label="">
               <p className="european-showcase__empty">
@@ -273,7 +357,19 @@ export default function EuropeanShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" title={copy.skills}>
-          {skillCategories.length > 0 ? (
+          {directEditDispatch ? (
+            // The read-only look is one label/value row per category with
+            // the skills comma-joined, which no chip reproduces. While
+            // editing, one row holds the shared grouped chips instead (they
+            // carry their own category labels, so the row's label column
+            // stays empty); the comma rows return as soon as editing ends.
+            <Row label="">
+              <EditableCategorizedChip
+                categories={editableSkillCategories}
+                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+              />
+            </Row>
+          ) : skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <Row key={cat.key} label={cat.label}>
                 <p className="european-showcase__skill-items" data-export-skill="true">{cat.items.join(', ')}</p>
@@ -418,9 +514,44 @@ export default function EuropeanShowcase({
           <p className="european-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="european-showcase__name">{fullName}</h1>
-          <p className="european-showcase__role">{title}</p>
-          {metaItems.length > 0 ? (
+          <h1 className="european-showcase__name">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : fullName}
+          </h1>
+          <p className="european-showcase__role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+          </p>
+          {directEditDispatch ? (
+            // The template's separator is a `meta-item + meta-item::before`
+            // rule, so the class stays on a wrapper span and never goes on
+            // EditableField itself — whose own ::before draws the empty-field
+            // placeholder (the Editorial collision).
+            <div className="european-showcase__meta">
+              {directEditMetaFields.map(([key, value, placeholderLabel, pathKind]) => (
+                <span key={key} className="european-showcase__meta-item">
+                  <EditableField
+                    as="span"
+                    path={{ kind: pathKind, field: key }}
+                    value={value}
+                    placeholder={placeholderLabel}
+                  />
+                </span>
+              ))}
+            </div>
+          ) : metaItems.length > 0 ? (
             <div className="european-showcase__meta">
               {metaItems.map(([key, value]) => (
                 <span key={key} className="european-showcase__meta-item">{value}</span>

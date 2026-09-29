@@ -235,6 +235,18 @@
   gap: 0.25rem;
 }
 
+/* Direct Edit's description is one multi-line field, not a flex <ul>.
+   pre-line is load-bearing: EditableField saves innerText, which collapses
+   a stored "\n" to a space under white-space: normal. */
+.european-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--eu-ink);
+}
+
 .european-showcase__bullets li {
   font-size: var(--tpl-body-size);
   line-height: 1.55;

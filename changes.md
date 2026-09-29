@@ -4,6 +4,50 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Inline editing on European — every template is now inline-editable — 2026-09-29
+
+European is the eighteenth and last template to get inline editing, so
+the rollout is complete: on every template, the name, title, contact
+details, About, Experience and Skills can be edited by clicking into the
+text, and everything else through the section popup.
+
+On European, the name, title, contact line (location, email, phone, and
+LinkedIn as a link field), About and Experience (role, company,
+description, drag to reorder, add) are editable in place, with each
+entry's dates staying in the label column. Skills use the agreed option
+A, as on Tech Executive: the comma-joined category rows become one row of
+grouped chips while editing and come back afterwards.
+
+The contact line's `·` separators are drawn by a
+`meta-item + meta-item::before` rule, the same shape that broke
+Editorial's placeholders when the template class sat on the editable
+field. The class stays on a wrapper span, and the empty-placeholder test
+passes. The only CSS needed was `white-space: pre-line` for the
+description's editing element, caught by the multi-line test failing
+first. European's one-page density auto-fit was checked while editing:
+the demo CV renders `compact` in both Classic and Direct Edit.
+
+**Three tests were rewritten**, because each depended on a template
+without inline editing, and none is left:
+- "an entry pencil still targets the right entry when an earlier entry is
+  hidden" now hides a Certificates entry instead of an Experience one.
+  Certificates, like every section other than Experience, still renders
+  from the visibility-filtered snapshot, so the index mapping it guards
+  is still real.
+- "an edit in Direct Edit mode survives switching template and back"
+  goes through European and now also checks the edit shows up inline
+  there.
+- "an inline-unwired template is still fully editable through the popup"
+  was removed: the per-template loop already opens and edits the popup on
+  all 18 templates.
+
+**Noticed, not changed:** European's Experience and Education entries sit
+with no space between them (0px, measured) in every mode, including
+exports. The row spacing rule is `.row + .row`, and each entry wraps its
+row in its own `div`, so the rule never applies between entries. That has
+been true since the template was added, so it is a design question, not
+an editing one.
+
 ## Inline editing on Tech Executive — 2026-09-29
 
 Tech Executive is the seventeenth inline-wired template. The name,

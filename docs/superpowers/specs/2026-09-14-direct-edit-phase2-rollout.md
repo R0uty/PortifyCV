@@ -10,7 +10,11 @@ incremental enhancement (inline editing feels lighter-weight than a
 popup for the fields it covers), but nothing here is required for a
 template to be fully editable.
 
-**Status:** planning. Phase 1 (spec:
+**Status (2026-09-29): complete.** All 18 templates are in
+`INLINE_EDIT_SUPPORTED_TEMPLATES` as of v1.2.73. The sections below are
+kept as the record of how each round was planned and what it hit.
+
+**Original status:** planning. Phase 1 (spec:
 `docs/superpowers/specs/2026-09-13-direct-edit-builder-design.md`, plan:
 `docs/superpowers/plans/2026-09-13-direct-edit-builder-phase1.md`) shipped
 one reference template (Minimalist) end-to-end and is live on `v1.3.0`.
@@ -120,7 +124,7 @@ unreliable; it governs the flat ATS renderer, not the Showcase):
 | Developer | categorized chips | `categorized` | `EditableCategorizedChip` |
 | Quadrant | categorized chips | `categorized` | `EditableCategorizedChip` |
 | Tech Executive | categorized **comma-joined text**, one `Label: a, b, c` line per group, no chips | `categorized` | `EditableCategorizedChip` while editing only (option A, v1.2.72) |
-| European | categorized **comma-joined text** in label/value rows, no chips | `flat` | neither fits as-is (see below) |
+| European | categorized **comma-joined text** in label/value rows, no chips | `flat` | `EditableCategorizedChip` while editing only (option A, v1.2.73) |
 | Navy Professional | flat chips | `flat` | `EditableChip` |
 | Colorful Compact | flat chips | `flat` | `EditableChip` |
 
@@ -237,7 +241,7 @@ same code):
 | 2 | `railTable` (8) | Left rail: Executive, Modern Orange. Right rail: Creative, Modern Professional, Graduate, Portfolio Hybrid, Tech Executive, Colorful Compact | Largest family — once the first one's rail+main wiring pattern is proven, the rest should move faster. Done so far: Executive, Modern Orange, Creative, Colorful Compact, Modern Professional, Graduate, Portfolio Hybrid. Modern Professional and Portfolio Hybrid both needed the timeline connector's `:last-child` replaced with a `--last` class (Graduate's rail is on Internships, so it never hit this). Tech Executive (v1.2.72) completes the family: its comma-joined skills show as grouped chips while editing (option A below). |
 | 3 | `darkSidebarTable` (2) | Developer, Navy Professional | Same rail mechanism as `railTable` plus a dark-fill/light-text palette swap — do after `railTable` so the rail pattern is already proven, not simultaneously. Navy Professional done (v1.2.69): its identity and contact live on the dark sidebar, and Direct Edit's generic "+ Add" chip needed a light override there (it read ~3:1); its uppercase role needed the `text-transform: none` override. Developer done (v1.2.70): its dark rail needed the same "+ Add" override plus one for the chip-group labels, and its gradient-text name (`color: transparent`) left the inline field with an invisible caret until given a `caret-color`. |
 | 4 | `gridTable` (1) | Quadrant | Structurally distinct (2×2 grid, `categorized` skills) — no family to amortize cost across, budget it as its own round. Done (v1.2.71): each section stays in its fixed cell (no column router), so it needed only the usual entry `--first`/`--last` and `pre-line` fixes. |
-| 5 | `labelGridTable` (1) | European | Most distinct reading pattern (label/value rows, not flowing prose) — last, and expect it to need the most novel `EditableField` usage of any template so far. |
+| 5 | `labelGridTable` (1) | European | Most distinct reading pattern (label/value rows, not flowing prose) — last, and expect it to need the most novel `EditableField` usage of any template so far. Done (v1.2.73), and less novel than expected: dates stay in the label column (popup-only), the editable fields sit in the value column, skills use option A in one label-less row, and the contact line keeps its `::before` separator on wrapper spans (the Editorial rule). |
 
 This order is a recommendation, not a hard rule — if a specific template
 turns out to need design decisions that stall a round, skip to the next
