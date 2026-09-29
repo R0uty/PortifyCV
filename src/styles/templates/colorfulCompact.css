@@ -128,6 +128,13 @@
   color: var(--cc-orange);
 }
 
+/* Direct Edit shows the name as one field in place of the two-tone spans,
+   and the <h1> itself inherits the template's dark ink — dark on the dark
+   header without this. Takes the lead half's white. */
+.colorful-compact-showcase__name .direct-edit-field {
+  color: #ffffff;
+}
+
 .colorful-compact-showcase__role {
   margin-top: 0.35rem;
   font-size: var(--tpl-title-size);
@@ -279,12 +286,16 @@
   border-bottom: 1px dashed var(--cc-border);
 }
 
-.colorful-compact-showcase__exp-row:last-child {
+/* First/last from JS-computed modifier classes, not :first-child/
+   :last-child: in Direct Edit, EditableList wraps each row in its own
+   .direct-edit-entry div, so every row would match both. Doubled class for
+   order-independent specificity over the base rule, as on Modern Orange. */
+.colorful-compact-showcase__exp-row.colorful-compact-showcase__exp-row--last {
   border-bottom: none;
   padding-bottom: 0;
 }
 
-.colorful-compact-showcase__exp-row:first-child {
+.colorful-compact-showcase__exp-row.colorful-compact-showcase__exp-row--first {
   padding-top: 0;
 }
 
@@ -334,6 +345,17 @@
 
 .colorful-compact-showcase__bullets li::marker {
   color: var(--cc-muted);
+}
+
+/* Direct Edit's description is one multi-line field, not a <ul>. pre-line
+   is load-bearing, not cosmetic: EditableField saves innerText, which
+   collapses a stored "\n" to a space under white-space: normal. */
+.colorful-compact-showcase__bullets--editing {
+  white-space: pre-line;
+  padding-left: 0;
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: #3f3f46;
 }
 
 /* ── Projects — bordered white cards, section-coloured tag pills ── */

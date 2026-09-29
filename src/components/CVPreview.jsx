@@ -359,14 +359,17 @@ function CVPreview({
   // color to fall back to).
   if (variant === 'colorfulCompact' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <ColorfulCompactShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch}>
+        <Suspense fallback={null}>
+          <ColorfulCompactShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 

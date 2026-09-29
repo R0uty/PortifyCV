@@ -4,6 +4,41 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Inline editing on Colorful Compact — 2026-09-29
+
+Colorful Compact joins the inline-edit allowlist, the tenth template where
+the CV text can be clicked and typed into, not only edited through the
+popup. The name, title, About, Experience (role, company, description,
+drag to reorder, add) and Skills chips are editable in place. So is the
+whole contact line, including the website, which is the first inline field
+to write a link (`links.website`) rather than a root field. Tagline and
+location stay popup-only, as on every other template.
+
+Three things needed more than wiring, each caught by a test that failed
+first:
+- **The name went dark on the dark header (1.02:1 contrast).** Its white
+  came from the two split spans, and the `<h1>` inherits the template's
+  dark ink. One editable field replaces the spans, so it now takes the
+  lead half's white. The two-tone split is shown only when not editing,
+  as on Modern Timeline.
+- **The experience divider and edge padding used `:first-child`/
+  `:last-child`.** `EditableList`'s per-entry wrapper makes every row both,
+  so the dashed divider vanished. The rows now carry `--first`/`--last`
+  modifier classes computed in JS, in both modes.
+- **The description's editing element needed `white-space: pre-line`**, or
+  a stored line break is saved back as a space on the first edit.
+
+Skills is the one inline section that can change column. A new test moves
+it into the main column and removes a chip there.
+
+The per-template e2e helper's divider check now accepts any drawn border,
+not only `solid`, since this template's is dashed. The empty-placeholder
+check now counts the template's own contact fields instead of assuming
+three.
+
+Also this session: the rollout doc's skills claims were corrected against
+each Showcase file (commit `c06c576`).
+
 ## Review fixes for the section column moves — 2026-09-28
 
 A high-effort review of everything since v1.2.52 found nine issues; all

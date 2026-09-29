@@ -1231,8 +1231,10 @@ test.describe('Direct Edit builder', () => {
       // exact divider pattern.
       if (entrySelector) {
         const entries = page.locator(entrySelector)
+        // Any drawn divider counts (Colorful Compact's is dashed); the bug
+        // this guards is the divider vanishing, not its style.
         const firstBorderStyle = await entries.first().evaluate((el) => getComputedStyle(el).borderBottomStyle)
-        expect(firstBorderStyle).toBe('solid')
+        expect(firstBorderStyle).not.toBe('none')
         const lastBorderStyle = await entries.last().evaluate((el) => getComputedStyle(el).borderBottomStyle)
         expect(lastBorderStyle).toBe('none')
       }
@@ -1291,7 +1293,7 @@ test.describe('Direct Edit builder', () => {
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
       const metaFields = page.locator(`.${classPrefix}__${contactRowSuffix} .direct-edit-field`)
-      await expect(metaFields).toHaveCount(3)
+      await expect(metaFields).toHaveCount(labelOrder.length)
 
       for (let i = 0; i < labelOrder.length; i++) {
         const content = await metaFields.nth(i).evaluate((el) => getComputedStyle(el, '::before').content)
@@ -1335,6 +1337,73 @@ test.describe('Direct Edit builder', () => {
     // regardless of which template is under test.
     const remainingTags = (await page.locator('#section-skills .tags-input__tag').allTextContents()).map((text) => text.trim())
     expect(remainingTags).toEqual(DEMO_SKILLS)
+  })
+
+  // Colorful Compact's header is dark and its name's white comes from the
+  // two split spans (name-lead / name-accent), not from the <h1>, which
+  // inherits the template's dark ink. The inline field replaces those
+  // spans, so without its own colour the name turns dark-on-dark.
+  test('Colorful Compact: every inline header field stays readable on the dark header', async ({ page }) => {
+    await selectTemplate(page, 'Colorful Compact')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await expect(page.locator('.colorful-compact-showcase__name .direct-edit-field')).toHaveCount(1)
+    const contrast = await minTextContrast(page, '.direct-edit-preview .colorful-compact-showcase__header')
+    expect(contrast).toBeGreaterThanOrEqual(4.5)
+  })
+
+  // The website sits in the contact line as a link field — the first
+  // inline field to dispatch SET_LINK_FIELD rather than a root field.
+  test('Colorful Compact: the website edited inline reaches Classic mode', async ({ page }) => {
+    await selectTemplate(page, 'Colorful Compact')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const websiteField = page.locator('.colorful-compact-showcase__contact .direct-edit-field').nth(3)
+    await websiteField.click()
+    await page.keyboard.press('Control+A')
+    await page.keyboard.type('https://jordan.example')
+    await websiteField.blur()
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await expect(page.locator('#link-field-website')).toHaveValue('https://jordan.example')
+  })
+
+  // The divider rows used :first-child/:last-child, which EditableList's
+  // per-entry wrapper defeats: the first row regained its top padding and
+  // the last kept its bottom padding. The runDirectEditDemoDataChecks row
+  // covers the divider itself; this covers the padding.
+  test('Colorful Compact: the first and last experience rows keep their edge spacing in Direct Edit', async ({ page }) => {
+    await selectTemplate(page, 'Colorful Compact')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const rows = page.locator('.direct-edit-preview .colorful-compact-showcase__exp-row')
+    await expect(rows).toHaveCount(2)
+    expect(await rows.first().evaluate((el) => getComputedStyle(el).paddingTop)).toBe('0px')
+    expect(await rows.last().evaluate((el) => getComputedStyle(el).paddingBottom)).toBe('0px')
+  })
+
+  // Skills is the one inline-edited section that can change column. Moved
+  // into main, it renders through its home (sidebar) renderer, and its
+  // chips must still be there and still remove the right skill.
+  test('Colorful Compact: Skills moved to the main column is still inline-editable', async ({ page }) => {
+    await selectTemplate(page, 'Colorful Compact')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await openSectionPopup(page, 'skills')
+    await page.locator('.direct-edit-popup__columns [data-column="main"]').click()
+    await page.keyboard.press('Escape')
+    expect((await sectionColumnState(page, 'skills')).inSidebar).toBe(false)
+
+    const skillsSection = page.locator('.direct-edit-preview [data-export-section="skills"]')
+    await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
+    await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
+
+    await skillsSection.getByRole('button', { name: /^Figma/ }).click()
+    await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length - 1)
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    const remainingTags = (await page.locator('#section-skills .tags-input__tag').allTextContents()).map((text) => text.trim())
+    expect(remainingTags).toEqual(DEMO_SKILLS.filter((skill) => skill !== 'Figma'))
   })
 
   // One row per Direct-Edit-supported template.
@@ -1384,6 +1453,10 @@ test.describe('Direct Edit builder', () => {
     { label: 'Executive', classPrefix: 'executive-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'], entrySelector: '.executive-showcase__entry' },
     { label: 'Modern Orange', classPrefix: 'modern-orange-showcase', contactRowSuffix: 'contact-list', labelOrder: ['Location', 'Email', 'Phone'], titleFieldSuffix: 'title-badge', skillsSectionSelector: '.modern-orange-showcase__skill-list', entrySelector: '.modern-orange-showcase__exp-row' },
     { label: 'Creative', classPrefix: 'creative-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
+    // Colorful Compact's header contact line carries a fourth item, the
+    // website (links.website), in the read-only order Email, Location,
+    // Phone, Website.
+    { label: 'Colorful Compact', classPrefix: 'colorful-compact-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Location', 'Phone', 'Website'], entrySelector: '.colorful-compact-showcase__exp-row' },
   ]
 
   for (const { label, classPrefix, contactRowSuffix, labelOrder, titleFieldSuffix, skillsSectionSelector, entrySelector } of DIRECT_EDIT_TEMPLATES) {

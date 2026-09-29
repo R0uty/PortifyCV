@@ -29,6 +29,8 @@ import { useMemo } from 'react'
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
 import { formatDateRange, formatLinkDisplayValue, createSectionRouter } from './shared'
+import EditableField from '../EditableField'
+import EditableList, { EditableChip } from '../EditableList'
 
 // The capped, named palette (design-system §3). Assigned by running section
 // position (main sections first, then sidebar), wrapping after six. Order
@@ -45,6 +47,83 @@ function splitToBullets(text) {
 
 function colorAt(cycle, index) {
   return cycle[index % cycle.length]
+}
+
+// Colorful Compact's own Experience-entry renderer — not
+// directEditExperienceEntry.jsx: role and the company/location meta line
+// nest together in one `min-w-0` div with the date as its sibling, the
+// same shape as Creative's. Only role and company are editable inline;
+// location stays read-only-appended text. `index` is formData-relative in
+// the directEditDispatch branch (EditableList's own index); the read-only
+// call site passes the snapshot's `sourceIndex` for data-direct-edit-index.
+//
+// First/last spacing is driven by isFirst/isLast modifier classes, never
+// :first-child/:last-child — EditableList wraps each entry in its own
+// .direct-edit-entry div, which makes every row a first AND last child.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, color, isFirst, isLast, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+  const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
+  const rowClassName = [
+    'colorful-compact-showcase__exp-row',
+    isFirst ? 'colorful-compact-showcase__exp-row--first' : '',
+    isLast ? 'colorful-compact-showcase__exp-row--last' : '',
+  ].filter(Boolean).join(' ')
+
+  return (
+    <div
+      data-direct-edit-index={sourceIndex}
+      key={`${item.role}-${item.company}-${index}`}
+      className={rowClassName}
+      data-export-card="true"
+    >
+      <div className="colorful-compact-showcase__exp-head">
+        <div className="min-w-0">
+          <p className="colorful-compact-showcase__exp-role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                value={item.role}
+                placeholder={copy.untitledRole}
+              />
+            ) : item.role || copy.untitledRole}
+          </p>
+          {directEditDispatch ? (
+            <p className="colorful-compact-showcase__exp-meta">
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                value={item.company}
+                placeholder={copy.company}
+              />
+              {item.location ? ` · ${item.location}` : null}
+            </p>
+          ) : metaLine ? <p className="colorful-compact-showcase__exp-meta">{metaLine}</p> : null}
+        </div>
+        <p className={`colorful-compact-showcase__exp-date colorful-compact-showcase__exp-date--${color}`}>
+          {dateRange || copy.datesPending}
+        </p>
+      </div>
+      {directEditDispatch ? (
+        <p className="colorful-compact-showcase__bullets colorful-compact-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="colorful-compact-showcase__bullets">
+          {bullets.map((line, lineIndex) => (
+            <li key={lineIndex}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  )
 }
 
 function SectionHead({ title, color }) {
@@ -70,7 +149,13 @@ function Section({ id, placement, movedFrom = null, title, color, children }) {
   )
 }
 
-export default function ColorfulCompactShowcase({ formData, locale = 'en', previewRef, templateConfig }) {
+export default function ColorfulCompactShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  directEditDispatch = null,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -97,6 +182,14 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     ['phone', snapshot.phone],
     ['website', websiteUrl],
   ].filter(([, value]) => value)
+  // Direct Edit shows every contact slot, empty or not, in the read-only
+  // order. The website is a link field (links.website), not a root one.
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email', 'root'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location', 'root'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone', 'root'],
+    ['website', formData.links.website, isFinnish ? 'Verkkosivusto' : 'Website', 'link'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
 
@@ -116,6 +209,8 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     about: isFinnish ? 'Tietoa minusta' : 'About',
     experience: isFinnish ? 'Kokemus' : 'Experience',
@@ -131,7 +226,21 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     if (key === 'about') {
       return (
         <Section key={key} id="about" placement={placement} movedFrom={movedFrom} title={copy.about} color={color}>
-          <p className="colorful-compact-showcase__summary">{about}</p>
+          <p className="colorful-compact-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </Section>
       )
     }
@@ -140,38 +249,31 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
       return (
         <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} title={copy.experience} color={color}>
           <div className="colorful-compact-showcase__exp-list">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-                const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
-
-                return (
-                  <div
-                    data-direct-edit-index={snapshot.sourceIndices.experience[index]}
-                    key={`${item.role}-${item.company}-${index}`}
-                    className="colorful-compact-showcase__exp-row"
-                    data-export-card="true"
-                  >
-                    <div className="colorful-compact-showcase__exp-head">
-                      <div className="min-w-0">
-                        <p className="colorful-compact-showcase__exp-role">{item.role || copy.untitledRole}</p>
-                        {metaLine ? <p className="colorful-compact-showcase__exp-meta">{metaLine}</p> : null}
-                      </div>
-                      <p className={`colorful-compact-showcase__exp-date colorful-compact-showcase__exp-date--${color}`}>
-                        {dateRange || copy.datesPending}
-                      </p>
-                    </div>
-                    {bullets.length > 0 ? (
-                      <ul className="colorful-compact-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  color,
+                  isFirst: index === 0,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  color,
+                  isFirst: index === 0,
+                  isLast: index === snapshot.experience.length - 1,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="colorful-compact-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -228,7 +330,14 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} title={copy.skills} color={color}>
-          {snapshot.skills.length > 0 ? (
+          {directEditDispatch ? (
+            // Chips replace the read-only pills outright (never both, or
+            // every skill renders twice); the empty-state <p> stays out of
+            // the chip row, matching Executive.
+            <div className="colorful-compact-showcase__skill-row">
+              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+            </div>
+          ) : snapshot.skills.length > 0 ? (
             <div className="colorful-compact-showcase__skill-row">
               {snapshot.skills.map((skill) => (
                 <span
@@ -368,22 +477,51 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
           <p className="colorful-compact-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
+          {/* The two-tone split can't live inside one contentEditable field,
+              so Direct Edit shows the whole name as one field (in the lead
+              colour — see colorfulCompact.css), like Modern Timeline. */}
           <h1 className="colorful-compact-showcase__name">
-            <span className="colorful-compact-showcase__name-lead">{nameFirst}</span>
-            {nameRest ? <> <span className="colorful-compact-showcase__name-accent">{nameRest}</span></> : null}
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : (
+              <>
+                <span className="colorful-compact-showcase__name-lead">{nameFirst}</span>
+                {nameRest ? <> <span className="colorful-compact-showcase__name-accent">{nameRest}</span></> : null}
+              </>
+            )}
           </h1>
           <p className="colorful-compact-showcase__role">
-            {title}{tagline ? ` · ${tagline}` : ''}
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+            {tagline ? ` · ${tagline}` : ''}
           </p>
-          {contactItems.length > 0 ? (
+          {directEditDispatch || contactItems.length > 0 ? (
             <div className="colorful-compact-showcase__contact">
-              {contactItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditContactFields : contactItems).map(([key, value, placeholderLabel, pathKind]) => (
                 <span key={key} className="colorful-compact-showcase__contact-item">
                   <span
                     className={`colorful-compact-showcase__contact-dot colorful-compact-showcase__contact-dot--${HEADER_ACCENT}`}
                     aria-hidden="true"
                   />
-                  {key === 'website' ? formatLinkDisplayValue(value) : value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: pathKind, field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : key === 'website' ? formatLinkDisplayValue(value) : value}
                 </span>
               ))}
             </div>
