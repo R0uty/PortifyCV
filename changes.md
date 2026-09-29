@@ -4,6 +4,27 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Executive's secondary text meets AA contrast — 2026-09-29
+
+Executive's tagline and contact details read 4.37:1 on its rail, under
+WCAG AA's 4.5:1, and unlike the kicker they are exported. Measuring every
+piece of text in the template showed the cause was the shared
+`--ex-ink-faint` token, not those two rules: every use of it on the rail
+failed the same way (tagline, contact details, core-strength
+descriptions, skill-group labels and certificate details), and its uses
+on the main column only just passed at 4.56:1.
+
+So the token itself changed, from `#78716c` to `#6b645e`: 5.3:1 on the
+rail, and still lighter than `--ex-ink-muted`, so secondary text still
+reads as secondary. **This changes exported Executive PDFs**, slightly
+darkening all of the template's secondary text, not only the tagline and
+contact. The kicker, given `#6b645e` as its own colour in the previous
+change, points back at the token again.
+
+A new test checks every piece of text on the rail is at 4.5:1 or better;
+it failed at 4.37 first. The old hex had no other copies (the Word export
+does not duplicate it).
+
 ## Creative and Executive kicker labels meet AA contrast — 2026-09-29
 
 The follow-up to the Tech Executive fix. Each template's "<Template>
@@ -35,9 +56,8 @@ nothing else in the templates used `color-mix()`.
 The Tech Executive kicker test is now a loop over all three templates;
 Creative's and Executive's rows failed first, at 3.35 and 4.37.
 
-**Still open, not changed:** Executive's tagline and contact details,
-which are real CV content and do get exported, use the same
-`--ex-ink-faint` on the same rail, so they also read 4.37:1.
+(Executive's tagline and contact details, flagged here as still open,
+were fixed in the next change.)
 
 ## Tech Executive's masthead label meets AA contrast — 2026-09-29
 

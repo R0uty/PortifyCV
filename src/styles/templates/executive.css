@@ -28,7 +28,10 @@
 
   --ex-ink: #1c1917;
   --ex-ink-muted: #44403c;
-  --ex-ink-faint: #78716c;
+  /* Was #78716c: 4.37:1 on the rail, under WCAG AA's 4.5:1 for the
+     tagline, contact details and other secondary text there. #6b645e
+     reads 5.3:1 on the rail and stays lighter than --ex-ink-muted. */
+  --ex-ink-faint: #6b645e;
   --ex-border: #d6d3d1;
   --ex-rail: #f7f4ef;
   /* Deliberately NOT pure #ffffff — the blank-canvas PDF export guard the
@@ -83,15 +86,12 @@
   border: 3px solid var(--tpl-accent);
 }
 
-/* Its own colour rather than --ex-ink-faint, which reads 4.37:1 on the
-   rail (under WCAG AA's 4.5:1); #6b645e reads 5.3:1 and stays lighter
-   than --ex-ink-muted, so the label still reads as secondary. */
 .executive-showcase__kicker {
   font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: #6b645e;
+  color: var(--ex-ink-faint);
 }
 
 .executive-showcase__name {

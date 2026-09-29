@@ -1441,6 +1441,18 @@ test.describe('Direct Edit builder', () => {
     })
   }
 
+  // Executive's secondary text (--ex-ink-faint) read 4.37:1 on its rail:
+  // the tagline and contact details, which are exported CV content, plus
+  // strength descriptions, skill-group labels and certificate details.
+  // Measured over the whole rail so any rail text that slips under
+  // WCAG AA's 4.5:1 fails here.
+  test('Executive: every piece of text on the rail meets 4.5:1 contrast', async ({ page }) => {
+    await selectTemplate(page, 'Executive')
+    const rail = '.preview-document--designer .executive-showcase__sidebar'
+    await expect(page.locator(`${rail} .executive-showcase__tagline`).first()).toBeVisible()
+    expect(await minTextContrast(page, rail)).toBeGreaterThanOrEqual(4.5)
+  })
+
   // Dark-sidebar templates put inline controls on a dark rail, where
   // Direct Edit's generic chrome (the "+ Add" chip, chip-group labels) was
   // designed for a white page.
