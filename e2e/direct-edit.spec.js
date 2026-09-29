@@ -1083,10 +1083,10 @@ test.describe('Direct Edit builder', () => {
     await page.keyboard.type('Jordan Rivera')
     await nameField.blur()
 
-    // Developer is not in INLINE_EDIT_SUPPORTED_TEMPLATES, so it has no
+    // Quadrant is not in INLINE_EDIT_SUPPORTED_TEMPLATES, so it has no
     // inline contentEditable fields, but it's still fully editable via the
     // popup — this test only checks the edit survives the round-trip.
-    await selectTemplate(page, 'Developer')
+    await selectTemplate(page, 'Quadrant')
 
     await selectTemplate(page, 'Minimalist')
     const nameFieldAgain = page.locator('.direct-edit-preview h3 .direct-edit-field')
@@ -1312,7 +1312,7 @@ test.describe('Direct Edit builder', () => {
   // mode's Skill tags input, removes specifically that chip in Direct Edit
   // mode, and confirms all 6 original skills survive untouched — proving
   // the index mapping is correct, not just that a chip disappeared.
-  for (const label of ['Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid']) {
+  for (const label of ['Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid', 'Developer']) {
     test(`${label}: removing a categorized skill chip removes the correct skill, not a same-category neighbor`, async ({ page }) => {
       await selectTemplate(page, label)
 
@@ -1388,7 +1388,7 @@ test.describe('Direct Edit builder', () => {
   // Skills is the one inline-edited section that can change column. Moved
   // into main, it renders through its home (sidebar) renderer, and its
   // chips must still be there and still remove the right skill.
-  for (const label of ['Colorful Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid', 'Navy Professional']) {
+  for (const label of ['Colorful Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid', 'Navy Professional', 'Developer']) {
     test(`${label}: Skills moved to the main column is still inline-editable`, async ({ page }) => {
       await selectTemplate(page, label)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
@@ -1411,16 +1411,32 @@ test.describe('Direct Edit builder', () => {
     })
   }
 
-  // Navy's identity, contact and skills all sit on the dark sidebar, where
-  // Direct Edit's generic chrome (the "+ Add" chip, placeholders) was
+  // Dark-sidebar templates put inline controls on a dark rail, where
+  // Direct Edit's generic chrome (the "+ Add" chip, chip-group labels) was
   // designed for a white page.
-  test('Navy Professional: every inline sidebar control stays readable on the dark sidebar', async ({ page }) => {
-    await selectTemplate(page, 'Navy Professional')
+  for (const { label, sidebarSelector } of [
+    { label: 'Navy Professional', sidebarSelector: '.navy-professional-showcase__sidebar' },
+    { label: 'Developer', sidebarSelector: '.dev-showcase__sidebar' },
+  ]) {
+    test(`${label}: every inline sidebar control stays readable on the dark sidebar`, async ({ page }) => {
+      await selectTemplate(page, label)
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+      await expect(page.locator(`${sidebarSelector} .direct-edit-chip-add`)).toHaveCount(1)
+      const contrast = await minTextContrast(page, `.direct-edit-preview ${sidebarSelector}`)
+      expect(contrast).toBeGreaterThanOrEqual(4.5)
+    })
+  }
+
+  // Developer's name is gradient text: `color: transparent` with the
+  // gradient clipped to the glyphs. An editable field inside inherits the
+  // transparent colour, and the caret follows currentColor, so it vanished.
+  test('Developer: the inline name field shows a visible caret', async ({ page }) => {
+    await selectTemplate(page, 'Developer')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
-    await expect(page.locator('.navy-professional-showcase__sidebar .direct-edit-chip-add')).toHaveCount(1)
-    const contrast = await minTextContrast(page, '.direct-edit-preview .navy-professional-showcase__sidebar')
-    expect(contrast).toBeGreaterThanOrEqual(4.5)
+    const caret = await page.locator('.dev-showcase__name .direct-edit-field').evaluate((el) => getComputedStyle(el).caretColor)
+    expect(caret).not.toMatch(/rgba\(0, 0, 0, 0\)|transparent/)
   })
 
   // The entry spacing used :not(:first-child)/:last-child, which
@@ -1462,6 +1478,7 @@ test.describe('Direct Edit builder', () => {
   for (const { label, classPrefix } of [
     { label: 'Modern Professional', classPrefix: 'modern-showcase' },
     { label: 'Portfolio Hybrid', classPrefix: 'portfolio-showcase' },
+    { label: 'Developer', classPrefix: 'dev-showcase' },
   ]) {
     test(`${label}: the timeline connector joins entries and stops at the last one in Direct Edit`, async ({ page }) => {
       await selectTemplate(page, label)
@@ -1526,6 +1543,7 @@ test.describe('Direct Edit builder', () => {
     // LinkedIn as a link field). Its entry class is shared with Education,
     // so the divider check is scoped to Experience.
     { label: 'Navy Professional', classPrefix: 'navy-professional-showcase', contactRowSuffix: 'contact-list', labelOrder: ['Phone', 'Email', 'Location', 'LinkedIn'], entrySelector: '[data-export-section="experience"] .navy-professional-showcase__entry' },
+    { label: 'Developer', classPrefix: 'dev-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
     { label: 'Portfolio Hybrid', classPrefix: 'portfolio-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
     { label: 'Graduate', classPrefix: 'graduate-showcase', contactRowSuffix: 'contact', labelOrder: ['Email', 'Phone', 'Location'] },
     // Colorful Compact's header contact line carries a fourth item, the

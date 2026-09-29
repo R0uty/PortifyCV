@@ -4,6 +4,32 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Inline editing on Developer — 2026-09-29
+
+Developer is the fifteenth inline-wired template. The name, title,
+contact line (email, phone, location), Summary, Experience (role,
+company, description, drag to reorder, add) and Skills (grouped chips on
+the dark rail, via `EditableCategorizedChip`) are editable in place.
+
+Four things needed more than wiring, each caught by a failing test:
+- **The name field had an invisible caret.** The name is gradient text:
+  `color: transparent` with the gradient clipped to the glyphs. The
+  editable span inherits the transparent colour and the caret follows it,
+  so you could type into the name without seeing where. It now has a
+  blue `caret-color`; the gradient itself is unchanged.
+- **Direct Edit's chip chrome read 3.7:1 on the dark rail.** The grey
+  chip-group labels now take the read-only group label's colour, and
+  "+ Add" gets the same light override as Navy's. The sidebar-contrast
+  test is now a loop covering both dark-sidebar templates.
+- **The timeline connector used `:last-child`**, which hid every
+  connector once `EditableList` wrapped the entries. It now uses a
+  `--last` class, as on Modern Professional and Portfolio Hybrid.
+- **The description's editing element needed `white-space: pre-line`.**
+
+Also: the test "an edit in Direct Edit mode survives switching to an
+inline-unwired template and back" used Developer as its unwired template.
+It now uses Quadrant, which is still unwired.
+
 ## Inline editing on Navy Professional — 2026-09-29
 
 Navy Professional is the fourteenth inline-wired template, and the first

@@ -25,12 +25,15 @@ import {
   contactIcons,
   sectionIcons,
   parseSkillCategories,
+  buildEditableSkillCategories,
   formatDateRange,
   formatLinkLabel,
   formatLinkDisplayValue,
   getSafeHref,
   createSectionRouter,
 } from './shared'
+import EditableField from '../EditableField'
+import EditableList, { EditableCategorizedChip } from '../EditableList'
 
 // The fixed cool-spectrum gradient — Developer's one accent form. Used for
 // the name text, photo ring, section-icon badges and timeline marker.
@@ -38,6 +41,86 @@ const SECTION_ICON_GRADIENT = 'linear-gradient(135deg, var(--dev-teal), var(--de
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+}
+
+// Developer's own Experience-entry renderer: a timeline rail beside a
+// card, like Modern Professional's (not directEditExperienceEntry.jsx's
+// shape). Only role and company are editable inline; location stays
+// read-only-appended text. `index` is formData-relative in the
+// directEditDispatch branch (EditableList's own index); the read-only call
+// site passes the snapshot's `sourceIndex`.
+//
+// The rail's connector line is hidden on the last entry through an
+// `--last` modifier class, never :last-child — EditableList wraps each
+// entry in its own .direct-edit-entry div, making every item a last child.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, showTimeline, isLast, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <div
+      data-direct-edit-index={sourceIndex}
+      key={`${item.role}-${item.company}-${index}`}
+      className={`dev-showcase__timeline-item${isLast ? ' dev-showcase__timeline-item--last' : ''}`}
+      data-export-card="true"
+    >
+      {showTimeline ? (
+        <div className="dev-showcase__timeline-rail">
+          <span className="dev-showcase__timeline-marker" aria-hidden="true" />
+          <span className="dev-showcase__timeline-line" aria-hidden="true" />
+        </div>
+      ) : null}
+      <div className="dev-showcase__timeline-card">
+        <div className="dev-showcase__role-row">
+          <div className="min-w-0">
+            <p className="dev-showcase__role-title">
+              {directEditDispatch ? (
+                <EditableField
+                  as="span"
+                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                  value={item.role}
+                  placeholder={copy.untitledRole}
+                />
+              ) : item.role || copy.untitledRole}
+            </p>
+            {directEditDispatch ? (
+              <p className="dev-showcase__company">
+                <EditableField
+                  as="span"
+                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                  value={item.company}
+                  placeholder={copy.company}
+                />
+                {item.location ? ` · ${item.location}` : null}
+              </p>
+            ) : item.company || item.location ? (
+              <p className="dev-showcase__company">
+                {[item.company, item.location].filter(Boolean).join(' · ')}
+              </p>
+            ) : null}
+          </div>
+          <p className="dev-showcase__dates">{dateRange || copy.datesPending}</p>
+        </div>
+        {directEditDispatch ? (
+          <p className="dev-showcase__bullets dev-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+        ) : bullets.length > 0 ? (
+          <ul className="dev-showcase__bullets">
+            {bullets.map((line, lineIndex) => (
+              <li key={lineIndex}>{line}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+    </div>
+  )
 }
 
 // Takes the section's real placement, the same fact Section derives its
@@ -85,6 +168,7 @@ export default function DeveloperShowcase({
   previewRef,
   templateConfig,
   showcaseConfig = {},
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -116,11 +200,22 @@ export default function DeveloperShowcase({
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
     () => parseSkillCategories(snapshot.skills, isFinnish),
     [snapshot.skills, isFinnish],
+  )
+  // Editing branch only: the same grouping over formData.skills, each chip
+  // carrying its ORIGINAL flat-array index so removal hits the right skill.
+  const editableSkillCategories = useMemo(
+    () => buildEditableSkillCategories(formData.skills, isFinnish),
+    [formData.skills, isFinnish],
   )
 
   const sectionVisibility = {
@@ -140,6 +235,8 @@ export default function DeveloperShowcase({
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
   }
@@ -149,7 +246,16 @@ export default function DeveloperShowcase({
       return (
         <Section key={key} id="skills" placement={placement} movedFrom={movedFrom}>
           <SectionHeading icon="skills" label={isFinnish ? 'Taidot' : 'Skills'} placement={placement} />
-          {skillCategories.length > 0 ? (
+          {directEditDispatch ? (
+            // Chips replace the read-only tags outright (never both, or
+            // every skill renders twice).
+            <div className="dev-showcase__skill-group">
+              <EditableCategorizedChip
+                categories={editableSkillCategories}
+                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+              />
+            </div>
+          ) : skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="dev-showcase__skill-group">
                 <p className="dev-showcase__skill-group-label">{cat.label}</p>
@@ -284,7 +390,21 @@ export default function DeveloperShowcase({
       return (
         <Section key={key} id="about" placement={placement} movedFrom={movedFrom}>
           <SectionHeading icon="about" label={isFinnish ? 'Yhteenveto' : 'Summary'} placement={placement} />
-          <p className="dev-showcase__summary">{about}</p>
+          <p className="dev-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </Section>
       )
     }
@@ -294,47 +414,29 @@ export default function DeveloperShowcase({
         <Section key={key} id="experience" placement={placement} movedFrom={movedFrom}>
           <SectionHeading icon="experience" label={isFinnish ? 'Kokemus' : 'Experience'} placement={placement} />
           <div className="dev-showcase__timeline">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-
-                return (
-                  <div
-                    data-direct-edit-index={snapshot.sourceIndices.experience[index]}
-                    key={`${item.role}-${item.company}-${index}`}
-                    className="dev-showcase__timeline-item"
-                    data-export-card="true"
-                  >
-                    {showTimeline ? (
-                      <div className="dev-showcase__timeline-rail">
-                        <span className="dev-showcase__timeline-marker" aria-hidden="true" />
-                        <span className="dev-showcase__timeline-line" aria-hidden="true" />
-                      </div>
-                    ) : null}
-                    <div className="dev-showcase__timeline-card">
-                      <div className="dev-showcase__role-row">
-                        <div className="min-w-0">
-                          <p className="dev-showcase__role-title">{item.role || copy.untitledRole}</p>
-                          {item.company || item.location ? (
-                            <p className="dev-showcase__company">
-                              {[item.company, item.location].filter(Boolean).join(' · ')}
-                            </p>
-                          ) : null}
-                        </div>
-                        <p className="dev-showcase__dates">{dateRange || copy.datesPending}</p>
-                      </div>
-                      {bullets.length > 0 ? (
-                        <ul className="dev-showcase__bullets">
-                          {bullets.map((line, lineIndex) => (
-                            <li key={lineIndex}>{line}</li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </div>
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  showTimeline,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  showTimeline,
+                  isLast: index === snapshot.experience.length - 1,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="dev-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -539,14 +641,39 @@ export default function DeveloperShowcase({
           <p className="dev-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`}>{fullName}</h1>
-          <p className="dev-showcase__role">{title}</p>
-          {personalContactItems.length > 0 ? (
+          <h1 className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`}>
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : fullName}
+          </h1>
+          <p className="dev-showcase__role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+          </p>
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="dev-showcase__contact">
-              {personalContactItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
                 <span key={key} className="dev-showcase__contact-item">
                   <span className="dev-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  {value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : value}
                 </span>
               ))}
             </div>

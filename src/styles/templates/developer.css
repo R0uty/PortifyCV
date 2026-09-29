@@ -77,6 +77,13 @@
   animation: none !important;
 }
 
+/* The name is gradient text (color: transparent, gradient clipped to the
+   glyphs). The inline field inherits the transparent colour, and the caret
+   follows currentColor, so without this it is invisible while typing. */
+.dev-showcase__name .direct-edit-field {
+  caret-color: var(--dev-blue);
+}
+
 /* ── Decorative background (opacity kept under 5%, excluded from exports) ── */
 
 .dev-showcase__bg {
@@ -257,6 +264,18 @@
   background: linear-gradient(180deg, var(--dev-sidebar) 0%, #1e293b 100%);
   color: #e2e8f0;
   padding: 1.5rem 1.35rem 2rem;
+}
+
+/* Direct Edit's chip chrome is styled for a white page: its grey group
+   labels and "+ Add" read ~3.7:1 on this dark rail. The labels take the
+   read-only group label's colour. */
+.dev-showcase__sidebar .direct-edit-chip-group__label {
+  color: #94a3b8;
+}
+
+.dev-showcase__sidebar .direct-edit-chip-add {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .dev-showcase__main {
@@ -516,7 +535,10 @@
   background: linear-gradient(180deg, var(--dev-blue), var(--dev-border));
 }
 
-.dev-showcase__timeline-item:last-child .dev-showcase__timeline-line {
+/* `--last` is set in JS, not matched with :last-child: in Direct Edit,
+   EditableList wraps each item in its own .direct-edit-entry div, which
+   made every item a last child and hid every connector. */
+.dev-showcase__timeline-item--last .dev-showcase__timeline-line {
   display: none;
 }
 
@@ -572,6 +594,17 @@
 .dev-showcase__bullets {
   margin-top: 0.5rem;
   padding-left: 1.1rem;
+}
+
+/* Direct Edit's description is one multi-line field, not a <ul>. pre-line
+   is load-bearing: EditableField saves innerText, which collapses a stored
+   "\n" to a space under white-space: normal. */
+.dev-showcase__bullets--editing {
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.65;
+  color: #334155;
 }
 
 .dev-showcase__bullets li {
