@@ -4,6 +4,22 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Two minor review follow-ups: search box and Finnish entry labels — 2026-09-30
+
+The two minor findings from the whole-branch review:
+- **The toolbar's "Search sections" box did nothing in Direct Edit.** It
+  only filters Classic mode's nav rail, which Direct Edit does not
+  render. It now shows in Classic mode only; Direct Edit's Sections
+  popover already lists the sections.
+- **`EditableList`'s drag handle and remove button were labelled in
+  English only** ("Drag to reorder", "Remove entry"), so a screen reader
+  on the Finnish UI announced them in English. `DirectEditContext` now
+  carries the locale, passed by all 18 of `CVPreview`'s providers, and the
+  Finnish labels are "Järjestä vetämällä" and "Poista kohta".
+
+One test each, both failing first (the search box was still present in
+Direct Edit; the handle read "Drag to reorder" in Finnish).
+
 ## PDFs exported from Direct Edit no longer contain the editor — 2026-09-30
 
 Found by a whole-branch review of `v1.3.0` against `main`. PDF export

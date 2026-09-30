@@ -1016,6 +1016,19 @@ test.describe('Direct Edit builder', () => {
   // gated on directEditDispatch) and once as a removable EditableChip. Each
   // skill must now appear exactly once, as a chip, with zero plain tags left
   // in the Skills section.
+  // The toolbar's section search only filters Classic mode's nav rail,
+  // which Direct Edit does not render, so there it did nothing at all.
+  test('the section search box shows in Classic mode only', async ({ page }) => {
+    const search = page.getByRole('searchbox', { name: 'Search sections' })
+    await expect(search).toBeVisible()
+
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await expect(search).toHaveCount(0)
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await expect(search).toBeVisible()
+  })
+
   test('each skill renders exactly once, as a removable chip, in Direct Edit mode', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
@@ -1774,5 +1787,15 @@ test.describe('Direct Edit column control in Finnish', () => {
     const group = page.getByRole('group', { name: 'Sarake' })
     await expect(group.getByRole('button', { name: 'Pääsarake' })).toBeVisible()
     await expect(group.getByRole('button', { name: 'Sivupalkki' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  // EditableList's drag handle and remove button had English-only
+  // aria-labels, so a Finnish UI announced them in English.
+  test('the inline entry controls are labelled in Finnish', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Suora muokkaus' }).click()
+
+    const firstEntry = page.locator('.direct-edit-preview [data-export-section="experience"] .direct-edit-entry').first()
+    await expect(firstEntry.locator('.direct-edit-entry__handle')).toHaveAttribute('aria-label', 'Järjestä vetämällä')
+    await expect(firstEntry.locator('.direct-edit-entry__remove')).toHaveAttribute('aria-label', 'Poista kohta')
   })
 })

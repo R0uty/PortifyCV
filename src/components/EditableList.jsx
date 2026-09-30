@@ -16,7 +16,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { useDirectEdit } from './DirectEditContext'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 
-function EditableListEntry({ id, onRemove, removeLabel, children }) {
+function EditableListEntry({ id, onRemove, dragLabel, removeLabel, children }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
   const style = { transform: CSS.Transform.toString(transform), transition }
 
@@ -29,7 +29,7 @@ function EditableListEntry({ id, onRemove, removeLabel, children }) {
       <button
         type="button"
         className="direct-edit-entry__handle"
-        aria-label="Drag to reorder"
+        aria-label={dragLabel}
         {...attributes}
         {...listeners}
       >
@@ -43,8 +43,11 @@ function EditableListEntry({ id, onRemove, removeLabel, children }) {
   )
 }
 
-export default function EditableList({ section, items, addLabel, removeLabel = 'Remove entry', children }) {
-  const { isEditing, dispatchFormData } = useDirectEdit()
+export default function EditableList({ section, items, addLabel, removeLabel, children }) {
+  const { isEditing, dispatchFormData, locale } = useDirectEdit()
+  const isFinnish = locale === 'fi'
+  const dragLabel = isFinnish ? 'Järjestä vetämällä' : 'Drag to reorder'
+  const resolvedRemoveLabel = removeLabel ?? (isFinnish ? 'Poista kohta' : 'Remove entry')
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -87,7 +90,8 @@ export default function EditableList({ section, items, addLabel, removeLabel = '
             key={ids[index]}
             id={ids[index]}
             onRemove={() => handleRemove(index)}
-            removeLabel={removeLabel}
+            dragLabel={dragLabel}
+            removeLabel={resolvedRemoveLabel}
           >
             {children(item, index)}
           </EditableListEntry>

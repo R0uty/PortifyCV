@@ -170,18 +170,23 @@ function Toolbar({
           </button>
         </div>
 
-        <div className="app-toolbar__group app-toolbar__group--search">
-          <label className="app-toolbar__search">
-            <Search size={14} strokeWidth={2} aria-hidden="true" />
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder={isFinnish ? 'Etsi osioita...' : 'Search sections...'}
-              aria-label={isFinnish ? 'Etsi osioita' : 'Search sections'}
-            />
-          </label>
-        </div>
+        {/* Section search filters Classic mode's nav rail, which Direct
+            Edit does not render (its Sections popover lists the sections
+            instead), so the box only shows in Classic. */}
+        {builderMode === 'classic' ? (
+          <div className="app-toolbar__group app-toolbar__group--search">
+            <label className="app-toolbar__search">
+              <Search size={14} strokeWidth={2} aria-hidden="true" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => onSearchChange(event.target.value)}
+                placeholder={isFinnish ? 'Etsi osioita...' : 'Search sections...'}
+                aria-label={isFinnish ? 'Etsi osioita' : 'Search sections'}
+              />
+            </label>
+          </div>
+        ) : null}
 
         <div className="app-toolbar__spacer" />
 
