@@ -1019,7 +1019,9 @@ test.describe('Direct Edit builder', () => {
   test('each skill renders exactly once, as a removable chip, in Direct Edit mode', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
-    const skillsSection = page.locator('[data-export-section="skills"]')
+    // Scoped to the editable CV: the off-screen read-only copy PDF export
+    // captures (DirectEditPreview.jsx) renders the plain skills too.
+    const skillsSection = page.locator('.direct-edit-preview [data-export-section="skills"]')
     await expect(skillsSection).toBeVisible()
 
     // No plain read-only tags left in the Skills section while editing.
@@ -1039,7 +1041,11 @@ test.describe('Direct Edit builder', () => {
   test('the Sections popover toggles a section\'s visibility in the live preview', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
-    await expect(page.locator('[data-export-section="skills"]')).toBeVisible()
+    // The visible checks are scoped to the editable CV (the off-screen
+    // read-only export copy also renders a Skills section); the hidden check
+    // stays page-wide, since the export copy must drop the section too.
+    const editableSkills = page.locator('.direct-edit-preview [data-export-section="skills"]')
+    await expect(editableSkills).toBeVisible()
 
     await page.getByRole('button', { name: 'Sections' }).click()
     const skillsCheckbox = page.getByRole('checkbox', { name: 'Skills' })
@@ -1062,7 +1068,7 @@ test.describe('Direct Edit builder', () => {
 
     await skillsCheckbox.click()
     await expect(skillsCheckbox).toBeChecked()
-    await expect(page.locator('[data-export-section="skills"]')).toBeVisible()
+    await expect(editableSkills).toBeVisible()
   })
 
   // Explicitly listed in the spec's testing plan and never written until
@@ -1088,6 +1094,44 @@ test.describe('Direct Edit builder', () => {
     const nameFieldAgain = page.locator('.direct-edit-preview h3 .direct-edit-field')
     await expect(nameFieldAgain).toHaveText('Jordan Rivera')
     await expect(nameFieldAgain).toHaveAttribute('contenteditable', 'true')
+  })
+
+  // The PDF is a raster image, so this inspects what the exporter captured
+  // instead: exporters.js deep-clones the export root into its sandbox
+  // (cloneNode(true); html2canvas's own clones are shallow). In Direct Edit
+  // that root used to be the live editable preview, so the PDF carried the
+  // editing chrome, the chips shown in place of Tech Executive's comma
+  // lines, and entries the user had hidden.
+  test('a PDF exported from Direct Edit captures the read-only CV, not the editor', async ({ page }) => {
+    await selectTemplate(page, 'Tech Executive')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    await openSectionPopup(page, 'experience')
+    await page.locator('.direct-edit-popup__entry').first().locator('.direct-edit-popup__entry-visibility').click()
+    await page.keyboard.press('Escape')
+
+    await page.evaluate(() => {
+      window.__exportClones = []
+      const originalCloneNode = Node.prototype.cloneNode
+      Node.prototype.cloneNode = function cloneNode(deep) {
+        const copy = originalCloneNode.call(this, deep)
+        if (deep && this.getAttribute?.('data-export-root') === 'true') {
+          window.__exportClones.push({
+            editingChrome: copy.querySelectorAll('[class*="direct-edit-"], [contenteditable]').length,
+            hasHiddenEntry: copy.textContent.includes('Studio North'),
+            hasVisibleEntry: copy.textContent.includes('Atlas Labs'),
+            commaSkillLines: copy.querySelectorAll('.tech-exec-showcase__skill-items').length,
+          })
+        }
+        return copy
+      }
+    })
+
+    await exportPdfAndExpectSuccess(page)
+
+    const clones = await page.evaluate(() => window.__exportClones)
+    expect(clones.length).toBeGreaterThan(0)
+    expect(clones[0]).toEqual({ editingChrome: 0, hasHiddenEntry: false, hasVisibleEntry: true, commaSkillLines: 1 })
   })
 
   // Regression guard for Fix 2 (final whole-branch review): DirectEditPreview
@@ -1211,7 +1255,9 @@ test.describe('Direct Edit builder', () => {
       // directEditDispatch) and once as a removable chip. Each
       // Direct-Edit-supported template has its own separate Skills
       // gating and needs its own guard.
-      const skillsSection = page.locator(skillsSectionSelector)
+      // Scoped to the editable CV: the off-screen read-only copy PDF export
+      // captures renders the plain, non-chip skills by design.
+      const skillsSection = page.locator(`.direct-edit-preview ${skillsSectionSelector}`)
       await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
       await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
 

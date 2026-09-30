@@ -4,6 +4,34 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## PDFs exported from Direct Edit no longer contain the editor — 2026-09-30
+
+Found by a whole-branch review of `v1.3.0` against `main`. PDF export
+deep-clones whatever `previewRef` points at, and in Direct Edit (the
+default mode) that was the live editable CV. So every PDF exported from
+Direct Edit carried the editing chrome (the "+ Add experience" row,
+removable skill chips with ×, the "+ Add" chip, placeholder text in empty
+fields), showed experience entries the user had hidden (`EditableList`
+renders formData, not the visibility-filtered snapshot), and on Tech
+Executive and European printed chips instead of their comma-joined
+skills. It affected every template.
+
+`DirectEditPreview` now also renders the same CV read-only (no dispatch,
+exactly as Classic mode would) in an off-screen, `inert`, `aria-hidden`
+container, and `previewRef` points at that copy. The copy sits outside
+`.direct-edit-preview`, so the section overlay only ever sees the
+editable CV. It is moved off-screen rather than hidden, because the
+exporter reads computed styles from the source nodes. The cost is a second
+render of the CV while in Direct Edit.
+
+A new test hooks the exporter's deep clone and checks what it captured:
+before the fix it held 29 editing elements, the hidden entry, and no
+comma-joined skill line; now none, not present, and one. Three existing
+tests looked sections up page-wide and started matching the off-screen
+copy too; they are now scoped to `.direct-edit-preview`, except the check
+that a hidden section is gone, which stays page-wide so it also covers the
+export copy.
+
 ## The inline-edit allowlist is gone — 2026-09-29
 
 With every template inline-editable since v1.2.73,

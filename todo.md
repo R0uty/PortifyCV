@@ -1980,7 +1980,7 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
-**State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.78**,
+**State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.79**,
 pushed to `origin/v1.3.0` with CI green there (run `git log -1` for the exact
 commit; it is deliberately not recorded here, because every refresh commit
 would make it stale). Latest work: section column moves (v1.2.53–v1.2.60),
@@ -2002,8 +2002,13 @@ on Tech Executive (v1.2.75) and Creative/Executive (v1.2.76) and for
 Executive's secondary-text token `--ex-ink-faint` (v1.2.77, which changes
 exported Executive PDFs slightly). Portfolio's measured 1.00:1 kicker was
 an artifact (really 4.82:1+). No known contrast issues remain open.
+A whole-branch review against `main` (2026-09-30) found PDFs exported
+from Direct Edit contained the editor itself; fixed in v1.2.79. Its two
+minor findings are still open: the toolbar's "Search sections" box does
+nothing in Direct Edit (it only filters Classic's nav rail), and
+`EditableList`'s drag/remove `aria-label`s are English-only.
 Working tree clean (only an untracked `.claude/`). Full suite green with
-no known flakes: **178/178 e2e**, lint, build and all six `check:*`
+no known flakes: **179/179 e2e**, lint, build and all six `check:*`
 scripts. `main` untouched at
 `0f5261f`, no PR — the user said explicitly on 2026-09-28 NOT to merge yet.
 

@@ -166,6 +166,22 @@
   box-sizing: border-box;
 }
 
+/* The read-only copy PDF export captures (see DirectEditPreview.jsx).
+   Moved off-screen, not hidden: the exporter reads computed styles from
+   these source nodes, and visibility/display would leak into them. Its
+   width is the editable CV's content box at its 68rem cap (less the 1.5rem
+   side padding above), so on a desktop-width window templates that measure
+   themselves (Compact's and European's density auto-fit) settle on the
+   same tier as the CV on screen. On a narrower window the two can differ;
+   the PDF sandbox re-lays the clone out at paper width either way. */
+.direct-edit-export-source {
+  position: fixed;
+  top: 0;
+  left: -200000px;
+  width: 65rem;
+  pointer-events: none;
+}
+
 .app-toolbar__mode-switch {
   display: inline-flex;
   padding: 3px;
