@@ -228,7 +228,8 @@ asserts:
 4. For each template × example pair, every section in the template's
    `primarySections` is non-empty in that example (both locales).
 5. Every template has `templatePageCopy` in both locales: exactly 3 tips,
-   and a `metaDescription` of 50–160 characters.
+   and an English `metaDescription` of 50–160 characters (English-only,
+   like every `VIEW_HEAD` description).
 6. Every template page path appears in `public/sitemap.xml`. Every
    `VIEW_HEAD` title is unique.
 7. Example emails end in `@example.com`.

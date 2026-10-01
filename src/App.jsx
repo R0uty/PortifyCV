@@ -10,7 +10,7 @@ import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
 import { safeStorageGet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
 import { ROUTES } from './utils/routes'
-import { VIEW_HEAD, SITE_ORIGIN, buildArticleSchema } from './utils/pageMeta'
+import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema } from './utils/pageMeta'
 import { APP_VERSION } from './utils/appVersion'
 
 const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
@@ -135,11 +135,12 @@ function useDocumentHead(view) {
     setMetaContent('meta[name="twitter:description"]', head.description)
 
     const existingScript = document.getElementById(VIEW_STRUCTURED_DATA_SCRIPT_ID)
-    if (head.isArticle) {
+    const schema = buildViewSchema(head)
+    if (schema) {
       const script = existingScript ?? document.createElement('script')
       script.type = 'application/ld+json'
       script.id = VIEW_STRUCTURED_DATA_SCRIPT_ID
-      script.textContent = JSON.stringify(buildArticleSchema(head))
+      script.textContent = JSON.stringify(schema)
       if (!existingScript) {
         document.head.appendChild(script)
       }

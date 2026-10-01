@@ -4,8 +4,9 @@
 // that never run JS) — the two exist to solve the same problem in the two
 // places a page's HTML actually gets read, so importing one object into
 // both keeps them from drifting apart.
-import { ROUTES } from './routes.js'
+import { ROUTES, templatePath } from './routes.js'
 import { cvTemplates } from './cvTemplates.js'
+import { TEMPLATE_PAGE_COPY } from './templatePageCopy.js'
 
 export const SITE_ORIGIN = 'https://portifycv.app'
 
@@ -15,7 +16,7 @@ export const SITE_ORIGIN = 'https://portifycv.app'
 // updated to match (same issue LandingPage.jsx had).
 const TEMPLATE_COUNT = cvTemplates.length
 
-export const VIEW_HEAD = {
+const STATIC_VIEW_HEAD = {
   landing: {
     title: 'PortifyCV - CV Builder',
     path: ROUTES.landing,
@@ -126,6 +127,29 @@ export const VIEW_HEAD = {
   },
 }
 
+// View key prefix for the per-template pages: `template:developer` etc.
+// App.jsx maps every key with this prefix onto TemplateDetailPage.
+export const TEMPLATE_VIEW_PREFIX = 'template:'
+
+// One entry per template, generated from the registry so a new template
+// gets its page, metadata, worker routing, and 404/redirect handling just
+// by being added to cvTemplates.js (plus its copy in templatePageCopy.js,
+// which check:template-pages enforces).
+const TEMPLATE_VIEW_HEAD = Object.fromEntries(
+  cvTemplates.map((template) => [
+    `${TEMPLATE_VIEW_PREFIX}${template.id}`,
+    {
+      title: `${template.label} CV Template - Free, No Login - PortifyCV`,
+      path: templatePath(template.slug),
+      description: TEMPLATE_PAGE_COPY[template.id]?.metaDescription ?? template.description,
+      templateId: template.id,
+      schema: 'template',
+    },
+  ]),
+)
+
+export const VIEW_HEAD = { ...STATIC_VIEW_HEAD, ...TEMPLATE_VIEW_HEAD }
+
 // Article schema for guide-type pages (VIEW_HEAD entries with isArticle:
 // true) — index.html's own two JSON-LD blocks (SoftwareApplication, FAQPage)
 // describe the app itself and stay static across every route; this is the
@@ -145,4 +169,33 @@ export function buildArticleSchema(head) {
     datePublished: head.datePublished,
     dateModified: head.dateModified ?? head.datePublished,
   }
+}
+
+// BreadcrumbList for a per-template page: Home › Free CV templates › <Label>.
+// The template pages aren't articles, so they don't get Article schema.
+export function buildTemplatePageSchema(head) {
+  const crumbs = [
+    { name: 'PortifyCV', path: ROUTES.landing },
+    { name: 'Free CV templates', path: ROUTES.freeTemplates },
+    { name: head.title.replace(/ CV Template - .*$/, ''), path: head.path },
+  ]
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((crumb, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: crumb.name,
+      item: `${SITE_ORIGIN}${crumb.path}`,
+    })),
+  }
+}
+
+// The per-view JSON-LD block, or null when a view has none. Shared by
+// App.jsx (client) and worker/index.js (edge), like VIEW_HEAD itself.
+export function buildViewSchema(head) {
+  if (head.isArticle) return buildArticleSchema(head)
+  if (head.schema === 'template') return buildTemplatePageSchema(head)
+  return null
 }

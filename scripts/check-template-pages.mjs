@@ -52,6 +52,56 @@ check(
   templatePath('developer') === '/free-cv-templates/developer',
 )
 
+// --- Metadata -----------------------------------------------------------------
+const { VIEW_HEAD, buildTemplatePageSchema, TEMPLATE_VIEW_PREFIX } = await importSrc('utils/pageMeta.js')
+const { TEMPLATE_PAGE_COPY } = await importSrc('utils/templatePageCopy.js')
+
+for (const template of cvTemplates) {
+  const head = VIEW_HEAD[`${TEMPLATE_VIEW_PREFIX}${template.id}`]
+  check(`${template.id}: has a VIEW_HEAD entry`, Boolean(head))
+  if (!head) continue
+  check(`${template.id}: path is templatePath(slug)`, head.path === templatePath(template.slug), head.path)
+  check(
+    `${template.id}: description is 50–160 chars`,
+    head.description.length >= 50 && head.description.length <= 160,
+    `${head.description.length} chars`,
+  )
+  const schema = buildTemplatePageSchema(head)
+  check(
+    `${template.id}: breadcrumb ends at its own page`,
+    schema['@type'] === 'BreadcrumbList'
+      && schema.itemListElement.length === 3
+      && schema.itemListElement[2].item === `https://portifycv.app${head.path}`,
+  )
+}
+
+const titles = Object.values(VIEW_HEAD).map((head) => head.title)
+check('every VIEW_HEAD title is unique', new Set(titles).size === titles.length)
+
+// --- Page copy ------------------------------------------------------------------
+for (const template of cvTemplates) {
+  const copy = TEMPLATE_PAGE_COPY[template.id]
+  for (const locale of ['en', 'fi']) {
+    const localized = copy?.[locale]
+    check(
+      `${template.id}/${locale}: bestFor and exactly 3 non-empty tips`,
+      Boolean(localized?.bestFor?.trim())
+        && Array.isArray(localized.tips)
+        && localized.tips.length === 3
+        && localized.tips.every((tip) => tip.trim().length > 0),
+    )
+  }
+}
+const allTips = Object.values(TEMPLATE_PAGE_COPY).flatMap((copy) => copy.en.tips)
+check('no English tip is copy-pasted between templates', new Set(allTips).size === allTips.length)
+
+// --- Sitemap ------------------------------------------------------------------
+const sitemap = readFileSync(resolvePath(rootDir, 'public/sitemap.xml'), 'utf8')
+const missingFromSitemap = cvTemplates.filter(
+  (template) => !sitemap.includes(`<loc>https://portifycv.app${templatePath(template.slug)}</loc>`),
+)
+check('every template page is in sitemap.xml', missingFromSitemap.length === 0, missingFromSitemap.map((t) => t.slug).join(', '))
+
 if (failures > 0) {
   console.log(`\n${failures} template-page check(s) failed.`)
   process.exit(1)
