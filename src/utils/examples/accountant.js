@@ -55,7 +55,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'South-Eastern Finland University of Applied Sciences (Xamk)',
+      school: 'Kymenlaakso University of Applied Sciences',
       degree: 'B.B.A. Accounting',
       location: 'Kotka, Finland',
       startDate: '2011',
@@ -120,7 +120,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Kaakkois-Suomen ammattikorkeakoulu (Xamk)',
+      school: 'Kymenlaakson ammattikorkeakoulu',
       degree: 'Tradenomi (AMK), laskentatoimi',
       location: 'Kotka',
       startDate: '2011',

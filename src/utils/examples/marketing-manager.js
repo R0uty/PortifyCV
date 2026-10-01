@@ -142,7 +142,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Hanken Svenska handelshögskolan',
+      school: 'Svenska handelshögskolan (Hanken)',
       degree: 'Kauppatieteiden maisteri, markkinointi',
       location: 'Vaasa',
       startDate: '2014',

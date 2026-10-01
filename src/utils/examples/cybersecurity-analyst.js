@@ -56,7 +56,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'LUT University',
+      school: 'Lappeenranta University of Technology',
       degree: 'B.Sc. Information Technology (Cybersecurity)',
       location: 'Lappeenranta, Finland',
       startDate: '2013',
@@ -155,7 +155,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'LUT-yliopisto',
+      school: 'Lappeenrannan teknillinen yliopisto',
       degree: 'Tekniikan kandidaatti, tietotekniikka (kyberturvallisuus)',
       location: 'Lappeenranta',
       startDate: '2013',

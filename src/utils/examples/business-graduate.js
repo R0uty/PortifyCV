@@ -169,7 +169,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Hanken Svenska handelshögskolan',
+      school: 'Svenska handelshögskolan (Hanken)',
       degree: 'Kauppatieteiden maisteri (KTM)',
       location: 'Helsinki',
       startDate: '2022',
@@ -179,7 +179,7 @@ const fi = buildExampleCv({
       grade: '',
     },
     {
-      school: 'Hanken Svenska handelshögskolan',
+      school: 'Svenska handelshögskolan (Hanken)',
       degree: 'Kauppatieteiden kandidaatti (KTK)',
       location: 'Helsinki',
       startDate: '2019',
@@ -209,7 +209,7 @@ const fi = buildExampleCv({
       stack: 'SPSS, Excel',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Hanken Svenska handelshögskolan',
+      organization: 'Svenska handelshögskolan (Hanken)',
       impact: 'Tulokset esiteltiin 2 yhteistyöyritykselle.',
       date: '2024',
       teamSize: '',
@@ -220,7 +220,7 @@ const fi = buildExampleCv({
   publications: [
     {
       title: 'Asiakaspoistuman syyt tilausvähittäiskaupassa: pohjoismainen tapaustutkimus',
-      publisher: 'Hanken Svenska handelshögskolan (pro gradu -tutkielma)',
+      publisher: 'Svenska handelshögskolan (Hanken), pro gradu -tutkielma',
       year: '2024',
       url: 'https://example.com/thesis/aaltonen-2024',
     },
