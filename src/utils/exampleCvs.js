@@ -12,12 +12,12 @@ const role = (en, fi) => ({ en, fi })
 
 export const EXAMPLES = {
   'frontend-developer': { role: role('Frontend developer', 'Frontend-kehittäjä'), load: () => import('./examples/frontend-developer.js') },
-  'data-engineer': { role: role('Data engineer', 'Data engineer'), load: () => import('./examples/_pending.js') },
-  'junior-developer': { role: role('Junior developer', 'Juniorikehittäjä'), load: () => import('./examples/_pending.js') },
-  'ux-designer': { role: role('UX designer', 'UX-suunnittelija'), load: () => import('./examples/_pending.js') },
-  'graphic-designer': { role: role('Graphic designer', 'Graafinen suunnittelija'), load: () => import('./examples/_pending.js') },
-  'marketing-manager': { role: role('Marketing manager', 'Markkinointipäällikkö'), load: () => import('./examples/_pending.js') },
-  'project-manager': { role: role('Project manager', 'Projektipäällikkö'), load: () => import('./examples/_pending.js') },
+  'data-engineer': { role: role('Data engineer', 'Data engineer'), load: () => import('./examples/data-engineer.js') },
+  'junior-developer': { role: role('Junior developer', 'Juniorikehittäjä'), load: () => import('./examples/junior-developer.js') },
+  'ux-designer': { role: role('UX designer', 'UX-suunnittelija'), load: () => import('./examples/ux-designer.js') },
+  'graphic-designer': { role: role('Graphic designer', 'Graafinen suunnittelija'), load: () => import('./examples/graphic-designer.js') },
+  'marketing-manager': { role: role('Marketing manager', 'Markkinointipäällikkö'), load: () => import('./examples/marketing-manager.js') },
+  'project-manager': { role: role('Project manager', 'Projektipäällikkö'), load: () => import('./examples/project-manager.js') },
   'product-manager': { role: role('Product manager', 'Tuotepäällikkö'), load: () => import('./examples/_pending.js') },
   'finance-director': { role: role('Finance director', 'Talousjohtaja'), load: () => import('./examples/_pending.js') },
   'operations-manager': { role: role('Operations manager', 'Operatiivinen päällikkö'), load: () => import('./examples/_pending.js') },
