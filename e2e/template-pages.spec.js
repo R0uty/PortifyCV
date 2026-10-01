@@ -26,4 +26,38 @@ test.describe('Template pages', () => {
     expect(schema['@type']).toBe('BreadcrumbList')
     expect(schema.itemListElement[2].item).toBe('https://portifycv.app/free-cv-templates/modern-timeline')
   })
+
+  test('the example switcher changes the preview and the URL', async ({ page }) => {
+    await page.goto('/free-cv-templates/developer')
+    const examples = page.getByRole('radiogroup', { name: 'Examples' })
+    await expect(examples.getByRole('radio', { name: 'Frontend developer' })).toBeChecked()
+    await expect(page.locator('.template-page__preview')).toContainText('Mikael Laine')
+
+    await examples.getByRole('radio', { name: 'Data engineer' }).click()
+    await expect(page).toHaveURL(/\?example=data-engineer$/)
+
+    await page.reload()
+    await expect(page.getByRole('radiogroup', { name: 'Examples' }).getByRole('radio', { name: 'Data engineer' })).toBeChecked()
+  })
+
+  test('an unknown ?example= falls back to the first example', async ({ page }) => {
+    await page.goto('/free-cv-templates/developer?example=nope')
+    await expect(page.getByRole('radiogroup', { name: 'Examples' }).getByRole('radio', { name: 'Frontend developer' })).toBeChecked()
+  })
+
+  test('the ATS view toggle switches the preview to ATS rendering', async ({ page }) => {
+    await page.goto('/free-cv-templates/developer')
+    const preview = page.locator('.template-page__preview')
+    const before = await preview.innerHTML()
+    await page.getByRole('checkbox', { name: 'ATS view' }).check()
+    await expect.poll(() => preview.innerHTML()).not.toBe(before)
+  })
+
+  test('previous and next wrap around the template list', async ({ page }) => {
+    await page.goto('/free-cv-templates/minimalist')
+    await page.getByRole('link', { name: /Previous template/ }).click()
+    await expect(page).toHaveURL(/\/free-cv-templates\/european$/)
+    await page.getByRole('link', { name: /Next template/ }).click()
+    await expect(page).toHaveURL(/\/free-cv-templates\/minimalist$/)
+  })
 })
