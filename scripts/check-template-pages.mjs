@@ -109,6 +109,75 @@ const missingFromSitemap = cvTemplates.filter(
 )
 check('every template page is in sitemap.xml', missingFromSitemap.length === 0, missingFromSitemap.map((t) => t.slug).join(', '))
 
+// --- Example CVs -------------------------------------------------------------
+const { EXAMPLES, TEMPLATE_EXAMPLES, loadExampleCv } = await importSrc('utils/exampleCvs.js')
+const { parseImportedCvData, CV_SECTION_ORDER_KEYS } = await importSrc('utils/cvForm.js')
+// Flip to true in Task 8, once all 24 example files exist. Until then a
+// person whose loader still points at the _pending stub is reported as
+// pending, not as a failure. Reads the registry, not the filesystem, so it
+// agrees with what Vite builds.
+const REQUIRE_ALL_EXAMPLES = false
+
+function isSectionFilled(cv, key) {
+  const value = cv[key]
+  const hasText = (item) => typeof item === 'string'
+    ? item.trim().length > 0
+    : Boolean(item) && Object.values(item).some((field) => (typeof field === 'string' ? field.trim() : Array.isArray(field) && field.length))
+  if (typeof value === 'string') return value.trim().length > 0
+  if (Array.isArray(value)) return value.some(hasText)
+  if (value && typeof value === 'object') return Object.values(value).some((field) => typeof field === 'string' && field.trim())
+  return false
+}
+
+for (const template of cvTemplates) {
+  const ids = TEMPLATE_EXAMPLES[template.id] ?? []
+  check(`${template.id}: lists 2–3 examples`, ids.length >= 2 && ids.length <= 3, `${ids.length}`)
+  check(`${template.id}: every listed example is registered`, ids.every((id) => EXAMPLES[id]), ids.filter((id) => !EXAMPLES[id]).join(', '))
+}
+
+const usedIds = new Set(Object.values(TEMPLATE_EXAMPLES).flat())
+const unused = Object.keys(EXAMPLES).filter((id) => !usedIds.has(id))
+check('every registered example is used by a template', unused.length === 0, unused.join(', '))
+
+const pending = []
+for (const [exampleId, entry] of Object.entries(EXAMPLES)) {
+  check(`${exampleId}: has en and fi role labels`, Boolean(entry.role?.en && entry.role?.fi))
+  if (entry.load.toString().includes('_pending')) {
+    pending.push(exampleId)
+    continue
+  }
+
+  const templatesUsingIt = cvTemplates.filter((template) => (TEMPLATE_EXAMPLES[template.id] ?? []).includes(exampleId))
+  const requiredSections = [...new Set(templatesUsingIt.flatMap((template) => template.primarySections))]
+
+  for (const locale of ['en', 'fi']) {
+    const cv = await loadExampleCv(exampleId, locale)
+    const tag = `${exampleId}/${locale}`
+    check(`${tag}: loads`, Boolean(cv))
+    if (!cv) continue
+
+    let parsed = null
+    try { parsed = parseImportedCvData(JSON.parse(JSON.stringify(cv))) } catch (error) {
+      check(`${tag}: accepted by parseImportedCvData`, false, error.message)
+    }
+    if (parsed) {
+      const changed = CV_SECTION_ORDER_KEYS.filter((key) => Array.isArray(cv[key]) && cv[key].length !== parsed[key]?.length)
+      check(`${tag}: parsing keeps every entry`, changed.length === 0, changed.join(', '))
+    }
+
+    check(`${tag}: has fullName and title`, Boolean(cv.fullName?.trim() && cv.title?.trim()))
+    check(`${tag}: email is @example.com`, /@example\.com$/.test(cv.email ?? ''), cv.email)
+    check(`${tag}: no photo baked in`, !cv.photo)
+    const missing = requiredSections.filter((key) => !isSectionFilled(cv, key))
+    check(`${tag}: fills every primary section of ${templatesUsingIt.map((t) => t.id).join(', ')}`, missing.length === 0, `missing: ${missing.join(', ')}`)
+  }
+}
+
+if (pending.length > 0) {
+  console.log(`pend  ${pending.length} example file(s) not written yet: ${pending.join(', ')}`)
+}
+check('all example files exist', !REQUIRE_ALL_EXAMPLES || pending.length === 0, pending.join(', '))
+
 if (failures > 0) {
   console.log(`\n${failures} template-page check(s) failed.`)
   process.exit(1)
