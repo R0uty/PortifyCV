@@ -64,16 +64,23 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
     const requested = readExampleParam()
     return isTemplateExample(templateId, requested) ? requested : examples[0]?.id ?? null
   })
-  const [exampleCv, setExampleCv] = useState(null)
+  const [loadedExample, setLoadedExample] = useState(null)
   const [atsView, setAtsView] = useState(false)
 
   useEffect(() => {
     let cancelled = false
     loadExampleCv(exampleId, resolvedLocale).then((cv) => {
-      if (!cancelled) setExampleCv(cv)
+      if (!cancelled) setLoadedExample({ id: exampleId, locale: resolvedLocale, cv })
     })
     return () => { cancelled = true }
   }, [exampleId, resolvedLocale])
+
+  // Only trust the loaded result when it matches what's currently
+  // selected — otherwise the previous example's CV would briefly show
+  // under the newly-selected radio while the new one is still loading.
+  const exampleCv = loadedExample && loadedExample.id === exampleId && loadedExample.locale === resolvedLocale
+    ? loadedExample.cv
+    : null
 
   const selectExample = (nextId) => {
     setExampleId(nextId)

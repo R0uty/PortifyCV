@@ -40,6 +40,32 @@ test.describe('Template pages', () => {
     await expect(page.getByRole('radiogroup', { name: 'Examples' }).getByRole('radio', { name: 'Data engineer' })).toBeChecked()
   })
 
+  test('switching examples does not show the previous example under the new radio', async ({ page }) => {
+    // Delay the dynamic import of the new example so the race window
+    // between clicking the radio and the load resolving is wide enough
+    // to observe deterministically, instead of depending on how fast an
+    // already-cached chunk happens to resolve.
+    await page.route('**/*_pending*.js', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      await route.continue()
+    })
+
+    await page.goto('/free-cv-templates/developer')
+    const examples = page.getByRole('radiogroup', { name: 'Examples' })
+    const preview = page.locator('.template-page__preview')
+    await expect(preview).toContainText('Mikael Laine')
+
+    await examples.getByRole('radio', { name: 'Data engineer' }).click()
+    // data-engineer is still a stub (resolves to the demo CV via a
+    // delayed dynamic import above). Read the preview's text as an
+    // immediate snapshot (no Playwright auto-retry polling) right after
+    // the click, while the import is still in flight: it must already
+    // have dropped the frontend-developer example's content, not keep
+    // showing it until the import settles.
+    const immediateText = await preview.innerText()
+    expect(immediateText).not.toContain('Mikael Laine')
+  })
+
   test('an unknown ?example= falls back to the first example', async ({ page }) => {
     await page.goto('/free-cv-templates/developer?example=nope')
     await expect(page.getByRole('radiogroup', { name: 'Examples' }).getByRole('radio', { name: 'Frontend developer' })).toBeChecked()
