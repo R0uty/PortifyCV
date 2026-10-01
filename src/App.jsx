@@ -10,7 +10,7 @@ import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
 import { safeStorageGet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
 import { ROUTES } from './utils/routes'
-import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema } from './utils/pageMeta'
+import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema, TEMPLATE_VIEW_PREFIX } from './utils/pageMeta'
 import { APP_VERSION } from './utils/appVersion'
 
 const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
@@ -26,6 +26,7 @@ const DeveloperCvExamplesPage = lazy(() => import('./pages/DeveloperCvExamplesPa
 const ItCvExamplesPage = lazy(() => import('./pages/ItCvExamplesPage'))
 const CybersecurityCvExamplesPage = lazy(() => import('./pages/CybersecurityCvExamplesPage'))
 const FinnishCvExamplesPage = lazy(() => import('./pages/FinnishCvExamplesPage'))
+const TemplateDetailPage = lazy(() => import('./pages/TemplateDetailPage'))
 
 function NotFoundView({ locale, onNavigateToView }) {
   const isFinnish = locale === 'fi'
@@ -381,7 +382,8 @@ function App() {
   }, [])
 
   if (view !== 'builder') {
-    const PageComponent = STATIC_PAGES[view] ?? LandingPage
+    const templatePageId = view.startsWith(TEMPLATE_VIEW_PREFIX) ? VIEW_HEAD[view]?.templateId : null
+    const PageComponent = templatePageId ? TemplateDetailPage : (STATIC_PAGES[view] ?? LandingPage)
 
     return (
       <div className="one-pager">
@@ -425,7 +427,13 @@ function App() {
         </header>
 
         <Suspense fallback={null}>
-          <PageComponent locale={locale} onGetStarted={goToBuilder} onNavigateToView={goToView} />
+          <PageComponent
+            key={view}
+            locale={locale}
+            templateId={templatePageId ?? undefined}
+            onGetStarted={goToBuilder}
+            onNavigateToView={goToView}
+          />
         </Suspense>
 
         <SiteFooter locale={locale} onNavigate={goToView} />
