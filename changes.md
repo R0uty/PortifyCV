@@ -7,8 +7,9 @@ notes for each item live in `todo.md`; per-commit detail is in git history.
 ## 1.3.0 release — 2026-10-01
 
 Closes out the `v1.3.0` branch for its pull request into `main`. The
-headline features since 1.1.0 are already logged below: eight new bespoke
-templates (18 in total), Word (.docx) export, the Direct Edit builder
+headline features since 1.2.0 are already logged below: three new bespoke
+templates (Editorial, Portrait, European; 18 in total, with Classic retired
+into Classic Professional), Word (.docx) export, the Direct Edit builder
 (inline editing on every template, photo upload, keyboard access, entry
 pencils, section column moves), opt-in session restore, and the Playwright
 e2e suite in CI.
