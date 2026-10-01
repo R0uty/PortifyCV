@@ -1,0 +1,308 @@
+import { buildExampleCv } from './buildExampleCv.js'
+
+// Fictional person. Listed under: executive, classicProfessional.
+// Stress case: 6 roles, two-page history.
+const shared = {
+  fullName: 'Tuomas Kivelä',
+  email: 'tuomas.kivela@example.com',
+  phone: '+358 40 000 2001',
+  links: {
+    linkedin: 'https://linkedin.com/in/example-tkivela',
+  },
+}
+
+const en = buildExampleCv({
+  ...shared,
+  title: 'Finance Director',
+  location: 'Espoo, Finland',
+  about:
+    'Finance director with over 20 years across manufacturing and industrial services, the last 6 running finance for a 180 million EUR revenue business. I build forecasts the board trusts and finance teams that close the month in 4 days, not 12.',
+  skills: ['Financial planning & analysis', 'IFRS reporting', 'M&A due diligence', 'Treasury & cash management', 'ERP implementation (SAP)', 'Board reporting', 'Cost control', 'Team leadership'],
+  experience: [
+    {
+      role: 'Finance Director',
+      company: 'Tervaset Industrial Oy',
+      location: 'Espoo, Finland',
+      employmentType: 'Full-time',
+      startDate: 'Feb 2019',
+      endDate: '',
+      isCurrent: true,
+      description: 'Lead finance for a 180 million EUR industrial services group across 4 business units.',
+      achievements: [
+        'Cut the monthly close from 12 days to 4 by consolidating 7 legacy ledgers onto a single SAP instance.',
+        'Negotiated a 40 million EUR refinancing package that lowered the group\'s average interest rate by 1.2 percentage points.',
+        'Built the rolling 18-month forecast model the board now uses for every capital allocation decision.',
+      ],
+      technologies: [],
+    },
+    {
+      role: 'VP Finance',
+      company: 'Rautaranta Group',
+      location: 'Helsinki, Finland',
+      employmentType: 'Full-time',
+      startDate: 'Mar 2015',
+      endDate: 'Jan 2019',
+      isCurrent: false,
+      description: 'Oversaw FP&A and treasury for a steel distribution group with operations in 5 countries.',
+      achievements: [
+        'Led due diligence on 3 acquisitions totaling 22 million EUR, 2 of which closed on the original timeline.',
+        'Reduced working capital by 9 million EUR by renegotiating payment terms with the top 20 suppliers.',
+      ],
+      technologies: [],
+    },
+    {
+      role: 'Finance Director',
+      company: 'Pajamäki Manufacturing',
+      location: 'Tampere, Finland',
+      employmentType: 'Full-time',
+      startDate: 'Apr 2011',
+      endDate: 'Feb 2015',
+      isCurrent: false,
+      description: 'Ran finance for a 60 million EUR precision-components manufacturer.',
+      achievements: [
+        'Introduced standard costing across 3 production lines, exposing 1.1 million EUR a year in hidden scrap cost.',
+        'Rebuilt the annual budgeting process, cutting the cycle from 10 weeks to 5.',
+      ],
+      technologies: [],
+    },
+    {
+      role: 'Senior Financial Controller',
+      company: 'Koivuranta Logistics',
+      location: 'Helsinki, Finland',
+      employmentType: 'Full-time',
+      startDate: 'Jun 2007',
+      endDate: 'Mar 2011',
+      isCurrent: false,
+      description: 'Managed group consolidation and statutory reporting for a logistics holding company.',
+      achievements: [
+        'Delivered the first group-wide IFRS consolidation, replacing a spreadsheet process prone to monthly restatements.',
+        'Cut audit findings from 14 to 2 over 3 consecutive annual audits.',
+      ],
+      technologies: [],
+    },
+    {
+      role: 'Financial Controller',
+      company: 'Nummela Paper Mills',
+      location: 'Lahti, Finland',
+      employmentType: 'Full-time',
+      startDate: 'Aug 2004',
+      endDate: 'May 2007',
+      isCurrent: false,
+      description: 'Owned plant-level cost accounting and monthly reporting for a paper production site.',
+      achievements: [
+        'Identified a billing error pattern that had understated intercompany revenue by 400,000 EUR over 2 years.',
+      ],
+      technologies: [],
+    },
+    {
+      role: 'Financial Analyst',
+      company: 'Hiekkaharju Trading',
+      location: 'Helsinki, Finland',
+      employmentType: 'Full-time',
+      startDate: 'Jul 2001',
+      endDate: 'Jul 2004',
+      isCurrent: false,
+      description: 'Supported budgeting and variance analysis for a wholesale trading business.',
+      achievements: [
+        'Built the first automated variance-analysis report, cutting preparation time from 2 days to 3 hours.',
+      ],
+      technologies: [],
+    },
+  ],
+  education: [
+    {
+      school: 'Aalto University School of Business',
+      degree: 'M.Sc. Economics and Business Administration',
+      location: 'Espoo, Finland',
+      startDate: '1996',
+      endDate: '2001',
+      honors: '',
+      coursework: 'Corporate finance, Management accounting, Financial markets',
+      grade: '',
+    },
+  ],
+  leadership: [
+    {
+      role: 'Board Member',
+      organization: 'Finnish Association of Finance Directors',
+      description: 'Advise on continuing-education programs for mid-career finance leaders.',
+      startDate: '2021',
+      endDate: '',
+    },
+  ],
+  projects: [
+    {
+      name: 'SAP consolidation program',
+      description: 'Led the migration of 7 legacy ledgers onto a single SAP instance across 4 business units.',
+      stack: '',
+      githubUrl: '',
+      demoUrl: '',
+      organization: 'Tervaset Industrial Oy',
+      impact: 'Monthly close time cut from 12 days to 4.',
+      date: '2021',
+      teamSize: '9',
+      contribution: 'Executive sponsor and program lead.',
+      image: '',
+    },
+  ],
+  achievements: [
+    { title: 'CFO Finland "Finance Transformation" shortlist', description: 'Shortlisted for the SAP consolidation program at Tervaset Industrial Oy.', year: '2022' },
+  ],
+  languages: [
+    { language: 'Finnish', level: 'Native' },
+    { language: 'English', level: 'Fluent' },
+    { language: 'Swedish', level: 'Intermediate' },
+  ],
+  certificates: [
+    { name: 'KHT – Authorized Public Accountant', issuer: 'Finnish Patent and Registration Office', year: '2006', credentialUrl: '', expiry: '' },
+  ],
+})
+
+const fi = buildExampleCv({
+  ...shared,
+  title: 'Talousjohtaja',
+  location: 'Espoo',
+  about:
+    'Talousjohtaja, jolla on yli 20 vuoden kokemus valmistavasta teollisuudesta ja teollisuuspalveluista, viimeiset 6 vuotta 180 miljoonan euron liikevaihdon yrityksen taloudesta vastaten. Rakennan ennusteita, joihin hallitus luottaa, ja talousorganisaatioita, jotka sulkevat kuukauden 4 päivässä, ei 12:ssa.',
+  skills: ['Taloussuunnittelu ja -analyysi', 'IFRS-raportointi', 'Yritysostojen due diligence', 'Kassanhallinta', 'ERP-käyttöönotto (SAP)', 'Hallitusraportointi', 'Kustannusten hallinta', 'Tiimin johtaminen'],
+  experience: [
+    {
+      role: 'Talousjohtaja',
+      company: 'Tervaset Industrial Oy',
+      location: 'Espoo',
+      employmentType: 'Full-time',
+      startDate: '02/2019',
+      endDate: '',
+      isCurrent: true,
+      description: 'Johdan taloutta 180 miljoonan euron teollisuuspalvelukonsernissa neljässä liiketoimintayksikössä.',
+      achievements: [
+        'Lyhensin kuukausittaisen tilinpäätöksen 12 päivästä 4 päivään yhdistämällä 7 vanhaa pääkirjaa yhteen SAP-järjestelmään.',
+        'Neuvottelin 40 miljoonan euron jälleenrahoituspaketin, joka laski konsernin keskikorkoa 1,2 prosenttiyksikköä.',
+        'Rakensin rullaavan 18 kuukauden ennustemallin, jota hallitus käyttää nyt kaikissa pääoman kohdennuspäätöksissä.',
+      ],
+      technologies: [],
+    },
+    {
+      role: 'Talousjohtajan sijainen (VP Finance)',
+      company: 'Rautaranta Group',
+      location: 'Helsinki',
+      employmentType: 'Full-time',
+      startDate: '03/2015',
+      endDate: '01/2019',
+      isCurrent: false,
+      description: 'Vastasin taloussuunnittelusta ja kassanhallinnasta teräsjakeluyhtiössä, jolla on toimintaa 5 maassa.',
+      achievements: [
+        'Johdin 3 yritysoston due diligence -prosessit, yhteisarvo 22 miljoonaa euroa, 2 toteutui alkuperäisessä aikataulussa.',
+        'Vähensin käyttöpääomaa 9 miljoonalla eurolla neuvottelemalla maksuehdot uudelleen 20 suurimman toimittajan kanssa.',
+      ],
+      technologies: [],
+    },
+    {
+      role: 'Talousjohtaja',
+      company: 'Pajamäki Manufacturing',
+      location: 'Tampere',
+      employmentType: 'Full-time',
+      startDate: '04/2011',
+      endDate: '02/2015',
+      isCurrent: false,
+      description: 'Vastasin taloudesta 60 miljoonan euron tarkkuuskomponenttien valmistajassa.',
+      achievements: [
+        'Otin käyttöön standardikustannuslaskennan 3 tuotantolinjalla, mikä paljasti 1,1 miljoonan euron vuosittaisen piilevän hukkakustannuksen.',
+        'Uudistin vuosibudjetointiprosessin, lyhentäen kierron 10 viikosta 5 viikkoon.',
+      ],
+      technologies: [],
+    },
+    {
+      role: 'Senior controller',
+      company: 'Koivuranta Logistics',
+      location: 'Helsinki',
+      employmentType: 'Full-time',
+      startDate: '06/2007',
+      endDate: '03/2011',
+      isCurrent: false,
+      description: 'Vastasin konsernin konsolidoinnista ja lakisääteisestä raportoinnista logistiikkaholdingyhtiössä.',
+      achievements: [
+        'Toteutin ensimmäisen koko konsernin kattavan IFRS-konsolidoinnin, korvaten taulukkolaskentaprosessin, joka vaati kuukausittaisia oikaisuja.',
+        'Vähensin tilintarkastushavaintoja 14:stä 2:een kolmen peräkkäisen vuositarkastuksen aikana.',
+      ],
+      technologies: [],
+    },
+    {
+      role: 'Controller',
+      company: 'Nummela Paper Mills',
+      location: 'Lahti',
+      employmentType: 'Full-time',
+      startDate: '08/2004',
+      endDate: '05/2007',
+      isCurrent: false,
+      description: 'Vastasin tehtaan kustannuslaskennasta ja kuukausiraportoinnista paperintuotantolaitoksella.',
+      achievements: [
+        'Löysin laskutusvirhekaavan, joka oli aliarvioinut konsernin sisäistä liikevaihtoa 400 000 eurolla kahden vuoden aikana.',
+      ],
+      technologies: [],
+    },
+    {
+      role: 'Talousanalyytikko',
+      company: 'Hiekkaharju Trading',
+      location: 'Helsinki',
+      employmentType: 'Full-time',
+      startDate: '07/2001',
+      endDate: '07/2004',
+      isCurrent: false,
+      description: 'Tuin budjetointia ja poikkeama-analyysiä tukkukauppayrityksessä.',
+      achievements: [
+        'Rakensin ensimmäisen automatisoidun poikkeama-analyysiraportin, lyhentäen valmisteluajan 2 päivästä 3 tuntiin.',
+      ],
+      technologies: [],
+    },
+  ],
+  education: [
+    {
+      school: 'Aalto-yliopiston kauppakorkeakoulu',
+      degree: 'Kauppatieteiden maisteri, laskentatoimi ja rahoitus',
+      location: 'Espoo',
+      startDate: '1996',
+      endDate: '2001',
+      honors: '',
+      coursework: 'Yritysrahoitus, johdon laskentatoimi, rahoitusmarkkinat',
+      grade: '',
+    },
+  ],
+  leadership: [
+    {
+      role: 'Hallituksen jäsen',
+      organization: 'Suomen talousjohtajien yhdistys',
+      description: 'Neuvonannan tehtävässä keskiuran talousjohtajien täydennyskoulutusohjelmissa.',
+      startDate: '2021',
+      endDate: '',
+    },
+  ],
+  projects: [
+    {
+      name: 'SAP-konsolidointiohjelma',
+      description: 'Johdin 7 vanhan pääkirjan migraation yhteen SAP-järjestelmään neljässä liiketoimintayksikössä.',
+      stack: '',
+      githubUrl: '',
+      demoUrl: '',
+      organization: 'Tervaset Industrial Oy',
+      impact: 'Kuukausittainen tilinpäätösaika laski 12 päivästä 4 päivään.',
+      date: '2021',
+      teamSize: '9',
+      contribution: 'Johdon sponsori ja ohjelman vetäjä.',
+      image: '',
+    },
+  ],
+  achievements: [
+    { title: 'CFO Finland "Vuoden talousmuutos" -ehdokas', description: 'Ehdolla SAP-konsolidointiohjelmasta Tervaset Industrial Oy:ssä.', year: '2022' },
+  ],
+  languages: [
+    { language: 'Suomi', level: 'Äidinkieli' },
+    { language: 'Englanti', level: 'Sujuva' },
+    { language: 'Ruotsi', level: 'Keskitaso' },
+  ],
+  certificates: [
+    { name: 'KHT-tilintarkastaja', issuer: 'Patentti- ja rekisterihallitus', year: '2006', credentialUrl: '', expiry: '' },
+  ],
+})
+
+export default { en, fi }
