@@ -11,8 +11,7 @@ headline features since 1.2.0 are already logged below: three new bespoke
 templates (Editorial, Portrait, European; 18 in total, with Classic retired
 into Classic Professional), Word (.docx) export, the Direct Edit builder
 (inline editing on every template, photo upload, keyboard access, entry
-pencils, section column moves), opt-in session restore, and the Playwright
-e2e suite in CI.
+pencils, section column moves), and three new `check:*` scripts.
 
 Release check on this commit: lint clean, all six `check:*` scripts pass,
 181/181 e2e pass against a production build. The README was out of date
