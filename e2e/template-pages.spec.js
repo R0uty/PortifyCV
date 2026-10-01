@@ -8,7 +8,11 @@ test.describe('Template pages', () => {
     await page.goto('/free-cv-templates/developer')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Developer CV template')
     await expect(page).toHaveTitle('Developer CV Template - Free, No Login - PortifyCV')
-    await expect(page.locator('.template-page__preview .cv-preview, .template-page__preview [data-export-header]').first()).toBeVisible()
+    await expect(page.locator('.template-page__preview [data-export-header]').first()).toBeVisible()
+
+    const breadcrumbBox = await page.locator('.template-page__breadcrumb').boundingBox()
+    const headingBox = await page.getByRole('heading', { level: 1 }).boundingBox()
+    expect(Math.abs(breadcrumbBox.x - headingBox.x)).toBeLessThanOrEqual(2)
   })
 
   test('an unknown template slug shows the not-found view', async ({ page }) => {

@@ -2586,7 +2586,20 @@ select.floating-field__control {
 
 /* Per-template page (/free-cv-templates/<slug>). Two columns: copy and
    actions on the left, a live scaled preview on the right. Stacks under
-   1024px, the same breakpoint as the landing hero. */
+   1024px, the same breakpoint as the landing hero.
+
+   .landing-page (the shared shell) is a column flexbox with
+   align-items: center, so a direct child with no explicit width shrinks to
+   its own content and gets centered instead of left-aligned — harmless for
+   .landing-section elsewhere, which always sets its own width, but it threw
+   the breadcrumb (short text, so it visibly drifted to the middle) out of
+   line with the grid below it. Stretch every direct child of .template-page
+   to the full row width instead, so this and the Task 5 pager both align
+   to the same left edge as the grid's own content. */
+.template-page > * {
+  align-self: stretch;
+}
+
 .template-page__breadcrumb {
   font-size: var(--text-caption);
   color: var(--app-text-muted);
