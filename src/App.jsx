@@ -433,7 +433,11 @@ function App() {
   }
 
   return (
-    <div className="one-pager one-pager--builder">
+    <div
+      className={`one-pager one-pager--builder${
+        headerProps?.builderMode === 'direct' ? ' one-pager--direct-edit' : ''
+      }`}
+    >
       {headerProps && (
         <Toolbar
           locale={headerProps.locale}
@@ -445,9 +449,7 @@ function App() {
           onRedo={headerProps.onRedo}
           templates={headerProps.templates}
           selectedTemplateId={headerProps.selectedTemplateId}
-          onSelectTemplate={headerProps.onSelectTemplate}
-          templateSelectRef={headerProps.templateSelectRef}
-          formDataRef={headerProps.formDataRef}
+          onOpenTemplateGallery={headerProps.onOpenTemplateGallery}
           cvFontId={headerProps.cvFontId}
           onCvFontChange={headerProps.onCvFontChange}
           cvHeadingColor={headerProps.cvHeadingColor}
@@ -463,6 +465,8 @@ function App() {
           onExport={headerProps.onExport}
           onCopyShareLink={headerProps.onCopyShareLink}
           onOpenSettings={headerProps.onOpenSettings}
+          builderMode={headerProps.builderMode}
+          onSetBuilderMode={headerProps.onSetBuilderMode}
         />
       )}
 

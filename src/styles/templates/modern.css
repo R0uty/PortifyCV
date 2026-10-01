@@ -9,6 +9,13 @@
    and sections flow directly on the page (a divider line under each title)
    instead of sitting in individual bordered/background cards, matching the
    reference's "restraint, zero decorative noise" brief.
+
+   §2 type ramp (docs/template-design-system.md): sizes for the six roles
+   come from the shared `--tpl-*` tokens; the root carries
+   `tpl-density-standard`. This file sets weight/case/tracking/colour only.
+   (The serif display name drops from its hand-authored 2.875rem to the
+   standard 1.95rem — it lives in a full-width flex header, so no §7.1
+   fragmentation risk.)
    ========================================================================== */
 
 .modern-showcase {
@@ -77,7 +84,7 @@
 }
 
 .modern-showcase__kicker {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.18em;
@@ -87,16 +94,16 @@
 .modern-showcase__name {
   margin-top: 0.5rem;
   font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: 2.875rem;
+  font-size: var(--tpl-name-size);
   font-weight: 600;
   letter-spacing: -0.01em;
-  line-height: 1.05;
+  line-height: var(--tpl-name-lh);
   color: var(--cv-heading-color, var(--ms-navy));
 }
 
 .modern-showcase__role {
   margin-top: 0.5rem;
-  font-size: 1.125rem;
+  font-size: var(--tpl-title-size);
   font-weight: 600;
   color: var(--ms-navy-muted);
 }
@@ -113,7 +120,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   color: var(--ms-muted);
   white-space: nowrap;
 }
@@ -189,7 +196,7 @@
 }
 
 .modern-showcase__section-title {
-  font-size: 0.6875rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -204,7 +211,7 @@
 
 .modern-showcase__empty {
   margin-top: 0.9rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   color: var(--ms-muted);
 }
 
@@ -212,7 +219,7 @@
 
 .modern-showcase__summary {
   margin-top: 0.9rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.75;
   color: var(--ms-text);
   white-space: pre-line;
@@ -260,7 +267,10 @@
   background: var(--ms-border);
 }
 
-.modern-showcase__timeline-item:last-child .modern-showcase__timeline-line {
+/* `--last` is set in JS, not matched with :last-child: in Direct Edit,
+   EditableList wraps each item in its own .direct-edit-entry div, which
+   made every item a last child and hid every connector. */
+.modern-showcase__timeline-item--last .modern-showcase__timeline-line {
   display: none;
 }
 
@@ -278,19 +288,19 @@
 }
 
 .modern-showcase__role-title {
-  font-size: 0.95rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--ms-navy);
 }
 
 .modern-showcase__company {
   margin-top: 0.15rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   color: var(--ms-muted);
 }
 
 .modern-showcase__dates {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--ms-rose);
   white-space: nowrap;
@@ -305,13 +315,25 @@
 }
 
 .modern-showcase__bullets li {
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.55;
   color: var(--ms-text);
 }
 
 .modern-showcase__bullets li::marker {
   color: var(--ms-blush);
+}
+
+/* Direct Edit's description is one multi-line field, not a flex <ul>.
+   pre-line is load-bearing: EditableField saves innerText, which collapses
+   a stored "\n" to a space under white-space: normal. */
+.modern-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--ms-text);
 }
 
 .modern-showcase__metric {
@@ -339,20 +361,20 @@
 }
 
 .modern-showcase__edu-degree {
-  font-size: 0.86rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--ms-navy);
 }
 
 .modern-showcase__edu-meta {
   margin-top: 0.2rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   color: var(--ms-muted);
 }
 
 .modern-showcase__edu-dates {
   margin-top: 0.15rem;
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--ms-rose);
 }
@@ -377,14 +399,14 @@
 }
 
 .modern-showcase__project-name {
-  font-size: 0.86rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--ms-navy);
 }
 
 .modern-showcase__project-desc {
   margin-top: 0.3rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.55;
   color: var(--ms-text);
   white-space: pre-line;
@@ -392,7 +414,7 @@
 
 .modern-showcase__project-link {
   margin-top: 0.4rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   color: var(--ms-rose);
   word-break: break-all;
 }
@@ -408,7 +430,7 @@
   border-radius: 6px;
   border: 1px solid var(--ms-border);
   padding: 0.28rem 0.6rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--ms-text);
   background: transparent;
@@ -446,20 +468,20 @@
 }
 
 .modern-showcase__achievement-title {
-  font-size: 0.82rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--ms-navy);
 }
 
 .modern-showcase__achievement-year {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--ms-rose);
 }
 
 .modern-showcase__achievement-desc {
   margin-top: 0.2rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.5;
   color: var(--ms-text);
   white-space: pre-line;
@@ -476,7 +498,7 @@
 }
 
 .modern-showcase__skill-group-label {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -498,7 +520,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   color: var(--ms-text);
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--ms-border);
@@ -510,7 +532,7 @@
 }
 
 .modern-showcase__lang-level {
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   color: var(--ms-rose);
 }
 
@@ -534,21 +556,21 @@
 }
 
 .modern-showcase__cert-name {
-  font-size: 0.8rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--ms-navy);
 }
 
 .modern-showcase__cert-meta {
   margin-top: 0.15rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   color: var(--ms-muted);
 }
 
 .modern-showcase__cert-link {
   display: inline-block;
   margin-top: 0.3rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--ms-rose);
 }
@@ -578,7 +600,7 @@
 }
 
 .modern-showcase__link-label {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -589,7 +611,7 @@
   display: block;
   overflow: hidden;
   margin-top: 0.1rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   color: var(--ms-text);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -611,7 +633,7 @@
   border-radius: 9999px;
   border: 1px solid var(--ms-border);
   padding: 0.32rem 0.7rem;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   color: var(--ms-text);
 }
 
@@ -654,10 +676,6 @@
 
   .modern-showcase__sidebar {
     padding: 1.25rem 1.25rem 1.75rem;
-  }
-
-  .modern-showcase__name {
-    font-size: 2.1rem;
   }
 
   .modern-showcase__photo {

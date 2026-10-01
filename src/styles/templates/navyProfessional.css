@@ -6,6 +6,13 @@
    section-icon badges, no timeline). Unlike every other bespoke Showcase in
    this app, there is no shared top header — the sidebar IS the identity
    block, matching the reference design's full-height rail.
+
+   §2 type ramp (docs/template-design-system.md): main-column roles read the
+   shared `--tpl-*` tokens; the root carries `tpl-density-standard`. The
+   sidebar identity block (kicker, name, role) keeps its own small sizes —
+   it is white knockout in a ~180px rail, narrower than any ramp density's
+   name-column floor, so the standard 1.95rem name cannot go there. Other
+   sidebar text uses `--tpl-meta-size` (a condensed zone).
    ========================================================================== */
 
 .navy-professional-showcase {
@@ -68,6 +75,9 @@
   border: 3px solid rgba(255, 255, 255, 0.85);
 }
 
+/* Identity block — kicker / name / role. Ad-hoc sizes on purpose: white
+   knockout in the ~180px navy rail, narrower than the standard ramp's
+   210px name-column floor (see the file header). */
 .navy-professional-showcase__kicker {
   margin-top: 1rem;
   font-size: 0.62rem;
@@ -95,6 +105,20 @@
   color: var(--np-blue-light);
 }
 
+/* The role is styled uppercase. EditableField saves innerText, which
+   reflects text-transform, so without this an inline edit would save the
+   title in capitals. Scoped to the editable span only. */
+.navy-professional-showcase__role .direct-edit-field {
+  text-transform: none;
+}
+
+/* Direct Edit's "+ Add" chip is styled for a white page (grey text, no
+   fill), which reads at ~3:1 on the navy sidebar. */
+.navy-professional-showcase__sidebar .direct-edit-chip-add {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .navy-professional-showcase__sidebar-divider {
   height: 1px;
   margin: 1.75rem 0;
@@ -110,16 +134,16 @@
 }
 
 .navy-professional-showcase__sidebar-heading {
-  font-size: 0.68rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   color: var(--np-blue-light);
   margin-bottom: 0.75rem;
 }
 
 .navy-professional-showcase__empty {
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   color: var(--np-muted);
 }
 
@@ -139,10 +163,10 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.85);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .navy-professional-showcase__contact-icon {
@@ -163,7 +187,7 @@
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.28);
   padding: 0.3rem 0.65rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: #ffffff;
   background: rgba(255, 255, 255, 0.06);
@@ -182,7 +206,7 @@
 .navy-professional-showcase__language-item {
   position: relative;
   padding-left: 0.9rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   color: rgba(255, 255, 255, 0.85);
 }
 
@@ -236,10 +260,10 @@
 }
 
 .navy-professional-showcase__section-title {
-  font-size: 0.85rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   /* Unlike __name (white text on the dark sidebar — deliberately left out
      of the heading-color override, see utils/cvHeadingColors.js), section
      titles render in the light main column, so they're safe to override. */
@@ -250,7 +274,7 @@
 
 .navy-professional-showcase__summary {
   margin-top: 0.9rem;
-  font-size: 0.85rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.75;
   color: var(--np-text);
   white-space: pre-line;
@@ -265,15 +289,19 @@
 }
 
 .navy-professional-showcase__entry {
-  padding: 0 0 1.2rem;
+  padding: 1.2rem 0;
   border-bottom: 1px solid var(--np-border);
 }
 
-.navy-professional-showcase__entry:not(:first-child) {
-  padding-top: 1.2rem;
+/* First/last come from JS modifier classes that both Experience and
+   Education set, not :first-child/:last-child: in Direct Edit, EditableList
+   wraps each Experience entry in its own .direct-edit-entry div, making
+   every entry both. Doubled class for order-independent specificity. */
+.navy-professional-showcase__entry.navy-professional-showcase__entry--first {
+  padding-top: 0;
 }
 
-.navy-professional-showcase__entry:last-child {
+.navy-professional-showcase__entry.navy-professional-showcase__entry--last {
   border-bottom: none;
   padding-bottom: 0;
 }
@@ -287,13 +315,13 @@
 }
 
 .navy-professional-showcase__entry-role {
-  font-size: 0.92rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--np-text);
 }
 
 .navy-professional-showcase__entry-dates {
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--np-muted);
   white-space: nowrap;
@@ -301,7 +329,7 @@
 
 .navy-professional-showcase__entry-meta {
   margin-top: 0.15rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   font-style: italic;
   color: var(--np-muted);
 }
@@ -314,8 +342,20 @@
   gap: 0.32rem;
 }
 
+/* Direct Edit's description is one multi-line field, not a flex <ul>.
+   pre-line is load-bearing: EditableField saves innerText, which collapses
+   a stored "\n" to a space under white-space: normal. */
+.navy-professional-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--np-text);
+}
+
 .navy-professional-showcase__bullets li {
-  font-size: 0.79rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
   color: var(--np-text);
 }
@@ -339,7 +379,7 @@
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   color: var(--np-text);
 }
 
@@ -473,4 +513,88 @@
     transition: none !important;
     box-shadow: none !important;
   }
+}
+
+/* ── Sections moved between columns (Direct Edit, sectionColumns.js) ──
+   A moved section keeps its home markup; these rules adapt it to the
+   surface it now sits on. Sidebar markup is written for the navy rail,
+   main markup for the white page.
+
+   Every rule is scoped to the designer render. ATS mode reuses this same
+   Showcase with a transparent sidebar and its own monochrome block above,
+   which already recolours every sidebar class for white; white rail text
+   applied there would land white-on-white (caught by the ATS e2e guard).
+
+   Sidebar → main: the same recolouring the ATS block above uses to put
+   the rail's pills, languages and headings on white, except the heading,
+   which matches its main-column neighbours' blue (and honours the user's
+   heading colour the same way they do). */
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__sidebar-heading {
+  color: var(--cv-heading-color, var(--np-blue));
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__tag {
+  border-color: var(--np-border);
+  background: transparent;
+  color: var(--np-text);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__language-item {
+  color: var(--np-text);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__language-item::before {
+  background: var(--np-blue);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__language-level,
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__main [data-moved-from='side'] .navy-professional-showcase__empty--sidebar {
+  color: var(--np-muted);
+}
+
+/* Main → sidebar: main-column text recoloured with the rail's own
+   palette (white body text, translucent-white meta, light-blue accents,
+   the rail's own divider line). */
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__section-title {
+  color: var(--np-blue-light);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-role {
+  color: #ffffff;
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__cert-item,
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__bullets li {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-dates,
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-meta,
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__empty {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry {
+  border-bottom-color: var(--np-navy-line);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__cert-dot {
+  background: var(--np-blue-light);
+}
+
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__bullets li::marker {
+  color: var(--np-blue-light);
+}
+
+/* Spacing, in both renders: the rail spaces its SidebarBlock <div>s with
+   .sidebar-block's own margin, and the main column spaces its <section>s
+   with `section + section`. A moved section is the other element type, so
+   neither rule reaches it (or the section after it) without these. */
+.navy-professional-showcase__sidebar [data-moved-from='main'] {
+  margin-top: 1.75rem;
+}
+
+.navy-professional-showcase__main [data-moved-from='side'],
+.navy-professional-showcase__main [data-moved-from='side'] + .navy-professional-showcase__section {
+  margin-top: 2rem;
 }

@@ -4,15 +4,19 @@
    `.timeline-showcase`. Single column, no sidebar, restrained — a vertical
    timeline (dot + connecting line, date in its own left column) is the one
    strong visual feature, reused for both Experience and Education. The one
-   accent color comes from `--tl-accent`, set inline per-render from the
+   accent color comes from `--tpl-accent`, set inline per-render from the
    `accentColor` prop (see TimelineShowcase.jsx) so it's user-customizable
    without this stylesheet needing to know about it — the value declared
    here is only the fallback for contexts where the inline style is
    somehow absent.
+
+   §2 type ramp (docs/template-design-system.md): sizes for the six roles
+   come from the shared `--tpl-*` tokens; the root carries
+   `tpl-density-standard`. This file sets weight/case/tracking/colour only.
    ========================================================================== */
 
 .timeline-showcase {
-  --tl-accent: #6d28d9;
+  --tpl-accent: #6d28d9;
   --tl-text: #1f2937;
   --tl-muted: #6b7280;
   --tl-border: #e5e7eb;
@@ -62,7 +66,7 @@
 }
 
 .timeline-showcase__kicker {
-  font-size: 0.62rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -71,25 +75,42 @@
 
 .timeline-showcase__name {
   margin-top: 0.3rem;
-  font-size: 2.1rem;
+  font-size: var(--tpl-name-size);
   font-weight: 800;
   letter-spacing: -0.01em;
-  line-height: 1.1;
+  line-height: var(--tpl-name-lh);
   text-transform: uppercase;
   color: var(--cv-heading-color, #111827);
 }
 
 .timeline-showcase__name-accent {
-  color: var(--tl-accent);
+  color: var(--tpl-accent);
 }
 
 .timeline-showcase__role {
   margin-top: 0.35rem;
-  font-size: 0.82rem;
+  font-size: var(--tpl-title-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: var(--tl-accent);
+  color: var(--tpl-accent);
+}
+
+/* Direct Edit data-integrity fix (found by e2e/direct-edit.spec.js's
+   "Modern Timeline: name persists..." check, Phase 2 Round 4 Task 6):
+   EditableField (src/components/EditableField.jsx) dispatches a field's
+   new value from `event.currentTarget.innerText`, and `innerText` (unlike
+   `textContent`) reflects CSS `text-transform` — so with the uppercase
+   rules above still in effect on the live contentEditable span, typing a
+   mixed-case name/title here didn't just *display* as uppercase, it got
+   *saved* as uppercase into formData (and from there into Classic mode,
+   PDF/DOCX export, share links). Undoing the transform on the editable
+   span only — the read-only render (`isEditing` false, EditableField.jsx)
+   is untouched, so the all-caps look is unchanged everywhere Direct Edit
+   isn't actively on. */
+.timeline-showcase__name .direct-edit-field,
+.timeline-showcase__role .direct-edit-field {
+  text-transform: none;
 }
 
 .timeline-showcase__contact {
@@ -104,7 +125,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   color: var(--tl-muted);
   white-space: nowrap;
   overflow-wrap: anywhere;
@@ -119,7 +140,7 @@
 .timeline-showcase__header-divider {
   height: 2px;
   margin: 0 2.75rem;
-  background: var(--tl-accent);
+  background: var(--tpl-accent);
 }
 
 /* ── Body: single column ── */
@@ -146,7 +167,7 @@
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 9999px;
-  background: var(--tl-accent);
+  background: var(--tpl-accent);
   color: #ffffff;
 }
 
@@ -156,16 +177,16 @@
 }
 
 .timeline-showcase__section-title {
-  font-size: 0.85rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.16em;
   color: var(--cv-heading-color, #111827);
 }
 
 .timeline-showcase__empty {
   margin-top: 0.8rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   color: var(--tl-muted);
 }
 
@@ -173,7 +194,7 @@
 
 .timeline-showcase__summary {
   margin-top: 0.8rem;
-  font-size: 0.85rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.75;
   color: var(--tl-text);
   white-space: pre-line;
@@ -194,7 +215,7 @@
   margin-bottom: 1.25rem;
 }
 
-.timeline-showcase__row:last-child {
+.timeline-showcase__row--last {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
@@ -204,9 +225,9 @@
   flex-shrink: 0;
   width: 6.5rem;
   padding-top: 0.15rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
-  color: var(--tl-accent);
+  color: var(--tpl-accent);
 }
 
 .timeline-showcase__row-rail {
@@ -223,7 +244,7 @@
   width: 0.6rem;
   height: 0.6rem;
   border-radius: 9999px;
-  border: 2px solid var(--tl-accent);
+  border: 2px solid var(--tpl-accent);
   background: #ffffff;
 }
 
@@ -232,7 +253,7 @@
   top: 0.28rem;
   bottom: -2.5rem;
   width: 1.5px;
-  background: var(--tl-accent);
+  background: var(--tpl-accent);
   opacity: 0.3;
 }
 
@@ -242,15 +263,15 @@
 }
 
 .timeline-showcase__entry-role {
-  font-size: 0.92rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: #111827;
 }
 
 .timeline-showcase__entry-meta {
   margin-top: 0.15rem;
-  font-size: 0.78rem;
-  color: var(--tl-accent);
+  font-size: var(--tpl-meta-size);
+  color: var(--tpl-accent);
 }
 
 .timeline-showcase__bullets {
@@ -262,13 +283,22 @@
 }
 
 .timeline-showcase__bullets li {
-  font-size: 0.79rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
   color: var(--tl-text);
 }
 
 .timeline-showcase__bullets li::marker {
-  color: var(--tl-accent);
+  color: var(--tpl-accent);
+}
+
+.timeline-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--tl-text);
 }
 
 /* ── Projects: clean horizontal cards ── */
@@ -293,7 +323,7 @@
   width: 1.9rem;
   height: 1.9rem;
   border-radius: 9999px;
-  background: var(--tl-accent);
+  background: var(--tpl-accent);
   color: #ffffff;
   margin-bottom: 0.6rem;
 }
@@ -304,14 +334,14 @@
 }
 
 .timeline-showcase__project-name {
-  font-size: 0.88rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: #111827;
 }
 
 .timeline-showcase__project-desc {
   margin-top: 0.35rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.55;
   color: var(--tl-muted);
 }
@@ -327,17 +357,17 @@
   border-radius: 5px;
   border: 1px solid var(--tl-border);
   padding: 0.2rem 0.5rem;
-  font-size: 0.66rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--tl-accent);
+  color: var(--tpl-accent);
 }
 
 .timeline-showcase__project-link {
   display: inline-block;
   margin-top: 0.7rem;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--tl-accent);
+  color: var(--tpl-accent);
 }
 
 /* ── Skills ── */
@@ -353,9 +383,9 @@
   border-radius: 6px;
   border: 1px solid var(--tl-border);
   padding: 0.3rem 0.7rem;
-  font-size: 0.75rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--tl-accent);
+  color: var(--tpl-accent);
   background: transparent;
 }
 
@@ -369,14 +399,14 @@
 }
 
 .timeline-showcase__language-name {
-  font-size: 0.84rem;
+  font-size: var(--tpl-body-size);
   font-weight: 700;
   color: #111827;
 }
 
 .timeline-showcase__language-level {
   margin-top: 0.1rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   color: var(--tl-muted);
 }
 
@@ -394,7 +424,7 @@
 }
 
 .timeline-showcase__language-dot--filled {
-  background: var(--tl-accent);
+  background: var(--tpl-accent);
 }
 
 /* ── Certifications ── */
@@ -428,20 +458,20 @@
 }
 
 .timeline-showcase__cert-name {
-  font-size: 0.86rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: #111827;
 }
 
 .timeline-showcase__cert-issuer {
   margin-top: 0.15rem;
-  font-size: 0.78rem;
-  color: var(--tl-accent);
+  font-size: var(--tpl-meta-size);
+  color: var(--tpl-accent);
 }
 
 .timeline-showcase__cert-year {
   flex-shrink: 0;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--tl-muted);
 }
@@ -449,9 +479,9 @@
 .timeline-showcase__cert-link {
   display: inline-block;
   margin-top: 0.35rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--tl-accent);
+  color: var(--tpl-accent);
 }
 
 /* ── Responsive ── */
@@ -467,10 +497,6 @@
 
   .timeline-showcase__body {
     padding: 1.25rem 1.25rem 1.75rem;
-  }
-
-  .timeline-showcase__name {
-    font-size: 1.6rem;
   }
 
   .timeline-showcase__row-date {

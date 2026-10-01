@@ -312,6 +312,7 @@ export const createInitialCvData = () => ({
   location: '',
   photo: '',
   photoVisibilityByTemplate: createTemplatePhotoVisibility(),
+  sectionColumnsByTemplate: {},
   sectionOrder: createSectionOrder(),
   skills: [],
   experience: [createEmptyExperience()],
@@ -349,6 +350,7 @@ export const demoCvData = {
   location: 'Helsinki, Finland',
   photo: '',
   photoVisibilityByTemplate: createTemplatePhotoVisibility(),
+  sectionColumnsByTemplate: {},
   sectionOrder: createSectionOrder(),
   skills: [
     'Product Strategy',
@@ -971,6 +973,7 @@ export function parseImportedCvData(value) {
   const sectionItemVisibility = value.sectionItemVisibility ?? defaultState.sectionItemVisibility
   const photoVisibilityByTemplate =
     value.photoVisibilityByTemplate ?? defaultState.photoVisibilityByTemplate
+  const sectionColumnsByTemplate = value.sectionColumnsByTemplate ?? {}
   const sectionOrder = value.sectionOrder ?? defaultState.sectionOrder
 
   validateAllowedKeys(
@@ -985,6 +988,7 @@ export function parseImportedCvData(value) {
       'location',
       'photo',
       'photoVisibilityByTemplate',
+      'sectionColumnsByTemplate',
       'skills',
       'experience',
       'education',
@@ -1377,6 +1381,25 @@ export function parseImportedCvData(value) {
     }
   })
 
+  // Shape only. Whether a given move is still ALLOWED is decided at render
+  // time (sectionColumns.js ignores stale entries), so a rule changing
+  // later never makes an old file un-importable.
+  if (!isPlainObject(sectionColumnsByTemplate)) {
+    throw new Error('sectionColumnsByTemplate must be an object.')
+  }
+
+  Object.entries(sectionColumnsByTemplate).forEach(([templateId, columns]) => {
+    if (!isPlainObject(columns)) {
+      throw new Error(`sectionColumnsByTemplate.${templateId} must be an object.`)
+    }
+
+    Object.entries(columns).forEach(([sectionKey, column]) => {
+      if (column !== 'main' && column !== 'sidebar') {
+        throw new Error(`sectionColumnsByTemplate.${templateId}.${sectionKey} must be "main" or "sidebar".`)
+      }
+    })
+  })
+
   return {
     fullName: readOptionalString(value.fullName, 'fullName'),
     title: readOptionalString(value.title, 'title'),
@@ -1390,6 +1413,9 @@ export function parseImportedCvData(value) {
       ...createTemplatePhotoVisibility(),
       ...photoVisibilityByTemplate,
     },
+    sectionColumnsByTemplate: Object.fromEntries(
+      Object.entries(sectionColumnsByTemplate).map(([templateId, columns]) => [templateId, { ...columns }]),
+    ),
     skills: skills.map((skill, index) => readOptionalString(skill, `skills[${index}]`)),
     experience:
       experience.length > 0

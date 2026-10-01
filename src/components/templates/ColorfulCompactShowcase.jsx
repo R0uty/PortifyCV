@@ -12,40 +12,34 @@
 // see CreativeShowcase.jsx's STRIPE_SEGMENTS comment for why a *repeating*
 // linear-gradient is unsafe for html2canvas; a single multi-stop
 // linear-gradient bar like this one doesn't hit that bug (confirmed already
-// in production by portfolio.css's header hairline). Every section header
-// cycles through a fixed six-color rainbow rather than one template-wide
-// accent, which is the one visual idea this whole template is built around
-// — so unlike Modern Timeline/Modern Orange, there is no user-customizable
-// accentColor prop here.
+// in production by portfolio.css's header hairline).
+//
+// Colour is the one visual idea this template is built around, so it is the
+// single template allowed more than one accent — but only under the design
+// system's capped exception (§3): a fixed, named six-swatch palette, one hue
+// assigned per *section*, in order. Never per skill chip, per project card
+// or per bullet — everything decorative inside a section takes that
+// section's one colour. There is no user-customizable accentColor prop.
+// (Polished v1.2.12: the 7th/8th hues — yellow, charcoal — retired, and the
+// per-item colour cycles collapsed to the section colour; compact type ramp
+// adopted.)
 
 import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
-import { formatDateRange, formatLinkDisplayValue } from './shared'
+import { formatDateRange, formatLinkDisplayValue, createSectionRouter } from './shared'
+import EditableField from '../EditableField'
+import EditableList, { EditableChip } from '../EditableList'
 
-// Cycled by running position (main sections first, then sidebar) so every
-// section on the page gets its own color, wrapping back to pink after six —
-// exactly the reference's About/Experience/Projects/Skills/Education/
-// Languages/Links/Extras coloring (the 7th and 8th sections reuse pink/orange).
-const SECTION_COLORS = ['pink', 'orange', 'blue', 'green', 'teal', 'purple']
+// The capped, named palette (design-system §3). Assigned by running section
+// position (main sections first, then sidebar), wrapping after six. Order
+// matches the spec's table: pink, orange, green, teal, blue, purple.
+const SECTION_COLORS = ['pink', 'orange', 'green', 'teal', 'blue', 'purple']
 
-// Cycled by skill index — the reference's Toolkit row uses eight distinct
-// solid-fill pill colors before repeating.
-const SKILL_COLORS = ['pink', 'orange', 'yellow', 'green', 'teal', 'blue', 'purple', 'charcoal']
-
-// Cycled by experience-entry index for the date-range label.
-const EXP_DATE_COLORS = ['orange', 'teal', 'purple']
-
-// Cycled per project, reset for each card — matches the reference's varied
-// (not globally continuous) tag coloring per project.
-const TAG_COLORS = ['blue', 'purple', 'green', 'pink', 'teal']
-
-// Cycled by language-entry index for the level badge.
-const LANG_LEVEL_COLORS = ['pink', 'blue', 'green']
-
-// Cycled by contact-item index for the small dot marker in the header.
-const CONTACT_DOT_COLORS = ['pink', 'teal', 'purple']
+// Fixed single colour for the dark header's contact dots — matches the
+// two-tone name's accent half. Not a section, so not part of the cycle.
+const HEADER_ACCENT = 'orange'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -53,6 +47,83 @@ function splitToBullets(text) {
 
 function colorAt(cycle, index) {
   return cycle[index % cycle.length]
+}
+
+// Colorful Compact's own Experience-entry renderer — not
+// directEditExperienceEntry.jsx: role and the company/location meta line
+// nest together in one `min-w-0` div with the date as its sibling, the
+// same shape as Creative's. Only role and company are editable inline;
+// location stays read-only-appended text. `index` is formData-relative in
+// the directEditDispatch branch (EditableList's own index); the read-only
+// call site passes the snapshot's `sourceIndex` for data-direct-edit-index.
+//
+// First/last spacing is driven by isFirst/isLast modifier classes, never
+// :first-child/:last-child — EditableList wraps each entry in its own
+// .direct-edit-entry div, which makes every row a first AND last child.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, color, isFirst, isLast, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+  const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
+  const rowClassName = [
+    'colorful-compact-showcase__exp-row',
+    isFirst ? 'colorful-compact-showcase__exp-row--first' : '',
+    isLast ? 'colorful-compact-showcase__exp-row--last' : '',
+  ].filter(Boolean).join(' ')
+
+  return (
+    <div
+      data-direct-edit-index={sourceIndex}
+      key={`${item.role}-${item.company}-${index}`}
+      className={rowClassName}
+      data-export-card="true"
+    >
+      <div className="colorful-compact-showcase__exp-head">
+        <div className="min-w-0">
+          <p className="colorful-compact-showcase__exp-role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                value={item.role}
+                placeholder={copy.untitledRole}
+              />
+            ) : item.role || copy.untitledRole}
+          </p>
+          {directEditDispatch ? (
+            <p className="colorful-compact-showcase__exp-meta">
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                value={item.company}
+                placeholder={copy.company}
+              />
+              {item.location ? ` · ${item.location}` : null}
+            </p>
+          ) : metaLine ? <p className="colorful-compact-showcase__exp-meta">{metaLine}</p> : null}
+        </div>
+        <p className={`colorful-compact-showcase__exp-date colorful-compact-showcase__exp-date--${color}`}>
+          {dateRange || copy.datesPending}
+        </p>
+      </div>
+      {directEditDispatch ? (
+        <p className="colorful-compact-showcase__bullets colorful-compact-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="colorful-compact-showcase__bullets">
+          {bullets.map((line, lineIndex) => (
+            <li key={lineIndex}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  )
 }
 
 function SectionHead({ title, color }) {
@@ -69,16 +140,22 @@ function SectionHead({ title, color }) {
   )
 }
 
-function Section({ id, placement, title, color, children }) {
+function Section({ id, placement, movedFrom = null, title, color, children }) {
   return (
-    <section className="colorful-compact-showcase__section" data-export-section={id} data-export-placement={placement}>
+    <section className="colorful-compact-showcase__section" data-export-section={id} data-export-placement={placement} data-moved-from={movedFrom ?? undefined}>
       <SectionHead title={title} color={color} />
       {children}
     </section>
   )
 }
 
-export default function ColorfulCompactShowcase({ formData, locale = 'en', previewRef, templateConfig }) {
+export default function ColorfulCompactShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  directEditDispatch = null,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -105,6 +182,14 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     ['phone', snapshot.phone],
     ['website', websiteUrl],
   ].filter(([, value]) => value)
+  // Direct Edit shows every contact slot, empty or not, in the read-only
+  // order. The website is a link field (links.website), not a root one.
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email', 'root'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location', 'root'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone', 'root'],
+    ['website', formData.links.website, isFinnish ? 'Verkkosivusto' : 'Website', 'link'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
 
@@ -124,6 +209,8 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     about: isFinnish ? 'Tietoa minusta' : 'About',
     experience: isFinnish ? 'Kokemus' : 'Experience',
@@ -135,51 +222,58 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     achievements: isFinnish ? 'Lisätiedot' : 'Extras',
   }
 
-  const renderMainSection = (key, color) => {
+  const renderMainSection = (key, placement, movedFrom, color) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" placement="main" title={copy.about} color={color}>
-          <p className="colorful-compact-showcase__summary">{about}</p>
+        <Section key={key} id="about" placement={placement} movedFrom={movedFrom} title={copy.about} color={color}>
+          <p className="colorful-compact-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </Section>
       )
     }
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main" title={copy.experience} color={color}>
+        <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} title={copy.experience} color={color}>
           <div className="colorful-compact-showcase__exp-list">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-                const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
-                const dateColor = colorAt(EXP_DATE_COLORS, index)
-
-                return (
-                  <div
-                    key={`${item.role}-${item.company}-${index}`}
-                    className="colorful-compact-showcase__exp-row"
-                    data-export-card="true"
-                  >
-                    <div className="colorful-compact-showcase__exp-head">
-                      <div className="min-w-0">
-                        <p className="colorful-compact-showcase__exp-role">{item.role || copy.untitledRole}</p>
-                        {metaLine ? <p className="colorful-compact-showcase__exp-meta">{metaLine}</p> : null}
-                      </div>
-                      <p className={`colorful-compact-showcase__exp-date colorful-compact-showcase__exp-date--${dateColor}`}>
-                        {dateRange || copy.datesPending}
-                      </p>
-                    </div>
-                    {bullets.length > 0 ? (
-                      <ul className="colorful-compact-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  color,
+                  isFirst: index === 0,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  color,
+                  isFirst: index === 0,
+                  isLast: index === snapshot.experience.length - 1,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="colorful-compact-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -192,7 +286,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="main" title={copy.projects} color={color}>
+        <Section key={key} id="projects" placement={placement} movedFrom={movedFrom} title={copy.projects} color={color}>
           <div className="colorful-compact-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -201,15 +295,15 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="colorful-compact-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="colorful-compact-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="colorful-compact-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="colorful-compact-showcase__project-desc">{item.description}</p> : null}
                     {tags.length > 0 ? (
                       <div className="colorful-compact-showcase__tag-row">
-                        {tags.map((tag, tagIndex) => (
+                        {tags.map((tag) => (
                           <span
                             key={tag}
-                            className={`colorful-compact-showcase__tag colorful-compact-showcase__tag--${colorAt(TAG_COLORS, tagIndex)}`}
+                            className={`colorful-compact-showcase__tag colorful-compact-showcase__tag--${color}`}
                           >
                             {tag}
                           </span>
@@ -232,17 +326,24 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     return null
   }
 
-  const renderSidebarSection = (key, color) => {
+  const renderSidebarSection = (key, placement, movedFrom, color) => {
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side" title={copy.skills} color={color}>
-          {snapshot.skills.length > 0 ? (
+        <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} title={copy.skills} color={color}>
+          {directEditDispatch ? (
+            // Chips replace the read-only pills outright (never both, or
+            // every skill renders twice); the empty-state <p> stays out of
+            // the chip row, matching Executive.
             <div className="colorful-compact-showcase__skill-row">
-              {snapshot.skills.map((skill, index) => (
+              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+            </div>
+          ) : snapshot.skills.length > 0 ? (
+            <div className="colorful-compact-showcase__skill-row">
+              {snapshot.skills.map((skill) => (
                 <span
                   key={skill}
                   data-export-skill="true"
-                  className={`colorful-compact-showcase__skill-pill colorful-compact-showcase__skill-pill--${colorAt(SKILL_COLORS, index)}`}
+                  className={`colorful-compact-showcase__skill-pill colorful-compact-showcase__skill-pill--${color}`}
                 >
                   {skill}
                 </span>
@@ -259,7 +360,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="side" title={copy.education} color={color}>
+        <Section key={key} id="education" placement={placement} movedFrom={movedFrom} title={copy.education} color={color}>
           <div className="colorful-compact-showcase__plain-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => {
@@ -267,7 +368,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
                 const dateRange = formatDateRange(item.startDate, item.endDate)
 
                 return (
-                  <div key={`${item.school}-${index}`} className="colorful-compact-showcase__plain-item" data-export-card="true">
+                  <div key={`${item.school}-${index}`} className="colorful-compact-showcase__plain-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                     <p className="colorful-compact-showcase__plain-title">{item.degree || copy.untitledRole}</p>
                     {metaLine || dateRange ? (
                       <p className="colorful-compact-showcase__plain-meta">
@@ -289,15 +390,15 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" title={copy.languages} color={color}>
+        <Section key={key} id="languages" placement={placement} movedFrom={movedFrom} title={copy.languages} color={color}>
           <div className="colorful-compact-showcase__lang-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="colorful-compact-showcase__lang-row">
+                <div key={`${item.language}-${index}`} className="colorful-compact-showcase__lang-row" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span className="colorful-compact-showcase__lang-name">{item.language}</span>
                   {item.level ? (
                     <span
-                      className={`colorful-compact-showcase__lang-badge colorful-compact-showcase__lang-badge--${colorAt(LANG_LEVEL_COLORS, index)}`}
+                      className={`colorful-compact-showcase__lang-badge colorful-compact-showcase__lang-badge--${color}`}
                     >
                       {item.level}
                     </span>
@@ -316,7 +417,7 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" title={copy.links} color={color}>
+        <Section key={key} id="links" placement={placement} movedFrom={movedFrom} title={copy.links} color={color}>
           <div className="colorful-compact-showcase__plain-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -336,11 +437,11 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
     if (key === 'achievements') {
       return (
-        <Section key={key} id="achievements" placement="side" title={copy.achievements} color={color}>
+        <Section key={key} id="achievements" placement={placement} movedFrom={movedFrom} title={copy.achievements} color={color}>
           <div className="colorful-compact-showcase__plain-list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
-                <p key={`${item.title}-${index}`} className="colorful-compact-showcase__extra-line">
+                <p key={`${item.title}-${index}`} className="colorful-compact-showcase__extra-line" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                   {item.description ? `${item.title} — ${item.description}` : item.title}
                 </p>
               ))
@@ -357,12 +458,17 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
     return null
   }
 
+
+  // Each section renders through its home renderer in whichever column the
+  // user put it — see createSectionRouter in ./shared.
+  const renderSection = createSectionRouter(templateConfig, renderMainSection, renderSidebarSection)
+
   return (
     <article
       ref={previewRef}
       data-export-root="true"
       data-export-variant="colorfulCompact"
-      className="colorful-compact-showcase preview-document--designer"
+      className="colorful-compact-showcase preview-document--designer tpl-density-compact"
     >
       <div className="colorful-compact-showcase__rainbow colorful-compact-showcase__rainbow--top" aria-hidden="true" />
 
@@ -371,22 +477,51 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
           <p className="colorful-compact-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
+          {/* The two-tone split can't live inside one contentEditable field,
+              so Direct Edit shows the whole name as one field (in the lead
+              colour — see colorfulCompact.css), like Modern Timeline. */}
           <h1 className="colorful-compact-showcase__name">
-            <span className="colorful-compact-showcase__name-lead">{nameFirst}</span>
-            {nameRest ? <> <span className="colorful-compact-showcase__name-accent">{nameRest}</span></> : null}
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : (
+              <>
+                <span className="colorful-compact-showcase__name-lead">{nameFirst}</span>
+                {nameRest ? <> <span className="colorful-compact-showcase__name-accent">{nameRest}</span></> : null}
+              </>
+            )}
           </h1>
           <p className="colorful-compact-showcase__role">
-            {title}{tagline ? ` · ${tagline}` : ''}
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+            {tagline ? ` · ${tagline}` : ''}
           </p>
-          {contactItems.length > 0 ? (
+          {directEditDispatch || contactItems.length > 0 ? (
             <div className="colorful-compact-showcase__contact">
-              {contactItems.map(([key, value], index) => (
+              {(directEditDispatch ? directEditContactFields : contactItems).map(([key, value, placeholderLabel, pathKind]) => (
                 <span key={key} className="colorful-compact-showcase__contact-item">
                   <span
-                    className={`colorful-compact-showcase__contact-dot colorful-compact-showcase__contact-dot--${colorAt(CONTACT_DOT_COLORS, index)}`}
+                    className={`colorful-compact-showcase__contact-dot colorful-compact-showcase__contact-dot--${HEADER_ACCENT}`}
                     aria-hidden="true"
                   />
-                  {key === 'website' ? formatLinkDisplayValue(value) : value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: pathKind, field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : key === 'website' ? formatLinkDisplayValue(value) : value}
                 </span>
               ))}
             </div>
@@ -407,12 +542,12 @@ export default function ColorfulCompactShowcase({ formData, locale = 'en', previ
 
       <div className="colorful-compact-showcase__body" data-export-content="true">
         <main className="colorful-compact-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key, index) => renderMainSection(key, colorAt(SECTION_COLORS, index)))}
+          {mainSectionKeys.map((key, index) => renderSection(key, 'main', colorAt(SECTION_COLORS, index)))}
         </main>
 
         <aside className="colorful-compact-showcase__sidebar" data-export-secondary="true">
           {sidebarSectionKeys.map((key, index) =>
-            renderSidebarSection(key, colorAt(SECTION_COLORS, mainSectionKeys.length + index)))}
+            renderSection(key, 'side', colorAt(SECTION_COLORS, mainSectionKeys.length + index)))}
         </aside>
       </div>
 

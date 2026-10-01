@@ -5,13 +5,16 @@
 // in presentation. ATS mode (the app's existing global toggle) bypasses this
 // component entirely and falls back to the shared flat renderer.
 //
-// Restyled 2026-08-23 against docs/developer-showcase-cv.html: sidebar is
-// now a full-bleed dark column (no gap/rounded-corner floating panel), and
-// most sidebar list items (links, certificates, education, languages) and
-// the top-level section wrapper lost their individual card box — only the
-// portfolio-style item cards (Projects/Achievements/Open Source/
-// Publications) keep a bordered/tinted card, matching the reference. See
-// developer.css's own header comment and todo.md item 35 for the full diff.
+// Restyled 2026-08-23 against docs/developer-showcase-cv.html (full-bleed
+// dark sidebar, portfolio-style cards only on the high-value main sections).
+// Reworked 2026-09-10 to docs/template-design-system.md: the per-category /
+// per-chip 7-colour cycle on skill tags and project chips is gone — one tag
+// style now — and the company line is ink, not blue. The template's one
+// documented accent form is the fixed teal→blue→purple cool-spectrum
+// gradient (name, photo ring, icon badges, timeline marker); it opts out of
+// the Settings accent swatch (§6). §4 heading: icon-badge (the gradient
+// divider bar under each title is removed). Type sizes read the `--tpl-*`
+// ramp via `tpl-density-standard`.
 
 import { useMemo } from 'react'
 
@@ -22,47 +25,114 @@ import {
   contactIcons,
   sectionIcons,
   parseSkillCategories,
+  buildEditableSkillCategories,
   formatDateRange,
   formatLinkLabel,
   formatLinkDisplayValue,
   getSafeHref,
+  createSectionRouter,
 } from './shared'
+import EditableField from '../EditableField'
+import EditableList, { EditableCategorizedChip } from '../EditableList'
 
-// Category → tag color mapping (spec calls for colorful grouped skills rather
-// than plain pills). Falls back to gray for anything unrecognized.
-const CATEGORY_COLOR = {
-  languages: 'blue',
-  frameworks: 'purple',
-  databases: 'orange',
-  cloud: 'teal',
-  devops: 'pink',
-  security: 'green',
-  other: 'gray',
-}
-
-// Rotating palette for free-text tech-stack chips (project.stack), since we
-// can't know each individual technology's "correct" color ahead of time.
-const CHIP_COLORS = ['blue', 'teal', 'purple', 'orange', 'green', 'pink']
-
-// Gradient background for every section-icon badge. Previously a different
-// color pair per section, cycling through the full --dev-* palette (blue,
-// purple, pink, orange, green...) with no logic behind which section got
-// which pair — read as random rather than deliberate. Now the same
-// teal → blue → purple gradient the template already uses for the name
-// text, the photo ring, and every section divider (developer.css), so the
-// badges tie into that existing signature instead of introducing more hues.
+// The fixed cool-spectrum gradient — Developer's one accent form. Used for
+// the name text, photo ring, section-icon badges and timeline marker.
 const SECTION_ICON_GRADIENT = 'linear-gradient(135deg, var(--dev-teal), var(--dev-blue), var(--dev-purple))'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
 }
 
-function SectionHeading({ icon, label, tone }) {
+// Developer's own Experience-entry renderer: a timeline rail beside a
+// card, like Modern Professional's (not directEditExperienceEntry.jsx's
+// shape). Only role and company are editable inline; location stays
+// read-only-appended text. `index` is formData-relative in the
+// directEditDispatch branch (EditableList's own index); the read-only call
+// site passes the snapshot's `sourceIndex`.
+//
+// The rail's connector line is hidden on the last entry through an
+// `--last` modifier class, never :last-child — EditableList wraps each
+// entry in its own .direct-edit-entry div, making every item a last child.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, showTimeline, isLast, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <div
+      data-direct-edit-index={sourceIndex}
+      key={`${item.role}-${item.company}-${index}`}
+      className={`dev-showcase__timeline-item${isLast ? ' dev-showcase__timeline-item--last' : ''}`}
+      data-export-card="true"
+    >
+      {showTimeline ? (
+        <div className="dev-showcase__timeline-rail">
+          <span className="dev-showcase__timeline-marker" aria-hidden="true" />
+          <span className="dev-showcase__timeline-line" aria-hidden="true" />
+        </div>
+      ) : null}
+      <div className="dev-showcase__timeline-card">
+        <div className="dev-showcase__role-row">
+          <div className="min-w-0">
+            <p className="dev-showcase__role-title">
+              {directEditDispatch ? (
+                <EditableField
+                  as="span"
+                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                  value={item.role}
+                  placeholder={copy.untitledRole}
+                />
+              ) : item.role || copy.untitledRole}
+            </p>
+            {directEditDispatch ? (
+              <p className="dev-showcase__company">
+                <EditableField
+                  as="span"
+                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                  value={item.company}
+                  placeholder={copy.company}
+                />
+                {item.location ? ` · ${item.location}` : null}
+              </p>
+            ) : item.company || item.location ? (
+              <p className="dev-showcase__company">
+                {[item.company, item.location].filter(Boolean).join(' · ')}
+              </p>
+            ) : null}
+          </div>
+          <p className="dev-showcase__dates">{dateRange || copy.datesPending}</p>
+        </div>
+        {directEditDispatch ? (
+          <p className="dev-showcase__bullets dev-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+        ) : bullets.length > 0 ? (
+          <ul className="dev-showcase__bullets">
+            {bullets.map((line, lineIndex) => (
+              <li key={lineIndex}>{line}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+// Takes the section's real placement, the same fact Section derives its
+// tone class from, so a section moved between columns gets the heading
+// colour of the surface it now sits on (light on the dark rail, primary on
+// the page) without every call site restating the mapping.
+function SectionHeading({ icon, label, placement }) {
   return (
     <div>
       <h2
         className="dev-showcase__section-title"
-        style={{ color: tone === 'sidebar' ? '#f1f5f9' : 'var(--dev-primary)' }}
+        style={{ color: placement === 'side' ? '#f1f5f9' : 'var(--dev-primary)' }}
       >
         <span
           className="dev-showcase__section-icon"
@@ -73,12 +143,11 @@ function SectionHeading({ icon, label, tone }) {
         </span>
         {label}
       </h2>
-      <div className="dev-showcase__section-divider" aria-hidden="true" />
     </div>
   )
 }
 
-function Section({ id, placement, children }) {
+function Section({ id, placement, movedFrom = null, children }) {
   const toneClass = placement === 'side' ? 'dev-showcase__section--sidebar' : 'dev-showcase__section--main'
 
   return (
@@ -86,6 +155,7 @@ function Section({ id, placement, children }) {
       className={`dev-showcase__section ${toneClass}`}
       data-export-section={id}
       data-export-placement={placement}
+      data-moved-from={movedFrom ?? undefined}
     >
       {children}
     </section>
@@ -98,6 +168,7 @@ export default function DeveloperShowcase({
   previewRef,
   templateConfig,
   showcaseConfig = {},
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -129,11 +200,22 @@ export default function DeveloperShowcase({
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
     () => parseSkillCategories(snapshot.skills, isFinnish),
     [snapshot.skills, isFinnish],
+  )
+  // Editing branch only: the same grouping over formData.skills, each chip
+  // carrying its ORIGINAL flat-array index so removal hits the right skill.
+  const editableSkillCategories = useMemo(
+    () => buildEditableSkillCategories(formData.skills, isFinnish),
+    [formData.skills, isFinnish],
   )
 
   const sectionVisibility = {
@@ -149,29 +231,37 @@ export default function DeveloperShowcase({
   const secondarySet = new Set(templateConfig.secondarySections)
   const mainSectionKeys = orderedSections.filter((key) => primarySet.has(key) && sectionVisibility[key])
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
+  const hasSidebar = showSidebar && sidebarSectionKeys.length > 0
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side">
-          <SectionHeading icon="skills" label={isFinnish ? 'Taidot' : 'Skills'} tone="sidebar" />
-          {skillCategories.length > 0 ? (
+        <Section key={key} id="skills" placement={placement} movedFrom={movedFrom}>
+          <SectionHeading icon="skills" label={isFinnish ? 'Taidot' : 'Skills'} placement={placement} />
+          {directEditDispatch ? (
+            // Chips replace the read-only tags outright (never both, or
+            // every skill renders twice).
+            <div className="dev-showcase__skill-group">
+              <EditableCategorizedChip
+                categories={editableSkillCategories}
+                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+              />
+            </div>
+          ) : skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="dev-showcase__skill-group">
                 <p className="dev-showcase__skill-group-label">{cat.label}</p>
                 <div className="dev-showcase__skill-tags">
                   {cat.items.map((skill) => (
-                    <span
-                      key={skill}
-                      data-export-skill="true"
-                      className={`dev-showcase__skill-tag dev-showcase__skill-tag--${CATEGORY_COLOR[cat.key] || 'gray'}`}
-                    >
+                    <span key={skill} data-export-skill="true" className="dev-showcase__skill-tag">
                       {skill}
                     </span>
                   ))}
@@ -189,8 +279,8 @@ export default function DeveloperShowcase({
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side">
-          <SectionHeading icon="links" label={isFinnish ? 'Linkit' : 'Links'} tone="sidebar" />
+        <Section key={key} id="links" placement={placement} movedFrom={movedFrom}>
+          <SectionHeading icon="links" label={isFinnish ? 'Linkit' : 'Links'} placement={placement} />
           {linkEntries.length > 0 ? (
             linkEntries.map(([linkKey, value]) => (
               <div key={linkKey} data-export-card="true" className="dev-showcase__link-card">
@@ -212,11 +302,11 @@ export default function DeveloperShowcase({
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" placement="side">
-          <SectionHeading icon="certificates" label={isFinnish ? 'Sertifikaatit' : 'Certificates'} tone="sidebar" />
+        <Section key={key} id="certificates" placement={placement} movedFrom={movedFrom}>
+          <SectionHeading icon="certificates" label={isFinnish ? 'Sertifikaatit' : 'Certificates'} placement={placement} />
           {snapshot.certificates.length > 0 ? (
             snapshot.certificates.map((item, index) => (
-              <div key={`${item.name}-${index}`} data-export-card="true" className="dev-showcase__cert-card">
+              <div key={`${item.name}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.certificates[index]} className="dev-showcase__cert-card">
                 {item.name ? <p className="dev-showcase__cert-name">{item.name}</p> : null}
                 {item.issuer || item.year ? (
                   <p className="dev-showcase__cert-meta">
@@ -246,11 +336,11 @@ export default function DeveloperShowcase({
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="side">
-          <SectionHeading icon="education" label={isFinnish ? 'Koulutus' : 'Education'} tone="sidebar" />
+        <Section key={key} id="education" placement={placement} movedFrom={movedFrom}>
+          <SectionHeading icon="education" label={isFinnish ? 'Koulutus' : 'Education'} placement={placement} />
           {snapshot.education.length > 0 ? (
             snapshot.education.map((item, index) => (
-              <div key={`${item.school}-${index}`} data-export-card="true" className="dev-showcase__edu-item">
+              <div key={`${item.school}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]} className="dev-showcase__edu-item">
                 {item.degree ? <p className="dev-showcase__edu-degree">{item.degree}</p> : null}
                 {item.school || item.location ? (
                   <p className="dev-showcase__edu-meta">
@@ -273,11 +363,11 @@ export default function DeveloperShowcase({
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side">
-          <SectionHeading icon="languages" label={isFinnish ? 'Kielet' : 'Languages'} tone="sidebar" />
+        <Section key={key} id="languages" placement={placement} movedFrom={movedFrom}>
+          <SectionHeading icon="languages" label={isFinnish ? 'Kielet' : 'Languages'} placement={placement} />
           {snapshot.languages.length > 0 ? (
             snapshot.languages.map((item, index) => (
-              <div key={`${item.language}-${index}`} className="dev-showcase__lang-item">
+              <div key={`${item.language}-${index}`} className="dev-showcase__lang-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                 <span className="dev-showcase__lang-dot" aria-hidden="true" />
                 <span>{item.language}</span>
                 {item.level ? <span className="dev-showcase__lang-level"> — {item.level}</span> : null}
@@ -295,61 +385,58 @@ export default function DeveloperShowcase({
     return null
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" placement="main">
-          <SectionHeading icon="about" label={isFinnish ? 'Yhteenveto' : 'Summary'} />
-          <p className="dev-showcase__summary">{about}</p>
+        <Section key={key} id="about" placement={placement} movedFrom={movedFrom}>
+          <SectionHeading icon="about" label={isFinnish ? 'Yhteenveto' : 'Summary'} placement={placement} />
+          <p className="dev-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </Section>
       )
     }
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main">
-          <SectionHeading icon="experience" label={isFinnish ? 'Kokemus' : 'Experience'} />
+        <Section key={key} id="experience" placement={placement} movedFrom={movedFrom}>
+          <SectionHeading icon="experience" label={isFinnish ? 'Kokemus' : 'Experience'} placement={placement} />
           <div className="dev-showcase__timeline">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-
-                return (
-                  <div
-                    key={`${item.role}-${item.company}-${index}`}
-                    className="dev-showcase__timeline-item"
-                    data-export-card="true"
-                  >
-                    {showTimeline ? (
-                      <div className="dev-showcase__timeline-rail">
-                        <span className="dev-showcase__timeline-marker" aria-hidden="true" />
-                        <span className="dev-showcase__timeline-line" aria-hidden="true" />
-                      </div>
-                    ) : null}
-                    <div className="dev-showcase__timeline-card">
-                      <div className="dev-showcase__role-row">
-                        <div className="min-w-0">
-                          <p className="dev-showcase__role-title">{item.role || copy.untitledRole}</p>
-                          {item.company || item.location ? (
-                            <p className="dev-showcase__company">
-                              {[item.company, item.location].filter(Boolean).join(' · ')}
-                            </p>
-                          ) : null}
-                        </div>
-                        <p className="dev-showcase__dates">{dateRange || copy.datesPending}</p>
-                      </div>
-                      {bullets.length > 0 ? (
-                        <ul className="dev-showcase__bullets">
-                          {bullets.map((line, lineIndex) => (
-                            <li key={lineIndex}>{line}</li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </div>
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  showTimeline,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  showTimeline,
+                  isLast: index === snapshot.experience.length - 1,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="dev-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -362,8 +449,8 @@ export default function DeveloperShowcase({
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="main">
-          <SectionHeading icon="projects" label={isFinnish ? 'Projektit' : 'Projects'} />
+        <Section key={key} id="projects" placement={placement} movedFrom={movedFrom}>
+          <SectionHeading icon="projects" label={isFinnish ? 'Projektit' : 'Projects'} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -372,26 +459,27 @@ export default function DeveloperShowcase({
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="dev-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="dev-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="dev-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="dev-showcase__project-desc">{item.description}</p> : null}
                     {chips.length > 0 ? (
                       <div className="dev-showcase__chip-row">
-                        {chips.map((chip, chipIndex) => (
-                          <span
-                            key={chip}
-                            className={`dev-showcase__chip dev-showcase__chip--${CHIP_COLORS[chipIndex % CHIP_COLORS.length]}`}
-                          >
-                            {chip}
-                          </span>
+                        {chips.map((chip) => (
+                          <span key={chip} className="dev-showcase__chip">{chip}</span>
                         ))}
                       </div>
                     ) : null}
                     {item.githubUrl || item.demoUrl ? (
                       <div className="dev-showcase__link-row">
                         {item.githubUrl ? (
-                          <a href={getSafeHref(item.githubUrl)} target="_blank" rel="noreferrer" className="dev-showcase__link-btn">
-                            GitHub
+                          <a
+                            href={getSafeHref(item.githubUrl)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="dev-showcase__project-link"
+                            title={item.githubUrl}
+                          >
+                            {formatLinkDisplayValue(item.githubUrl)}
                           </a>
                         ) : null}
                         {item.demoUrl ? (
@@ -399,9 +487,10 @@ export default function DeveloperShowcase({
                             href={getSafeHref(item.demoUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="dev-showcase__link-btn dev-showcase__link-btn--primary"
+                            className="dev-showcase__project-link"
+                            title={item.demoUrl}
                           >
-                            {isFinnish ? 'Demo' : 'Live Demo'}
+                            {formatLinkDisplayValue(item.demoUrl)}
                           </a>
                         ) : null}
                       </div>
@@ -421,12 +510,12 @@ export default function DeveloperShowcase({
 
     if (key === 'achievements') {
       return (
-        <Section key={key} id="achievements" placement="main">
-          <SectionHeading icon="achievements" label={isFinnish ? 'Saavutukset' : 'Achievements'} />
+        <Section key={key} id="achievements" placement={placement} movedFrom={movedFrom}>
+          <SectionHeading icon="achievements" label={isFinnish ? 'Saavutukset' : 'Achievements'} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
-                <div key={`${item.title}-${index}`} className="dev-showcase__achievement-card" data-export-card="true">
+                <div key={`${item.title}-${index}`} className="dev-showcase__achievement-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                   <span className="dev-showcase__trophy-icon" aria-hidden="true">{sectionIcons.achievements}</span>
                   <div className="min-w-0">
                     <div className="dev-showcase__achievement-title-row">
@@ -451,12 +540,12 @@ export default function DeveloperShowcase({
 
     if (key === 'openSource') {
       return (
-        <Section key={key} id="openSource" placement="main">
-          <SectionHeading icon="openSource" label={isFinnish ? 'Avoin lähdekoodi' : 'Open Source'} />
+        <Section key={key} id="openSource" placement={placement} movedFrom={movedFrom}>
+          <SectionHeading icon="openSource" label={isFinnish ? 'Avoin lähdekoodi' : 'Open Source'} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.openSource.length > 0 ? (
               snapshot.openSource.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="dev-showcase__opensource-card" data-export-card="true">
+                <div key={`${item.name}-${index}`} className="dev-showcase__opensource-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.openSource[index]}>
                   {item.name ? <p className="dev-showcase__opensource-name">{item.name}</p> : null}
                   {item.language || item.stars || item.forks ? (
                     <div className="dev-showcase__opensource-meta">
@@ -493,12 +582,12 @@ export default function DeveloperShowcase({
 
     if (key === 'publications') {
       return (
-        <Section key={key} id="publications" placement="main">
-          <SectionHeading icon="publications" label={isFinnish ? 'Julkaisut' : 'Publications'} />
+        <Section key={key} id="publications" placement={placement} movedFrom={movedFrom}>
+          <SectionHeading icon="publications" label={isFinnish ? 'Julkaisut' : 'Publications'} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.publications.length > 0 ? (
               snapshot.publications.map((item, index) => (
-                <div key={`${item.title}-${index}`} className="dev-showcase__publication-item" data-export-card="true">
+                <div key={`${item.title}-${index}`} className="dev-showcase__publication-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.publications[index]}>
                   {item.title ? <p className="dev-showcase__publication-title">{item.title}</p> : null}
                   {item.publisher || item.year ? (
                     <p className="dev-showcase__publication-meta">
@@ -520,6 +609,11 @@ export default function DeveloperShowcase({
     return null
   }
 
+
+  // Each section renders through its home renderer in whichever column the
+  // user put it — see createSectionRouter in ./shared.
+  const renderSection = createSectionRouter(templateConfig, renderMainSection, renderSidebarSection)
+
   return (
     <article
       ref={previewRef}
@@ -531,7 +625,7 @@ export default function DeveloperShowcase({
       // DeveloperShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className={`dev-showcase preview-document--designer ${animationEnabled ? '' : 'dev-showcase--no-animation'}`}
+      className={`dev-showcase preview-document--designer tpl-density-standard ${animationEnabled ? '' : 'dev-showcase--no-animation'}`}
     >
       {showDecorations ? (
         <div className="dev-showcase__bg" data-export-ignore="true" aria-hidden="true">
@@ -547,14 +641,39 @@ export default function DeveloperShowcase({
           <p className="dev-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`}>{fullName}</h1>
-          <p className="dev-showcase__role">{title}</p>
-          {personalContactItems.length > 0 ? (
+          <h1 className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`}>
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : fullName}
+          </h1>
+          <p className="dev-showcase__role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+          </p>
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="dev-showcase__contact">
-              {personalContactItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
                 <span key={key} className="dev-showcase__contact-item">
                   <span className="dev-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  {value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : value}
                 </span>
               ))}
             </div>
@@ -578,19 +697,27 @@ export default function DeveloperShowcase({
         ) : null}
       </header>
 
+      {/* The body grid reserves a narrow first track for the rail, so it
+          must collapse to one track whenever the rail isn't rendered —
+          either because this variant has no sidebar, or because the user
+          moved every sidebar section into main, which would otherwise
+          squeeze the whole CV into that narrow track. Sidebar sections that
+          flow into main for want of a rail render with placement 'main',
+          where they actually are, so their heading tone, the PDF exporter's
+          pagination and the moved-section CSS all agree. */}
       <div
         className="dev-showcase__body"
         data-export-content="true"
-        style={!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
+        style={!hasSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
       >
-        {showSidebar && sidebarSectionKeys.length > 0 ? (
+        {hasSidebar ? (
           <aside className="dev-showcase__sidebar" data-export-secondary="true">
-            {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+            {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
           </aside>
         ) : null}
         <main className="dev-showcase__main" data-export-primary="true">
-          {!showSidebar ? sidebarSectionKeys.map((key) => renderSidebarSection(key)) : null}
-          {mainSectionKeys.map((key) => renderMainSection(key))}
+          {!showSidebar ? sidebarSectionKeys.map((key) => renderSection(key, 'main')) : null}
+          {mainSectionKeys.map((key) => renderSection(key, 'main'))}
         </main>
       </div>
     </article>

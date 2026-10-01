@@ -13,7 +13,7 @@ const PLACEHOLDER_PROFILE_PHOTO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA
 // The three deliberately text-only templates (typography, no photo slot in
 // their design) — kept photo-free in preview thumbnails even though the
 // demo CV below carries a placeholder photo.
-const PHOTO_FREE_TEMPLATE_IDS = ['minimal', 'classic', 'classicProfessional']
+const PHOTO_FREE_TEMPLATE_IDS = ['minimal', 'classicProfessional']
 
 // Each thumbnail renders a real CVPreview (see components/TemplateThumbnail.jsx),
 // so the card shows the layout the user is actually choosing rather than an

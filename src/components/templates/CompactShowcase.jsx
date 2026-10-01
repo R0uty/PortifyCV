@@ -24,12 +24,18 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import { accentSoftFill } from '../../utils/templateAccents'
+import { COMPACT_DEFAULT_ACCENT_COLOR } from './compact'
+import EditableField from '../EditableField'
+import EditableList, { EditableCategorizedChip } from '../EditableList'
 import {
   devIcons,
   contactIcons,
   parseSkillCategories,
+  buildEditableSkillCategories,
   formatDateRange,
   formatLinkLabel,
+  formatLinkDisplayValue,
 } from './shared'
 
 const DENSITY_STEPS = ['cozy', 'snug', 'tight']
@@ -52,7 +58,81 @@ function highlightMetrics(text) {
   ))
 }
 
-export default function CompactShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
+// Compact's own Experience-entry renderer — deliberately NOT
+// directEditExperienceEntry.jsx (the shared module for Classic
+// Professional/Editorial/Portrait). Compact's read-only shape renders
+// role+company+location together in ONE row with dates floated right (no
+// separate company/location meta line), a genuinely different DOM shape
+// from that module's two-row layout — same reasoning Modern Timeline used
+// for its own local copy. Location is read-only-appended text, never its
+// own EditableField, matching the shared module's own precedent (only
+// role and company are independently editable there too).
+function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <div key={`${item.role}-${item.company}-${index}`} className="compact-showcase__entry" data-export-card="true" data-direct-edit-index={sourceIndex}>
+      <div className="compact-showcase__entry-row">
+        <div className="min-w-0">
+          <span className="compact-showcase__entry-role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                value={item.role}
+                placeholder={copy.untitledRole}
+              />
+            ) : item.role}
+          </span>
+          {directEditDispatch || item.company ? (
+            <span className="compact-showcase__entry-company">
+              {' · '}
+              {directEditDispatch ? (
+                <EditableField
+                  as="span"
+                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                  value={item.company}
+                  placeholder={copy.company}
+                />
+              ) : item.company}
+            </span>
+          ) : null}
+          {item.location ? <span className="compact-showcase__entry-location"> · {item.location}</span> : null}
+        </div>
+        <span className="compact-showcase__entry-dates">{dateRange || copy.datesPending}</span>
+      </div>
+      {directEditDispatch ? (
+        <p className="compact-showcase__bullets compact-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="compact-showcase__bullets">
+          {bullets.map((line, lineIndex) => (
+            <li key={lineIndex}>{highlightMetrics(line)}</li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  )
+}
+
+export default function CompactShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  showcaseConfig = {},
+  headingColor = null,
+  accentColor = COMPACT_DEFAULT_ACCENT_COLOR,
+  directEditDispatch = null,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -78,11 +158,27 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
     () => parseSkillCategories(snapshot.skills, isFinnish),
     [snapshot.skills, isFinnish],
+  )
+  // Editing-branch-only: the same categorization, but computed off the raw
+  // formData.skills array (not the trimmed snapshot) and with each item's
+  // ORIGINAL flat-array index attached, so EditableCategorizedChip can
+  // dispatch REMOVE_SKILL against the right entry regardless of which
+  // category group it renders under — see buildEditableSkillCategories in
+  // shared.jsx for why a per-text queue is used instead of a plain Map
+  // (duplicate-text skills are reachable via JSON import).
+  const editableSkillCategories = useMemo(
+    () => buildEditableSkillCategories(formData.skills, isFinnish),
+    [formData.skills, isFinnish],
   )
 
   const sectionVisibility = {
@@ -98,6 +194,9 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
   const sectionKeys = orderedSections.filter((key) => visibleSet.has(key) && sectionVisibility[key] && key !== 'about')
 
   const copy = {
+    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Pvm puuttuu' : 'Dates pending',
     summary: isFinnish ? 'Yhteenveto' : 'Summary',
     skills: isFinnish ? 'Taidot' : 'Skills',
@@ -153,17 +252,13 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
       return (
         <section key={key} className="compact-showcase__section" data-export-section="skills" data-export-placement="main">
           <h2 className="compact-showcase__section-title">{copy.skills}</h2>
-          {skillCategories.length > 0 ? (
+          {directEditDispatch ? null : skillCategories.length > 0 ? (
             <div className="compact-showcase__skill-groups">
               {skillCategories.map((cat) => (
-                <div key={cat.key} className="compact-showcase__skill-group">
-                  <span className="compact-showcase__skill-group-label">{cat.label}:</span>
-                  <div className="compact-showcase__tag-row">
-                    {cat.items.map((skill) => (
-                      <span key={skill} data-export-skill="true" className="compact-showcase__tag">{skill}</span>
-                    ))}
-                  </div>
-                </div>
+                <p key={cat.key} className="compact-showcase__skill-group" data-export-skill="true">
+                  <span className="compact-showcase__skill-group-label">{cat.label}: </span>
+                  <span className="compact-showcase__skill-items">{cat.items.join(', ')}</span>
+                </p>
               ))}
             </div>
           ) : (
@@ -171,6 +266,14 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
               {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
             </p>
           )}
+          {directEditDispatch ? (
+            <div className="compact-showcase__skill-groups compact-showcase__skill-groups--editing">
+              <EditableCategorizedChip
+                categories={editableSkillCategories}
+                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+              />
+            </div>
+          ) : null}
         </section>
       )
     }
@@ -180,31 +283,22 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
         <section key={key} className="compact-showcase__section" data-export-section="experience" data-export-placement="main">
           <h2 className="compact-showcase__section-title">{copy.experience}</h2>
           <div className="compact-showcase__entry-list">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-
-                return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="compact-showcase__entry" data-export-card="true">
-                    <div className="compact-showcase__entry-row">
-                      <div className="min-w-0">
-                        <span className="compact-showcase__entry-role">{item.role}</span>
-                        {item.company ? <span className="compact-showcase__entry-company"> · {item.company}</span> : null}
-                        {item.location ? <span className="compact-showcase__entry-location"> · {item.location}</span> : null}
-                      </div>
-                      <span className="compact-showcase__entry-dates">{dateRange || copy.datesPending}</span>
-                    </div>
-                    {bullets.length > 0 ? (
-                      <ul className="compact-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{highlightMetrics(line)}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="compact-showcase__empty">
                 {isFinnish ? 'Kokemus näkyy tässä.' : 'Experience will appear here.'}
@@ -222,10 +316,13 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
           <div className="compact-showcase__entry-list">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
-                const linkLine = [item.githubUrl, item.demoUrl].filter(Boolean).join('  ·  ')
+                const linkLine = [item.githubUrl, item.demoUrl]
+                  .filter(Boolean)
+                  .map(formatLinkDisplayValue)
+                  .join('  ·  ')
 
                 return (
-                  <div key={`${item.name}-${index}`} className="compact-showcase__project" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="compact-showcase__project" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     <span className="compact-showcase__entry-role">{item.name}</span>
                     {item.description ? <span className="compact-showcase__project-desc"> — {item.description}</span> : null}
                     {item.stack ? <p className="compact-showcase__project-stack">{item.stack}</p> : null}
@@ -253,7 +350,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
                 const dateRange = formatDateRange(item.startDate, item.endDate)
 
                 return (
-                  <div key={`${item.school}-${index}`} className="compact-showcase__entry-row" data-export-card="true">
+                  <div key={`${item.school}-${index}`} className="compact-showcase__entry-row" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                     <div className="min-w-0">
                       <span className="compact-showcase__entry-role">{item.degree}</span>
                       {item.school ? <span className="compact-showcase__entry-company"> · {item.school}</span> : null}
@@ -279,7 +376,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
           <div className="compact-showcase__entry-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="compact-showcase__entry-row" data-export-card="true">
+                <div key={`${item.name}-${index}`} className="compact-showcase__entry-row" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   <span className="compact-showcase__entry-role">{item.name}</span>
                   <span className="compact-showcase__entry-dates">
                     {[item.issuer, item.year].filter(Boolean).join(' · ')}
@@ -303,7 +400,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
           {snapshot.languages.length > 0 ? (
             <p className="compact-showcase__inline-list">
               {snapshot.languages.map((item, index) => (
-                <span key={`${item.language}-${index}`}>
+                <span key={`${item.language}-${index}`} data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   {index > 0 ? '  ·  ' : ''}
                   {item.language}{item.level ? ` — ${item.level}` : ''}
                 </span>
@@ -328,7 +425,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
                 <span key={linkKey} className="compact-showcase__link-item" data-export-card="true">
                   <span className="compact-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <span className="compact-showcase__link-label">{formatLinkLabel(linkKey)}:</span>
-                  <span className="compact-showcase__link-value">{value}</span>
+                  <span className="compact-showcase__link-value">{formatLinkDisplayValue(value)}</span>
                 </span>
               ))}
             </div>
@@ -348,7 +445,7 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
           {snapshot.interests.length > 0 ? (
             <p className="compact-showcase__inline-list">
               {snapshot.interests.map((item, index) => (
-                <span key={`${item.name}-${index}`}>{index > 0 ? '  ·  ' : ''}{item.name}</span>
+                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`}>{index > 0 ? '  ·  ' : ''}{item.name}</span>
               ))}
             </p>
           ) : (
@@ -377,23 +474,52 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
       // CompactShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className={`compact-showcase preview-document--designer compact-showcase--${density}${showTwoColumn ? ' compact-showcase--two-column' : ''}`}
-      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
+      className={`compact-showcase preview-document--designer tpl-density-compact compact-showcase--${density}${showTwoColumn ? ' compact-showcase--two-column' : ''}`}
+      style={{
+        '--tpl-accent': accentColor,
+        '--tpl-accent-soft': accentSoftFill(accentColor, 0.1, COMPACT_DEFAULT_ACCENT_COLOR),
+        ...(headingColor ? { '--cv-heading-color': headingColor } : null),
+      }}
     >
       <header data-export-header="true" className="compact-showcase__header">
         <div className="min-w-0">
           <p className="compact-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="compact-showcase__name">{fullName}</h1>
-          <p className="compact-showcase__role">{title}</p>
-          {personalContactItems.length > 0 ? (
+          <h1 className="compact-showcase__name">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : fullName}
+          </h1>
+          <p className="compact-showcase__role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+          </p>
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="compact-showcase__contact">
-              {personalContactItems.map(([key, value], index) => (
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel], index) => (
                 <span key={key} className="compact-showcase__contact-item">
                   {index > 0 ? <span className="compact-showcase__contact-sep" aria-hidden="true">|</span> : null}
                   <span className="compact-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  {value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : value}
                 </span>
               ))}
             </div>
@@ -412,10 +538,24 @@ export default function CompactShowcase({ formData, locale = 'en', previewRef, t
         ) : null}
       </header>
 
-      {about ? (
+      {directEditDispatch || about ? (
         <section className="compact-showcase__section compact-showcase__section--summary" data-export-section="about" data-export-placement="main">
           <h2 className="compact-showcase__section-title">{copy.summary}</h2>
-          <p className="compact-showcase__summary">{about}</p>
+          <p className="compact-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </section>
       ) : null}
 

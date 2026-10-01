@@ -229,6 +229,8 @@ export interface CvData {
   location: string
   photo: string
   photoVisibilityByTemplate: Record<string, boolean>
+  /** Per template id, the sections the user moved out of their home column. Overrides only. */
+  sectionColumnsByTemplate: Record<string, Record<string, 'main' | 'sidebar'>>
   sectionOrder: CvSectionKey[]
   skills: string[]
   experience: CvExperienceItem[]
@@ -281,4 +283,6 @@ export interface CvSnapshot {
   internships: CvInternshipItem[]
   caseStudies: CvCaseStudyItem[]
   testimonials: CvTestimonialItem[]
+  /** Per record-array section, the formData index of each entry kept above. */
+  sourceIndices: Record<string, number[]>
 }

@@ -1,0 +1,301 @@
+/* Direct Edit builder — styles for the inline-editable preview
+   (EditableField/EditableList/EditableChip) and the Sections popover.
+   Scoped to `.direct-edit-*` classes so it never collides with any
+   bespoke Showcase's own `.<template>-showcase__*` classes. */
+
+.direct-edit-field {
+  outline: none;
+  border-radius: 3px;
+  cursor: text;
+}
+
+.direct-edit-field:hover {
+  box-shadow: 0 0 0 1.5px var(--ds-border-strong, #d4d4d8);
+}
+
+.direct-edit-field:focus {
+  box-shadow: 0 0 0 1.5px var(--ds-accent, #0f766e);
+}
+
+.direct-edit-field--empty:not(:focus)::before {
+  content: attr(data-placeholder);
+  color: var(--ds-text-muted, #a1a1aa);
+  pointer-events: none;
+}
+
+.direct-edit-entry {
+  position: relative;
+  padding-left: 22px;
+  margin-left: -22px;
+  border-radius: 8px;
+}
+
+.direct-edit-entry:hover {
+  background: var(--ds-surface-muted, #fafaf9);
+}
+
+.direct-edit-entry--dragging {
+  opacity: 0.6;
+}
+
+.direct-edit-entry__handle,
+.direct-edit-entry__remove {
+  position: absolute;
+  top: 2px;
+  border: none;
+  background: transparent;
+  color: var(--ds-text-muted, #a1a1aa);
+  font-size: 13px;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.direct-edit-entry__handle {
+  left: 0;
+  cursor: grab;
+}
+
+.direct-edit-entry__remove {
+  right: 0;
+}
+
+.direct-edit-entry:hover .direct-edit-entry__handle,
+.direct-edit-entry:hover .direct-edit-entry__remove {
+  opacity: 1;
+}
+
+.direct-edit-entry__remove:hover {
+  color: var(--ds-danger, #b3261e);
+}
+
+.direct-edit-add-row {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 7px 11px;
+  border: 1px dashed var(--ds-border-strong, #d4d4d8);
+  border-radius: 7px;
+  background: none;
+  color: var(--ds-text-muted, #71717a);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.direct-edit-add-row:hover {
+  border-color: var(--ds-accent, #0f766e);
+  color: var(--ds-accent, #0f766e);
+}
+
+.direct-edit-chip,
+.direct-edit-chip-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: inherit;
+  font-size: 0.8125rem;
+  padding: 5px 11px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.direct-edit-chip--removable {
+  border: none;
+  background: var(--ds-accent-soft, #e1f5ee);
+  color: var(--ds-accent-ink, #04342c);
+}
+
+.direct-edit-chip-add {
+  border: 1px dashed var(--ds-border-strong, #d4d4d8);
+  background: none;
+  color: var(--ds-text-muted, #71717a);
+}
+
+.direct-edit-chip-add:hover {
+  border-color: var(--ds-accent, #0f766e);
+  color: var(--ds-accent, #0f766e);
+}
+
+.direct-edit-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.direct-edit-chip-group__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ds-text-muted, #71717a);
+  margin-right: 2px;
+}
+
+.direct-edit-chip-group__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.direct-edit-preview {
+  /* Wider than --preview-paper-width (the printed-page metaphor Classic
+     mode's preview column shares with PDF export sizing) — Direct Edit
+     has no competing form column, so the extra width is free and reads
+     better as a full editing surface rather than a narrow page floating
+     in empty space.
+
+     `width: 100%` is required, not decorative: this div is a flex item
+     of `.builder-section` (flex-direction: column). A flex item with
+     `margin: 0 auto` and `width: auto` does NOT stretch to the
+     container's cross size the way a plain block element would — the
+     auto side-margins suppress stretch and the item shrink-wraps to its
+     content's preferred width instead, silently capping this well below
+     max-width regardless of what max-width is set to. An explicit width
+     sidesteps that flex-sizing rule entirely. */
+  position: relative;
+  width: 100%;
+  max-width: min(100%, 68rem);
+  margin: 0 auto;
+  /* The CV itself (an <article>) is a white "paper" card with its own
+     shadow, floating on the page's off-white background — this padding
+     is what creates that visible gap above (below the toolbar) and below
+     (above the footer), not just internal whitespace. Bottom gets extra
+     room: the footer's own border/text sit right at its top edge, so a
+     gap that reads as "enough" above the card reads as cramped below it. */
+  padding: var(--space-8, 2rem) var(--space-6, 1.5rem) 3.5rem;
+  box-sizing: border-box;
+}
+
+/* The read-only copy PDF export captures (see DirectEditPreview.jsx).
+   Moved off-screen, not hidden: the exporter reads computed styles from
+   these source nodes, and visibility/display would leak into them. Its
+   width is the editable CV's content box at its 68rem cap (less the 1.5rem
+   side padding above), so on a desktop-width window templates that measure
+   themselves (Compact's and European's density auto-fit) settle on the
+   same tier as the CV on screen. On a narrower window the two can differ;
+   the PDF sandbox re-lays the clone out at paper width either way. */
+.direct-edit-export-source {
+  position: fixed;
+  top: 0;
+  left: -200000px;
+  width: 65rem;
+  pointer-events: none;
+}
+
+.app-toolbar__mode-switch {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 8px;
+  background: var(--ds-surface-muted, #fafaf9);
+  border: 1px solid var(--ds-border, #e4e4e7);
+}
+
+.app-toolbar__mode-switch-btn {
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--ds-text-secondary, #52525b);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.app-toolbar__mode-switch-btn--active {
+  background: var(--ds-surface, #ffffff);
+  color: var(--ds-text-primary, #18181b);
+  box-shadow: 0 0 0 1px var(--ds-border-strong, #d4d4d8);
+}
+
+.direct-edit-sections {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  /* z-index:auto (the brief's original omission) is not enough here: the
+     CV header content it overlaps is deep inside a plain, non-positioned
+     ARTICLE/HEADER subtree, yet real-browser paint/hit-testing still put
+     that subtree above this popover without an explicit z-index — verified
+     via elementsFromPoint before/after adding this. An explicit value is
+     required for the trigger to actually be clickable. */
+  z-index: 5;
+}
+
+.direct-edit-sections__trigger {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--ds-text-secondary, #52525b);
+  background: var(--ds-surface, #ffffff);
+  border: 1px solid var(--ds-border, #e4e4e7);
+  border-radius: 999px;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+
+.direct-edit-sections__panel {
+  position: absolute;
+  top: 38px;
+  right: 0;
+  min-width: 168px;
+  background: var(--ds-surface, #ffffff);
+  border: 1px solid var(--ds-border, #e4e4e7);
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.direct-edit-sections__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8125rem;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.direct-edit-sections__row:hover {
+  background: var(--ds-surface-muted, #fafaf9);
+}
+
+/* `.site-footer` (App.jsx) is `position: sticky; bottom: 0` — correct for
+   Classic mode and every static page, where the content above it never
+   grows taller than the viewport (Classic's builder panels scroll inside
+   their own bounded containers). Direct Edit's preview is a normal,
+   unbounded block that can genuinely be taller than the viewport for a
+   real CV, so a sticky footer stays pinned over the bottom of whatever's
+   currently in view for the entire scroll, not just once you reach the
+   true end of the page. Drop back to normal flow here so the footer
+   only ever appears once, after the content actually ends. */
+.one-pager--direct-edit .site-footer {
+  position: static;
+}
+
+/* `.builder-section` (app-shell.css) is `flex: 1; min-height: 0` — the
+   `min-height: 0` is what lets Classic mode's own AppShell panels scroll
+   *inside* a viewport-bounded box instead of growing it. Direct Edit has
+   no such internal panel: `.direct-edit-preview` is meant to grow the
+   whole page (see the position:static rule above). But `min-height: 0`
+   also drops the flex item's content-based minimum, so once a real CV's
+   preview is taller than the box's flex-computed share of the viewport,
+   the overflow paints past `.builder-section`'s own boundary with
+   `overflow: visible` — it never forces `.builder-section` (or
+   `.one-pager`) to actually grow. `.site-footer`, positioned in normal
+   flow right after `.builder-section`, ends up sitting at that
+   flex-computed (viewport-sized) height instead of after the real
+   content, so the tail of a long CV visually overlaps straight through
+   it. Restoring the default `min-height: auto` gives `.builder-section`
+   its content's height as a floor: `flex: 1` still grows it to fill the
+   viewport for a short CV (the standard flexbox sticky-footer pattern),
+   but a taller-than-viewport CV now grows the box — and `.one-pager` — to
+   match, so the footer lands genuinely after the content instead of
+   overlapping it. Verified live: without this rule, a demo CV's preview
+   (1619px) sat inside a 554px-tall `.builder-section` box with the
+   footer positioned right after that 554px, overlapping the remaining
+   ~1065px of visible content; with it, `.builder-section` measures the
+   full 1619px and the footer sits flush after it, at the true end of
+   the page. */
+.one-pager--direct-edit .builder-section {
+  min-height: auto;
+}

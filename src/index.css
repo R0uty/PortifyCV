@@ -10,6 +10,9 @@
 @import './styles/tokens.css';
 @import './styles/app-shell.css';
 @import './styles/utilities.css';
+@import './styles/direct-edit.css';
+@import './styles/direct-edit-popup.css';
+@import './styles/templates/_system.css';
 @import './styles/templates/developer.css';
 @import './styles/templates/creative.css';
 @import './styles/templates/modern.css';
@@ -19,8 +22,11 @@
 @import './styles/templates/compact.css';
 @import './styles/templates/portfolio.css';
 @import './styles/templates/classicProfessional.css';
-@import './styles/templates/classic.css';
 @import './styles/templates/navyProfessional.css';
 @import './styles/templates/modernOrange.css';
 @import './styles/templates/colorfulCompact.css';
 @import './styles/templates/quadrant.css';
+@import './styles/templates/techExec.css';
+@import './styles/templates/editorial.css';
+@import './styles/templates/portrait.css';
+@import './styles/templates/european.css';

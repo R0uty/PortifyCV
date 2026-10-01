@@ -39,12 +39,14 @@ import CoverLetterModal from '../components/CoverLetterModal'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
 import CVSuggestionsPanel from '../components/CVSuggestionsPanel'
+import DirectEditPreview from '../components/DirectEditPreview'
 import NavRail from '../components/NavRail'
 import SettingsModal from '../components/SettingsModal'
 import TemplateGalleryModal from '../components/TemplateGalleryModal'
 import ToastStack from '../components/ToastStack'
 import {
   getUiTheme,
+  UI_BUILDER_MODE_STORAGE_KEY,
   UI_LOCALE_STORAGE_KEY,
   UI_NAV_RAIL_COLLAPSED_STORAGE_KEY,
 } from '../utils/designSystem'
@@ -66,7 +68,9 @@ import {
 import {
   getCvTemplates,
   getCvTemplate,
+  resolveTemplateAccent,
 } from '../utils/cvTemplates'
+import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
 import { APP_VERSION_RAW } from '../utils/appVersion'
@@ -360,11 +364,12 @@ function ResumeBuilderPage({
     coverLetterHiringManager,
     coverLetterBody,
     sessionRestoreEnabled,
-    timelineAccentColor,
-    modernOrangeAccentColor,
+    templateAccentColors,
     cvFontId,
     cvHeadingColor,
+    classicNameAlignment,
     navRailCollapsed,
+    builderMode,
     toasts,
   } = uiState
   const ui = getUiTheme()
@@ -375,18 +380,8 @@ function ResumeBuilderPage({
   const sessionRestoreWarningShownRef = useRef(false)
   const shareWarningShownRef = useRef(false)
   const editorScrollRef = useRef(null)
-  const templateSelectRef = useRef(null)
   const previewViewportRef = useRef(null)
   const resetConfirmTimeoutRef = useRef(null)
-  // Read by TemplateQuickSwitcher when its panel opens, instead of threading
-  // formData itself through onHeaderChange — that object's identity changes
-  // on every keystroke, and putting it in the header-sync effect's deps
-  // below would re-render the toolbar on every keystroke just to keep a
-  // rarely-opened thumbnail strip fresh.
-  const formDataRef = useRef(formData)
-  useEffect(() => {
-    formDataRef.current = formData
-  }, [formData])
 
   // Non-default CV fonts are fetched on demand (see utils/cvFonts.js) rather
   // than bundled upfront. PDF export snapshots the live DOM, so it has to
@@ -431,8 +426,10 @@ function ResumeBuilderPage({
 
   const exportFileName = createExportFileName(formData) || 'cv'
   const currentTemplate = useMemo(
-    () => getCvTemplate(selectedTemplate, locale),
-    [locale, selectedTemplate],
+    () => getEffectiveCvTemplate(selectedTemplate, locale, formData),
+    // Only the column overrides matter here, not every keystroke in formData.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locale, selectedTemplate, formData.sectionColumnsByTemplate],
   )
   const templates = useMemo(() => getCvTemplates(locale), [locale])
   const shellStyle = {}
@@ -545,6 +542,10 @@ function ResumeBuilderPage({
   useEffect(() => {
     setStorageValue(UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, navRailCollapsed ? 'true' : 'false')
   }, [navRailCollapsed, setStorageValue])
+
+  useEffect(() => {
+    setStorageValue(UI_BUILDER_MODE_STORAGE_KEY, builderMode)
+  }, [builderMode, setStorageValue])
 
   useEffect(() => {
     setStorageValue(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, sessionRestoreEnabled ? 'true' : 'false')
@@ -668,21 +669,35 @@ function ResumeBuilderPage({
   const handleExport = useCallback(async (type) => {
     dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: type })
 
+    // Direct Edit always renders the bespoke/flat Showcase with ATS mode
+    // forced off (DirectEditPreview hardcodes atsFriendlyMode={false} on its
+    // CVPreview call — see that file) — ATS mode is an export concern, not
+    // an editing surface. So the export must agree: a PDF exported from
+    // Direct Edit always uses the designer/bespoke rendering that's actually
+    // on screen, regardless of the app's real ATS toggle state, or
+    // waitForPreviewModeSync below polls for a `--ats` class the DOM will
+    // never produce and times out every single time.
+    const effectiveAtsFriendlyMode = builderMode === 'direct' ? false : atsFriendlyMode
+
     const exportLabel =
       type === 'pdf-designer'
-        ? atsFriendlyMode
+        ? effectiveAtsFriendlyMode
           ? 'ATS PDF'
           : 'Designer PDF'
         : type === 'html'
           ? 'HTML'
-          : 'JSON'
+          : type === 'docx'
+            ? 'Word'
+            : 'JSON'
 
     const toastLabel =
       type === 'pdf-designer'
         ? locale === 'fi' ? 'Valmistellaan PDF-vientiä...' : 'Preparing PDF export...'
         : type === 'html'
           ? locale === 'fi' ? 'Valmistellaan HTML-vientiä...' : 'Preparing HTML export...'
-          : locale === 'fi' ? 'Valmistellaan JSON-vientiä...' : 'Preparing JSON export...'
+          : type === 'docx'
+            ? locale === 'fi' ? 'Valmistellaan Word-vientiä...' : 'Preparing Word export...'
+            : locale === 'fi' ? 'Valmistellaan JSON-vientiä...' : 'Preparing JSON export...'
 
     showToast(toastLabel, 'info')
 
@@ -702,7 +717,7 @@ function ResumeBuilderPage({
 
       if (type === 'pdf-designer') {
         const expectedVariant = getCvTemplate(selectedTemplate, locale).variant
-        const exportPdfMode = atsFriendlyMode ? 'ats' : 'designer'
+        const exportPdfMode = effectiveAtsFriendlyMode ? 'ats' : 'designer'
         const didSyncPreviewMode = await waitForPreviewModeSync(
           previewRef.current,
           exportPdfMode,
@@ -749,7 +764,7 @@ function ResumeBuilderPage({
           formData,
           template: selectedTemplate,
           variant: selectedTemplate,
-          atsFriendlyMode,
+          atsFriendlyMode: effectiveAtsFriendlyMode,
           locale,
         })
       }
@@ -760,6 +775,15 @@ function ResumeBuilderPage({
 
       if (type === 'html') {
         exportCvAsHtml(formData, exportFileName, { locale })
+      }
+
+      if (type === 'docx') {
+        const { exportCvAsDocx } = await import('../utils/docxExport')
+        await exportCvAsDocx(formData, exportFileName, {
+          template: selectedTemplate,
+          locale,
+          accentColor: resolveTemplateAccent(templateAccentColors, selectedTemplate),
+        })
       }
 
       showToast(
@@ -782,7 +806,7 @@ function ResumeBuilderPage({
       }
       dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
     }
-  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate, zoomPercent])
+  }, [atsFriendlyMode, builderMode, exportFileName, formData, locale, previewRef, selectedTemplate, templateAccentColors, zoomPercent])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()
@@ -947,12 +971,12 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.TOGGLE_SESSION_RESTORE })
   }, [])
 
-  const handleTimelineAccentColorChange = useCallback((color) => {
-    dispatchUi({ type: UI_ACTION.SET_TIMELINE_ACCENT_COLOR, color })
-  }, [])
+  const handleTemplateAccentColorChange = useCallback((color) => {
+    dispatchUi({ type: UI_ACTION.SET_TEMPLATE_ACCENT_COLOR, templateId: selectedTemplate, color })
+  }, [selectedTemplate])
 
-  const handleModernOrangeAccentColorChange = useCallback((color) => {
-    dispatchUi({ type: UI_ACTION.SET_MODERN_ORANGE_ACCENT_COLOR, color })
+  const handleClassicNameAlignmentChange = useCallback((alignment) => {
+    dispatchUi({ type: UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT, alignment })
   }, [])
 
   const handleToggleMobilePreview = useCallback(() => {
@@ -999,6 +1023,11 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.TOGGLE_NAV_RAIL_COLLAPSED })
   }, [])
 
+  const handleSetBuilderMode = useCallback(
+    (mode) => dispatchUi({ type: UI_ACTION.SET_BUILDER_MODE, mode }),
+    [dispatchUi],
+  )
+
   const handleOpenSettings = useCallback(() => {
     setIsSettingsOpen(true)
   }, [])
@@ -1040,6 +1069,10 @@ function ResumeBuilderPage({
         scrollSectionIntoView(container, target)
       })
     }
+  }, [])
+
+  const handleOpenTemplateGallery = useCallback(() => {
+    setIsTemplateGalleryOpen(true)
   }, [])
 
   const handleCloseTemplateGallery = useCallback(() => {
@@ -1244,9 +1277,7 @@ function ResumeBuilderPage({
       onRedo: handleRedo,
       templates,
       selectedTemplateId: selectedTemplate,
-      onSelectTemplate: handleSelectTemplate,
-      templateSelectRef,
-      formDataRef,
+      onOpenTemplateGallery: handleOpenTemplateGallery,
       cvFontId,
       onCvFontChange: handleCvFontChange,
       cvHeadingColor,
@@ -1258,18 +1289,21 @@ function ResumeBuilderPage({
       isResponsivePreview,
       onToggleResponsivePreview: handleToggleResponsivePreview,
       onOpenSettings: handleOpenSettings,
+      builderMode,
+      onSetBuilderMode: handleSetBuilderMode,
     })
   }, [
     activeExport, isActionBusy, locale,
     handleExport, handleCopyShareLink, handleLocaleChange,
     canUndo, canRedo, handleUndo, handleRedo,
-    templates, selectedTemplate, handleSelectTemplate,
+    templates, selectedTemplate, handleOpenTemplateGallery,
     cvFontId, handleCvFontChange,
     cvHeadingColor, handleCvHeadingColorChange,
     searchQuery,
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
     handleOpenSettings,
+    builderMode, handleSetBuilderMode,
     onHeaderChange,
   ])
 
@@ -1793,9 +1827,9 @@ function ResumeBuilderPage({
                 template={selectedTemplate}
                 locale={locale}
                 atsFriendlyMode={atsFriendlyMode}
-                timelineAccentColor={timelineAccentColor}
-                modernOrangeAccentColor={modernOrangeAccentColor}
+                accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
                 headingColor={cvHeadingColor}
+                classicNameAlignment={classicNameAlignment}
               />
             </AppErrorBoundary>
           </div>
@@ -1805,6 +1839,7 @@ function ResumeBuilderPage({
     </div>
   ), [
     atsFriendlyMode,
+    classicNameAlignment,
     cvFontId,
     cvHeadingColor,
     formData,
@@ -1818,8 +1853,7 @@ function ResumeBuilderPage({
     isResponsivePreview,
     locale,
     selectedTemplate,
-    timelineAccentColor,
-    modernOrangeAccentColor,
+    templateAccentColors,
     zoomPercent,
     ui.button,
     ui.surface,
@@ -1932,16 +1966,36 @@ function ResumeBuilderPage({
   return (
     <>
       <h1 className="sr-only">{locale === 'fi' ? 'Rakenna CV:si' : 'Build Your CV'}</h1>
-      <AppShell
-        shellStyle={shellStyle}
-        showContentOnMobile={mobilePreviewVisible}
-        nav={navRailContent}
-        sidebar={sidebarContent}
-        content={previewContent}
-        navCollapsed={navRailCollapsed}
-      />
+      {builderMode === 'direct' ? (
+        <AppErrorBoundary
+          panelTitle={locale === 'fi' ? 'Suoran muokkauksen esikatselu' : 'Direct Edit preview'}
+          locale={locale}
+        >
+          <DirectEditPreview
+            formData={formData}
+            dispatchFormData={dispatchFormData}
+            selectedTemplate={selectedTemplate}
+            templateConfig={currentTemplate}
+            locale={locale}
+            accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
+            headingColor={cvHeadingColor}
+            classicNameAlignment={classicNameAlignment}
+            previewRef={previewRef}
+            cvFontId={cvFontId}
+          />
+        </AppErrorBoundary>
+      ) : (
+        <AppShell
+          shellStyle={shellStyle}
+          showContentOnMobile={mobilePreviewVisible}
+          nav={navRailContent}
+          sidebar={sidebarContent}
+          content={previewContent}
+          navCollapsed={navRailCollapsed}
+        />
+      )}
 
-      {mobileBottomActions}
+      {builderMode === 'direct' ? null : mobileBottomActions}
 
       <TemplateGalleryModal
         isOpen={isTemplateGalleryOpen}
@@ -1967,10 +2021,10 @@ function ResumeBuilderPage({
         sessionRestoreEnabled={sessionRestoreEnabled}
         onToggleSessionRestore={handleToggleSessionRestore}
         selectedTemplate={selectedTemplate}
-        timelineAccentColor={timelineAccentColor}
-        onTimelineAccentColorChange={handleTimelineAccentColorChange}
-        modernOrangeAccentColor={modernOrangeAccentColor}
-        onModernOrangeAccentColorChange={handleModernOrangeAccentColorChange}
+        templateAccentColors={templateAccentColors}
+        onTemplateAccentColorChange={handleTemplateAccentColorChange}
+        classicNameAlignment={classicNameAlignment}
+        onClassicNameAlignmentChange={handleClassicNameAlignmentChange}
       />
 
       <BadgeModal

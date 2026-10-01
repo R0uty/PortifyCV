@@ -6,25 +6,25 @@
 // ATS mode (the app's existing global toggle) bypasses this component
 // entirely and falls back to the shared flat renderer (portfolio.js).
 //
-// Featured Projects is the hero section — premium cards with colorful tech
-// chips and GitHub/Live Demo action buttons, mirroring the visual weight a
-// real portfolio site would give its project showcase. The sidebar's
-// "Skills" section is deliberately branded and styled as "Tech Stack"
-// (colorful category-colored badges rather than plain tags) since the
-// spec's own CONFIG SUPPORT list only has a showTechStack flag, not a
-// separate showSkills one — confirming these are the same underlying data
-// rendered with more personality.
+// Featured Projects is the hero section — premium cards with tech chips and
+// GitHub/Live Demo links, mirroring the visual weight a real portfolio site
+// would give its project showcase. The sidebar's "Skills" section is
+// branded as "Tech Stack" since the spec's own CONFIG SUPPORT list only has
+// a showTechStack flag, not a separate showSkills one — confirming these are
+// the same underlying data.
 //
 // Restyled 2026-08-23 against docs/portfolio-hybrid-cv.html: serif display
 // name (Instrument Serif, self-hosted here via @fontsource rather than
 // main.jsx's global Inter import, so its ~9KB weight is only ever fetched
 // by users who actually land on this one template's lazy chunk — see
-// CVPreview.jsx's React.lazy() split), a gradient hairline across the very
-// top of the card, and every section icon upgraded from a flat glyph to a
-// small colored gradient badge (a different two-color pairing per section,
-// per the reference) — matching the template's already-established
-// "portfolio website condensed into a résumé" multi-color identity instead
-// of the single-accent badge every other bespoke Showcase uses.
+// CVPreview.jsx's React.lazy() split).
+//
+// Polished v1.2.11 to the design-system bar: the roomy `--tpl-*` type ramp
+// (tpl-density-roomy), and §3's one-ink-one-accent rule — the earlier
+// seven-hue palette (emerald/teal/sky/violet/pink/orange/green gradients on
+// the hairline, section-icon badges, chips, badges and the "Live Demo"
+// button) collapses to a single emerald accent read from `--tpl-accent`,
+// user-customizable via the Settings swatch (`forestGreen` set).
 
 import { useMemo } from 'react'
 import '@fontsource/instrument-serif/400.css'
@@ -32,32 +32,22 @@ import '@fontsource/instrument-serif/400-italic.css'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import { accentSoftFill } from '../../utils/templateAccents'
+import { PORTFOLIO_DEFAULT_ACCENT_COLOR } from './portfolio'
 import {
   devIcons,
   contactIcons,
   sectionIcons,
   parseSkillCategories,
+  buildEditableSkillCategories,
   formatDateRange,
   formatLinkLabel,
   formatLinkDisplayValue,
   getSafeHref,
+  createSectionRouter,
 } from './shared'
-
-// Category → tag color mapping, matching DeveloperShowcase's palette so
-// "Tech Stack" reads consistently with the app's other colorful showcase.
-const CATEGORY_COLOR = {
-  languages: 'blue',
-  frameworks: 'purple',
-  databases: 'orange',
-  cloud: 'teal',
-  devops: 'pink',
-  security: 'green',
-  other: 'gray',
-}
-
-// Rotating palette for free-text tech-stack chips (project.stack), since we
-// can't know each individual technology's "correct" color ahead of time.
-const CHIP_COLORS = ['emerald', 'teal', 'sky', 'purple', 'green', 'pink']
+import EditableField from '../EditableField'
+import EditableList, { EditableCategorizedChip } from '../EditableList'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -77,33 +67,92 @@ function highlightMetrics(text) {
   ))
 }
 
-// Two-color gradient badge per section id, matching the reference mockup's
-// per-section icon treatment (About falls back to the base rule's
-// emerald→teal gradient in portfolio.css, so it has no entry here).
-const SECTION_ICON_TONE = {
-  projects: 'violet-sky',
-  experience: 'sky-emerald',
-  caseStudies: 'orange-pink',
-  openSource: 'sky-teal',
-  education: 'emerald-teal',
-  testimonials: 'violet-pink',
-  skills: 'emerald-sky',
-  links: 'sky-violet',
-  certificates: 'green-teal',
-  languages: 'pink-violet',
-  achievements: 'orange-pink',
-  interests: 'teal-emerald',
-}
-
-function SectionHead({ id, icon, title, subtitle }) {
-  const tone = SECTION_ICON_TONE[id]
-  const iconClassName = tone
-    ? `portfolio-showcase__section-icon portfolio-showcase__section-icon--${tone}`
-    : 'portfolio-showcase__section-icon'
+// Portfolio Hybrid's own Experience-entry renderer: a timeline rail beside
+// a card, the same shape as Modern Professional's (not
+// directEditExperienceEntry.jsx's two-row one). Only role and company are
+// editable inline; location stays read-only-appended text. `index` is
+// formData-relative in the directEditDispatch branch (EditableList's own
+// index); the read-only call site passes the snapshot's `sourceIndex`.
+//
+// The rail's connector line is hidden on the last entry through an
+// `--last` modifier class, never :last-child — EditableList wraps each
+// entry in its own .direct-edit-entry div, making every item a last child.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
 
   return (
+    <div
+      key={`${item.role}-${item.company}-${index}`}
+      className={`portfolio-showcase__timeline-item${isLast ? ' portfolio-showcase__timeline-item--last' : ''}`}
+      data-export-card="true"
+      data-direct-edit-index={sourceIndex}
+    >
+      <div className="portfolio-showcase__timeline-rail">
+        <span className="portfolio-showcase__timeline-marker" aria-hidden="true" />
+        <span className="portfolio-showcase__timeline-line" aria-hidden="true" />
+      </div>
+      <div className="portfolio-showcase__timeline-card">
+        <div className="portfolio-showcase__role-row">
+          <div className="min-w-0">
+            <p className="portfolio-showcase__role-title">
+              {directEditDispatch ? (
+                <EditableField
+                  as="span"
+                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                  value={item.role}
+                  placeholder={copy.untitledRole}
+                />
+              ) : item.role || copy.untitledRole}
+            </p>
+            {directEditDispatch ? (
+              <p className="portfolio-showcase__company">
+                <EditableField
+                  as="span"
+                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                  value={item.company}
+                  placeholder={copy.company}
+                />
+                {item.location ? ` · ${item.location}` : null}
+              </p>
+            ) : item.company || item.location ? (
+              <p className="portfolio-showcase__company">
+                {[item.company, item.location].filter(Boolean).join(' · ')}
+              </p>
+            ) : null}
+          </div>
+          <p className="portfolio-showcase__dates">{dateRange || copy.datesPending}</p>
+        </div>
+        {directEditDispatch ? (
+          <p className="portfolio-showcase__bullets portfolio-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+        ) : bullets.length > 0 ? (
+          <ul className="portfolio-showcase__bullets">
+            {bullets.map((line, lineIndex) => (
+              <li key={lineIndex}>{highlightMetrics(line)}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+// One accent-filled icon badge per section (§4 icon-badge treatment), the
+// same single-accent mark every other bespoke Showcase uses — the earlier
+// per-section two-colour gradient badges were the template's §3 colour
+// finding.
+function SectionHead({ icon, title, subtitle }) {
+  return (
     <div className="portfolio-showcase__section-head">
-      <span className={iconClassName} aria-hidden="true">
+      <span className="portfolio-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
       <div>
@@ -114,16 +163,25 @@ function SectionHead({ id, icon, title, subtitle }) {
   )
 }
 
-function Section({ id, placement, icon, title, subtitle, children }) {
+function Section({ id, placement, movedFrom = null, icon, title, subtitle, children }) {
   return (
-    <section className="portfolio-showcase__section" data-export-section={id} data-export-placement={placement}>
-      <SectionHead id={id} icon={icon} title={title} subtitle={subtitle} />
+    <section className="portfolio-showcase__section" data-export-section={id} data-export-placement={placement} data-moved-from={movedFrom ?? undefined}>
+      <SectionHead icon={icon} title={title} subtitle={subtitle} />
       {children}
     </section>
   )
 }
 
-export default function PortfolioShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
+export default function PortfolioShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  showcaseConfig = {},
+  accentColor = PORTFOLIO_DEFAULT_ACCENT_COLOR,
+  headingColor = null,
+  directEditDispatch = null,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -145,11 +203,22 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
     () => parseSkillCategories(snapshot.skills, isFinnish),
     [snapshot.skills, isFinnish],
+  )
+  // Editing branch only: the same grouping over formData.skills, each chip
+  // carrying its ORIGINAL flat-array index so removal hits the right skill.
+  const editableSkillCategories = useMemo(
+    () => buildEditableSkillCategories(formData.skills, isFinnish),
+    [formData.skills, isFinnish],
   )
 
   const sectionVisibility = {
@@ -168,6 +237,8 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
     about: isFinnish ? 'Minusta' : 'About Me',
@@ -192,18 +263,32 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
     lessons: isFinnish ? 'Opitut asiat' : 'Lessons Learned',
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" placement="main" icon="about" title={copy.about} subtitle={copy.aboutSub}>
-          <p className="portfolio-showcase__summary">{about}</p>
+        <Section key={key} id="about" placement={placement} movedFrom={movedFrom} icon="about" title={copy.about} subtitle={copy.aboutSub}>
+          <p className="portfolio-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </Section>
       )
     }
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="main" icon="projects" title={copy.projects} subtitle={copy.projectsSub}>
+        <Section key={key} id="projects" placement={placement} movedFrom={movedFrom} icon="projects" title={copy.projects} subtitle={copy.projectsSub}>
           <div className="portfolio-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -212,7 +297,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="portfolio-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="portfolio-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="portfolio-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="portfolio-showcase__project-desc">{item.description}</p> : null}
                     {item.impact ? (
@@ -220,11 +305,8 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                     ) : null}
                     {chips.length > 0 ? (
                       <div className="portfolio-showcase__chip-row">
-                        {chips.map((chip, chipIndex) => (
-                          <span
-                            key={chip}
-                            className={`portfolio-showcase__chip portfolio-showcase__chip--${CHIP_COLORS[chipIndex % CHIP_COLORS.length]}`}
-                          >
+                        {chips.map((chip) => (
+                          <span key={chip} className="portfolio-showcase__chip">
                             {chip}
                           </span>
                         ))}
@@ -242,7 +324,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                             href={getSafeHref(item.demoUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="portfolio-showcase__link-btn portfolio-showcase__link-btn--primary"
+                            className="portfolio-showcase__link-btn"
                           >
                             {isFinnish ? 'Demo' : 'Live Demo'}
                           </a>
@@ -264,42 +346,29 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main" icon="experience" title={copy.experience}>
+        <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} icon="experience" title={copy.experience}>
           <div className="portfolio-showcase__timeline">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-
-                return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="portfolio-showcase__timeline-item" data-export-card="true">
-                    <div className="portfolio-showcase__timeline-rail">
-                      <span className="portfolio-showcase__timeline-marker" aria-hidden="true" />
-                      <span className="portfolio-showcase__timeline-line" aria-hidden="true" />
-                    </div>
-                    <div className="portfolio-showcase__timeline-card">
-                      <div className="portfolio-showcase__role-row">
-                        <div className="min-w-0">
-                          <p className="portfolio-showcase__role-title">{item.role || copy.untitledRole}</p>
-                          {item.company || item.location ? (
-                            <p className="portfolio-showcase__company">
-                              {[item.company, item.location].filter(Boolean).join(' · ')}
-                            </p>
-                          ) : null}
-                        </div>
-                        <p className="portfolio-showcase__dates">{dateRange || copy.datesPending}</p>
-                      </div>
-                      {bullets.length > 0 ? (
-                        <ul className="portfolio-showcase__bullets">
-                          {bullets.map((line, lineIndex) => (
-                            <li key={lineIndex}>{highlightMetrics(line)}</li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </div>
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  isLast: index === snapshot.experience.length - 1,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="portfolio-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -312,7 +381,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
 
     if (key === 'caseStudies') {
       return (
-        <Section key={key} id="caseStudies" placement="main" icon="caseStudies" title={copy.caseStudies}>
+        <Section key={key} id="caseStudies" placement={placement} movedFrom={movedFrom} icon="caseStudies" title={copy.caseStudies}>
           <div className="portfolio-showcase__case-list">
             {snapshot.caseStudies.length > 0 ? (
               snapshot.caseStudies.map((item, index) => {
@@ -325,7 +394,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                 ].filter(([, value]) => value)
 
                 return (
-                  <div key={`${item.title}-${index}`} className="portfolio-showcase__case-card" data-export-card="true">
+                  <div key={`${item.title}-${index}`} className="portfolio-showcase__case-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.caseStudies[index]}>
                     {item.title ? <p className="portfolio-showcase__project-name">{item.title}</p> : null}
                     <div className="portfolio-showcase__case-rows">
                       {rows.map(([label, value]) => (
@@ -350,7 +419,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
 
     if (key === 'openSource') {
       return (
-        <Section key={key} id="openSource" placement="main" icon="openSource" title={copy.openSource}>
+        <Section key={key} id="openSource" placement={placement} movedFrom={movedFrom} icon="openSource" title={copy.openSource}>
           <div className="portfolio-showcase__project-grid">
             {snapshot.openSource.length > 0 ? (
               snapshot.openSource.map((item, index) => {
@@ -361,7 +430,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                 ].filter(Boolean)
 
                 return (
-                  <div key={`${item.name}-${index}`} className="portfolio-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="portfolio-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.openSource[index]}>
                     {item.name ? <p className="portfolio-showcase__project-name">{item.name}</p> : null}
                     {meta.length > 0 ? (
                       <p className="portfolio-showcase__project-meta">{meta.join('   ')}</p>
@@ -385,11 +454,11 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="main" icon="education" title={copy.education}>
+        <Section key={key} id="education" placement={placement} movedFrom={movedFrom} icon="education" title={copy.education}>
           <div className="portfolio-showcase__edu-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
-                <div key={`${item.school}-${index}`} className="portfolio-showcase__edu-item" data-export-card="true">
+                <div key={`${item.school}-${index}`} className="portfolio-showcase__edu-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                   <p className="portfolio-showcase__project-name">{item.degree}</p>
                   {item.school || item.location ? (
                     <p className="portfolio-showcase__project-meta">
@@ -415,13 +484,13 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
       if (snapshot.testimonials.length === 0) return null
 
       return (
-        <Section key={key} id="testimonials" placement="main" icon="testimonials" title={copy.testimonials}>
+        <Section key={key} id="testimonials" placement={placement} movedFrom={movedFrom} icon="testimonials" title={copy.testimonials}>
           <div className="portfolio-showcase__testimonial-list">
             {snapshot.testimonials.map((item, index) => {
               const meta = [item.author, item.role].filter(Boolean).join(', ')
 
               return (
-                <div key={`${item.author}-${index}`} className="portfolio-showcase__testimonial-card" data-export-card="true">
+                <div key={`${item.author}-${index}`} className="portfolio-showcase__testimonial-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.testimonials[index]}>
                   {item.quote ? <p className="portfolio-showcase__testimonial-quote">&ldquo;{item.quote}&rdquo;</p> : null}
                   {meta ? <p className="portfolio-showcase__testimonial-meta">{meta}</p> : null}
                 </div>
@@ -435,11 +504,20 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
     return null
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side" icon="skills" title={copy.skills}>
-          {skillCategories.length > 0 ? (
+        <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} icon="skills" title={copy.skills}>
+          {directEditDispatch ? (
+            // Chips replace the read-only badges outright (never both, or
+            // every skill renders twice).
+            <div className="portfolio-showcase__skill-group">
+              <EditableCategorizedChip
+                categories={editableSkillCategories}
+                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+              />
+            </div>
+          ) : skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="portfolio-showcase__skill-group">
                 <p className="portfolio-showcase__skill-group-label">{cat.label}</p>
@@ -448,7 +526,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
                     <span
                       key={skill}
                       data-export-skill="true"
-                      className={`portfolio-showcase__badge portfolio-showcase__badge--${CATEGORY_COLOR[cat.key] || 'gray'}`}
+                      className="portfolio-showcase__badge"
                     >
                       {skill}
                     </span>
@@ -467,11 +545,11 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" placement="side" icon="certificates" title={copy.certificates}>
+        <Section key={key} id="certificates" placement={placement} movedFrom={movedFrom} icon="certificates" title={copy.certificates}>
           <div className="portfolio-showcase__list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="portfolio-showcase__list-item">
+                <div key={`${item.name}-${index}`} className="portfolio-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {item.name ? <p className="portfolio-showcase__list-title">{item.name}</p> : null}
                   {item.issuer || item.year ? (
                     <p className="portfolio-showcase__list-meta">
@@ -497,7 +575,7 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" icon="links" title={copy.links}>
+        <Section key={key} id="links" placement={placement} movedFrom={movedFrom} icon="links" title={copy.links}>
           <div className="portfolio-showcase__link-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -521,11 +599,11 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" icon="languages" title={copy.languages}>
+        <Section key={key} id="languages" placement={placement} movedFrom={movedFrom} icon="languages" title={copy.languages}>
           <div className="portfolio-showcase__list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="portfolio-showcase__list-item portfolio-showcase__list-item--row">
+                <div key={`${item.language}-${index}`} className="portfolio-showcase__list-item portfolio-showcase__list-item--row" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span>{item.language}</span>
                   {item.level ? <span className="portfolio-showcase__list-meta">{item.level}</span> : null}
                 </div>
@@ -542,11 +620,11 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
 
     if (key === 'achievements') {
       return (
-        <Section key={key} id="achievements" placement="side" icon="achievements" title={copy.achievements}>
+        <Section key={key} id="achievements" placement={placement} movedFrom={movedFrom} icon="achievements" title={copy.achievements}>
           <div className="portfolio-showcase__list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
-                <div key={`${item.title}-${index}`} className="portfolio-showcase__list-item">
+                <div key={`${item.title}-${index}`} className="portfolio-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                   <div className="portfolio-showcase__list-item-row">
                     {item.title ? <p className="portfolio-showcase__list-title">{item.title}</p> : null}
                     {item.year ? <p className="portfolio-showcase__list-meta">{item.year}</p> : null}
@@ -566,11 +644,11 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
 
     if (key === 'interests') {
       return (
-        <Section key={key} id="interests" placement="side" icon="interests" title={copy.interests}>
+        <Section key={key} id="interests" placement={placement} movedFrom={movedFrom} icon="interests" title={copy.interests}>
           <div className="portfolio-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span key={`${item.name}-${index}`} className="portfolio-showcase__interest-chip">{item.name}</span>
+                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`} className="portfolio-showcase__interest-chip">{item.name}</span>
               ))
             ) : (
               <p className="portfolio-showcase__empty">
@@ -585,6 +663,11 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
     return null
   }
 
+
+  // Each section renders through its home renderer in whichever column the
+  // user put it — see createSectionRouter in ./shared.
+  const renderSection = createSectionRouter(templateConfig, renderMainSection, renderSidebarSection)
+
   return (
     <article
       ref={previewRef}
@@ -596,23 +679,52 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
       // PortfolioShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className="portfolio-showcase preview-document--designer"
-      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
+      className="portfolio-showcase preview-document--designer tpl-density-roomy"
+      style={{
+        '--tpl-accent': accentColor,
+        '--tpl-accent-soft': accentSoftFill(accentColor, 0.1, PORTFOLIO_DEFAULT_ACCENT_COLOR),
+        ...(headingColor ? { '--cv-heading-color': headingColor } : null),
+      }}
     >
       <header data-export-header="true" className="portfolio-showcase__header">
         <div className="min-w-0">
           <p className="portfolio-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="portfolio-showcase__name">{fullName}</h1>
-          <p className="portfolio-showcase__role">{title}</p>
+          <h1 className="portfolio-showcase__name">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : fullName}
+          </h1>
+          <p className="portfolio-showcase__role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+          </p>
           {tagline ? <p className="portfolio-showcase__tagline">{tagline}</p> : null}
-          {personalContactItems.length > 0 ? (
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="portfolio-showcase__contact">
-              {personalContactItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
                 <span key={key} className="portfolio-showcase__contact-item">
                   <span className="portfolio-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  {value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : value}
                 </span>
               ))}
             </div>
@@ -639,11 +751,11 @@ export default function PortfolioShowcase({ formData, locale = 'en', previewRef,
         style={!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
       >
         <main className="portfolio-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key) => renderMainSection(key))}
+          {mainSectionKeys.map((key) => renderSection(key, 'main'))}
         </main>
         {showSidebar ? (
           <aside className="portfolio-showcase__sidebar" data-export-secondary="true">
-            {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+            {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
           </aside>
         ) : null}
       </div>

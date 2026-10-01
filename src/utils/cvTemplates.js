@@ -3,6 +3,12 @@ export const defaultTemplateId = 'minimal'
 const templateMap = {
   minimal: {
     id: 'minimal',
+    // Wiring a new template's accent is a 3-step opt-in — see docs/template-design-system.md §6.
+    // `accent.default` must be the lowercase hex of that template's
+    // `*_DEFAULT_ACCENT_COLOR` constant in `src/components/templates/<id>.js`
+    // (same colour, exact string match — CSS hex is case-insensitive but the
+    // registry and the constant should agree exactly).
+    accent: null,
     label: 'Minimalist',
     description: 'Typography only, thin dividers, contact details in the header — a clean, no-frills layout that works for any role.',
     variant: 'minimal',
@@ -22,10 +28,15 @@ const templateMap = {
   },
   developer: {
     id: 'developer',
+    // Opts out of the Settings accent swatch (§6): the fixed teal→blue→purple
+    // cool-spectrum gradient is the template's concept, like Colorful Compact's
+    // capped rainbow — not a single configurable hue.
+    accent: null,
     label: 'Developer',
     description: 'Dark sidebar with project and achievement cards — a strong fit if your work is naturally project-based.',
     variant: 'developer',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'projects', 'achievements', 'openSource', 'publications'],
     secondarySections: ['skills', 'links', 'certificates', 'education', 'languages'],
     summaryBadgeLabel: 'Focus',
@@ -41,10 +52,12 @@ const templateMap = {
   },
   creative: {
     id: 'creative',
+    accent: { default: '#e2572a', swatchSet: 'warmCoral' },
     label: 'Creative',
-    description: 'Editorial full-width header with a two-tone name and a color-coded sidebar of quick facts. Suits any creative profession.',
+    description: 'Editorial two-column layout with numbered section headings, a full-width header, and a single customizable accent color. Suits any creative profession.',
     variant: 'creative',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'projects'],
     secondarySections: ['skills', 'education', 'certificates', 'links', 'languages', 'interests'],
     summaryBadgeLabel: 'Notes',
@@ -60,10 +73,12 @@ const templateMap = {
   },
   modern: {
     id: 'modern',
+    accent: null,
     label: 'Modern Professional',
     description: 'Consulting-style layout with a rose timeline and circular photo — built for a clear, step-by-step career story.',
     variant: 'modern',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'education', 'projects', 'achievements'],
     secondarySections: ['skills', 'languages', 'certificates', 'links', 'interests'],
     summaryBadgeLabel: 'Summary',
@@ -79,10 +94,12 @@ const templateMap = {
   },
   executive: {
     id: 'executive',
+    accent: { default: '#b45309', swatchSet: 'warmGold' },
     label: 'Executive',
-    description: 'Restrained boardroom layout with a gold accent, no timeline — suits a CV that leads with outcomes over a chronological story.',
+    description: 'Restrained boardroom layout with one customizable accent and no timeline — suits a CV that leads with outcomes over a chronological story.',
     variant: 'executive',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'leadership', 'projects', 'achievements', 'education'],
     secondarySections: ['coreStrengths', 'skills', 'certificates', 'languages', 'memberships', 'links'],
     summaryBadgeLabel: 'Executive Profile',
@@ -98,6 +115,7 @@ const templateMap = {
   },
   timeline: {
     id: 'timeline',
+    accent: { default: '#6d28d9', swatchSet: 'cool' },
     label: 'Modern Timeline',
     description: 'Single-column layout with a clean vertical timeline for your career story and a customizable accent color — restrained, modern, and suited to almost any profession.',
     variant: 'timeline',
@@ -117,10 +135,12 @@ const templateMap = {
   },
   graduate: {
     id: 'graduate',
+    accent: { default: '#4f46e5', swatchSet: 'coolIndigo' },
     label: 'Graduate',
-    description: 'Bright indigo layout leading with education, academic projects, and internships — a strong fit when those are the strongest part of your story.',
+    description: 'An education-first layout that leads with your degree, academic projects, and internships, with a customizable accent color — a strong fit when those are the strongest part of your story.',
     variant: 'graduate',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'education', 'projects', 'internships', 'experience', 'publications', 'volunteering'],
     secondarySections: ['skills', 'languages', 'certificates', 'links', 'achievements', 'interests', 'memberships'],
     summaryBadgeLabel: 'Profile',
@@ -136,8 +156,9 @@ const templateMap = {
   },
   compact: {
     id: 'compact',
+    accent: { default: '#0284c7', swatchSet: 'coolBlue' },
     label: 'Compact',
-    description: 'Tightens spacing automatically until everything fits one page — built for a long, detailed history that needs to stay to one page.',
+    description: 'A tight single-column one-pager with a customizable accent that shrinks its own spacing until everything fits one page — built for a long, detailed history.',
     variant: 'compact',
     layout: 'stacked',
     primarySections: ['about', 'skills', 'experience', 'projects', 'education', 'certificates', 'languages', 'links', 'interests'],
@@ -155,10 +176,12 @@ const templateMap = {
   },
   portfolio: {
     id: 'portfolio',
+    accent: { default: '#047857', swatchSet: 'forestGreen' },
     label: 'Portfolio Hybrid',
     description: 'Featured project cards, case studies, and tech-stack badges — a strong fit when your work speaks for itself through projects.',
     variant: 'portfolio',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'projects', 'experience', 'caseStudies', 'openSource', 'education', 'testimonials'],
     secondarySections: ['skills', 'certificates', 'links', 'languages', 'achievements', 'interests'],
     summaryBadgeLabel: 'About',
@@ -174,10 +197,12 @@ const templateMap = {
   },
   techExec: {
     id: 'techExec',
+    accent: { default: '#2563eb', swatchSet: 'royalBlue' },
     label: 'Tech Executive',
-    description: 'Annual-report layout with a timeline and a core-strengths sidebar, built for leadership-style narratives.',
+    description: 'An annual-report layout — a deep-navy masthead and footer band around a two-column body, with a core-strengths sidebar and a customizable accent. Built for leadership-style narratives.',
     variant: 'techExec',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'education', 'skills'],
     secondarySections: ['coreStrengths', 'certificates', 'projects', 'links', 'languages', 'interests'],
     summaryBadgeLabel: 'Profile',
@@ -193,8 +218,9 @@ const templateMap = {
   },
   classicProfessional: {
     id: 'classicProfessional',
+    accent: null,
     label: 'Classic Professional',
-    description: 'Traditional single-column layout with a centered name and thin dividers — a universally safe choice for any industry.',
+    description: 'Traditional single-column layout with thin dividers and a serif name you can centre or left-align — a universally safe choice for any industry.',
     variant: 'classicProfessional',
     layout: 'stacked',
     primarySections: ['about', 'experience', 'education', 'skills', 'languages', 'certificates'],
@@ -210,31 +236,14 @@ const templateMap = {
       chips: ['Summary', 'Experience'],
     },
   },
-  classic: {
-    id: 'classic',
-    label: 'Classic',
-    description: 'Calm left-aligned letterhead — a serif name over a single rule, ink on ivory, no color, no sidebar. Roomy whitespace and hairline dividers make it an easy, universally safe read.',
-    variant: 'classic',
-    layout: 'stacked',
-    primarySections: ['about', 'experience', 'education', 'skills', 'languages', 'certificates', 'links'],
-    secondarySections: [],
-    summaryBadgeLabel: 'Profile',
-    thumbnail: {
-      accentClassName: 'bg-stone-800',
-      surfaceClassName: 'bg-stone-50',
-      primaryRatioClassName: 'grid-cols-1',
-      titleWidthClassName: 'w-28',
-      subtitleWidthClassName: 'w-20',
-      blockWidths: ['w-full', 'w-full', 'w-11/12'],
-      chips: ['Summary', 'Experience'],
-    },
-  },
   navyProfessional: {
     id: 'navyProfessional',
+    accent: null,
     label: 'Navy Professional',
     description: 'Modern two-column layout with a dark navy sidebar and blue accents — professional and ATS-friendly.',
     variant: 'navyProfessional',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'education', 'certificates'],
     secondarySections: ['skills', 'languages'],
     summaryBadgeLabel: 'Profile',
@@ -250,10 +259,12 @@ const templateMap = {
   },
   modernOrange: {
     id: 'modernOrange',
+    accent: { default: '#f28c00', swatchSet: 'warm' },
     label: 'Modern Orange',
     description: 'Premium two-column layout with a warm cream sidebar, orange accents, dot-rated skills, and timelines for education and experience — suits almost any profession.',
     variant: 'modernOrange',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'projects', 'certificates'],
     secondarySections: ['skills', 'languages', 'education'],
     summaryBadgeLabel: 'Profile',
@@ -269,10 +280,12 @@ const templateMap = {
   },
   colorfulCompact: {
     id: 'colorfulCompact',
+    accent: null,
     label: 'Colorful Compact',
     description: 'Dark editorial header over a tight two-column body, with every section — Skills, Experience, Projects, Languages — in its own rainbow accent color. Suits any creative or product profile.',
     variant: 'colorfulCompact',
     layout: 'split',
+    columnMoves: true,
     primarySections: ['about', 'experience', 'projects'],
     secondarySections: ['skills', 'education', 'languages', 'links', 'achievements'],
     summaryBadgeLabel: 'About',
@@ -288,8 +301,9 @@ const templateMap = {
   },
   quadrant: {
     id: 'quadrant',
+    accent: { default: '#0e7490', swatchSet: 'coolCyan' },
     label: 'Quadrant',
-    description: 'A literal 2x2 grid — profile, skills, work history, and everything else split into four scannable quarters, with a single cyan accent. A strong fit if you want your CV to read at a glance rather than top to bottom.',
+    description: 'A literal 2x2 grid — identity, summary and skills, work history, and everything else split into four scannable quarters, with a single customizable accent. A strong fit if you want your CV to read at a glance rather than top to bottom.',
     variant: 'quadrant',
     layout: 'split',
     primarySections: ['about', 'experience', 'projects'],
@@ -303,6 +317,66 @@ const templateMap = {
       subtitleWidthClassName: 'w-16',
       blockWidths: ['w-full', 'w-11/12', 'w-9/12'],
       chips: ['Skills', 'Education'],
+    },
+  },
+  editorial: {
+    id: 'editorial',
+    accent: { default: '#9f1239', swatchSet: 'inkCrimson' },
+    label: 'Editorial',
+    description: 'A magazine-style single column — an oversized byline name, numbered sections, and a wide reading measure. No sidebar, no clutter.',
+    variant: 'editorial',
+    layout: 'stacked',
+    primarySections: ['about', 'experience', 'education', 'skills', 'projects', 'links', 'languages', 'certificates'],
+    secondarySections: [],
+    summaryBadgeLabel: 'Profile',
+    thumbnail: {
+      accentClassName: 'bg-rose-800',
+      surfaceClassName: 'bg-gray-50',
+      primaryRatioClassName: 'grid-cols-1',
+      titleWidthClassName: 'w-28',
+      subtitleWidthClassName: 'w-20',
+      blockWidths: ['w-full', 'w-full', 'w-11/12'],
+      chips: ['Byline', 'Sections'],
+    },
+  },
+  portrait: {
+    id: 'portrait',
+    accent: { default: '#0f766e', swatchSet: 'quietTeal' },
+    label: 'Portrait',
+    description: 'A full-height photo fills the left column; identity and every section flow on the right, with one customizable accent. The photo is the structure, not an accent — the strongest fit if you want your face to lead.',
+    variant: 'portrait',
+    layout: 'stacked',
+    primarySections: ['about', 'experience', 'education', 'skills', 'projects', 'links', 'languages', 'certificates'],
+    secondarySections: [],
+    summaryBadgeLabel: 'Profile',
+    thumbnail: {
+      accentClassName: 'bg-teal-700',
+      surfaceClassName: 'bg-gray-50',
+      primaryRatioClassName: 'grid-cols-[0.4fr_0.6fr]',
+      titleWidthClassName: 'w-24',
+      subtitleWidthClassName: 'w-16',
+      blockWidths: ['w-full', 'w-11/12', 'w-9/12'],
+      chips: ['Photo', 'Sections'],
+    },
+  },
+  european: {
+    id: 'european',
+    accent: { default: '#1d4ed8', swatchSet: 'civicBlue' },
+    label: 'European',
+    description: 'A Europass-adjacent, genuinely minimal one-page format — every section reads as a label/value table (dates, categories, link types) instead of flowing prose, with one customizable accent. Auto-fits one page.',
+    variant: 'european',
+    layout: 'stacked',
+    primarySections: ['about', 'experience', 'education', 'skills', 'projects', 'links', 'languages', 'certificates'],
+    secondarySections: [],
+    summaryBadgeLabel: 'Profile',
+    thumbnail: {
+      accentClassName: 'bg-blue-700',
+      surfaceClassName: 'bg-gray-50',
+      primaryRatioClassName: 'grid-cols-1',
+      titleWidthClassName: 'w-28',
+      subtitleWidthClassName: 'w-20',
+      blockWidths: ['w-full', 'w-full', 'w-11/12'],
+      chips: ['Table', 'One page'],
     },
   },
 }
@@ -323,7 +397,7 @@ const templateLocalization = {
     },
     creative: {
       label: 'Luova',
-      description: 'Koko leveyden otsikko kaksivärisellä nimellä ja väri­koodattu pikatietojen sivupalkki. Sopii mille tahansa luovalle ammatille.',
+      description: 'Toimituksellinen kaksipalstainen asettelu numeroiduilla osiootsikoilla, koko leveyden otsikkoalue ja yksi muokattava korostusväri. Sopii mille tahansa luovalle ammatille.',
       summaryBadgeLabel: 'Huomiot',
       chips: ['Tarina', 'Linkit'],
     },
@@ -335,7 +409,7 @@ const templateLocalization = {
     },
     executive: {
       label: 'Johtaja',
-      description: 'Hillitty hallitushuoneasettelu kulta-aksentilla, ei aikajanaa — sopii, kun CV:si nostaa tulokset kronologian edelle.',
+      description: 'Hillitty hallitushuoneasettelu yhdellä muokattavalla aksenttivärillä, ei aikajanaa — sopii, kun CV:si nostaa tulokset kronologian edelle.',
       summaryBadgeLabel: 'Johtajaprofiili',
       chips: ['Yhteenveto', 'Johtavuus'],
     },
@@ -347,13 +421,13 @@ const templateLocalization = {
     },
     graduate: {
       label: 'Tutkinto',
-      description: 'Kirkas indigoasettelu nostaa koulutuksen, akateemiset projektit ja harjoittelut etusijalle — sopii, kun ne ovat tarinasi vahvin osa.',
+      description: 'Koulutuksen etusijalle nostava asettelu, joka aloittaa tutkinnostasi, akateemisista projekteista ja harjoitteluista — muokattavalla aksenttivärillä. Sopii, kun ne ovat tarinasi vahvin osa.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Koulutus', 'Taidot'],
     },
     compact: {
       label: 'Tiivis',
-      description: 'Tiivistää välit automaattisesti, kunnes sisältö mahtuu yhdelle sivulle — pitkälle, yksityiskohtaiselle uralle joka pitää saada yhdelle sivulle.',
+      description: 'Tiivis yksipalstainen yhden sivun CV muokattavalla aksenttivärillä, joka pienentää välejään automaattisesti kunnes sisältö mahtuu yhdelle sivulle — pitkälle, yksityiskohtaiselle uralle.',
       summaryBadgeLabel: 'Profiili',
       chips: ['CV', '1-sivu'],
     },
@@ -365,19 +439,13 @@ const templateLocalization = {
     },
     techExec: {
       label: 'Tekninen johtaja',
-      description: 'Vuosikertomustyylinen asettelu, aikajana ja ydinvahvuuksien sivupalkki — rakennettu johtajuustarinoille.',
+      description: 'Vuosikertomustyylinen asettelu — syvän laivastonsininen otsikko- ja alapalkki kaksipalstaisen rungon ympärillä, ydinvahvuuksien sivupalkki ja muokattava aksenttiväri. Rakennettu johtajuustarinoille.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Vahvuudet', 'Projektit'],
     },
     classicProfessional: {
       label: 'Klassinen ammattilainen',
-      description: 'Perinteinen yksipalstainen asettelu keskitetyllä nimellä ja ohuilla erottimilla — universaalisti turvallinen valinta mille tahansa alalle.',
-      summaryBadgeLabel: 'Profiili',
-      chips: ['Yhteenveto', 'Kokemus'],
-    },
-    classic: {
-      label: 'Klassinen',
-      description: 'Rauhallinen vasemmalle tasattu kirjelomake — seriffinimi yhden viivan yllä, mustetta norsunluulla, ei väriä, ei sivupalkkia. Väljä tyhjä tila ja hiusviivaerottimet tekevät siitä helpon, universaalisti turvallisen luettavan.',
+      description: 'Perinteinen yksipalstainen asettelu ohuilla erottimilla ja seriffinimellä, jonka voit keskittää tai tasata vasemmalle — universaalisti turvallinen valinta mille tahansa alalle.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Yhteenveto', 'Kokemus'],
     },
@@ -401,9 +469,27 @@ const templateLocalization = {
     },
     quadrant: {
       label: 'Neliö',
-      description: 'Kirjaimellinen 2x2-ruudukko — profiili, taidot, työkokemus ja loput tiedot omissa neljänneksissään, yhdellä syaanilla aksentilla. Sopii hyvin, jos haluat CV:n hahmottuvan yhdellä silmäyksellä ylhäältä alas lukemisen sijaan.',
+      description: 'Kirjaimellinen 2x2-ruudukko — henkilötiedot, yhteenveto ja taidot, työkokemus sekä loput tiedot omissa neljänneksissään, yhdellä muokattavalla aksenttivärillä. Sopii hyvin, jos haluat CV:n hahmottuvan yhdellä silmäyksellä ylhäältä alas lukemisen sijaan.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Taidot', 'Koulutus'],
+    },
+    editorial: {
+      label: 'Toimituksellinen',
+      description: 'Aikakauslehtityylinen yksipalstainen asettelu — suuri nimiotsikko, numeroidut osiot ja leveä lukumitta. Ei sivupalkkia, ei sotkua.',
+      summaryBadgeLabel: 'Profiili',
+      chips: ['Nimiö', 'Osiot'],
+    },
+    portrait: {
+      label: 'Muotokuva',
+      description: 'Täyskorkuinen valokuva täyttää vasemman palstan; henkilötiedot ja kaikki osiot virtaavat oikealla, yhdellä muokattavalla aksenttivärillä. Kuva on itse rakenne, ei koriste — vahvin valinta, jos haluat kasvojesi johtavan.',
+      summaryBadgeLabel: 'Profiili',
+      chips: ['Kuva', 'Osiot'],
+    },
+    european: {
+      label: 'Eurooppalainen',
+      description: 'Europass-henkinen, todella minimalistinen yksisivuinen muoto — jokainen osio esitetään otsikko/arvo-taulukkona (päivämäärät, luokat, linkkityypit) juoksevan tekstin sijaan, yhdellä muokattavalla aksenttivärillä. Sovittuu automaattisesti yhdelle sivulle.',
+      summaryBadgeLabel: 'Profiili',
+      chips: ['Taulukko', 'Yksi sivu'],
     },
   },
 }
@@ -444,4 +530,39 @@ export function getCvTemplate(templateId, locale = 'en') {
 
 export function isValidTemplateId(templateId) {
   return typeof templateId === 'string' && Object.hasOwn(templateMap, templateId)
+}
+
+// A template's accent-color config: `{ default, swatchSet }` for templates
+// that expose a customizable accent, or `null` for those that don't (yet).
+//
+// Registry rule: `accent.default` must be the lowercase hex of that
+// template's `*_DEFAULT_ACCENT_COLOR` constant in
+// `src/components/templates/<id>.js` — same colour, exact string match.
+// Adding this entry is only step 1 of a 3-step opt-in (registry entry →
+// CVPreview.jsx delegation forwards `accentColor` → the Showcase writes
+// `--tpl-accent` + an ATS-mode override); see docs/template-design-system.md
+// §6. A template with no `*Showcase.jsx` (only the flat renderer path, e.g.
+// Minimalist) keeps `accent: null` — the flat path uses Tailwind colour
+// tokens, not hex.
+export function getTemplateAccent(templateId) {
+  return templateMap[templateId]?.accent ?? null
+}
+
+// The accent color to render `templateId` with: the user's per-template
+// override from the UI reducer's `templateAccentColors` map, else the
+// template's registry default. One resolver for both call sites
+// (ResumeBuilderPage.jsx's CVPreview `accentColor` prop, SettingsModal's
+// active swatch).
+export function resolveTemplateAccent(templateAccentColors, templateId) {
+  return templateAccentColors?.[templateId] ?? getTemplateAccent(templateId)?.default
+}
+
+// `{ [templateId]: accent.default }` for every template with a non-null
+// accent config. Used to seed the UI reducer's `templateAccentColors` map.
+export function getAllTemplateAccents() {
+  return Object.fromEntries(
+    Object.values(templateMap)
+      .filter((template) => template.accent)
+      .map((template) => [template.id, template.accent.default]),
+  )
 }

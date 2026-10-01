@@ -1,54 +1,54 @@
 /* ==========================================================================
-   Executive Showcase — hand-authored component styles for the Executive
-   template's non-ATS "boardroom" mode. Scoped entirely under
-   `.executive-showcase`. Deep navy / indigo / royal-blue palette. No
-   decorative timeline, no boxed section containers — whitespace and thin
-   1px dividers separate content instead, per the "no heavy containers"
-   brief. Only Projects and Links use a subtle bordered card, matching the
-   spec's explicit "Professional cards" call-out. A single gold accent is
-   reserved for the Awards section only ("gold should only be used for
-   subtle highlights").
+   Executive Showcase — hand-authored styles for the Executive template's
+   non-ATS "boardroom" mode. Scoped under `.executive-showcase`.
 
-   Layout: a full-height left rail (identity + secondary sections) beside a
-   white main column (primary sections) — same two-column shape as the
-   Navy Professional / Modern Orange Showcases, rather than the template's
-   older horizontal top-header band.
+   Reworked 2026-09-10 to docs/template-design-system.md:
+   - §3 colour: one warm-charcoal ink (`--ex-ink` + two muted steps), one
+     gold accent (`--tpl-accent`, set inline from the `accentColor` prop
+     with #b45309 as the fallback; `--tpl-accent-soft` is the JS-computed
+     rgba fill), and the warm-neutral left rail as the single tint region.
+     The pale-indigo `--ex-header-bg: #eef2ff` (residual from the Aug
+     indigo→gold pass) is gone, and the ink is warmed from cool slate to a
+     stone scale to sit with the gold.
+   - §4 heading: rule-under — a tracked-uppercase label over a 1px gold
+     hairline. The old bare section glyph is removed.
+   - §2 ramp: sizes from `--tpl-*` (root carries `tpl-density-standard` —
+     reclassified from the doc's `roomy` starting assignment, since the name
+     lives in a ~210px rail that can't give roomy's 240px floor).
+
+   No boxed section containers; only Projects and Links keep a subtle
+   bordered card (the template's stated "Professional cards" exception).
    ========================================================================== */
 
 .executive-showcase {
-  --ex-navy: #0f172a;
-  /* Was indigo (#4338ca) — the same hue family the Graduate showcase uses
-     for its own accent, so the two templates read as near-identical at a
-     glance despite unrelated descriptions ("restrained boardroom" vs
-     "bright indigo layout"). Gold is this template's actual identity per
-     its own description; it used to appear only on the Awards icon/dot,
-     everywhere else was this indigo. Now gold is the one accent, used
-     everywhere indigo was — #b45309 (not the lighter #c9a227 the Awards
-     dot used) so body-text-weight usages (role, tags, metrics) clear
-     4.5:1 contrast on white/var(--ex-card), not just decorative icons. */
-  --ex-gold: #b45309;
-  --ex-gray: #64748b;
-  --ex-light-gray: #f1f5f9;
-  --ex-border: #cbd5e1;
-  --ex-text: #1e293b;
-  /* Deliberately NOT pure #ffffff — same blank-canvas PDF export guard used
-     by the Creative/Modern Showcases (see those blocks' comments above):
-     this design is mostly whitespace with thin 1px dividers, so an all-
-     #ffffff page background can make every sampled point register as
-     near-white and silently fall back to a plain-text PDF render. */
-  --ex-bg: #f7f7fa;
+  /* Accent — overridden inline per render. Kept in sync with
+     EXECUTIVE_DEFAULT_ACCENT_COLOR in components/templates/executive.js. */
+  --tpl-accent: #b45309;
+  --tpl-accent-soft: rgba(180, 83, 9, 0.12);
+
+  --ex-ink: #1c1917;
+  --ex-ink-muted: #44403c;
+  /* Was #78716c: 4.37:1 on the rail, under WCAG AA's 4.5:1 for the
+     tagline, contact details and other secondary text there. #6b645e
+     reads 5.3:1 on the rail and stays lighter than --ex-ink-muted. */
+  --ex-ink-faint: #6b645e;
+  --ex-border: #d6d3d1;
+  --ex-rail: #f7f4ef;
+  /* Deliberately NOT pure #ffffff — the blank-canvas PDF export guard the
+     other Showcases use (this design is mostly whitespace + thin dividers). */
+  --ex-bg: #faf9f7;
   --ex-card: #ffffff;
-  --ex-header-bg: #eef2ff;
 
   position: relative;
   display: grid;
-  grid-template-columns: minmax(200px, 0.32fr) minmax(0, 0.68fr);
+  grid-template-columns: minmax(212px, 0.33fr) minmax(0, 0.67fr);
   background: var(--ex-bg);
-  color: var(--ex-text);
+  color: var(--ex-ink);
   font-family: var(--font-sans);
+  font-size: var(--tpl-body-size);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 24px 60px -32px rgba(28, 25, 23, 0.2);
 
   width: min(100%, var(--preview-paper-width));
   min-height: var(--preview-paper-min-height);
@@ -61,12 +61,12 @@
   box-shadow: none !important;
 }
 
-/* ── Left rail: identity + secondary sections, full height ── */
+/* ── Left rail: identity + secondary sections, full height (the one tint) ── */
 
 .executive-showcase__sidebar {
   min-width: 0;
-  background: var(--ex-header-bg);
-  padding: 2.5rem 1.75rem;
+  background: var(--ex-rail);
+  padding: 2.5rem 1.6rem;
 }
 
 .executive-showcase__identity {
@@ -83,39 +83,39 @@
   height: 6.5rem;
   object-fit: cover;
   border-radius: 9999px;
-  border: 3px solid var(--ex-navy);
+  border: 3px solid var(--tpl-accent);
 }
 
 .executive-showcase__kicker {
-  font-size: 0.64rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: var(--ex-gray);
+  color: var(--ex-ink-faint);
 }
 
 .executive-showcase__name {
   margin-top: 0.4rem;
-  font-size: 1.9rem;
+  font-size: var(--tpl-name-size);
+  line-height: var(--tpl-name-lh);
   font-weight: 800;
   letter-spacing: -0.01em;
-  line-height: 1.08;
-  color: var(--cv-heading-color, var(--ex-navy));
-  overflow-wrap: anywhere;
+  color: var(--cv-heading-color, var(--ex-ink));
+  overflow-wrap: break-word;
 }
 
 .executive-showcase__role {
   margin-top: 0.4rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--ex-gold);
+  font-size: var(--tpl-title-size);
+  font-weight: 600;
+  color: var(--tpl-accent);
 }
 
 .executive-showcase__tagline {
   margin-top: 0.5rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   font-style: italic;
-  color: var(--ex-gray);
+  color: var(--ex-ink-faint);
 }
 
 .executive-showcase__contact {
@@ -129,15 +129,15 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-size: 0.74rem;
-  color: var(--ex-gray);
-  overflow-wrap: anywhere;
+  font-size: var(--tpl-meta-size);
+  color: var(--ex-ink-faint);
+  overflow-wrap: break-word;
 }
 
 .executive-showcase__contact-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--ex-gold);
+  color: var(--tpl-accent);
 }
 
 .executive-showcase__sidebar-divider {
@@ -153,53 +153,38 @@
   padding: 2.5rem 2.5rem 2.5rem 2.25rem;
 }
 
-/* ── Sections — no boxed container; whitespace + thin dividers separate
-   content, per the "no heavy containers" brief. ── */
+/* ── Sections — no boxed container; rule-under heading (§4) ── */
 
 .executive-showcase__section + .executive-showcase__section {
   margin-top: 2rem;
 }
 
 .executive-showcase__section-head {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--ex-border);
-}
-
-.executive-showcase__section-icon {
-  display: inline-flex;
-  flex-shrink: 0;
-  color: var(--ex-gold);
-}
-
-.executive-showcase__section-icon svg {
-  height: 0.85rem;
-  width: 0.85rem;
+  border-bottom: 1px solid var(--tpl-accent);
 }
 
 .executive-showcase__section-title {
-  font-size: 0.6875rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.22em;
-  color: var(--cv-heading-color, var(--ex-navy));
+  color: var(--cv-heading-color, var(--ex-ink));
 }
 
 .executive-showcase__empty {
   margin-top: 0.9rem;
-  font-size: 0.8rem;
-  color: var(--ex-gray);
+  font-size: var(--tpl-meta-size);
+  color: var(--ex-ink-faint);
 }
 
 /* ── Executive Profile ── */
 
 .executive-showcase__summary {
   margin-top: 0.9rem;
-  font-size: 0.8rem;
-  line-height: 1.8;
-  color: var(--ex-text);
+  font-size: var(--tpl-body-size);
+  line-height: 1.7;
+  color: var(--ex-ink-muted);
   white-space: pre-line;
 }
 
@@ -216,11 +201,49 @@
   border-bottom: 1px solid var(--ex-border);
 }
 
-.executive-showcase__entry:not(:first-child) {
+/* Position-based defaults — Leadership and Education only. Both reuse this
+   exact class from their own separate, read-only-only render code, are
+   never wrapped by EditableList, and have no Direct Edit wiring of their
+   own, so true DOM position is a correct signal for them.
+   `:not(.executive-showcase__entry--wired)` excludes Experience's entries
+   (see below) so the two mechanisms are fully partitioned — mutually
+   exclusive by selector, not by specificity or source-order tie-breaking,
+   which is fragile and easy to silently invert with a later edit. */
+.executive-showcase__entry:not(:first-child):not(.executive-showcase__entry--wired) {
   padding-top: 1.25rem;
 }
 
-.executive-showcase__entry:last-child {
+.executive-showcase__entry:last-child:not(.executive-showcase__entry--wired) {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* `--wired` is added unconditionally to EVERY Experience entry (never to
+   Leadership/Education, which don't go through `renderExperienceEntry` in
+   ExecutiveShowcase.jsx) specifically to opt out of the position-based
+   rules above — Direct Edit mode wraps every entry in `EditableList`'s own
+   `.direct-edit-entry` div (drag handle + remove button + the entry
+   itself), which makes every `.executive-showcase__entry` the 3rd/last
+   child of ITS OWN wrapper regardless of overall list position, so
+   `:not(:first-child)`/`:last-child` would otherwise match EVERY
+   Experience entry once wrapped, not just the true first/last one. A
+   wrapper-anchored `:first-of-type`/`:last-of-type` re-fix (this file's
+   earlier, now-abandoned attempt) doesn't work either: `EditableList`'s
+   `DndContext` (no `accessibility.container` configured) mounts an
+   un-portaled accessibility live-region — two more untyped `<div>`
+   siblings — after the last `.direct-edit-entry` once mounted, so the
+   true-last wrapper is never actually `:last-of-type` among `div`-tag
+   siblings. `--not-first`/`--last` (from the `isFirst`/`isLast` params
+   `renderExperienceEntry` now takes) are JS-driven modifier classes,
+   robust against whatever `EditableList`/dnd-kit renders around an entry
+   — same fix shape as `.modern-orange-showcase__exp-row--last` (Direct
+   Edit Phase 2 Round 7, where this identical bug class was independently
+   found and fixed). */
+.executive-showcase__entry--wired.executive-showcase__entry--not-first {
+  padding-top: 1.25rem;
+}
+
+.executive-showcase__entry--wired.executive-showcase__entry--last {
   border-bottom: none;
   padding-bottom: 0;
 }
@@ -234,21 +257,21 @@
 }
 
 .executive-showcase__entry-role {
-  font-size: 0.98rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 600;
-  color: var(--ex-navy);
+  color: var(--ex-ink);
 }
 
 .executive-showcase__entry-meta {
   margin-top: 0.15rem;
-  font-size: 0.78rem;
-  color: var(--ex-gray);
+  font-size: var(--tpl-meta-size);
+  color: var(--ex-ink-faint);
 }
 
 .executive-showcase__entry-dates {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--ex-gray);
+  color: var(--tpl-accent);
   white-space: nowrap;
 }
 
@@ -261,17 +284,26 @@
 }
 
 .executive-showcase__bullets li {
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
-  color: var(--ex-text);
+  color: var(--ex-ink-muted);
 }
 
 .executive-showcase__bullets li::marker {
-  color: var(--ex-gold);
+  color: var(--tpl-accent);
+}
+
+.executive-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--ex-ink-muted);
 }
 
 .executive-showcase__metric {
-  color: var(--ex-gold);
+  color: var(--tpl-accent);
   font-weight: 700;
 }
 
@@ -292,31 +324,31 @@
 }
 
 .executive-showcase__project-name {
-  font-size: 0.92rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
-  color: var(--ex-navy);
+  color: var(--ex-ink);
 }
 
 .executive-showcase__project-org {
   margin-top: 0.15rem;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--ex-gold);
+  color: var(--tpl-accent);
 }
 
 .executive-showcase__project-desc {
   margin-top: 0.5rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
-  color: var(--ex-text);
+  color: var(--ex-ink-muted);
   white-space: pre-line;
 }
 
 .executive-showcase__project-impact {
   margin-top: 0.5rem;
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
-  color: var(--ex-gold);
+  color: var(--tpl-accent);
 }
 
 /* ── Sidebar: plain lists — no card wrapper, thin dividers only ── */
@@ -346,28 +378,28 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
-  font-size: 0.8rem;
-  color: var(--ex-text);
+  font-size: var(--tpl-body-size);
+  color: var(--ex-ink);
 }
 
 .executive-showcase__list-title {
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   font-weight: 700;
-  color: var(--ex-navy);
+  color: var(--ex-ink);
 }
 
 .executive-showcase__list-meta {
   margin-top: 0.15rem;
-  font-size: 0.72rem;
-  color: var(--ex-gray);
+  font-size: var(--tpl-meta-size);
+  color: var(--ex-ink-faint);
 }
 
 .executive-showcase__list-link {
   display: inline-block;
   margin-top: 0.3rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--ex-gold);
+  color: var(--tpl-accent);
 }
 
 /* ── Core Competencies ── */
@@ -393,20 +425,20 @@
 }
 
 .executive-showcase__strength-title {
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   font-weight: 700;
-  color: var(--ex-navy);
+  color: var(--ex-ink);
 }
 
 .executive-showcase__strength-desc {
   margin-top: 0.2rem;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   line-height: 1.55;
-  color: var(--ex-gray);
+  color: var(--ex-ink-faint);
   white-space: pre-line;
 }
 
-/* ── Executive Skills (flat grouped tags, no bars/stars) ── */
+/* ── Executive Skills (flat grouped tags) ── */
 
 .executive-showcase__skill-group {
   margin-top: 1rem;
@@ -417,12 +449,20 @@
 }
 
 .executive-showcase__skill-group-label {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--ex-gray);
+  color: var(--ex-ink-faint);
   margin-bottom: 0.5rem;
+}
+
+.executive-showcase__skill-group .direct-edit-chip-group__label {
+  font-size: var(--tpl-meta-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ex-ink-faint);
 }
 
 .executive-showcase__tag-row {
@@ -433,12 +473,12 @@
 
 .executive-showcase__tag {
   border-radius: 6px;
-  border: 1px solid var(--ex-border);
   padding: 0.28rem 0.6rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--ex-gold);
-  background: transparent;
+  color: var(--ex-ink);
+  background: var(--tpl-accent-soft);
+  overflow-wrap: anywhere;
 }
 
 /* ── Awards ── */
@@ -461,7 +501,7 @@
   width: 0.4rem;
   height: 0.4rem;
   border-radius: 9999px;
-  background: var(--ex-gold);
+  background: var(--tpl-accent);
 }
 
 .executive-showcase__award-row {
@@ -473,22 +513,22 @@
 }
 
 .executive-showcase__award-title {
-  font-size: 0.8rem;
+  font-size: var(--tpl-body-size);
   font-weight: 700;
-  color: var(--ex-navy);
+  color: var(--ex-ink);
 }
 
 .executive-showcase__award-year {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--ex-gray);
+  color: var(--ex-ink-faint);
 }
 
 .executive-showcase__award-desc {
   margin-top: 0.2rem;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   line-height: 1.5;
-  color: var(--ex-gray);
+  color: var(--ex-ink-faint);
   white-space: pre-line;
 }
 
@@ -514,23 +554,23 @@
 .executive-showcase__link-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--ex-gold);
+  color: var(--tpl-accent);
 }
 
 .executive-showcase__link-label {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--ex-gray);
+  color: var(--ex-ink-faint);
 }
 
 .executive-showcase__link-value {
   display: block;
   overflow: hidden;
   margin-top: 0.1rem;
-  font-size: 0.76rem;
-  color: var(--ex-text);
+  font-size: var(--tpl-meta-size);
+  color: var(--ex-ink);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -550,10 +590,6 @@
 
   .executive-showcase__main {
     padding: 1.75rem 1.25rem;
-  }
-
-  .executive-showcase__name {
-    font-size: 1.6rem;
   }
 
   .executive-showcase__photo {
@@ -576,4 +612,3 @@
     box-shadow: none !important;
   }
 }
-

@@ -8,34 +8,114 @@
 // Layout: a literal 2x2 CSS grid, not four equal boxes — each row auto-
 // sizes to its own content, so a long Experience list can grow taller than
 // a short Education list without clipping or forcing scroll:
-//   top-left     — identity (photo, name, title, contact) + About
-//   top-right    — Skills + Languages (Languages is pinned here rather than
-//                  bottom-right so that quadrant doesn't end up visibly
-//                  taller than the other three — see the extrasKeys comment
-//                  below)
+//   top-left     — identity (photo, name, title, contact) — a tight card
+//   top-right    — Profile summary + Skills + Languages (About moved here
+//                  from the identity cell in the 2026-09-10 rework so the
+//                  top-left quadrant isn't visibly taller than the top-right)
 //   bottom-left  — Experience (+ Projects) — the one cell that drives PDF
 //                  pagination (data-export-placement="main"); the other
 //                  three are "side" and fall wherever they land, same
 //                  asymmetric handling every split-layout template uses.
 //   bottom-right — Education + Certificates + Links
+//
+// Reworked 2026-09-10 to docs/template-design-system.md: the `compact`
+// density ramp (`tpl-density-compact` + `--tpl-*`), one cyan accent read
+// from `--tpl-accent` (real soft-cyan icon-badges, accent-tinted grid
+// dividers, soft-cyan skill tags), and the About rebalance above.
 
 import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import { accentSoftFill } from '../../utils/templateAccents'
+import { QUADRANT_DEFAULT_ACCENT_COLOR } from './quadrant'
 import {
   devIcons,
   contactIcons,
   sectionIcons,
   parseSkillCategories,
+  buildEditableSkillCategories,
   formatDateRange,
   formatLinkLabel,
   formatLinkDisplayValue,
   getSafeHref,
 } from './shared'
+import EditableField from '../EditableField'
+import EditableList, { EditableCategorizedChip } from '../EditableList'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+}
+
+// Quadrant's own Experience-entry renderer: role and company/location nest
+// in one `min-w-0` div with the dates as its sibling. Only role and company
+// are editable inline; location stays read-only-appended text. `index` is
+// formData-relative in the directEditDispatch branch (EditableList's own
+// index); the read-only call site passes the snapshot's `sourceIndex`.
+//
+// Entry spacing and dividers come from --first/--last modifier classes,
+// never :first-child/:last-child — EditableList wraps each entry in its own
+// .direct-edit-entry div, making every entry both.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst, isLast, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+  const className = [
+    'quadrant-showcase__entry',
+    isFirst ? 'quadrant-showcase__entry--first' : '',
+    isLast ? 'quadrant-showcase__entry--last' : '',
+  ].filter(Boolean).join(' ')
+
+  return (
+    <div key={`${item.role}-${item.company}-${index}`} className={className} data-export-card="true" data-direct-edit-index={sourceIndex}>
+      <div className="quadrant-showcase__entry-row">
+        <div className="min-w-0">
+          <p className="quadrant-showcase__entry-role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                value={item.role}
+                placeholder={copy.untitledRole}
+              />
+            ) : item.role || copy.untitledRole}
+          </p>
+          {directEditDispatch ? (
+            <p className="quadrant-showcase__entry-meta">
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                value={item.company}
+                placeholder={copy.company}
+              />
+              {item.location ? ` · ${item.location}` : null}
+            </p>
+          ) : item.company || item.location ? (
+            <p className="quadrant-showcase__entry-meta">
+              {[item.company, item.location].filter(Boolean).join(' · ')}
+            </p>
+          ) : null}
+        </div>
+        <p className="quadrant-showcase__entry-dates">{dateRange || copy.datesPending}</p>
+      </div>
+      {directEditDispatch ? (
+        <p className="quadrant-showcase__bullets quadrant-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="quadrant-showcase__bullets">
+          {bullets.map((line, lineIndex) => (
+            <li key={lineIndex}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  )
 }
 
 function SectionHead({ icon, title }) {
@@ -62,7 +142,16 @@ function Section({ id, placement, icon, title, children, className = '' }) {
   )
 }
 
-export default function QuadrantShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
+export default function QuadrantShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  showcaseConfig = {},
+  headingColor = null,
+  accentColor = QUADRANT_DEFAULT_ACCENT_COLOR,
+  directEditDispatch = null,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -86,11 +175,22 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
     () => parseSkillCategories(snapshot.skills, isFinnish),
     [snapshot.skills, isFinnish],
+  )
+  // Editing branch only: the same grouping over formData.skills, each chip
+  // carrying its ORIGINAL flat-array index so removal hits the right skill.
+  const editableSkillCategories = useMemo(
+    () => buildEditableSkillCategories(formData.skills, isFinnish),
+    [formData.skills, isFinnish],
   )
 
   const sectionVisibility = {
@@ -125,8 +225,11 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
+    summary: isFinnish ? 'Yhteenveto' : 'Profile',
     experience: isFinnish ? 'Kokemus' : 'Experience',
     projects: isFinnish ? 'Projektit' : 'Projects',
     education: isFinnish ? 'Koulutus' : 'Education',
@@ -141,34 +244,29 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
       return (
         <Section key={key} id="experience" placement="main" icon="experience" title={copy.experience}>
           <div className="quadrant-showcase__entry-list">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-
-                return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="quadrant-showcase__entry" data-export-card="true">
-                    <div className="quadrant-showcase__entry-row">
-                      <div className="min-w-0">
-                        <p className="quadrant-showcase__entry-role">{item.role || copy.untitledRole}</p>
-                        {item.company || item.location ? (
-                          <p className="quadrant-showcase__entry-meta">
-                            {[item.company, item.location].filter(Boolean).join(' · ')}
-                          </p>
-                        ) : null}
-                      </div>
-                      <p className="quadrant-showcase__entry-dates">{dateRange || copy.datesPending}</p>
-                    </div>
-                    {bullets.length > 0 ? (
-                      <ul className="quadrant-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  isFirst: index === 0,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  isFirst: index === 0,
+                  isLast: index === snapshot.experience.length - 1,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="quadrant-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -190,7 +288,7 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="quadrant-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="quadrant-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="quadrant-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="quadrant-showcase__project-desc">{item.description}</p> : null}
                     {chips.length > 0 ? (
@@ -223,7 +321,7 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
           <div className="quadrant-showcase__list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
-                <div key={`${item.school}-${index}`} className="quadrant-showcase__list-item">
+                <div key={`${item.school}-${index}`} className="quadrant-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                   {item.degree ? <p className="quadrant-showcase__list-title">{item.degree}</p> : null}
                   {item.school || item.location ? (
                     <p className="quadrant-showcase__list-meta">
@@ -249,7 +347,7 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
           <div className="quadrant-showcase__list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="quadrant-showcase__list-item">
+                <div key={`${item.name}-${index}`} className="quadrant-showcase__list-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {item.name ? <p className="quadrant-showcase__list-title">{item.name}</p> : null}
                   {item.issuer || item.year ? (
                     <p className="quadrant-showcase__list-meta">
@@ -279,7 +377,7 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
           <div className="quadrant-showcase__list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="quadrant-showcase__list-item quadrant-showcase__list-item--row">
+                <div key={`${item.language}-${index}`} className="quadrant-showcase__list-item quadrant-showcase__list-item--row" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span>{item.language}</span>
                   {item.level ? <span className="quadrant-showcase__list-meta">{item.level}</span> : null}
                 </div>
@@ -333,8 +431,12 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
       // QuadrantShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className="quadrant-showcase preview-document--designer"
-      style={headingColor ? { '--cv-heading-color': headingColor } : null}
+      className="quadrant-showcase preview-document--designer tpl-density-compact"
+      style={{
+        '--tpl-accent': accentColor,
+        '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, QUADRANT_DEFAULT_ACCENT_COLOR),
+        ...(headingColor ? { '--cv-heading-color': headingColor } : null),
+      }}
     >
       <section className="quadrant-showcase__cell quadrant-showcase__cell--profile" data-export-header="true" data-export-secondary="true">
         {showPhoto ? (
@@ -350,29 +452,78 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
         <p className="quadrant-showcase__kicker" data-export-ignore="true">
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
-        <h1 className="quadrant-showcase__name">{fullName}</h1>
-        <p className="quadrant-showcase__role">{title}</p>
+        <h1 className="quadrant-showcase__name">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'fullName' }}
+              value={formData.fullName}
+              placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+            />
+          ) : fullName}
+        </h1>
+        <p className="quadrant-showcase__role">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'title' }}
+              value={formData.title}
+              placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+            />
+          ) : title}
+        </p>
         {tagline ? <p className="quadrant-showcase__tagline">{tagline}</p> : null}
-        {personalContactItems.length > 0 ? (
+        {directEditDispatch || personalContactItems.length > 0 ? (
           <div className="quadrant-showcase__contact">
-            {personalContactItems.map(([key, value]) => (
+            {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
               <span key={key} className="quadrant-showcase__contact-item">
                 <span className="quadrant-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                {value}
+                {directEditDispatch ? (
+                  <EditableField
+                    as="span"
+                    path={{ kind: 'root', field: key }}
+                    value={value}
+                    placeholder={placeholderLabel}
+                  />
+                ) : value}
               </span>
             ))}
           </div>
         ) : null}
-        {showAbout ? (
-          <p className="quadrant-showcase__summary" data-export-section="about" data-export-placement="side">{about}</p>
-        ) : null}
       </section>
 
       <section className="quadrant-showcase__cell quadrant-showcase__cell--skills" data-export-secondary="true">
+        {showAbout ? (
+          <Section id="about" placement="side" icon="about" title={copy.summary}>
+            <p className="quadrant-showcase__summary">
+              {directEditDispatch ? (
+                <EditableField
+                  as="span"
+                  path={{ kind: 'root', field: 'about' }}
+                  value={formData.about}
+                  placeholder={
+                    isFinnish
+                      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                      : 'Your professional summary will appear here as you fill out the CV form.'
+                  }
+                  multiline
+                />
+              ) : about}
+            </p>
+          </Section>
+        ) : null}
         {showSkills ? (
-          <>
-            <SectionHead icon="skills" title={copy.skills} />
-            {skillCategories.length > 0 ? (
+          <Section id="skills" placement="side" icon="skills" title={copy.skills}>
+            {directEditDispatch ? (
+              // Chips replace the read-only tags outright (never both, or
+              // every skill renders twice).
+              <div className="quadrant-showcase__skill-group">
+                <EditableCategorizedChip
+                  categories={editableSkillCategories}
+                  addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+                />
+              </div>
+            ) : skillCategories.length > 0 ? (
               skillCategories.map((cat) => (
                 <div key={cat.key} className="quadrant-showcase__skill-group">
                   <p className="quadrant-showcase__skill-group-label">{cat.label}</p>
@@ -388,7 +539,7 @@ export default function QuadrantShowcase({ formData, locale = 'en', previewRef, 
                 {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
               </p>
             )}
-          </>
+          </Section>
         ) : null}
         {showLanguages ? renderExtraSection('languages') : null}
       </section>

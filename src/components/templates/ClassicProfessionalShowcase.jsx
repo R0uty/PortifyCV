@@ -8,10 +8,14 @@
 //
 // Design language: traditional single-column resume — white background,
 // black/dark-gray typography only, no accent color, no sidebar, no photo.
-// A large centered name (system serif, since the app's one self-hosted
+// A large serif name (system serif, since the app's one self-hosted
 // typeface is Inter — see classicProfessional.js's headerTitle comment)
 // is the only visual flourish; everything else is thin 1px dividers and
 // generous whitespace, per the "traditional and universally safe" brief.
+//
+// `nameAlignment` ('center' default | 'left') folds in the retired Classic
+// template's left-aligned letterhead as one option (v1.2.10) — set via
+// data-name-align, handled in classicProfessional.css.
 
 import { useMemo } from 'react'
 
@@ -23,10 +27,9 @@ import {
   formatDateRange,
   formatLinkDisplayValue,
 } from './shared'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
+import EditableField from '../EditableField'
+import EditableList, { EditableChip } from '../EditableList'
+import { renderExperienceEntry } from './directEditExperienceEntry'
 
 function Section({ id, children }) {
   return (
@@ -36,16 +39,17 @@ function Section({ id, children }) {
   )
 }
 
-export default function ClassicProfessionalShowcase({ formData, locale = 'en', previewRef, templateConfig, headingColor = null }) {
+export default function ClassicProfessionalShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  headingColor = null,
+  nameAlignment = 'center',
+  directEditDispatch = null,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
-
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
-  const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
 
   const contactItems = [
     ['phone', snapshot.phone],
@@ -53,6 +57,11 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const linkedinUrl = snapshot.links.linkedin
+  const directEditContactFields = [
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const sectionVisibility = {
     ...createSectionVisibility(),
@@ -69,6 +78,8 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     summary: isFinnish ? 'Yhteenveto' : 'Professional Summary',
     experience: isFinnish ? 'Kokemus' : 'Experience',
     education: isFinnish ? 'Koulutus' : 'Education',
@@ -82,7 +93,19 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
       return (
         <Section key={key} id="about">
           <h2 className="classic-professional-showcase__heading">{copy.summary}</h2>
-          <p className="classic-professional-showcase__summary">{about}</p>
+          <p className="classic-professional-showcase__summary">
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'about' }}
+              value={formData.about}
+              placeholder={
+                isFinnish
+                  ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                  : 'Your professional summary will appear here as you fill out the CV form.'
+              }
+              multiline
+            />
+          </p>
         </Section>
       )
     }
@@ -92,29 +115,27 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
         <Section key={key} id="experience">
           <h2 className="classic-professional-showcase__heading">{copy.experience}</h2>
           <div className="classic-professional-showcase__entry-list">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-                const metaLine = [item.company, item.location].filter(Boolean).join(', ')
-
-                return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="classic-professional-showcase__entry" data-export-card="true">
-                    <div className="classic-professional-showcase__entry-row">
-                      <p className="classic-professional-showcase__entry-role">{item.role || copy.untitledRole}</p>
-                      <p className="classic-professional-showcase__entry-dates">{dateRange || copy.datesPending}</p>
-                    </div>
-                    {metaLine ? <p className="classic-professional-showcase__entry-meta">{metaLine}</p> : null}
-                    {bullets.length > 0 ? (
-                      <ul className="classic-professional-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  classPrefix: 'classic-professional-showcase',
+                  separator: ', ',
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
+                directEditDispatch,
+                sourceIndex: snapshot.sourceIndices.experience[index],
+                copy,
+                classPrefix: 'classic-professional-showcase',
+                separator: ', ',
+              }))
             ) : (
               <p className="classic-professional-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -135,7 +156,7 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
                 const metaLine = [item.school, item.location].filter(Boolean).join(', ')
 
                 return (
-                  <div key={`${item.school}-${index}`} className="classic-professional-showcase__entry" data-export-card="true">
+                  <div key={`${item.school}-${index}`} className="classic-professional-showcase__entry" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                     <div className="classic-professional-showcase__entry-row">
                       <p className="classic-professional-showcase__entry-role">{item.degree || copy.untitledRole}</p>
                       <p className="classic-professional-showcase__entry-dates">{formatDateRange(item.startDate, item.endDate)}</p>
@@ -159,7 +180,7 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
         <Section key={key} id="skills">
           <h2 className="classic-professional-showcase__heading">{copy.skills}</h2>
           <div className="classic-professional-showcase__tag-row">
-            {snapshot.skills.length > 0 ? (
+            {directEditDispatch ? null : snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill) => (
                 <span key={skill} data-export-skill="true" className="classic-professional-showcase__tag">{skill}</span>
               ))
@@ -168,6 +189,9 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
                 {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
               </p>
             )}
+            {directEditDispatch ? (
+              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+            ) : null}
           </div>
         </Section>
       )
@@ -180,7 +204,7 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
           {snapshot.languages.length > 0 ? (
             <p className="classic-professional-showcase__language-row">
               {snapshot.languages.map((item, index) => (
-                <span key={`${item.language}-${index}`} className="classic-professional-showcase__language-item">
+                <span key={`${item.language}-${index}`} className="classic-professional-showcase__language-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   {index > 0 ? <span className="classic-professional-showcase__language-sep" aria-hidden="true">|</span> : null}
                   {item.language}
                   {item.level ? <> – {item.level}</> : null}
@@ -203,7 +227,7 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
           <div className="classic-professional-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <p key={`${item.name}-${index}`} className="classic-professional-showcase__cert-item">
+                <p key={`${item.name}-${index}`} className="classic-professional-showcase__cert-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {[item.name, item.issuer].filter(Boolean).join(' – ')}
                 </p>
               ))
@@ -225,6 +249,7 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
       ref={previewRef}
       data-export-root="true"
       data-export-variant="classicProfessional"
+      data-name-align={nameAlignment === 'left' ? 'left' : 'center'}
       // "preview-document--designer" is a pure marker class (no styling
       // rules of its own — see index.css) that ResumeBuilderPage's export
       // handler polls for via waitForPreviewModeSync before starting a PDF
@@ -232,21 +257,44 @@ export default function ClassicProfessionalShowcase({ formData, locale = 'en', p
       // always "designer", never "ats". Without this class the export
       // handler polls forever waiting for a class that can never appear,
       // hanging the export.
-      className="classic-professional-showcase preview-document--designer"
+      className="classic-professional-showcase preview-document--designer tpl-density-roomy"
       style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
     >
       <header data-export-header="true" className="classic-professional-showcase__header">
         <p className="classic-professional-showcase__kicker" data-export-ignore="true">
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
-        <h1 className="classic-professional-showcase__name">{fullName}</h1>
-        <p className="classic-professional-showcase__role">{title}</p>
-        {contactItems.length > 0 || linkedinUrl ? (
+        <h1 className="classic-professional-showcase__name">
+          <EditableField
+            as="span"
+            path={{ kind: 'root', field: 'fullName' }}
+            value={formData.fullName}
+            placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+          />
+        </h1>
+        <p className="classic-professional-showcase__role">
+          <EditableField
+            as="span"
+            path={{ kind: 'root', field: 'title' }}
+            value={formData.title}
+            placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+          />
+        </p>
+        {directEditDispatch || contactItems.length > 0 || linkedinUrl ? (
           <div className="classic-professional-showcase__contact">
-            {contactItems.map(([key, value]) => (
+            {(directEditDispatch ? directEditContactFields : contactItems).map(([key, value, placeholderLabel]) => (
               <span key={key} className="classic-professional-showcase__contact-item">
                 <span className="classic-professional-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                {value}
+                {directEditDispatch ? (
+                  <EditableField
+                    as="span"
+                    path={{ kind: 'root', field: key }}
+                    value={value}
+                    placeholder={placeholderLabel}
+                  />
+                ) : (
+                  value
+                )}
               </span>
             ))}
             {linkedinUrl ? (

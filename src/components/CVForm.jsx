@@ -25,7 +25,7 @@ import ReorderableListInput from './fields/ReorderableListInput'
 import TagsInput from './fields/TagsInput'
 import ToggleSwitch from './fields/ToggleSwitch'
 import { getUiTheme } from '../utils/designSystem'
-import { getCvTemplate } from '../utils/cvTemplates'
+import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import {
   createSectionVisibility,
   createSectionItemVisibility,
@@ -37,79 +37,7 @@ import {
   EMPLOYMENT_TYPE_OPTIONS,
 } from '../utils/cvForm'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
-
-const MAX_PROFILE_PHOTO_SIZE_BYTES = 2 * 1024 * 1024
-const MAX_PROFILE_PHOTO_EDGE_PX = 480
-const MAX_PROFILE_PHOTO_DATA_URL_LENGTH = 450_000
-
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result ?? ''))
-    reader.onerror = () => reject(new Error('Could not read the selected image file.'))
-    reader.readAsDataURL(file)
-  })
-}
-
-function loadImageElement(dataUrl) {
-  return new Promise((resolve, reject) => {
-    const image = new Image()
-    image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error('Could not process the selected image file.'))
-    image.src = dataUrl
-  })
-}
-
-async function buildProfilePhotoDataUrl(file) {
-  if (!file || !file.type.startsWith('image/')) {
-    throw new Error('Select a valid image file.')
-  }
-
-  if (file.size > MAX_PROFILE_PHOTO_SIZE_BYTES) {
-    throw new Error('Image must be 2MB or smaller.')
-  }
-
-  const sourceDataUrl = await readFileAsDataUrl(file)
-  const sourceImage = await loadImageElement(sourceDataUrl)
-  const maxSide = Math.max(sourceImage.naturalWidth, sourceImage.naturalHeight, 1)
-  const scale = Math.min(1, MAX_PROFILE_PHOTO_EDGE_PX / maxSide)
-  const width = Math.max(1, Math.round(sourceImage.naturalWidth * scale))
-  const height = Math.max(1, Math.round(sourceImage.naturalHeight * scale))
-  const canvas = document.createElement('canvas')
-  const context = canvas.getContext('2d')
-
-  if (!context) {
-    throw new Error('Could not process the selected image file.')
-  }
-
-  canvas.width = width
-  canvas.height = height
-  context.drawImage(sourceImage, 0, 0, width, height)
-
-  const normalizedDataUrl = canvas.toDataURL('image/jpeg', 0.86)
-
-  if (normalizedDataUrl.length > MAX_PROFILE_PHOTO_DATA_URL_LENGTH) {
-    throw new Error('Image is too large after processing. Try a smaller image.')
-  }
-
-  return normalizedDataUrl
-}
-
-function localizePhotoErrorMessage(message, locale = 'en') {
-  if (locale !== 'fi') {
-    return message
-  }
-
-  const map = {
-    'Could not read the selected image file.': 'Valittua kuvatiedostoa ei voitu lukea.',
-    'Could not process the selected image file.': 'Valittua kuvatiedostoa ei voitu käsitellä.',
-    'Select a valid image file.': 'Valitse kelvollinen kuvatiedosto.',
-    'Image must be 2MB or smaller.': 'Kuvan on oltava enintään 2 Mt.',
-    'Image is too large after processing. Try a smaller image.': 'Kuva on käsittelyn jälkeen liian suuri. Kokeile pienempää kuvaa.',
-  }
-
-  return map[message] ?? message
-}
+import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/profilePhoto'
 
 function isSectionItemVisible(sectionItemVisibility, section, itemKey) {
   return sectionItemVisibility?.[section]?.[String(itemKey)] !== false
@@ -161,7 +89,7 @@ function CVForm({
   const ui = getUiTheme(theme)
   const isFinnish = locale === 'fi'
   const sectionVisibilityFields = getSectionVisibilityFields(locale)
-  const templateConfig = getCvTemplate(selectedTemplate, locale)
+  const templateConfig = getEffectiveCvTemplate(selectedTemplate, locale, formData)
   const templateSectionOrder = [
     ...templateConfig.primarySections,
     ...templateConfig.secondarySections,
@@ -811,6 +739,7 @@ function CVForm({
                             <input
                               type="text"
                               value={item.startDate}
+                              placeholder={isFinnish ? 'esim. tammikuu 2022' : 'e.g. Jan 2022'}
                               onChange={(event) =>
                                 updateArrayItem('experience', index, 'startDate', event.target.value)
                               }
@@ -821,7 +750,11 @@ function CVForm({
                               type="text"
                               value={item.isCurrent ? '' : item.endDate}
                               disabled={item.isCurrent}
-                              placeholder={item.isCurrent ? (isFinnish ? 'Nykyinen' : 'Present') : ' '}
+                              placeholder={
+                                item.isCurrent
+                                  ? (isFinnish ? 'Nykyinen' : 'Present')
+                                  : (isFinnish ? 'esim. kesäkuu 2023' : 'e.g. Jun 2023')
+                              }
                               onChange={(event) =>
                                 updateArrayItem('experience', index, 'endDate', event.target.value)
                               }
@@ -844,6 +777,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
                             <AutoGrowTextarea
                               value={item.description}
+                              minHeight={160}
                               onChange={(event) =>
                                 updateArrayItem('experience', index, 'description', event.target.value)
                               }
@@ -997,6 +931,7 @@ function CVForm({
                             <input
                               type="text"
                               value={item.startDate}
+                              placeholder={isFinnish ? 'esim. syyskuu 2018' : 'e.g. Sep 2018'}
                               onChange={(event) =>
                                 updateArrayItem('education', index, 'startDate', event.target.value)
                               }
@@ -1006,6 +941,7 @@ function CVForm({
                             <input
                               type="text"
                               value={item.endDate}
+                              placeholder={isFinnish ? 'esim. kesäkuu 2022' : 'e.g. Jun 2022'}
                               onChange={(event) =>
                                 updateArrayItem('education', index, 'endDate', event.target.value)
                               }

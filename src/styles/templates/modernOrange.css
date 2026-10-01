@@ -5,17 +5,23 @@
    personal info, skills, languages, education timeline) beside a white main
    column (name header + orange title badge, profile, an orange experience
    timeline, project cards, certifications). The one accent color comes from
-   `--mo-accent`, set inline per-render from the `accentColor` prop (see
+   `--tpl-accent`, set inline per-render from the `accentColor` prop (see
    ModernOrangeShowcase.jsx) so it's user-customizable without this
    stylesheet needing to know about it — the value declared here is only the
    fallback for contexts where the inline style is somehow absent. Colors
    are plain hex throughout (no oklch/color-mix) so html2canvas-based PDF
    export renders them reliably — same constraint as every other bespoke
    Showcase in this app.
+
+   §2 type ramp (docs/template-design-system.md): sizes for the six roles
+   come from the shared `--tpl-*` tokens; the root carries
+   `tpl-density-standard`. This file sets weight/case/tracking/colour only.
+   Sidebar list items (skill/language names, education meta) deliberately
+   stay at `--tpl-meta-size` — the sidebar is a condensed zone.
    ========================================================================== */
 
 .modern-orange-showcase {
-  --mo-accent: #f28c00;
+  --tpl-accent: #f28c00;
   --mo-text: #151a22;
   --mo-muted: #6b7280;
   --mo-border: #ece1d2;
@@ -27,7 +33,9 @@
 
   position: relative;
   display: grid;
-  grid-template-columns: minmax(180px, 0.29fr) minmax(200px, 0.71fr);
+  /* Second column holds the name (header + main share it); 210px floor per
+     §2's standard-density name rule. */
+  grid-template-columns: minmax(180px, 0.29fr) minmax(210px, 0.71fr);
   grid-template-rows: auto 1fr;
   grid-template-areas:
     'sidebar header'
@@ -71,7 +79,7 @@
   height: 7rem;
   object-fit: cover;
   border-radius: 9999px;
-  border: 3px solid var(--mo-accent);
+  border: 3px solid var(--tpl-accent);
   padding: 3px;
   background: var(--mo-bg);
 }
@@ -85,16 +93,16 @@
 }
 
 .modern-orange-showcase__sidebar-heading {
-  font-size: 0.68rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--mo-accent);
+  letter-spacing: 0.16em;
+  color: var(--tpl-accent);
   margin-bottom: 0.85rem;
 }
 
 .modern-orange-showcase__empty {
-  font-size: 0.78rem;
+  font-size: var(--tpl-body-size);
   color: var(--mo-muted);
 }
 
@@ -110,16 +118,16 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   line-height: 1.4;
   color: var(--mo-text);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .modern-orange-showcase__contact-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 /* ── Sidebar: skills (name + dot rating) ── */
@@ -138,7 +146,7 @@
 }
 
 .modern-orange-showcase__skill-name {
-  font-size: 0.78rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--mo-text);
   min-width: 0;
@@ -161,7 +169,7 @@
 }
 
 .modern-orange-showcase__dot--filled {
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
 }
 
 /* ── Sidebar: languages ── */
@@ -186,13 +194,13 @@
 }
 
 .modern-orange-showcase__lang-name {
-  font-size: 0.8rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   color: var(--mo-text);
 }
 
 .modern-orange-showcase__lang-level {
-  font-size: 0.68rem;
+  font-size: var(--tpl-meta-size);
   color: var(--mo-muted);
 }
 
@@ -227,7 +235,7 @@
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 9999px;
-  border: 2px solid var(--mo-accent);
+  border: 2px solid var(--tpl-accent);
   background: var(--mo-bg);
 }
 
@@ -236,7 +244,7 @@
   top: 0.22rem;
   bottom: -1.1rem;
   width: 1.5px;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   opacity: 0.3;
 }
 
@@ -246,21 +254,21 @@
 }
 
 .modern-orange-showcase__edu-dates {
-  font-size: 0.66rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 .modern-orange-showcase__edu-degree {
   margin-top: 0.15rem;
-  font-size: 0.8rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   color: var(--mo-text);
 }
 
 .modern-orange-showcase__edu-meta {
   margin-top: 0.1rem;
-  font-size: 0.72rem;
+  font-size: var(--tpl-meta-size);
   color: var(--mo-muted);
 }
 
@@ -279,7 +287,7 @@
 }
 
 .modern-orange-showcase__kicker {
-  font-size: 0.62rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -288,16 +296,16 @@
 
 .modern-orange-showcase__name {
   margin-top: 0.35rem;
-  font-size: 2.05rem;
+  font-size: var(--tpl-name-size);
   font-weight: 800;
-  line-height: 1.08;
+  line-height: var(--tpl-name-lh);
   letter-spacing: -0.01em;
   color: var(--cv-heading-color, var(--mo-text));
   overflow-wrap: break-word;
 }
 
 .modern-orange-showcase__name-last {
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 .modern-orange-showcase__title-badge {
@@ -306,19 +314,23 @@
   margin-top: 0.9rem;
   padding: 0.45rem 1rem;
   border-radius: 8px;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   color: #ffffff;
-  font-size: 0.78rem;
+  font-size: var(--tpl-title-size);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   overflow-wrap: break-word;
 }
 
+.modern-orange-showcase__title-badge .direct-edit-field {
+  text-transform: none;
+}
+
 .modern-orange-showcase__header-divider {
   height: 2px;
   margin-top: 1.5rem;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   opacity: 0.25;
 }
 
@@ -340,7 +352,7 @@
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 9999px;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   color: #ffffff;
 }
 
@@ -350,10 +362,10 @@
 }
 
 .modern-orange-showcase__section-title {
-  font-size: 0.85rem;
+  font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   color: var(--cv-heading-color, var(--mo-text));
 }
 
@@ -361,7 +373,7 @@
 
 .modern-orange-showcase__summary {
   margin-top: 0.9rem;
-  font-size: 0.85rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.75;
   color: var(--mo-text);
   white-space: pre-line;
@@ -381,7 +393,29 @@
   margin-bottom: 1.25rem;
 }
 
-.modern-orange-showcase__exp-row:last-child {
+/* Direct Edit mode wraps every entry in EditableList's `.direct-edit-entry`
+   wrapper, and — since EditableList's DndContext never passes an
+   `accessibility.container` — dnd-kit also mounts two unclassed, un-portaled
+   `<div>`s (its hidden-text + live-region a11y nodes) as trailing siblings
+   after the last entry and the "add" button. That defeats ANY positional
+   selector here: `:last-child` would match every entry's own wrapper div
+   inside `.direct-edit-entry` (since exp-row is always the last child of
+   ITS wrapper), and re-anchoring to `.direct-edit-entry:last-of-type` still
+   fails because the true last `div`-tag sibling is one of dnd-kit's a11y
+   divs, not any `.direct-edit-entry`. So this is driven from the `isLast`
+   prop (already computed as `index === items.length - 1` by both call
+   sites, editing and read-only) via an explicit modifier class instead —
+   see ExperienceRow in ModernOrangeShowcase.jsx. Robust regardless of what
+   EditableList/dnd-kit renders around the entry, same pattern as
+   `.timeline-showcase__row--last`.
+
+   The selector below doubles the class (`.exp-row.exp-row--last`) for
+   higher, order-independent specificity, matching Executive's fix —
+   there is no restored positional base rule here to actually conflict
+   with (the base `.exp-row` rule above is unqualified and this is the
+   only override), so this is precautionary consistency, not a live
+   specificity bug. */
+.modern-orange-showcase__exp-row.modern-orange-showcase__exp-row--last {
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
@@ -391,9 +425,9 @@
   flex-shrink: 0;
   width: 6rem;
   padding-top: 0.15rem;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 700;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 .modern-orange-showcase__exp-rail {
@@ -410,7 +444,7 @@
   width: 0.6rem;
   height: 0.6rem;
   border-radius: 9999px;
-  border: 2px solid var(--mo-accent);
+  border: 2px solid var(--tpl-accent);
   background: var(--mo-bg);
 }
 
@@ -419,7 +453,7 @@
   top: 0.28rem;
   bottom: -2.5rem;
   width: 1.5px;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   opacity: 0.3;
 }
 
@@ -429,15 +463,15 @@
 }
 
 .modern-orange-showcase__exp-role {
-  font-size: 0.92rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--mo-text);
 }
 
 .modern-orange-showcase__exp-meta {
   margin-top: 0.15rem;
-  font-size: 0.78rem;
-  color: var(--mo-accent);
+  font-size: var(--tpl-meta-size);
+  color: var(--tpl-accent);
 }
 
 .modern-orange-showcase__bullets {
@@ -448,14 +482,23 @@
   gap: 0.3rem;
 }
 
+.modern-orange-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.6;
+  color: var(--mo-text);
+}
+
 .modern-orange-showcase__bullets li {
-  font-size: 0.79rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.6;
   color: var(--mo-text);
 }
 
 .modern-orange-showcase__bullets li::marker {
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 /* ── Projects: compact three-column cards ── */
@@ -481,7 +524,7 @@
   width: 1.7rem;
   height: 1.7rem;
   border-radius: 9999px;
-  background: var(--mo-accent);
+  background: var(--tpl-accent);
   color: #ffffff;
   margin-bottom: 0.55rem;
 }
@@ -492,14 +535,14 @@
 }
 
 .modern-orange-showcase__project-name {
-  font-size: 0.82rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--mo-text);
 }
 
 .modern-orange-showcase__project-desc {
   margin-top: 0.3rem;
-  font-size: 0.73rem;
+  font-size: var(--tpl-body-size);
   line-height: 1.5;
   color: var(--mo-muted);
 }
@@ -515,17 +558,17 @@
   border-radius: 5px;
   border: 1px solid var(--mo-border);
   padding: 0.18rem 0.45rem;
-  font-size: 0.62rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 .modern-orange-showcase__project-link {
   display: inline-block;
   margin-top: 0.6rem;
-  font-size: 0.7rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 /* ── Certifications ── */
@@ -540,7 +583,7 @@
 
 .modern-orange-showcase__cert-item {
   padding: 0.8rem 0 0.8rem 0.9rem;
-  border-left: 2px solid var(--mo-accent);
+  border-left: 2px solid var(--tpl-accent);
   border-bottom: 1px solid var(--mo-border);
 }
 
@@ -562,22 +605,22 @@
 }
 
 .modern-orange-showcase__cert-name {
-  font-size: 0.85rem;
+  font-size: var(--tpl-entry-title-size);
   font-weight: 700;
   color: var(--mo-text);
 }
 
 .modern-orange-showcase__cert-issuer {
   margin-top: 0.12rem;
-  font-size: 0.76rem;
+  font-size: var(--tpl-meta-size);
   color: var(--mo-muted);
 }
 
 .modern-orange-showcase__cert-year {
   flex-shrink: 0;
-  font-size: 0.74rem;
+  font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: var(--mo-accent);
+  color: var(--tpl-accent);
 }
 
 /* ── ATS mode: same layout, one column instead of two, no color ──
@@ -587,7 +630,7 @@
    across the full page width. Everything else — section order, the icon
    badges, the dot ratings, the timeline — stays in the same relative
    place, just recolored to the same monochrome every other template's
-   ATS pass already uses (see `--mo-accent`'s ATS override in
+   ATS pass already uses (see `--tpl-accent`'s ATS override in
    ModernOrangeShowcase.jsx). */
 
 .modern-orange-showcase--ats {
@@ -640,10 +683,6 @@
     height: 5.5rem;
   }
 
-  .modern-orange-showcase__name {
-    font-size: 1.8rem;
-  }
-
   .modern-orange-showcase__exp-date {
     width: 4.25rem;
     font-size: 0.66rem;
@@ -663,4 +702,17 @@
     transition: none !important;
     box-shadow: none !important;
   }
+}
+
+/* ── Sections moved between columns (Direct Edit, sectionColumns.js) ──
+   A moved section keeps its home markup. Modern Orange's cream rail is
+   light enough that both directions read without recolouring, and both
+   columns space their children uniformly, so the only adaptation is the
+   skill list: a column stack sized for the narrow rail. Its Classic
+   skill-rows (name + dot rating) are meant to span the list, but Direct
+   Edit's inline chips stretched into full-width bars in the wider main
+   column, so there they flow and wrap instead. */
+.modern-orange-showcase__main [data-moved-from='side'] .modern-orange-showcase__skill-list:has(> .direct-edit-chip) {
+  flex-direction: row;
+  flex-wrap: wrap;
 }

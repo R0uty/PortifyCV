@@ -13,11 +13,13 @@ import compact from './compact'
 import portfolio from './portfolio'
 import techExec from './techExec'
 import classicProfessional from './classicProfessional'
-import classic from './classic'
 import navyProfessional from './navyProfessional'
 import modernOrange from './modernOrange'
 import colorfulCompact from './colorfulCompact'
 import quadrant from './quadrant'
+import editorial from './editorial'
+import portrait from './portrait'
+import european from './european'
 
 // Map of variant name → template config object
 const templates = {
@@ -32,11 +34,13 @@ const templates = {
   portfolio,
   techExec,
   classicProfessional,
-  classic,
   navyProfessional,
   modernOrange,
   colorfulCompact,
   quadrant,
+  editorial,
+  portrait,
+  european,
 }
 
 // Returns the template config for a given variant string.
@@ -74,11 +78,14 @@ export function prefetchTemplateShowcases() {
   import('./CompactShowcase')
   import('./PortfolioShowcase')
   import('./ClassicProfessionalShowcase')
-  import('./ClassicShowcase')
   import('./NavyProfessionalShowcase')
   import('./ModernOrangeShowcase')
   import('./ColorfulCompactShowcase')
   import('./QuadrantShowcase')
+  import('./TechExecShowcase')
+  import('./EditorialShowcase')
+  import('./PortraitShowcase')
+  import('./EuropeanShowcase')
 }
 
 // Export the full map for cases where iteration over all templates is needed

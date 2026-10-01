@@ -393,9 +393,22 @@ console.log('\nuiReducer\n')
 
 {
   const state = createInitialUiState({})
-  check('createInitialUiState defaults the timeline accent color', typeof state.timelineAccentColor === 'string' && state.timelineAccentColor.length > 0)
-  const next = uiReducer(state, { type: UI_ACTION.SET_TIMELINE_ACCENT_COLOR, color: '#2563eb' })
-  check('SET_TIMELINE_ACCENT_COLOR stores the chosen color', next.timelineAccentColor === '#2563eb')
+  check(
+    'createInitialUiState seeds templateAccentColors for accent-capable templates',
+    typeof state.templateAccentColors === 'object'
+      && typeof state.templateAccentColors.timeline === 'string'
+      && typeof state.templateAccentColors.modernOrange === 'string',
+  )
+  const nextAccent = uiReducer(state, {
+    type: UI_ACTION.SET_TEMPLATE_ACCENT_COLOR,
+    templateId: 'timeline',
+    color: '#2563eb',
+  })
+  check(
+    'SET_TEMPLATE_ACCENT_COLOR updates only the named template',
+    nextAccent.templateAccentColors.timeline === '#2563eb'
+      && nextAccent.templateAccentColors.modernOrange === state.templateAccentColors.modernOrange,
+  )
 }
 
 {
@@ -421,6 +434,28 @@ console.log('\nuiReducer\n')
   check('TOGGLE_NAV_RAIL_COLLAPSED collapses the nav rail', next.navRailCollapsed === true)
   const backAgain = uiReducer(next, { type: UI_ACTION.TOGGLE_NAV_RAIL_COLLAPSED })
   check('TOGGLE_NAV_RAIL_COLLAPSED is reversible', backAgain.navRailCollapsed === false)
+}
+
+{
+  const state = createInitialUiState({})
+  check('createInitialUiState defaults the classic name alignment to centre', state.classicNameAlignment === 'center')
+  const left = uiReducer(state, { type: UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT, alignment: 'left' })
+  check('SET_CLASSIC_NAME_ALIGNMENT switches to left', left.classicNameAlignment === 'left')
+  const backCentre = uiReducer(left, { type: UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT, alignment: 'center' })
+  check('SET_CLASSIC_NAME_ALIGNMENT switches back to centre', backCentre.classicNameAlignment === 'center')
+  const garbage = uiReducer(left, { type: UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT, alignment: 'diagonal' })
+  check('SET_CLASSIC_NAME_ALIGNMENT falls back to centre for an unknown value', garbage.classicNameAlignment === 'center')
+}
+
+{
+  const state = createInitialUiState({})
+  check('createInitialUiState defaults the builder mode to direct', state.builderMode === 'direct')
+  const direct = uiReducer(state, { type: UI_ACTION.SET_BUILDER_MODE, mode: 'direct' })
+  check('SET_BUILDER_MODE switches to direct', direct.builderMode === 'direct')
+  const backClassic = uiReducer(direct, { type: UI_ACTION.SET_BUILDER_MODE, mode: 'classic' })
+  check('SET_BUILDER_MODE switches back to classic', backClassic.builderMode === 'classic')
+  const garbage = uiReducer(direct, { type: UI_ACTION.SET_BUILDER_MODE, mode: 'sideways' })
+  check('SET_BUILDER_MODE falls back to classic for an unknown value', garbage.builderMode === 'classic')
 }
 
 {

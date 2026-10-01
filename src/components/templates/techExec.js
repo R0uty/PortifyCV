@@ -1,9 +1,15 @@
-// Tech Executive template config — a premium, modern-annual-report style layout for
-// software engineers, cybersecurity, AI/ML, DevOps, and cloud professionals.
-// Palette: Deep Navy #163D7A (primary), Royal Blue #2563EB (accent), Slate Gray #64748B
-// (secondary), #E5E7EB (borders). No gradients, no shadows, no more than two accent colors.
-// Left column (65%) holds About/Experience/Education/Skills; right column (35%) holds
-// Core Strengths/Certificates/Projects/Links/Languages/Interests.
+// Tech Executive template config. The non-ATS visual is now a bespoke
+// TechExecShowcase.jsx (navy masthead + navy footer band around a right-rail
+// body, royal-blue accent from --tpl-accent, rule-under headings). This
+// config drives the shared flat renderer, which Tech Executive falls
+// through to in ATS-friendly mode — its arbitrary `bg-[#163D7A]` /
+// `bg-[#2563EB]` classes are stocked in utilities.css.
+// Palette: Deep Navy #163D7A, Royal Blue #2563EB, Slate Gray #64748B.
+
+// Registry default accent — must match `accent.default` for `techExec` in
+// cvTemplates.js exactly (lowercase hex). See docs/template-design-system.md §6.
+export const TECHEXEC_DEFAULT_ACCENT_COLOR = '#2563eb'
+
 export default {
   // Outer document border and background — pure white, no shadow
   preview: () => 'border-[#E5E7EB] bg-white shadow-none',

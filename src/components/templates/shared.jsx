@@ -308,6 +308,29 @@ function parseSkillCategories(skills, isFinnish) {
   }))
 }
 
+// Editing-branch-only sibling of parseSkillCategories: the same categorization,
+// but with each item's ORIGINAL flat-array index attached via a per-text QUEUE
+// (not a plain Map — a Map collapses duplicate skill text to one index, which
+// Round 5's final review found reachable via the app's JSON-import feature and
+// fixed). Used by every categorized-skills template's Direct Edit wiring.
+function buildEditableSkillCategories(skills, isFinnish) {
+  const grouped = parseSkillCategories(skills, isFinnish)
+  const indexQueueByText = new Map()
+  skills.forEach((skill, index) => {
+    const queue = indexQueueByText.get(skill)
+    if (queue) {
+      queue.push(index)
+    } else {
+      indexQueueByText.set(skill, [index])
+    }
+  })
+
+  return grouped.map((cat) => ({
+    ...cat,
+    items: cat.items.map((skill) => ({ skill, index: indexQueueByText.get(skill).shift() })),
+  }))
+}
+
 // Renders a <section> wrapper element with data-export attributes for PDF/ATS export.
 // Used by all section renderers (about, experience, education, skills, links).
 function renderSectionCard({ section, placement, children, classes }) {
@@ -323,16 +346,42 @@ function renderSectionCard({ section, placement, children, classes }) {
   )
 }
 
+// Section column moves (Direct Edit, utils/sectionColumns.js): a section
+// always renders through its HOME renderer — the column the template
+// designed it for — even when the user moved it to the other column, so no
+// template needs bespoke markup per column. Placement is where the section
+// actually sits (the PDF exporter paginates by it), and movedFrom is the
+// hook each template's CSS uses to adapt a moved section to its new
+// surface. Extra arguments (Colorful Compact's per-section colour) pass
+// straight through to the renderer.
+//
+// Renderers take (key, placement, movedFrom, ...extra). The config's
+// defaultSecondarySections is the template's untouched sidebar; gallery
+// thumbnails pass a plain config without it, hence the fallback.
+function createSectionRouter(templateConfig, renderMainSection, renderSidebarSection) {
+  const homeSidebar = new Set(templateConfig.defaultSecondarySections ?? templateConfig.secondarySections)
+
+  return (key, placement, ...extra) => {
+    const homePlacement = homeSidebar.has(key) ? 'side' : 'main'
+    const movedFrom = homePlacement === placement ? null : homePlacement
+    const render = homePlacement === 'side' ? renderSidebarSection : renderMainSection
+
+    return render(key, placement, movedFrom, ...extra)
+  }
+}
+
 // Export all shared utilities for use by CVPreview.jsx and template configs
 export {
   devIcons,            // SVG icon components for link types
   contactIcons,        // Icons for the header personal contact line (email/phone/location)
   sectionIcons,        // Monochrome glyphs for the circular section icon badge
   parseSkillCategories, // Skill categorization function
+  buildEditableSkillCategories, // parseSkillCategories + original-index mapping, for Direct Edit
   previewSectionTitleClasses, // Base CSS for section titles
   renderSectionCard,   // Section wrapper component
   formatDateRange,     // Re-exported from utils/shared
   formatLinkLabel,     // Re-exported from utils/shared
   formatLinkDisplayValue, // Re-exported from utils/shared
   getSafeHref,         // Re-exported from utils/shared
+  createSectionRouter, // Home-renderer routing for section column moves
 }

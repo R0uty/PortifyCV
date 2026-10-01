@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react'
+import AutoGrowTextarea from '../AutoGrowTextarea'
 
 function ReorderableListInput({
   items = [],
@@ -77,11 +78,11 @@ function ReorderableListInput({
     <div className="reorderable-list">
       {items.map((item, index) => (
         <div className="reorderable-list__row" key={ids[index] ?? index}>
-          <input
-            type="text"
+          <AutoGrowTextarea
             className="reorderable-list__input"
             value={item}
             placeholder={placeholder}
+            minHeight={40}
             aria-label={`${itemAriaLabel} ${index + 1}`}
             onChange={(event) => updateAt(index, event.target.value)}
           />

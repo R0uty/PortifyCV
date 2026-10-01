@@ -20,13 +20,13 @@ export const VIEW_HEAD = {
     title: 'PortifyCV - CV Builder',
     path: ROUTES.landing,
     description:
-      'Build a free CV in minutes. No login, no data saved. Live preview, ATS-friendly mode, and PDF/HTML/JSON export.',
+      'Build a free CV in minutes. No login, no data saved. Live preview, ATS-friendly mode, and PDF/Word/HTML/JSON export.',
   },
   builder: {
     title: 'PortifyCV - Build Your CV Online',
     path: ROUTES.builder,
     description:
-      'Build and edit your CV online for free. Live preview, ATS-friendly mode, and PDF/HTML/JSON export — no login required.',
+      'Build and edit your CV online for free. Live preview, ATS-friendly mode, and PDF/Word/HTML/JSON export — no login required.',
   },
   privacy: {
     title: 'Privacy Policy - PortifyCV',

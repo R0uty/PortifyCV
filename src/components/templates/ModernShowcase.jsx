@@ -27,11 +27,15 @@ import {
   contactIcons,
   sectionIcons,
   parseSkillCategories,
+  buildEditableSkillCategories,
   formatDateRange,
   formatLinkLabel,
   formatLinkDisplayValue,
   getSafeHref,
+  createSectionRouter,
 } from './shared'
+import EditableField from '../EditableField'
+import EditableList, { EditableCategorizedChip } from '../EditableList'
 
 // Small outline glyph for interest chips — a single shared glyph rather than
 // per-interest icon matching, consistent with the Creative template's choice.
@@ -63,6 +67,86 @@ function highlightMetrics(text) {
   ))
 }
 
+// Modern Professional's own Experience-entry renderer: a timeline rail
+// beside a card, unlike directEditExperienceEntry.jsx's two-row shape. Only
+// role and company are editable inline; location stays read-only-appended
+// text. `index` is formData-relative in the directEditDispatch branch
+// (EditableList's own index); the read-only call site passes the
+// snapshot's `sourceIndex` for data-direct-edit-index.
+//
+// The rail's connector line is hidden on the last entry through an
+// `--last` modifier class, never :last-child — EditableList wraps each
+// entry in its own .direct-edit-entry div, making every item a last child.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, showTimeline, isLast, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <div
+      key={`${item.role}-${item.company}-${index}`}
+      className={`modern-showcase__timeline-item${isLast ? ' modern-showcase__timeline-item--last' : ''}`}
+      data-export-card="true"
+      data-direct-edit-index={sourceIndex}
+    >
+      {showTimeline ? (
+        <div className="modern-showcase__timeline-rail">
+          <span className="modern-showcase__timeline-marker" aria-hidden="true" />
+          <span className="modern-showcase__timeline-line" aria-hidden="true" />
+        </div>
+      ) : null}
+      <div className="modern-showcase__timeline-card">
+        <div className="modern-showcase__role-row">
+          <div className="min-w-0">
+            <p className="modern-showcase__role-title">
+              {directEditDispatch ? (
+                <EditableField
+                  as="span"
+                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                  value={item.role}
+                  placeholder={copy.untitledRole}
+                />
+              ) : item.role || copy.untitledRole}
+            </p>
+            {directEditDispatch ? (
+              <p className="modern-showcase__company">
+                <EditableField
+                  as="span"
+                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                  value={item.company}
+                  placeholder={copy.company}
+                />
+                {item.location ? ` · ${item.location}` : null}
+              </p>
+            ) : item.company || item.location ? (
+              <p className="modern-showcase__company">
+                {[item.company, item.location].filter(Boolean).join(' · ')}
+              </p>
+            ) : null}
+          </div>
+          <p className="modern-showcase__dates">{dateRange || copy.datesPending}</p>
+        </div>
+        {directEditDispatch ? (
+          <p className="modern-showcase__bullets modern-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+        ) : bullets.length > 0 ? (
+          <ul className="modern-showcase__bullets">
+            {bullets.map((line, lineIndex) => (
+              <li key={lineIndex}>{highlightMetrics(line)}</li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
 function SectionHead({ icon, title }) {
   return (
     <div className="modern-showcase__section-head">
@@ -74,9 +158,9 @@ function SectionHead({ icon, title }) {
   )
 }
 
-function Section({ id, placement, icon, title, children }) {
+function Section({ id, placement, movedFrom = null, icon, title, children }) {
   return (
-    <section className="modern-showcase__section" data-export-section={id} data-export-placement={placement}>
+    <section className="modern-showcase__section" data-export-section={id} data-export-placement={placement} data-moved-from={movedFrom ?? undefined}>
       <SectionHead icon={icon} title={title} />
       <div className="modern-showcase__section-divider" aria-hidden="true" />
       {children}
@@ -84,7 +168,15 @@ function Section({ id, placement, icon, title, children }) {
   )
 }
 
-export default function ModernShowcase({ formData, locale = 'en', previewRef, templateConfig, showcaseConfig = {}, headingColor = null }) {
+export default function ModernShowcase({
+  formData,
+  locale = 'en',
+  previewRef,
+  templateConfig,
+  showcaseConfig = {},
+  headingColor = null,
+  directEditDispatch = null,
+}) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
@@ -109,11 +201,22 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
     () => parseSkillCategories(snapshot.skills, isFinnish),
     [snapshot.skills, isFinnish],
+  )
+  // Editing branch only: the same grouping over formData.skills, each chip
+  // carrying its ORIGINAL flat-array index so removal hits the right skill.
+  const editableSkillCategories = useMemo(
+    () => buildEditableSkillCategories(formData.skills, isFinnish),
+    [formData.skills, isFinnish],
   )
 
   const sectionVisibility = {
@@ -132,6 +235,8 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
     summary: isFinnish ? 'Yhteenveto' : 'Professional Summary',
@@ -146,55 +251,56 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
     interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" placement="main" icon="about" title={copy.summary}>
-          <p className="modern-showcase__summary">{about}</p>
+        <Section key={key} id="about" placement={placement} movedFrom={movedFrom} icon="about" title={copy.summary}>
+          <p className="modern-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </Section>
       )
     }
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" placement="main" icon="experience" title={copy.experience}>
+        <Section key={key} id="experience" placement={placement} movedFrom={movedFrom} icon="experience" title={copy.experience}>
           <div className="modern-showcase__timeline">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-
-                return (
-                  <div key={`${item.role}-${item.company}-${index}`} className="modern-showcase__timeline-item" data-export-card="true">
-                    {showTimeline ? (
-                      <div className="modern-showcase__timeline-rail">
-                        <span className="modern-showcase__timeline-marker" aria-hidden="true" />
-                        <span className="modern-showcase__timeline-line" aria-hidden="true" />
-                      </div>
-                    ) : null}
-                    <div className="modern-showcase__timeline-card">
-                      <div className="modern-showcase__role-row">
-                        <div className="min-w-0">
-                          <p className="modern-showcase__role-title">{item.role || copy.untitledRole}</p>
-                          {item.company || item.location ? (
-                            <p className="modern-showcase__company">
-                              {[item.company, item.location].filter(Boolean).join(' · ')}
-                            </p>
-                          ) : null}
-                        </div>
-                        <p className="modern-showcase__dates">{dateRange || copy.datesPending}</p>
-                      </div>
-                      {bullets.length > 0 ? (
-                        <ul className="modern-showcase__bullets">
-                          {bullets.map((line, lineIndex) => (
-                            <li key={lineIndex}>{highlightMetrics(line)}</li>
-                          ))}
-                        </ul>
-                      ) : null}
-                    </div>
-                  </div>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  showTimeline,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) =>
+                renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  showTimeline,
+                  isLast: index === snapshot.experience.length - 1,
+                  sourceIndex: snapshot.sourceIndices.experience[index],
+                }),
+              )
             ) : (
               <p className="modern-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -207,11 +313,11 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'education') {
       return (
-        <Section key={key} id="education" placement="main" icon="education" title={copy.education}>
+        <Section key={key} id="education" placement={placement} movedFrom={movedFrom} icon="education" title={copy.education}>
           <div className="modern-showcase__edu-grid">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => (
-                <div key={`${item.school}-${index}`} className="modern-showcase__edu-card" data-export-card="true">
+                <div key={`${item.school}-${index}`} className="modern-showcase__edu-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]}>
                   {item.degree ? <p className="modern-showcase__edu-degree">{item.degree}</p> : null}
                   {item.school || item.location ? (
                     <p className="modern-showcase__edu-meta">
@@ -235,7 +341,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" placement="main" icon="projects" title={copy.projects}>
+        <Section key={key} id="projects" placement={placement} movedFrom={movedFrom} icon="projects" title={copy.projects}>
           <div className="modern-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -244,7 +350,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
                   : []
 
                 return (
-                  <div key={`${item.name}-${index}`} className="modern-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="modern-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.name ? <p className="modern-showcase__project-name">{item.name}</p> : null}
                     {item.description ? <p className="modern-showcase__project-desc">{item.description}</p> : null}
                     {stackTags.length > 0 ? (
@@ -272,11 +378,11 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'achievements') {
       return (
-        <Section key={key} id="achievements" placement="main" icon="achievements" title={copy.achievements}>
+        <Section key={key} id="achievements" placement={placement} movedFrom={movedFrom} icon="achievements" title={copy.achievements}>
           <ul className="modern-showcase__achievement-list">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
-                <li key={`${item.title}-${index}`} className="modern-showcase__achievement-item">
+                <li key={`${item.title}-${index}`} className="modern-showcase__achievement-item" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                   <span className="modern-showcase__achievement-dot" aria-hidden="true" />
                   <div className="min-w-0">
                     <div className="modern-showcase__achievement-row">
@@ -300,11 +406,20 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
     return null
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
-        <Section key={key} id="skills" placement="side" icon="skills" title={copy.skills}>
-          {skillCategories.length > 0 ? (
+        <Section key={key} id="skills" placement={placement} movedFrom={movedFrom} icon="skills" title={copy.skills}>
+          {directEditDispatch ? (
+            // Chips replace the read-only tags outright (never both, or
+            // every skill renders twice).
+            <div className="modern-showcase__skill-group">
+              <EditableCategorizedChip
+                categories={editableSkillCategories}
+                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+              />
+            </div>
+          ) : skillCategories.length > 0 ? (
             skillCategories.map((cat) => (
               <div key={cat.key} className="modern-showcase__skill-group">
                 <p className="modern-showcase__skill-group-label">{cat.label}</p>
@@ -326,11 +441,11 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'languages') {
       return (
-        <Section key={key} id="languages" placement="side" icon="languages" title={copy.languages}>
+        <Section key={key} id="languages" placement={placement} movedFrom={movedFrom} icon="languages" title={copy.languages}>
           <div className="modern-showcase__lang-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="modern-showcase__lang-item">
+                <div key={`${item.language}-${index}`} className="modern-showcase__lang-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <span>{item.language}</span>
                   {item.level ? <span className="modern-showcase__lang-level">{item.level}</span> : null}
                 </div>
@@ -347,11 +462,11 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" placement="side" icon="certificates" title={copy.certificates}>
+        <Section key={key} id="certificates" placement={placement} movedFrom={movedFrom} icon="certificates" title={copy.certificates}>
           <div className="modern-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="modern-showcase__cert-item">
+                <div key={`${item.name}-${index}`} className="modern-showcase__cert-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   {item.name ? <p className="modern-showcase__cert-name">{item.name}</p> : null}
                   {item.issuer || item.year ? (
                     <p className="modern-showcase__cert-meta">
@@ -377,7 +492,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'links') {
       return (
-        <Section key={key} id="links" placement="side" icon="links" title={copy.links}>
+        <Section key={key} id="links" placement={placement} movedFrom={movedFrom} icon="links" title={copy.links}>
           <div className="modern-showcase__link-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
@@ -401,11 +516,11 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
 
     if (key === 'interests') {
       return (
-        <Section key={key} id="interests" placement="side" icon="interests" title={copy.interests}>
+        <Section key={key} id="interests" placement={placement} movedFrom={movedFrom} icon="interests" title={copy.interests}>
           <div className="modern-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span key={`${item.name}-${index}`} className="modern-showcase__interest-chip">
+                <span key={`${item.name}-${index}`} className="modern-showcase__interest-chip" data-direct-edit-index={snapshot.sourceIndices.interests[index]}>
                   <InterestGlyph />
                   {item.name}
                 </span>
@@ -423,6 +538,11 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
     return null
   }
 
+
+  // Each section renders through its home renderer in whichever column the
+  // user put it — see createSectionRouter in ./shared.
+  const renderSection = createSectionRouter(templateConfig, renderMainSection, renderSidebarSection)
+
   return (
     <article
       ref={previewRef}
@@ -434,7 +554,7 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
       // ModernShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className="modern-showcase preview-document--designer"
+      className="modern-showcase preview-document--designer tpl-density-standard"
       style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
     >
       <header data-export-header="true" className="modern-showcase__header">
@@ -442,14 +562,39 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
           <p className="modern-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="modern-showcase__name">{fullName}</h1>
-          <p className="modern-showcase__role">{title}</p>
-          {personalContactItems.length > 0 ? (
+          <h1 className="modern-showcase__name">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : fullName}
+          </h1>
+          <p className="modern-showcase__role">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
+            ) : title}
+          </p>
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="modern-showcase__contact">
-              {personalContactItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
                 <span key={key} className="modern-showcase__contact-item">
                   <span className="modern-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  {value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : value}
                 </span>
               ))}
             </div>
@@ -476,11 +621,11 @@ export default function ModernShowcase({ formData, locale = 'en', previewRef, te
         style={!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : undefined}
       >
         <main className="modern-showcase__main" data-export-primary="true">
-          {mainSectionKeys.map((key) => renderMainSection(key))}
+          {mainSectionKeys.map((key) => renderSection(key, 'main'))}
         </main>
         {showSidebar ? (
           <aside className="modern-showcase__sidebar" data-export-secondary="true">
-            {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+            {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
           </aside>
         ) : null}
       </div>

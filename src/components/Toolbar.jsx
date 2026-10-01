@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft,
   ChevronDown,
@@ -17,14 +17,6 @@ import LocaleFlagIcon from './LocaleFlagIcon'
 import CvFontSwitcher from './CvFontSwitcher'
 import CvHeadingColorSwitcher from './CvHeadingColorSwitcher'
 
-// Lazy so Toolbar (statically imported by App.jsx, and rendered on every
-// static page's bundle boundary as a result) doesn't drag TemplateThumbnail's
-// full CVPreview dependency graph into the eagerly-loaded main chunk — it's
-// only ever needed once the builder is open. See CVPreview's own lazy
-// Showcase imports for the same reasoning. CvFontSwitcher has no such
-// dependency (just the small cvFonts.js registry) so it's imported eagerly.
-const TemplateQuickSwitcher = lazy(() => import('./TemplateQuickSwitcher'))
-
 function Toolbar({
   locale = 'en',
   onReturn = () => {},
@@ -35,9 +27,9 @@ function Toolbar({
   onRedo = () => {},
   templates = [],
   selectedTemplateId = '',
-  onSelectTemplate = () => {},
-  templateSelectRef,
-  formDataRef,
+  onOpenTemplateGallery = () => {},
+  builderMode = 'classic',
+  onSetBuilderMode = () => {},
   cvFontId = '',
   onCvFontChange = () => {},
   cvHeadingColor = '',
@@ -178,45 +170,64 @@ function Toolbar({
           </button>
         </div>
 
-        <div className="app-toolbar__group app-toolbar__group--search">
-          <label className="app-toolbar__search">
-            <Search size={14} strokeWidth={2} aria-hidden="true" />
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder={isFinnish ? 'Etsi osioita...' : 'Search sections...'}
-              aria-label={isFinnish ? 'Etsi osioita' : 'Search sections'}
-            />
-          </label>
-        </div>
+        {/* Section search filters Classic mode's nav rail, which Direct
+            Edit does not render (its Sections popover lists the sections
+            instead), so the box only shows in Classic. */}
+        {builderMode === 'classic' ? (
+          <div className="app-toolbar__group app-toolbar__group--search">
+            <label className="app-toolbar__search">
+              <Search size={14} strokeWidth={2} aria-hidden="true" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => onSearchChange(event.target.value)}
+                placeholder={isFinnish ? 'Etsi osioita...' : 'Search sections...'}
+                aria-label={isFinnish ? 'Etsi osioita' : 'Search sections'}
+              />
+            </label>
+          </div>
+        ) : null}
 
         <div className="app-toolbar__spacer" />
 
         <div className="app-toolbar__group">
           <div className="app-toolbar__control-cluster">
+            <div className="app-toolbar__mode-switch" role="tablist" aria-label={locale === 'fi' ? 'Muokkaustila' : 'Builder mode'}>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={builderMode === 'direct'}
+                className={`app-toolbar__mode-switch-btn${builderMode === 'direct' ? ' app-toolbar__mode-switch-btn--active' : ''}`}
+                onClick={() => onSetBuilderMode('direct')}
+              >
+                {locale === 'fi' ? 'Suora muokkaus' : 'Direct Edit'}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={builderMode === 'classic'}
+                className={`app-toolbar__mode-switch-btn${builderMode === 'classic' ? ' app-toolbar__mode-switch-btn--active' : ''}`}
+                onClick={() => onSetBuilderMode('classic')}
+              >
+                {locale === 'fi' ? 'Klassinen' : 'Classic'}
+              </button>
+            </div>
+
             <div className="app-toolbar__labeled-control">
               <span className="app-toolbar__control-label">{isFinnish ? 'Pohja' : 'Template'}</span>
-              <Suspense
-                fallback={(
-                  <span className="template-quick-switcher__trigger" aria-hidden="true">
-                    <span className="template-quick-switcher__trigger-label">
-                      {templates.find((template) => template.id === selectedTemplateId)?.label}
-                    </span>
-                  </span>
-                )}
+              <button
+                type="button"
+                className="app-toolbar__template-trigger"
+                onClick={onOpenTemplateGallery}
               >
-                <TemplateQuickSwitcher
-                  templates={templates}
-                  selectedTemplateId={selectedTemplateId}
-                  onSelectTemplate={onSelectTemplate}
-                  formDataRef={formDataRef}
-                  cvFontId={cvFontId}
-                  cvHeadingColor={cvHeadingColor}
-                  locale={locale}
-                  triggerRef={templateSelectRef}
-                />
-              </Suspense>
+                {/* Visually hidden so sighted users just see the template name, but
+                    screen readers get "Select template: X" instead of only "X". */}
+                <span className="sr-only">{isFinnish ? 'Valitse pohja: ' : 'Select template: '}</span>
+                <span className="app-toolbar__template-trigger-label">
+                  {templates.find((template) => template.id === selectedTemplateId)?.label}
+                </span>
+                <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
+              </button>
             </div>
 
             <div className="app-toolbar__labeled-control">
@@ -279,7 +290,7 @@ function Toolbar({
 
           <button
             type="button"
-            className="app-toolbar__icon-button lg:hidden"
+            className={`app-toolbar__icon-button${builderMode === 'direct' ? '' : ' lg:hidden'}`}
             onClick={onOpenSettings}
             aria-label={isFinnish ? 'Asetukset' : 'Settings'}
             title={isFinnish ? 'Asetukset' : 'Settings'}
@@ -350,6 +361,20 @@ function Toolbar({
                   JSON
                   <span className="app-toolbar__export-item-hint">
                     {isFinnish ? 'Varmuuskopio, jonka voi tuoda takaisin' : 'Backup you can import again later'}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-toolbar__export-item"
+                  disabled={isActionBusy}
+                  onClick={() => handleExportSelect('docx')}
+                >
+                  Word
+                  <span className="app-toolbar__export-item-hint">
+                    {isFinnish
+                      ? 'Muokattava .docx, toimii kaikkien ATS-järjestelmien kanssa'
+                      : 'Editable .docx, works with any ATS'}
                   </span>
                 </button>
               </div>

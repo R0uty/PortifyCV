@@ -21,11 +21,14 @@ import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import EditableField from '../EditableField'
+import EditableList, { EditableChip } from '../EditableList'
 import {
   contactIcons,
   devIcons,
   sectionIcons,
   formatDateRange,
+  formatLinkDisplayValue,
   getSafeHref,
 } from './shared'
 import { TIMELINE_DEFAULT_ACCENT_COLOR } from './timeline'
@@ -78,9 +81,9 @@ function Section({ id, icon, title, children }) {
   )
 }
 
-function TimelineRow({ date, isLast, children }) {
+function TimelineRow({ date, isLast, entryIndex, children }) {
   return (
-    <div className="timeline-showcase__row" data-export-card="true">
+    <div className={`timeline-showcase__row${isLast ? ' timeline-showcase__row--last' : ''}`} data-export-card="true" data-direct-edit-index={entryIndex}>
       <p className="timeline-showcase__row-date">{date}</p>
       <div className="timeline-showcase__row-rail">
         <span className="timeline-showcase__row-marker" aria-hidden="true" />
@@ -88,6 +91,65 @@ function TimelineRow({ date, isLast, children }) {
       </div>
       <div className="timeline-showcase__row-content">{children}</div>
     </div>
+  )
+}
+
+function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <TimelineRow
+      key={`${item.role}-${item.company}-${index}`}
+      date={dateRange || copy.datesPending}
+      isLast={isLast}
+      entryIndex={sourceIndex}
+    >
+      <p className="timeline-showcase__entry-role">
+        {directEditDispatch ? (
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+            value={item.role}
+            placeholder={copy.untitledRole}
+          />
+        ) : (
+          item.role || copy.untitledRole
+        )}
+      </p>
+      {directEditDispatch || item.company || item.location ? (
+        <p className="timeline-showcase__entry-meta">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+              value={item.company}
+              placeholder={copy.company}
+            />
+          ) : (
+            item.company
+          )}
+          {item.company && item.location ? ` · ${item.location}` : item.location || null}
+        </p>
+      ) : null}
+      {directEditDispatch ? (
+        <p className="timeline-showcase__bullets timeline-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="timeline-showcase__bullets">
+          {bullets.map((line, lineIndex) => (
+            <li key={lineIndex}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
+    </TimelineRow>
   )
 }
 
@@ -100,6 +162,7 @@ export default function TimelineShowcase({
   accentColor = TIMELINE_DEFAULT_ACCENT_COLOR,
   atsFriendlyMode = false,
   headingColor = null,
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -116,22 +179,21 @@ export default function TimelineShowcase({
   const spaceIndex = fullName.indexOf(' ')
   const nameFirst = spaceIndex === -1 ? fullName : fullName.slice(0, spaceIndex)
   const nameRest = spaceIndex === -1 ? '' : fullName.slice(spaceIndex)
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
-  const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
-
   const personalContactItems = [
     ['phone', snapshot.phone],
     ['email', snapshot.email],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
   const linkContactItems = [
     ['linkedin', snapshot.links.linkedin],
     ['website', snapshot.links.website],
@@ -153,6 +215,8 @@ export default function TimelineShowcase({
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     profile: isFinnish ? 'Profiili' : 'Profile',
     experience: isFinnish ? 'Kokemus' : 'Experience',
     education: isFinnish ? 'Koulutus' : 'Education',
@@ -168,7 +232,19 @@ export default function TimelineShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about" icon="about" title={copy.profile}>
-          <p className="timeline-showcase__summary">{about}</p>
+          <p className="timeline-showcase__summary">
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'about' }}
+              value={formData.about}
+              placeholder={
+                isFinnish
+                  ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                  : 'Your professional summary will appear here as you fill out the CV form.'
+              }
+              multiline
+            />
+          </p>
         </Section>
       )
     }
@@ -177,30 +253,25 @@ export default function TimelineShowcase({
       return (
         <Section key={key} id="experience" icon="experience" title={copy.experience}>
           <div className="timeline-showcase__timeline">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-                const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
-
-                return (
-                  <TimelineRow
-                    key={`${item.role}-${item.company}-${index}`}
-                    date={dateRange || copy.datesPending}
-                    isLast={index === snapshot.experience.length - 1}
-                  >
-                    <p className="timeline-showcase__entry-role">{item.role || copy.untitledRole}</p>
-                    {metaLine ? <p className="timeline-showcase__entry-meta">{metaLine}</p> : null}
-                    {bullets.length > 0 ? (
-                      <ul className="timeline-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </TimelineRow>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
+                directEditDispatch,
+                sourceIndex: snapshot.sourceIndices.experience[index],
+                copy,
+                isLast: index === snapshot.experience.length - 1,
+              }))
             ) : (
               <p className="timeline-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -224,6 +295,7 @@ export default function TimelineShowcase({
                     key={`${item.school}-${index}`}
                     date={formatDateRange(item.startDate, item.endDate)}
                     isLast={index === snapshot.education.length - 1}
+                    entryIndex={snapshot.sourceIndices.education[index]}
                   >
                     <p className="timeline-showcase__entry-role">{item.degree || copy.untitledRole}</p>
                     {metaLine ? <p className="timeline-showcase__entry-meta">{metaLine}</p> : null}
@@ -252,7 +324,7 @@ export default function TimelineShowcase({
                 const projectUrl = item.demoUrl || item.githubUrl
 
                 return (
-                  <div key={`${item.name}-${index}`} className="timeline-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="timeline-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     <span className="timeline-showcase__project-icon" aria-hidden="true">
                       {sectionIcons.projects}
                     </span>
@@ -286,17 +358,29 @@ export default function TimelineShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" icon="skills" title={copy.skills}>
-          <div className="timeline-showcase__tag-row">
-            {snapshot.skills.length > 0 ? (
-              snapshot.skills.map((skill) => (
+          {/* Three-way ternary rather than one persistent .tag-row wrapper:
+              .tag-row's own margin-top (1rem) would stack with .empty's
+              margin-top (0.8rem) if the empty state were nested inside it —
+              flex-item margins don't collapse — adding an unwanted extra
+              gap. Keeping the three states as fully separate branches
+              avoids that regression while still guaranteeing mutual
+              exclusion (a single chained ternary can only ever select one
+              branch), same pattern Round 2/3 used for Editorial/Portrait. */}
+          {directEditDispatch ? (
+            <div className="timeline-showcase__tag-row">
+              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+            </div>
+          ) : snapshot.skills.length > 0 ? (
+            <div className="timeline-showcase__tag-row">
+              {snapshot.skills.map((skill) => (
                 <span key={skill} data-export-skill="true" className="timeline-showcase__tag">{skill}</span>
-              ))
-            ) : (
-              <p className="timeline-showcase__empty">
-                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
-              </p>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="timeline-showcase__empty">
+              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+            </p>
+          )}
         </Section>
       )
     }
@@ -310,7 +394,7 @@ export default function TimelineShowcase({
                 const dotCount = levelToDotCount(item.level)
 
                 return (
-                  <div key={`${item.language}-${index}`} className="timeline-showcase__language-item">
+                  <div key={`${item.language}-${index}`} className="timeline-showcase__language-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                     <p className="timeline-showcase__language-name">{item.language}</p>
                     {item.level ? <p className="timeline-showcase__language-level">{item.level}</p> : null}
                     <div className="timeline-showcase__language-dots" aria-hidden="true">
@@ -340,7 +424,7 @@ export default function TimelineShowcase({
           <div className="timeline-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <div key={`${item.name}-${index}`} className="timeline-showcase__cert-item" data-export-card="true">
+                <div key={`${item.name}-${index}`} className="timeline-showcase__cert-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   <div className="timeline-showcase__cert-row">
                     <div className="min-w-0">
                       {item.name ? <p className="timeline-showcase__cert-name">{item.name}</p> : null}
@@ -382,9 +466,9 @@ export default function TimelineShowcase({
       // class has to actually track the live atsFriendlyMode value rather
       // than being hardcoded to "designer". Getting this wrong hangs the
       // export: the handler polls forever for a class that never appears.
-      className={`timeline-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'}`}
+      className={`timeline-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'} tpl-density-standard`}
       style={{
-        '--tl-accent': effectiveAccentColor,
+        '--tpl-accent': effectiveAccentColor,
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),
       }}
     >
@@ -405,16 +489,41 @@ export default function TimelineShowcase({
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
           <h1 className="timeline-showcase__name">
-            {nameFirst}<span className="timeline-showcase__name-accent">{nameRest}</span>
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
+            ) : (
+              <>{nameFirst}<span className="timeline-showcase__name-accent">{nameRest}</span></>
+            )}
           </h1>
-          <p className="timeline-showcase__role">{title}</p>
+          <p className="timeline-showcase__role">
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'title' }}
+              value={formData.title}
+              placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+            />
+          </p>
 
-          {personalContactItems.length > 0 ? (
+          {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="timeline-showcase__contact">
-              {personalContactItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
                 <span key={key} className="timeline-showcase__contact-item">
                   <span className="timeline-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  {value}
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : (
+                    value
+                  )}
                 </span>
               ))}
             </div>
@@ -425,7 +534,7 @@ export default function TimelineShowcase({
               {linkContactItems.map(([key, value]) => (
                 <span key={key} className="timeline-showcase__contact-item">
                   <span className="timeline-showcase__contact-icon" aria-hidden="true">{devIcons[key]}</span>
-                  {value}
+                  {formatLinkDisplayValue(value)}
                 </span>
               ))}
             </div>

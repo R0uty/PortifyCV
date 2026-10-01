@@ -22,6 +22,8 @@ import { useMemo } from 'react'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
+import EditableField from '../EditableField'
+import EditableList, { EditableChip } from '../EditableList'
 import {
   contactIcons,
   devIcons,
@@ -29,6 +31,7 @@ import {
   formatDateRange,
   formatLinkDisplayValue,
   getSafeHref,
+  createSectionRouter,
 } from './shared'
 import { MODERN_ORANGE_DEFAULT_ACCENT_COLOR } from './modernOrange'
 
@@ -100,27 +103,40 @@ function SectionHead({ icon, title }) {
   )
 }
 
-function Section({ id, icon, title, children }) {
+function Section({ id, icon, title, placement = 'main', movedFrom = null, children }) {
   return (
-    <section className="modern-orange-showcase__section" data-export-section={id} data-export-placement="main">
+    <section
+      className="modern-orange-showcase__section"
+      data-export-section={id}
+      data-export-placement={placement}
+      data-moved-from={movedFrom ?? undefined}
+    >
       <SectionHead icon={icon} title={title} />
       {children}
     </section>
   )
 }
 
-function SidebarBlock({ title, children }) {
+// `id` is set only for real CV sections: it is what the PDF exporter and
+// Direct Edit's overlay find a section by. The personal-info block passes none
+// and stays untagged.
+function SidebarBlock({ id, title, placement = 'side', movedFrom = null, children }) {
   return (
-    <div className="modern-orange-showcase__sidebar-block">
+    <div
+      className="modern-orange-showcase__sidebar-block"
+      data-export-section={id}
+      data-export-placement={id ? placement : undefined}
+      data-moved-from={movedFrom ?? undefined}
+    >
       <p className="modern-orange-showcase__sidebar-heading">{title}</p>
       {children}
     </div>
   )
 }
 
-function ExperienceRow({ date, isLast, children }) {
+function ExperienceRow({ date, isLast, entryIndex, children }) {
   return (
-    <div className="modern-orange-showcase__exp-row" data-export-card="true">
+    <div className={`modern-orange-showcase__exp-row${isLast ? ' modern-orange-showcase__exp-row--last' : ''}`} data-export-card="true" data-direct-edit-index={entryIndex}>
       <p className="modern-orange-showcase__exp-date">{date}</p>
       <div className="modern-orange-showcase__exp-rail">
         <span className="modern-orange-showcase__exp-marker" aria-hidden="true" />
@@ -131,15 +147,81 @@ function ExperienceRow({ date, isLast, children }) {
   )
 }
 
-function EducationRow({ isLast, children }) {
+function EducationRow({ isLast, entryIndex, children }) {
   return (
-    <div className="modern-orange-showcase__edu-row" data-export-card="true">
+    <div className="modern-orange-showcase__edu-row" data-export-card="true" data-direct-edit-index={entryIndex}>
       <div className="modern-orange-showcase__edu-rail">
         <span className="modern-orange-showcase__edu-marker" aria-hidden="true" />
         {!isLast ? <span className="modern-orange-showcase__edu-line" aria-hidden="true" /> : null}
       </div>
       <div className="modern-orange-showcase__edu-content">{children}</div>
     </div>
+  )
+}
+
+// Modern Orange's own Experience-entry renderer — reuses the existing
+// ExperienceRow wrapper (the rail marker + connecting line), which already
+// takes `isLast` as an explicit prop rather than relying on CSS position —
+// safe for EditableList's own reordering/removal, since `isLast` is
+// recomputed from `index === items.length - 1` on every render regardless
+// of DOM wrapping. Only role and company are independently editable —
+// location and dates stay read-only-appended text, matching every other
+// template's Experience wiring in this rollout. `index` here is always
+// formData.experience-relative (only ever read inside directEditDispatch-
+// gated branches or the React key) — never assume it lines up with
+// snapshot.experience's own (filtered) indices in the read-only call site.
+function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, sourceIndex = index }) {
+  const dateRange = formatDateRange(item.startDate, item.endDate)
+  const bullets = item.description ? splitToBullets(item.description) : []
+
+  return (
+    <ExperienceRow
+      key={`${item.role}-${item.company}-${index}`}
+      date={dateRange || copy.datesPending}
+      isLast={isLast}
+      entryIndex={sourceIndex}
+    >
+      <p className="modern-orange-showcase__exp-role">
+        {directEditDispatch ? (
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+            value={item.role}
+            placeholder={copy.untitledRole}
+          />
+        ) : item.role || copy.untitledRole}
+      </p>
+      {directEditDispatch || item.company || item.location ? (
+        <p className="modern-orange-showcase__exp-meta">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+              value={item.company}
+              placeholder={copy.company}
+            />
+          ) : item.company}
+          {item.company && item.location ? ` · ${item.location}` : item.location || null}
+        </p>
+      ) : null}
+      {directEditDispatch ? (
+        <p className="modern-orange-showcase__bullets modern-orange-showcase__bullets--editing">
+          <EditableField
+            as="span"
+            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+            value={item.description}
+            placeholder={copy.descriptionPlaceholder}
+            multiline
+          />
+        </p>
+      ) : bullets.length > 0 ? (
+        <ul className="modern-orange-showcase__bullets">
+          {bullets.map((line, lineIndex) => (
+            <li key={lineIndex}>{line}</li>
+          ))}
+        </ul>
+      ) : null}
+    </ExperienceRow>
   )
 }
 
@@ -152,6 +234,7 @@ export default function ModernOrangeShowcase({
   accentColor = MODERN_ORANGE_DEFAULT_ACCENT_COLOR,
   atsFriendlyMode = false,
   headingColor = null,
+  directEditDispatch = null,
 }) {
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
@@ -185,6 +268,11 @@ export default function ModernOrangeShowcase({
     ['email', snapshot.email],
     ['phone', snapshot.phone],
   ].filter(([, value]) => value)
+  const directEditContactFields = [
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+  ]
   const websiteUrl = snapshot.links.website
   const linkedinUrl = snapshot.links.linkedin
 
@@ -204,6 +292,8 @@ export default function ModernOrangeShowcase({
 
   const copy = {
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
+    company: isFinnish ? 'Yritys' : 'Company',
+    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
     datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
     personalInfo: isFinnish ? 'Henkilötiedot' : 'Personal Info',
     profile: isFinnish ? 'Profiili' : 'Profile',
@@ -216,43 +306,52 @@ export default function ModernOrangeShowcase({
     viewProject: isFinnish ? 'Näytä projekti' : 'View project',
   }
 
-  const renderMainSection = (key) => {
+  const renderMainSection = (key, placement = 'main', movedFrom = null) => {
     if (key === 'about') {
       return (
-        <Section key={key} id="about" icon="about" title={copy.profile}>
-          <p className="modern-orange-showcase__summary">{about}</p>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="about" icon="about" title={copy.profile}>
+          <p className="modern-orange-showcase__summary">
+            {directEditDispatch ? (
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
+            ) : about}
+          </p>
         </Section>
       )
     }
 
     if (key === 'experience') {
       return (
-        <Section key={key} id="experience" icon="experience" title={copy.experience}>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="experience" icon="experience" title={copy.experience}>
           <div className="modern-orange-showcase__exp-list">
-            {snapshot.experience.length > 0 ? (
-              snapshot.experience.map((item, index) => {
-                const dateRange = formatDateRange(item.startDate, item.endDate)
-                const bullets = item.description ? splitToBullets(item.description) : []
-                const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
-
-                return (
-                  <ExperienceRow
-                    key={`${item.role}-${item.company}-${index}`}
-                    date={dateRange || copy.datesPending}
-                    isLast={index === snapshot.experience.length - 1}
-                  >
-                    <p className="modern-orange-showcase__exp-role">{item.role || copy.untitledRole}</p>
-                    {metaLine ? <p className="modern-orange-showcase__exp-meta">{metaLine}</p> : null}
-                    {bullets.length > 0 ? (
-                      <ul className="modern-orange-showcase__bullets">
-                        {bullets.map((line, lineIndex) => (
-                          <li key={lineIndex}>{line}</li>
-                        ))}
-                      </ul>
-                    ) : null}
-                  </ExperienceRow>
-                )
-              })
+            {directEditDispatch ? (
+              <EditableList
+                section="experience"
+                items={formData.experience}
+                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+              >
+                {(item, index) => renderExperienceEntry(item, index, {
+                  directEditDispatch,
+                  copy,
+                  isLast: index === formData.experience.length - 1,
+                })}
+              </EditableList>
+            ) : snapshot.experience.length > 0 ? (
+              snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
+                directEditDispatch,
+                sourceIndex: snapshot.sourceIndices.experience[index],
+                copy,
+                isLast: index === snapshot.experience.length - 1,
+              }))
             ) : (
               <p className="modern-orange-showcase__empty">
                 {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
@@ -265,7 +364,7 @@ export default function ModernOrangeShowcase({
 
     if (key === 'projects') {
       return (
-        <Section key={key} id="projects" icon="projects" title={copy.projects}>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="projects" icon="projects" title={copy.projects}>
           <div className="modern-orange-showcase__project-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -275,7 +374,7 @@ export default function ModernOrangeShowcase({
                 const projectUrl = item.demoUrl || item.githubUrl
 
                 return (
-                  <div key={`${item.name}-${index}`} className="modern-orange-showcase__project-card" data-export-card="true">
+                  <div key={`${item.name}-${index}`} className="modern-orange-showcase__project-card" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     <span className="modern-orange-showcase__project-icon" aria-hidden="true">
                       {sectionIcons.projects}
                     </span>
@@ -308,11 +407,11 @@ export default function ModernOrangeShowcase({
 
     if (key === 'certificates') {
       return (
-        <Section key={key} id="certificates" icon="certificates" title={copy.certificates}>
+        <Section key={key} placement={placement} movedFrom={movedFrom} id="certificates" icon="certificates" title={copy.certificates}>
           <ul className="modern-orange-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
-                <li key={`${item.name}-${index}`} className="modern-orange-showcase__cert-item" data-export-card="true">
+                <li key={`${item.name}-${index}`} className="modern-orange-showcase__cert-item" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   <div className="modern-orange-showcase__cert-row">
                     <div className="modern-orange-showcase__cert-text">
                       {item.name ? <p className="modern-orange-showcase__cert-name">{item.name}</p> : null}
@@ -335,12 +434,12 @@ export default function ModernOrangeShowcase({
     return null
   }
 
-  const renderSidebarSection = (key) => {
+  const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
-        <SidebarBlock key={key} title={copy.skills}>
+        <SidebarBlock key={key} placement={placement} movedFrom={movedFrom} id="skills" title={copy.skills}>
           <div className="modern-orange-showcase__skill-list">
-            {snapshot.skills.length > 0 ? (
+            {directEditDispatch ? null : snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill, index) => (
                 <div key={skill} data-export-skill="true" className="modern-orange-showcase__skill-row">
                   <span className="modern-orange-showcase__skill-name">{skill}</span>
@@ -352,6 +451,9 @@ export default function ModernOrangeShowcase({
                 {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
               </p>
             )}
+            {directEditDispatch ? (
+              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+            ) : null}
           </div>
         </SidebarBlock>
       )
@@ -359,11 +461,11 @@ export default function ModernOrangeShowcase({
 
     if (key === 'languages') {
       return (
-        <SidebarBlock key={key} title={copy.languages}>
+        <SidebarBlock key={key} placement={placement} movedFrom={movedFrom} id="languages" title={copy.languages}>
           <div className="modern-orange-showcase__lang-list">
             {snapshot.languages.length > 0 ? (
               snapshot.languages.map((item, index) => (
-                <div key={`${item.language}-${index}`} className="modern-orange-showcase__lang-row">
+                <div key={`${item.language}-${index}`} className="modern-orange-showcase__lang-row" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
                   <div className="modern-orange-showcase__lang-head">
                     <span className="modern-orange-showcase__lang-name">{item.language}</span>
                     {item.level ? <span className="modern-orange-showcase__lang-level">{item.level}</span> : null}
@@ -383,14 +485,18 @@ export default function ModernOrangeShowcase({
 
     if (key === 'education') {
       return (
-        <SidebarBlock key={key} title={copy.education}>
+        <SidebarBlock key={key} placement={placement} movedFrom={movedFrom} id="education" title={copy.education}>
           <div className="modern-orange-showcase__edu-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => {
                 const metaLine = [item.school, item.location].filter(Boolean).join(', ')
 
                 return (
-                  <EducationRow key={`${item.school}-${index}`} isLast={index === snapshot.education.length - 1}>
+                  <EducationRow
+                    key={`${item.school}-${index}`}
+                    isLast={index === snapshot.education.length - 1}
+                    entryIndex={snapshot.sourceIndices.education[index]}
+                  >
                     <p className="modern-orange-showcase__edu-dates">{formatDateRange(item.startDate, item.endDate)}</p>
                     <p className="modern-orange-showcase__edu-degree">{item.degree || copy.untitledRole}</p>
                     {metaLine ? <p className="modern-orange-showcase__edu-meta">{metaLine}</p> : null}
@@ -410,6 +516,11 @@ export default function ModernOrangeShowcase({
     return null
   }
 
+
+  // Each section renders through its home renderer in whichever column the
+  // user put it — see createSectionRouter in ./shared.
+  const renderSection = createSectionRouter(templateConfig, renderMainSection, renderSidebarSection)
+
   return (
     <article
       ref={previewRef}
@@ -428,9 +539,9 @@ export default function ModernOrangeShowcase({
       // stylesheet) — the one genuinely "necessary" change for ATS mode,
       // since a side-by-side column is exactly what this app's own ATS
       // claims ("no columns") promise to remove.
-      className={`modern-orange-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'}${atsFriendlyMode ? ' modern-orange-showcase--ats' : ''}`}
+      className={`modern-orange-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'} tpl-density-standard${atsFriendlyMode ? ' modern-orange-showcase--ats' : ''}`}
       style={{
-        '--mo-accent': effectiveAccentColor,
+        '--tpl-accent': effectiveAccentColor,
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),
       }}
     >
@@ -439,15 +550,35 @@ export default function ModernOrangeShowcase({
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
         <h1 className="modern-orange-showcase__name">
-          <span className="modern-orange-showcase__name-first">{nameFirst}</span>
-          {nameRest ? (
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'fullName' }}
+              value={formData.fullName}
+              placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+            />
+          ) : (
             <>
-              <br />
-              <span className="modern-orange-showcase__name-last">{nameRest}</span>
+              <span className="modern-orange-showcase__name-first">{nameFirst}</span>
+              {nameRest ? (
+                <>
+                  <br />
+                  <span className="modern-orange-showcase__name-last">{nameRest}</span>
+                </>
+              ) : null}
             </>
-          ) : null}
+          )}
         </h1>
-        <span className="modern-orange-showcase__title-badge">{title}</span>
+        <span className="modern-orange-showcase__title-badge">
+          {directEditDispatch ? (
+            <EditableField
+              as="span"
+              path={{ kind: 'root', field: 'title' }}
+              value={formData.title}
+              placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+            />
+          ) : title}
+        </span>
       </header>
 
       <aside className="modern-orange-showcase__sidebar" data-export-secondary="true">
@@ -462,13 +593,22 @@ export default function ModernOrangeShowcase({
           </div>
         ) : null}
 
-        {personalItems.length > 0 || websiteUrl || linkedinUrl ? (
+        {directEditDispatch || personalItems.length > 0 || websiteUrl || linkedinUrl ? (
           <SidebarBlock title={copy.personalInfo}>
             <div className="modern-orange-showcase__contact-list">
-              {personalItems.map(([key, value]) => (
+              {(directEditDispatch ? directEditContactFields : personalItems).map(([key, value, placeholderLabel]) => (
                 <div key={key} className="modern-orange-showcase__contact-item">
                   <span className="modern-orange-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  <span>{value}</span>
+                  {directEditDispatch ? (
+                    <EditableField
+                      as="span"
+                      path={{ kind: 'root', field: key }}
+                      value={value}
+                      placeholder={placeholderLabel}
+                    />
+                  ) : (
+                    <span>{value}</span>
+                  )}
                 </div>
               ))}
               {websiteUrl ? (
@@ -487,13 +627,13 @@ export default function ModernOrangeShowcase({
           </SidebarBlock>
         ) : null}
 
-        {sidebarSectionKeys.map((key) => renderSidebarSection(key))}
+        {sidebarSectionKeys.map((key) => renderSection(key, 'side'))}
       </aside>
 
       <main className="modern-orange-showcase__main" data-export-primary="true">
         <div className="modern-orange-showcase__header-divider" aria-hidden="true" />
 
-        {mainSectionKeys.map((key) => renderMainSection(key))}
+        {mainSectionKeys.map((key) => renderSection(key, 'main'))}
       </main>
     </article>
   )

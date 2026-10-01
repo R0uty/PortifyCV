@@ -9,20 +9,26 @@ A modern, minimal CV builder for creating and exporting professional resumes in 
 ## Features
 
 - **Live Preview**: See your CV update instantly as you edit
-- **10 Templates**: Minimalist, Developer, Creative, Modern Professional, Executive,
-  Timeline, Graduate, Compact, Portfolio Hybrid, and Tech Executive — each template
-  supports its own set of CV sections (e.g. Minimalist covers 5, Developer 11), and
-  the editor and nav rail only show what the selected template actually renders
+- **Direct Edit**: Edit the CV right on the preview — click any text to change it,
+  add/remove/reorder entries, upload a photo, and move sections between the main
+  column and the sidebar; the classic form editor is one toggle away
+- **18 Templates**: Minimalist, Developer, Creative, Modern Professional, Executive,
+  Modern Timeline, Graduate, Compact, Portfolio Hybrid, Tech Executive, Classic
+  Professional, Navy Professional, Modern Orange, Colorful Compact, Quadrant,
+  Editorial, Portrait, and European — each template supports its own set of CV
+  sections, and the editor only shows what the selected template actually renders
 - **ATS Optimization**: Parser-readiness score, job-description keyword matching, and a
   dedicated ATS-friendly mode that flattens any template for applicant tracking systems
 - **CV Suggestions**: Rule-based feedback on clarity, impact, and completeness
-- **Export**: PDF (rendered, with a text-based fallback), standalone HTML, and JSON
+- **Export**: PDF (rendered, with a text-based fallback), Word (.docx), standalone HTML, and JSON
 - **Share & Import**: Generate a shareable link that carries the CV text in the URL,
   or import a JSON backup / paste raw resume text
 - **Bilingual UI**: English and Finnish
 - **No persistence**: No CV data is saved to a server or to browser storage; the CV lives
-  in the page for as long as the tab is open. Only the UI language preference and a flag
-  recording that onboarding was dismissed are remembered.
+  in the page for as long as the tab is open. Local storage only holds UI preferences
+  (language, editor mode, onboarding dismissed). If you turn on "restore last
+  session" in Settings, a snapshot is kept in session storage, so it survives a
+  reload but is gone once the tab is closed.
 
 ## Tech Stack
 
@@ -69,6 +75,15 @@ npm run check:reducers
 # Verify the rule-based CV feedback engine (no browser needed)
 npm run check:feedback
 
+# Verify the Word (.docx) export builders (no browser needed)
+npm run check:docx-export
+
+# Verify the Direct Edit section schema (no browser needed)
+npm run check:section-schema
+
+# Verify the section column-move rules (no browser needed)
+npm run check:section-columns
+
 # Run the end-to-end smoke suite against a production build
 npm run test:e2e
 ```
@@ -85,8 +100,15 @@ merge/reset/import, and unknown-action no-ops.
 `check:feedback` covers `evaluateCvFeedback` (`src/utils/cvFeedback.js`) —
 missing/thin sections, over-length copy, weak-phrase detection ("responsible
 for", "in charge of", ...), and action-verb-opener detection across an
-experience entry's description and achievement bullets. All three scripts are
-framework-free Node harnesses, no test runner required.
+experience entry's description and achievement bullets.
+
+`check:docx-export` covers the Word exporter and its layout archetypes
+(`src/utils/docxExport.js`), `check:section-schema` validates the Direct Edit
+popup's section schema (`src/utils/sectionSchema.js`), and
+`check:section-columns` covers which sections may move between the main
+column and the sidebar, and how imports validate that. All six scripts are
+framework-free Node harnesses, no test runner required; CI runs them all on
+every push and pull request.
 
 `test:e2e` runs the Playwright suite in `e2e/` (landing page, live preview,
 template-gated sections, the Export menu) against `npm run build` +
@@ -112,7 +134,16 @@ Static files are ready to be served:
 
 ## Deployment
 
-Deploy the `dist/` folder to any static hosting:
+Production runs on Cloudflare Workers (`wrangler.jsonc`, `worker/index.js`
+serving `dist/` as static assets):
+
+```bash
+npm run build
+npm run deploy        # wrangler deploy
+npm run worker:dev    # run the Worker locally
+```
+
+The `dist/` folder also works on any other static host:
 
 ```bash
 # GitHub Pages

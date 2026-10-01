@@ -14,6 +14,9 @@ npm run lint               # ESLint over the whole repo
 npm run check:share        # round-trips a full CV through shareLinks.js encode/decode
 npm run check:reducers     # exercises every cvFormReducer/uiReducer action
 npm run check:feedback     # exercises evaluateCvFeedback (src/utils/cvFeedback.js)
+npm run check:docx-export  # exercises the Word export builders and archetypes (src/utils/docxExport.js)
+npm run check:section-schema   # validates the Direct Edit popup's section schema (src/utils/sectionSchema.js)
+npm run check:section-columns  # exercises the section column-move rules (src/utils/sectionColumns.js)
 
 npm run test:e2e           # Playwright suite in e2e/, against a prod build+preview
 npx playwright test e2e/templates.spec.js   # run a single e2e spec file
@@ -23,12 +26,17 @@ npm run worker:dev         # wrangler dev — run the Cloudflare Worker locally
 npm run deploy              # wrangler deploy — deploy to Cloudflare Workers
 ```
 
-`check:share`, `check:reducers`, and `check:feedback` are framework-free Node
-scripts (`scripts/*.mjs`), not a test runner — run them directly after
-touching the share-link codec, the CV schema/reducers, or the rule-based
-feedback engine, respectively. A mistyped short key in `shareLinks.js`
-silently drops a field from every link the app generates, so `check:share`
-in particular is cheap insurance.
+The `check:*` scripts are framework-free Node scripts (`scripts/*.mjs`), not
+a test runner — run the matching one directly after touching the share-link
+codec (`check:share`), the CV schema/reducers (`check:reducers`), the
+rule-based feedback engine (`check:feedback`), the Word exporter
+(`check:docx-export`), the Direct Edit popup schema
+(`check:section-schema`), or the section column-move
+rules and their import validation (`check:section-columns`). A mistyped
+short key in `shareLinks.js` silently drops a field from every link the app
+generates, so `check:share` in particular is cheap insurance. CI
+(`.github/workflows/ci.yml`) runs all six on every push to `main` and
+`v1.3.0` and on every pull request.
 
 `test:e2e` builds and serves the app first (`playwright.config.js`'s
 `webServer`), deliberately not the dev server, so it exercises real lazy
@@ -42,7 +50,7 @@ browser actually sees them. First run downloads Chromium
 no server and no database. CV data lives only in React state for the life of
 the tab — nothing is saved automatically. The only things that survive a
 reload are the UI locale, an onboarding-seen flag, and (if the user opts in)
-a session-restore snapshot, all in `localStorage` (see `src/utils/cvForm.js`
+a session-restore snapshot (`sessionStorage`; the rest in `localStorage` — see `src/utils/cvForm.js`
 for the storage keys). Sharing a CV means encoding it into a URL (below), not
 uploading it anywhere.
 

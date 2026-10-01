@@ -1,0 +1,542 @@
+/* ==========================================================================
+   Tech Executive Showcase — hand-authored styles for the Tech Executive
+   template's non-ATS "annual-report / navy leadership" mode. Scoped under
+   `.tech-exec-showcase`. New in v1.2.9 — Tech Executive previously rendered
+   only through the shared flat renderer.
+
+   Structure: a deep-navy (#163D7A) full-width masthead with knocked-out
+   white identity, a right-rail + main two-column body, and a deep-navy
+   footer band carrying the user's tagline. The navy bands are the single
+   §3 tint region; one royal-blue accent from `--tpl-accent`; §4 rule-under
+   section headings (a tracked-uppercase label over an accent hairline).
+   Type reads the `--tpl-*` ramp via `tpl-density-standard`.
+   ========================================================================== */
+
+.tech-exec-showcase {
+  /* Accent — overridden inline per render. Kept in sync with
+     TECHEXEC_DEFAULT_ACCENT_COLOR in components/templates/techExec.js. */
+  --tpl-accent: #2563eb;
+  --tpl-accent-soft: rgba(37, 99, 235, 0.12);
+
+  /* Fixed structural navy for the masthead + footer bands (not the accent). */
+  --te-navy: #163d7a;
+  --te-ink: #1e293b;
+  --te-ink-muted: #475569;
+  --te-ink-faint: #64748b;
+  --te-border: #e2e8f0;
+  /* Deliberately NOT pure #ffffff — the blank-canvas PDF export guard. */
+  --te-bg: #f8fafc;
+
+  position: relative;
+  overflow: hidden;
+  background: var(--te-bg);
+  color: var(--te-ink);
+  font-family: var(--font-sans);
+  font-size: var(--tpl-body-size);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.2);
+
+  width: min(100%, var(--preview-paper-width));
+  min-height: var(--preview-paper-min-height);
+  margin: 0 auto;
+  align-self: center;
+}
+
+.pdf-export-root.tech-exec-showcase {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ── Masthead — deep-navy band, white knockout identity ── */
+
+.tech-exec-showcase__masthead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.75rem;
+  padding: 2.5rem 2.75rem;
+  background: var(--te-navy);
+}
+
+/* #a8b5c8 reads 5.1:1 on --te-navy (the old #94a3b8 was 4.13:1, under
+   WCAG AA's 4.5:1), and stays dimmer than the contact line's #cbd5e1
+   (7.1:1) so the label still reads as secondary. */
+.tech-exec-showcase__kicker {
+  font-size: var(--tpl-meta-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: #a8b5c8;
+}
+
+.tech-exec-showcase__name {
+  margin-top: 0.4rem;
+  font-size: var(--tpl-name-size);
+  line-height: var(--tpl-name-lh);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  overflow-wrap: break-word;
+}
+
+.tech-exec-showcase__role {
+  margin-top: 0.45rem;
+  font-size: var(--tpl-title-size);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #bfdbfe;
+}
+
+/* The role is styled uppercase. EditableField saves innerText, which
+   reflects text-transform, so without this an inline edit would save the
+   title in capitals. Scoped to the editable span only. */
+.tech-exec-showcase__role .direct-edit-field {
+  text-transform: none;
+}
+
+.tech-exec-showcase__contact {
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1.1rem;
+  font-size: var(--tpl-meta-size);
+  color: #cbd5e1;
+}
+
+.tech-exec-showcase__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  overflow-wrap: break-word;
+}
+
+.tech-exec-showcase__contact-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: #93c5fd;
+}
+
+.tech-exec-showcase__photo-wrap {
+  flex-shrink: 0;
+}
+
+.tech-exec-showcase__photo {
+  display: block;
+  width: 6rem;
+  height: 6rem;
+  object-fit: cover;
+  border-radius: 9999px;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 2px var(--tpl-accent);
+}
+
+/* ── Body: right-rail + main ── */
+
+.tech-exec-showcase__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(210px, 1fr);
+  gap: 2.25rem;
+  padding: 2rem 2.75rem 2.5rem;
+}
+
+.tech-exec-showcase__main {
+  min-width: 0;
+}
+
+.tech-exec-showcase__sidebar {
+  min-width: 0;
+  border-left: 1px solid var(--te-border);
+  padding-left: 1.75rem;
+}
+
+/* ── Sections — §4 rule-under ── */
+
+.tech-exec-showcase__section + .tech-exec-showcase__section {
+  margin-top: 1.75rem;
+}
+
+.tech-exec-showcase__section-head {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--tpl-accent);
+}
+
+.tech-exec-showcase__section-title {
+  font-size: var(--tpl-heading-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--cv-heading-color, var(--te-ink));
+}
+
+.tech-exec-showcase__empty {
+  margin-top: 0.7rem;
+  font-size: var(--tpl-meta-size);
+  color: var(--te-ink-faint);
+}
+
+/* ── Profile summary ── */
+
+.tech-exec-showcase__summary {
+  margin-top: 0.7rem;
+  font-size: var(--tpl-body-size);
+  line-height: 1.7;
+  color: var(--te-ink-muted);
+  white-space: pre-line;
+}
+
+/* ── Experience / Education entries ── */
+
+.tech-exec-showcase__entry-list {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.tech-exec-showcase__entry {
+  padding: 1.1rem 0;
+  border-bottom: 1px solid var(--te-border);
+}
+
+/* First/last come from JS modifier classes that both Experience and
+   Education set, not :first-child/:last-child: in Direct Edit, EditableList
+   wraps each Experience entry in its own .direct-edit-entry div, making
+   every entry both. Doubled class for order-independent specificity. */
+.tech-exec-showcase__entry.tech-exec-showcase__entry--first {
+  padding-top: 0;
+}
+
+.tech-exec-showcase__entry.tech-exec-showcase__entry--last {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tech-exec-showcase__entry-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+}
+
+.tech-exec-showcase__entry-role {
+  font-size: var(--tpl-entry-title-size);
+  font-weight: 700;
+  color: var(--te-ink);
+}
+
+.tech-exec-showcase__entry-dates {
+  flex-shrink: 0;
+  font-size: var(--tpl-meta-size);
+  font-weight: 600;
+  color: var(--tpl-accent);
+  white-space: nowrap;
+}
+
+.tech-exec-showcase__entry-meta {
+  margin-top: 0.15rem;
+  font-size: var(--tpl-meta-size);
+  color: var(--te-ink-muted);
+}
+
+.tech-exec-showcase__bullets {
+  margin-top: 0.5rem;
+  padding-left: 1.05rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+/* Direct Edit's description is one multi-line field, not a flex <ul>.
+   pre-line is load-bearing: EditableField saves innerText, which collapses
+   a stored "\n" to a space under white-space: normal. */
+.tech-exec-showcase__bullets--editing {
+  display: block;
+  padding-left: 0;
+  white-space: pre-line;
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--te-ink-muted);
+}
+
+.tech-exec-showcase__bullets li {
+  font-size: var(--tpl-body-size);
+  line-height: 1.55;
+  color: var(--te-ink-muted);
+}
+
+.tech-exec-showcase__bullets li::marker {
+  color: var(--tpl-accent);
+}
+
+/* ── Technical Skills — grouped inline lists ── */
+
+.tech-exec-showcase__skill-groups {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.tech-exec-showcase__skill-group {
+  font-size: var(--tpl-body-size);
+  line-height: 1.5;
+}
+
+.tech-exec-showcase__skill-group-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: var(--tpl-meta-size);
+  color: var(--te-ink);
+}
+
+.tech-exec-showcase__skill-items {
+  color: var(--te-ink-muted);
+}
+
+/* ── Core Strengths (sidebar) ── */
+
+.tech-exec-showcase__strength-list {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.tech-exec-showcase__strength-item {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--te-border);
+}
+
+.tech-exec-showcase__strength-item:first-child {
+  padding-top: 0;
+}
+
+.tech-exec-showcase__strength-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tech-exec-showcase__strength-title {
+  font-size: var(--tpl-body-size);
+  font-weight: 700;
+  color: var(--te-ink);
+}
+
+.tech-exec-showcase__strength-desc {
+  margin-top: 0.15rem;
+  font-size: var(--tpl-meta-size);
+  line-height: 1.5;
+  color: var(--te-ink-faint);
+}
+
+/* ── Certifications (sidebar, accent-dot list) ── */
+
+.tech-exec-showcase__cert-list {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.tech-exec-showcase__cert-item {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.tech-exec-showcase__cert-dot {
+  flex-shrink: 0;
+  margin-top: 0.4rem;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 9999px;
+  background: var(--tpl-accent);
+}
+
+.tech-exec-showcase__cert-name {
+  font-size: var(--tpl-body-size);
+  font-weight: 700;
+  color: var(--te-ink);
+}
+
+.tech-exec-showcase__cert-meta {
+  margin-top: 0.1rem;
+  font-size: var(--tpl-meta-size);
+  color: var(--te-ink-faint);
+}
+
+.tech-exec-showcase__cert-link {
+  display: inline-block;
+  margin-top: 0.2rem;
+  font-size: var(--tpl-meta-size);
+  font-weight: 600;
+  color: var(--tpl-accent);
+}
+
+/* ── Projects (sidebar) ── */
+
+.tech-exec-showcase__project-list {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.tech-exec-showcase__project + .tech-exec-showcase__project {
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--te-border);
+}
+
+.tech-exec-showcase__project-name {
+  font-size: var(--tpl-body-size);
+  font-weight: 700;
+  color: var(--te-ink);
+}
+
+.tech-exec-showcase__project-desc {
+  margin-top: 0.2rem;
+  font-size: var(--tpl-meta-size);
+  line-height: 1.5;
+  color: var(--te-ink-faint);
+  white-space: pre-line;
+}
+
+.tech-exec-showcase__project-stack {
+  margin-top: 0.25rem;
+  font-size: var(--tpl-meta-size);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--te-ink-faint);
+}
+
+/* ── Links (sidebar) ── */
+
+.tech-exec-showcase__link-list {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.tech-exec-showcase__link-card {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.tech-exec-showcase__link-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--tpl-accent);
+}
+
+.tech-exec-showcase__link-label {
+  font-size: var(--tpl-meta-size);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--te-ink-faint);
+}
+
+.tech-exec-showcase__link-value {
+  display: block;
+  overflow: hidden;
+  margin-top: 0.05rem;
+  font-size: var(--tpl-meta-size);
+  color: var(--te-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Languages / Interests (sidebar) ── */
+
+.tech-exec-showcase__inline-list {
+  margin-top: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.tech-exec-showcase__inline-item {
+  font-size: var(--tpl-body-size);
+  color: var(--te-ink);
+}
+
+.tech-exec-showcase__inline-meta {
+  color: var(--te-ink-faint);
+}
+
+.tech-exec-showcase__interests {
+  margin-top: 0.8rem;
+  font-size: var(--tpl-body-size);
+  line-height: 1.5;
+  color: var(--te-ink-muted);
+}
+
+/* ── Footer — deep-navy band with the user's tagline ── */
+
+.tech-exec-showcase__footer {
+  padding: 1.5rem 2.75rem;
+  background: var(--te-navy);
+  text-align: center;
+}
+
+.tech-exec-showcase__footer-text {
+  font-size: var(--tpl-title-size);
+  font-style: italic;
+  line-height: 1.5;
+  color: #cbd5e1;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 860px) {
+  .tech-exec-showcase__body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.75rem;
+  }
+
+  .tech-exec-showcase__sidebar {
+    border-left: none;
+    border-top: 1px solid var(--te-border);
+    padding-left: 0;
+    padding-top: 1.5rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .tech-exec-showcase__masthead {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .tech-exec-showcase__body {
+    padding: 1.5rem 1.25rem 1.75rem;
+  }
+
+  .tech-exec-showcase__footer {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .tech-exec-showcase__photo {
+    width: 5rem;
+    height: 5rem;
+  }
+}
+
+/* ── Print ── */
+
+@media print {
+  .tech-exec-showcase {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .tech-exec-showcase * {
+    animation: none !important;
+    transition: none !important;
+    box-shadow: none !important;
+  }
+}

@@ -8,7 +8,10 @@ import { lazy, memo, Suspense, useMemo } from 'react'
 import { createCvSnapshot } from '../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../utils/cvForm'
 import { getUiTheme } from '../utils/designSystem'
-import { getCvTemplate } from '../utils/cvTemplates'
+import { getEffectiveCvTemplate } from '../utils/sectionColumns'
+import { DirectEditProvider } from './DirectEditContext'
+import EditableField from './EditableField'
+import EditableList, { EditableChip } from './EditableList'
 import {
   devIcons,
   contactIcons,
@@ -18,6 +21,7 @@ import {
   renderSectionCard,
   formatDateRange,
   formatLinkLabel,
+  formatLinkDisplayValue,
 } from './templates/shared'
 import { getTemplateConfig } from './templates'
 
@@ -38,11 +42,14 @@ const GraduateShowcase = lazy(() => import('./templates/GraduateShowcase'))
 const CompactShowcase = lazy(() => import('./templates/CompactShowcase'))
 const PortfolioShowcase = lazy(() => import('./templates/PortfolioShowcase'))
 const ClassicProfessionalShowcase = lazy(() => import('./templates/ClassicProfessionalShowcase'))
-const ClassicShowcase = lazy(() => import('./templates/ClassicShowcase'))
 const NavyProfessionalShowcase = lazy(() => import('./templates/NavyProfessionalShowcase'))
 const ModernOrangeShowcase = lazy(() => import('./templates/ModernOrangeShowcase'))
 const ColorfulCompactShowcase = lazy(() => import('./templates/ColorfulCompactShowcase'))
 const QuadrantShowcase = lazy(() => import('./templates/QuadrantShowcase'))
+const TechExecShowcase = lazy(() => import('./templates/TechExecShowcase'))
+const EditorialShowcase = lazy(() => import('./templates/EditorialShowcase'))
+const PortraitShowcase = lazy(() => import('./templates/PortraitShowcase'))
+const EuropeanShowcase = lazy(() => import('./templates/EuropeanShowcase'))
 
 function CVPreview({
   formData,
@@ -51,20 +58,39 @@ function CVPreview({
   template = 'minimal',
   locale = 'en',
   atsFriendlyMode = false,
-  timelineAccentColor,
-  modernOrangeAccentColor,
+  // Resolved accent color for the current template (from the app's
+  // per-template `templateAccentColors` map, falling back to the template
+  // registry's default). `timeline`, `modernOrange`, `creative`, `graduate`,
+  // `executive`, `compact`, `quadrant`, `techExec`, `portfolio`,
+  // `editorial`, `portrait` and `european` consume it.
+  accentColor,
   // Overrides the name and section-title color for every template except
   // Developer (animated gradient name), Colorful Compact (dark header, own
   // per-section rainbow identity), and Navy Professional's name (white on
   // its dark sidebar) — see utils/cvHeadingColors.js for why those are
   // excluded. `null`/undefined means "use the template's own color".
   headingColor = null,
+  // 'center' (default) | 'left' — Classic Professional's name-alignment
+  // option, folded in from the retired Classic template (v1.2.10).
+  classicNameAlignment = 'center',
+  // Direct Edit builder: a dispatch function only when the app is in
+  // Direct Edit mode (every template supports inline editing since
+  // v1.2.73) — null in every other case (Classic mode, PDF/html2canvas
+  // export, the thumbnail gallery). EditableField/
+  // EditableList/EditableChip read this indirectly via DirectEditContext
+  // — see the wrap in the final return below.
+  directEditDispatch = null,
 }) {
   // ── Theme and template resolution ──────────────────────────────────
   // Resolve the UI theme (dark/light) and the template config (variant, layout, etc.)
   const ui = useMemo(() => getUiTheme(theme), [theme])
   const isDark = ui.isDark
-  const templateConfig = useMemo(() => getCvTemplate(template, locale), [locale, template])
+  const templateConfig = useMemo(
+    () => getEffectiveCvTemplate(template, locale, formData),
+    // Only the column overrides matter here, not every keystroke in formData.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [locale, template, formData.sectionColumnsByTemplate],
+  )
   const t = getTemplateConfig(templateConfig.variant)
   const variant = templateConfig.variant
   const isFinnish = locale === 'fi'
@@ -83,15 +109,18 @@ function CVPreview({
   // never move it earlier without checking no hook follows it.
   if (variant === 'developer' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <DeveloperShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <DeveloperShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
@@ -100,15 +129,19 @@ function CVPreview({
   // system that ATS mode bypasses entirely.
   if (variant === 'creative' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <CreativeShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <CreativeShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
@@ -117,16 +150,19 @@ function CVPreview({
   // "premium executive" visual system that ATS mode bypasses entirely.
   if (variant === 'modern' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <ModernShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <ModernShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
@@ -135,16 +171,20 @@ function CVPreview({
   // bespoke "boardroom" visual system that ATS mode bypasses entirely.
   if (variant === 'executive' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <ExecutiveShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <ExecutiveShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
@@ -158,18 +198,21 @@ function CVPreview({
   // a different template."
   if (variant === 'timeline') {
     return (
-      <Suspense fallback={null}>
-        <TimelineShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          accentColor={timelineAccentColor}
-          atsFriendlyMode={atsFriendlyMode}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <TimelineShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            accentColor={accentColor}
+            atsFriendlyMode={atsFriendlyMode}
+            headingColor={headingColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
@@ -179,16 +222,20 @@ function CVPreview({
   // bypasses entirely.
   if (variant === 'graduate' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <GraduateShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <GraduateShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
@@ -198,16 +245,20 @@ function CVPreview({
   // system that ATS mode bypasses entirely.
   if (variant === 'compact' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <CompactShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <CompactShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
@@ -217,16 +268,20 @@ function CVPreview({
   // condensed into a résumé" visual system that ATS mode bypasses entirely.
   if (variant === 'portfolio' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <PortfolioShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <PortfolioShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            accentColor={accentColor}
+            headingColor={headingColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
@@ -235,39 +290,24 @@ function CVPreview({
   // ATS mode bypasses entirely (though this template's ATS fallback and
   // Showcase mode look nearly identical anyway, since it's monochrome by
   // design — the fallback just swaps the serif name for the app's Inter).
+  // `nameAlignment` ('center' | 'left') folds in the retired Classic
+  // template's left-aligned letterhead as a Settings option (v1.2.10).
   if (variant === 'classicProfessional' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <ClassicProfessionalShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-        />
-      </Suspense>
-    )
-  }
-
-  // ── Classic Showcase delegation ──────────────────────────────────────
-  // A calm left-aligned letterhead visual — single column, ink on ivory,
-  // no color. ATS mode bypasses it entirely and falls back to the shared
-  // flat renderer (classic.js), which is monochrome by design so the two
-  // modes look nearly identical anyway (the fallback swaps the serif name
-  // for the app's Inter).
-  if (variant === 'classic' && !atsFriendlyMode) {
-    return (
-      <Suspense fallback={null}>
-        <ClassicShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <ClassicProfessionalShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            nameAlignment={classicNameAlignment}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
@@ -280,19 +320,26 @@ function CVPreview({
   // the one thing this app's own ATS claims ("no columns") specifically
   // promise to remove — while keeping every section in the same relative
   // order and everything else about the layout intact.
+  //
+  // Wrapped in DirectEditProvider unconditionally, as Timeline is: Direct
+  // Edit always renders with atsFriendlyMode={false}, and in Classic/ATS
+  // directEditDispatch is null, so the provider stays inert there.
   if (variant === 'navyProfessional') {
     return (
-      <Suspense fallback={null}>
-        <NavyProfessionalShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          atsFriendlyMode={atsFriendlyMode}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <NavyProfessionalShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            atsFriendlyMode={atsFriendlyMode}
+            headingColor={headingColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
   // ── Modern Orange Showcase delegation ─────────────────────────────────
@@ -304,18 +351,21 @@ function CVPreview({
   // Professional. Its accent color is user-customizable, same as Timeline.
   if (variant === 'modernOrange') {
     return (
-      <Suspense fallback={null}>
-        <ModernOrangeShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          accentColor={modernOrangeAccentColor}
-          atsFriendlyMode={atsFriendlyMode}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <ModernOrangeShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            accentColor={accentColor}
+            atsFriendlyMode={atsFriendlyMode}
+            headingColor={headingColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
   // ── Colorful Compact Showcase delegation ──────────────────────────────
@@ -327,14 +377,17 @@ function CVPreview({
   // color to fall back to).
   if (variant === 'colorfulCompact' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <ColorfulCompactShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <ColorfulCompactShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
@@ -344,35 +397,132 @@ function CVPreview({
   // every other bespoke Showcase above.
   if (variant === 'quadrant' && !atsFriendlyMode) {
     return (
-      <Suspense fallback={null}>
-        <QuadrantShowcase
-          formData={formData}
-          locale={locale}
-          previewRef={previewRef}
-          templateConfig={templateConfig}
-          showcaseConfig={t}
-          headingColor={headingColor}
-        />
-      </Suspense>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <QuadrantShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
+    )
+  }
+
+  // ── Tech Executive Showcase delegation ──────────────────────────────
+  // Promoted to a bespoke Showcase in v1.2.9 (was flat-renderer-only): a
+  // navy masthead + navy footer band around a right-rail body. ATS mode
+  // bypasses to the flat renderer (techExec.js), same as every other
+  // bespoke Showcase above.
+  if (variant === 'techExec' && !atsFriendlyMode) {
+    return (
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <TechExecShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            showcaseConfig={t}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
+    )
+  }
+
+  // ── Editorial Showcase delegation ───────────────────────────────────
+  // The Editorial template's non-ATS look is a magazine-style single
+  // column — a fully bespoke visual system ATS mode bypasses entirely,
+  // same reasoning as every other bespoke Showcase above.
+  if (variant === 'editorial' && !atsFriendlyMode) {
+    return (
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <EditorialShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
+    )
+  }
+
+  // ── Portrait Showcase delegation ────────────────────────────────────
+  // The Portrait template's non-ATS look is a full-bleed photo column — a
+  // fully bespoke visual system ATS mode bypasses entirely, same reasoning
+  // as every other bespoke Showcase above.
+  if (variant === 'portrait' && !atsFriendlyMode) {
+    return (
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <PortraitShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
+    )
+  }
+
+  // ── European Showcase delegation ────────────────────────────────────
+  // The European template's non-ATS look is a label/value table with a
+  // one-page auto-fit — a fully bespoke visual system ATS mode bypasses
+  // entirely, same reasoning as every other bespoke Showcase above.
+  if (variant === 'european' && !atsFriendlyMode) {
+    return (
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+        <Suspense fallback={null}>
+          <EuropeanShowcase
+            formData={formData}
+            locale={locale}
+            previewRef={previewRef}
+            templateConfig={templateConfig}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            directEditDispatch={directEditDispatch}
+          />
+        </Suspense>
+      </DirectEditProvider>
     )
   }
 
   const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
   const photo = snapshot.photo
   const showPhoto = Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
-  const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
   const personalContactItems = [
     ['email', snapshot.email],
     ['phone', snapshot.phone],
     ['location', snapshot.location],
   ].filter(([, value]) => value)
+  // Direct Edit needs a slot to click even when the field is empty
+  // (personalContactItems above filters those out for the read-only
+  // render, which is correct there and wrong here).
+  const directEditContactFields = [
+    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
+    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+  ]
   const skills = snapshot.skills
   const experience = snapshot.experience
   const education = snapshot.education
@@ -600,7 +750,17 @@ function CVPreview({
               ) : null}
             </div>
             <p className={`mt-4 whitespace-pre-line ${aboutTextSize} ${bodyTextClasses}`}>
-              {about}
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'about' }}
+                value={formData.about}
+                placeholder={
+                  isFinnish
+                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+                    : 'Your professional summary will appear here as you fill out the CV form.'
+                }
+                multiline
+              />
             </p>
           </>
         ),
@@ -612,16 +772,13 @@ function CVPreview({
     // 'clean' is used by minimal, developer, creative, executive, timeline templates.
     // 'timeline' is used by modern, graduate, compact, portfolio templates.
     if (section === 'experience') {
-      return renderSectionCard({
-        section,
-        placement,
-        classes: sectionClasses,
-        children: (
-          <>
-            {renderSectionHeading('experience', isFinnish ? 'Kokemus' : 'Experience')}
-            <div className={`mt-5 ${experienceItemGap}`}>
-              {experience.length > 0 ? (
-                experience.map((item, index) => {
+      // Extracted so both the read-only `.map()` and EditableList's editing
+      // wrapper (below) render identical entry markup — pure extraction,
+      // same body, no behavior change for any of the three layout branches.
+      // `sourceIndex` feeds Direct Edit's entry pencil and must be the
+      // formData index: EditableList already iterates formData, the
+      // read-only map passes snapshot.sourceIndices.experience[index].
+      const renderExperienceEntry = (item, index, sourceIndex = index) => {
                   const dateRange = formatDateRange(
                     item.startDate,
                     item.endDate,
@@ -675,6 +832,7 @@ function CVPreview({
                         key={`${item.role}-${item.company}-${index}`}
                         className={`relative ${experienceItemBorder} ${experienceItemPadding} ${resolvedTimelineBorderClasses}`}
                         data-export-card="true"
+                        data-direct-edit-index={sourceIndex}
                       >
                         <span
                           className={`absolute ${experienceItemDot} top-1 rounded-full border-4 shadow-sm ${resolvedTimelineDotClasses}`}
@@ -722,22 +880,51 @@ function CVPreview({
                         key={`${item.role}-${item.company}-${index}`}
                         className="relative pl-0"
                         data-export-card="true"
+                        data-direct-edit-index={sourceIndex}
                       >
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0 flex-1">
                             <p
                               className={`${experienceTitleSize} font-semibold tracking-tight text-gray-900`}
                             >
-                              {item.role.trim() || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')}
+                              {directEditDispatch ? (
+                                <EditableField
+                                  as="span"
+                                  path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
+                                  value={item.role}
+                                  placeholder={isFinnish ? 'Nimeämätön rooli' : 'Untitled role'}
+                                />
+                              ) : (
+                                item.role.trim() || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')
+                              )}
                             </p>
-                            {item.company.trim() ? (
+                            {directEditDispatch || item.company.trim() ? (
                               <p className="text-sm text-gray-500">
-                                {item.company}
+                                {directEditDispatch ? (
+                                  <EditableField
+                                    as="span"
+                                    path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
+                                    value={item.company}
+                                    placeholder={isFinnish ? 'Yritys' : 'Company'}
+                                  />
+                                ) : (
+                                  item.company
+                                )}
                               </p>
                             ) : null}
-                            {item.description.trim() ? (
+                            {directEditDispatch || item.description.trim() ? (
                               <p className={`mt-2 whitespace-pre-line ${experienceDescSize} ${bodyTextClasses}`}>
-                                {item.description}
+                                {directEditDispatch ? (
+                                  <EditableField
+                                    as="span"
+                                    path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+                                    value={item.description}
+                                    placeholder={isFinnish ? 'Kuvaus' : 'Description'}
+                                    multiline
+                                  />
+                                ) : (
+                                  item.description
+                                )}
                               </p>
                             ) : null}
                             {renderExtras()}
@@ -757,6 +944,7 @@ function CVPreview({
                       key={`${item.role}-${item.company}-${index}`}
                       className={`relative ${experienceItemBorder} ${experienceItemPadding} ${resolvedTimelineBorderClasses}`}
                       data-export-card="true"
+                      data-direct-edit-index={sourceIndex}
                     >
                       <span
                         className={`absolute ${experienceItemDot} top-1 rounded-full border-4 shadow-sm ${resolvedTimelineDotClasses}`}
@@ -788,7 +976,22 @@ function CVPreview({
                       </div>
                     </div>
                   )
-                })
+      }
+
+      return renderSectionCard({
+        section,
+        placement,
+        classes: sectionClasses,
+        children: (
+          <>
+            {renderSectionHeading('experience', isFinnish ? 'Kokemus' : 'Experience')}
+            <div className={`mt-5 ${experienceItemGap}`}>
+              {directEditDispatch ? (
+                <EditableList section="experience" items={formData.experience} addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}>
+                  {(item, index) => renderExperienceEntry(item, index)}
+                </EditableList>
+              ) : experience.length > 0 ? (
+                experience.map((item, index) => renderExperienceEntry(item, index, snapshot.sourceIndices.experience[index]))
               ) : (
                 <p className="text-sm text-gray-500">
                   {isFinnish
@@ -817,6 +1020,7 @@ function CVPreview({
               {education.length > 0 ? (
                 education.map((item, index) => (
                   <div
+                    data-direct-edit-index={snapshot.sourceIndices.education[index]}
                     key={`${item.school}-${item.degree}-${index}`}
                     className={resolvedEducationCardClasses}
                     data-export-card="true"
@@ -911,7 +1115,7 @@ function CVPreview({
           <>
             {renderSectionHeading('skills', isFinnish ? 'Taidot' : 'Skills')}
             <div className="mt-4 flex flex-wrap gap-2">
-              {skills.length > 0 ? (
+              {directEditDispatch ? null : skills.length > 0 ? (
                 skills.map((skill) => (
                   <span
                     key={skill}
@@ -926,6 +1130,9 @@ function CVPreview({
                   {isFinnish ? 'Lisää taitoja näyttääksesi ne tageina.' : 'Add skills to display them as tags.'}
                 </p>
               )}
+              {directEditDispatch ? (
+                <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+              ) : null}
             </div>
           </>
         ),
@@ -955,7 +1162,7 @@ function CVPreview({
                       <span className={`shrink-0 ${resolvedLinkIconColor}`}>{devIcons[key] || null}</span>
                       <div className="min-w-0">
                         <p className={`text-[0.6rem] font-bold uppercase tracking-[0.18em] ${resolvedLinkIconColor || 'text-gray-400'}`}>{formatLinkLabel(key)}</p>
-                        <p className="truncate text-[0.72rem] text-gray-600">{value}</p>
+                        <p className="truncate text-[0.72rem] text-gray-600">{formatLinkDisplayValue(value)}</p>
                       </div>
                     </div>
                   ))
@@ -986,7 +1193,7 @@ function CVPreview({
                   links.map(([key, value]) => (
                     <div key={key} data-export-card="true" className="flex items-center gap-1.5 text-sm">
                       <span className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-400">{formatLinkLabel(key)}</span>
-                      <span className="text-gray-600">{value}</span>
+                      <span className="text-gray-600">{formatLinkDisplayValue(value)}</span>
                     </div>
                   ))
                 ) : (
@@ -1022,7 +1229,7 @@ function CVPreview({
                       {formatLinkLabel(key)}
                     </p>
                     <p className={`mt-1 break-all text-sm ${supportingTextClasses}`}>
-                      {value}
+                      {formatLinkDisplayValue(value)}
                     </p>
                   </div>
                 ))
@@ -1052,7 +1259,7 @@ function CVPreview({
             <div className="mt-4 space-y-4">
               {coreStrengths.length > 0 ? (
                 coreStrengths.map((item, index) => (
-                  <div key={`${item.title}-${index}`} className="flex items-start gap-3" data-export-card="true">
+                  <div key={`${item.title}-${index}`} className="flex items-start gap-3" data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.coreStrengths[index]}>
                     <span
                       className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${resolvedSectionIconBg} ${resolvedSectionIconColor}`}
                       aria-hidden="true"
@@ -1094,6 +1301,7 @@ function CVPreview({
               <ul className="mt-4 space-y-2">
                 {certificates.map((item, index) => (
                   <li
+                    data-direct-edit-index={snapshot.sourceIndices.certificates[index]}
                     key={`${item.name}-${index}`}
                     className={`flex items-start gap-2 text-sm ${supportingTextClasses}`}
                     data-export-card="true"
@@ -1140,7 +1348,7 @@ function CVPreview({
             <div className="mt-4 space-y-4">
               {projects.length > 0 ? (
                 projects.map((item, index) => (
-                  <div key={`${item.name}-${index}`} data-export-card="true">
+                  <div key={`${item.name}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.projects[index]}>
                     {item.image ? (
                       <img
                         src={item.image}
@@ -1195,6 +1403,7 @@ function CVPreview({
               {languages.length > 0 ? (
                 languages.map((item, index) => (
                   <p
+                    data-direct-edit-index={snapshot.sourceIndices.languages[index]}
                     key={`${item.language}-${index}`}
                     className={`text-sm ${supportingTextClasses}`}
                     data-export-card="true"
@@ -1228,6 +1437,7 @@ function CVPreview({
               {interests.length > 0 ? (
                 interests.map((item, index) => (
                   <span
+                    data-direct-edit-index={snapshot.sourceIndices.interests[index]}
                     key={`${item.name}-${index}`}
                     className={`inline-flex items-center gap-1.5 text-sm ${supportingTextClasses}`}
                     data-export-card="true"
@@ -1262,7 +1472,7 @@ function CVPreview({
             <div className="mt-4 space-y-4">
               {achievements.length > 0 ? (
                 achievements.map((item, index) => (
-                  <div key={`${item.title}-${index}`} data-export-card="true">
+                  <div key={`${item.title}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.achievements[index]}>
                     <div className="flex items-start justify-between gap-4">
                       {item.title ? (
                         <p className="text-sm font-semibold tracking-tight text-gray-900">{item.title}</p>
@@ -1307,7 +1517,7 @@ function CVPreview({
                   ].filter(Boolean)
 
                   return (
-                    <div key={`${item.name}-${index}`} data-export-card="true">
+                    <div key={`${item.name}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.openSource[index]}>
                       {item.name ? (
                         <p className={`text-sm font-semibold tracking-tight ${accentTextClasses}`}>{item.name}</p>
                       ) : null}
@@ -1349,7 +1559,7 @@ function CVPreview({
             <div className="mt-4 space-y-4">
               {publications.length > 0 ? (
                 publications.map((item, index) => (
-                  <div key={`${item.title}-${index}`} data-export-card="true">
+                  <div key={`${item.title}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.publications[index]}>
                     {item.title ? (
                       <p className="text-sm font-semibold tracking-tight text-gray-900">{item.title}</p>
                     ) : null}
@@ -1391,7 +1601,7 @@ function CVPreview({
                   const dateRange = formatDateRange(item.startDate, item.endDate)
 
                   return (
-                    <div key={`${item.role}-${item.organization}-${index}`} data-export-card="true">
+                    <div key={`${item.role}-${item.organization}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.leadership[index]}>
                       <div className="flex items-start justify-between gap-4">
                         {heading ? (
                           <p className="text-sm font-semibold tracking-tight text-gray-900">{heading}</p>
@@ -1430,7 +1640,7 @@ function CVPreview({
             <div className="mt-4 space-y-3">
               {memberships.length > 0 ? (
                 memberships.map((item, index) => (
-                  <div key={`${item.organization}-${index}`} data-export-card="true">
+                  <div key={`${item.organization}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.memberships[index]}>
                     {item.organization ? (
                       <p className="text-sm font-semibold tracking-tight text-gray-900">{item.organization}</p>
                     ) : null}
@@ -1465,7 +1675,7 @@ function CVPreview({
             <div className="mt-4 space-y-4">
               {speaking.length > 0 ? (
                 speaking.map((item, index) => (
-                  <div key={`${item.conference}-${item.topic}-${index}`} data-export-card="true">
+                  <div key={`${item.conference}-${item.topic}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.speaking[index]}>
                     {item.topic ? (
                       <p className="text-sm font-semibold tracking-tight text-gray-900">{item.topic}</p>
                     ) : null}
@@ -1506,7 +1716,7 @@ function CVPreview({
                   const heading = [item.role, item.organization].filter(Boolean).join(' — ')
 
                   return (
-                    <div key={`${item.role}-${item.organization}-${index}`} data-export-card="true">
+                    <div key={`${item.role}-${item.organization}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.volunteering[index]}>
                       {heading ? (
                         <p className="text-sm font-semibold tracking-tight text-gray-900">{heading}</p>
                       ) : null}
@@ -1545,7 +1755,7 @@ function CVPreview({
                   const dateRange = formatDateRange(item.startDate, item.endDate)
 
                   return (
-                    <div key={`${item.role}-${item.company}-${index}`} data-export-card="true">
+                    <div key={`${item.role}-${item.company}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.internships[index]}>
                       <div className="flex items-start justify-between gap-4">
                         <p className="text-sm font-semibold tracking-tight text-gray-900">{heading}</p>
                         {dateRange ? (
@@ -1600,7 +1810,7 @@ function CVPreview({
                   ].filter(([, value]) => value)
 
                   return (
-                    <div key={`${item.title}-${index}`} data-export-card="true">
+                    <div key={`${item.title}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.caseStudies[index]}>
                       {item.title ? (
                         <p className="text-sm font-semibold tracking-tight text-gray-900">{item.title}</p>
                       ) : null}
@@ -1642,7 +1852,7 @@ function CVPreview({
                   const meta = [item.author, item.role].filter(Boolean).join(', ')
 
                   return (
-                    <div key={`${item.author}-${index}`} data-export-card="true">
+                    <div key={`${item.author}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.testimonials[index]}>
                       {item.quote ? (
                         <p className={`whitespace-pre-line text-xs italic leading-6 ${bodyTextClasses}`}>&ldquo;{item.quote}&rdquo;</p>
                       ) : null}
@@ -1669,6 +1879,7 @@ function CVPreview({
   // ── Document shell ─────────────────────────────────────────────────
   // The outer <article> wraps the entire CV. Style varies by template and ATS mode.
   return (
+    <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
     <article
       ref={previewRef}
       data-export-root="true"
@@ -1710,21 +1921,40 @@ function CVPreview({
               }`}
               style={headingColor ? { color: headingColor } : undefined}
             >
-              {fullName}
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'fullName' }}
+                value={formData.fullName}
+                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              />
             </h3>
 
             {/* Professional title / subtitle */}
             <p className={resolvedHeaderSubtitleClasses}>
-              {title}
+              <EditableField
+                as="span"
+                path={{ kind: 'root', field: 'title' }}
+                value={formData.title}
+                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              />
             </p>
 
             {/* Contact info — piped layout (minimal: email/phone/location separated by |,
                 no icons — GitHub/LinkedIn/Portfolio/website stay in the Links section) */}
-            {t.headerContactMode === 'piped' && personalContactItems.length > 0 ? (
+            {t.headerContactMode === 'piped' && (directEditDispatch ? true : personalContactItems.length > 0) ? (
               <p className={`mt-3 flex flex-wrap items-center ${t.headerContactGap} gap-y-1 ${t.headerContactTextSize} leading-5 ${resolvedHeaderContactTextColor}`}>
-                {personalContactItems.map(([key, value], i, arr) => (
+                {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel], i, arr) => (
                   <span key={key} className="flex items-center gap-x-2">
-                    <span>{value}</span>
+                    {directEditDispatch ? (
+                      <EditableField
+                        as="span"
+                        path={{ kind: 'root', field: key }}
+                        value={value}
+                        placeholder={placeholderLabel}
+                      />
+                    ) : (
+                      <span>{value}</span>
+                    )}
                     {i < arr.length - 1 ? <span className="text-gray-300">|</span> : null}
                   </span>
                 ))}
@@ -1875,6 +2105,7 @@ function CVPreview({
         </footer>
       ) : null}
     </article>
+    </DirectEditProvider>
   )
 }
 

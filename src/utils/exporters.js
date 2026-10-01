@@ -1,5 +1,10 @@
-import { saveAs } from 'file-saver'
-import { defaultTemplateId, getCvTemplate } from './cvTemplates'
+// 'file-saver' is CommonJS-only — a named import { saveAs } fails under
+// plain Node ESM (as used by scripts/check-docx-export.mjs), so this takes
+// the default-import-then-destructure shape instead.
+import fileSaverPkg from 'file-saver'
+const { saveAs } = fileSaverPkg
+import { defaultTemplateId } from './cvTemplates'
+import { getEffectiveCvTemplate } from './sectionColumns'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
 import { formatDateRange, formatLinkLabel } from './shared'
@@ -169,7 +174,7 @@ async function waitForPreviewVariant(previewElement, expectedVariant, maxWaitMs 
   return false
 }
 
-function createExportCopy(locale = 'en') {
+export function createExportCopy(locale = 'en') {
   const isFinnish = locale === 'fi'
 
   return {
@@ -212,7 +217,7 @@ function createExportCopy(locale = 'en') {
   }
 }
 
-function getPhotoDataUrl(value) {
+export function getPhotoDataUrl(value) {
   if (typeof value !== 'string') {
     return ''
   }
@@ -243,7 +248,7 @@ function loadImageFromDataUrl(dataUrl) {
 // upload (the common case; there is no crop step on upload) would come out
 // visibly squished. Center-cropping to a square here first keeps the
 // fallback's proportions consistent with every other export path.
-async function cropPhotoDataUrlToSquare(dataUrl) {
+export async function cropPhotoDataUrlToSquare(dataUrl) {
   try {
     const image = await loadImageFromDataUrl(dataUrl)
     const side = Math.min(image.naturalWidth, image.naturalHeight)
@@ -279,7 +284,7 @@ async function cropPhotoDataUrlToSquare(dataUrl) {
   }
 }
 
-function getImageFormatFromDataUrl(dataUrl) {
+export function getImageFormatFromDataUrl(dataUrl) {
   if (/^data:image\/png;base64,/i.test(dataUrl)) {
     return 'PNG'
   }
@@ -1709,7 +1714,8 @@ async function exportCvAsPdfTextFallback(
   })
   const snapshot = createCvSnapshot(formData)
   const copy = createExportCopy(locale)
-  const templateConfig = getCvTemplate(templateId)
+  // Only section lists are read here, so the locale is irrelevant.
+  const templateConfig = getEffectiveCvTemplate(templateId, 'en', formData)
   const sectionVisibility = {
     about: true,
     experience: true,

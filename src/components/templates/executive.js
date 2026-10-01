@@ -1,6 +1,15 @@
-// Executive template config — premium, understated design for senior leadership.
-// Left-border sidebar with slate color palette. Categorized skills, icon-list links.
-// Commanding name, clean dividers, generous spacing. No timeline dots on experience.
+// Executive template config — premium, understated "boardroom" design. The
+// non-ATS visual is ExecutiveShowcase.jsx (warm-charcoal ink, one gold accent
+// read from --tpl-accent, a warm-neutral left rail, rule-under headings). This
+// config is only consumed by the shared flat renderer, which Executive falls
+// through to in ATS-friendly mode (monochrome there — the amber-* classes
+// below only matter if the flat path renders Executive in non-ATS mode, which
+// it never does).
+
+// Registry default accent — must match `accent.default` for `executive` in
+// cvTemplates.js exactly (lowercase hex). See docs/template-design-system.md §6.
+export const EXECUTIVE_DEFAULT_ACCENT_COLOR = '#b45309'
+
 export default {
   // Outer document border — slate-tinted, white bg
   preview: () => 'border-slate-300 bg-white shadow-none',

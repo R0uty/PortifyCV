@@ -179,6 +179,16 @@ after.
       more structural, cross-template pattern than the Executive/Graduate fix
       and would need its own follow-up if the gallery still feels
       insufficiently distinct after this fix.
+      **Resolved 2026-09-28, no change needed (checked in the running app and
+      the template gallery):** both notes were overtaken by later restyles.
+      Modern Professional was restyled 2026-08-23 and is now rose (rose
+      timeline, section icons and dates), nothing like Tech Executive's
+      deep-navy masthead band. Modern Timeline's name is already two-tone,
+      with the last name in its purple accent. Modern Professional's name
+      is dark navy by design, with the rose carried by its timeline, icons
+      and dates. In the gallery, the five templates this item grouped as
+      "pale blue" now read as rose, navy band, purple, bronze-on-cream and
+      lavender band.
 - [x] **13. `creative` template's description promises "one accent colour you
       can change"** — checked 2026-08-14: false, no such control exists. The
       Settings modal (`ResumeBuilderPage.jsx`) has exactly two controls —
@@ -585,6 +595,11 @@ rename pass.
 - [ ] **23. Lock the new Playwright e2e suite into branch protection** now
       that it's in CI (`.github/workflows/ci.yml`), so it actually gates
       merges rather than just running.
+      **Update 2026-09-28:** CI now runs on pushes to `v1.3.0` too and
+      covers all six `check:*` scripts (seven until `check:direct-edit` was removed in 1.2.78). Branch protection itself is still
+      open: it is a GitHub repository setting on `main` for the user to
+      turn on, and should list both CI jobs ("Lint, build, and regression
+      checks" and "End-to-end smoke tests") as required.
 - [x] **24. Optional session-only "restore last session" via `sessionStorage`**
       — done 2026-08-15. Added a fourth Settings row, off by default:
       "Restore last session." When on, a debounced effect in
@@ -1962,3 +1977,175 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 - Responsive layout is handled (breakpoints at 1023 / 860 / 560px).
 - The builder's three-pane layout, live preview, and zoom controls read well.
+
+## Next session — handoff, 2026-09-24
+
+**State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.80**,
+pushed to `origin/v1.3.0` with CI green there (run `git log -1` for the exact
+commit; it is deliberately not recorded here, because every refresh commit
+would make it stale). Latest work: section column moves (v1.2.53–v1.2.60),
+the Colorful Compact skill-pill contrast fix (v1.2.61), the footer-test
+flake fix (v1.2.62), CI running on this branch with all seven check scripts
+(v1.2.63), nine review fixes (v1.2.64), and inline editing on Colorful
+Compact (v1.2.65), Modern Professional (v1.2.66), Graduate (v1.2.67),
+Portfolio Hybrid (v1.2.68), Navy Professional (v1.2.69), Developer
+(v1.2.70), Quadrant (v1.2.71), Tech Executive (v1.2.72) and European
+(v1.2.73). **The inline rollout is complete: every template is
+inline-editable**, and the per-template allowlist
+(`INLINE_EDIT_SUPPORTED_TEMPLATES`, `src/utils/directEdit.js`) and its
+`check:direct-edit` script were removed in v1.2.78, at the user's
+request — there are now **six** check scripts. Comma-joined skills (Tech
+Executive, European) use option A, grouped chips while editing only,
+agreed with the user 2026-09-29. After the rollout: European's 0px entry
+spacing was fixed (v1.2.74), and contrast was fixed for the kicker labels
+on Tech Executive (v1.2.75) and Creative/Executive (v1.2.76) and for
+Executive's secondary-text token `--ex-ink-faint` (v1.2.77, which changes
+exported Executive PDFs slightly). Portfolio's measured 1.00:1 kicker was
+an artifact (really 4.82:1+). No known contrast issues remain open.
+A whole-branch review against `main` (2026-09-30) found PDFs exported
+from Direct Edit contained the editor itself (fixed in v1.2.79) and two
+minor issues, the dead search box in Direct Edit and English-only entry
+labels (both fixed in v1.2.80). Nothing from that review is open.
+Working tree clean (only an untracked `.claude/`). Full suite green with
+no known flakes: **181/181 e2e**, lint, build and all six `check:*`
+scripts. `main` untouched at
+`0f5261f`, no PR — the user said explicitly on 2026-09-28 NOT to merge yet.
+
+Source of truth for the Direct Edit editor's design and its known gaps:
+`docs/superpowers/specs/2026-09-19-direct-edit-universal-sections-design.md`
+and `docs/superpowers/plans/2026-09-19-direct-edit-universal-sections.md`.
+`changes.md` carries a narrative entry per shipped item, newest first.
+
+**Four of the six deferred gaps are now closed** (items 55, 56, 57, 59 — see
+"Shipped since the 2026-09-20 handoff" below). Two remain, and neither is on
+the critical path: the popup already gives full editability of every section
+on all 18 templates, by keyboard as well as pointer.
+
+### START HERE — both remaining gaps are now closed (items 58, 60; see below)
+
+- [x] **58. Entry-level pencils (hover one job, not the whole section).**
+      DONE 2026-09-27, v1.2.52. Every entry of every record-array section on
+      all 18 templates carries `data-direct-edit-index`; hovering one shows a
+      small gutter pencil that opens the section popup beside that entry,
+      outlined, with its first field focused. **Not one line per template as
+      planned above:** templates render the visibility-filtered snapshot, so
+      their map index is not the formData index. `createCvSnapshot` now
+      returns `sourceIndices` and every site writes the mapped value. See
+      `changes.md` for the full reasoning.
+
+- [x] **61. Navy/Modern Orange sidebar sections had no Direct Edit pencil.**
+      DONE 2026-09-28, v1.2.53. `SidebarBlock` rendered no
+      `data-export-section`; it now takes an optional `id`. Found while
+      designing item 60.
+
+- [x] **60. Sections cannot move between columns.**
+      DONE 2026-09-28, v1.2.53–v1.2.60. Spec
+      `docs/superpowers/specs/2026-09-27-section-column-moves-design.md`, plan
+      `docs/superpowers/plans/2026-09-27-section-column-moves.md`. The Direct
+      Edit popup has a Main/Sidebar row on **10** two-column templates.
+      Quadrant is excluded because it is a fixed 2x2 grid, not main plus
+      sidebar. Moves are per-template overrides in
+      `formData.sectionColumnsByTemplate`, carried by JSON, session restore
+      and share links (key `sc`). **Five** template resolvers apply them
+      through `getEffectiveCvTemplate`, not one as the spec assumed. A moved
+      section renders through its home renderer with its real placement and
+      a `data-moved-from` CSS hook. Guarded by `check:section-columns`, an
+      e2e sweep that moves every movable section on every opted-in template
+      both ways (column, placement, height, text contrast), and an ATS-mode
+      guard for Navy and Modern Orange, which reuse their Showcase in ATS
+      mode. CSS was needed only on Developer, Navy and Modern Orange; see
+      `changes.md` for what and why.
+
+If neither appeals, the branch is in a good state to stop: consider whether
+v1.3.0 is ready to merge to `main` instead (it has never been merged and the
+feature is now complete and tested).
+
+### Shipped since the 2026-09-20 handoff — do NOT re-plan these
+
+Full reasoning per item is in `changes.md`; per-commit detail is in git.
+
+- [x] **55. Profile photo upload in Direct Edit** — v1.2.48, commit `c4d02dc`.
+      Extracted the shared image pipeline to `src/utils/profilePhoto.js`
+      (Classic imports it too, so the two surfaces can't drift); the header
+      popup's `renderRootGroup` always offers "Choose image", with
+      preview/Remove once a photo exists and the visibility checkbox still
+      gated on one existing. `projects.image` stays out of scope by an
+      explicit user decision and remains in `INTENTIONALLY_EXCLUDED`.
+
+- [x] **56. Keyboard access to the section editor** — v1.2.49, commit
+      `7fc37ee`. The overlay enumerates its editable sections from the same
+      `data-export-section`/`data-export-header` attributes the pointer path
+      uses and renders one visually-hidden-until-focused "Edit <section>"
+      button each (still zero per-template code). The popup gained
+      `aria-modal`, initial focus on the dialog, a Tab/Shift+Tab trap and
+      focus restore to the trigger on Escape; click-outside close deliberately
+      leaves focus alone. NOTE: the inline `contentEditable` layer's own
+      keyboard gap is untouched — only the popup editor is reachable.
+
+- [x] **57. Array sub-fields** — v1.2.50, commit `b0707a9`. New `list` field
+      type in `sectionSchema.js` plus an add/remove sub-editor in the popup's
+      `FieldInput`, covering `experience.achievements` and
+      `experience.technologies`. Writes go through the existing
+      `UPDATE_ARRAY_ITEM`, so no new reducer action and edits round-trip with
+      Classic. **Worth knowing:** those two are the ONLY array-typed fields in
+      the entire data model — `internships.technologies` and
+      `caseStudies.technologies` are plain strings — so this closed the gap
+      outright; no further sub-editors are pending.
+
+- [x] **59. Popup side-flipping** — v1.2.51, commit `7d9aa9e`. The popup now
+      opens right of its section when that fits inside the preview, else left,
+      else the old clamped overlap. **Measured geometry at a 1280px viewport,
+      useful for any future popup work:** preview container ~1088px, a
+      full-width template's section ~765px, Creative's sidebar rail ~248px,
+      popup 380px. So full-width templates leave ~160px either side and
+      legitimately still overlap — the fallback is not dead code. The win case
+      was the sidebar rail, which the popup used to cover outright.
+
+### Conventions for whoever picks this up
+
+- Commits carry **only** `r0uty <yasa.sheva@gmail.com>` — never an AI/Claude
+  co-authorship trailer, and never mention AI in the message.
+- Bump `package.json`'s patch version once per unit of work, in its own
+  standalone commit.
+- This branch pushes straight to `origin/v1.3.0` — no PR, no merge to `main`,
+  because the Direct Edit feature branch is still mid-development. Confirm with
+  the user before pushing anyway.
+- Full verification before calling anything done: `npm run lint`, all six
+  check scripts (`check:reducers`, `check:share`, `check:feedback`,
+  `check:docx-export`, `check:section-schema`, `check:section-columns`),
+  `npm run build`, `npm run test:e2e`. (`check:direct-edit` was removed in
+  v1.2.78 along with the allowlist it checked.)
+- The old flake in `'the footer never overlaps the CV preview in Direct Edit
+  mode'` is FIXED (v1.2.62, 2026-09-28). It was the test, not the layout:
+  `page.mouse.wheel` starts an asynchronous smooth scroll, and the test took
+  two separate `boundingBox()` calls, so when the scroll landed between them
+  it compared pre-scroll and post-scroll positions. It now reads both edges
+  in one `evaluate`, is 30/30 stable parallel and single-worker, and still
+  fails 5/5 with the guarded CSS removed. Any e2e failure is now a real one:
+  don't re-run it away.
+- The per-template inline rollout (`docs/superpowers/specs/2026-09-14-direct-edit-phase2-rollout.md`)
+  is **no longer the path to editability** — the popup covers all 18 templates.
+  Those remaining rounds are optional polish now.
+- Work TDD: write the failing e2e test first and watch it fail for the right
+  reason. Where a test guards a refactor rather than new behaviour (e.g. "Classic
+  upload still works"), say so — it will pass before and after, and pretending
+  otherwise is the one way to fake a red.
+- Add a `changes.md` entry per unit of work, newest first, and mark the todo
+  item done in place rather than deleting it.
+
+### Gotchas learned the hard way (2026-09-23)
+
+- **`react-hooks/set-state-in-effect` is touchy.** Routing the overlay's
+  re-measure effect through a `useCallback` DOM-lookup helper instead of an
+  inline `querySelector` made the rule start firing on a previously-clean
+  effect. The inline lookup in that effect is deliberate — don't "tidy" it.
+- **The in-app browser tool does not activate a focused button** with Enter or
+  Space (it dispatches the key but not the browser's default click). Escape and
+  other plain keydown listeners work fine. Verify button activation with
+  Playwright or a programmatic `.click()`, and don't read this as a product bug.
+- **Popup geometry is measured, not guessed** — see item 59's numbers above
+  before changing any popup placement logic.
+- **The e2e config seeds `portifycv-builder-mode: classic`** into localStorage
+  for every test (see `playwright.config.js`), because the suite predates
+  Direct Edit. Any standalone Playwright script you write for measurement must
+  do the same or it will not find Classic's "Load demo CV" button.
