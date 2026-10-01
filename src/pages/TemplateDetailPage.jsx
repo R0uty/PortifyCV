@@ -8,6 +8,7 @@ import { ROUTES, templatePath } from '../utils/routes'
 import { TEMPLATE_VIEW_PREFIX } from '../utils/pageMeta'
 import { demoCvData } from '../utils/cvForm'
 import { withPlaceholderPhoto } from '../utils/thumbnailCv'
+import { hideEmptySections } from '../utils/sectionContent'
 
 // CVPreview is the heaviest import here; lazy so the page's own chunk
 // stays small. It shares the CVPreview chunk with the landing page and
@@ -90,8 +91,14 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
   }
 
   // A not-yet-written or failed example falls back to the demo CV rather
-  // than an empty frame.
-  const previewCv = useMemo(() => withPlaceholderPhoto(exampleCv ?? demoCvData), [exampleCv])
+  // than an empty frame. Empty sections are hidden here, page-preview only
+  // (hideEmptySections), so an unfilled section's placeholder text never
+  // shows on the marketing page — the builder and the example data itself
+  // are untouched.
+  const previewCv = useMemo(
+    () => withPlaceholderPhoto(hideEmptySections(exampleCv ?? demoCvData)),
+    [exampleCv],
+  )
 
   const index = cvTemplates.findIndex((entry) => entry.id === templateId)
   const neighbour = (offset) => cvTemplates[(index + offset + cvTemplates.length) % cvTemplates.length]

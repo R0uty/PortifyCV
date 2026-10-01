@@ -111,23 +111,13 @@ check('every template page is in sitemap.xml', missingFromSitemap.length === 0, 
 
 // --- Example CVs -------------------------------------------------------------
 const { EXAMPLES, TEMPLATE_EXAMPLES, loadExampleCv } = await importSrc('utils/exampleCvs.js')
-const { parseImportedCvData, CV_SECTION_ORDER_KEYS } = await importSrc('utils/cvForm.js')
+const { parseImportedCvData, createInitialCvData, CV_SECTION_ORDER_KEYS } = await importSrc('utils/cvForm.js')
+const { hasSectionContent, hideEmptySections } = await importSrc('utils/sectionContent.js')
 // Flip to true in Task 8, once all 24 example files exist. Until then a
 // person whose loader still points at the _pending stub is reported as
 // pending, not as a failure. Reads the registry, not the filesystem, so it
 // agrees with what Vite builds.
 const REQUIRE_ALL_EXAMPLES = false
-
-function isSectionFilled(cv, key) {
-  const value = cv[key]
-  const hasText = (item) => typeof item === 'string'
-    ? item.trim().length > 0
-    : Boolean(item) && Object.values(item).some((field) => (typeof field === 'string' ? field.trim() : Array.isArray(field) && field.length))
-  if (typeof value === 'string') return value.trim().length > 0
-  if (Array.isArray(value)) return value.some(hasText)
-  if (value && typeof value === 'object') return Object.values(value).some((field) => typeof field === 'string' && field.trim())
-  return false
-}
 
 for (const template of cvTemplates) {
   const ids = TEMPLATE_EXAMPLES[template.id] ?? []
@@ -168,10 +158,38 @@ for (const [exampleId, entry] of Object.entries(EXAMPLES)) {
     check(`${tag}: has fullName and title`, Boolean(cv.fullName?.trim() && cv.title?.trim()))
     check(`${tag}: email is @example.com`, /@example\.com$/.test(cv.email ?? ''), cv.email)
     check(`${tag}: no photo baked in`, !cv.photo)
-    const missing = requiredSections.filter((key) => !isSectionFilled(cv, key))
+    const missing = requiredSections.filter((key) => !hasSectionContent(cv, key))
     check(`${tag}: fills every primary section of ${templatesUsingIt.map((t) => t.id).join(', ')}`, missing.length === 0, `missing: ${missing.join(', ')}`)
   }
 }
+
+// --- sectionContent (template-page-only empty-section hiding) --------------
+const blankCv = createInitialCvData()
+check(
+  'hasSectionContent is false for every section of a blank CV',
+  CV_SECTION_ORDER_KEYS.every((key) => !hasSectionContent(blankCv, key)),
+  CV_SECTION_ORDER_KEYS.filter((key) => hasSectionContent(blankCv, key)).join(', '),
+)
+
+const blankCvJson = JSON.stringify(blankCv)
+const hiddenBlank = hideEmptySections(blankCv)
+check(
+  'hideEmptySections hides every section on a blank CV',
+  CV_SECTION_ORDER_KEYS.every((key) => hiddenBlank.sectionVisibility[key] === false),
+)
+check('hideEmptySections does not mutate its input', JSON.stringify(blankCv) === blankCvJson)
+
+const frontendDeveloperEn = await loadExampleCv('frontend-developer', 'en')
+const hiddenFrontendDeveloper = hideEmptySections(frontendDeveloperEn)
+check(
+  'hideEmptySections keeps about/experience visible for frontend-developer/en',
+  hiddenFrontendDeveloper.sectionVisibility.about === true
+    && hiddenFrontendDeveloper.sectionVisibility.experience === true,
+)
+check(
+  'hideEmptySections hides languages for frontend-developer/en',
+  hiddenFrontendDeveloper.sectionVisibility.languages === false,
+)
 
 if (pending.length > 0) {
   console.log(`pend  ${pending.length} example file(s) not written yet: ${pending.join(', ')}`)

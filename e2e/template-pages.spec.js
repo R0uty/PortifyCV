@@ -103,6 +103,18 @@ test.describe('Template pages', () => {
     await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Mikael Laine')
   })
 
+  test('the preview hides empty sections instead of showing placeholder text', async ({ page }) => {
+    await page.goto('/free-cv-templates/developer')
+    const preview = page.locator('.template-page__preview')
+    await expect(preview).toBeVisible()
+    await expect(preview).not.toContainText(/will appear here/i)
+
+    await page.goto('/free-cv-templates/graduate')
+    const graduatePreview = page.locator('.template-page__preview')
+    await expect(graduatePreview).toBeVisible()
+    await expect(graduatePreview).not.toContainText(/will appear here/i)
+  })
+
   test('an example link never overwrites a restored session', async ({ page }) => {
     await page.goto('/cv')
     await page.evaluate(() => window.localStorage.setItem('portifycv-session-restore-enabled', 'true'))
