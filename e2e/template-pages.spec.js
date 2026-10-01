@@ -115,6 +115,24 @@ test.describe('Template pages', () => {
     await expect(graduatePreview).not.toContainText(/will appear here/i)
   })
 
+  test('the preview hides empty sections in Finnish too', async ({ page }) => {
+    // Every Finnish placeholder across the Showcase templates follows the
+    // same "<Section> näky(vät|y) tässä[,.]" pattern (e.g. "Kielet näkyvät
+    // tässä.", "Koulutus näkyy tässä."); one case-insensitive regex on the
+    // shared "näky... tässä" fragment covers all of them.
+    await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'fi'))
+
+    await page.goto('/free-cv-templates/developer')
+    const preview = page.locator('.template-page__preview')
+    await expect(preview).toBeVisible()
+    await expect(preview).not.toContainText(/näky\S* tässä/i)
+
+    await page.goto('/free-cv-templates/graduate')
+    const graduatePreview = page.locator('.template-page__preview')
+    await expect(graduatePreview).toBeVisible()
+    await expect(graduatePreview).not.toContainText(/näky\S* tässä/i)
+  })
+
   test('an example link never overwrites a restored session', async ({ page }) => {
     await page.goto('/cv')
     await page.evaluate(() => window.localStorage.setItem('portifycv-session-restore-enabled', 'true'))
