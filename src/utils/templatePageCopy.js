@@ -10,9 +10,9 @@
 export const TEMPLATE_PAGE_COPY = {
   developer: {
     metaDescription:
-      'Free Developer CV template: dark sidebar for your stack, project and open-source cards up front. Live examples, no login, PDF and Word export.',
+      'Free Developer CV template: dark sidebar for your stack, project and open-source cards up front. Live examples, PDF and Word export, no login.',
     en: {
-      bestFor: 'Software engineers, data and platform engineers, and anyone whose best evidence is things they built.',
+      bestFor: 'Frontend developers, data engineers, and junior developers whose best evidence is things they built.',
       tips: [
         'Lead the main column with two or three projects that have a measurable outcome. The cards give each one room for a link and a stack line.',
         'Keep the sidebar skills list to about twelve items. Past that it runs below the fold of page one and pushes Education onto page two.',
@@ -20,7 +20,7 @@ export const TEMPLATE_PAGE_COPY = {
       ],
     },
     fi: {
-      bestFor: 'Ohjelmistokehittäjille, data- ja alustainsinööreille sekä kaikille, joiden vahvin näyttö on itse rakennetut asiat.',
+      bestFor: 'Frontend-kehittäjille, data engineereille ja juniorikehittäjille, joiden vahvin näyttö on itse rakennetut asiat.',
       tips: [
         'Aloita pääpalsta kahdella tai kolmella projektilla, joilla on mitattava tulos. Korteissa jokaiselle mahtuu linkki ja teknologiarivi.',
         'Pidä sivupalkin taitolista noin kahdessatoista kohdassa. Pidempi lista valuu ensimmäisen sivun alaosaan ja työntää Koulutuksen toiselle sivulle.',
@@ -30,7 +30,7 @@ export const TEMPLATE_PAGE_COPY = {
   },
   minimal: {
     metaDescription:
-      'Free Minimalist CV template: typography-only layout, thin dividers, no sidebar at all. Live examples, no login, instant export.',
+      'Free Minimalist CV template: typography-only layout, thin dividers, no sidebar at all. Live examples, instant export, no login.',
     en: {
       bestFor: 'Nurses, accountants, and cybersecurity analysts — anyone who wants a CV that reads as competent, not designed.',
       tips: [

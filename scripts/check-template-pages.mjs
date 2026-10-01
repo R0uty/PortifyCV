@@ -91,6 +91,13 @@ for (const template of cvTemplates) {
         && localized.tips.every((tip) => tip.trim().length > 0),
     )
   }
+  const metaDescription = copy?.metaDescription ?? ''
+  check(
+    `${template.id}: metaDescription starts with "Free ${template.label} CV template:" and ends with "no login"`,
+    metaDescription.startsWith(`Free ${template.label} CV template:`)
+      && /no login\.?$/.test(metaDescription.trim()),
+    metaDescription,
+  )
 }
 const allTips = Object.values(TEMPLATE_PAGE_COPY).flatMap((copy) => copy.en.tips)
 check('no English tip is copy-pasted between templates', new Set(allTips).size === allTips.length)
