@@ -86,4 +86,11 @@ test.describe('Template pages', () => {
     await page.getByRole('link', { name: /Next template/ }).click()
     await expect(page).toHaveURL(/\/free-cv-templates\/minimalist$/)
   })
+
+  test('a hub card links to its template page', async ({ page }) => {
+    await page.goto('/free-cv-templates')
+    await page.getByRole('link', { name: 'Modern Timeline', exact: true }).click()
+    await expect(page).toHaveURL(/\/free-cv-templates\/modern-timeline$/)
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Modern Timeline CV template')
+  })
 })

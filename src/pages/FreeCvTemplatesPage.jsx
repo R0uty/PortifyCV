@@ -4,7 +4,8 @@ import TemplateThumbnail from '../components/TemplateThumbnail'
 import InternalNavLink from '../components/InternalNavLink'
 import { buildThumbnailCv } from '../utils/thumbnailCv'
 import { cvTemplates, getCvTemplates } from '../utils/cvTemplates'
-import { ROUTES } from '../utils/routes'
+import { ROUTES, templatePath } from '../utils/routes'
+import { TEMPLATE_VIEW_PREFIX } from '../utils/pageMeta'
 
 // Read off the template registry instead of a hardcoded number — this
 // count previously drifted out of sync with cvTemplates.js after a
@@ -69,10 +70,22 @@ function FreeCvTemplatesPage({ locale = 'en', onGetStarted = () => {}, onNavigat
         <div className="templates-page-grid">
           {templates.map((template) => (
             <div className="templates-page-card" key={template.id}>
-              <div className="templates-page-card__thumb">
+              <InternalNavLink
+                to={templatePath(template.slug)}
+                onNavigate={() => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${template.id}`)}
+                className="templates-page-card__thumb"
+                aria-hidden="true"
+                tabIndex={-1}
+              >
                 <TemplateThumbnail templateId={template.id} formData={thumbnailCv} locale={resolvedLocale} />
-              </div>
-              <p className="templates-page-card__name">{template.label}</p>
+              </InternalNavLink>
+              <InternalNavLink
+                to={templatePath(template.slug)}
+                onNavigate={() => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${template.id}`)}
+                className="templates-page-card__name"
+              >
+                {template.label}
+              </InternalNavLink>
               <p className="templates-page-card__description">{template.description}</p>
               <button
                 type="button"

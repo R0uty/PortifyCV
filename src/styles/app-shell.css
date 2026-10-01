@@ -2548,14 +2548,27 @@ select.floating-field__control {
 }
 
 .templates-page-card__thumb {
+  display: block;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
 }
 
 .templates-page-card__name {
+  display: inline-block;
   font-size: var(--text-body);
   font-weight: 700;
   color: var(--app-text);
+  text-decoration: none;
+}
+
+.templates-page-card__name:hover,
+.templates-page-card__name:focus-visible {
+  text-decoration: underline;
+}
+
+.templates-page-card__name:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
 }
 
 .templates-page-card__description {
