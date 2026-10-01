@@ -596,7 +596,7 @@ rename pass.
       that it's in CI (`.github/workflows/ci.yml`), so it actually gates
       merges rather than just running.
       **Update 2026-09-28:** CI now runs on pushes to `v1.3.0` too and
-      covers all seven `check:*` scripts. Branch protection itself is still
+      covers all six `check:*` scripts (seven until `check:direct-edit` was removed in 1.2.78). Branch protection itself is still
       open: it is a GitHub repository setting on `main` for the user to
       turn on, and should list both CI jobs ("Lint, build, and regression
       checks" and "End-to-end smoke tests") as required.

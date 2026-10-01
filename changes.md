@@ -4,6 +4,20 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## 1.3.0 release — 2026-10-01
+
+Closes out the `v1.3.0` branch for its pull request into `main`. The
+headline features since 1.1.0 are already logged below: eight new bespoke
+templates (18 in total), Word (.docx) export, the Direct Edit builder
+(inline editing on every template, photo upload, keyboard access, entry
+pencils, section column moves), opt-in session restore, and the Playwright
+e2e suite in CI.
+
+Release check on this commit: lint clean, all six `check:*` scripts pass,
+181/181 e2e pass against a production build. The README was out of date
+(it still listed 10 templates, three of the six check scripts, and no
+Cloudflare deploy commands), so it now describes 1.3.0 as it ships.
+
 ## Two minor review follow-ups: search box and Finnish entry labels — 2026-09-30
 
 The two minor findings from the whole-branch review:

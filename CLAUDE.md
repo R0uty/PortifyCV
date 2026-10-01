@@ -50,7 +50,7 @@ browser actually sees them. First run downloads Chromium
 no server and no database. CV data lives only in React state for the life of
 the tab — nothing is saved automatically. The only things that survive a
 reload are the UI locale, an onboarding-seen flag, and (if the user opts in)
-a session-restore snapshot, all in `localStorage` (see `src/utils/cvForm.js`
+a session-restore snapshot (`sessionStorage`; the rest in `localStorage` — see `src/utils/cvForm.js`
 for the storage keys). Sharing a CV means encoding it into a URL (below), not
 uploading it anywhere.
 
