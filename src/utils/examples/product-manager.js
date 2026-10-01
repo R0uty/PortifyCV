@@ -54,7 +54,7 @@ const en = buildExampleCv({
   education: [
     {
       school: 'Aalto University',
-      degree: 'M.Sc. Industrial Engineering and Management',
+      degree: 'M.Sc. (Tech.) Industrial Engineering and Management',
       location: 'Espoo, Finland',
       startDate: '2013',
       endDate: '2017',
@@ -159,7 +159,7 @@ const fi = buildExampleCv({
   education: [
     {
       school: 'Aalto-yliopisto',
-      degree: 'Kauppatieteiden maisteri, tuotantotalous',
+      degree: 'Diplomi-insinööri, tuotantotalous',
       location: 'Espoo',
       startDate: '2013',
       endDate: '2017',

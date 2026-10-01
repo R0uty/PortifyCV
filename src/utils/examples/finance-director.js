@@ -91,6 +91,7 @@ const en = buildExampleCv({
       description: 'Owned plant-level cost accounting and monthly reporting for a paper production site.',
       achievements: [
         'Identified a billing error pattern that had understated intercompany revenue by 400,000 EUR over 2 years.',
+        'Cut the plant\'s monthly reporting cycle from 9 days to 4 by automating the cost-allocation spreadsheet.',
       ],
       technologies: [],
     },
@@ -105,13 +106,14 @@ const en = buildExampleCv({
       description: 'Supported budgeting and variance analysis for a wholesale trading business.',
       achievements: [
         'Built the first automated variance-analysis report, cutting preparation time from 2 days to 3 hours.',
+        'Kept the quarterly budget within 3% of actuals across 12 consecutive quarters.',
       ],
       technologies: [],
     },
   ],
   education: [
     {
-      school: 'Aalto University School of Business',
+      school: 'Helsinki School of Economics',
       degree: 'M.Sc. Economics and Business Administration',
       location: 'Espoo, Finland',
       startDate: '1996',
@@ -183,7 +185,7 @@ const fi = buildExampleCv({
       technologies: [],
     },
     {
-      role: 'Talousjohtajan sijainen (VP Finance)',
+      role: 'VP Finance',
       company: 'Rautaranta Group',
       location: 'Helsinki',
       employmentType: 'Full-time',
@@ -238,6 +240,7 @@ const fi = buildExampleCv({
       description: 'Vastasin tehtaan kustannuslaskennasta ja kuukausiraportoinnista paperintuotantolaitoksella.',
       achievements: [
         'Löysin laskutusvirhekaavan, joka oli aliarvioinut konsernin sisäistä liikevaihtoa 400 000 eurolla kahden vuoden aikana.',
+        'Lyhensin tehtaan kuukausittaisen raportointikierron 9 päivästä 4 päivään automatisoimalla kustannusten kohdistuslaskennan.',
       ],
       technologies: [],
     },
@@ -252,13 +255,14 @@ const fi = buildExampleCv({
       description: 'Tuin budjetointia ja poikkeama-analyysiä tukkukauppayrityksessä.',
       achievements: [
         'Rakensin ensimmäisen automatisoidun poikkeama-analyysiraportin, lyhentäen valmisteluajan 2 päivästä 3 tuntiin.',
+        'Pidin neljännesvuosibudjetin toteuman 3 %:n sisällä 12 peräkkäisen vuosineljänneksen ajan.',
       ],
       technologies: [],
     },
   ],
   education: [
     {
-      school: 'Aalto-yliopiston kauppakorkeakoulu',
+      school: 'Helsingin kauppakorkeakoulu',
       degree: 'Kauppatieteiden maisteri, laskentatoimi ja rahoitus',
       location: 'Espoo',
       startDate: '1996',
