@@ -93,4 +93,27 @@ test.describe('Template pages', () => {
     await expect(page).toHaveURL(/\/free-cv-templates\/modern-timeline$/)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Modern Timeline CV template')
   })
+
+  test('"Use this example" opens the builder with that template and example', async ({ page }) => {
+    await page.goto('/free-cv-templates/developer')
+    await page.getByRole('button', { name: 'Use this example' }).click()
+    await expect(page).toHaveURL(/\/cv\?template=developer$/)
+    await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Developer')
+    await expect(page.getByText('Loaded the Frontend developer example.')).toBeVisible()
+    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Mikael Laine')
+  })
+
+  test('an example link never overwrites a restored session', async ({ page }) => {
+    await page.goto('/cv')
+    await page.evaluate(() => window.localStorage.setItem('portifycv-session-restore-enabled', 'true'))
+    await page.reload()
+    await page.getByRole('textbox', { name: /Full name/ }).fill('Grace Hopper')
+    await expect
+      .poll(() => page.evaluate(() => window.sessionStorage.getItem('portifycv-session-snapshot')))
+      .toContain('Grace Hopper')
+
+    await page.goto('/cv?template=developer&example=frontend-developer')
+    await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Developer')
+    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Grace Hopper')
+  })
 })

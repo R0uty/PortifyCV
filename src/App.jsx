@@ -336,14 +336,18 @@ function App() {
   // templateId is optional — passed when a link should open the builder with
   // a specific template already selected (e.g. "Use this template" on the
   // Free CV Templates page) instead of always landing on the default.
-  // uiReducer's createInitialUiState reads it back off the URL on mount.
-  const goToBuilder = useCallback((templateId) => {
+  // exampleId is also optional — passed by a template page's "Use this
+  // example" button so the builder loads that example's CV instead of the
+  // blank/demo default. uiReducer's createInitialUiState reads templateId
+  // back off the URL on mount; ResumeBuilderPage reads exampleId.
+  const goToBuilder = useCallback((templateId, exampleId) => {
     setView('builder')
 
     if (typeof window !== 'undefined') {
-      const query = typeof templateId === 'string' && templateId
-        ? `?template=${encodeURIComponent(templateId)}`
-        : ''
+      const params = new URLSearchParams()
+      if (typeof templateId === 'string' && templateId) params.set('template', templateId)
+      if (typeof exampleId === 'string' && exampleId) params.set('example', exampleId)
+      const query = params.toString() ? `?${params}` : ''
       const nextPath = `${VIEW_HEAD.builder.path}${query}`
 
       if (`${window.location.pathname}${window.location.search}` !== nextPath) {

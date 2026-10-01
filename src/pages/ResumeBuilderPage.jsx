@@ -91,6 +91,7 @@ import {
 } from '../utils/atsScore'
 import { evaluateCvFeedback } from '../utils/cvFeedback'
 import { generateCoverLetterDraft } from '../utils/coverLetter'
+import { EXAMPLES, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
@@ -251,6 +252,7 @@ function loadInitialCvSession() {
       initialToast: null,
       clearShareParam: false,
       storageIssue: false,
+      pendingExampleId: null,
     }
   }
 
@@ -271,6 +273,7 @@ function loadInitialCvSession() {
         initialToast: createToast('Loaded CV from share link.', 'success'),
         clearShareParam: false,
         storageIssue: hasStorageIssue,
+        pendingExampleId: null,
       }
     }
   } catch (error) {
@@ -284,6 +287,7 @@ function loadInitialCvSession() {
       ),
       clearShareParam: true,
       storageIssue: hasStorageIssue,
+      pendingExampleId: null,
     }
   }
 
@@ -303,6 +307,7 @@ function loadInitialCvSession() {
           initialToast: createToast('Restored your last session.', 'success'),
           clearShareParam: false,
           storageIssue: hasStorageIssue,
+          pendingExampleId: null,
         }
       } catch {
         // Snapshot is corrupted or from an incompatible app version — fall
@@ -313,12 +318,31 @@ function loadInitialCvSession() {
     }
   }
 
+  // ?example= from a template page's "Use this example". Only reached when
+  // there's no share link and no restored snapshot (both returned above),
+  // so an example link can never overwrite a CV the user is working on.
+  // The file loads asynchronously; ResumeBuilderPage's mount effect
+  // dispatches it. Until then the builder shows a blank CV, not the
+  // onboarding demo, so the demo doesn't flash first.
+  const params = new URLSearchParams(window.location.search)
+  const requestedExampleId = params.get('example')
+  if (isTemplateExample(params.get('template'), requestedExampleId)) {
+    return {
+      formData: initialCvData,
+      initialToast: null,
+      clearShareParam: false,
+      storageIssue: hasStorageIssue,
+      pendingExampleId: requestedExampleId,
+    }
+  }
+
   if (!hasSeenOnboarding) {
     return {
       formData: structuredClone(demoCvData),
       initialToast: createToast('Loaded a sample CV to help you get started.', 'success'),
       clearShareParam: false,
       storageIssue: hasStorageIssue,
+      pendingExampleId: null,
     }
   }
 
@@ -327,6 +351,7 @@ function loadInitialCvSession() {
     initialToast: null,
     clearShareParam: false,
     storageIssue: hasStorageIssue,
+    pendingExampleId: null,
   }
 }
 
@@ -591,6 +616,32 @@ function ResumeBuilderPage({
     if (initialSession.clearShareParam) {
       removeShareDataParamFromCurrentUrl()
     }
+  }, [initialSession])
+
+  // Strip ?example= so a reload doesn't re-apply it on top of edits. Always
+  // strip, whether or not it loaded: a restored session also ignores it.
+  useEffect(() => {
+    const url = new URL(window.location.href)
+    if (url.searchParams.has('example')) {
+      url.searchParams.delete('example')
+      window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`)
+    }
+
+    const exampleId = initialSession.pendingExampleId
+    if (!exampleId) {
+      return undefined
+    }
+
+    let cancelled = false
+    loadExampleCv(exampleId, locale).then((exampleCv) => {
+      if (cancelled || !exampleCv) return
+      dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: exampleCv })
+      const roleLabel = EXAMPLES[exampleId].role[locale === 'fi' ? 'fi' : 'en']
+      showToast(locale === 'fi' ? `Esimerkki ladattu: ${roleLabel}.` : `Loaded the ${roleLabel} example.`)
+    })
+    return () => { cancelled = true }
+    // Mount-only: the session decision is made once, like initialSession itself.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialSession])
 
   useEffect(() => {
