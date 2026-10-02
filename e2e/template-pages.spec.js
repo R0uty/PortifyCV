@@ -45,7 +45,7 @@ test.describe('Template pages', () => {
     // between clicking the radio and the load resolving is wide enough
     // to observe deterministically, instead of depending on how fast an
     // already-cached chunk happens to resolve.
-    await page.route('**/*_pending*.js', async (route) => {
+    await page.route('**/*data-engineer*.js', async (route) => {
       await new Promise((resolve) => setTimeout(resolve, 500))
       await route.continue()
     })
@@ -56,14 +56,19 @@ test.describe('Template pages', () => {
     await expect(preview).toContainText('Mikael Laine')
 
     await examples.getByRole('radio', { name: 'Data engineer' }).click()
-    // data-engineer is still a stub (resolves to the demo CV via a
-    // delayed dynamic import above). Read the preview's text as an
-    // immediate snapshot (no Playwright auto-retry polling) right after
-    // the click, while the import is still in flight: it must already
-    // have dropped the frontend-developer example's content, not keep
+    // The data-engineer chunk's dynamic import is delayed above. Read the
+    // preview's text as an immediate snapshot (no Playwright auto-retry
+    // polling) right after the click, while the import is still in
+    // flight: it must already have dropped the frontend-developer
+    // example's content (falling back to the demo CV instead), not keep
     // showing it until the import settles.
     const immediateText = await preview.innerText()
     expect(immediateText).not.toContain('Mikael Laine')
+
+    // Once the delayed chunk resolves, the preview must show the
+    // data-engineer person, proving the race was real and is now won by
+    // the right example (not just "not Mikael Laine").
+    await expect(preview).toContainText('Elina Virtanen')
   })
 
   test('an unknown ?example= falls back to the first example', async ({ page }) => {

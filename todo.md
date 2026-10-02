@@ -2149,3 +2149,11 @@ Full reasoning per item is in `changes.md`; per-commit detail is in git.
   for every test (see `playwright.config.js`), because the suite predates
   Direct Edit. Any standalone Playwright script you write for measurement must
   do the same or it will not find Classic's "Load demo CV" button.
+
+## Phase 2 inputs (from template-page examples)
+
+Observed by the controller's visual audits of the template pages (desktop, dev server, 2026-10). Don't fix template CSS as part of Task 8 — these are inputs for Phase 2.
+
+- Sidebar link values are ellipsis-truncated (e.g. "linkedin.com/in/example-…", "github.com/example-…") in Modern Professional, Portfolio Hybrid, Executive and Tech Executive (product-manager, finance-director, operations-manager, engineering-director, cto examples).
+- Navy Professional: the long name "Maximilian Alexander Vandenberg-Lindqvist" (cto example) wraps to 4 lines at 24px in the narrow sidebar header (clean word/hyphen breaks, but tall); Tech Executive keeps it on 1 line.
+- Long previews: ux-designer in Portfolio Hybrid ≈ 2.6 A4 pages; product-manager in Portfolio Hybrid ≈ 2.25; data-engineer in Developer ≈ 1.99; business-graduate in Graduate ≈ 1.81 — check whether these templates' density/spacing is the cause.

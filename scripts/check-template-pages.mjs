@@ -113,11 +113,11 @@ check('every template page is in sitemap.xml', missingFromSitemap.length === 0, 
 const { EXAMPLES, TEMPLATE_EXAMPLES, loadExampleCv } = await importSrc('utils/exampleCvs.js')
 const { parseImportedCvData, createInitialCvData, CV_SECTION_ORDER_KEYS } = await importSrc('utils/cvForm.js')
 const { hasSectionContent, hideEmptySections } = await importSrc('utils/sectionContent.js')
-// Flip to true in Task 8, once all 24 example files exist. Until then a
-// person whose loader still points at the _pending stub is reported as
-// pending, not as a failure. Reads the registry, not the filesystem, so it
-// agrees with what Vite builds.
-const REQUIRE_ALL_EXAMPLES = false
+// All 24 example files exist as of Task 8. Strict now: a person whose
+// loader still points at a _pending-style stub fails the check instead of
+// just being reported as pending. Reads the registry, not the filesystem,
+// so it agrees with what Vite builds.
+const REQUIRE_ALL_EXAMPLES = true
 
 for (const template of cvTemplates) {
   const ids = TEMPLATE_EXAMPLES[template.id] ?? []
