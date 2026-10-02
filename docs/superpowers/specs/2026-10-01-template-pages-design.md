@@ -155,6 +155,8 @@ A single component for all 18 pages. It reads:
   `primarySections`/`secondarySections` for the section count, `layout` for
   the column fact, photo capability),
 - the per-template copy from `templatePageCopy.js`,
+- the per-template `metaDescription` is NOT read here — it's only used by
+  `pageMeta.js`'s `VIEW_HEAD`, from the separate `templateMetaDescriptions.js`,
 - the example list from `exampleCvs.js`.
 
 The selected example's CV data is loaded with a dynamic `import()`, so a
@@ -165,17 +167,26 @@ measures its container width and applies a CSS `transform: scale()` to an
 A4-width page. The Suspense fallback is a same-sized placeholder, so the
 layout doesn't jump.
 
-### Per-template copy: `src/utils/templatePageCopy.js`
+### Per-template copy: `src/utils/templatePageCopy.js` + `src/utils/templateMetaDescriptions.js`
 
-`{ [templateId]: { metaDescription, en: { bestFor, tips: [3] }, fi: {…} } }`.
-`metaDescription` is English-only (like every other `VIEW_HEAD`
-description, since the worker serves it before any locale is known);
-`bestFor` and `tips` are per-locale. Each template's text is written for
-that template specifically: who it suits, and three concrete tips about
-its layout (e.g. "the sidebar fits ~12 skills before it pushes the next
-section onto page 2"). Unique text per page is what keeps 18
-near-identical pages from reading as thin or duplicate content to search
-engines and AdSense review.
+Split across two files so the entry chunk doesn't pay for bilingual copy
+it never reads:
+
+- **`templatePageCopy.js`:** `{ [templateId]: { en: { bestFor, tips: [3] }, fi: {…} } }`.
+  `bestFor` and `tips` are per-locale, read only by the lazy-loaded
+  `TemplateDetailPage.jsx`. Each template's text is written for that
+  template specifically: who it suits, and three concrete tips about its
+  layout (e.g. "the sidebar fits ~12 skills before it pushes the next
+  section onto page 2"). Unique text per page is what keeps 18
+  near-identical pages from reading as thin or duplicate content to
+  search engines and AdSense review.
+- **`templateMetaDescriptions.js`:** `{ [templateId]: string }`,
+  English-only (like every other `VIEW_HEAD` description, since the
+  worker serves it before any locale is known), read by `pageMeta.js`'s
+  `VIEW_HEAD` — which is in the entry chunk via `App.jsx`. Keeping this
+  map tiny and separate from the bilingual `bestFor`/`tips` copy is what
+  keeps the entry chunk from growing by the full weight of all 18
+  templates' marketing copy; see the bundle-check numbers in `changes.md`.
 
 ### Example CVs: `src/utils/examples/`
 
@@ -230,9 +241,10 @@ asserts:
    `title`, and at least one experience or education entry.
 4. For each template × example pair, every section in the template's
    `primarySections` is non-empty in that example (both locales).
-5. Every template has `templatePageCopy` in both locales: exactly 3 tips,
-   and an English `metaDescription` of 50–160 characters (English-only,
-   like every `VIEW_HEAD` description).
+5. Every template has `templatePageCopy` in both locales: exactly 3 tips.
+   Every template also has a `templateMetaDescriptions` entry, an English
+   string of 50–160 characters (English-only, like every `VIEW_HEAD`
+   description).
 6. Every template page path appears in `public/sitemap.xml`. Every
    `VIEW_HEAD` title is unique.
 7. Example emails end in `@example.com`.

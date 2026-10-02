@@ -17,7 +17,7 @@ npm run check:feedback     # exercises evaluateCvFeedback (src/utils/cvFeedback.
 npm run check:docx-export  # exercises the Word export builders and archetypes (src/utils/docxExport.js)
 npm run check:section-schema   # validates the Direct Edit popup's section schema (src/utils/sectionSchema.js)
 npm run check:section-columns  # exercises the section column-move rules (src/utils/sectionColumns.js)
-npm run check:template-pages   # validates per-template page slugs, examples, and copy (src/utils/templatePageCopy.js, src/utils/exampleCvs.js)
+npm run check:template-pages   # validates per-template page slugs, examples, and copy (src/utils/templatePageCopy.js, src/utils/templateMetaDescriptions.js, src/utils/exampleCvs.js)
 
 npm run test:e2e           # Playwright suite in e2e/, against a prod build+preview
 npx playwright test e2e/templates.spec.js   # run a single e2e spec file
@@ -151,9 +151,16 @@ component.
 **Per-template pages (`/free-cv-templates/<slug>`).** Each of the 18
 templates gets its own public page, generated from `cvTemplates.js` (the
 template's slug, section support, layout) plus `VIEW_HEAD`
-(`pageMeta.js`, which pulls in per-template copy from
-`templatePageCopy.js` and drives the worker's edge metadata the same way
-every other route does). Slugs are public URLs and are permanent once
+(`pageMeta.js`, which drives the worker's edge metadata the same way
+every other route does). The per-template copy is split in two so the
+app's entry chunk doesn't pay for text it never reads: `pageMeta.js`
+imports only the small, English-only `templateMetaDescriptions.js`
+(`{ [templateId]: string }`) for `VIEW_HEAD`'s description, while the
+bilingual `bestFor`/tips copy in `templatePageCopy.js` is read only by
+the lazy-loaded `TemplateDetailPage.jsx` — don't import
+`templatePageCopy.js` from anything in the entry graph (`App.jsx`,
+`pageMeta.js`, `routes.js`), or every template's bilingual copy ships to
+every visitor on first load. Slugs are public URLs and are permanent once
 shipped — never rename one. Example people live one file per person in
 `src/utils/examples/`, registered in `exampleCvs.js`
 (`EXAMPLES`/`TEMPLATE_EXAMPLES`), and shared across templates where the

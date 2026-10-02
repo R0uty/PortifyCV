@@ -1,16 +1,16 @@
-// Copy for the per-template pages (/free-cv-templates/<slug>). Each entry
-// is written for that template specifically: who it suits and three
-// concrete tips about its own layout. Eighteen pages that differ only by
-// template name would read as thin, duplicate content to search engines
-// and AdSense review.
+// Bilingual copy for the per-template pages (/free-cv-templates/<slug>),
+// read only by TemplateDetailPage.jsx (lazy-loaded, not in the entry
+// chunk). Each entry is written for that template specifically: who it
+// suits and three concrete tips about its own layout. Eighteen pages
+// that differ only by template name would read as thin, duplicate
+// content to search engines and AdSense review.
 //
-// metaDescription is English-only, like every VIEW_HEAD description (the
-// worker serves it before any locale is known). 50–160 characters;
-// check:template-pages enforces the bounds.
+// The English-only metaDescription that VIEW_HEAD needs lives separately
+// in templateMetaDescriptions.js, so pageMeta.js (which IS in the entry
+// chunk, via App.jsx) doesn't have to pull in this whole bilingual file
+// just to read that one string.
 export const TEMPLATE_PAGE_COPY = {
   developer: {
-    metaDescription:
-      'Free Developer CV template: dark sidebar for your stack, project and open-source cards up front. Live examples, PDF and Word export, no login.',
     en: {
       bestFor: 'Frontend developers, data engineers, and junior developers whose best evidence is things they built.',
       tips: [
@@ -29,8 +29,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   minimal: {
-    metaDescription:
-      'Free Minimalist CV template: typography-only layout, thin dividers, no sidebar at all. Live examples, instant export, no login.',
     en: {
       bestFor: 'Nurses, accountants, and cybersecurity analysts — anyone who wants a CV that reads as competent, not designed.',
       tips: [
@@ -49,8 +47,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   creative: {
-    metaDescription:
-      'Free Creative CV template: editorial two-column layout, numbered sections, one customizable accent color, no login.',
     en: {
       bestFor: 'UX designers, graphic designers, and other creative roles that benefit from a distinct visual personality.',
       tips: [
@@ -69,8 +65,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   modern: {
-    metaDescription:
-      'Free Modern Professional CV template: consulting-style layout with a rose timeline and circular photo, no login.',
     en: {
       bestFor: 'Marketing managers, project managers, and product managers who want a clear, step-by-step career story.',
       tips: [
@@ -89,8 +83,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   executive: {
-    metaDescription:
-      'Free Executive CV template: boardroom layout, no timeline, one customizable accent — leads with outcomes, no login.',
     en: {
       bestFor: 'Finance directors, operations managers, and engineering directors whose CV leads with outcomes over chronology.',
       tips: [
@@ -109,8 +101,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   timeline: {
-    metaDescription:
-      'Free Modern Timeline CV template: single column with a vertical career timeline, one customizable accent, no login.',
     en: {
       bestFor: 'Project managers, teachers, and operations managers with a long, linear career story worth walking through in order.',
       tips: [
@@ -129,8 +119,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   graduate: {
-    metaDescription:
-      'Free Graduate CV template: education-first layout leading with your degree, projects, and internships, no login.',
     en: {
       bestFor: 'Junior developers and business graduates whose degree, academic projects, and internships are their strongest material.',
       tips: [
@@ -149,8 +137,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   compact: {
-    metaDescription:
-      'Free Compact CV template: dense one-pager with a customizable accent that auto-shrinks to fit everything, no login.',
     en: {
       bestFor: 'Data engineers, cybersecurity analysts, and business graduates with a long history that still needs to fit one page.',
       tips: [
@@ -169,8 +155,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   portfolio: {
-    metaDescription:
-      'Free Portfolio Hybrid CV template: project cards, case studies, and tech-stack badges lead the page, no login.',
     en: {
       bestFor: 'Frontend developers, UX designers, and product managers whose work speaks for itself through projects.',
       tips: [
@@ -189,8 +173,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   techExec: {
-    metaDescription:
-      'Free Tech Executive CV template: navy masthead and footer band, core-strengths sidebar, leadership tone, no login.',
     en: {
       bestFor: 'Engineering directors and CTOs who want a leadership narrative with an annual-report, not a resume, feel.',
       tips: [
@@ -209,8 +191,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   classicProfessional: {
-    metaDescription:
-      'Free Classic Professional CV template: traditional single column, thin dividers, a serif name you can center, no login.',
     en: {
       bestFor: 'Accountants, finance directors, and research scientists who want a universally safe choice for any industry.',
       tips: [
@@ -229,8 +209,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   navyProfessional: {
-    metaDescription:
-      'Free Navy Professional CV template: dark navy sidebar, blue accents, ATS-friendly two-column layout, no login.',
     en: {
       bestFor: 'CTOs, sales managers, and research scientists who want an ATS-friendly look with a confident dark sidebar.',
       tips: [
@@ -249,8 +227,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   modernOrange: {
-    metaDescription:
-      'Free Modern Orange CV template: cream sidebar, orange accent, dot-rated skills and dual timelines, no login.',
     en: {
       bestFor: 'Marketing managers, UX designers, and customer success managers who want a warm, premium two-column look.',
       tips: [
@@ -269,8 +245,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   colorfulCompact: {
-    metaDescription:
-      'Free Colorful Compact CV template: dark header, tight two-column body, each section in its own accent color, no login.',
     en: {
       bestFor: 'Graphic designers and customer success managers who want a colorful, scannable CV without going sparse on detail.',
       tips: [
@@ -289,8 +263,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   quadrant: {
-    metaDescription:
-      'Free Quadrant CV template: a literal 2x2 grid of identity, summary, work history, and extras, no login.',
     en: {
       bestFor: 'Marketing managers, sales managers, and journalists who want a CV that reads at a glance instead of top to bottom.',
       tips: [
@@ -309,8 +281,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   editorial: {
-    metaDescription:
-      'Free Editorial CV template: magazine-style single column, oversized byline, numbered sections, no login.',
     en: {
       bestFor: 'Journalists and research scientists who want a CV that reads like a publication, not a form.',
       tips: [
@@ -329,8 +299,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   portrait: {
-    metaDescription:
-      'Free Portrait CV template: a full-height photo fills the left column, every section flows on the right, no login.',
     en: {
       bestFor: 'Brand specialists, chefs, and architects who want their face and personal presence to lead the page.',
       tips: [
@@ -349,8 +317,6 @@ export const TEMPLATE_PAGE_COPY = {
     },
   },
   european: {
-    metaDescription:
-      'Free European CV template: a Europass-style label/value table layout that auto-fits one page, no login.',
     en: {
       bestFor: 'Nurses, teachers, and chefs applying with a structured, Europass-adjacent format rather than flowing prose.',
       tips: [

@@ -32,13 +32,19 @@ slug (`/free-cv-templates/not-a-template`) returns a real `404`; and a
 case/trailing-slash variant (`/free-cv-templates/Developer/`) redirects
 `301` to the canonical slug.
 
-Bundle check: the entry chunk grew from 35.17 kB gzip (`v1.3.0`, built
-from `origin/v1.3.0` in a scratch worktree) to 45.06 kB gzip — about 9.9
-kB, past the ~2 KB expectation, but it traces entirely to
-`templatePageCopy.js` (18 templates × bilingual copy, ~9.6 kB gzip on its
-own) being pulled in through `pageMeta.js`'s `VIEW_HEAD`, which the task
-brief calls out as expected and acceptable since it's text, not code. Each
-example CV is still its own small lazy chunk (verified via `ls dist/assets`).
+Bundle check: a first pass found the entry chunk had grown from 35.17 kB
+gzip (`v1.3.0`, built from `origin/v1.3.0` in a scratch worktree) to 45.06
+kB gzip — about 9.9 kB — because `pageMeta.js`'s `VIEW_HEAD` imported
+`templatePageCopy.js` for `metaDescription` alone, dragging every
+template's bilingual `bestFor`/tips copy into the entry graph along with
+it. Fixed by splitting the English-only `metaDescription` strings out
+into their own `src/utils/templateMetaDescriptions.js`
+(`{ [templateId]: string }`), which `pageMeta.js` now imports instead;
+`templatePageCopy.js` keeps only the bilingual `bestFor`/tips and is read
+solely by the lazy-loaded `TemplateDetailPage.jsx`. Re-measured: the entry
+chunk is now **36.46 kB gzip**, +1.29 kB over the `v1.3.0` baseline — under
+the ~2 KB target. Each example CV is still its own small lazy chunk
+(verified via `ls dist/assets`).
 
 Three visual issues were observed in example previews during this work
 and deliberately left for Phase 2 template polish rather than fixed here

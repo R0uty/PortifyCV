@@ -55,6 +55,7 @@ check(
 // --- Metadata -----------------------------------------------------------------
 const { VIEW_HEAD, buildTemplatePageSchema, TEMPLATE_VIEW_PREFIX } = await importSrc('utils/pageMeta.js')
 const { TEMPLATE_PAGE_COPY } = await importSrc('utils/templatePageCopy.js')
+const { TEMPLATE_META_DESCRIPTIONS } = await importSrc('utils/templateMetaDescriptions.js')
 
 for (const template of cvTemplates) {
   const head = VIEW_HEAD[`${TEMPLATE_VIEW_PREFIX}${template.id}`]
@@ -81,6 +82,7 @@ check('every VIEW_HEAD title is unique', new Set(titles).size === titles.length)
 // --- Page copy ------------------------------------------------------------------
 for (const template of cvTemplates) {
   const copy = TEMPLATE_PAGE_COPY[template.id]
+  check(`${template.id}: has a templatePageCopy entry`, Boolean(copy))
   for (const locale of ['en', 'fi']) {
     const localized = copy?.[locale]
     check(
@@ -91,11 +93,18 @@ for (const template of cvTemplates) {
         && localized.tips.every((tip) => tip.trim().length > 0),
     )
   }
-  const metaDescription = copy?.metaDescription ?? ''
+
+  const metaDescription = TEMPLATE_META_DESCRIPTIONS[template.id]
+  check(`${template.id}: has a templateMetaDescriptions entry`, Boolean(metaDescription))
+  check(
+    `${template.id}: metaDescription is 50–160 chars`,
+    typeof metaDescription === 'string' && metaDescription.length >= 50 && metaDescription.length <= 160,
+    `${metaDescription?.length ?? 0} chars`,
+  )
   check(
     `${template.id}: metaDescription starts with "Free ${template.label} CV template:" and ends with "no login"`,
-    metaDescription.startsWith(`Free ${template.label} CV template:`)
-      && /no login\.?$/.test(metaDescription.trim()),
+    (metaDescription ?? '').startsWith(`Free ${template.label} CV template:`)
+      && /no login\.?$/.test((metaDescription ?? '').trim()),
     metaDescription,
   )
 }

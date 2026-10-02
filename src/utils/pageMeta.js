@@ -6,7 +6,7 @@
 // both keeps them from drifting apart.
 import { ROUTES, templatePath } from './routes.js'
 import { cvTemplates } from './cvTemplates.js'
-import { TEMPLATE_PAGE_COPY } from './templatePageCopy.js'
+import { TEMPLATE_META_DESCRIPTIONS } from './templateMetaDescriptions.js'
 
 export const SITE_ORIGIN = 'https://portifycv.app'
 
@@ -133,15 +133,16 @@ export const TEMPLATE_VIEW_PREFIX = 'template:'
 
 // One entry per template, generated from the registry so a new template
 // gets its page, metadata, worker routing, and 404/redirect handling just
-// by being added to cvTemplates.js (plus its copy in templatePageCopy.js,
-// which check:template-pages enforces).
+// by being added to cvTemplates.js (plus its copy in
+// templateMetaDescriptions.js and templatePageCopy.js, which
+// check:template-pages enforces).
 const TEMPLATE_VIEW_HEAD = Object.fromEntries(
   cvTemplates.map((template) => [
     `${TEMPLATE_VIEW_PREFIX}${template.id}`,
     {
       title: `${template.label} CV Template - Free, No Login - PortifyCV`,
       path: templatePath(template.slug),
-      description: TEMPLATE_PAGE_COPY[template.id]?.metaDescription ?? template.description,
+      description: TEMPLATE_META_DESCRIPTIONS[template.id] ?? template.description,
       templateId: template.id,
       schema: 'template',
     },
