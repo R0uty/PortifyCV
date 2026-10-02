@@ -3,10 +3,20 @@
 **Date:** 2026-10-03
 **Scores against:** `docs/template-design-system.md` §9 rubric (7 axes, 0–3;
 same scale and anchors as `docs/template-audit-a2.md`).
-**Feeds:** fix tasks 6 (G6), 7 (G7), 8 (G8), 9 (G9). Each fix task removes
-its allowlist entries from `e2e/fixtures/layoutAllowlist.js`; the harness
-fails on stale entries, so this doc's `F#` → allowlist mapping is the
-checklist for "done."
+**Feeds:** fix tasks 6 (G6), 7 (G7), 8a (content coverage — F14, its own
+task, carved out of G9), 8 (G8 density), 9 (G9, the remainder). Each fix
+task removes its allowlist entries from `e2e/fixtures/layoutAllowlist.js`;
+the harness fails on stale entries, so this doc's `F#` → allowlist mapping
+is the checklist for "done."
+
+**Controller-ruled task order: T6 (G6) → T7 (G7) → T8a (F14) → T8 (G8) →
+T9 (G9).** F14's fix (rendering experience `achievements` as further
+bullets and `technologies` as a meta line, per each template's existing
+style) necessarily *lengthens* every affected CV, so it must land and have
+its `EXPECTED_PDF_PAGES` fallout settled **before** T8's density work
+(G8/F13, Portfolio's page-count fix) — doing it the other way round would
+have T8 tune Portfolio's spacing against a page count that T8a then
+invalidates.
 
 ## Method & evidence
 
@@ -107,7 +117,8 @@ on the link-value element, identical pattern copy-pasted across templates:
 sidebar column on one line is silently cut to "…" instead of wrapping,
 which is exactly the behavior §7.6 says must not happen for long values.
 Templates: developer, modern, executive, portfolio, techExec, graduate,
-european. Clears 21 entries (14 example + 7 stress). Group: **G6**.
+european (7 templates). Clears 21 entries (14 example + 7 stress). Group:
+**G6**.
 
 **F2 — `*__arrow-item` / `*__link-item` plain link lists, same truncation.**
 Same root cause as F1, different class name because these templates render
@@ -137,9 +148,13 @@ skill label instead of a link, inside a flex row shared with the dot-rating
 this exact case. Template: modernOrange. Clears 3 entries (2 example + 1
 stress). Group: **G6**.
 
-G6 total: **4 fix items, 31 allowlist entries, 12 templates** (developer,
-modern, executive, portfolio, techExec, european, creative, colorfulCompact,
-editorial, portrait, quadrant, modernOrange).
+G6 total: **4 fix items, 31 allowlist entries, 13 templates** (developer,
+modern, executive, portfolio, techExec, graduate, european, creative,
+colorfulCompact, editorial, portrait, quadrant, modernOrange). (Fix-round-1
+correction: the first pass of this doc omitted graduate from this rollup
+line even though F1's own template list and the §6 index already counted
+it — graduate's `clipped-text` entries, rows 35 and 40 in §6, were always
+mapped to F1.)
 
 ### G7 — names in narrow columns
 
@@ -152,11 +167,21 @@ the whole string are 1 space + 2 hyphens. At every density class's declared
 name size and floor width (§2: 210–240px), that budget produces 3–6 line
 boxes, not 2, even where the column is sized exactly per spec and nothing
 else is wrong. This is a synthetic-fixture-vs-threshold mismatch, not a
-discovered per-template defect — see "Out of scope" below for the
-threshold question. Templates affected (name-lines only, no mid-word
-fragmentation): minimal, creative, executive, timeline, graduate,
+discovered per-template defect. Templates affected (name-lines only, no
+mid-word fragmentation): minimal, creative, executive, timeline, graduate,
 classicProfessional, quadrant, editorial, portrait. Clears 9 entries
-(stress). Group: **G7**.
+(stress).
+
+**Controller ruling (fix round 1):** the fixture's name
+("Kristiansen-Vandenberghe Oyelaran-Lindqvist") is harsher than §7.1's
+stated case ("a long two-part name and a single long word") — it's two
+*already-compound* long words, not one. **Resolution, owned by Task 7:**
+change `stress:long-single-word`'s `fullName` in
+`e2e/fixtures/stressCvs.js` to a §7.1-faithful long two-part name (e.g.
+"Maximiliana Kristiansen") and re-baseline this fixture's expectations.
+The real 4-part name in the example tier (navyProfessional's `cto`, F7
+below) is a genuine, non-synthetic case and stays the extreme one this
+group must actually handle. Group: **G7**.
 
 **F6 — Executive and Modern Orange: the per-segment width is tight enough
 that a single hyphen-segment itself fragments mid-word.**
@@ -208,6 +233,81 @@ fix is the same component and the same visit).
 G7 total: **4 fix items, 14 allowlist entries, 11 templates** (minimal,
 creative, executive, timeline, graduate, classicProfessional, quadrant,
 editorial, portrait, navyProfessional, modernOrange).
+
+### G8a — content coverage (its own fix task, scheduled after G7, before G8)
+
+**Controller ruling (fix round 1):** F14 (below) is carved out of G9 into
+its own fix task, **Task 8a**, run after Task 7 (G7) and before Task 8
+(G8/density) — see the task-order note at the top of this doc. The fix
+approach: render `achievements` as further bullets in each template's
+existing bullet style, and `technologies` as a meta line in each
+template's existing style (not a redesign of either), in all 17 affected
+Showcases; add an example-tier e2e content-coverage check so this can't
+regress silently again; update `EXPECTED_PDF_PAGES` deliberately once
+rendering these fields lengthens the affected example CVs' exports.
+
+**F14 — Every bespoke Showcase except three drop the experience entry's
+`achievements` and `technologies` fields in normal/non-ATS-bypass
+rendering. This is the single largest finding in this audit — see the
+content-coverage table below for the full matrix.**
+
+Root cause, one pattern, confirmed in **17 separate files** (fix-round-1
+correction: only **3** of the 17 actually import the shared helper; the
+other **14** each carry their own independent copy of the identical
+pattern, not a single shared bug):
+
+```js
+const bullets = item.description ? splitToBullets(item.description) : []
+```
+— never reads `item.achievements` or `item.technologies`.
+
+- **3 templates import the shared helper**,
+  `src/components/templates/directEditExperienceEntry.jsx:33`:
+  ClassicProfessional, Editorial, Portrait.
+- **14 templates have their own local copy** of the exact same
+  `item.description`-only pattern:
+  - `CreativeShowcase.jsx:55`
+  - `ColorfulCompactShowcase.jsx:65`
+  - `NavyProfessionalShowcase.jsx:57`
+  - `CompactShowcase.jsx:72`
+  - `ExecutiveShowcase.jsx:97`
+  - `DeveloperShowcase.jsx:58`
+  - `PortfolioShowcase.jsx:82`
+  - `GraduateShowcase.jsx:58`
+  - `ModernShowcase.jsx:82`
+  - `ModernOrangeShowcase.jsx:175`
+  - `QuadrantShowcase.jsx:61`
+  - `TechExecShowcase.jsx:61`
+  - `TimelineShowcase.jsx:99`
+  - `EuropeanShowcase.jsx:76`
+
+3 + 14 = 17 of the app's 18 templates (every one except Minimal, which has
+no bespoke Showcase at all).
+
+Meanwhile the shared flat renderer (`src/components/CVPreview.jsx`'s
+`renderExtras()`, lines 806-825) *does* render both fields correctly (an
+achievements `<ul>` and a technologies tag row) — which is why Minimal
+(always flat-rendered) is clean, and why the 14 templates that bypass to
+the flat renderer in ATS mode (`CVPreview.jsx`'s `variant === '…' &&
+!atsFriendlyMode` delegations) show the content correctly **only in ATS
+mode**, not in their own bespoke normal-mode view. `achievements`/
+`technologies` are real, user-facing fields (`CVForm.jsx:793` and `:805`
+wire separate list-editor controls for them, distinct from the
+`description` textarea at `:782`; `createEmptyExperience()` in
+`cvForm.js:16-27` and `CvExperienceItem` in `types/cv.d.ts:3-14` both
+declare them), and `cvSnapshot.js:97-102` normalizes them into every
+Showcase's `snapshot.experience` — the data reaches every renderer; every
+renderer except the flat one ignores it. This explains the PDFs the
+controller flagged (executive/navyProfessional/modernOrange showing ~1
+line per job despite 2–3 achievements in the source data): the PDF is a
+clone of the normal-mode preview, which has this bug for every one of
+those three (and 14 others). No allowlist entries — the layout harness
+checks layout, not content completeness, so nothing in Tasks 2–3 could
+have caught this; it surfaced from this audit's content-coverage pass, per
+the task-5 ruling. Group: **G8a** (fix-round-1 correction — was G9).
+
+G8a total: **1 fix item, 0 allowlist entries, 17 templates** (all but
+minimal).
 
 ### G8 — density (length)
 
@@ -289,81 +389,70 @@ read. Template: graduate. Clears 3 entries. Group: **G9**.
 
 **F12 — Placeholder "… will appear here" text reaches the exported PDF for
 every template (controller finding 1).**
-Confirmed by Task 4's investigation (not re-verified here, taken as given):
-`createExportSandbox()` (`src/utils/exporters.js:~715-723`) calls
-`resolveExportRoot(previewElement)` then `exportRoot.cloneNode(true)` — a
-verbatim deep clone of whatever `previewRef.current` currently contains,
-with no DOM filtering before or after. `hideEmptySections()`
-(`src/utils/sectionContent.js`) already solves exactly this problem, but
-its own header comment says it is wired **only** into
-`TemplateDetailPage.jsx` (the marketing template-gallery page) and
-explicitly "never imported by `ResumeBuilderPage.jsx`" — so the builder's
-live preview (and therefore every export, which clones that same preview)
-keeps the visible-but-empty section's editing-affordance placeholder text.
-**Proposed fix location:** inside `createExportSandbox()`, immediately
-after `const clone = exportRoot.cloneNode(true)` (`exporters.js:723`) and
-before the clone is styled/appended — walk the clone's
-`[data-export-section]` nodes (every section wrapper already carries this
-attribute per §8) and remove/hide any whose corresponding `formData`
-section has no real content, using the same visibility predicate
-`hasSectionContent()`/`hideEmptySections()` already implements in
-`sectionContent.js` (that function operates on CV data and returns a CV
-with `sectionVisibility` turned off per-section — it would need either a
-DOM-level sibling that checks `formData` directly against each clone
-node's `data-export-section` id, or `exportCvAsPdf()`'s caller
-(`ResumeBuilderPage.jsx`, call site at line ~860) could pass the already-
-computed visible-section set down into `createExportSandbox()` so it never
-needs to re-derive it from the DOM). Either way, the fix is **export-time
-DOM pruning of the clone**, not a change to the live builder preview (which
-intentionally keeps the placeholder as an editing affordance). Affects
-every template. No allowlist entries (the stress-tier harness explicitly
-skips the `placeholder` rule — see `e2e/template-layout.spec.js`'s comment
-— so this was never caught by Phase 2's own harness, only by Task 4's
-separate investigation). Group: **G9**.
+Confirmed by Task 4's investigation: `createExportSandbox()`
+(`src/utils/exporters.js:~715-723`) calls `resolveExportRoot(previewElement)`
+then `exportRoot.cloneNode(true)` — a verbatim deep clone of whatever
+`previewElement` (i.e. `previewRef.current`) currently contains, with no
+DOM filtering before or after.
 
-**F14 — Every bespoke Showcase drops the experience entry's `achievements`
-and `technologies` fields in normal/non-ATS-bypass rendering. This is the
-single largest finding in this audit — see the content-coverage table
-below for the full matrix.** Root cause, one shared pattern repeated 17
-times: every bespoke experience-entry renderer computes its bullet list as
-```js
-const bullets = item.description ? splitToBullets(item.description) : []
-```
-and never reads `item.achievements` or `item.technologies` at all —
-confirmed identically in `src/components/templates/directEditExperienceEntry.jsx:33`
-(shared by Creative, ColorfulCompact, NavyProfessional, Editorial, Compact,
-ClassicProfessional, Executive, Developer, Portfolio, Portrait — 10
-templates) and in each template's own local copy of the same pattern:
-`GraduateShowcase.jsx:58`, `ModernShowcase.jsx:82`,
-`ModernOrangeShowcase.jsx:175`, `QuadrantShowcase.jsx:61`,
-`TechExecShowcase.jsx:61`, `TimelineShowcase.jsx:99`,
-`EuropeanShowcase.jsx:76`. That's all 17 bespoke Showcases. Meanwhile the
-shared flat renderer (`src/components/CVPreview.jsx`'s `renderExtras()`,
-lines 806-825) *does* render both fields correctly (an achievements
-`<ul>` and a technologies tag row) — which is why Minimal (always
-flat-rendered) is clean, and why the 14 templates that bypass to the flat
-renderer in ATS mode (`CVPreview.jsx`'s `variant === '…' &&
-!atsFriendlyMode` delegations) show the content correctly **only in ATS
-mode**, not in their own bespoke normal-mode view. `achievements`/
-`technologies` are real, user-facing fields (`CVForm.jsx:793` and `:805`
-wire separate list-editor controls for them, distinct from the
-`description` textarea at `:782`; `createEmptyExperience()` in
-`cvForm.js:16-27` and `CvExperienceItem` in `types/cv.d.ts:3-14` both
-declare them), and `cvSnapshot.js:97-102` normalizes them into every
-Showcase's `snapshot.experience` — the data reaches every renderer; every
-renderer except the flat one ignores it. This explains the PDFs the
-controller flagged (executive/navyProfessional/modernOrange showing ~1
-line per job despite 2–3 achievements in the source data): the PDF is a
-clone of the normal-mode preview, which has this bug for every one of
-those three (and 14 others). No allowlist entries — the layout harness
-checks layout, not content completeness, so nothing in Tasks 2–3 could
-have caught this; it surfaced from this audit's content-coverage pass, per
-the task-5 ruling. Group: **G9**.
+**Fix-round-1 addition: verified the export source in both builder modes,
+not just Classic's.** `previewRef` does **not** point at the same kind of
+node in both modes:
 
-G9 total: **6 fix items (F9–F12, F14 + the allowlist-covered trio F9/F10/F11),
-6 allowlist entries, 18 templates** (F14 and F12 are app-wide; F9/F10/F11
-are template-specific — see table below for the full template list per
-item).
+- **Classic mode** — `src/pages/ResumeBuilderPage.jsx:~1921`: there is one
+  `<CVPreview formData={formData} previewRef={previewRef} … />` and it is
+  both the visible live preview *and* the export source.
+- **Direct Edit mode** — `src/components/DirectEditPreview.jsx:53-61`:
+  there are **two** `<CVPreview>` instances. The visible, editable one
+  (`directEditDispatch={dispatchFormData}`) is what the user interacts
+  with and **does not** carry `previewRef`. A second, inert, off-screen
+  copy — `<div className="direct-edit-export-source" … inert><CVPreview
+  {...previewProps} directEditDispatch={null} previewRef={previewRef}
+  /></div>` — is rendered purely as "the same CV read-only … exactly as
+  Classic mode would" (the file's own comment, lines 53-58), and
+  `previewRef` points at *that* copy, not the editable one.
+
+Both of these — Classic's single CVPreview and Direct Edit's dedicated
+inert export-source CVPreview — receive `formData` as a plain prop and
+render it with the live placeholder text (same `CVPreview.jsx` code path
+either way), so **neither mode has anything upstream of `previewRef.current`
+that already filters empty sections.** `hideEmptySections()`
+(`src/utils/sectionContent.js`) would solve it, but its own header comment
+says it is wired **only** into `TemplateDetailPage.jsx` and explicitly
+"never imported by `ResumeBuilderPage.jsx`" (which also covers
+`DirectEditPreview.jsx`, a child it renders).
+
+**The single place that covers both modes is still `createExportSandbox()`
+in `exporters.js` — confirmed, not just assumed.** Because `previewRef`
+resolves to a *different* CVPreview instance depending on mode, a fix
+applied at the `formData`-prop level would need two separate call sites
+(one in `ResumeBuilderPage.jsx`, one in `DirectEditPreview.jsx`) and would
+risk also changing Direct Edit's *editable* preview if wired to the wrong
+instance. `exportCvAsPdf(previewRef.current, …)` (`ResumeBuilderPage.jsx`,
+call site at line ~860), by contrast, is the **one call site both modes
+already funnel through**, regardless of which CVPreview `previewRef`
+happens to point at — so the fix belongs inside `createExportSandbox()`,
+operating on the resolved `clone` DOM node itself (immediately after
+`const clone = exportRoot.cloneNode(true)`, `exporters.js:723`, before the
+clone is styled/appended): walk the clone's `[data-export-section]` nodes
+(every section wrapper already carries this attribute per §8) and
+remove/hide any whose corresponding `formData` section has no real
+content, using the same visibility predicate `hasSectionContent()` already
+implements in `sectionContent.js`. This never touches Direct Edit's
+editable preview (which isn't in the clone's ancestry) and never touches
+Classic's live preview either, since it only prunes the detached clone
+`html2canvas` captures — not `exportRoot` itself. Affects every template.
+No allowlist entries (the stress-tier harness explicitly skips the
+`placeholder` rule — see `e2e/template-layout.spec.js`'s comment — so this
+was never caught by Phase 2's own harness, only by Task 4's separate
+investigation). Group: **G9**.
+
+G9 total: **4 fix items (F9, F10, F11, F12), 6 allowlist entries, 18
+templates** (F12 is app-wide; F9/F10/F11 are template-specific — see table
+below for the full template list per item). (Fix-round-1 correction: the
+first pass of this doc miscounted this as "6 fix items" by listing F9–F11
+twice and including F14, which fix round 1 moved to its own task, G8a,
+above.)
 
 | F# | one-line cause | templates | allowlist entries |
 |---|---|---|---|
@@ -371,7 +460,6 @@ item).
 | F10 | unspaced `·` separator glued to next language | portrait | 2 |
 | F11 | unfloored sidebar heading overflows the card edge | graduate | 3 |
 | F12 | export clone keeps "will appear here" placeholder text | all 18 | 0 |
-| F14 | experience `achievements`/`technologies` never rendered outside the flat path | 17 of 18 (all but minimal) | 0 |
 
 ---
 
@@ -420,7 +508,8 @@ than ATS-fallback parity for 14 of the 17. For timeline, navyProfessional
 and modernOrange, the loss *is* consistent between normal and ATS mode
 (both wrong the same way), so — unusually — their ATS parity axis is not
 the one that catches it; their Export fidelity and Content edge-cases axes
-are. Filed as **F14** above, group **G9**.
+are. Filed as **F14** above, group **G8a** (its own fix task — see the
+task-order note at the top of this doc).
 
 ---
 
@@ -437,7 +526,7 @@ edge-cases · A = ATS parity · X = export fidelity
 
 | Template | T | C | S | D | E (before) | A (before) | X (before) | Verdict | Driving axis |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|---|---|
-| Minimal | 2 | 3 | 2 | 2 | 2 | 2 | 2 | keep | — only template passing content-coverage cleanly; still the flat-renderer `--tpl-*` gap from A.2 |
+| Minimal | 2 | 3 | 2 | 2 | 2 | 3 | 2 | keep | — only template passing content-coverage cleanly (F14 doesn't apply — it's always flat-rendered, so normal and ATS mode are literally the same code path, no asymmetry possible); A restored to A.2's 3 (fix-round-1 correction — the first pass of this doc dropped it to 2 with no stated reason); still the flat-renderer `--tpl-*` gap from A.2 |
 | Developer | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14 (no achievements/tech in normal mode); E=1 — F1 clipped links on 3/3 example CVs; A=1 — ATS now shows *more* content than normal (parity break, just inverted) |
 | Creative | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F2 clipped links (2/2 example CVs) + F5/F6 name-wrap on stress |
 | Modern | 3 | 3 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F1 clipped links (3/3 example CVs) |
@@ -452,9 +541,9 @@ edge-cases · A = ATS parity · X = export fidelity
 | ModernOrange | 3 | 3 | 3 | 2 | **0** | 2 | **0** | rework | X=0 — F14 (A stays 2); E=0 — F4 clipped skills (2/2 example CVs) + F6/F8 name mid-word-break and gluing |
 | ColorfulCompact | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F2 clipped links on stress |
 | Quadrant | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F3 clipped links (worse variant, no ellipsis) + F5 name-wrap on stress |
-| Editorial | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F2 clipped links + F5 name-wrap on stress |
-| Portrait | 2 | 2 | 2 | 2 | **0** | **1** | **0** | rework | X=0 — F14; E=0 — F10 glued language separator is an **example-tier** failure (real CVs, not stress) + F2/F5 on stress |
-| European | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F1 clipped links on stress |
+| Editorial\* | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F2 clipped links + F5 name-wrap on stress |
+| Portrait\* | 2 | 2 | **3** | 2 | **0** | **1** | **0** | rework | X=0 — F14; S=3 — sole occupant of the `photo-rail + main` family (§5), structure that serves a real use case; E=0 — F10 glued language separator is an **example-tier** failure (real CVs, not stress) + F2/F5 on stress |
+| European\* | 2 | 2 | **3** | **3** | **1** | **1** | **0** | rework | X=0 — F14; S=3 — sole occupant of `label-grid` (§5), a genuinely different reading pattern; D=3 — its own-density-switching (`tpl-density-standard`→`compact`) one-page mechanism is fully realized, per §5's note; E=1 — F1 clipped links on stress |
 
 **Everything except Minimal is "rework" once F14 (the universal
 achievements/technologies drop) is scored on Export fidelity, where its own
@@ -462,27 +551,51 @@ achievements/technologies drop) is scored on Export fidelity, where its own
 exact match** — this is not rubric-gaming; `template-audit-a2.md`'s X
 column was explicitly "provisional (2)" pending exactly this check, which
 that session's resize-window tooling couldn't do and this one could by
-reading the renderer code directly. The T/C/D columns are carried forward
-unchanged from `template-audit-a2.md` (2026-09-09) since this audit found
-no new evidence against them — only S (Graduate), E, A and X changed.
+reading the renderer code directly.
 
-**After-fix column:** left for Task 10, once G6–G9 fixes land and F14 in
-particular is resolved (which should move every template's X back toward
-2–3 and several E scores back toward 2).
+For the 15 templates `template-audit-a2.md` (2026-09-09) already scored,
+the T/C/D columns are carried forward unchanged since this audit found no
+new evidence against them — only S (Graduate), E, A and X changed.
+**\*Editorial, Portrait and European are not in `template-audit-a2.md` at
+all** (that doc predates all three — Editorial and Portrait shipped
+v1.2.20–21, European v1.2.22, after that 2026-09-09 session). Fix-round-1
+correction: the first pass of this doc's table implicitly presented their
+T/C/S/D as carried forward too, which was never true because there was
+nothing to carry forward. Their T/C/S/D cells above are scored fresh from
+this audit's own evidence: all three read their six type-ramp roles from
+`--tpl-*` with a declared `tpl-density-*` class (T=2) —
+`src/styles/templates/editorial.css:19-20` (`roomy`),
+`portrait.css:25-26` (`standard`), `european.css:22-23`
+(`standard`↔`compact`, switching); all three run exactly one ink set + one
+`--tpl-accent` hex with no second decorative hue in their own CV-content
+CSS (C=2) — editorial `#9f1239`, portrait `#0f766e`, european `#1d4ed8`
+(european's `#b91c1c`/`#fecaca`/`#fef2f2` triplet at
+`european.css:309-311` is an editor-only one-page overflow *warning*
+banner, not CV content, so it doesn't count against §3); structural
+family placement per §5's table — editorial is `numbered` heading +
+`single-column-flow` (shares the family with 3 others, S=2); portrait and
+european are each the **sole occupant** of their family
+(`photo-rail + main`, `label-grid` respectively — §5 explicitly says both
+are genuinely distinct reading patterns, not repaints), matching the
+rubric's S=3 anchor ("sole occupant of one, with structure that serves a
+real use case"); density spacing matches each one's declared class (D=2
+for editorial/portrait), and european's dynamic `standard`→`compact`
+one-page mechanism (reusing Compact's measure-and-step technique per §5's
+note) is fully realized, matching D=3's anchor.
+
+**After-fix column:** left for Task 10, once G6, G7, G8a, G8 and G9 fixes
+land and F14 in particular is resolved (which should move every
+template's X back toward 2–3 and several E scores back toward 2).
 
 ---
 
 ## 5. Out-of-scope follow-ups (redesign-level, not fixed here)
 
-1. **The `stress:long-single-word` 2-line threshold itself may be the wrong
-   bar for a double-compound name with no internal spaces.** F5 shows 9
-   templates landing at 3–6 lines through no fault of their own CSS — every
-   floor and font size matches §2 exactly. Either the threshold needs an
-   explicit exception for names with zero space-separated "words" longer
-   than some length, or the fixture itself is more adversarial than real
-   CVs ever are and the bar should move. This is a test-design question for
-   whoever owns the harness, not a template fix — flagging it rather than
-   quietly loosening `maxNameLines` in `layoutAudit.js` ourselves.
+1. ~~The `stress:long-single-word` 2-line threshold~~ — **resolved, not
+   out-of-scope.** Fix round 1 moved this into G7/F5 above: the controller
+   ruled the fixture's name is harsher than §7.1 intends and Task 7 will
+   change it and re-baseline, rather than this being an open question for
+   the harness owner.
 2. **Navy Professional's 180px identity rail (F7) is a layout decision, not
    a bug fix.** Widening it to the 210px floor changes the rail's visual
    proportion against the rest of the dark sidebar — a redesign call for
@@ -579,5 +692,6 @@ by file order, mapped to the `F#` that clears it.
 | 54 | european | stress:long-single-word | clipped-text | F1 |
 
 **Totals: G6 = 31 entries (F1 21, F2 6, F3 1, F4 3) · G7 = 14 entries (F5 9,
-F6 2, F7 2, F8 1) · G8 = 3 entries (F13 3) · G9 = 6 entries (F9 1, F10 2,
-F11 3) + 2 non-allowlist items (F12, F14). 31 + 14 + 3 + 6 = 54.**
+F6 2, F7 2, F8 1) · G8a = 0 entries (F14 — its own task, no allowlist
+coverage) · G8 = 3 entries (F13 3) · G9 = 6 entries (F9 1, F10 2, F11 3) +
+1 non-allowlist item (F12). 31 + 14 + 0 + 3 + 6 = 54.**
