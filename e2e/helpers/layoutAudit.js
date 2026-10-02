@@ -31,19 +31,30 @@ export async function auditLayout(page, rootSelector, opts = {}) {
       const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())
 
       // Check if element is clipped by an ancestor with overflow:hidden/clip between it and root
+      // Checks all four edges based on overflow-x/overflow-y settings
       const isClippedByAncestor = (el) => {
         let ancestor = el.parentElement
         while (ancestor && ancestor !== root) {
           const cs = getComputedStyle(ancestor)
-          if (['hidden', 'clip'].includes(cs.overflowX) || ['hidden', 'clip'].includes(cs.overflowY)) {
-            const ancestorRect = ancestor.getBoundingClientRect()
-            const elRect = el.getBoundingClientRect()
-            // Element extends past ancestor's bounds
+          const ancestorRect = ancestor.getBoundingClientRect()
+          const elRect = el.getBoundingClientRect()
+
+          // Check horizontal overflow
+          if (['hidden', 'clip'].includes(cs.overflowX)) {
             if ((elRect.right - ancestorRect.right) / scale > thresholds.overflowTolerancePx ||
                 (ancestorRect.left - elRect.left) / scale > thresholds.overflowTolerancePx) {
               return true
             }
           }
+
+          // Check vertical overflow
+          if (['hidden', 'clip'].includes(cs.overflowY)) {
+            if ((elRect.bottom - ancestorRect.bottom) / scale > thresholds.overflowTolerancePx ||
+                (ancestorRect.top - elRect.top) / scale > thresholds.overflowTolerancePx) {
+              return true
+            }
+          }
+
           ancestor = ancestor.parentElement
         }
         return false
@@ -120,12 +131,21 @@ export async function auditLayout(page, rootSelector, opts = {}) {
       // A word whose glyphs land on two line boxes was broken mid-word.
       // URL/email-like tokens may break anywhere (that's the fix for clipped
       // links), and hyphens/slashes are legitimate break points.
-      // Process text per block container to handle words split across text nodes.
+      // Process text per block container, respecting block boundaries (no concatenation across blocks).
+      const isBlockContainer = (el) => {
+        if (el === root) return true
+        const cs = getComputedStyle(el)
+        const display = cs.display
+        // Block-level and inline-block elements start new formatting contexts
+        return ['block', 'flex', 'grid', 'list-item', 'table', 'table-cell', 'inline-block'].includes(display) ||
+               // Flex/grid items are their own containers
+               (el.parentElement && ['flex', 'grid'].includes(getComputedStyle(el.parentElement).display))
+      }
+
       const getBlockContainer = (el) => {
         let current = el
         while (current && current !== root.parentElement) {
-          const cs = getComputedStyle(current)
-          if (['block', 'flex', 'grid', 'list-item', 'table-cell'].includes(cs.display)) return current
+          if (isBlockContainer(current)) return current
           current = current.parentElement
         }
         return root
@@ -140,19 +160,53 @@ export async function auditLayout(page, rootSelector, opts = {}) {
       }
 
       for (const container of blockContainers) {
-        // Concatenate all text nodes in this container with offset mapping
+        // Concatenate text nodes in this container, respecting nested block boundaries
         const textNodes = []
         const nodeOffsets = []
         let currentOffset = 0
-        const containerWalker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT)
-        for (let node = containerWalker.nextNode(); node; node = containerWalker.nextNode()) {
-          if (!node.parentElement || isDecorative(node.parentElement)) continue
-          nodeOffsets.push({ node, start: currentOffset, end: currentOffset + node.textContent.length })
-          textNodes.push(node)
-          currentOffset += node.textContent.length
-        }
 
-        const concatenated = textNodes.map((n) => n.textContent).join('')
+        // Collect all nested block containers to skip them
+        const nestedBlockContainers = new Set()
+        const findNestedBlocks = (el) => {
+          for (const child of el.childNodes) {
+            if (child.nodeType === Node.ELEMENT_NODE && isBlockContainer(child) && child !== container) {
+              nestedBlockContainers.add(child)
+              // Don't recurse into nested blocks; they're processed separately
+            } else if (child.nodeType === Node.ELEMENT_NODE) {
+              findNestedBlocks(child)
+            }
+          }
+        }
+        findNestedBlocks(container)
+
+        // Walk container's content, skipping text in nested block containers
+        const walk = (el) => {
+          for (const node of el.childNodes) {
+            if (node.nodeType === Node.ELEMENT_NODE && isDecorative(node)) continue
+            if (nestedBlockContainers.has(node)) continue // Skip nested block containers entirely
+
+            if (node.nodeType === Node.TEXT_NODE) {
+              if (node.textContent.trim()) {
+                nodeOffsets.push({ node, start: currentOffset, end: currentOffset + node.textContent.length })
+                textNodes.push(node)
+                currentOffset += node.textContent.length
+              }
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+              if (node.tagName === 'BR') {
+                // Add space for line break
+                textNodes.push(' ')
+                currentOffset += 1
+              } else if (!isBlockContainer(node)) {
+                // Recurse into non-block elements only
+                walk(node)
+              }
+              // Skip recursion into block containers (they're processed separately)
+            }
+          }
+        }
+        walk(container)
+
+        const concatenated = textNodes.map((n) => typeof n === 'string' ? n : n.textContent).join('')
         const tokens = /\S+/g
         for (let t = tokens.exec(concatenated); t; t = tokens.exec(concatenated)) {
           // URL/email-like tokens (any of @ . : /) may break anywhere.
@@ -168,7 +222,7 @@ export async function auditLayout(page, rootSelector, opts = {}) {
             const startNodeInfo = nodeOffsets.find((no) => no.start <= start && start < no.end)
             const endNodeInfo = nodeOffsets.find((no) => no.start < end && end <= no.end)
 
-            // Handle case where word spans multiple nodes
+            // Handle case where word spans multiple text nodes
             let endNode = endNodeInfo
             if (!endNode) {
               endNode = nodeOffsets.findLast((no) => no.start < end)

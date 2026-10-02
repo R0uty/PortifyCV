@@ -123,4 +123,44 @@ test.describe('auditLayout', () => {
     await page.setContent(page780('<h1 data-cv-name style="width:50px;overflow-wrap:break-word"><span style="display:inline">Ada</span> <span style="display:inline">Lovelace</span></h1>'))
     expect(rules(await auditLayout(page, '#root'))).toContain('name-lines')
   })
+
+  // Fix round 2 tests
+  test('flags clipped text by ancestor vertical overflow', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="height:20px;overflow:hidden"><p>Line 1<br>Line 2<br>Line 3</p></div>'))
+    expect(rules(await auditLayout(page, '#root'))).toContain('clipped-text')
+  })
+
+  test('ignores mid-word-break across block boundaries', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="overflow-wrap:anywhere">Senior<div style="display:block">Engineer</div></p>'))
+    expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
+  })
+
+  test('ignores mid-word-break with line break between words', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:60px;overflow-wrap:anywhere">here<br>Line</p>'))
+    expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
+  })
+
+  test('mid-word-break still catches Kristian<b>sen</b> across nodes', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:60px;overflow-wrap:anywhere">Kristian<b>sen</b></p>'))
+    expect(rules(await auditLayout(page, '#root'))).toContain('mid-word-break')
+  })
+
+  test('filterAllowlisted distinguishes by template, subject, and mode', () => {
+    const violations = [{ rule: 'clipped-text', detail: 'test' }]
+    const allowlist = [
+      { template: 'modern', subject: 'example', mode: 'screen', rule: 'clipped-text' },
+      { template: 'modern', subject: 'example', mode: 'screen', rule: 'beyond-page' }, // This key matches but rule doesn't, so stale
+      { template: 'other', subject: 'example', mode: 'screen', rule: 'clipped-text' }, // Different template, not in result
+      { template: 'modern', subject: 'other', mode: 'screen', rule: 'clipped-text' }, // Different subject, not in result
+      { template: 'modern', subject: 'example', mode: 'print', rule: 'clipped-text' } // Different mode, not in result
+    ]
+
+    const key = { template: 'modern', subject: 'example', mode: 'screen' }
+    const result = filterAllowlisted(violations, allowlist, key)
+    // Only clipped-text violation is covered by matching entry
+    expect(result.remaining).toEqual([])
+    // Only the beyond-page entry with matching key is stale (no beyond-page violation)
+    expect(result.staleEntries.length).toBe(1)
+    expect(result.staleEntries[0].rule).toBe('beyond-page')
+  })
 })
