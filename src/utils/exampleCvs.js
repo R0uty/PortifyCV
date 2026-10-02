@@ -30,11 +30,11 @@ export const EXAMPLES = {
   'business-graduate': { role: role('Business graduate', 'Kauppatieteiden vastavalmistunut'), load: () => import('./examples/business-graduate.js') },
   'research-scientist': { role: role('Research scientist', 'Tutkija'), load: () => import('./examples/research-scientist.js') },
   'sales-manager': { role: role('Sales manager', 'Myyntipäällikkö'), load: () => import('./examples/sales-manager.js') },
-  'customer-success': { role: role('Customer success manager', 'Asiakkuuspäällikkö'), load: () => import('./examples/_pending.js') },
-  journalist: { role: role('Journalist', 'Toimittaja'), load: () => import('./examples/_pending.js') },
-  'brand-specialist': { role: role('Brand specialist', 'Brändiasiantuntija'), load: () => import('./examples/_pending.js') },
-  chef: { role: role('Head chef', 'Keittiöpäällikkö'), load: () => import('./examples/_pending.js') },
-  architect: { role: role('Architect', 'Arkkitehti'), load: () => import('./examples/_pending.js') },
+  'customer-success': { role: role('Customer success manager', 'Asiakkuuspäällikkö'), load: () => import('./examples/customer-success.js') },
+  journalist: { role: role('Journalist', 'Toimittaja'), load: () => import('./examples/journalist.js') },
+  'brand-specialist': { role: role('Brand specialist', 'Brändiasiantuntija'), load: () => import('./examples/brand-specialist.js') },
+  chef: { role: role('Head chef', 'Keittiöpäällikkö'), load: () => import('./examples/chef.js') },
+  architect: { role: role('Architect', 'Arkkitehti'), load: () => import('./examples/architect.js') },
 }
 
 export const TEMPLATE_EXAMPLES = {
