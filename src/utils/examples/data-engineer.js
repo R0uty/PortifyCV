@@ -16,7 +16,7 @@ const en = buildExampleCv({
   title: 'Data Engineer',
   location: 'Oulu, Finland',
   about:
-    'Data engineer with 6 years of building and operating pipelines that keep analytics and ML teams fed with trustworthy data. I favor boring, observable infrastructure over clever one-offs.',
+    'Data engineer with 8 years of building and operating pipelines that keep analytics and ML teams fed with trustworthy data. I favor boring, observable infrastructure over clever one-offs.',
   skills: [
     'Python', 'SQL', 'Apache Airflow', 'Apache Spark', 'dbt', 'Snowflake', 'AWS (S3, Glue, Redshift)',
     'Kafka', 'Docker', 'Kubernetes', 'Terraform', 'CI/CD', 'Data modeling', 'ETL/ELT pipelines',
@@ -122,7 +122,7 @@ const fi = buildExampleCv({
   title: 'Data Engineer',
   location: 'Oulu',
   about:
-    'Data engineer, jolla on 6 vuoden kokemus putkistojen rakentamisesta ja ylläpidosta, jotka pitävät analytiikka- ja ML-tiimit luotettavan datan varassa. Suosin tylsää, tarkkailtavaa infraa näppärien kertaratkaisujen sijaan.',
+    'Data engineer, jolla on 8 vuoden kokemus putkistojen rakentamisesta ja ylläpidosta, jotka pitävät analytiikka- ja ML-tiimit luotettavan datan varassa. Suosin tylsää, tarkkailtavaa infraa näppärien kertaratkaisujen sijaan.',
   skills: [
     'Python', 'SQL', 'Apache Airflow', 'Apache Spark', 'dbt', 'Snowflake', 'AWS (S3, Glue, Redshift)',
     'Kafka', 'Docker', 'Kubernetes', 'Terraform', 'CI/CD', 'Tietomallinnus', 'ETL/ELT-putket',

@@ -15,7 +15,7 @@ const en = buildExampleCv({
   title: 'Registered Nurse',
   location: 'Rovaniemi, Finland',
   about:
-    'Registered nurse with 9 years in acute and emergency care. I keep a calm floor during a surge by triaging early and over-communicating with the team, not by working faster alone.',
+    'Registered nurse with 11 years in acute and emergency care. I keep a calm floor during a surge by triaging early and over-communicating with the team, not by working faster alone.',
   skills: ['Emergency triage', 'Patient assessment', 'IV therapy', 'Electronic health records (EHR)', 'Wound care', 'Medication administration', 'Patient education', 'Infection control'],
   experience: [
     {
@@ -93,7 +93,7 @@ const fi = buildExampleCv({
   title: 'Sairaanhoitaja',
   location: 'Rovaniemi',
   about:
-    'Sairaanhoitaja, jolla on 9 vuoden kokemus akuutti- ja ensihoidosta. Pidän osaston rauhallisena ruuhka-aikana triagaamalla ajoissa ja viestimällä tiimille ylen, en työskentelemällä yksin nopeammin.',
+    'Sairaanhoitaja, jolla on 11 vuoden kokemus akuutti- ja ensihoidosta. Pidän osaston rauhallisena ruuhka-aikana triagaamalla ajoissa ja viestimällä tiimille ylen, en työskentelemällä yksin nopeammin.',
   skills: ['Ensihoidon triage', 'Potilaan arviointi', 'Suonensisäinen hoito', 'Sähköinen potilaskertomus', 'Haavanhoito', 'Lääkehoito', 'Potilasohjaus', 'Infektioiden torjunta'],
   experience: [
     {

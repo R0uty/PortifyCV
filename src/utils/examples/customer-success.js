@@ -16,7 +16,7 @@ const en = buildExampleCv({
   title: 'Customer Success Manager',
   location: 'Kerava, Finland',
   about:
-    'Customer success manager with 7 years retaining and growing B2B SaaS accounts. I turn onboarding into a repeatable playbook, read churn risk before it shows up in the numbers, and get support, product, and sales pointed at the same renewal.',
+    'Customer success manager with 8 years retaining and growing B2B SaaS accounts. I turn onboarding into a repeatable playbook, read churn risk before it shows up in the numbers, and get support, product, and sales pointed at the same renewal.',
   skills: [
     'Customer onboarding', 'Churn analysis', 'Renewal negotiation', 'Account expansion',
     'Salesforce', 'Zendesk', 'Voice-of-customer programs', 'Cross-functional collaboration',
@@ -110,7 +110,7 @@ const fi = buildExampleCv({
   title: 'Asiakkuuspäällikkö',
   location: 'Kerava',
   about:
-    'Asiakkuuspäällikkö, jolla on 7 vuoden kokemus B2B SaaS -asiakkuuksien säilyttämisestä ja kasvattamisesta. Rakennan käyttöönotosta toistettavan mallin, huomaan irtisanomisriskin ennen kuin se näkyy luvuissa ja saan tuen, tuotteen ja myynnin tähtäämään samaan jatkoon.',
+    'Asiakkuuspäällikkö, jolla on 8 vuoden kokemus B2B SaaS -asiakkuuksien säilyttämisestä ja kasvattamisesta. Rakennan käyttöönotosta toistettavan mallin, huomaan irtisanomisriskin ennen kuin se näkyy luvuissa ja saan tuen, tuotteen ja myynnin tähtäämään samaan jatkoon.',
   skills: [
     'Asiakkaan käyttöönotto', 'Churn-analyysi', 'Sopimusten uusintaneuvottelut', 'Asiakkuuksien kasvattaminen',
     'Salesforce', 'Zendesk', 'Asiakaspalauteohjelmat', 'Toimintojen välinen yhteistyö',

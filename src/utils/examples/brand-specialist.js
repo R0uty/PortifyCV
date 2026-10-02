@@ -17,7 +17,7 @@ const en = buildExampleCv({
   title: 'Brand Specialist',
   location: 'Hyvinkää, Finland',
   about:
-    'Brand specialist with 8 years building and defending consistent brand identities for consumer and retail companies. I turn a vague "make it feel premium" brief into guidelines a 20-person team can actually follow.',
+    'Brand specialist with 9 years building and defending consistent brand identities for consumer and retail companies. I turn a vague "make it feel premium" brief into guidelines a 20-person team can actually follow.',
   skills: [
     'Brand strategy', 'Visual identity', 'Campaign management', 'Adobe Creative Suite',
     'Market research', 'Social media branding', 'Brand guidelines', 'Stakeholder presentations',
@@ -110,7 +110,7 @@ const fi = buildExampleCv({
   title: 'Brändiasiantuntija',
   location: 'Hyvinkää',
   about:
-    'Brändiasiantuntija, jolla on 8 vuoden kokemus yhtenäisten brändi-identiteettien rakentamisesta ja vaalimisesta kuluttaja- ja vähittäiskauppayrityksille. Muutan epämääräisen "tee siitä premium-tuntuinen" -toimeksiannon ohjeistukseksi, jota 20 hengen tiimi pystyy oikeasti noudattamaan.',
+    'Brändiasiantuntija, jolla on 9 vuoden kokemus yhtenäisten brändi-identiteettien rakentamisesta ja vaalimisesta kuluttaja- ja vähittäiskauppayrityksille. Muutan epämääräisen "tee siitä premium-tuntuinen" -toimeksiannon ohjeistukseksi, jota 20 hengen tiimi pystyy oikeasti noudattamaan.',
   skills: [
     'Brändistrategia', 'Visuaalinen identiteetti', 'Kampanjanhallinta', 'Adobe Creative Suite',
     'Markkinatutkimus', 'Sosiaalisen median brändäys', 'Brändiohjeistot', 'Sidosryhmäesitykset',

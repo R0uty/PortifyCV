@@ -17,7 +17,7 @@ const en = buildExampleCv({
   title: 'Architect',
   location: 'Rauma, Finland',
   about:
-    'Architect with 9 years designing residential and public buildings, from concept sketch through building-permit drawings. I care about buildings that work for the people using them 20 years from now, not just the rendering.',
+    'Architect with 11 years designing residential and public buildings, from concept sketch through building-permit drawings. I care about buildings that work for the people using them 20 years from now, not just the rendering.',
   skills: [
     'Building Information Modeling (BIM)', 'Revit', 'AutoCAD', 'Sustainable design',
     'Urban planning', 'Construction documentation', 'Client presentations', 'Permit applications',
@@ -111,7 +111,7 @@ const fi = buildExampleCv({
   title: 'Arkkitehti',
   location: 'Rauma',
   about:
-    'Arkkitehti, jolla on 9 vuoden kokemus asuin- ja julkisten rakennusten suunnittelusta konseptiluonnoksesta rakennuslupakuviin. Minulle tärkeintä on, että rakennus toimii käyttäjilleen 20 vuoden kuluttua, ei vain havainnekuvassa.',
+    'Arkkitehti, jolla on 11 vuoden kokemus asuin- ja julkisten rakennusten suunnittelusta konseptiluonnoksesta rakennuslupakuviin. Minulle tärkeintä on, että rakennus toimii käyttäjilleen 20 vuoden kuluttua, ei vain havainnekuvassa.',
   skills: [
     'Tietomallinnus (BIM)', 'Revit', 'AutoCAD', 'Kestävä suunnittelu',
     'Kaupunkisuunnittelu', 'Rakennuslupa-asiakirjat', 'Asiakasesitykset', 'Lupahakemukset',

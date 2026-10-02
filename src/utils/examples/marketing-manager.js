@@ -16,7 +16,7 @@ const en = buildExampleCv({
   title: 'Marketing Manager',
   location: 'Vaasa, Finland',
   about:
-    'Marketing manager with 8 years of building growth programs for retail brands, from content and SEO to paid media and loyalty. I measure everything I ship against a number, not a feeling.',
+    'Marketing manager with 10 years of building growth programs for retail brands, from content and SEO to paid media and loyalty. I measure everything I ship against a number, not a feeling.',
   skills: ['SEO', 'Content strategy', 'Paid media', 'Marketing analytics', 'Email marketing', 'Brand strategy', 'Team leadership'],
   experience: [
     {
@@ -105,7 +105,7 @@ const fi = buildExampleCv({
   title: 'Markkinointipäällikkö',
   location: 'Vaasa',
   about:
-    'Markkinointipäällikkö, jolla on 8 vuoden kokemus kasvuohjelmien rakentamisesta vähittäiskaupan brändeille sisällöstä ja hakukoneoptimoinnista maksettuun mediaan ja kanta-asiakkuuteen. Mittaan kaiken julkaisemani luvulla, ei fiiliksellä.',
+    'Markkinointipäällikkö, jolla on 10 vuoden kokemus kasvuohjelmien rakentamisesta vähittäiskaupan brändeille sisällöstä ja hakukoneoptimoinnista maksettuun mediaan ja kanta-asiakkuuteen. Mittaan kaiken julkaisemani luvulla, ei fiiliksellä.',
   skills: ['Hakukoneoptimointi (SEO)', 'Sisältöstrategia', 'Maksettu media', 'Markkinoinnin analytiikka', 'Sähköpostimarkkinointi', 'Brändistrategia', 'Tiiminjohtaminen'],
   experience: [
     {

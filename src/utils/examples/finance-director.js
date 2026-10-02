@@ -16,7 +16,7 @@ const en = buildExampleCv({
   title: 'Finance Director',
   location: 'Espoo, Finland',
   about:
-    'Finance director with over 20 years across manufacturing and industrial services, the last 6 running finance for a 180 million EUR revenue business. I build forecasts the board trusts and finance teams that close the month in 4 days, not 12.',
+    'Finance director with over 20 years across manufacturing and industrial services, the last 7 running finance for a 180 million EUR revenue business. I build forecasts the board trusts and finance teams that close the month in 4 days, not 12.',
   skills: ['Financial planning & analysis', 'IFRS reporting', 'M&A due diligence', 'Treasury & cash management', 'ERP implementation (SAP)', 'Board reporting', 'Cost control', 'Team leadership'],
   experience: [
     {
@@ -165,7 +165,7 @@ const fi = buildExampleCv({
   title: 'Talousjohtaja',
   location: 'Espoo',
   about:
-    'Talousjohtaja, jolla on yli 20 vuoden kokemus valmistavasta teollisuudesta ja teollisuuspalveluista, viimeiset 6 vuotta 180 miljoonan euron liikevaihdon yrityksen taloudesta vastaten. Rakennan ennusteita, joihin hallitus luottaa, ja talousorganisaatioita, jotka sulkevat kuukauden 4 päivässä, ei 12:ssa.',
+    'Talousjohtaja, jolla on yli 20 vuoden kokemus valmistavasta teollisuudesta ja teollisuuspalveluista, viimeiset 7 vuotta 180 miljoonan euron liikevaihdon yrityksen taloudesta vastaten. Rakennan ennusteita, joihin hallitus luottaa, ja talousorganisaatioita, jotka sulkevat kuukauden 4 päivässä, ei 12:ssa.',
   skills: ['Taloussuunnittelu ja -analyysi', 'IFRS-raportointi', 'Yritysostojen due diligence', 'Kassanhallinta', 'ERP-käyttöönotto (SAP)', 'Hallitusraportointi', 'Kustannusten hallinta', 'Tiimin johtaminen'],
   experience: [
     {

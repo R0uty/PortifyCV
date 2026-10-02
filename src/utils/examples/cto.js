@@ -17,7 +17,7 @@ const en = buildExampleCv({
   title: 'Chief Technology Officer',
   location: 'Stockholm, Sweden',
   about:
-    'CTO with 16 years in software, the last 4 as CTO of a 90-person fintech scale-up. I split my time between the architecture review and the hiring plan, because a good platform decays fast under a bad org chart.',
+    'CTO with 16 years in software, the last 6 as CTO of a 90-person fintech scale-up. I split my time between the architecture review and the hiring plan, because a good platform decays fast under a bad org chart.',
   skills: ['Technology strategy', 'Cloud architecture (AWS, GCP)', 'Platform security', 'Engineering leadership', 'Fundraising technical diligence', 'Microservices', 'Kubernetes', 'Vendor & build-vs-buy decisions'],
   experience: [
     {
@@ -75,7 +75,7 @@ const fi = buildExampleCv({
   title: 'Teknologiajohtaja',
   location: 'Tukholma, Ruotsi',
   about:
-    'Teknologiajohtaja, jolla on 16 vuoden kokemus ohjelmistoalalta, viimeiset 4 vuotta CTO:na 90 hengen fintech-kasvuyhtiössä. Jaan aikani arkkitehtuurikatselmusten ja rekrytointisuunnitelman välillä, koska hyvä alusta rapautuu nopeasti huonon organisaatiorakenteen alla.',
+    'Teknologiajohtaja, jolla on 16 vuoden kokemus ohjelmistoalalta, viimeiset 6 vuotta CTO:na 90 hengen fintech-kasvuyhtiössä. Jaan aikani arkkitehtuurikatselmusten ja rekrytointisuunnitelman välillä, koska hyvä alusta rapautuu nopeasti huonon organisaatiorakenteen alla.',
   skills: ['Teknologiastrategia', 'Pilviarkkitehtuuri (AWS, GCP)', 'Alustaturvallisuus', 'Teknologiajohtaminen', 'Rahoituskierrosten tekninen due diligence', 'Mikropalvelut', 'Kubernetes', 'Toimittaja- ja build-vs-buy-päätökset'],
   experience: [
     {

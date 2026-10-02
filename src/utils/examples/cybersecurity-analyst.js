@@ -16,7 +16,7 @@ const en = buildExampleCv({
   title: 'Cybersecurity Analyst',
   location: 'Lappeenranta, Finland',
   about:
-    'Cybersecurity analyst with 8 years in SOC operations, incident response, and vulnerability management. I turn noisy alert queues into detections people actually trust.',
+    'Cybersecurity analyst with 9 years in SOC operations, incident response, and vulnerability management. I turn noisy alert queues into detections people actually trust.',
   skills: [
     'SIEM (Splunk)', 'Incident response', 'Vulnerability management', 'Network security',
     'Threat intelligence', 'SOC operations', 'Python scripting', 'Firewall/IDS/IPS', 'Cloud security (AWS)',
@@ -115,7 +115,7 @@ const fi = buildExampleCv({
   title: 'Kyberturvallisuusanalyytikko',
   location: 'Lappeenranta',
   about:
-    'Kyberturvallisuusanalyytikko, jolla on 8 vuoden kokemus SOC-toiminnasta, häiriötilanteiden hoidosta ja haavoittuvuuksien hallinnasta. Muutan meluisat hälytysjonot havainnoiksi, joihin ihmiset oikeasti luottavat.',
+    'Kyberturvallisuusanalyytikko, jolla on 9 vuoden kokemus SOC-toiminnasta, häiriötilanteiden hoidosta ja haavoittuvuuksien hallinnasta. Muutan meluisat hälytysjonot havainnoiksi, joihin ihmiset oikeasti luottavat.',
   skills: [
     'SIEM (Splunk)', 'Häiriötilanteiden hoito', 'Haavoittuvuuksien hallinta', 'Verkkoturvallisuus',
     'Uhkatiedustelu', 'SOC-toiminta', 'Python-skriptaus', 'Palomuurit/IDS/IPS', 'Pilviturvallisuus (AWS)',

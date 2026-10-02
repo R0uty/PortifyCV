@@ -18,7 +18,7 @@ const en = buildExampleCv({
   title: 'Research Scientist',
   location: 'Delft, Netherlands',
   about:
-    'Research scientist in battery materials with 8 years in solid-state electrolytes and electrode coatings. I lead small teams that publish and that get their findings into products, not just journals.',
+    'Research scientist in battery materials with 9 years in solid-state electrolytes and electrode coatings. I lead small teams that publish and that get their findings into products, not just journals.',
   skills: [
     'Materials characterization', 'Battery electrochemistry', 'XRD/SEM/TEM', 'Scientific writing',
     'Grant writing', 'Python & MATLAB data analysis', 'Team leadership', 'Peer review',
@@ -113,7 +113,7 @@ const fi = buildExampleCv({
   title: 'Tutkija',
   location: 'Delft, Alankomaat',
   about:
-    'Akkumateriaalien tutkija, jolla on 8 vuoden kokemus kiinteän olomuodon elektrolyyteistä ja elektrodipinnoitteista. Johdan pieniä tiimejä, jotka julkaisevat ja saavat löydöksensä myös tuotteisiin, ei vain lehtiin.',
+    'Akkumateriaalien tutkija, jolla on 9 vuoden kokemus kiinteän olomuodon elektrolyyteistä ja elektrodipinnoitteista. Johdan pieniä tiimejä, jotka julkaisevat ja saavat löydöksensä myös tuotteisiin, ei vain lehtiin.',
   skills: [
     'Materiaalikarakterisointi', 'Akkujen sähkökemia', 'XRD/SEM/TEM', 'Tieteellinen kirjoittaminen',
     'Rahoitushakemukset', 'Python- ja MATLAB-data-analyysi', 'Tiiminjohtaminen', 'Vertaisarviointi',

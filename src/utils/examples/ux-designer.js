@@ -16,7 +16,7 @@ const en = buildExampleCv({
   title: 'UX Designer',
   location: 'Turku, Finland',
   about:
-    'UX designer with 6 years of research-led product design across fintech and logistics. I spend as much time watching people struggle with a flow as I do drawing the fix.',
+    'UX designer with 8 years of research-led product design across fintech and logistics. I spend as much time watching people struggle with a flow as I do drawing the fix.',
   skills: ['Figma', 'User research', 'Usability testing', 'Design systems', 'Prototyping', 'Information architecture'],
   experience: [
     {
@@ -117,7 +117,7 @@ const fi = buildExampleCv({
   title: 'UX-suunnittelija',
   location: 'Turku',
   about:
-    'UX-suunnittelija, jolla on 6 vuoden kokemus tutkimuslähtöisestä tuotesuunnittelusta fintech- ja logistiikka-alalla. Käytän yhtä paljon aikaa seuraamiseen, kun käyttäjät kompastuvat johonkin näkymään, kuin itse korjauksen piirtämiseen.',
+    'UX-suunnittelija, jolla on 8 vuoden kokemus tutkimuslähtöisestä tuotesuunnittelusta fintech- ja logistiikka-alalla. Käytän yhtä paljon aikaa seuraamiseen, kun käyttäjät kompastuvat johonkin näkymään, kuin itse korjauksen piirtämiseen.',
   skills: ['Figma', 'Käyttäjätutkimus', 'Käytettävyystestaus', 'Design-järjestelmät', 'Prototypointi', 'Informaatioarkkitehtuuri'],
   experience: [
     {

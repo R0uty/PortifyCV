@@ -17,7 +17,7 @@ const en = buildExampleCv({
   title: 'Frontend Developer',
   location: 'Tampere, Finland',
   about:
-    'Frontend developer with 5 years of building accessible React applications for fintech and e-commerce. I care about fast pages, readable components, and shipping small changes often.',
+    'Frontend developer with 7 years of building accessible React applications for fintech and e-commerce. I care about fast pages, readable components, and shipping small changes often.',
   skills: ['React', 'TypeScript', 'Next.js', 'CSS architecture', 'Accessibility (WCAG 2.2)', 'Playwright', 'Vite', 'Storybook', 'GraphQL', 'Web performance'],
   experience: [
     {
@@ -125,7 +125,7 @@ const fi = buildExampleCv({
   title: 'Frontend-kehittäjä',
   location: 'Tampere',
   about:
-    'Frontend-kehittäjä, jolla on viiden vuoden kokemus saavutettavien React-sovellusten rakentamisesta fintech- ja verkkokauppa-alalla. Minulle tärkeintä ovat nopeat sivut, selkeät komponentit ja pienet, usein julkaistavat muutokset.',
+    'Frontend-kehittäjä, jolla on seitsemän vuoden kokemus saavutettavien React-sovellusten rakentamisesta fintech- ja verkkokauppa-alalla. Minulle tärkeintä ovat nopeat sivut, selkeät komponentit ja pienet, usein julkaistavat muutokset.',
   skills: ['React', 'TypeScript', 'Next.js', 'CSS-arkkitehtuuri', 'Saavutettavuus (WCAG 2.2)', 'Playwright', 'Vite', 'Storybook', 'GraphQL', 'Verkkosuorituskyky'],
   experience: [
     {

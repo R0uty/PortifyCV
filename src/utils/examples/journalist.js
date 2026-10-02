@@ -17,7 +17,7 @@ const en = buildExampleCv({
   title: 'Journalist',
   location: 'Mikkeli, Finland',
   about:
-    'Journalist with 11 years covering housing, local government, and the environment for regional and national outlets. I build stories on public records and data, not just quotes, and I follow up until the story changes something.',
+    'Journalist with 13 years covering housing, local government, and the environment for regional and national outlets. I build stories on public records and data, not just quotes, and I follow up until the story changes something.',
   skills: [
     'Investigative reporting', 'Data journalism', 'Interviewing', 'Freedom-of-information requests',
     'CMS (WordPress, Drupal)', 'SEO for news', 'Adobe Premiere', 'Multimedia storytelling',
@@ -111,7 +111,7 @@ const fi = buildExampleCv({
   title: 'Toimittaja',
   location: 'Mikkeli',
   about:
-    'Toimittaja, jolla on 11 vuoden kokemus asumisen, kunnallispolitiikan ja ympäristön uutisoinnista alueellisille ja valtakunnallisille julkaisuille. Rakennan juttuni julkisiin asiakirjoihin ja dataan, en vain sitaatteihin, ja seuraan asiaa kunnes se muuttaa jotain.',
+    'Toimittaja, jolla on 13 vuoden kokemus asumisen, kunnallispolitiikan ja ympäristön uutisoinnista alueellisille ja valtakunnallisille julkaisuille. Rakennan juttuni julkisiin asiakirjoihin ja dataan, en vain sitaatteihin, ja seuraan asiaa kunnes se muuttaa jotain.',
   skills: [
     'Tutkiva journalismi', 'Datajournalismi', 'Haastattelu', 'Tietopyynnöt viranomaisilta',
     'Julkaisujärjestelmät (WordPress, Drupal)', 'Hakukoneoptimointi uutisille', 'Adobe Premiere', 'Multimediakerronta',

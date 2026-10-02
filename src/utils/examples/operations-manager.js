@@ -15,7 +15,7 @@ const en = buildExampleCv({
   title: 'Operations Manager',
   location: 'Pori, Finland',
   about:
-    'Operations manager with 11 years running warehouse and fulfillment operations for retail and e-commerce. I measure everything on the floor weekly, so a problem is a line on a chart before it becomes a customer complaint.',
+    'Operations manager with 12 years running warehouse and fulfillment operations for retail and e-commerce. I measure everything on the floor weekly, so a problem is a line on a chart before it becomes a customer complaint.',
   skills: ['Supply chain management', 'Lean & Six Sigma', 'Warehouse management systems', 'Workforce planning', 'Vendor negotiation', 'KPI reporting', 'Process improvement', 'Safety compliance'],
   experience: [
     {
@@ -103,7 +103,7 @@ const fi = buildExampleCv({
   title: 'Operatiivinen päällikkö',
   location: 'Pori',
   about:
-    'Operatiivinen päällikkö, jolla on 11 vuoden kokemus varasto- ja toimitustoiminnan johtamisesta vähittäiskaupassa ja verkkokaupassa. Mittaan kaiken lattiatasolla viikoittain, jotta ongelma näkyy kaaviossa ennen kuin se näkyy asiakasvalituksena.',
+    'Operatiivinen päällikkö, jolla on 12 vuoden kokemus varasto- ja toimitustoiminnan johtamisesta vähittäiskaupassa ja verkkokaupassa. Mittaan kaiken lattiatasolla viikoittain, jotta ongelma näkyy kaaviossa ennen kuin se näkyy asiakasvalituksena.',
   skills: ['Toimitusketjun hallinta', 'Lean ja Six Sigma', 'Varastonhallintajärjestelmät', 'Työvoimasuunnittelu', 'Toimittajaneuvottelut', 'KPI-raportointi', 'Prosessien kehittäminen', 'Työturvallisuus'],
   experience: [
     {

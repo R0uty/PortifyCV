@@ -15,7 +15,7 @@ const en = buildExampleCv({
   title: 'Accountant',
   location: 'Kotka, Finland',
   about:
-    'Accountant with 10 years in SME bookkeeping, tax compliance, and month-end close. I keep the books clean enough that audits are a formality, not a fire drill.',
+    'Accountant with 12 years in SME bookkeeping, tax compliance, and month-end close. I keep the books clean enough that audits are a formality, not a fire drill.',
   skills: [
     'Bookkeeping', 'VAT & tax compliance', 'Month-end close', 'Financial reporting (FAS/IFRS)',
     'Payroll processing', 'Excel & Power Query', 'Procountor & Netvisor', 'Internal controls',
@@ -80,7 +80,7 @@ const fi = buildExampleCv({
   title: 'Kirjanpitäjä',
   location: 'Kotka',
   about:
-    'Kirjanpitäjä, jolla on 10 vuoden kokemus pk-yritysten kirjanpidosta, verotuksesta ja kuukausikatkojen tekemisestä. Pidän kirjat niin siistissä kunnossa, että tilintarkastukset ovat muodollisuus, ei sammutustyötä.',
+    'Kirjanpitäjä, jolla on 12 vuoden kokemus pk-yritysten kirjanpidosta, verotuksesta ja kuukausikatkojen tekemisestä. Pidän kirjat niin siistissä kunnossa, että tilintarkastukset ovat muodollisuus, ei sammutustyötä.',
   skills: [
     'Kirjanpito', 'ALV ja verotus', 'Kuukausikatkot', 'Talousraportointi (FAS/IFRS)',
     'Palkanlaskenta', 'Excel ja Power Query', 'Procountor ja Netvisor', 'Sisäinen valvonta',

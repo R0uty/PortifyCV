@@ -15,7 +15,7 @@ const en = buildExampleCv({
   title: 'Teacher',
   location: 'Seinäjoki, Finland',
   about:
-    'Upper-secondary mathematics teacher with 14 years in the classroom and a track record of redesigning curriculum that actually raises exam results. I mentor trainee teachers and push for digital tools that save time, not add to it.',
+    'Upper-secondary mathematics teacher with 16 years in the classroom and a track record of redesigning curriculum that actually raises exam results. I mentor trainee teachers and push for digital tools that save time, not add to it.',
   skills: [
     'Curriculum design', 'Classroom management', 'Differentiated instruction', 'Digital learning tools',
     'Assessment & grading', 'Mentoring & coaching', 'Public speaking', 'Wilma & Peda.net',
@@ -119,7 +119,7 @@ const fi = buildExampleCv({
   title: 'Opettaja',
   location: 'Seinäjoki',
   about:
-    'Lukion matematiikan opettaja, jolla on 14 vuoden kokemus luokkahuoneesta ja näyttöjä opetussuunnitelman uudistamisesta niin, että tulokset todella paranevat. Ohjaan opettajaharjoittelijoita ja ajan digitaalisia työkaluja, jotka säästävät aikaa eivätkä lisäävät sitä.',
+    'Lukion matematiikan opettaja, jolla on 16 vuoden kokemus luokkahuoneesta ja näyttöjä opetussuunnitelman uudistamisesta niin, että tulokset todella paranevat. Ohjaan opettajaharjoittelijoita ja ajan digitaalisia työkaluja, jotka säästävät aikaa eivätkä lisäävät sitä.',
   skills: [
     'Opetussuunnitelmatyö', 'Luokanhallinta', 'Eriyttävä opetus', 'Digitaaliset oppimistyökalut',
     'Arviointi', 'Mentorointi ja valmennus', 'Esiintymistaidot', 'Wilma ja Peda.net',

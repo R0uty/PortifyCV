@@ -17,7 +17,7 @@ const en = buildExampleCv({
   title: 'Graphic Designer',
   location: 'Lahti, Finland',
   about:
-    'Graphic designer with 8 years of brand identity and print work for retail and events clients. I like projects that need a system, not just a one-off poster.',
+    'Graphic designer with 10 years of brand identity and print work for retail and events clients. I like projects that need a system, not just a one-off poster.',
   skills: ['Adobe Illustrator', 'Adobe InDesign', 'Adobe Photoshop', 'Figma', 'Brand identity', 'Typography', 'Print production', 'Packaging design'],
   experience: [
     {
@@ -99,7 +99,7 @@ const fi = buildExampleCv({
   title: 'Graafinen suunnittelija',
   location: 'Lahti',
   about:
-    'Graafinen suunnittelija, jolla on 8 vuoden kokemus brändi-identiteetti- ja painotuotetyöstä vähittäiskaupan ja tapahtumien asiakkaille. Pidän projekteista, jotka vaativat järjestelmän, ei vain yksittäisen julisteen.',
+    'Graafinen suunnittelija, jolla on 10 vuoden kokemus brändi-identiteetti- ja painotuotetyöstä vähittäiskaupan ja tapahtumien asiakkaille. Pidän projekteista, jotka vaativat järjestelmän, ei vain yksittäisen julisteen.',
   skills: ['Adobe Illustrator', 'Adobe InDesign', 'Adobe Photoshop', 'Figma', 'Brändi-identiteetti', 'Typografia', 'Painotuotanto', 'Pakkaussuunnittelu'],
   experience: [
     {

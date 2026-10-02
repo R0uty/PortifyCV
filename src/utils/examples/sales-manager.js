@@ -15,7 +15,7 @@ const en = buildExampleCv({
   title: 'Sales Manager',
   location: 'Kokkola, Finland',
   about:
-    'B2B sales manager with 10 years growing recurring revenue and leading sales teams. I build pipelines that forecast accurately and reps who hit quota without burning out.',
+    'B2B sales manager with 12 years growing recurring revenue and leading sales teams. I build pipelines that forecast accurately and reps who hit quota without burning out.',
   skills: [
     'B2B sales', 'Sales leadership', 'CRM (Salesforce, HubSpot)', 'Negotiation',
     'Forecasting & pipeline management', 'Key account management', 'Channel partnerships', 'Sales coaching',
@@ -109,7 +109,7 @@ const fi = buildExampleCv({
   title: 'Myyntipäällikkö',
   location: 'Kokkola',
   about:
-    'B2B-myyntipäällikkö, jolla on 10 vuoden kokemus toistuvan liikevaihdon kasvattamisesta ja myyntitiimien johtamisesta. Rakennan myyntiputkia, jotka ennustavat tarkasti, ja myyjiä, jotka saavuttavat tavoitteensa uupumatta.',
+    'B2B-myyntipäällikkö, jolla on 12 vuoden kokemus toistuvan liikevaihdon kasvattamisesta ja myyntitiimien johtamisesta. Rakennan myyntiputkia, jotka ennustavat tarkasti, ja myyjiä, jotka saavuttavat tavoitteensa uupumatta.',
   skills: [
     'B2B-myynti', 'Myynnin johtaminen', 'CRM (Salesforce, HubSpot)', 'Neuvottelutaidot',
     'Ennustaminen ja myyntiputken hallinta', 'Avainasiakashallinta', 'Kanavakumppanuudet', 'Myynnin valmennus',

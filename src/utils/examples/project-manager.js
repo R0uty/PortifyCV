@@ -15,7 +15,7 @@ const en = buildExampleCv({
   title: 'Project Manager',
   location: 'Kuopio, Finland',
   about:
-    'Project manager with 10 years of delivering construction and logistics projects on budget and on schedule. I run weekly risk reviews so surprises surface in week one, not month three.',
+    'Project manager with 11 years of delivering construction and logistics projects on budget and on schedule. I run weekly risk reviews so surprises surface in week one, not month three.',
   skills: ['Project planning', 'Risk management', 'Budgeting & cost control', 'Stakeholder management', 'Agile & Waterfall methods', 'Contract negotiation', 'MS Project', 'Resource planning'],
   experience: [
     {
@@ -108,7 +108,7 @@ const fi = buildExampleCv({
   title: 'Projektipäällikkö',
   location: 'Kuopio',
   about:
-    'Projektipäällikkö, jolla on 10 vuoden kokemus rakennus- ja logistiikkaprojektien toimittamisesta budjetissa ja aikataulussa. Pidän viikoittaiset riskikatsaukset, jotta yllätykset näkyvät ensimmäisellä viikolla, ei kolmannessa kuukaudessa.',
+    'Projektipäällikkö, jolla on 11 vuoden kokemus rakennus- ja logistiikkaprojektien toimittamisesta budjetissa ja aikataulussa. Pidän viikoittaiset riskikatsaukset, jotta yllätykset näkyvät ensimmäisellä viikolla, ei kolmannessa kuukaudessa.',
   skills: ['Projektisuunnittelu', 'Riskienhallinta', 'Budjetointi ja kustannusten hallinta', 'Sidosryhmien johtaminen', 'Agile- ja vesiputousmenetelmät', 'Sopimusneuvottelut', 'MS Project', 'Resurssisuunnittelu'],
   experience: [
     {

@@ -16,7 +16,7 @@ const en = buildExampleCv({
   title: 'Engineering Director',
   location: 'Joensuu, Finland',
   about:
-    'Engineering director with 15 years in software, the last 5 leading a 60-engineer organization across 7 teams. I care about predictable delivery and engineers who can explain what they shipped and why it mattered.',
+    'Engineering director with 15 years in software, the last 7 leading a 60-engineer organization across 7 teams. I care about predictable delivery and engineers who can explain what they shipped and why it mattered.',
   skills: ['Engineering leadership', 'Org design', 'Cloud architecture (AWS)', 'Hiring & mentoring', 'Agile delivery', 'Budget planning', 'Cross-functional strategy', 'Technical due diligence'],
   experience: [
     {
@@ -100,7 +100,7 @@ const fi = buildExampleCv({
   title: 'Kehitysjohtaja',
   location: 'Joensuu',
   about:
-    'Kehitysjohtaja, jolla on 15 vuoden kokemus ohjelmistoalalta, viimeiset 5 vuotta 60 insinöörin organisaation johtamisesta seitsemässä tiimissä. Minulle tärkeintä on ennustettava toimituskyky ja insinöörit, jotka osaavat kertoa mitä toimittivat ja miksi se oli tärkeää.',
+    'Kehitysjohtaja, jolla on 15 vuoden kokemus ohjelmistoalalta, viimeiset 7 vuotta 60 insinöörin organisaation johtamisesta seitsemässä tiimissä. Minulle tärkeintä on ennustettava toimituskyky ja insinöörit, jotka osaavat kertoa mitä toimittivat ja miksi se oli tärkeää.',
   skills: ['Teknologiajohtaminen', 'Organisaatiosuunnittelu', 'Pilviarkkitehtuuri (AWS)', 'Rekrytointi ja mentoroin', 'Agile-toimitus', 'Budjettisuunnittelu', 'Monialainen strategia', 'Tekninen due diligence'],
   experience: [
     {

@@ -16,7 +16,7 @@ const en = buildExampleCv({
   title: 'Product Manager',
   location: 'Helsinki, Finland',
   about:
-    'Product manager with 8 years of shipping B2B SaaS features that customers actually ask for. I run discovery interviews every sprint and kill roadmap items that don\'t move a metric.',
+    'Product manager with 9 years of shipping B2B SaaS features that customers actually ask for. I run discovery interviews every sprint and kill roadmap items that don\'t move a metric.',
   skills: ['Product discovery', 'Roadmapping', 'SQL', 'A/B testing', 'Jira & Confluence', 'Stakeholder management', 'User interviews', 'Pricing strategy'],
   experience: [
     {
@@ -121,7 +121,7 @@ const fi = buildExampleCv({
   title: 'Tuotepäällikkö',
   location: 'Helsinki',
   about:
-    'Tuotepäällikkö, jolla on 8 vuoden kokemus B2B SaaS -ominaisuuksien toimittamisesta, joita asiakkaat oikeasti pyytävät. Pidän asiakashaastatteluja joka sprintissä ja karsin roadmapista kohdat, jotka eivät liikuta mitään mittaria.',
+    'Tuotepäällikkö, jolla on 9 vuoden kokemus B2B SaaS -ominaisuuksien toimittamisesta, joita asiakkaat oikeasti pyytävät. Pidän asiakashaastatteluja joka sprintissä ja karsin roadmapista kohdat, jotka eivät liikuta mitään mittaria.',
   skills: ['Tuotekehityksen discovery', 'Roadmapin suunnittelu', 'SQL', 'A/B-testaus', 'Jira ja Confluence', 'Sidosryhmien johtaminen', 'Käyttäjähaastattelut', 'Hinnoittelustrategia'],
   experience: [
     {
