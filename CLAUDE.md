@@ -17,6 +17,7 @@ npm run check:feedback     # exercises evaluateCvFeedback (src/utils/cvFeedback.
 npm run check:docx-export  # exercises the Word export builders and archetypes (src/utils/docxExport.js)
 npm run check:section-schema   # validates the Direct Edit popup's section schema (src/utils/sectionSchema.js)
 npm run check:section-columns  # exercises the section column-move rules (src/utils/sectionColumns.js)
+npm run check:template-pages   # validates per-template page slugs, examples, and copy (src/utils/templatePageCopy.js, src/utils/exampleCvs.js)
 
 npm run test:e2e           # Playwright suite in e2e/, against a prod build+preview
 npx playwright test e2e/templates.spec.js   # run a single e2e spec file
@@ -31,12 +32,13 @@ a test runner — run the matching one directly after touching the share-link
 codec (`check:share`), the CV schema/reducers (`check:reducers`), the
 rule-based feedback engine (`check:feedback`), the Word exporter
 (`check:docx-export`), the Direct Edit popup schema
-(`check:section-schema`), or the section column-move
-rules and their import validation (`check:section-columns`). A mistyped
-short key in `shareLinks.js` silently drops a field from every link the app
-generates, so `check:share` in particular is cheap insurance. CI
-(`.github/workflows/ci.yml`) runs all six on every push to `main` and
-`v1.3.0` and on every pull request.
+(`check:section-schema`), the section column-move
+rules and their import validation (`check:section-columns`), or the
+per-template pages' slugs, examples, and copy (`check:template-pages`). A
+mistyped short key in `shareLinks.js` silently drops a field from every
+link the app generates, so `check:share` in particular is cheap insurance.
+CI (`.github/workflows/ci.yml`) runs all seven on every push to `main` and
+`v1.4.0` and on every pull request.
 
 `test:e2e` builds and serves the app first (`playwright.config.js`'s
 `webServer`), deliberately not the dev server, so it exercises real lazy
@@ -145,3 +147,20 @@ component.
 **Bilingual throughout (`en`/`fi`).** Locale is threaded as a prop from
 `App.jsx` down; most user-facing strings are inline `isFinnish ? '...' :
 '...'` pairs rather than a translation-file/i18n library.
+
+**Per-template pages (`/free-cv-templates/<slug>`).** Each of the 18
+templates gets its own public page, generated from `cvTemplates.js` (the
+template's slug, section support, layout) plus `VIEW_HEAD`
+(`pageMeta.js`, which pulls in per-template copy from
+`templatePageCopy.js` and drives the worker's edge metadata the same way
+every other route does). Slugs are public URLs and are permanent once
+shipped — never rename one. Example people live one file per person in
+`src/utils/examples/`, registered in `exampleCvs.js`
+(`EXAMPLES`/`TEMPLATE_EXAMPLES`), and shared across templates where the
+fit is real rather than duplicated. Every example must fill every
+`primarySections` entry of each template it's listed under, in both
+locales — `check:template-pages` enforces this, so an empty section never
+reaches a visitor. On the template page only (never the builder, and
+never mutating the CV itself), `src/utils/sectionContent.js` hides a
+section that has no real content instead of rendering its placeholder
+text.

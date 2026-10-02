@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-01
 **Branch:** `v1.4.0` (cut from `v1.3.0`; rebase onto `main` once the 1.3.0 PR merges)
-**Status:** draft, awaiting review
+**Status:** implemented (v1.4.0)
 
 ## Goal
 
@@ -167,12 +167,15 @@ layout doesn't jump.
 
 ### Per-template copy: `src/utils/templatePageCopy.js`
 
-`{ [templateId]: { en: { bestFor, metaDescription, tips: [3] }, fi: {…} } }`.
-Each template's text is written for that template specifically: who it
-suits, and three concrete tips about its layout (e.g. "the sidebar fits
-~12 skills before it pushes the next section onto page 2"). Unique text
-per page is what keeps 18 near-identical pages from reading as thin or
-duplicate content to search engines and AdSense review.
+`{ [templateId]: { metaDescription, en: { bestFor, tips: [3] }, fi: {…} } }`.
+`metaDescription` is English-only (like every other `VIEW_HEAD`
+description, since the worker serves it before any locale is known);
+`bestFor` and `tips` are per-locale. Each template's text is written for
+that template specifically: who it suits, and three concrete tips about
+its layout (e.g. "the sidebar fits ~12 skills before it pushes the next
+section onto page 2"). Unique text per page is what keeps 18
+near-identical pages from reading as thin or duplicate content to search
+engines and AdSense review.
 
 ### Example CVs: `src/utils/examples/`
 

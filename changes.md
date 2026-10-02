@@ -4,6 +4,49 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template pages — 2026-10-02
+
+Closes out the `v1.4.0` branch for its pull request into `main`. Each of
+the 18 templates now has its own public page at
+`/free-cv-templates/<slug>` (slugs are permanent once shipped): the
+template rendered full-size with 2–3 switchable example CVs, per-template
+copy (who it suits, three layout tips, an English `metaDescription`), the
+breadcrumb structured data the worker already attaches to every route,
+and a "Use this example" link that opens the builder with that template
+and example preloaded. 24 fictional example people (`src/utils/examples/`,
+registered in `exampleCvs.js`) cover the 18 templates' 2–3 example slots,
+shared across templates where the fit is real; each person fills every
+`primarySections` entry of every template listing them, in both locales,
+so no template page ever shows an empty-section placeholder — the
+preview-only `src/utils/sectionContent.js` hides what has no content
+instead. A new `npm run check:template-pages` (the seventh `check:*`
+script, now in CI) enforces slugs, example coverage, section fill, and
+copy bounds; `e2e/template-pages.spec.js` covers the page itself.
+
+Verification on this commit: lint clean, all seven `check:*` scripts pass,
+196/196 e2e pass against a production build. Manual worker check
+(`npm run build` + `npm run worker:dev`) confirmed `/free-cv-templates/developer`
+serves the Developer title, a canonical link ending
+`/free-cv-templates/developer`, and the BreadcrumbList JSON-LD; an unknown
+slug (`/free-cv-templates/not-a-template`) returns a real `404`; and a
+case/trailing-slash variant (`/free-cv-templates/Developer/`) redirects
+`301` to the canonical slug.
+
+Bundle check: the entry chunk grew from 35.17 kB gzip (`v1.3.0`, built
+from `origin/v1.3.0` in a scratch worktree) to 45.06 kB gzip — about 9.9
+kB, past the ~2 KB expectation, but it traces entirely to
+`templatePageCopy.js` (18 templates × bilingual copy, ~9.6 kB gzip on its
+own) being pulled in through `pageMeta.js`'s `VIEW_HEAD`, which the task
+brief calls out as expected and acceptable since it's text, not code. Each
+example CV is still its own small lazy chunk (verified via `ls dist/assets`).
+
+Three visual issues were observed in example previews during this work
+and deliberately left for Phase 2 template polish rather than fixed here
+(sidebar link truncation, a long name wrapping to four lines in Navy
+Professional, long previews running to 2+ A4 pages, Modern Orange
+clipping long skill names) — see "Phase 2 inputs" in `todo.md` for the
+full list and which templates/examples triggered each one.
+
 ## 1.3.0 release — 2026-10-01
 
 Closes out the `v1.3.0` branch for its pull request into `main`. The
