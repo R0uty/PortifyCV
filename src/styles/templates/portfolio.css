@@ -682,12 +682,9 @@
 
 .portfolio-showcase__link-value {
   display: block;
-  overflow: hidden;
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   color: var(--pf-text);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .portfolio-showcase__interest-row {

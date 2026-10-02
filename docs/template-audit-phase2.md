@@ -118,7 +118,10 @@ sidebar column on one line is silently cut to "…" instead of wrapping,
 which is exactly the behavior §7.6 says must not happen for long values.
 Templates: developer, modern, executive, portfolio, techExec, graduate,
 european (7 templates). Clears 21 entries (14 example + 7 stress). Group:
-**G6**.
+**G6**. **Fixed (1.4.6):** replaced the ellipsis rule with the shared
+`.tpl-value-breakable` primitive (`overflow-wrap: anywhere; min-width: 0`,
+`src/styles/templates/_system.css`), applied in each Showcase's JSX
+alongside the existing `*__link-value` class.
 
 **F2 — `*__arrow-item` / `*__link-item` plain link lists, same truncation.**
 Same root cause as F1, different class name because these templates render
@@ -131,13 +134,16 @@ links as a plain list rather than a label+value card:
 `src/styles/templates/portrait.css:306`
 (`.portrait-showcase__link-item`). Templates: creative, colorfulCompact,
 editorial, portrait. Clears 6 entries (2 example + 4 stress). Group: **G6**.
+**Fixed (1.4.6):** same `.tpl-value-breakable` primitive applied to each
+template's arrow-item/link-item class.
 
 **F3 — Quadrant's `link-value` clips with no ellipsis at all.**
 `src/styles/templates/quadrant.css:453` has `overflow: hidden; white-space:
 nowrap` but — unlike every other `link-value`, see F1 — no
 `text-overflow: ellipsis`, so the cut is silent (no "…" cue that content is
 missing), a strictly worse variant of the same bug. Template: quadrant.
-Clears 1 entry (stress). Group: **G6**.
+Clears 1 entry (stress). Group: **G6**. **Fixed (1.4.6):** same
+`.tpl-value-breakable` primitive applied to `.quadrant-showcase__link-value`.
 
 **F4 — Modern Orange skill-name rows truncate long skill strings.**
 `src/styles/templates/modernOrange.css:148`
@@ -146,7 +152,9 @@ text-overflow:ellipsis; white-space:nowrap` pattern as F1, applied to the
 skill label instead of a link, inside a flex row shared with the dot-rating
 (`modernOrange.css:163`). §7.6 ("one very long single skill string") names
 this exact case. Template: modernOrange. Clears 3 entries (2 example + 1
-stress). Group: **G6**.
+stress). Group: **G6**. **Fixed (1.4.6):** same `.tpl-value-breakable`
+primitive applied to `.modern-orange-showcase__skill-name`; the dot-rating
+sibling keeps `flex-shrink: 0` so a wrapped skill name doesn't crowd it.
 
 G6 total: **4 fix items, 31 allowlist entries, 13 templates** (developer,
 modern, executive, portfolio, techExec, graduate, european, creative,

@@ -580,7 +580,7 @@ export default function ExecutiveShowcase({
                   <span className="executive-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="executive-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="executive-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
+                    <p className="executive-showcase__link-value tpl-value-breakable" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))

@@ -298,9 +298,6 @@
   font-size: var(--tpl-body-size);
   font-weight: 600;
   color: var(--ed-ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* ── Languages: inline row separated by a thin middle dot ── */

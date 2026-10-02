@@ -397,7 +397,7 @@ export default function CreativeShowcase({
           <div className="creative-showcase__arrow-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
-                <p key={linkKey} className="creative-showcase__arrow-item" data-export-card="true" title={value}>
+                <p key={linkKey} className="creative-showcase__arrow-item tpl-value-breakable" data-export-card="true" title={value}>
                   <span className="creative-showcase__arrow" aria-hidden="true">&rarr;</span>
                   {formatLinkDisplayValue(value)}
                 </p>

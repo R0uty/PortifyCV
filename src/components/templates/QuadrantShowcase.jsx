@@ -402,7 +402,7 @@ export default function QuadrantShowcase({
                   <span className="quadrant-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="quadrant-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="quadrant-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
+                    <p className="quadrant-showcase__link-value tpl-value-breakable" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))

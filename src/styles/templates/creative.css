@@ -419,12 +419,9 @@
 }
 
 .creative-showcase__arrow-item {
-  overflow: hidden;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--cr-ink);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .creative-showcase__arrow {

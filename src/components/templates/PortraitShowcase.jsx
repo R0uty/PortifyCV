@@ -265,7 +265,7 @@ export default function PortraitShowcase({
           <div className="portrait-showcase__plain-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
-                <p key={linkKey} className="portrait-showcase__link-item" data-export-card="true" title={value}>
+                <p key={linkKey} className="portrait-showcase__link-item tpl-value-breakable" data-export-card="true" title={value}>
                   {formatLinkDisplayValue(value)}
                 </p>
               ))

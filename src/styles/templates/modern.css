@@ -609,12 +609,9 @@
 
 .modern-showcase__link-value {
   display: block;
-  overflow: hidden;
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   color: var(--ms-text);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* ── Interests (simple outline icons) ── */

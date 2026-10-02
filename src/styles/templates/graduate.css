@@ -540,12 +540,9 @@
 
 .graduate-showcase__link-value {
   display: block;
-  overflow: hidden;
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   color: var(--gr-ink);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .graduate-showcase__interest-row {

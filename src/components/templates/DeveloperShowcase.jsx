@@ -287,7 +287,7 @@ export default function DeveloperShowcase({
                 <span className="dev-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                 <div className="min-w-0">
                   <p className="dev-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                  <p className="dev-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
+                  <p className="dev-showcase__link-value tpl-value-breakable" title={value}>{formatLinkDisplayValue(value)}</p>
                 </div>
               </div>
             ))

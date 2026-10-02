@@ -500,7 +500,7 @@ export default function ModernShowcase({
                   <span className="modern-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="modern-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="modern-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
+                    <p className="modern-showcase__link-value tpl-value-breakable" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))

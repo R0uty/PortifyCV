@@ -356,6 +356,18 @@ named.
     feed one.
   - One very long single skill string must wrap inside its chip or line, not
     push the column (see §7).
+- **Long unbreakable values — `.tpl-value-breakable`**
+  (`src/styles/templates/_system.css`). Applied alongside a template's own
+  class on any element holding a URL, email, or single long skill string:
+  `overflow-wrap: anywhere; min-width: 0`. Never truncate an
+  information-bearing value with `overflow: hidden` / `text-overflow:
+  ellipsis` / `white-space: nowrap` — let it break anywhere instead (URLs
+  and emails have no spaces to wrap at) and make sure the flex/grid
+  ancestor isn't holding it to its intrinsic width (`min-width: 0`).
+  Introduced in 1.4.6 once the ellipsis-truncation pattern turned up
+  copy-pasted across 13 templates (`docs/template-audit-phase2.md` G6);
+  use it for every new template's link/skill values rather than
+  reintroducing the ellipsis pattern.
 - **Accent color — one custom property, one per-template default.** Each
   template's CSS reads its accent from **`--tpl-accent`**, and declares its
   default value in that template's entry in `src/utils/cvTemplates.js`. The

@@ -413,11 +413,8 @@
 
 .dev-showcase__link-value {
   display: block;
-  overflow: hidden;
   font-size: var(--tpl-meta-size);
   color: #e2e8f0;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* ── Certificates (sidebar, divider-line list — no card) ── */

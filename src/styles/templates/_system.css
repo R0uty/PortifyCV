@@ -48,3 +48,15 @@
   --tpl-body-size: 0.82rem;
   --tpl-meta-size: 0.70rem;
 }
+
+/* Shared primitive — long unbreakable values (links/emails/URLs/skills,
+   see docs/template-design-system.md §6). Never truncate an
+   information-bearing value: let it break anywhere instead of hiding
+   content behind an ellipsis or pushing its flex/grid container wider. The
+   `min-width: 0` matters as much as `overflow-wrap` — without it a flex or
+   grid child refuses to shrink below its content's intrinsic width and the
+   wrap rule never gets a chance to apply. */
+.tpl-value-breakable {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}

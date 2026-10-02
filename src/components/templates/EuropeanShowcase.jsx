@@ -432,7 +432,7 @@ export default function EuropeanShowcase({
           {linkEntries.length > 0 ? (
             linkEntries.map(([linkKey, value]) => (
               <Row key={linkKey} label={formatLinkLabel(linkKey)}>
-                <p className="european-showcase__link-value" data-export-card="true" title={value}>
+                <p className="european-showcase__link-value tpl-value-breakable" data-export-card="true" title={value}>
                   {formatLinkDisplayValue(value)}
                 </p>
               </Row>

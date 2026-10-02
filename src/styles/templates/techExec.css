@@ -443,12 +443,9 @@
 
 .tech-exec-showcase__link-value {
   display: block;
-  overflow: hidden;
   margin-top: 0.05rem;
   font-size: var(--tpl-meta-size);
   color: var(--te-ink);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* ── Languages / Interests (sidebar) ── */

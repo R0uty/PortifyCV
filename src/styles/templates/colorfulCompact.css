@@ -462,12 +462,9 @@
 }
 
 .colorful-compact-showcase__link-item {
-  overflow: hidden;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: #3f3f46;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .colorful-compact-showcase__extra-line {
