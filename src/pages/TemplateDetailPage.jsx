@@ -29,6 +29,8 @@ function getCopy(locale) {
       previous: 'Edellinen pohja',
       next: 'Seuraava pohja',
       all: 'Kaikki pohjat',
+      pagerNav: 'Pohjien selaus',
+      previewCaption: (role, label) => `Esikatselu: ${role}-esimerkki ${label}-pohjassa`,
       facts: { split: '2 palstaa', single: '1 palsta', sections: (n) => `${n} osiota` },
     }
   }
@@ -45,6 +47,8 @@ function getCopy(locale) {
     previous: 'Previous template',
     next: 'Next template',
     all: 'All templates',
+    pagerNav: 'Template navigation',
+    previewCaption: (role, label) => `Preview: ${role} example in the ${label} template`,
     facts: { split: '2 columns', single: '1 column', sections: (n) => `${n} sections` },
   }
 }
@@ -79,9 +83,16 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
   // Only trust the loaded result when it matches what's currently
   // selected — otherwise the previous example's CV would briefly show
   // under the newly-selected radio while the new one is still loading.
-  const exampleCv = loadedExample && loadedExample.id === exampleId && loadedExample.locale === resolvedLocale
-    ? loadedExample.cv
-    : null
+  // Distinguish "still loading" (loadedExample doesn't match yet, so the
+  // caller should show a placeholder) from "loaded, but resolved to null"
+  // (a missing/failed example file — the only case that falls back to the
+  // demo CV). Without this, the demo CV (Alex Morgan) would flash under
+  // the selected radio while a real example is still in flight.
+  const exampleMatchesSelection = Boolean(
+    loadedExample && loadedExample.id === exampleId && loadedExample.locale === resolvedLocale,
+  )
+  const isLoadingExample = !exampleMatchesSelection
+  const exampleCv = exampleMatchesSelection ? loadedExample.cv : null
 
   const selectExample = (nextId) => {
     setExampleId(nextId)
@@ -106,6 +117,7 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
   const next = getCvTemplate(neighbour(1).id, resolvedLocale)
   const goToTemplate = (target) => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${target.id}`)
 
+  const selectedExampleRole = examples.find((example) => example.id === exampleId)?.role ?? ''
   const sectionCount = template.primarySections.length + (template.secondarySections?.length ?? 0)
   const facts = [
     template.layout === 'split' ? copy.facts.split : copy.facts.single,
@@ -161,22 +173,33 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
             <button type="button" className="landing-cta" onClick={() => onGetStarted(templateId, exampleId)}>
               {copy.useExample}
             </button>
-            <button type="button" className="templates-page-card__cta" onClick={() => onGetStarted(templateId)}>
+            <button
+              type="button"
+              className="templates-page-card__cta"
+              onClick={() => onGetStarted(templateId, undefined, { blank: true })}
+            >
               {copy.useTemplate}
             </button>
           </div>
         </div>
 
-        <div className="template-page__preview">
-          <Suspense fallback={<div className="template-page__preview-placeholder" aria-hidden="true" />}>
-            <ScaledPreview
-              formData={previewCv}
-              template={templateId}
-              locale={resolvedLocale}
-              atsFriendlyMode={atsView}
-              accentColor={resolveTemplateAccent(null, templateId)}
-            />
-          </Suspense>
+        <div className="template-page__preview" aria-busy={isLoadingExample}>
+          <span className="sr-only">
+            {copy.previewCaption(selectedExampleRole, template.label)}
+          </span>
+          {isLoadingExample ? (
+            <div className="template-page__preview-placeholder" aria-hidden="true" />
+          ) : (
+            <Suspense fallback={<div className="template-page__preview-placeholder" aria-hidden="true" />}>
+              <ScaledPreview
+                formData={previewCv}
+                template={templateId}
+                locale={resolvedLocale}
+                atsFriendlyMode={atsView}
+                accentColor={resolveTemplateAccent(null, templateId)}
+              />
+            </Suspense>
+          )}
         </div>
       </div>
 
@@ -189,7 +212,7 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
         </div>
       )}
 
-      <nav className="template-page__pager" aria-label={copy.all}>
+      <nav className="template-page__pager" aria-label={copy.pagerNav}>
         <InternalNavLink to={templatePath(previous.slug)} onNavigate={() => goToTemplate(previous)}>
           ← {copy.previous}: {previous.label}
         </InternalNavLink>
