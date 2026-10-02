@@ -175,11 +175,13 @@ export async function auditLayout(page, rootSelector, opts = {}) {
             if (nestedBlockContainers.has(node)) continue // Skip nested block containers entirely
 
             if (node.nodeType === Node.TEXT_NODE) {
-              if (node.textContent.trim()) {
-                nodeOffsets.push({ node, start: currentOffset, end: currentOffset + node.textContent.length })
-                textNodes.push(node)
-                currentOffset += node.textContent.length
-              }
+              // Include whitespace-only nodes too — a lone space between two
+              // adjacent inline elements (e.g. `<span>A</span> <span>B</span>`)
+              // is a real text node and a real word boundary. Dropping it here
+              // used to glue the words on either side into one fake token.
+              nodeOffsets.push({ node, start: currentOffset, end: currentOffset + node.textContent.length })
+              textNodes.push(node)
+              currentOffset += node.textContent.length
             } else if (node.nodeType === Node.ELEMENT_NODE) {
               if (node.tagName === 'BR') {
                 // Add space for line break

@@ -150,6 +150,17 @@ test.describe('auditLayout', () => {
     expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
   })
 
+  // Fix round 1 for Task 2: a real single-space text node between two inline
+  // elements used to get dropped (textContent.trim() === '' skipped it
+  // entirely), gluing the words on either side into one fake token that
+  // could then spuriously trip mid-word-break. Reproduces
+  // NavyProfessionalShowcase.jsx's `{label} {'Template'}` kicker shape:
+  // two adjacent inline spans with a lone whitespace text node between them.
+  test('does not glue words across a real inter-element space', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:90px;overflow-wrap:anywhere"><span>Navy Professional</span> <span>Template</span></p>'))
+    expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
+  })
+
   test('filterAllowlisted distinguishes by template, subject, and mode', () => {
     const violations = [{ rule: 'clipped-text', detail: 'test' }]
     const allowlist = [
