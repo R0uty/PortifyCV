@@ -5,53 +5,69 @@ import { TEMPLATE_EXAMPLES, loadExampleCv } from '../src/utils/exampleCvs.js'
 import { waitForStableLayout } from './helpers/layoutAudit.js'
 
 // PDF smoke per template (Phase 2): the real export path must finish, produce
-// a non-blank file, and paginate close to what the preview shows. The PDF is
-// image-based (html2canvas), so text isn't checked here — the plan's manual
-// step renders page 1 of each to an image.
+// a non-blank file, and paginate deterministically. The PDF is image-based
+// (html2canvas), so text isn't checked here — the plan's manual step renders
+// page 1 of each to an image.
 //
-// Size floor: calibrated against observed exports of all 18 templates (see
-// task-4-report.md) — sizes ranged 193,261 (european) to 445,737 (portfolio)
-// bytes. A third of the smallest observed size is ~64 KB, so the brief's
-// 30 KB floor is raised to 60 KB: still comfortably below every real export,
-// but tight enough to catch a genuinely blank/near-blank PDF.
+// Size floor: rounded down from ~⅓ of the smallest observed export (european,
+// 193,261 bytes) — see task-4-report.md for the full per-template size table
+// and the near-blank-export check that validates this floor still separates
+// a blank/near-blank render from a real one.
 const MIN_PDF_BYTES = 60_000
 
-// Finding (Task 4): for every split-layout template whose sidebar renders
-// taller than the main column for its example CV, `expectedPages` (derived
-// from the whole preview root's offsetHeight) overshoots the PDF's actual
-// page count. This matches the documented asymmetric page-break handling in
-// exporters.js (see the block comment above collectCanvasPageBreakpoints et
-// al., also referenced in CLAUDE.md): "main column drives the page-break
-// decision; sidebar content is filtered out of that calculation and just
-// falls wherever it lands." The sidebar's full height still counts toward
-// the preview root's offsetHeight, so `expectedPages` — which assumes a
-// single column of content — overestimates for these seven templates by
-// 2-4 pages, even though the real PDF output looks fine (verified by byte
-// size and manual page-1 render). Not every split-layout template is
-// affected — only those whose example CV gives the sidebar more content
-// than the main column holds. Task 9 should either compute `expectedPages`
-// from the main column alone for split layouts, or drop the page-count
-// assertion in favor of a looser check for these seven templates.
-const EXPECTED_PAGES_OVERSHOOT_SPLIT_LAYOUT = new Set([
-  'executive', 'graduate', 'portfolio', 'techExec', 'navyProfessional', 'modernOrange', 'quadrant',
-])
+// Fix round 1 (Task 4): the original spec estimated `expectedPages` from the
+// live builder preview's rendered height (offsetHeight ÷ (offsetWidth ×
+// 1.414)) and allowed ±1 page of slack against the real PDF. That estimate
+// is biased on every template, not just the split-layout ones originally
+// flagged: the live preview is width-clamped to the viewport
+// (`--preview-paper-width: min(100%, 220mm)`, src/styles/tokens.css:82) while
+// the PDF always renders at a fixed 220mm designer width regardless of
+// viewport (`DESIGNER_PAPER_WIDTH_MM`, src/utils/exporters.js:21-29) — so the
+// preview's on-screen aspect ratio doesn't match the exported page's aspect
+// ratio, and the estimate overshoots. On top of that, split-layout templates
+// (executive, graduate, portfolio, techExec, navyProfessional, modernOrange,
+// quadrant) compound the error: the preview root's height reflects the
+// taller of its two equal-height columns, while PDF pagination is driven by
+// the main column alone (sidebar content "falls wherever it lands" — see the
+// comment above collectCanvasPageBreakpoints in exporters.js) — so those
+// seven previously exceeded even a generous tolerance and were test.fixme'd.
+//
+// Replaced with an explicit expected-page-count map instead of an estimate:
+// this is a regression net for pagination, not a layout predictor. A
+// deliberate layout change (e.g. a density fix) that shifts a template's
+// real page count updates this map in the same commit, and that commit must
+// say why the count changed.
+const EXPECTED_PDF_PAGES = {
+  minimal: 2,
+  developer: 2,
+  creative: 2,
+  modern: 2,
+  executive: 2,
+  timeline: 2,
+  graduate: 2,
+  compact: 1,
+  portfolio: 3,
+  techExec: 1,
+  classicProfessional: 1,
+  navyProfessional: 1,
+  modernOrange: 2,
+  colorfulCompact: 1,
+  quadrant: 1,
+  editorial: 2,
+  portrait: 2,
+  european: 2,
+}
 
 const PREVIEW_ROOT = '.app-shell__preview [data-export-variant]'
 
 for (const template of cvTemplates) {
   test(`pdf / ${template.id}`, async ({ page }, testInfo) => {
-    test.fixme(
-      EXPECTED_PAGES_OVERSHOOT_SPLIT_LAYOUT.has(template.id),
-      'expectedPages (whole preview offsetHeight) overshoots the real PDF page count for this split-layout template\'s sidebar — see finding above. Task 9 removes this.',
-    )
     test.setTimeout(90_000)
     const exampleId = TEMPLATE_EXAMPLES[template.id][0]
     const cv = await loadExampleCv(exampleId, 'en')
     await page.goto(`/cv?template=${template.id}&example=${exampleId}`)
     await expect(page.locator(PREVIEW_ROOT)).toContainText(cv.fullName.split(' ')[0])
     await waitForStableLayout(page)
-
-    const expectedPages = await page.locator(PREVIEW_ROOT).evaluate((el) => Math.ceil(el.offsetHeight / (el.offsetWidth * 1.414)))
 
     await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
     const downloadPromise = page.waitForEvent('download', { timeout: 60_000 })
@@ -65,6 +81,6 @@ for (const template of cvTemplates) {
     expect(bytes.length, 'PDF should not be blank').toBeGreaterThan(MIN_PDF_BYTES)
 
     const pageCount = (bytes.toString('latin1').match(/\/Type\s*\/Page(?!s)/g) || []).length
-    expect(Math.abs(pageCount - expectedPages), `pdf pages ${pageCount} vs preview ${expectedPages}`).toBeLessThanOrEqual(1)
+    expect(pageCount, `pdf pages for ${template.id}`).toBe(EXPECTED_PDF_PAGES[template.id])
   })
 }
