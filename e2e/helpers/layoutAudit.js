@@ -30,9 +30,9 @@ export async function auditLayout(page, rootSelector, opts = {}) {
       const label = (el) => `${el.tagName.toLowerCase()}.${String(el.className).trim().split(/\s+/)[0] || ''} "${(el.textContent || '').trim().slice(0, 40)}"`
       const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())
 
-      // Check if element is clipped by an ancestor with overflow:hidden/clip between it and root
+      // Find ancestor that clips this element; return first clipping ancestor or null
       // Checks all four edges based on overflow-x/overflow-y settings
-      const isClippedByAncestor = (el) => {
+      const findClippingAncestor = (el) => {
         let ancestor = el.parentElement
         while (ancestor && ancestor !== root) {
           const cs = getComputedStyle(ancestor)
@@ -43,7 +43,7 @@ export async function auditLayout(page, rootSelector, opts = {}) {
           if (['hidden', 'clip'].includes(cs.overflowX)) {
             if ((elRect.right - ancestorRect.right) / scale > thresholds.overflowTolerancePx ||
                 (ancestorRect.left - elRect.left) / scale > thresholds.overflowTolerancePx) {
-              return true
+              return ancestor
             }
           }
 
@@ -51,14 +51,16 @@ export async function auditLayout(page, rootSelector, opts = {}) {
           if (['hidden', 'clip'].includes(cs.overflowY)) {
             if ((elRect.bottom - ancestorRect.bottom) / scale > thresholds.overflowTolerancePx ||
                 (ancestorRect.top - elRect.top) / scale > thresholds.overflowTolerancePx) {
-              return true
+              return ancestor
             }
           }
 
           ancestor = ancestor.parentElement
         }
-        return false
+        return null
       }
+
+      const isClippedByAncestor = (el) => findClippingAncestor(el) !== null
 
       for (const el of root.querySelectorAll('*')) {
         if (isDecorative(el)) continue
@@ -67,22 +69,9 @@ export async function auditLayout(page, rootSelector, opts = {}) {
 
         // beyond-page: element extends past root's right edge, but not if clipped by intermediate ancestor
         if ((rect.right - rootRect.right) / scale > thresholds.overflowTolerancePx) {
-          // Check if clipped by a non-root ancestor
-          let clippedByIntermediate = false
-          let ancestor = el.parentElement
-          while (ancestor && ancestor !== root) {
-            const cs = getComputedStyle(ancestor)
-            if (['hidden', 'clip'].includes(cs.overflowX) || ['hidden', 'clip'].includes(cs.overflowY)) {
-              const ancestorRect = ancestor.getBoundingClientRect()
-              // Ancestor clips and its own right edge is within page
-              if ((ancestorRect.right - rootRect.right) / scale <= thresholds.overflowTolerancePx) {
-                clippedByIntermediate = true
-                break
-              }
-            }
-            ancestor = ancestor.parentElement
-          }
-          if (!clippedByIntermediate) {
+          // Check if clipped by an intermediate ancestor (via shared helper)
+          const clippingAncestor = findClippingAncestor(el)
+          if (!clippingAncestor) {
             add('beyond-page', label(el))
           }
         }

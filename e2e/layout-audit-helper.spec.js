@@ -131,7 +131,7 @@ test.describe('auditLayout', () => {
   })
 
   test('ignores mid-word-break across block boundaries', async ({ page }) => {
-    await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="overflow-wrap:anywhere">Senior<div style="display:block">Engineer</div></p>'))
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="width:70px;overflow-wrap:anywhere">Senior<div style="display:block">Engineer</div></div>'))
     expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
   })
 
@@ -143,6 +143,11 @@ test.describe('auditLayout', () => {
   test('mid-word-break still catches Kristian<b>sen</b> across nodes', async ({ page }) => {
     await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:60px;overflow-wrap:anywhere">Kristian<b>sen</b></p>'))
     expect(rules(await auditLayout(page, '#root'))).toContain('mid-word-break')
+  })
+
+  test('ignores mid-word-break with flex items wrapping to separate lines', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="display:flex;flex-wrap:wrap;width:70px"><span>Senior</span><span>Engineer</span></div>'))
+    expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
   })
 
   test('filterAllowlisted distinguishes by template, subject, and mode', () => {
