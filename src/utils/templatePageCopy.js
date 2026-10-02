@@ -16,7 +16,7 @@ export const TEMPLATE_PAGE_COPY = {
       tips: [
         'Lead the main column with two or three projects that have a measurable outcome. The cards give each one room for a link and a stack line.',
         'Keep the sidebar skills list to about twelve items. Past that it runs below the fold of page one and pushes Education onto page two.',
-        'Put a GitHub link in Links. The header shows it next to your email, which is where a technical reviewer looks first.',
+        'Put your GitHub URL in Links. It renders as its own icon row in the sidebar, right after Skills — not in the header, which only shows email, phone, and location.',
       ],
     },
     fi: {
@@ -24,7 +24,7 @@ export const TEMPLATE_PAGE_COPY = {
       tips: [
         'Aloita pääpalsta kahdella tai kolmella projektilla, joilla on mitattava tulos. Korteissa jokaiselle mahtuu linkki ja teknologiarivi.',
         'Pidä sivupalkin taitolista noin kahdessatoista kohdassa. Pidempi lista valuu ensimmäisen sivun alaosaan ja työntää Koulutuksen toiselle sivulle.',
-        'Lisää GitHub-linkki Linkkeihin. Otsikko näyttää sen sähköpostisi vieressä, josta tekninen arvioija katsoo ensimmäisenä.',
+        'Lisää GitHub-osoitteesi Linkkeihin. Se näkyy omana ikonirivinään sivupalkissa, suoraan Taitojen jälkeen — ei otsikossa, joka näyttää vain sähköpostin, puhelimen ja paikkakunnan.',
       ],
     },
   },
@@ -156,7 +156,7 @@ export const TEMPLATE_PAGE_COPY = {
       tips: [
         'The template shrinks its own spacing automatically as you add content — don\'t manually trim sections to fit; let the density ramp do that work.',
         'Skills renders as inline comma lists, not tags or bars, so a long skills section costs far less vertical space here than on other templates.',
-        'The dark header strip and sky accent are fixed chrome around a single tight column — there\'s no sidebar to move sections into if the page runs long.',
+        'The accent-tinted header band and the single tight column are the template\'s only fixed chrome — there\'s no sidebar to move sections into if the page runs long.',
       ],
     },
     fi: {
@@ -164,7 +164,7 @@ export const TEMPLATE_PAGE_COPY = {
       tips: [
         'Pohja pienentää välejään automaattisesti sisällön kasvaessa — älä lyhennä osioita käsin, anna tiiviysasteen hoitaa se puolesta.',
         'Taidot näkyvät pilkuin eroteltuna rivinä, ei tageina tai palkkeina, niin pitkä taito-osio vie tässä huomattavasti vähemmän tilaa kuin muissa pohjissa.',
-        'Tumma otsikkopalkki ja taivaansininen aksentti ovat kiinteää kehystä yhden tiiviin palstan ympärillä — sivupalkkia ei ole, johon siirtää osioita jos sivu pitenee.',
+        'Aksenttivärinen otsikkopalkki ja yksi tiivis palsta ovat pohjan ainoa kiinteä kehys — sivupalkkia ei ole, johon siirtää osioita jos sivu pitenee.',
       ],
     },
   },
@@ -176,7 +176,7 @@ export const TEMPLATE_PAGE_COPY = {
       tips: [
         'Lead Projects with a tech-stack badge per card — that\'s the one visual element this template gives you that a plain bullet list can\'t.',
         'Case Studies is a separate primary section from Projects; use it for the one or two pieces of work worth a longer walkthrough, not a repeat list.',
-        'Testimonials sits in the secondary column — a short quote from a manager or client there reads as social proof without crowding the main story.',
+        'Testimonials closes out the main column, after Education — a short quote from a manager or client there reads as social proof right before the page ends.',
       ],
     },
     fi: {
@@ -184,7 +184,7 @@ export const TEMPLATE_PAGE_COPY = {
       tips: [
         'Aloita Projektit-osio teknologiamerkillä per kortti — se on yksi visuaalinen elementti, jota tavallinen luettelo ei anna.',
         'Tapaustutkimukset on oma pääosionsa, erillään Projekteista; käytä sitä yhteen tai kahteen työhön, joka ansaitsee pidemmän läpikäynnin, ei toistolistaa.',
-        'Suositukset on sivupalstalla — lyhyt lainaus esimieheltä tai asiakkaalta toimii siellä sosiaalisena näyttönä ahtaamatta pääkertomusta.',
+        'Suositukset päättää pääpalstan, Koulutuksen jälkeen — lyhyt lainaus esimieheltä tai asiakkaalta toimii sosiaalisena näyttönä juuri ennen sivun loppua.',
       ],
     },
   },
@@ -294,17 +294,17 @@ export const TEMPLATE_PAGE_COPY = {
     en: {
       bestFor: 'Marketing managers, sales managers, and journalists who want a CV that reads at a glance instead of top to bottom.',
       tips: [
-        'The top-left quadrant holds identity (photo, name, contact) and the top-right holds Summary and Skills — keep both short, since each row auto-matches the taller of the two.',
-        'Experience fills the bottom-left quadrant alone; trim it to the roles that matter most, since this quadrant can\'t borrow space from its neighbors.',
-        'Everything else — Education, Certificates, Languages, Links — shares the bottom-right quadrant, with Links always last in its own bordered box.',
+        'The top-left quadrant holds identity (photo, name, contact) and the top-right holds Summary, Skills, and Languages — keep them short, since each row auto-matches the taller of the two.',
+        'Experience and Projects share the bottom-left quadrant; trim whichever runs longer, since the pair can\'t borrow space from their neighbors.',
+        'Education, Certificates, and Links share the bottom-right quadrant, with Links always last in its own bordered box — Languages lives up in the Skills quadrant instead.',
       ],
     },
     fi: {
       bestFor: 'Markkinointipäälliköille, myyntipäälliköille ja toimittajille, jotka haluavat CV:n, joka hahmottuu yhdellä silmäyksellä ylhäältä alas lukemisen sijaan.',
       tips: [
-        'Vasen yläneljännes sisältää henkilötiedot (kuva, nimi, yhteystiedot) ja oikea yläneljännes Yhteenvedon ja Taidot — pidä molemmat lyhyinä, sillä rivi venyy korkeamman mukaan.',
-        'Kokemus täyttää alavasemman neljänneksen yksin; karsi se tärkeimpiin rooleihin, koska tämä neljännes ei voi lainata tilaa viereiseltä.',
-        'Kaikki muu — Koulutus, Todistukset, Kielet, Linkit — jakaa alaoikean neljänneksen, Linkit aina viimeisenä omassa kehystetyssä laatikossaan.',
+        'Vasen yläneljännes sisältää henkilötiedot (kuva, nimi, yhteystiedot) ja oikea yläneljännes Yhteenvedon, Taidot ja Kielet — pidä molemmat lyhyinä, sillä rivi venyy korkeamman mukaan.',
+        'Kokemus ja Projektit jakavat alavasemman neljänneksen; karsi pidempi niistä, koska pari ei voi lainata tilaa viereiseltä.',
+        'Koulutus, Todistukset ja Linkit jakavat alaoikean neljänneksen, Linkit aina viimeisenä omassa kehystetyssä laatikossaan — Kielet asuvat sen sijaan Taidot-neljänneksessä.',
       ],
     },
   },
@@ -336,7 +336,7 @@ export const TEMPLATE_PAGE_COPY = {
       tips: [
         'The photo isn\'t a small avatar here — it fills the entire left column, so use a genuinely high-resolution, well-lit headshot or the whole page suffers.',
         'Every section, from About to Certificates, flows down the right column in one sequence — there\'s no secondary column, so order sections by what matters most first.',
-        'If you don\'t have a strong photo, pick a different template; this layout has no fallback treatment for a missing one the way other templates do.',
+        'Without a photo, the left column doesn\'t break — it becomes a solid accent-tinted panel with a single-letter monogram instead of an empty hole. A real headshot still reads far stronger, so add one when you can.',
       ],
     },
     fi: {
@@ -344,7 +344,7 @@ export const TEMPLATE_PAGE_COPY = {
       tips: [
         'Valokuva ei ole tässä pieni kuvake — se täyttää koko vasemman palstan, niin käytä aidosti tarkkaa, hyvin valaistua kuvaa, tai koko sivu kärsii siitä.',
         'Jokainen osio Esittelystä Todistuksiin virtaa oikealla palstalla yhtenä jatkumona — sivupalstaa ei ole, niin järjestä osiot tärkeimmän mukaan ensin.',
-        'Jos sinulla ei ole vahvaa kuvaa, valitse toinen pohja; tällä asettelulla ei ole varakäsittelyä puuttuvalle kuvalle toisin kuin muissa pohjissa.',
+        'Jos kuvaa ei ole, vasen palsta ei jää tyhjäksi — siitä tulee aksenttivärinen laatikko yhden kirjaimen tunnuksella. Aito muotokuva näyttää silti huomattavasti vahvemmalta, niin lisää sellainen kun voit.',
       ],
     },
   },

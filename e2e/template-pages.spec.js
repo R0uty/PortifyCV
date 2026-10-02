@@ -138,6 +138,38 @@ test.describe('Template pages', () => {
     await expect(graduatePreview).not.toContainText(/näky\S* tässä/i)
   })
 
+  test('every template page renders without console errors', async ({ page }) => {
+    const errors = []
+    page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()) })
+    page.on('pageerror', (error) => errors.push(error.message))
+
+    await page.goto('/free-cv-templates')
+    const cardLinks = page.locator('a.templates-page-card__name')
+    await expect(cardLinks).toHaveCount(18)
+    const hrefs = await cardLinks.evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+    expect(hrefs).toHaveLength(18)
+
+    for (const href of hrefs) {
+      await page.goto(href)
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+      await expect(page.locator('.template-page__preview [data-export-header]').first()).toBeVisible()
+    }
+
+    // AdSense (loaded from index.html) can log its own console errors against
+    // the preview server that have nothing to do with this feature; filter
+    // only those out so an unrelated real error still fails the test.
+    const realErrors = errors.filter((text) => !/adsbygoogle|googlesyndication|ERR_BLOCKED_BY_CLIENT/.test(text))
+    expect(realErrors).toEqual([])
+  })
+
+  test('the Finnish page shows Finnish copy and a Finnish example', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'fi'))
+    await page.goto('/free-cv-templates/developer')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Kehittäjä – CV-pohja')
+    await expect(page.getByRole('radiogroup', { name: 'Esimerkit' })).toBeVisible()
+    await expect(page.locator('.template-page__preview')).toContainText('Frontend-kehittäjä')
+  })
+
   test('an example link never overwrites a restored session', async ({ page }) => {
     await page.goto('/cv')
     await page.evaluate(() => window.localStorage.setItem('portifycv-session-restore-enabled', 'true'))
