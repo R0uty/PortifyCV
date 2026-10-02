@@ -3,6 +3,7 @@ import { auditLayout, waitForStableLayout, filterAllowlisted } from './helpers/l
 import { LAYOUT_ALLOWLIST } from './fixtures/layoutAllowlist.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { TEMPLATE_EXAMPLES, loadExampleCv } from '../src/utils/exampleCvs.js'
+import { STRESS_CVS } from './fixtures/stressCvs.js'
 
 // Phase 2 layout harness, example tier: every template × each of its example
 // CVs, rendered on the template page (/free-cv-templates/<slug>), audited in
@@ -39,5 +40,35 @@ for (const template of cvTemplates) {
         expect(staleEntries, 'allowlist entries that no longer fail — remove them').toEqual([])
       })
     }
+  }
+}
+
+// Stress tier: §7 edge cases through the builder. The CV is injected as a
+// session-restore snapshot (the same path a reload takes), so no share-link
+// encoding is needed. Length is not checked here — ten-jobs is meant to be
+// long. The builder preview shows "… will appear here" placeholders for
+// visible-but-empty sections as an editing affordance by design, so the
+// placeholder rule is skipped here (controller ruling) — whether those
+// placeholders reach exported PDFs is checked in Task 4/5.
+const BUILDER_ROOT = '.app-shell__preview [data-export-variant]'
+
+for (const template of cvTemplates) {
+  for (const [fixtureId, cv] of Object.entries(STRESS_CVS)) {
+    test(`${template.id} / stress:${fixtureId}`, async ({ page }) => {
+      await page.addInitScript((snapshot) => {
+        window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+        window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
+      }, JSON.stringify(cv))
+      await page.goto(`/cv?template=${template.id}`)
+      await expect(page.locator(BUILDER_ROOT)).toContainText(cv.fullName.split(' ')[0])
+      await waitForStableLayout(page)
+
+      const violations = await auditLayout(page, BUILDER_ROOT, { skipRules: ['placeholder'] })
+      const { remaining, staleEntries } = filterAllowlisted(violations, LAYOUT_ALLOWLIST, {
+        template: template.id, subject: `stress:${fixtureId}`, mode: 'stress',
+      })
+      expect(remaining, 'layout violations').toEqual([])
+      expect(staleEntries, 'allowlist entries that no longer fail — remove them').toEqual([])
+    })
   }
 }
