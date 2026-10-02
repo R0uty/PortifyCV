@@ -30,20 +30,62 @@ export async function auditLayout(page, rootSelector, opts = {}) {
       const label = (el) => `${el.tagName.toLowerCase()}.${String(el.className).trim().split(/\s+/)[0] || ''} "${(el.textContent || '').trim().slice(0, 40)}"`
       const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())
 
+      // Check if element is clipped by an ancestor with overflow:hidden/clip between it and root
+      const isClippedByAncestor = (el) => {
+        let ancestor = el.parentElement
+        while (ancestor && ancestor !== root) {
+          const cs = getComputedStyle(ancestor)
+          if (['hidden', 'clip'].includes(cs.overflowX) || ['hidden', 'clip'].includes(cs.overflowY)) {
+            const ancestorRect = ancestor.getBoundingClientRect()
+            const elRect = el.getBoundingClientRect()
+            // Element extends past ancestor's bounds
+            if ((elRect.right - ancestorRect.right) / scale > thresholds.overflowTolerancePx ||
+                (ancestorRect.left - elRect.left) / scale > thresholds.overflowTolerancePx) {
+              return true
+            }
+          }
+          ancestor = ancestor.parentElement
+        }
+        return false
+      }
+
       for (const el of root.querySelectorAll('*')) {
         if (isDecorative(el)) continue
         const rect = el.getBoundingClientRect()
         if (!rect.width || !rect.height) continue
 
+        // beyond-page: element extends past root's right edge, but not if clipped by intermediate ancestor
         if ((rect.right - rootRect.right) / scale > thresholds.overflowTolerancePx) {
-          add('beyond-page', label(el))
+          // Check if clipped by a non-root ancestor
+          let clippedByIntermediate = false
+          let ancestor = el.parentElement
+          while (ancestor && ancestor !== root) {
+            const cs = getComputedStyle(ancestor)
+            if (['hidden', 'clip'].includes(cs.overflowX) || ['hidden', 'clip'].includes(cs.overflowY)) {
+              const ancestorRect = ancestor.getBoundingClientRect()
+              // Ancestor clips and its own right edge is within page
+              if ((ancestorRect.right - rootRect.right) / scale <= thresholds.overflowTolerancePx) {
+                clippedByIntermediate = true
+                break
+              }
+            }
+            ancestor = ancestor.parentElement
+          }
+          if (!clippedByIntermediate) {
+            add('beyond-page', label(el))
+          }
         }
 
         if (ownText(el)) {
           const cs = getComputedStyle(el)
           const hidesX = ['hidden', 'clip'].includes(cs.overflowX) || cs.textOverflow === 'ellipsis'
           const hidesY = ['hidden', 'clip'].includes(cs.overflowY)
+          // Check for clipping on the element itself
           if ((hidesX && el.scrollWidth > el.clientWidth + 1) || (hidesY && el.scrollHeight > el.clientHeight + 1)) {
+            add('clipped-text', label(el))
+          }
+          // Check for clipping by ancestor
+          else if (isClippedByAncestor(el)) {
             add('clipped-text', label(el))
           }
         }
@@ -78,13 +120,41 @@ export async function auditLayout(page, rootSelector, opts = {}) {
       // A word whose glyphs land on two line boxes was broken mid-word.
       // URL/email-like tokens may break anywhere (that's the fix for clipped
       // links), and hyphens/slashes are legitimate break points.
-      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+      // Process text per block container to handle words split across text nodes.
+      const getBlockContainer = (el) => {
+        let current = el
+        while (current && current !== root.parentElement) {
+          const cs = getComputedStyle(current)
+          if (['block', 'flex', 'grid', 'list-item', 'table-cell'].includes(cs.display)) return current
+          current = current.parentElement
+        }
+        return root
+      }
+
       const reported = new Set()
+      const blockContainers = new Set()
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
       for (let node = walker.nextNode(); node; node = walker.nextNode()) {
         if (!node.parentElement || isDecorative(node.parentElement)) continue
-        const text = node.textContent
+        blockContainers.add(getBlockContainer(node.parentElement))
+      }
+
+      for (const container of blockContainers) {
+        // Concatenate all text nodes in this container with offset mapping
+        const textNodes = []
+        const nodeOffsets = []
+        let currentOffset = 0
+        const containerWalker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT)
+        for (let node = containerWalker.nextNode(); node; node = containerWalker.nextNode()) {
+          if (!node.parentElement || isDecorative(node.parentElement)) continue
+          nodeOffsets.push({ node, start: currentOffset, end: currentOffset + node.textContent.length })
+          textNodes.push(node)
+          currentOffset += node.textContent.length
+        }
+
+        const concatenated = textNodes.map((n) => n.textContent).join('')
         const tokens = /\S+/g
-        for (let t = tokens.exec(text); t; t = tokens.exec(text)) {
+        for (let t = tokens.exec(concatenated); t; t = tokens.exec(concatenated)) {
           // URL/email-like tokens (any of @ . : /) may break anywhere.
           if (/[@.:/]/.test(t[0])) continue
           const parts = /[^\-–—]+/g
@@ -92,16 +162,35 @@ export async function auditLayout(page, rootSelector, opts = {}) {
             const word = m[0]
             if (word.length < 4 || reported.has(word)) continue
             const start = t.index + m.index
-            const range = document.createRange()
-            range.setStart(node, start)
-            range.setEnd(node, start + word.length)
-            const tops = []
-            for (const r of range.getClientRects()) {
-              if (r.width >= 1 && !tops.some((t) => Math.abs(t - r.top) < 3 * scale)) tops.push(r.top)
+            const end = start + word.length
+
+            // Find which nodes contain the start and end of this word
+            const startNodeInfo = nodeOffsets.find((no) => no.start <= start && start < no.end)
+            const endNodeInfo = nodeOffsets.find((no) => no.start < end && end <= no.end)
+
+            // Handle case where word spans multiple nodes
+            let endNode = endNodeInfo
+            if (!endNode) {
+              endNode = nodeOffsets.findLast((no) => no.start < end)
             }
-            if (tops.length > 1) {
-              reported.add(word)
-              add('mid-word-break', `"${word}" in ${label(node.parentElement)}`)
+
+            if (!startNodeInfo || !endNode) continue
+
+            try {
+              const range = document.createRange()
+              range.setStart(startNodeInfo.node, Math.max(0, Math.min(start - startNodeInfo.start, startNodeInfo.node.textContent.length)))
+              range.setEnd(endNode.node, Math.max(0, Math.min(end - endNode.start, endNode.node.textContent.length)))
+
+              const tops = []
+              for (const r of range.getClientRects()) {
+                if (r.width >= 1 && !tops.some((t) => Math.abs(t - r.top) < 3 * scale)) tops.push(r.top)
+              }
+              if (tops.length > 1) {
+                reported.add(word)
+                add('mid-word-break', `"${word}" in ${label(container)}`)
+              }
+            } catch {
+              // Skip if range is invalid
             }
           }
         }

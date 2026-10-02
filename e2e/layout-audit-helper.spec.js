@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { auditLayout } from './helpers/layoutAudit.js'
+import { auditLayout, filterAllowlisted } from './helpers/layoutAudit.js'
 
 // Unit tests for the layout audit itself, against hand-made HTML, so the
 // template harness can trust a clean result. One positive and one negative
@@ -75,5 +75,52 @@ test.describe('auditLayout', () => {
     const filtered = await auditLayout(page, '#root', { skipRules: ['placeholder'] })
     expect(rules(filtered)).not.toContain('placeholder')
     expect(rules(filtered)).toEqual([])
+  })
+
+  // Fix round 1 tests
+  test('flags clipped text by ancestor overflow', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="width:80px;overflow:hidden"><span style="white-space:nowrap">linkedin.com/in/someone-long</span></div>'))
+    expect(rules(await auditLayout(page, '#root'))).toContain('clipped-text')
+  })
+
+  test('ignores beyond-page when clipped by intermediate ancestor', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="width:300px;overflow:hidden"><div style="width:900px">wide</div></div>'))
+    expect(rules(await auditLayout(page, '#root'))).not.toContain('beyond-page')
+  })
+
+  test('flags beyond-page for wide element in overflow:hidden root', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="width:900px">wide</div>', 'overflow:hidden'))
+    expect(rules(await auditLayout(page, '#root'))).toContain('beyond-page')
+  })
+
+  test('flags mid-word-break across text nodes', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:60px;overflow-wrap:anywhere">Kristian<b>sen</b></p>'))
+    expect(rules(await auditLayout(page, '#root'))).toContain('mid-word-break')
+  })
+
+  test('filterAllowlisted matches and identifies stale entries', () => {
+    const violations = [{ rule: 'clipped-text', detail: 'test' }]
+    const allowlist = [
+      { template: 'modern', subject: 'example', mode: 'screen', rule: 'clipped-text' },
+      { template: 'modern', subject: 'example', mode: 'screen', rule: 'placeholder' },
+      { template: 'other', subject: 'example', mode: 'screen', rule: 'clipped-text' }
+    ]
+    const key = { template: 'modern', subject: 'example', mode: 'screen' }
+
+    const result = filterAllowlisted(violations, allowlist, key)
+    // Only placeholder should remain (clipped-text is covered by allowlist)
+    expect(result.remaining).toEqual([])
+    // placeholder entry is stale (no matching violation)
+    expect(result.staleEntries.map(e => e.rule)).toContain('placeholder')
+  })
+
+  test('name-lines: two spans on one line is ok', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name><span style="display:inline">Ada</span> <span style="display:inline">Lovelace</span></h1>'))
+    expect(rules(await auditLayout(page, '#root'))).not.toContain('name-lines')
+  })
+
+  test('name-lines: two spans forced to three lines is a violation', async ({ page }) => {
+    await page.setContent(page780('<h1 data-cv-name style="width:50px;overflow-wrap:break-word"><span style="display:inline">Ada</span> <span style="display:inline">Lovelace</span></h1>'))
+    expect(rules(await auditLayout(page, '#root'))).toContain('name-lines')
   })
 })
