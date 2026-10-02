@@ -340,13 +340,18 @@ function App() {
   // example" button so the builder loads that example's CV instead of the
   // blank/demo default. uiReducer's createInitialUiState reads templateId
   // back off the URL on mount; ResumeBuilderPage reads exampleId.
-  const goToBuilder = useCallback((templateId, exampleId) => {
+  // options.blank is set by a template page's "Start blank with this
+  // template" button: it must NOT fall into the onboarding-demo branch of
+  // loadInitialCvSession just because this is a first-time visitor — the
+  // visitor explicitly asked for blank, not a demo.
+  const goToBuilder = useCallback((templateId, exampleId, options = {}) => {
     setView('builder')
 
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams()
       if (typeof templateId === 'string' && templateId) params.set('template', templateId)
       if (typeof exampleId === 'string' && exampleId) params.set('example', exampleId)
+      if (options.blank) params.set('blank', '1')
       const query = params.toString() ? `?${params}` : ''
       const nextPath = `${VIEW_HEAD.builder.path}${query}`
 
