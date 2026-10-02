@@ -60,15 +60,33 @@ test.describe('Template pages', () => {
     // preview's text as an immediate snapshot (no Playwright auto-retry
     // polling) right after the click, while the import is still in
     // flight: it must already have dropped the frontend-developer
-    // example's content (falling back to the demo CV instead), not keep
-    // showing it until the import settles.
+    // example's content, not keep showing it until the import settles —
+    // and (Finding 3) it must show the loading placeholder, not the demo
+    // CV, while waiting.
     const immediateText = await preview.innerText()
     expect(immediateText).not.toContain('Mikael Laine')
+    expect(immediateText).not.toContain('Alex Morgan')
+    await expect(preview).toHaveAttribute('aria-busy', 'true')
 
     // Once the delayed chunk resolves, the preview must show the
     // data-engineer person, proving the race was real and is now won by
     // the right example (not just "not Mikael Laine").
     await expect(preview).toContainText('Elina Virtanen')
+    await expect(preview).not.toHaveAttribute('aria-busy', 'true')
+  })
+
+  test('the preview shows a placeholder, not the demo CV, on first paint', async ({ page }) => {
+    // Delay every example chunk so first paint is observable before any
+    // example has resolved.
+    await page.route('**/*frontend-developer*.js', async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      await route.continue()
+    })
+    await page.goto('/free-cv-templates/developer')
+    const preview = page.locator('.template-page__preview')
+    const immediateText = await preview.innerText()
+    expect(immediateText).not.toContain('Alex Morgan')
+    await expect(preview).toContainText('Mikael Laine')
   })
 
   test('an unknown ?example= falls back to the first example', async ({ page }) => {
@@ -90,6 +108,14 @@ test.describe('Template pages', () => {
     await expect(page).toHaveURL(/\/free-cv-templates\/european$/)
     await page.getByRole('link', { name: /Next template/ }).click()
     await expect(page).toHaveURL(/\/free-cv-templates\/minimalist$/)
+  })
+
+  test('the preview has a visually hidden caption and the pager has its own nav label', async ({ page }) => {
+    await page.goto('/free-cv-templates/developer')
+    await expect(page.locator('.template-page__preview .sr-only')).toHaveText(
+      'Preview: Frontend developer example in the Developer template',
+    )
+    await expect(page.getByRole('navigation', { name: 'Template navigation' })).toBeVisible()
   })
 
   test('a hub card links to its template page', async ({ page }) => {
@@ -182,5 +208,31 @@ test.describe('Template pages', () => {
     await page.goto('/cv?template=developer&example=frontend-developer')
     await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Developer')
     await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Grace Hopper')
+    // Finding 2: a valid ?example= for the selected template gets a toast
+    // that tells the user their restored CV won, not the generic restore
+    // toast — so they know why the example didn't load.
+    await expect(page.getByText("Kept your restored CV. Use 'Load demo CV' to start over.")).toBeVisible()
+  })
+
+  test('"Start blank with this template" opens a blank builder, not the onboarding demo', async ({ page }) => {
+    // Fresh context (Playwright default), so portifycv-onboarding-seen is
+    // unset — exactly the first-time-visitor state this bug was in.
+    await page.goto('/free-cv-templates/developer')
+    await page.getByRole('button', { name: 'Start blank with this template' }).click()
+    await expect(page).toHaveURL(/\/cv\?template=developer$/)
+    await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Developer')
+    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('')
+    await expect(page.getByText('Alex Morgan')).toHaveCount(0)
+    await expect(page.getByText('Loaded a sample CV')).toHaveCount(0)
+  })
+
+  test('a failed example load shows an error toast instead of silently keeping the blank CV', async ({ page }) => {
+    // Force the frontend-developer example chunk to fail so loadExampleCv
+    // resolves null (its catch branch), simulating a stale chunk after a
+    // deploy.
+    await page.route('**/*frontend-developer*.js', (route) => route.abort())
+    await page.goto('/cv?template=developer&example=frontend-developer')
+    await expect(page.getByText("Couldn't load that example.")).toBeVisible()
+    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('')
   })
 })
