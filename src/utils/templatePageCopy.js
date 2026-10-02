@@ -184,7 +184,7 @@ export const TEMPLATE_PAGE_COPY = {
       tips: [
         'Aloita Projektit-osio teknologiamerkillä per kortti — se on yksi visuaalinen elementti, jota tavallinen luettelo ei anna.',
         'Tapaustutkimukset on oma pääosionsa, erillään Projekteista; käytä sitä yhteen tai kahteen työhön, joka ansaitsee pidemmän läpikäynnin, ei toistolistaa.',
-        'Suositukset päättää pääpalstan, Koulutuksen jälkeen — lyhyt lainaus esimieheltä tai asiakkaalta toimii sosiaalisena näyttönä juuri ennen sivun loppua.',
+        'Suositukset päättävät pääpalstan, Koulutuksen jälkeen — lyhyt lainaus esimieheltä tai asiakkaalta toimii sosiaalisena näyttönä juuri ennen sivun loppua.',
       ],
     },
   },
