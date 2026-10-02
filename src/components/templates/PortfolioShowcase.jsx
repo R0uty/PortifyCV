@@ -691,7 +691,7 @@ export default function PortfolioShowcase({
           <p className="portfolio-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="portfolio-showcase__name">
+          <h1 className="portfolio-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

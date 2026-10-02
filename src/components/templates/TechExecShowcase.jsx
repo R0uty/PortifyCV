@@ -515,7 +515,7 @@ export default function TechExecShowcase({
           <p className="tech-exec-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="tech-exec-showcase__name">
+          <h1 className="tech-exec-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

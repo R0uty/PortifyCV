@@ -488,7 +488,7 @@ export default function TimelineShowcase({
           <p className="timeline-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="timeline-showcase__name">
+          <h1 className="timeline-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

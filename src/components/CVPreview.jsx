@@ -1916,6 +1916,7 @@ function CVPreview({
 
             {/* Full name heading — uses template-specific font size and weight */}
             <h3
+              data-cv-name
               className={`leading-none ${
                 atsFriendlyMode ? 'mt-2 text-4xl font-semibold tracking-tight text-gray-900' : t.headerTitle()
               }`}

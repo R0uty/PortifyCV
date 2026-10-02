@@ -628,7 +628,7 @@ export default function DeveloperShowcase({
       className={`dev-showcase preview-document--designer tpl-density-standard ${animationEnabled ? '' : 'dev-showcase--no-animation'}`}
     >
       {showDecorations ? (
-        <div className="dev-showcase__bg" data-export-ignore="true" aria-hidden="true">
+        <div className="dev-showcase__bg" data-export-ignore="true" data-decorative aria-hidden="true">
           <span className="dev-showcase__blob dev-showcase__blob--teal" />
           <span className="dev-showcase__blob dev-showcase__blob--purple" />
           <span className="dev-showcase__blob dev-showcase__blob--blue" />
@@ -641,7 +641,7 @@ export default function DeveloperShowcase({
           <p className="dev-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`}>
+          <h1 className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`} data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

@@ -486,7 +486,7 @@ export default function CompactShowcase({
           <p className="compact-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="compact-showcase__name">
+          <h1 className="compact-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

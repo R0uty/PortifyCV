@@ -692,7 +692,7 @@ export default function GraduateShowcase({
           <p className="graduate-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="graduate-showcase__name">
+          <h1 className="graduate-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

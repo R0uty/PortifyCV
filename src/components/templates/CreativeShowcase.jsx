@@ -476,7 +476,7 @@ export default function CreativeShowcase({
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),
       }}
     >
-      <div className="creative-showcase__bg" data-export-ignore="true" aria-hidden="true">
+      <div className="creative-showcase__bg" data-export-ignore="true" data-decorative aria-hidden="true">
         <span className="creative-showcase__blob creative-showcase__blob--top" />
         <span className="creative-showcase__blob creative-showcase__blob--bottom" />
       </div>
@@ -486,7 +486,7 @@ export default function CreativeShowcase({
           <p className="creative-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="creative-showcase__name">
+          <h1 className="creative-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

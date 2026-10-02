@@ -637,7 +637,7 @@ export default function ExecutiveShowcase({
           <p className="executive-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="executive-showcase__name">
+          <h1 className="executive-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

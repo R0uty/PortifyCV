@@ -361,7 +361,7 @@ export default function PortraitShowcase({
           <p className="portrait-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="portrait-showcase__name">
+          <h1 className="portrait-showcase__name" data-cv-name>
             <EditableField
               as="span"
               path={{ kind: 'root', field: 'fullName' }}

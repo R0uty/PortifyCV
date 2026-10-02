@@ -424,7 +424,7 @@ export default function NavyProfessionalShowcase({
           <p className="navy-professional-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="navy-professional-showcase__name">
+          <h1 className="navy-professional-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

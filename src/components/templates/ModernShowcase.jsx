@@ -562,7 +562,7 @@ export default function ModernShowcase({
           <p className="modern-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="modern-showcase__name">
+          <h1 className="modern-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

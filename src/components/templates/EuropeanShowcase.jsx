@@ -520,7 +520,7 @@ export default function EuropeanShowcase({
           <p className="european-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="european-showcase__name">
+          <h1 className="european-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

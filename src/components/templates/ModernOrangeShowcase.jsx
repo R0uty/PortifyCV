@@ -549,7 +549,7 @@ export default function ModernOrangeShowcase({
         <p className="modern-orange-showcase__kicker" data-export-ignore="true">
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
-        <h1 className="modern-orange-showcase__name">
+        <h1 className="modern-orange-showcase__name" data-cv-name>
           {directEditDispatch ? (
             <EditableField
               as="span"

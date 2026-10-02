@@ -452,7 +452,7 @@ export default function QuadrantShowcase({
         <p className="quadrant-showcase__kicker" data-export-ignore="true">
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
-        <h1 className="quadrant-showcase__name">
+        <h1 className="quadrant-showcase__name" data-cv-name>
           {directEditDispatch ? (
             <EditableField
               as="span"

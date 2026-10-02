@@ -340,7 +340,7 @@ export default function EditorialShowcase({
           <p className="editorial-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="editorial-showcase__name">
+          <h1 className="editorial-showcase__name" data-cv-name>
             <EditableField
               as="span"
               path={{ kind: 'root', field: 'fullName' }}

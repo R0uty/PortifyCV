@@ -480,7 +480,7 @@ export default function ColorfulCompactShowcase({
           {/* The two-tone split can't live inside one contentEditable field,
               so Direct Edit shows the whole name as one field (in the lead
               colour — see colorfulCompact.css), like Modern Timeline. */}
-          <h1 className="colorful-compact-showcase__name">
+          <h1 className="colorful-compact-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
