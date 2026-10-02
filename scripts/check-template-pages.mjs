@@ -122,11 +122,6 @@ check('every template page is in sitemap.xml', missingFromSitemap.length === 0, 
 const { EXAMPLES, TEMPLATE_EXAMPLES, loadExampleCv } = await importSrc('utils/exampleCvs.js')
 const { parseImportedCvData, createInitialCvData, CV_SECTION_ORDER_KEYS } = await importSrc('utils/cvForm.js')
 const { hasSectionContent, hideEmptySections } = await importSrc('utils/sectionContent.js')
-// All 24 example files exist as of Task 8. Strict now: a person whose
-// loader still points at a _pending-style stub fails the check instead of
-// just being reported as pending. Reads the registry, not the filesystem,
-// so it agrees with what Vite builds.
-const REQUIRE_ALL_EXAMPLES = true
 
 for (const template of cvTemplates) {
   const ids = TEMPLATE_EXAMPLES[template.id] ?? []
@@ -138,13 +133,8 @@ const usedIds = new Set(Object.values(TEMPLATE_EXAMPLES).flat())
 const unused = Object.keys(EXAMPLES).filter((id) => !usedIds.has(id))
 check('every registered example is used by a template', unused.length === 0, unused.join(', '))
 
-const pending = []
 for (const [exampleId, entry] of Object.entries(EXAMPLES)) {
   check(`${exampleId}: has en and fi role labels`, Boolean(entry.role?.en && entry.role?.fi))
-  if (entry.load.toString().includes('_pending')) {
-    pending.push(exampleId)
-    continue
-  }
 
   const templatesUsingIt = cvTemplates.filter((template) => (TEMPLATE_EXAMPLES[template.id] ?? []).includes(exampleId))
   const requiredSections = [...new Set(templatesUsingIt.flatMap((template) => template.primarySections))]
@@ -199,11 +189,6 @@ check(
   'hideEmptySections hides languages for frontend-developer/en',
   hiddenFrontendDeveloper.sectionVisibility.languages === false,
 )
-
-if (pending.length > 0) {
-  console.log(`pend  ${pending.length} example file(s) not written yet: ${pending.join(', ')}`)
-}
-check('all example files exist', !REQUIRE_ALL_EXAMPLES || pending.length === 0, pending.join(', '))
 
 if (failures > 0) {
   console.log(`\n${failures} template-page check(s) failed.`)
