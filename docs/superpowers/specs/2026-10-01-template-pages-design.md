@@ -42,8 +42,8 @@ CVs also become the stress data for Phase 2 (template polish).
 │ │ one-line description       │  │  full CVPreview of the selected    │ │
 │ │ Best for: …                │  │  example, scaled to fit the column │ │
 │ │ Layout facts (chips):      │  │  (normal mode; "ATS view" toggle   │ │
-│ │  2 columns · photo · N     │  │   flips it to the ATS rendering)   │ │
-│ │  sections · ATS mode       │  │                                    │ │
+│ │  2 columns · N sections    │  │   flips it to the ATS rendering)   │ │
+│ │                            │  │                                    │ │
 │ │ Examples: [Frontend dev]   │  │                                    │ │
 │ │  [Data engineer] [Junior]  │  │                                    │ │
 │ │ [ Use this example ]       │  │                                    │ │
@@ -55,6 +55,14 @@ CVs also become the stress data for Phase 2 (template polish).
 ```
 
 Under 1024px the columns stack: text and buttons first, then the preview.
+
+As shipped, the layout-facts chips are columns + section count only — no
+"photo" chip, because no template config exposes a per-template photo
+capability flag to read (`cvTemplates.js` has no such field, so a chip
+for it would have to be invented rather than read from existing data);
+and no separate "ATS mode" chip, because the ATS view toggle right below
+the chips already demonstrates that live on every template, making a
+static chip redundant.
 
 - **Example switcher:** a segmented control (`role="radiogroup"`) with one
   option per example, labelled by role ("Frontend developer"). Switching
@@ -153,7 +161,7 @@ A single component for all 18 pages. It reads:
 
 - the template from `getCvTemplates(locale)` (label, description,
   `primarySections`/`secondarySections` for the section count, `layout` for
-  the column fact, photo capability),
+  the column fact),
 - the per-template copy from `templatePageCopy.js`,
 - the per-template `metaDescription` is NOT read here — it's only used by
   `pageMeta.js`'s `VIEW_HEAD`, from the separate `templateMetaDescriptions.js`,

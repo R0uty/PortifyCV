@@ -117,8 +117,9 @@ and 2–3 examples, every example loads and round-trips through
 `parseImportedCvData` in both locales with a fictional `@example.com`
 email, every example fills every primary section of each template it's
 listed under, every template has a 3-tip, bilingual `templatePageCopy`
-entry with a 50–160 character English `metaDescription`, and every slug
-appears in `public/sitemap.xml`. All seven scripts are framework-free Node
+entry and a 50–160 character English `metaDescription` (in the separate
+`templateMetaDescriptions.js`), and every slug appears in
+`public/sitemap.xml`. All seven scripts are framework-free Node
 harnesses, no test runner required; CI runs them all on every push and
 pull request.
 

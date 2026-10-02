@@ -4,6 +4,30 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template pages fix wave — 2026-10-02
+
+Fixes from the final whole-branch review of the `v1.4.0` template pages,
+before the PR into `main`. "Start blank with this template" now opens
+`/cv?template=<id>&blank=1`, a new branch in `loadInitialCvSession`
+(after the share-link and session-snapshot branches) that returns a
+blank CV with no onboarding-demo toast, instead of falling into the
+first-time-visitor demo branch; the `blank` param is stripped from the
+URL on mount the same way `example` is. When a session snapshot is
+restored and the URL also carries a valid `?example=` for the selected
+template, the init toast now says "Kept your restored CV. Use 'Load demo
+CV' to start over." instead of the generic restore toast, so the visitor
+knows why the example link didn't take over. On `TemplateDetailPage`, the
+preview shows a same-sized loading placeholder (with `aria-busy` on the
+preview container) while an example is in flight, including on first
+paint — the demo CV only ever shows once a load has resolved to null
+(missing/failed example). The builder now shows an error toast
+("Couldn't load that example." / fi) when a `?example=` link resolves
+null instead of silently staying blank. Accessibility: the preview gets a
+visually hidden caption ("Preview: <role> example in the <Label>
+template" / fi), and the pager's `<nav aria-label>` is now "Template
+navigation" / "Pohjien selaus" instead of duplicating the "All templates"
+link text.
+
 ## Template pages — 2026-10-02
 
 Closes out the `v1.4.0` branch for its pull request into `main`. Each of
@@ -11,8 +35,8 @@ the 18 templates now has its own public page at
 `/free-cv-templates/<slug>` (slugs are permanent once shipped): the
 template rendered full-size with 2–3 switchable example CVs, per-template
 copy (who it suits, three layout tips, an English `metaDescription`), the
-breadcrumb structured data the worker already attaches to every route,
-and a "Use this example" link that opens the builder with that template
+breadcrumb structured data the worker now attaches to every template
+page, and a "Use this example" link that opens the builder with that template
 and example preloaded. 24 fictional example people (`src/utils/examples/`,
 registered in `exampleCvs.js`) cover the 18 templates' 2–3 example slots,
 shared across templates where the fit is real; each person fills every
@@ -46,7 +70,7 @@ chunk is now **36.46 kB gzip**, +1.29 kB over the `v1.3.0` baseline — under
 the ~2 KB target. Each example CV is still its own small lazy chunk
 (verified via `ls dist/assets`).
 
-Three visual issues were observed in example previews during this work
+Four visual issues were observed in example previews during this work
 and deliberately left for Phase 2 template polish rather than fixed here
 (sidebar link truncation, a long name wrapping to four lines in Navy
 Professional, long previews running to 2+ A4 pages, Modern Orange

@@ -2152,7 +2152,7 @@ Full reasoning per item is in `changes.md`; per-commit detail is in git.
 
 ## Phase 2 inputs (from template-page examples)
 
-Observed by the controller's visual audits of the template pages (desktop, dev server, 2026-10). Don't fix template CSS as part of Task 8 — these are inputs for Phase 2.
+Observed by the controller's visual audits of the template pages (desktop, dev server, 2026-10). Deferred to Phase 2 (template polish).
 
 - Sidebar link values are ellipsis-truncated (e.g. "linkedin.com/in/example-…", "github.com/example-…") in Modern Professional, Portfolio Hybrid, Executive and Tech Executive (product-manager, finance-director, operations-manager, engineering-director, cto examples).
 - Navy Professional: the long name "Maximilian Alexander Vandenberg-Lindqvist" (cto example) wraps to 4 lines at 24px in the narrow sidebar header (clean word/hyphen breaks, but tall); Tech Executive keeps it on 1 line.
