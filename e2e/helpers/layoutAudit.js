@@ -1,0 +1,136 @@
+// Layout audit for rendered CVs (Phase 2 template polish). auditLayout runs
+// in the browser against one rendered CV root and returns rule violations;
+// the template harness (template-layout.spec.js) treats any violation that
+// is not allowlisted as a failure. Rules map to docs/template-design-system.md
+// §7 (content edge cases). Thresholds live here and nowhere else.
+
+export const LAYOUT_THRESHOLDS = {
+  maxNameLines: 2, // §7.1
+  maxPages: 2.0, // Phase 2 decision: typical CV ≤ 2 A4 pages
+  overflowTolerancePx: 2,
+}
+
+// Fonts change line breaks; measure only after they've loaded.
+export async function waitForStableLayout(page) {
+  await page.waitForLoadState('networkidle')
+  await page.evaluate(() => document.fonts.ready)
+}
+
+export async function auditLayout(page, rootSelector, opts = {}) {
+  const violations = await page.evaluate(
+    ({ rootSelector, thresholds, checkLength }) => {
+      const root = document.querySelector(rootSelector)
+      if (!root) return [{ rule: 'missing-root', detail: rootSelector }]
+
+      const violations = []
+      const add = (rule, detail) => violations.push({ rule, detail })
+      const scale = root.getBoundingClientRect().width / root.offsetWidth || 1
+      const rootRect = root.getBoundingClientRect()
+      const isDecorative = (el) => Boolean(el.closest('[data-decorative]'))
+      const label = (el) => `${el.tagName.toLowerCase()}.${String(el.className).trim().split(/\s+/)[0] || ''} "${(el.textContent || '').trim().slice(0, 40)}"`
+      const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())
+
+      for (const el of root.querySelectorAll('*')) {
+        if (isDecorative(el)) continue
+        const rect = el.getBoundingClientRect()
+        if (!rect.width || !rect.height) continue
+
+        if ((rect.right - rootRect.right) / scale > thresholds.overflowTolerancePx) {
+          add('beyond-page', label(el))
+        }
+
+        if (ownText(el)) {
+          const cs = getComputedStyle(el)
+          const hidesX = ['hidden', 'clip'].includes(cs.overflowX) || cs.textOverflow === 'ellipsis'
+          const hidesY = ['hidden', 'clip'].includes(cs.overflowY)
+          if ((hidesX && el.scrollWidth > el.clientWidth + 1) || (hidesY && el.scrollHeight > el.clientHeight + 1)) {
+            add('clipped-text', label(el))
+          }
+        }
+      }
+
+      if (/will appear here|näky\S* tässä/i.test(root.innerText)) {
+        add('placeholder', (root.innerText.match(/[^\n]*(will appear here|näky\S* tässä)[^\n]*/i) || [''])[0].slice(0, 60))
+      }
+
+      // Distinct line boxes = distinct rounded `top` values of the text's client rects.
+      const lineCount = (el) => {
+        const range = document.createRange()
+        range.selectNodeContents(el)
+        const tops = []
+        for (const r of range.getClientRects()) {
+          if (r.width < 1) continue
+          if (!tops.some((t) => Math.abs(t - r.top) < 3 * scale)) tops.push(r.top)
+        }
+        return tops.length
+      }
+
+      const names = [...root.querySelectorAll('[data-cv-name]')].filter((el) => el.getBoundingClientRect().width)
+      if (names.length === 0) {
+        add('name-lines', 'no visible [data-cv-name] element')
+      } else {
+        for (const el of names) {
+          const lines = lineCount(el)
+          if (lines > thresholds.maxNameLines) add('name-lines', `${lines} lines: "${el.textContent.trim()}"`)
+        }
+      }
+
+      // A word whose glyphs land on two line boxes was broken mid-word.
+      // URL/email-like tokens may break anywhere (that's the fix for clipped
+      // links), and hyphens/slashes are legitimate break points.
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+      const reported = new Set()
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (!node.parentElement || isDecorative(node.parentElement)) continue
+        const text = node.textContent
+        const tokens = /\S+/g
+        for (let t = tokens.exec(text); t; t = tokens.exec(text)) {
+          // URL/email-like tokens (any of @ . : /) may break anywhere.
+          if (/[@.:/]/.test(t[0])) continue
+          const parts = /[^\-–—]+/g
+          for (let m = parts.exec(t[0]); m; m = parts.exec(t[0])) {
+            const word = m[0]
+            if (word.length < 4 || reported.has(word)) continue
+            const start = t.index + m.index
+            const range = document.createRange()
+            range.setStart(node, start)
+            range.setEnd(node, start + word.length)
+            const tops = []
+            for (const r of range.getClientRects()) {
+              if (r.width >= 1 && !tops.some((t) => Math.abs(t - r.top) < 3 * scale)) tops.push(r.top)
+            }
+            if (tops.length > 1) {
+              reported.add(word)
+              add('mid-word-break', `"${word}" in ${label(node.parentElement)}`)
+            }
+          }
+        }
+      }
+
+      if (checkLength) {
+        const pages = root.offsetHeight / (root.offsetWidth * 1.414)
+        if (pages > thresholds.maxPages) add('length', `${pages.toFixed(2)} A4 pages`)
+      }
+
+      return violations
+    },
+    { rootSelector, thresholds: LAYOUT_THRESHOLDS, checkLength: Boolean(opts.checkLength) },
+  )
+
+  // Filter out rules that are in the skipRules array
+  if (opts.skipRules && opts.skipRules.length > 0) {
+    return violations.filter((v) => !opts.skipRules.includes(v.rule))
+  }
+
+  return violations
+}
+
+// Splits violations into those not covered by the allowlist, and reports
+// allowlist entries for this key that no longer match anything (stale), so
+// a fixed defect forces its entry to be removed.
+export function filterAllowlisted(violations, allowlist, key) {
+  const entries = allowlist.filter((e) => e.template === key.template && e.subject === key.subject && e.mode === key.mode)
+  const remaining = violations.filter((v) => !entries.some((e) => e.rule === v.rule))
+  const staleEntries = entries.filter((e) => !violations.some((v) => v.rule === e.rule))
+  return { remaining, staleEntries }
+}
