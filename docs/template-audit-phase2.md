@@ -400,7 +400,21 @@ element — Task 8 needs to either tighten Portfolio's card chrome/spacing
 within the `roomy` ramp (not invent an ad-hoc size per §2) or move it to
 `standard`. Template: portfolio. Clears 3 entries. Group: **G8**.
 
-G8 total: **1 fix item, 3 allowlist entries, 1 template** (portfolio).
+**Fix-round-1 addition: two more `length` entries, carried in from G8a.**
+Rendering `achievements`/`technologies` (F14's fix, task 8a, 1.4.8) added
+real content to every experience entry, which pushed two more example CVs
+past the 2.0-page floor:
+- `executive` / `finance-director` — 2.34 A4 pages.
+- `classicProfessional` / `finance-director` — 2.03 A4 pages.
+
+Same root cause class as F13 (density, not a markup bug) — carried into
+this group as direct inputs rather than filed as a new F#, since G8a's own
+task explicitly flagged them as "fixed in Task 8 (G8 density)" at the
+moment they were added. Templates: executive, classicProfessional. Clears
+2 entries.
+
+G8 total: **1 fix item, 5 allowlist entries, 3 templates** (portfolio,
+executive, classicProfessional).
 
 ### G9 — everything else
 

@@ -322,6 +322,7 @@
 }
 
 .portrait-showcase__language-sep {
+  margin: 0 0.4rem;
   color: var(--pt-border);
 }
 
