@@ -10,9 +10,10 @@ import { waitForStableLayout } from './helpers/layoutAudit.js'
 // page 1 of each to an image.
 //
 // Size floor: rounded down from ~⅓ of the smallest observed export (european,
-// 193,261 bytes) — see task-4-report.md for the full per-template size table
-// and the near-blank-export check that validates this floor still separates
-// a blank/near-blank render from a real one.
+// 193,261 bytes), chosen that far below the smallest real export so the
+// floor only catches a genuinely blank/near-blank render (an empty white
+// page compresses far smaller than any populated one) rather than flagging
+// a legitimately short, sparse CV.
 const MIN_PDF_BYTES = 60_000
 
 // Fix round 1 (Task 4): the original spec estimated `expectedPages` from the

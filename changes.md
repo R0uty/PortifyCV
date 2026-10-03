@@ -39,10 +39,13 @@ re-opening the door to fracturing ordinary words once a row got crowded.
 Several templates' name rendering is fixed for long/compound names and
 narrow sidebar columns (Navy Professional's identity rail padding, Modern
 Orange's glued first/last name spans, Executive's and Modern Orange's
-mid-word fragmentation under a tight column floor). Portfolio Hybrid and
-Executive stepped from `standard` to `compact` density (with corrected
-line-heights) to pull their example CVs back under the 2.0-A4-page
-budget after the achievements/technologies fix added real content;
+mid-word fragmentation under a tight column floor). Executive stepped
+from `standard` to `compact` density (with corrected line-heights) to
+pull its example CVs back under the 2.0-A4-page budget after the
+achievements/technologies fix added real content; Portfolio Hybrid
+needed two steps, `roomy`→`standard`→`compact` (the first step alone
+only closed ~5% of its 20–23% overage, since its content is dominated by
+wrapped body text, not whitespace), plus a rhythm trim within `compact`;
 Classic Professional got a smaller rhythm trim within its existing
 `roomy` class for the same reason. Net effect on PDF page counts
 (`EXPECTED_PDF_PAGES`, `e2e/template-pdf.spec.js`): Executive 2→3→2,

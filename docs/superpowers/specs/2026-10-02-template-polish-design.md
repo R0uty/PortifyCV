@@ -149,7 +149,12 @@ Expected groups, to be confirmed by the audit:
   This covers Phase 2 input 2 and the `long-single-word` fixture.
 - **Density.** A template whose examples exceed 2 A4 pages moves to the next
   denser class in §2, or reduces its own entry/section spacing, whichever
-  the audit shows is the cause. This covers Phase 2 input 3.
+  the audit shows is the cause — and when the overage is dominated by
+  wrapped body text rather than whitespace, one class step may not be
+  enough (Portfolio needed `roomy`→`standard`→`compact`, a second step,
+  because the first alone only closed ~5% of a 20–23% overage) and a
+  rhythm trim within the final class still followed. This covers Phase 2
+  input 3.
 - **Sparse layouts.** Collapse empty rails and dividers (§7.5).
 - **Whatever else the harness reports.**
 

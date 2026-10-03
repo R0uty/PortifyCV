@@ -22,10 +22,13 @@ invalidates.
 
 - **Source data:** `e2e/fixtures/layoutAllowlist.js` (54 entries: 24
   example-tier, 30 stress-tier — the Phase 2 baseline recorded by Tasks
-  2–3), the full violation detail in
-  `.superpowers/sdd/2026-10-02-template-polish/layout-baseline.txt`, the PDF
-  pagination/export work in `task-4-report.md`, and the controller's
-  `controller-findings.md`.
+  2–3), the full `template-layout.spec.js` violation detail those entries
+  were drawn from (a `--reporter=line` run against the then-current
+  harness), the PDF pagination/export audit (Task 4: per-template export
+  byte sizes, page counts, and the near-blank-export floor — see
+  `MIN_PDF_BYTES`'s comment in `e2e/template-pdf.spec.js`), and the
+  controller's own ruling on each finding, folded into the per-finding
+  write-ups below rather than kept as a separate document.
 - **Root-cause diagnosis** was done by reading the actual failing element's
   JSX/CSS (file:line cited per finding below), not by re-running the
   harness — the harness already told us *what* fails; this doc explains
@@ -660,7 +663,7 @@ first pass of this doc miscounted this as "6 fix items" by listing F9–F11
 twice and including F14, which fix round 1 moved to its own task, G8a,
 above.) This "6 allowlist entries" is this group's **original Phase 2
 baseline count** (F9 1, F10 2, F11 3), not a running total of G9's current
-state — all 6 are cleared as of Task 9 (1.4.10); see §4 "Accepted
+state — all 6 are cleared as of Task 9 (1.4.10); see §7 "Accepted
 exceptions" below for the one additional, later complication (Task 9's
 own controller item C, resolved without needing any new allowlist entry
 either) and the final, current `LAYOUT_ALLOWLIST` state.
@@ -746,12 +749,12 @@ edge-cases · A = ATS parity · X = export fidelity
 | Graduate | 2 | 2 | **1→2** | 2 | **0** | **1** | **0** | 2 | 2 | 2 | keep | F11 (sidebar heading overflow, structural) fixed 1.4.10 — S restored to 2; F14 fixed |
 | Compact | 2 | 2 | 2 | **1** | 2 | **1** | **0** | 2 | 2 | 2 | keep | F14 fixed; D=1 (ad-hoc, not on the `compact` class) is a carried A.2 finding Task 8/9 did not touch — still open, tracked in `todo.md` follow-ups |
 | Portfolio | 2 | 3 | 2 | **1→2** | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1 and F14 fixed; F13 (all 3 example CVs over the 2.0-page cap) fixed 1.4.9 by stepping `standard`→`compact` with corrected line-heights — D restored to 2 |
-| TechExec | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1 and F14 fixed |
+| TechExec | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1 and F14 fixed; I-2 (final fix wave) stepped density `standard`→`compact` plus a rhythm trim to pull `engineering-director` back under 1 PDF page (~7.4% margin) after F14 added real achievement/technology content pushed it to 2 — D stays 2 |
 | ClassicProfessional | 3 | 3 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F5 (stress name-wrap) fixed; F14 fixed; the `finance-director` example's F13 fix-round-1 overage (2.03 pages) resolved with a ~10% rhythm trim within `roomy`, no density-class step needed |
 | NavyProfessional | 2 | 2 | 2 | 2 | **0** | 2 | **0** | 2 | 2 | 2 | keep | F7 (real `cto` example wrapping the name to 4 lines) fixed 1.4.7 by cutting identity-rail padding and stepping the name to a smaller-than-any-density size (documented §2 gap, now without the wrap symptom); F14 fixed |
 | ModernOrange | 3 | 3 | 3 | 2 | **0** | 2 | **0** | 2 | 2 | 2 | keep | F4 (clipped skills), F6 (mid-word break) and F8 (glued name halves) all fixed 1.4.6/1.4.7; F14 fixed |
 | ColorfulCompact | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F2 (stress clipped links) and F14 fixed |
-| Quadrant | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F3 (clipped links, no ellipsis) and F5 (stress name-wrap) fixed; F14 fixed |
+| Quadrant | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F3 (clipped links, no ellipsis) and F5 (stress name-wrap) fixed; F14 fixed; I-2 (final fix wave) rhythm-trimmed the main cell (already `compact`, the densest class — no further step available) to pull `marketing-manager` back under 1 PDF page (~5.2% margin) after F14's added content pushed it to 2 — D stays 2 |
 | Editorial\* | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F2 and F5 fixed; F14 fixed |
 | Portrait\* | 2 | 2 | **3** | 2 | **0** | **1** | **0** | 2 | 2 | 2 | keep | F10 (glued language separator, example-tier) fixed 1.4.8; F2/F5 (stress) fixed; F14 fixed; S stays 3 — sole occupant of the `photo-rail + main` family (§5), structure that serves a real use case |
 | European\* | 2 | 2 | **3** | **3** | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1 (stress clipped links) and F14 fixed; S stays 3 (sole occupant of `label-grid`, §5) and D stays 3 (own density-switching one-page mechanism, §5) |
@@ -833,36 +836,56 @@ phase's findings) is the one open item this task did not touch — see
    ruled the fixture's name is harsher than §7.1 intends and Task 7 will
    change it and re-baseline, rather than this being an open question for
    the harness owner.
-2. **Navy Professional's 180px identity rail (F7) is a layout decision, not
-   a bug fix.** Widening it to the 210px floor changes the rail's visual
-   proportion against the rest of the dark sidebar — a redesign call for
-   whoever owns that template's look, not a one-line CSS change. Flagged
-   here per F7; Task 7 should decide between widening the rail or further
-   shrinking the identity type inside it.
-3. **Portfolio's density (F13) may need more than spacing tightening.**
-   All three of Portfolio's own example CVs run long on `roomy` — pushing
-   it to `standard` is a valid Task 8 option per the ruling, but changing a
-   template's declared density class is itself a design call (§2's
-   "starting density assignment" table), not just a CSS edit under the
-   existing class. Flagging the choice rather than making it here.
+2. ~~Navy Professional's 180px identity rail (F7) is a layout decision, not
+   a bug fix~~ — **resolved, not out-of-scope.** The choice this item
+   flagged (widen the rail to the 210px floor, or keep the rail and shrink
+   the identity type further) was decided the latter way: F7 was fixed in
+   1.4.7 by cutting the identity-rail padding and stepping the name to a
+   size smaller than any density class carries (§2's documented gap for
+   this rail width, not a regression — see the `F# table`'s F7 row). The
+   180px rail itself stays; no further rail-width change followed.
+3. ~~Portfolio's density (F13) may need more than spacing tightening~~ —
+   **resolved, not out-of-scope.** Task 8 made the design-class call this
+   item flagged, and needed two density steps to clear the budget, not
+   one: `roomy`→`standard` alone (tried first, since that is the single
+   "next denser class" step a "fit two pages" fix is supposed to need, per
+   this doc's own framing elsewhere) only bought ~5% on Portfolio's worst
+   example, nowhere near the 20–23% overage — Portfolio is dominated by
+   wrapped body text (projects/experience/caseStudies descriptions), not
+   whitespace, so a single class step's smaller type and spacing wasn't
+   enough. `standard`→`compact` (a second step) plus a ~25% rhythm trim
+   within `compact` closed the rest. §2's fix-pass guidance ("step into
+   the next denser class") is amended below with one clause covering this
+   case. Final: `roomy`→`compact`, two steps, not the one-step
+   `standard`→`compact` that `changes.md`/`todo.md` previously recorded
+   (now corrected there too).
 4. **Quadrant's grid family (2×2 cells) may structurally fight long
    content regardless of the link-truncation fix (F3).** `template-audit-
    a2.md` already noted "dead space top-right quadrant, uneven fill" as a
    pre-existing structural note; this audit's F3/F5 findings are
    consistent with that same cramped-cell problem rather than new evidence
-   of a different issue. Not re-litigated here.
-5. **The flat renderer's blanket `word-break: break-word` rule (F9's root
+   of a different issue. Not re-litigated here. (Narrower, since-resolved
+   issue: the final fix wave's I-2 trimmed Quadrant's main-cell rhythm so
+   its `marketing-manager` example's PDF export fits 1 page with ~5.2%
+   margin — a page-count fix, not a change to this item's cell-fill-
+   evenness concern, which stays open.)
+5. ~~The flat renderer's blanket `word-break: break-word` rule (F9's root
    cause, `app-shell.css:3046-3052`) applies app-wide, to every `h3`/`h4`/
-   `p`/`span` under `.preview-document` — not just Minimal's link row.**
-   F9 only files the one violation the harness actually caught (Minimal's
-   stress case), but the same permissive rule is live for every template's
-   ATS-mode render too (ATS mode uses `.preview-document`). It didn't
-   surface elsewhere in Phase 2's matrix, but a future stress fixture or a
-   real CV with an unusually narrow ATS column could trip it anywhere the
-   flat renderer runs. Worth a floor-based fix (per the §2 Modern-Orange
-   lesson: a floor on the shrinking element, not just permission to break)
-   rather than a Minimal-only patch — flagging the scope for Task 9 to
-   decide, not fixing the global rule here.
+   `p`/`span` under `.preview-document` — not just Minimal's link row~~ —
+   **resolved, not out-of-scope.** The global rule itself was changed, not
+   just Minimal's one violation: `.preview-document h3, h4, p, span` now
+   sets only `overflow-wrap: break-word` (`src/styles/app-shell.css`,
+   currently ~lines 3043-3059) with no `word-break: break-word` /
+   `min-width: 0` alongside it. `overflow-wrap: break-word` only breaks a
+   word when it has no other way to fit its line and does not lower the
+   element's min-content size, so a flex-shrunk ancestor (the same
+   `.minimal-inline` links-row shape F9 found) can no longer force an
+   ordinary short label to fracture mid-word anywhere under
+   `.preview-document` — ATS mode included, closing the app-wide exposure
+   this item flagged, not just Minimal's stress case. A genuinely
+   unbreakable value (URL/email) still opts in to real anywhere-breaking
+   via `.tpl-value-breakable` (`src/styles/templates/_system.css`) itself,
+   per §6.
 
 ---
 
@@ -935,13 +958,13 @@ coverage) · G8 = 3 entries (F13 3) · G9 = 6 entries (F9 1, F10 2, F11 3) +
 **original Phase 2 baseline** (the 54 entries this doc's "Method &
 evidence" section cites as the starting point) — every one of these 54
 is cleared as of Task 9 (1.4.10). It does not include the 7 entries Task
-9 fix round 1 briefly added and fix round 2 then removed again (§4
+9 fix round 1 briefly added and fix round 2 then removed again (§7
 "Accepted exceptions" has the full story) — those were never part of this
 baseline. Current `LAYOUT_ALLOWLIST`: `[]`.
 
 ---
 
-## 4. Accepted exceptions
+## 7. Accepted exceptions
 
 None. `LAYOUT_ALLOWLIST` (`e2e/fixtures/layoutAllowlist.js`) is `[]` as of
 1.4.10. All findings above (F1–F14) are fixed; see "Task 9 fix round 2"
@@ -1001,5 +1024,6 @@ Both are verified with RED/GREEN fixtures in `e2e/layout-audit-helper.spec.js`
 (the `mid-word-break: exempts only genuinely-too-wide words` block) and a
 real-render regression case, `e2e/fixtures/stressCvs.js`'s
 `crowded-skills` fixture (several ordinary longish skills, checked across
-all 18 templates for any mid-word break). Full RED/GREEN transcript in
-`task-9-report.md`.
+all 18 templates for any mid-word break) — both specs are in the repo and
+reproduce the RED (pre-fix) and GREEN (post-fix) result by running them
+against each state directly, rather than a saved transcript.

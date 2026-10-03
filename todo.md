@@ -2156,8 +2156,8 @@ Observed by the controller's visual audits of the template pages (desktop, dev s
 
 - ~~Sidebar link values are ellipsis-truncated...~~ — fixed 1.4.6 (F1/G6): replaced the ellipsis rule with the shared `.tpl-value-breakable` primitive (`src/styles/templates/_system.css`).
 - ~~Navy Professional: the long name "Maximilian Alexander Vandenberg-Lindqvist" (cto example) wraps to 4 lines...~~ — fixed 1.4.7 (F7/G7): cut the identity-rail's own padding and stepped the name to a smaller size; the 180px rail (narrower than the standard 210px floor) stays a documented §2 gap, but the wrap symptom is gone.
-- ~~Long previews... check whether these templates' density/spacing is the cause.~~ — fixed 1.4.9 (F13/G8): Portfolio and Executive stepped `standard`→`compact` with corrected line-heights, Classic Professional got a ~10% rhythm trim within `roomy`; all examples now fit the 2.0-A4-page budget.
-- ~~Modern Orange clips long skill names with an ellipsis...~~ — fixed 1.4.6 (F4/G6): same `.tpl-value-breakable` primitive applied to `.modern-orange-showcase__skill-name`.
+- ~~Long previews... check whether these templates' density/spacing is the cause.~~ — fixed 1.4.9 (F13/G8): Executive stepped `standard`→`compact` with corrected line-heights; Portfolio needed two steps, `roomy`→`standard`→`compact` (its content is dominated by wrapped body text, so one step alone only closed ~5% of the overage), plus its own rhythm trim within `compact`; Classic Professional got a ~10% rhythm trim within `roomy`; all examples now fit the 2.0-A4-page budget.
+- ~~Modern Orange clips long skill names with an ellipsis...~~ — fixed 1.4.6 (F4/G6): the `.tpl-text-wrappable` primitive (ordinary word text — a skill name isn't an unbreakable URL/email value) applied to `.modern-orange-showcase__skill-name`.
 
 ### Follow-ups (not fixed in Phase 2, left for a future pass)
 
