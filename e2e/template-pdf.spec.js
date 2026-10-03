@@ -47,6 +47,23 @@ const MIN_PDF_BYTES = 60_000
 // (both had been pushed over by 8a's added content) dropped their PDF
 // export page counts back down. executive 3→2, portfolio 3→2 — a
 // deliberate layout change, not a regression.
+// I-2 (final fix wave, Phase 2 template polish): techExec (engineering-
+// director) and quadrant (marketing-manager) each spilled one line/card
+// onto a second page — a knife-edge overage, not more content. Fix:
+// techExec stepped tpl-density-standard→compact (plus the same compact-
+// correct line-height corrections the standard→compact precedent above
+// made for executive/portfolio) and both templates got a template-local
+// rhythm trim (src/styles/templates/techExec.css, quadrant.css). The
+// trim also caught a real bug feeding the overage in both files: their
+// `.{template}-showcase__bullets` is a bare <ul>, and tokens.css's reset
+// only clears p/h1-6 margins, not ul/ol — so each bullet list carried an
+// invisible ~1em UA-default margin-bottom on top of its own margin-top,
+// which (via margin collapsing) also swallowed any margin-top trim on
+// whatever followed it. Both now export at 1 page with real measured
+// margin (main column content bottom vs printable page height, at the
+// exact 831px-wide designer export clone html2canvas rasterizes):
+// techExec/engineering-director ~7.4%, quadrant/marketing-manager ~5.2%.
+// techExec 2→1, quadrant 2→1.
 const EXPECTED_PDF_PAGES = {
   minimal: 2,
   developer: 2,
@@ -57,12 +74,12 @@ const EXPECTED_PDF_PAGES = {
   graduate: 2,
   compact: 1,
   portfolio: 2,
-  techExec: 2,
+  techExec: 1,
   classicProfessional: 2,
   navyProfessional: 1,
   modernOrange: 2,
   colorfulCompact: 1,
-  quadrant: 2,
+  quadrant: 1,
   editorial: 2,
   portrait: 2,
   european: 2,

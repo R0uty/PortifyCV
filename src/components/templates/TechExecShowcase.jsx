@@ -514,7 +514,7 @@ export default function TechExecShowcase({
       // of its own) that ResumeBuilderPage's export handler polls for before
       // starting a PDF export. TechExecShowcase only ever renders in non-ATS
       // mode, so it's always "designer" — omitting it hangs the export.
-      className="tech-exec-showcase preview-document--designer tpl-density-standard"
+      className="tech-exec-showcase preview-document--designer tpl-density-compact"
       style={{
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, TECHEXEC_DEFAULT_ACCENT_COLOR),
