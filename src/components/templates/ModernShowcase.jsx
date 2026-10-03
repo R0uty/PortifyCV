@@ -36,6 +36,7 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // Small outline glyph for interest chips — a single shared glyph rather than
 // per-interest icon matching, consistent with the Creative template's choice.
@@ -45,10 +46,6 @@ function InterestGlyph() {
       <path d="M12 3l2.2 5.6L20 10l-4.4 3.8L17 20l-5-3.2L7 20l1.4-6.2L4 10l5.8-1.4L12 3z" />
     </svg>
   )
-}
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
 }
 
 // Bolds simple metric-shaped tokens (percentages, multipliers, counts,
@@ -79,7 +76,9 @@ function highlightMetrics(text) {
 // entry in its own .direct-edit-entry div, making every item a last child.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, showTimeline, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div
@@ -126,21 +125,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, showTime
           <p className="modern-showcase__dates">{dateRange || copy.datesPending}</p>
         </div>
         {directEditDispatch ? (
-          <p className="modern-showcase__bullets modern-showcase__bullets--editing">
-            <EditableField
-              as="span"
-              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-              value={item.description}
-              placeholder={copy.descriptionPlaceholder}
-              multiline
-            />
-          </p>
+          <>
+            <p className="modern-showcase__bullets modern-showcase__bullets--editing">
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+                value={item.description}
+                placeholder={copy.descriptionPlaceholder}
+                multiline
+              />
+            </p>
+            {achievements.length > 0 ? (
+              <ul className="modern-showcase__bullets">
+                {achievements.map((line, lineIndex) => (
+                  <li key={lineIndex}>{highlightMetrics(line)}</li>
+                ))}
+              </ul>
+            ) : null}
+          </>
         ) : bullets.length > 0 ? (
           <ul className="modern-showcase__bullets">
             {bullets.map((line, lineIndex) => (
               <li key={lineIndex}>{highlightMetrics(line)}</li>
             ))}
           </ul>
+        ) : null}
+        {technologies.length > 0 ? (
+          <p className="modern-showcase__company">{technologies.join(' · ')}</p>
         ) : null}
       </div>
     </div>

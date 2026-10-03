@@ -298,10 +298,10 @@ Showcases; add an example-tier e2e content-coverage check so this can't
 regress silently again; update `EXPECTED_PDF_PAGES` deliberately once
 rendering these fields lengthens the affected example CVs' exports.
 
-**F14 — Every bespoke Showcase except three drop the experience entry's
-`achievements` and `technologies` fields in normal/non-ATS-bypass
-rendering. This is the single largest finding in this audit — see the
-content-coverage table below for the full matrix.**
+**F14 — fixed (1.4.8).** Every bespoke Showcase except three drop the
+experience entry's `achievements` and `technologies` fields in
+normal/non-ATS-bypass rendering. This is the single largest finding in
+this audit — see the content-coverage table below for the full matrix.
 
 Root cause, one pattern, confirmed in **17 separate files** (fix-round-1
 correction: only **3** of the 17 actually import the shared helper; the
@@ -359,7 +359,30 @@ have caught this; it surfaced from this audit's content-coverage pass, per
 the task-5 ruling. Group: **G8a** (fix-round-1 correction — was G9).
 
 G8a total: **1 fix item, 0 allowlist entries, 17 templates** (all but
-minimal).
+minimal). Two new `length` allowlist entries were added as a direct,
+deliberate input of this fix — rendering more content lengthens a CV —
+and are carried into G8's table below (`executive`/`finance-director`,
+`classicProfessional`/`finance-director`, reason: "G8a lengthened the CV
+— fixed in Task 8 (G8 density)").
+
+**Fix-round-1 addition: F10 (below, filed under G9) was fixed early, as
+part of G8a, not deferred to Task 9.** G8a's content-coverage test
+exposed a *different* example CV (`portrait`/`chef`) hitting the exact
+same glued-separator defect F10 describes, because rendering the new
+technologies line shifted the page's content height and, with it, which
+example's language row happened to wrap at the separator. Per this task's
+own constraint ("fix new mid-word/clipping/overflow violations here, not
+allowlist them"), the actual defect — `.portrait-showcase__language-sep`
+rendering with no real whitespace character, compounded by `display:
+inline-block` making the audit treat it as its own text container and
+drop it (and any space inside it) from the surrounding `<p>` entirely —
+was fixed directly: the separator's text content is now `" · "` (real
+spaces) and `display: inline-block` was removed. All three Portrait
+examples (`brand-specialist`, `chef`, `architect`) now pass the
+`mid-word-break` check in normal mode; the two baseline allowlist entries
+for `brand-specialist`/`architect` were removed as stale. F10's own G9
+entry below is retained for the record, but its fix already shipped in
+1.4.8 — Task 9 should skip it.
 
 ### G8 — density (length)
 
@@ -404,8 +427,9 @@ is named after: a permissive wrap rule with no floor on the element it's
 applied to. Template: minimal. Clears 1 entry (stress mid-word-break).
 Group: **G9**.
 
-**F10 — Portrait's language separator is glued to the next item with no
-space.**
+**F10 — fixed early (1.4.8, as part of G8a — see that section's note).**
+Portrait's language separator is glued to the next item with no
+space.
 `src/components/templates/PortraitShowcase.jsx:289`:
 ```jsx
 {index > 0 ? <span className="portrait-showcase__language-sep" aria-hidden="true">·</span> : null}

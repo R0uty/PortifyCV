@@ -39,6 +39,7 @@ import {
   getSafeHref,
   createSectionRouter,
 } from './shared'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -94,7 +95,9 @@ function highlightMetrics(text, showMetrics) {
 // around an entry.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics, isFirst, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
   const entryClassName = [
     'executive-showcase__entry',
     // Unconditional marker opting this entry out of executive.css's
@@ -137,21 +140,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetr
         <p className="executive-showcase__entry-dates">{dateRange || copy.datesPending}</p>
       </div>
       {directEditDispatch ? (
-        <p className="executive-showcase__bullets executive-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="executive-showcase__bullets executive-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="executive-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{highlightMetrics(line, showMetrics)}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="executive-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{highlightMetrics(line, showMetrics)}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="executive-showcase__entry-meta">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )

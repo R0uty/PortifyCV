@@ -34,16 +34,13 @@ import {
   createSectionRouter,
 } from './shared'
 import { MODERN_ORANGE_DEFAULT_ACCENT_COLOR } from './modernOrange'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // ATS mode is monochrome for every template in this app (see
 // CVPreview.jsx's generic-path comments) — this template is no exception,
 // even though it otherwise keeps rendering itself (rather than bypassing
 // to the generic renderer) in ATS mode.
 const MODERN_ORANGE_ATS_ACCENT_COLOR = '#374151'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
 
 // Best-effort mapping from free-text proficiency ("Fluent", "B2",
 // "Edistynyt", ...) to a 1-5 dot count. Falls back to a neutral middle
@@ -172,7 +169,9 @@ function EducationRow({ isLast, entryIndex, children }) {
 // snapshot.experience's own (filtered) indices in the read-only call site.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <ExperienceRow
@@ -205,21 +204,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, 
         </p>
       ) : null}
       {directEditDispatch ? (
-        <p className="modern-orange-showcase__bullets modern-orange-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="modern-orange-showcase__bullets modern-orange-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="modern-orange-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="modern-orange-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="modern-orange-showcase__exp-meta">{technologies.join(' · ')}</p>
       ) : null}
     </ExperienceRow>
   )

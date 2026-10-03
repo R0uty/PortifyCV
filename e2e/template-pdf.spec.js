@@ -37,22 +37,27 @@ const MIN_PDF_BYTES = 60_000
 // deliberate layout change (e.g. a density fix) that shifts a template's
 // real page count updates this map in the same commit, and that commit must
 // say why the count changed.
+// Task 8a (G8a, 1.4.8): rendering achievements/technologies that every
+// bespoke Showcase was previously dropping made four templates' PDFs
+// genuinely longer — their experience entries now have more content, not a
+// layout regression. executive 2→3, techExec 1→2, classicProfessional 1→2,
+// quadrant 1→2.
 const EXPECTED_PDF_PAGES = {
   minimal: 2,
   developer: 2,
   creative: 2,
   modern: 2,
-  executive: 2,
+  executive: 3,
   timeline: 2,
   graduate: 2,
   compact: 1,
   portfolio: 3,
-  techExec: 1,
-  classicProfessional: 1,
+  techExec: 2,
+  classicProfessional: 2,
   navyProfessional: 1,
   modernOrange: 2,
   colorfulCompact: 1,
-  quadrant: 1,
+  quadrant: 2,
   editorial: 2,
   portrait: 2,
   european: 2,

@@ -286,7 +286,7 @@ export default function PortraitShowcase({
             <p className="portrait-showcase__language-row">
               {snapshot.languages.map((item, index) => (
                 <span key={`${item.language}-${index}`} className="portrait-showcase__language-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
-                  {index > 0 ? <span className="portrait-showcase__language-sep" aria-hidden="true">·</span> : null}
+                  {index > 0 ? <span className="portrait-showcase__language-sep" aria-hidden="true"> · </span> : null}
                   {item.language}
                   {item.level ? <> – {item.level}</> : null}
                 </span>

@@ -42,10 +42,7 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // Quadrant's own Experience-entry renderer: role and company/location nest
 // in one `min-w-0` div with the dates as its sibling. Only role and company
@@ -58,7 +55,9 @@ function splitToBullets(text) {
 // .direct-edit-entry div, making every entry both.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
   const className = [
     'quadrant-showcase__entry',
     isFirst ? 'quadrant-showcase__entry--first' : '',
@@ -98,21 +97,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst,
         <p className="quadrant-showcase__entry-dates">{dateRange || copy.datesPending}</p>
       </div>
       {directEditDispatch ? (
-        <p className="quadrant-showcase__bullets quadrant-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="quadrant-showcase__bullets quadrant-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="quadrant-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="quadrant-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="quadrant-showcase__entry-meta">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )

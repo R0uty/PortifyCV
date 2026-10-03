@@ -32,10 +32,7 @@ import { accentSoftFill, accentInkMix } from '../../utils/templateAccents'
 import { CREATIVE_DEFAULT_ACCENT_COLOR } from './creative'
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // Creative's own Experience-entry renderer — deliberately NOT
 // directEditExperienceEntry.jsx (the shared module for Classic
@@ -52,7 +49,9 @@ function splitToBullets(text) {
 // call site.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div
@@ -90,21 +89,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIn
         <p className="creative-showcase__exp-dates">{dateRange || copy.datesPending}</p>
       </div>
       {directEditDispatch ? (
-        <p className="creative-showcase__exp-desc creative-showcase__exp-desc--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="creative-showcase__exp-desc creative-showcase__exp-desc--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="creative-showcase__exp-desc">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="creative-showcase__exp-desc">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="creative-showcase__exp-company">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )

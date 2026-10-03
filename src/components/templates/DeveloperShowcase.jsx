@@ -34,14 +34,11 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // The fixed cool-spectrum gradient — Developer's one accent form. Used for
 // the name text, photo ring, section-icon badges and timeline marker.
 const SECTION_ICON_GRADIENT = 'linear-gradient(135deg, var(--dev-teal), var(--dev-blue), var(--dev-purple))'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
 
 // Developer's own Experience-entry renderer: a timeline rail beside a
 // card, like Modern Professional's (not directEditExperienceEntry.jsx's
@@ -55,7 +52,9 @@ function splitToBullets(text) {
 // entry in its own .direct-edit-entry div, making every item a last child.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, showTimeline, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div
@@ -102,21 +101,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, showTime
           <p className="dev-showcase__dates">{dateRange || copy.datesPending}</p>
         </div>
         {directEditDispatch ? (
-          <p className="dev-showcase__bullets dev-showcase__bullets--editing">
-            <EditableField
-              as="span"
-              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-              value={item.description}
-              placeholder={copy.descriptionPlaceholder}
-              multiline
-            />
-          </p>
+          <>
+            <p className="dev-showcase__bullets dev-showcase__bullets--editing">
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+                value={item.description}
+                placeholder={copy.descriptionPlaceholder}
+                multiline
+              />
+            </p>
+            {achievements.length > 0 ? (
+              <ul className="dev-showcase__bullets">
+                {achievements.map((line, lineIndex) => (
+                  <li key={lineIndex}>{line}</li>
+                ))}
+              </ul>
+            ) : null}
+          </>
         ) : bullets.length > 0 ? (
           <ul className="dev-showcase__bullets">
             {bullets.map((line, lineIndex) => (
               <li key={lineIndex}>{line}</li>
             ))}
           </ul>
+        ) : null}
+        {technologies.length > 0 ? (
+          <p className="dev-showcase__company">{technologies.join(' · ')}</p>
         ) : null}
       </div>
     </div>

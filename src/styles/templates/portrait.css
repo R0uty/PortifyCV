@@ -322,8 +322,6 @@
 }
 
 .portrait-showcase__language-sep {
-  display: inline-block;
-  margin: 0 0.75rem;
   color: var(--pt-border);
 }
 

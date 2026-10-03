@@ -29,10 +29,7 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // Experience and Education share the `entry` class, whose spacing and
 // divider depend on position. Both pass isFirst/isLast from their own
@@ -54,7 +51,9 @@ function entryClassName(isFirst, isLast) {
 // index); the read-only call site passes the snapshot's `sourceIndex`.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
   const metaLine = [item.company, item.location].filter(Boolean).join(', ')
 
   return (
@@ -84,21 +83,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst,
         </p>
       ) : metaLine ? <p className="navy-professional-showcase__entry-meta">{metaLine}</p> : null}
       {directEditDispatch ? (
-        <p className="navy-professional-showcase__bullets navy-professional-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="navy-professional-showcase__bullets navy-professional-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="navy-professional-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="navy-professional-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="navy-professional-showcase__entry-meta">{technologies.join(', ')}</p>
       ) : null}
     </div>
   )

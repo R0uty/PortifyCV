@@ -48,10 +48,7 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // Bolds metric-shaped tokens so quantified impact stands out, consistent
 // with every other Showcase's "metrics should be emphasised" treatment.
@@ -79,7 +76,9 @@ function highlightMetrics(text) {
 // entry in its own .direct-edit-entry div, making every item a last child.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div
@@ -124,21 +123,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, 
           <p className="portfolio-showcase__dates">{dateRange || copy.datesPending}</p>
         </div>
         {directEditDispatch ? (
-          <p className="portfolio-showcase__bullets portfolio-showcase__bullets--editing">
-            <EditableField
-              as="span"
-              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-              value={item.description}
-              placeholder={copy.descriptionPlaceholder}
-              multiline
-            />
-          </p>
+          <>
+            <p className="portfolio-showcase__bullets portfolio-showcase__bullets--editing">
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+                value={item.description}
+                placeholder={copy.descriptionPlaceholder}
+                multiline
+              />
+            </p>
+            {achievements.length > 0 ? (
+              <ul className="portfolio-showcase__bullets">
+                {achievements.map((line, lineIndex) => (
+                  <li key={lineIndex}>{highlightMetrics(line)}</li>
+                ))}
+              </ul>
+            ) : null}
+          </>
         ) : bullets.length > 0 ? (
           <ul className="portfolio-showcase__bullets">
             {bullets.map((line, lineIndex) => (
               <li key={lineIndex}>{highlightMetrics(line)}</li>
             ))}
           </ul>
+        ) : null}
+        {technologies.length > 0 ? (
+          <p className="portfolio-showcase__company">{technologies.join(' · ')}</p>
         ) : null}
       </div>
     </div>

@@ -31,6 +31,7 @@ import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTempla
 import { formatDateRange, formatLinkDisplayValue, createSectionRouter } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // The capped, named palette (design-system §3). Assigned by running section
 // position (main sections first, then sidebar), wrapping after six. Order
@@ -40,10 +41,6 @@ const SECTION_COLORS = ['pink', 'orange', 'green', 'teal', 'blue', 'purple']
 // Fixed single colour for the dark header's contact dots — matches the
 // two-tone name's accent half. Not a section, so not part of the cycle.
 const HEADER_ACCENT = 'orange'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
 
 function colorAt(cycle, index) {
   return cycle[index % cycle.length]
@@ -62,7 +59,9 @@ function colorAt(cycle, index) {
 // .direct-edit-entry div, which makes every row a first AND last child.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, color, isFirst, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
   const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
   const rowClassName = [
     'colorful-compact-showcase__exp-row',
@@ -106,21 +105,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, color, i
         </p>
       </div>
       {directEditDispatch ? (
-        <p className="colorful-compact-showcase__bullets colorful-compact-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="colorful-compact-showcase__bullets colorful-compact-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="colorful-compact-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="colorful-compact-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="colorful-compact-showcase__exp-meta">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )

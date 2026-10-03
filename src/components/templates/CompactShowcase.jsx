@@ -37,12 +37,9 @@ import {
   formatLinkLabel,
   formatLinkDisplayValue,
 } from './shared'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 const DENSITY_STEPS = ['cozy', 'snug', 'tight']
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
 
 // Bolds metric-shaped tokens so quantified impact stands out in the tight
 // bullet format, per the spec's "Metrics should be bold."
@@ -69,7 +66,9 @@ function highlightMetrics(text) {
 // role and company are independently editable there too).
 function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div key={`${item.role}-${item.company}-${index}`} className="compact-showcase__entry" data-export-card="true" data-direct-edit-index={sourceIndex}>
@@ -103,21 +102,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIn
         <span className="compact-showcase__entry-dates">{dateRange || copy.datesPending}</span>
       </div>
       {directEditDispatch ? (
-        <p className="compact-showcase__bullets compact-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="compact-showcase__bullets compact-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="compact-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{highlightMetrics(line)}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="compact-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{highlightMetrics(line)}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="compact-showcase__entry-company">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )

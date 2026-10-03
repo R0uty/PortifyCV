@@ -33,6 +33,7 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -55,7 +56,9 @@ function isInProgress(endDate) {
 // index); the read-only call site passes the snapshot's `sourceIndex`.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div key={`${item.role}-${item.company}-${index}`} className="graduate-showcase__edu-card" data-export-card="true" data-direct-edit-index={sourceIndex}>
@@ -90,19 +93,29 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIn
         <p className="graduate-showcase__edu-dates">{dateRange || copy.datesPending}</p>
       </div>
       {directEditDispatch ? (
-        <p className="graduate-showcase__bullets graduate-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="graduate-showcase__bullets graduate-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="graduate-showcase__bullets">
+              {achievements.map((line, lineIndex) => <li key={lineIndex}>{line}</li>)}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="graduate-showcase__bullets">
           {bullets.map((line, lineIndex) => <li key={lineIndex}>{line}</li>)}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="graduate-showcase__edu-meta">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )
