@@ -429,6 +429,12 @@ function ResumeBuilderPage({
   } = uiState
   const ui = getUiTheme()
   const previewRef = useRef(null)
+  // The CV the user sees in Classic mode's preview panel. previewRef is the
+  // off-screen export source (see the .direct-edit-export-source copy
+  // below), which hides empty sections and gets .pdf-export-root's PDF-only
+  // spacing — so anything sizing the visible preview, like Fit Page, has to
+  // measure this one instead.
+  const visiblePreviewRef = useRef(null)
   const importInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
   const storageWarningShownRef = useRef(false)
@@ -1233,24 +1239,43 @@ function ResumeBuilderPage({
 
   const handleFitPage = useCallback(() => {
     const viewport = previewViewportRef.current
-    const content = previewRef.current
+    const content = visiblePreviewRef.current
+    const zoomWrapper = content?.closest('.preview-zoom-wrapper')
+    const availableHeight = viewport ? viewport.clientHeight - 48 : 0
 
-    if (!viewport || !content) {
+    if (!zoomWrapper || availableHeight <= 0 || content.getBoundingClientRect().height <= 0) {
       setZoomPercent(100)
       return
     }
 
-    const currentZoom = zoomPercent / 100
-    const naturalHeight = content.offsetHeight / currentZoom
-    const availableHeight = viewport.clientHeight - 48
+    // The CV reflows to its zoomed width — zooming in narrows its layout box
+    // and makes it taller — so its height at the current zoom doesn't
+    // predict its height at any other. Binary-search the largest zoom whose
+    // rendered height fits instead, writing each candidate straight onto the
+    // wrapper so getBoundingClientRect forces a synchronous layout at it,
+    // then restore React's value before committing the result. Falls back to
+    // the 40% floor when even that overflows.
+    const committedZoom = zoomWrapper.style.getPropertyValue('--preview-zoom')
+    const fitsAt = (percent) => {
+      zoomWrapper.style.setProperty('--preview-zoom', String(percent / 100))
+      return content.getBoundingClientRect().height <= availableHeight
+    }
+    let low = 40
+    let high = 200
 
-    if (naturalHeight <= 0 || availableHeight <= 0) {
-      setZoomPercent(100)
-      return
+    while (low < high) {
+      const mid = Math.ceil((low + high) / 2)
+
+      if (fitsAt(mid)) {
+        low = mid
+      } else {
+        high = mid - 1
+      }
     }
 
-    setZoomPercent(clampZoomPercent((availableHeight / naturalHeight) * 100))
-  }, [clampZoomPercent, zoomPercent])
+    zoomWrapper.style.setProperty('--preview-zoom', committedZoom)
+    setZoomPercent(low)
+  }, [])
 
   useEffect(() => {
     const viewport = previewViewportRef.current
@@ -1922,6 +1947,7 @@ function ResumeBuilderPage({
             >
               <CVPreview
                 formData={formData}
+                previewRef={visiblePreviewRef}
                 template={selectedTemplate}
                 locale={locale}
                 atsFriendlyMode={atsFriendlyMode}
