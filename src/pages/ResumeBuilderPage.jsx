@@ -73,6 +73,7 @@ import {
 import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
+import { hideEmptySections } from '../utils/sectionContent'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
 import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
@@ -1921,7 +1922,6 @@ function ResumeBuilderPage({
             >
               <CVPreview
                 formData={formData}
-                previewRef={previewRef}
                 template={selectedTemplate}
                 locale={locale}
                 atsFriendlyMode={atsFriendlyMode}
@@ -2083,14 +2083,46 @@ function ResumeBuilderPage({
           />
         </AppErrorBoundary>
       ) : (
-        <AppShell
-          shellStyle={shellStyle}
-          showContentOnMobile={mobilePreviewVisible}
-          nav={navRailContent}
-          sidebar={sidebarContent}
-          content={previewContent}
-          navCollapsed={navRailCollapsed}
-        />
+        <>
+          <AppShell
+            shellStyle={shellStyle}
+            showContentOnMobile={mobilePreviewVisible}
+            nav={navRailContent}
+            sidebar={sidebarContent}
+            content={previewContent}
+            navCollapsed={navRailCollapsed}
+          />
+          {/* What PDF export captures in Classic mode — same off-screen,
+              inert, read-only pattern as Direct Edit's export-source copy
+              (DirectEditPreview.jsx), reused via the same
+              .direct-edit-export-source CSS, and deliberately rendered
+              OUTSIDE .app-shell__preview so it's never picked up by a
+              `[data-export-variant]` query scoped to that visible preview.
+              Rendered from hideEmptySections(formData) so an empty
+              section's placeholder never reaches the clone and a
+              template's running section numbering (Creative, Editorial)
+              is computed over the same sections the export actually
+              contains (I-1). The visible preview above keeps the raw
+              formData/placeholder editing affordance and is no longer the
+              export source — previewRef points here instead. */}
+          <div
+            className="direct-edit-export-source"
+            style={{ '--font-sans': getCvFontStack(cvFontId) }}
+            aria-hidden="true"
+            inert
+          >
+            <CVPreview
+              formData={hideEmptySections(formData)}
+              previewRef={previewRef}
+              template={selectedTemplate}
+              locale={locale}
+              atsFriendlyMode={atsFriendlyMode}
+              accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
+              headingColor={cvHeadingColor}
+              classicNameAlignment={classicNameAlignment}
+            />
+          </div>
+        </>
       )}
 
       {builderMode === 'direct' ? null : mobileBottomActions}

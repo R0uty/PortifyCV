@@ -2,6 +2,7 @@ import CVPreview from './CVPreview'
 import SectionsMenu from './SectionsMenu'
 import SectionEditOverlay from './SectionEditOverlay'
 import { getCvFontStack } from '../utils/cvFonts'
+import { hideEmptySections } from '../utils/sectionContent'
 
 export default function DirectEditPreview({
   formData,
@@ -32,6 +33,11 @@ export default function DirectEditPreview({
     headingColor,
     classicNameAlignment,
   }
+  // The export-source copy below renders from the empty-section-hidden
+  // formData (I-1), so a template's running section numbering (Creative,
+  // Editorial) and pill placement (coreStrengths-in-About) match what the
+  // export actually contains — never pruned out of a clone after the fact.
+  const exportPreviewProps = { ...previewProps, formData: hideEmptySections(formData) }
 
   return (
     <>
@@ -60,7 +66,7 @@ export default function DirectEditPreview({
           previewRef points here. It sits outside .direct-edit-preview so the
           section overlay and its queries only ever see the editable copy. */}
       <div className="direct-edit-export-source" style={fontStyle} aria-hidden="true" inert>
-        <CVPreview {...previewProps} directEditDispatch={null} previewRef={previewRef} />
+        <CVPreview {...exportPreviewProps} directEditDispatch={null} previewRef={previewRef} />
       </div>
     </>
   )

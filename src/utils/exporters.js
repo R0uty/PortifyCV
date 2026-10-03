@@ -8,7 +8,6 @@ import { getEffectiveCvTemplate } from './sectionColumns'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
 import { formatDateRange, formatLinkLabel } from './shared'
-import { hasSectionContent } from './sectionContent'
 
 const PDF_MODES = {
   designer: {
@@ -713,27 +712,16 @@ function createPdfMode(mode) {
   return PDF_MODES[mode] ?? PDF_MODES.designer
 }
 
-// Strips any `[data-export-section]` node from the (already-detached)
-// export clone whose corresponding CV section has no real content, so a
-// template's editing-affordance placeholder ("… will appear here") never
-// reaches a PDF export. Run once, right after `cloneNode(true)`, before the
-// clone is styled/appended — see docs/template-audit-phase2.md F12 for why
-// this is the one fix point that covers both Classic mode (previewRef is
-// the live CVPreview) and Direct Edit mode (previewRef is the dedicated
-// inert, off-screen export-source CVPreview): both already funnel through
-// this call, and pruning the clone never touches either mode's editable,
-// on-screen preview.
-function pruneEmptySectionsFromClone(clone, formData) {
-  if (!formData) return
-  clone.querySelectorAll('[data-export-section]').forEach((node) => {
-    const sectionKey = node.getAttribute('data-export-section')
-    if (sectionKey && !hasSectionContent(formData, sectionKey)) {
-      node.remove()
-    }
-  })
-}
-
-function createExportSandbox(previewElement, mode, expectedVariant = '', formData = null) {
+// `previewElement` (Classic mode: ResumeBuilderPage.jsx's dedicated
+// off-screen export-source CVPreview; Direct Edit: DirectEditPreview.jsx's)
+// already rendered from `hideEmptySections(formData)`, so its DOM never
+// contains a template's editing-affordance placeholder ("… will appear
+// here") for an empty section in the first place — see
+// docs/template-audit-phase2.md F12/I-1 for why this moved upstream of the
+// clone instead of pruning `[data-export-section]` nodes out of it here
+// after the fact (that ordering is what broke Creative/Editorial's running
+// section numbers whenever a middle section was empty).
+function createExportSandbox(previewElement, mode, expectedVariant = '') {
   const pdfMode = createPdfMode(mode)
   const exportRoot = resolveExportRoot(previewElement)
 
@@ -742,7 +730,6 @@ function createExportSandbox(previewElement, mode, expectedVariant = '', formDat
   }
 
   const clone = exportRoot.cloneNode(true)
-  pruneEmptySectionsFromClone(clone, formData)
   const designerContentWidthPx = mmToPx(DESIGNER_PAPER_WIDTH_MM)
   const a4ContentWidthPx = mmToPx(
     A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right,
@@ -2357,7 +2344,6 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     exportRoot,
     mode,
     expectedVariant,
-    options.formData,
   )
 
   try {

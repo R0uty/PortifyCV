@@ -18,13 +18,16 @@ for (const template of cvTemplates) {
       test(`${template.id} / ${exampleId} / ${mode}`, async ({ page }) => {
         const cv = await loadExampleCv(exampleId, 'en')
         await page.goto(`/free-cv-templates/${template.slug}?example=${exampleId}`)
-        // A plain substring match on the full name breaks for Modern Orange:
-        // its Showcase splits the name into first/last <span>s joined by a
-        // <br /> (no literal space character), which Playwright's text
-        // extraction does not turn into a separator. Match word-by-word with
-        // an optional gap instead, so this sanity check tolerates that split
-        // without weakening it for every other template, which does render
-        // the name as one contiguous "First Last" string.
+        // A plain substring match on the full name is fragile for Modern
+        // Orange: its Showcase splits the name into first/last <span>s
+        // joined by a literal space + <br /> (ModernOrangeShowcase.jsx,
+        // docs/template-audit-phase2.md G7/F8 added the space so
+        // el.textContent reads "First Rest" rather than "FirstRest"), which
+        // still leaves the name split across two <span>s rather than one
+        // contiguous text node. Match word-by-word with an optional gap
+        // instead, so this sanity check tolerates that split without
+        // weakening it for every other template, which does render the name
+        // as one contiguous "First Last" string.
         const nameWords = cv.fullName.split(' ').filter(Boolean).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
         await expect(page.locator('.template-page__preview')).toContainText(new RegExp(nameWords.join('\\s*')))
         if (mode === 'ats') {
@@ -66,6 +69,39 @@ for (const template of cvTemplates) {
       const violations = await auditLayout(page, BUILDER_ROOT, { skipRules: ['placeholder'] })
       const { remaining, staleEntries } = filterAllowlisted(violations, LAYOUT_ALLOWLIST, {
         template: template.id, subject: `stress:${fixtureId}`, mode: 'stress',
+      })
+      expect(remaining, 'layout violations').toEqual([])
+      expect(staleEntries, 'allowlist entries that no longer fail — remove them').toEqual([])
+    })
+  }
+}
+
+// Stress tier, ATS mode (M-3): the normal-mode stress loop above never
+// exercises ATS-friendly mode, which recolours/restructures several
+// templates (Navy Professional, Modern Orange — see direct-edit.spec.js)
+// enough that a stress-fixture-specific layout break there would otherwise
+// go uncaught. Classic mode only — ATS mode is a Classic-only concern
+// (DirectEditPreview.jsx hardcodes atsFriendlyMode={false}).
+for (const template of cvTemplates) {
+  for (const [fixtureId, cv] of Object.entries(STRESS_CVS)) {
+    test(`${template.id} / stress:${fixtureId} / ats @slow`, async ({ page }) => {
+      await page.addInitScript((snapshot) => {
+        window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+        window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
+      }, JSON.stringify(cv))
+      await page.goto(`/cv?template=${template.id}`)
+      await expect(page.locator(BUILDER_ROOT)).toContainText(cv.fullName.split(' ')[0])
+
+      await page.getByRole('button', { name: 'Settings' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Settings' })
+      await dialog.locator('.settings-row', { hasText: 'ATS-friendly mode' }).locator('.toggle-switch').click()
+      await page.getByRole('button', { name: 'Close' }).click()
+
+      await waitForStableLayout(page)
+
+      const violations = await auditLayout(page, BUILDER_ROOT, { skipRules: ['placeholder'] })
+      const { remaining, staleEntries } = filterAllowlisted(violations, LAYOUT_ALLOWLIST, {
+        template: template.id, subject: `stress:${fixtureId}`, mode: 'ats-stress',
       })
       expect(remaining, 'layout violations').toEqual([])
       expect(staleEntries, 'allowlist entries that no longer fail — remove them').toEqual([])

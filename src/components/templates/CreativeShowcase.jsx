@@ -166,10 +166,16 @@ export default function CreativeShowcase({
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
-  const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
+  const aboutPlaceholder = isFinnish
+    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+    : 'Your professional summary will appear here as you fill out the CV form.'
+  // In the read-only export/preview render (no directEditDispatch), never
+  // fall back to the "will appear here" placeholder when About's own text
+  // is blank but coreStrengths pills are present — those pills render
+  // inside this same section (I-1), so an otherwise-empty About still has
+  // real content and must not show editing-affordance copy in an export.
+  const hasAboutPills = snapshot.coreStrengths.some((item) => item.title)
+  const about = snapshot.about || (hasAboutPills ? '' : aboutPlaceholder)
 
   const personalContactItems = [
     ['email', snapshot.email],
@@ -230,21 +236,19 @@ export default function CreativeShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about" placement={placement} movedFrom={movedFrom} number={sectionNumber(key)} title={copy.about}>
-          <p className="creative-showcase__intro">
-            {directEditDispatch ? (
-              <EditableField
-                as="span"
-                path={{ kind: 'root', field: 'about' }}
-                value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-                    : 'Your professional summary will appear here as you fill out the CV form.'
-                }
-                multiline
-              />
-            ) : about}
-          </p>
+          {about || directEditDispatch ? (
+            <p className="creative-showcase__intro">
+              {directEditDispatch ? (
+                <EditableField
+                  as="span"
+                  path={{ kind: 'root', field: 'about' }}
+                  value={formData.about}
+                  placeholder={aboutPlaceholder}
+                  multiline
+                />
+              ) : about}
+            </p>
+          ) : null}
           {snapshot.coreStrengths.length > 0 ? (
             <div className="creative-showcase__pill-row">
               {snapshot.coreStrengths.slice(0, 3).map((item, index) => (
