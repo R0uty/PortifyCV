@@ -75,19 +75,16 @@
   border: 3px solid rgba(255, 255, 255, 0.85);
 }
 
-/* Identity block — kicker / name / role. Ad-hoc sizes on purpose: white
-   knockout in the ~180px navy rail (sidebar padding cut from 1.75rem to
-   1rem each side, see `__sidebar` above, to leave ~148px of content
-   width), narrower than even the *compact* row's 180px name-column floor
-   (§2) — this is the documented §2 "Adoption state" gap. Per the Task 7
-   controller ruling (docs/template-audit-phase2.md G7/F7): the real
-   4-part example name ("Maximilian Alexander Vandenberg-Lindqvist") needs
-   1.2rem/1.1 to wrap to 2 lines in this rail; that's smaller than every
-   §2 density's name row, but still bigger than this rail's own role
-   (0.8rem) and the main column's section headings (0.75rem standard), so
-   it stays the dominant line without a structural change (letting the
-   name span the header, the fallback the ruling asked for if no size
-   worked, wasn't needed). */
+/* Identity block — kicker / name / role. The `__name` size below is §2's
+   `narrow-column name` row (1.20rem / 1.10) — read the full rationale
+   there, not restated here: white knockout in the ~180px navy rail
+   (sidebar padding cut from 1.75rem to 1rem each side, see `__sidebar`
+   above, to leave ~148px of content width), narrower than even
+   `compact`'s 180px name-column floor. This is the documented §2
+   "Adoption state" gap, resolved 1.4.7 (G7 fix round 1,
+   docs/template-audit-phase2.md G7/F7) by using that row instead of an
+   undocumented ad-hoc number. Kicker/role stay their own ad-hoc sizes —
+   §2's narrow-column exception only covers the `name` role. */
 .navy-professional-showcase__kicker {
   margin-top: 1rem;
   font-size: 0.62rem;

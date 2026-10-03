@@ -49,14 +49,46 @@
   --tpl-meta-size: 0.70rem;
 }
 
-/* Shared primitive — long unbreakable values (links/emails/URLs/skills,
-   see docs/template-design-system.md §6). Never truncate an
-   information-bearing value: let it break anywhere instead of hiding
-   content behind an ellipsis or pushing its flex/grid container wider. The
-   `min-width: 0` matters as much as `overflow-wrap` — without it a flex or
-   grid child refuses to shrink below its content's intrinsic width and the
-   wrap rule never gets a chance to apply. */
+/* Shared primitive — long unbreakable values (links/emails/URLs — anything
+   with no internal space to wrap at, see docs/template-design-system.md
+   §6). Never truncate an information-bearing value: let it break anywhere
+   instead of hiding content behind an ellipsis or pushing its flex/grid
+   container wider. The `min-width: 0` matters as much as `overflow-wrap` —
+   without it a flex or grid child refuses to shrink below its content's
+   intrinsic width and the wrap rule never gets a chance to apply.
+   LINK/URL/EMAIL VALUES ONLY — see `.tpl-text-wrappable` below for
+   ordinary word text (skills, etc.): `overflow-wrap: anywhere` doesn't
+   just permit a break at the *last resort* character, it lowers the
+   element's min-content size to effectively zero, so inside a flex/grid
+   row this can let the row shrink the element below a single *ordinary*
+   word's width and break words that would otherwise fit — a real bug
+   found on Modern Orange's skill-name row (docs/template-audit-phase2.md
+   G7 fix round 1), not a harness quirk. */
 .tpl-value-breakable {
   overflow-wrap: anywhere;
   min-width: 0;
+}
+
+/* Shared primitive — long word-text values with internal spaces (skills,
+   category labels, etc., see docs/template-design-system.md §6). Unlike
+   `.tpl-value-breakable` above, `overflow-wrap: break-word` only breaks a
+   word when it's too long to fit a line *by itself* — it does not lower
+   the element's min-content size, so a flex/grid row can't shrink an
+   ordinary word below its own width and break it prematurely. Use this
+   (not `.tpl-value-breakable`) for anything that isn't a URL/email: a
+   single very long token (one 60-character skill with no spaces) still
+   wraps instead of overflowing, but a row of normal words wraps at its
+   spaces first.
+   Deliberately NO `min-width: 0` here (unlike `.tpl-value-breakable`
+   above) — tested and confirmed necessary, not an oversight. A flex/grid
+   item's automatic minimum width is its min-content size, which is what
+   actually stops the row from shrinking the element below one word's
+   width; `min-width: 0` overrides that protection and *reintroduces* the
+   exact bug this primitive exists to fix (confirmed with a RED run:
+   adding `min-width: 0` back made Modern Orange's skill-name mid-word
+   -break again). The element can still overflow its row by a few pixels
+   in the single-very-long-token case instead of forcing a break — that's
+   the accepted trade-off; it reads better than a fragmented word. */
+.tpl-text-wrappable {
+  overflow-wrap: break-word;
 }

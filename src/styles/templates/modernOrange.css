@@ -161,11 +161,17 @@
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--mo-text);
-  /* Carries `.tpl-value-breakable` in the JSX (G6/F4, fixed 1.4.6):
-     overflow-wrap: anywhere is deliberate here, so a single very long
-     skill string with no internal space (docs/template-audit-phase2.md
-     §7.6's 60-char case) is allowed to break mid-word rather than clip or
-     push the sidebar wider. Not a G7 bug — see the layout allowlist entry. */
+  /* Carries `.tpl-text-wrappable` in the JSX (§6, docs/
+     template-design-system.md): a single very long skill string with no
+     internal space (docs/template-audit-phase2.md §7.6's 60-char case)
+     still wraps instead of clipping or pushing the sidebar wider.
+     G7 fix round 1 switched this from `.tpl-value-breakable`
+     (overflow-wrap: anywhere) — that primitive also lowers the element's
+     min-content size, which let this flex row shrink the skill-name span
+     below an *ordinary* word's width and break it even when the word
+     would otherwise fit; `.tpl-text-wrappable`'s `overflow-wrap:
+     break-word` doesn't lower min-content, so a single long token still
+     wraps but normal words no longer fracture. */
 }
 
 .modern-orange-showcase__dots {

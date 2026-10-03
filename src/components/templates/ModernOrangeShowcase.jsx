@@ -442,7 +442,7 @@ export default function ModernOrangeShowcase({
             {directEditDispatch ? null : snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill, index) => (
                 <div key={skill} data-export-skill="true" className="modern-orange-showcase__skill-row">
-                  <span className="modern-orange-showcase__skill-name tpl-value-breakable">{skill}</span>
+                  <span className="modern-orange-showcase__skill-name tpl-text-wrappable">{skill}</span>
                   <DotRow count={skillOrderDotCount(index, snapshot.skills.length)} />
                 </div>
               ))

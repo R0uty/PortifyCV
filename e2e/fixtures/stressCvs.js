@@ -27,6 +27,10 @@ const job = (i) => ({
 export const STRESS_CVS = {
   'long-single-word': {
     ...base(),
+    // fullName is a §7.1-faithful long two-part name (G7 fix round 1,
+    // docs/template-audit-phase2.md) — the email/URLs/60-char skill below
+    // intentionally keep the old long, hyphenated strings, since those
+    // still test G6 (long unbreakable values), unrelated to the name fix.
     fullName: 'Maximiliana Kristiansen',
     title: 'Principal Infrastructure Reliability Engineer',
     email: 'kristiansen-vandenberghe.oyelaran-lindqvist@example.com',
