@@ -210,7 +210,7 @@ export default function EditorialShowcase({
           ) : snapshot.skills.length > 0 ? (
             <div className="editorial-showcase__tag-row">
               {snapshot.skills.map((skill) => (
-                <span key={skill} data-export-skill="true" className="editorial-showcase__tag">{skill}</span>
+                <span key={skill} data-export-skill="true" className="editorial-showcase__tag tpl-chip-wrappable">{skill}</span>
               ))}
             </div>
           ) : (
@@ -239,7 +239,7 @@ export default function EditorialShowcase({
                     {tags.length > 0 ? (
                       <div className="editorial-showcase__tag-row">
                         {tags.map((tag) => (
-                          <span key={tag} className="editorial-showcase__tag">{tag}</span>
+                          <span key={tag} className="editorial-showcase__tag tpl-chip-wrappable">{tag}</span>
                         ))}
                       </div>
                     ) : null}

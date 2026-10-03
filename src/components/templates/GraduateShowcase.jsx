@@ -662,7 +662,7 @@ export default function GraduateShowcase({
           <div className="graduate-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`} className="graduate-showcase__interest-chip">{item.name}</span>
+                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`} className="graduate-showcase__interest-chip tpl-chip-wrappable">{item.name}</span>
               ))
             ) : (
               <p className="graduate-showcase__empty">

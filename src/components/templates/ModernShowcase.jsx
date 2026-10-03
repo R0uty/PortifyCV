@@ -531,7 +531,7 @@ export default function ModernShowcase({
           <div className="modern-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span key={`${item.name}-${index}`} className="modern-showcase__interest-chip" data-direct-edit-index={snapshot.sourceIndices.interests[index]}>
+                <span key={`${item.name}-${index}`} className="modern-showcase__interest-chip tpl-chip-wrappable" data-direct-edit-index={snapshot.sourceIndices.interests[index]}>
                   <InterestGlyph />
                   {item.name}
                 </span>

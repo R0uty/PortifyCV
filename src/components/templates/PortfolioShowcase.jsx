@@ -667,7 +667,7 @@ export default function PortfolioShowcase({
           <div className="portfolio-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`} className="portfolio-showcase__interest-chip">{item.name}</span>
+                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`} className="portfolio-showcase__interest-chip tpl-chip-wrappable">{item.name}</span>
               ))
             ) : (
               <p className="portfolio-showcase__empty">

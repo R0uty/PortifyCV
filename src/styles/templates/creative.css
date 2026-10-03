@@ -389,7 +389,11 @@
   font-weight: 600;
   background: var(--tpl-accent-soft);
   color: var(--cr-ink);
-  overflow-wrap: anywhere;
+  /* Wrap behavior comes from `.tpl-chip-wrappable` in the JSX (§6, docs/
+     template-design-system.md) — see that primitive's own comment in
+     _system.css for why `overflow-wrap: anywhere` directly on a chip is
+     the wrong tool (Task 9 fix round 1's mistake on other templates).
+     Not the same class as `.creative-showcase__pill` (fix round 1). */
 }
 
 /* ── Sidebar: plain stacked lists (School, Certificates) ── */

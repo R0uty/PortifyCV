@@ -476,7 +476,7 @@ export default function DeveloperShowcase({
                     {chips.length > 0 ? (
                       <div className="dev-showcase__chip-row">
                         {chips.map((chip) => (
-                          <span key={chip} className="dev-showcase__chip">{chip}</span>
+                          <span key={chip} className="dev-showcase__chip tpl-chip-wrappable">{chip}</span>
                         ))}
                       </div>
                     ) : null}

@@ -307,7 +307,7 @@ export default function CreativeShowcase({
                     {tags.length > 0 ? (
                       <div className="creative-showcase__tag-row">
                         {tags.map((tag) => (
-                          <span key={tag} className="creative-showcase__tag">{tag}</span>
+                          <span key={tag} className="creative-showcase__tag tpl-chip-wrappable">{tag}</span>
                         ))}
                       </div>
                     ) : null}
@@ -450,7 +450,7 @@ export default function CreativeShowcase({
           <div className="creative-showcase__pill-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span key={`${item.name}-${index}`} className="creative-showcase__tag" data-direct-edit-index={snapshot.sourceIndices.interests[index]}>
+                <span key={`${item.name}-${index}`} className="creative-showcase__tag tpl-chip-wrappable" data-direct-edit-index={snapshot.sourceIndices.interests[index]}>
                   {item.name}
                 </span>
               ))

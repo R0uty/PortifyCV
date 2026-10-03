@@ -1,5 +1,6 @@
 import {
   createInitialCvData, createEmptyLinks, createEmptyExperience, createEmptyEducation,
+  createEmptyProject, createEmptyInterest,
 } from '../../src/utils/cvForm.js'
 
 // Synthetic CVs for docs/template-design-system.md §7 cases the 24 example
@@ -44,6 +45,23 @@ export const STRESS_CVS = {
     skills: ['Kubernetes', 'Infrastructure-as-code governance and policy-as-code tooling', 'Terraform', 'Go', 'Kubernetesoperatorreconciliationloopsdesign'],
     experience: [job(0), job(1)],
     education: [{ ...createEmptyEducation(), school: 'Aalto University', degree: 'M.Sc. (Tech.) Computer Science', startDate: '2012', endDate: '2017' }],
+    // The same 44-char token also appears in a project's `stack` (parsed
+    // into chip tags by every template's project renderer, e.g.
+    // `item.stack.split(',')`) and in `interests` — item 2, Task 9 fix
+    // round 2, docs/template-audit-phase2.md — so every template's
+    // project-tech-stack chip and interest chip gets exercised too, not
+    // just the dedicated `skills` chip row.
+    projects: [{
+      ...createEmptyProject(),
+      name: 'Reliability Platform',
+      description: 'Built the internal platform powering incident response and capacity planning.',
+      stack: 'Kubernetes, Terraform, Kubernetesoperatorreconciliationloopsdesign',
+      date: '2023',
+    }],
+    interests: [
+      { ...createEmptyInterest(), name: 'Kubernetesoperatorreconciliationloopsdesign' },
+      { ...createEmptyInterest(), name: 'Trail running' },
+    ],
     links: {
       ...createEmptyLinks(),
       github: 'https://github.com/example-kristiansen-vandenberghe-oyelaran',
