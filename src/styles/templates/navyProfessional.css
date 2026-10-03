@@ -53,7 +53,7 @@
 .navy-professional-showcase__sidebar {
   background: var(--np-navy);
   color: #ffffff;
-  padding: 2.5rem 1.75rem;
+  padding: 2.5rem 1rem;
   min-width: 0;
 }
 
@@ -76,8 +76,18 @@
 }
 
 /* Identity block — kicker / name / role. Ad-hoc sizes on purpose: white
-   knockout in the ~180px navy rail, narrower than the standard ramp's
-   210px name-column floor (see the file header). */
+   knockout in the ~180px navy rail (sidebar padding cut from 1.75rem to
+   1rem each side, see `__sidebar` above, to leave ~148px of content
+   width), narrower than even the *compact* row's 180px name-column floor
+   (§2) — this is the documented §2 "Adoption state" gap. Per the Task 7
+   controller ruling (docs/template-audit-phase2.md G7/F7): the real
+   4-part example name ("Maximilian Alexander Vandenberg-Lindqvist") needs
+   1.2rem/1.1 to wrap to 2 lines in this rail; that's smaller than every
+   §2 density's name row, but still bigger than this rail's own role
+   (0.8rem) and the main column's section headings (0.75rem standard), so
+   it stays the dominant line without a structural change (letting the
+   name span the header, the fallback the ruling asked for if no size
+   worked, wasn't needed). */
 .navy-professional-showcase__kicker {
   margin-top: 1rem;
   font-size: 0.62rem;
@@ -89,9 +99,9 @@
 
 .navy-professional-showcase__name {
   margin-top: 0.35rem;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.1;
   letter-spacing: -0.01em;
   color: #ffffff;
 }

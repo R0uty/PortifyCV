@@ -68,8 +68,12 @@ the production build.
    rendering is already covered by the template-pages spec.
 2. **Stress tier (3 fixtures × 18 templates).** Three synthetic CVs in
    `e2e/fixtures/stressCvs.js` cover §7 items the examples don't:
-   - `long-single-word`: name "Kristiansen-Vandenberghe Oyelaran-Lindqvist",
-     a 60-character skill string, and a URL-heavy links block.
+   - `long-single-word`: name "Maximiliana Kristiansen" (Task 7, fix round
+     1 — a §7.1-faithful long two-part name/single-long-word case, not the
+     earlier two-already-compound-hyphenated-words string, which was
+     harsher than §7.1's stated case; the 4-part real `cto` name in the
+     example tier already covers the extreme case), a 60-character skill
+     string, and a URL-heavy links block.
    - `ten-jobs`: ten experience entries with 3 achievements each (§7.4).
    - `sparse`: name, title, one job and nothing else; every optional section
      empty (§7.3, §7.5).

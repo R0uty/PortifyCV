@@ -33,8 +33,20 @@
 
   position: relative;
   display: grid;
-  /* Second column holds the name (header + main share it); 210px floor per
-     §2's standard-density name rule. */
+  /* Second column holds the name (header + main share it). The header's
+     own horizontal padding used to be 2.5rem/2.25rem (76px), which ate
+     almost all of this track's 210px floor before the name or title badge
+     ever saw it, fragmenting both (docs/template-audit-phase2.md G7/F6).
+     Widening this floor to compensate is the wrong fix here: it shares the
+     card's total width with the sidebar's own 180px floor via `fr`, and
+     growing it by even ~10-20px starves the sidebar enough to mid-word
+     -break its own long skill string (a *different*, already-accepted
+     break — see `.modern-orange-showcase__skill-name`'s comment). So the
+     floor stays at the original 210px; the header/main padding below is
+     cut instead (to 1.25rem each side, see `__header`/`__main`), and the
+     name itself steps down to the *compact* row (§2) rather than funding
+     the full standard floor. Both together give the name/title badge
+     enough content width within the unchanged 210px track. */
   grid-template-columns: minmax(180px, 0.29fr) minmax(210px, 0.71fr);
   grid-template-rows: auto 1fr;
   grid-template-areas:
@@ -149,6 +161,11 @@
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--mo-text);
+  /* Carries `.tpl-value-breakable` in the JSX (G6/F4, fixed 1.4.6):
+     overflow-wrap: anywhere is deliberate here, so a single very long
+     skill string with no internal space (docs/template-audit-phase2.md
+     §7.6's 60-char case) is allowed to break mid-word rather than clip or
+     push the sidebar wider. Not a G7 bug — see the layout allowlist entry. */
 }
 
 .modern-orange-showcase__dots {
@@ -273,13 +290,13 @@
 .modern-orange-showcase__main {
   grid-area: main;
   min-width: 0;
-  padding: 0 2.5rem 2.5rem 2.25rem;
+  padding: 0 1.25rem 2.5rem 1.25rem;
 }
 
 .modern-orange-showcase__header {
   grid-area: header;
   min-width: 0;
-  padding: 2.5rem 2.5rem 0 2.25rem;
+  padding: 2.5rem 1.25rem 0 1.25rem;
 }
 
 .modern-orange-showcase__kicker {
@@ -292,9 +309,14 @@
 
 .modern-orange-showcase__name {
   margin-top: 0.35rem;
-  font-size: var(--tpl-name-size);
+  /* §2 names this column's own narrow-column case: the header track can't
+     fund the full *standard* name floor (210px of content) without
+     starving the sidebar's fr share (docs/template-audit-phase2.md G7/F6),
+     so the name itself steps down to the *compact* row (1.65rem / 1.15)
+     while every other role here stays standard. */
+  font-size: 1.65rem;
   font-weight: 800;
-  line-height: var(--tpl-name-lh);
+  line-height: 1.15;
   letter-spacing: -0.01em;
   color: var(--cv-heading-color, var(--mo-text));
   overflow-wrap: break-word;

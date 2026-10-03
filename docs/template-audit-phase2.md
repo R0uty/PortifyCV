@@ -189,7 +189,12 @@ change `stress:long-single-word`'s `fullName` in
 "Maximiliana Kristiansen") and re-baseline this fixture's expectations.
 The real 4-part name in the example tier (navyProfessional's `cto`, F7
 below) is a genuine, non-synthetic case and stays the extreme one this
-group must actually handle. Group: **G7**.
+group must actually handle. Group: **G7**. **Fixed (1.4.7):** fixture
+renamed to "Maximiliana Kristiansen"
+(`e2e/fixtures/stressCvs.js`); the spec doc's "Stress tier" bullet
+(`docs/superpowers/specs/2026-10-02-template-polish-design.md`) amended
+with the same rationale. Cleared all 9 name-lines entries this fixture
+rename alone made stale.
 
 **F6 — Executive and Modern Orange: the per-segment width is tight enough
 that a single hyphen-segment itself fragments mid-word.**
@@ -207,7 +212,27 @@ mid-word. Every other template in F5 only gets *extra line wraps*, not a
 character-level fracture, which is the tell that these two specifically
 have a floor-vs-padding shortfall rather than a budget shortfall. Templates:
 executive, modernOrange. Clears 2 entries (stress mid-word-break). Group:
-**G7**.
+**G7**. **Fixed (1.4.7):** widening the floor to cover the padding was
+tried and reverted for both — it competes with the other grid track for
+the card's fixed total width, and on Executive it pushed an example CV to
+2.23 A4 pages (over the §7.1 budget), on Modern Orange it starved the
+sidebar enough to mid-word-break its own long skill string (see F4's
+note below). Fixed instead, on both templates, by cutting the
+identity block's own horizontal padding and stepping the name down to the
+*compact* row (§2) rather than funding the full standard floor —
+`src/styles/templates/executive.css` (`__sidebar`, `__name`,
+`grid-template-columns`) and `src/styles/templates/modernOrange.css`
+(`__header`, `__main`, `__name`, `grid-template-columns`), floors
+unchanged at 212px/210px. One side effect surfaced: fixing Modern
+Orange's title-badge mid-word-break (same root cause, see F6 above)
+unmasked an *already-accepted* G6/F4 mid-word-break on the sidebar's
+60-char skill string — the layout harness dedupes a broken word
+globally per page, so the skill-name's identical "Infrastructure" break
+was silently absorbed by the title-badge's report until the title-badge
+was fixed. That's `.tpl-value-breakable`'s intended `overflow-wrap:
+anywhere` doing its job (fixed 1.4.6), not a new bug; recorded as its own
+allowlist entry (`e2e/fixtures/layoutAllowlist.js`) rather than "fixed"
+away.
 
 **F7 — Navy Professional's identity rail is narrower than its own density
 floor, and it's a known, already-documented gap.**
@@ -220,7 +245,18 @@ than any density's name-column floor") as an accepted, unresolved gap. It
 produces a real 4-line wrap on the **example-tier** `cto` CV ("Maximilian
 Alexander Vandenberg-Lindqvist" — a real name, not synthetic), plus the
 stress fixture. Template: navyProfessional. Clears 2 entries (1 example +
-1 stress). Group: **G7**.
+1 stress). Group: **G7**. **Fixed (1.4.7):** the stress-fixture entry
+went stale on its own once F5's fixture rename landed (the new 2-part
+name already fit). The example-tier `cto` 4-line wrap needed its own fix:
+`src/styles/templates/navyProfessional.css`'s `__sidebar` padding cut
+from 1.75rem to 1rem each side (180px floor unchanged — widening it was
+not attempted, having just seen on Executive/Modern Orange above that it
+trades for page-length or sidebar regressions elsewhere) and
+`__name` stepped to 1.2rem/1.1 — smaller than every §2 density's name
+row, the documented gap this finding describes, but confirmed still
+bigger than this rail's own role (0.8rem) and the main column's section
+headings (0.75rem standard) so it stays the dominant line. No structural
+change (letting the name span the header) was needed.
 
 **F8 — Modern Orange's name markup glues `nameFirst`/`nameRest` into one
 unspaced string.**
@@ -236,11 +272,19 @@ unbroken-except-for-hyphens run and wrap to 6 lines instead of 2 shorter,
 independently-wrapped halves. Template: modernOrange. Clears 1 entry
 (stress name-lines). Group: **G7** (per the brief's note — grouped with
 name sizing/spacing rather than filed as a cosmetic G9 one-off, since the
-fix is the same component and the same visit).
+fix is the same component and the same visit). **Fixed (1.4.7):** a
+literal space (`{' '}`) added before the `<br/>` in
+`src/components/templates/ModernOrangeShowcase.jsx`, so `el.textContent`
+reads "First Rest" while the visual two-line layout is unchanged
+(trailing whitespace before a line break collapses visually).
 
 G7 total: **4 fix items, 14 allowlist entries, 11 templates** (minimal,
 creative, executive, timeline, graduate, classicProfessional, quadrant,
-editorial, portrait, navyProfessional, modernOrange).
+editorial, portrait, navyProfessional, modernOrange). **All fixed
+(1.4.7)** — see each finding above. One new, already-accepted allowlist
+entry was added (Modern Orange's long-skill-string break, unmasked by the
+title-badge fix, F6's note), so the net allowlist count for this group is
+14 removed, 1 added.
 
 ### G8a — content coverage (its own fix task, scheduled after G7, before G8)
 

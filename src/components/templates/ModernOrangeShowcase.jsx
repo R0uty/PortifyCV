@@ -562,6 +562,13 @@ export default function ModernOrangeShowcase({
               <span className="modern-orange-showcase__name-first">{nameFirst}</span>
               {nameRest ? (
                 <>
+                  {/* A literal space so el.textContent reads "First Rest"
+                      (copy-paste, screen readers, this app's own layout
+                      harness) — the <br/> alone only gives a *visual* line
+                      break (docs/template-audit-phase2.md G7/F8). Trailing
+                      whitespace before a line break collapses visually, so
+                      this doesn't reintroduce a visible gap. */}
+                  {' '}
                   <br />
                   <span className="modern-orange-showcase__name-last">{nameRest}</span>
                 </>

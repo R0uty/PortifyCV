@@ -41,6 +41,17 @@
 
   position: relative;
   display: grid;
+  /* Floor stays at §2's bare 212px (docs/template-audit-phase2.md G7/F6
+     found the rail's own 1.6rem/1.6rem padding ate ~51px of that before an
+     11-char word like "Kristiansen" ever saw it, fragmenting it). Widening
+     this floor to compensate was tried and reverted: the rail's `fr` share
+     competes with the main column for the card's fixed total width, and
+     the wider rail pushed an example CV's main column onto a 3rd page
+     (2.23 A4 pages, over the 2.0 budget). Fixed instead by cutting the
+     rail's own padding (to 1rem each side, see `__sidebar` below) and
+     stepping the name down to the *compact* row (§2) — compact's 180px
+     content floor + 32px of padding fits inside the unchanged 212px
+     track. */
   grid-template-columns: minmax(212px, 0.33fr) minmax(0, 0.67fr);
   background: var(--ex-bg);
   color: var(--ex-ink);
@@ -66,7 +77,7 @@
 .executive-showcase__sidebar {
   min-width: 0;
   background: var(--ex-rail);
-  padding: 2.5rem 1.6rem;
+  padding: 2.5rem 1rem;
 }
 
 .executive-showcase__identity {
@@ -96,8 +107,12 @@
 
 .executive-showcase__name {
   margin-top: 0.4rem;
-  font-size: var(--tpl-name-size);
-  line-height: var(--tpl-name-lh);
+  /* Steps down to the *compact* row (§2) rather than funding the full
+     standard name floor in this narrow rail — see the grid comment above
+     (docs/template-audit-phase2.md G7/F6). Every other role here stays
+     standard. */
+  font-size: 1.65rem;
+  line-height: 1.15;
   font-weight: 800;
   letter-spacing: -0.01em;
   color: var(--cv-heading-color, var(--ex-ink));

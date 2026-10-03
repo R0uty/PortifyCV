@@ -27,7 +27,7 @@ const job = (i) => ({
 export const STRESS_CVS = {
   'long-single-word': {
     ...base(),
-    fullName: 'Kristiansen-Vandenberghe Oyelaran-Lindqvist',
+    fullName: 'Maximiliana Kristiansen',
     title: 'Principal Infrastructure Reliability Engineer',
     email: 'kristiansen-vandenberghe.oyelaran-lindqvist@example.com',
     phone: '+358 40 000 9901',
