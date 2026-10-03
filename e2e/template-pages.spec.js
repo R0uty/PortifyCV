@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 
 // Per-template pages: /free-cv-templates/<slug>. One page component renders
 // all 18; routing comes from the VIEW_HEAD entries generated in pageMeta.js.

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 import { auditLayout, waitForStableLayout, filterAllowlisted } from './helpers/layoutAudit.js'
 import { LAYOUT_ALLOWLIST } from './fixtures/layoutAllowlist.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'

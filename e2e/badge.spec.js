@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 
 // Coverage for the "Made with PortifyCV" badge (todo items 22 / 26). It's
 // reachable from the template gallery and produces a self-contained,

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 import { auditLayout, filterAllowlisted } from './helpers/layoutAudit.js'
 
 // Unit tests for the layout audit itself, against hand-made HTML, so the

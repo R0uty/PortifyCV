@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 import { STRESS_CVS } from './fixtures/stressCvs.js'
 import { waitForStableLayout } from './helpers/layoutAudit.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'

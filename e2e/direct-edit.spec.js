@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 
 // Same pattern as e2e/templates.spec.js's selectTemplate helper: the
 // toolbar's template trigger exposes "Select template: <name>" to screen

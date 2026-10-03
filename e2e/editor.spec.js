@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 
 test.describe('CV editor', () => {
   test('typing a name updates the live preview', async ({ page }) => {

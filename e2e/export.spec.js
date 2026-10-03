@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 
 test.describe('Export menu', () => {
   test('lists PDF, HTML, JSON, and Word, and closes on outside click', async ({ page }) => {

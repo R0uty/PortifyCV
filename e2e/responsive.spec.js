@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 
 // Regression guard for audit-1.0.2.md: .app-toolbar__group had no
 // flex-wrap, so its ~7 children (template select, locale, print,

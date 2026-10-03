@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 
 // Regression guard for audit-1.0.1.md finding 5: sections used to stay
 // editable (and listed in the nav rail) even when the selected template
