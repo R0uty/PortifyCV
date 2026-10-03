@@ -151,11 +151,27 @@ Where each template starts. The A.2 triage confirms or changes these; a
 template that fights its class is a density-handling finding, not a reason
 to invent a fourth class:
 
-- **`roomy`** — Classic Professional, Minimalist, Creative,
-  Executive, Portfolio Hybrid
+- **`roomy`** — Classic Professional, Minimalist, Creative
 - **`standard`** — Modern Professional, Modern Orange, Navy Professional,
   Modern Timeline, Developer, Graduate, Tech Executive
-- **`compact`** — Compact, Colorful Compact, Quadrant
+- **`compact`** — Compact, Colorful Compact, Quadrant, Executive, Portfolio
+  Hybrid
+
+**Executive and Portfolio Hybrid moved to `compact`, 1.4.9 (G8,
+docs/template-audit-phase2.md):** both started at `roomy` here, but each
+had already drifted (Executive to `standard`, in the 1.2.11 rework, for a
+name-floor reason unrelated to density) or needed to move further, once
+Task 8a's rendering of every experience entry's `achievements`/
+`technologies` pushed their example CVs past the ≤2.0-A4-page budget (§7).
+A rhythm-only trim plateaued short of budget for both (Executive's and
+Portfolio's page height is dominated by wrapped body text, not
+whitespace, once that content landed), so both took the one step `compact`
+itself exists for — §2's own "fit one page" role for the class — rather
+than inventing a fourth density tier. Classic Professional's
+`finance-director` example also went over budget from the same 8a content,
+but by only 1.5%; it stayed on `roomy` and was fixed with a template-local
+vertical-rhythm trim instead (see docs/template-audit-phase2.md's G8
+writeup for the per-template values).
 
 **Adoption state (v1.2.13–1.2.14):** every bespoke Showcase now carries a
 `tpl-density-*` class on its root and reads the six roles from `--tpl-*`.

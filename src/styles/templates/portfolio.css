@@ -14,7 +14,12 @@
      numbers (body 1.60–1.75, meta 1.40–1.55) to compact's (body 1.45, meta
      1.35) in the same move — they were still roomy's when this was on
      `standard` for one fix-round, which is why they may look like an odd
-     jump if you're diffing against 1.4.8.
+     jump if you're diffing against 1.4.8. Fix-round-1 (G8) caught two more
+     rows this first pass missed: `title` steps 1.35→1.30 and
+     `entry-title` steps 1.30→1.25 between `standard` and `compact` (only
+     `body`/`meta` were corrected initially) — see `__role` (title),
+     `__section-title`/`__project-name`/`__role-title` (entry-title), and
+     `__testimonial-quote` (body, was still above even `standard`'s 1.55).
    - §3 colour: one ink (`--pf-slate` / `--pf-text` / `--pf-gray` tonal
      steps) + one accent (`--tpl-accent`, set inline from the `accentColor`
      prop with the emerald default as the fallback here; `--tpl-accent-soft`
@@ -125,7 +130,7 @@
 .portfolio-showcase__role {
   margin-top: 0.3rem;
   font-size: var(--tpl-title-size);
-  line-height: 1.35;
+  line-height: 1.3;
   font-weight: 600;
   color: var(--pf-text);
 }
@@ -233,7 +238,7 @@
 
 .portfolio-showcase__section-title {
   font-size: var(--tpl-entry-title-size);
-  line-height: 1.3;
+  line-height: 1.25;
   font-weight: 700;
   color: var(--cv-heading-color, var(--pf-slate));
 }
@@ -291,7 +296,7 @@
 
 .portfolio-showcase__project-name {
   font-size: var(--tpl-entry-title-size);
-  line-height: 1.3;
+  line-height: 1.25;
   font-weight: 700;
   color: var(--pf-slate);
 }
@@ -423,7 +428,7 @@
 
 .portfolio-showcase__role-title {
   font-size: var(--tpl-entry-title-size);
-  line-height: 1.3;
+  line-height: 1.25;
   font-weight: 700;
   color: var(--pf-slate);
 }
@@ -547,7 +552,7 @@
   font-family: 'Instrument Serif', Georgia, serif;
   font-size: var(--tpl-body-size);
   font-style: italic;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--pf-text);
   white-space: pre-line;
 }

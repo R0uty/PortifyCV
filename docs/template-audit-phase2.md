@@ -450,15 +450,23 @@ Fix chosen per template, smallest-first:
   sets directly from `standard`'s 1.55/1.40 to `compact`'s 1.45/1.35 (§2:
   only `name` carries a line-height token — the rest are normative per
   role/class and this file had still been carrying `roomy`'s numbers mid-
-  fix), then one clean ~25% trim of the remaining margin-top/gap/padding.
-  `frontend-developer` → 1.91, `ux-designer` → 1.94, `product-manager` →
-  1.98 pages.
+  fix; fix-round-1 found 5 more rows still on `standard`'s/`roomy`'s
+  line-height — `__role` (title, 1.35→1.30), `__section-title`/
+  `__project-name`/`__role-title` (entry-title, 1.3→1.25), and
+  `__testimonial-quote` (body, 1.5→1.45) — all now `compact`-correct),
+  then one clean ~25% trim of the remaining margin-top/gap/padding.
+  `frontend-developer` → 1.97, `ux-designer` → 1.90, `product-manager` →
+  1.98 pages (re-measured after the fix-round-1 line-height corrections,
+  which trimmed these slightly further than the numbers first reported).
 - **executive** — 14.5% over, already on `standard` (not `roomy` — see
   table above). A vertical-rhythm trim alone plateaued around 2.12–2.20
   pages even after three compounding passes (~30% cumulative), because
   Experience's bullet text (not whitespace) is 60%+ of the page. Reverted
   that trial, then: `standard`→`compact` + the same body/meta line-height
-  correction as Portfolio, plus one clean ~15% rhythm trim.
+  correction as Portfolio, plus one clean ~15% rhythm trim. (Executive's
+  title/entry-title rows set no explicit line-height of their own — they
+  inherit the default — so there was nothing to correct there in
+  fix-round-1.)
   `finance-director` → 1.99 pages.
 
 **Re-ran the full example tier for all three templates** (a density change
@@ -478,6 +486,28 @@ on-screen page-count budget, not across a PDF page boundary).
 All 5 `length` allowlist entries removed from
 `e2e/fixtures/layoutAllowlist.js`; 4 entries remain (G9's stress-tier
 items — out of this task's scope).
+
+**On the rhythm-trim numbers themselves (fix-round-1 ruling):** none of
+the three templates' margin-top/gap/padding values land on the app's
+`--space-*` grid (`src/styles/tokens.css`'s 0.25rem-step scale) — they
+were converged on iteratively, one small percentage trim at a time against
+each template's worst example's measured page height, stopping once it
+cleared the 2.0-page budget with a small safety margin, not read off that
+or any other fixed scale. This matches how these three templates' rhythm
+values already looked before this task (e.g. Portfolio's pre-fix
+`0.375rem`/`1.125rem` gaps, Executive's pre-fix `1.1rem` gaps) — none of
+the bespoke Showcase CSS files use `--space-*`; §2 only normalizes the six
+type-ramp roles, not spacing. Final representative values, post-fix:
+
+| Template | Header padding | Main content padding | Section-separator margin-top | Entry/bullet gap |
+|---|---|---|---|---|
+| classicProfessional | `2.7rem 3rem 1.35rem` | `1.55rem 3rem 2.7rem` | `1.55rem` | `0.55rem 1.35rem` (contact row), `0.45rem` (chip row) |
+| portfolio | `1.85rem 2.75rem 1.1rem` | `1.35rem 2.75rem 2.05rem` (main), `1.35rem 1.75rem 2.05rem 1.5rem` (sidebar) | `1.5rem` | `0.3rem`–`0.35rem` (chip/badge/bullet rows) |
+| executive | n/a (no separate header block — identity rail padding `2.2rem 1rem`) | `2.2rem 2.5rem 2.2rem 2.25rem` (main column) | `1.75rem` (section separator) | `0.35rem` (bullets), `1.05rem` padding-bottom per entry |
+
+(Full values are in each file's diff — `src/styles/templates/
+classicProfessional.css`, `portfolio.css`, `executive.css` — these are the
+header/body-level numbers that most directly drive page count.)
 
 ### G9 — everything else
 
