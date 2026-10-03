@@ -291,7 +291,6 @@
   font-weight: 500;
   color: var(--pt-ink);
   background: transparent;
-  overflow-wrap: anywhere;
 }
 
 /* ── Links: plain stacked lines ── */

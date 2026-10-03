@@ -127,7 +127,7 @@ function SectionHead({ icon, title }) {
       <span className="graduate-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
-      <h2 className="graduate-showcase__section-title">{title}</h2>
+      <h2 className="graduate-showcase__section-title tpl-text-wrappable">{title}</h2>
     </div>
   )
 }

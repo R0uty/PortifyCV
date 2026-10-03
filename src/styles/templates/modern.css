@@ -434,6 +434,15 @@
   font-weight: 600;
   color: var(--ms-text);
   background: transparent;
+  /* The sidebar column (.modern-showcase__sidebar) sits flush against the
+     card's own right edge with no outer margin, so a genuinely unbreakable
+     40+ character skill token would overflow past the page itself if left
+     to wrap normally — worse than breaking it. `overflow-wrap: anywhere`
+     here is the single-token exception documented in docs/
+     template-design-system.md §6 (not the default `.tpl-text-wrappable`
+     treatment, which only breaks a word as a last resort and would still
+     let this one run off the page). */
+  overflow-wrap: anywhere;
 }
 
 /* ── Achievements (professional list) ── */

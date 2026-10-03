@@ -86,9 +86,17 @@
    width; `min-width: 0` overrides that protection and *reintroduces* the
    exact bug this primitive exists to fix (confirmed with a RED run:
    adding `min-width: 0` back made Modern Orange's skill-name mid-word
-   -break again). The element can still overflow its row by a few pixels
-   in the single-very-long-token case instead of forcing a break — that's
-   the accepted trade-off; it reads better than a fragmented word. */
+   -break again). The element can still overflow its row in the
+   single-very-long-token case instead of forcing a break — for an
+   ordinary long word this is a few pixels, but a genuinely unbreakable
+   40+ character token (no spaces to wrap at) can overflow by far more
+   than that, up to the token's full width. That's the accepted
+   trade-off; it reads better than a fragmented word. If a chip/row is
+   narrow enough that this overflow would clip or visibly break layout
+   (not just run a little past its own box), apply `overflow-wrap:
+   anywhere` directly on that single token's own element instead — never
+   back on `.tpl-text-wrappable` itself, since that would reintroduce the
+   fracture-on-ordinary-words bug this primitive exists to prevent. */
 .tpl-text-wrappable {
   overflow-wrap: break-word;
 }

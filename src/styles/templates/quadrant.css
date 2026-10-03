@@ -239,6 +239,13 @@
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--qd-text);
+  /* Sidebar column sits flush against the card's right edge with no outer
+     margin — see the identical note on .modern-showcase__tag
+     (styles/templates/modern.css). A genuinely unbreakable 40+ character
+     token would run off the page rather than just overflow its own
+     column, so this is the single-token `overflow-wrap: anywhere`
+     exception (docs/template-design-system.md §6), not the default
+     `.tpl-text-wrappable` treatment. */
   overflow-wrap: anywhere;
 }
 

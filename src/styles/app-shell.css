@@ -3043,13 +3043,20 @@ select.floating-field__control {
   min-width: 0;
 }
 
+/* `overflow-wrap: break-word` only breaks a word when it has no other way
+   to fit its own line; it does not lower the element's min-content size.
+   Deliberately no `word-break: break-word` / `min-width: 0` here (F9,
+   docs/template-audit-phase2.md G9) — that combination let a flex-shrunk
+   ancestor (e.g. the minimal-inline links row, CVPreview.jsx) force even a
+   short, ordinary label like "LinkedIn" to fracture mid-word. A genuinely
+   unbreakable value (a URL/email) should carry `.tpl-value-breakable`
+   (src/styles/templates/_system.css) itself instead of relying on this
+   blanket rule to lower its min-content size. */
 .preview-document h3,
 .preview-document h4,
 .preview-document p,
 .preview-document span {
   overflow-wrap: break-word;
-  word-break: break-word;
-  min-width: 0;
 }
 
 .preview-document [data-export-primary],

@@ -37,7 +37,11 @@ export const STRESS_CVS = {
     phone: '+358 40 000 9901',
     location: 'Espoo, Finland',
     about: 'Infrastructure engineer focused on reliability and incident response.',
-    skills: ['Kubernetes', 'Infrastructure-as-code governance and policy-as-code tooling', 'Terraform', 'Go'],
+    // 'Kubernetesoperatorreconciliationloopsdesign' is a 44-character
+    // unbreakable single token (no spaces to wrap at) — G9/F-controller
+    // item C, docs/template-audit-phase2.md — checked across every
+    // template, not just Modern Orange's skill-dot row it was added for.
+    skills: ['Kubernetes', 'Infrastructure-as-code governance and policy-as-code tooling', 'Terraform', 'Go', 'Kubernetesoperatorreconciliationloopsdesign'],
     experience: [job(0), job(1)],
     education: [{ ...createEmptyEducation(), school: 'Aalto University', degree: 'M.Sc. (Tech.) Computer Science', startDate: '2012', endDate: '2017' }],
     links: {

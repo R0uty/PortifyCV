@@ -371,7 +371,6 @@
   font-weight: 600;
   background: rgba(20, 184, 166, 0.16);
   color: #5eead4;
-  overflow-wrap: anywhere;
 }
 
 .dev-showcase__main .dev-showcase__skill-tag {

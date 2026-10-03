@@ -438,8 +438,14 @@ named.
   same mid-word fracture `.tpl-value-breakable` would cause, so it's
   intentionally left off. The one trade-off: a genuinely long single token
   (e.g. a 60-character skill string with no spaces) can overflow its row
-  by a few pixels instead of being forced to wrap — accepted, since it
-  still reads as one word rather than a fragmented one.
+  instead of being forced to wrap — for an ordinary long word this is a
+  few pixels, but for a truly unbreakable 40+ character token it can be
+  far more than that. Accepted, since it still reads as one word rather
+  than a fragmented one. If a chip/row is narrow enough that this would
+  visibly clip or break the layout, apply `overflow-wrap: anywhere`
+  directly to that one token's own element (not back onto
+  `.tpl-text-wrappable` itself) — acceptable only for a single token
+  longer than its chip.
   Introduced in 1.4.7 (`docs/template-audit-phase2.md` G7 fix round 1)
   after `.tpl-value-breakable` on Modern Orange's skill-name row turned
   out to fracture ordinary skill words, not just the one long synthetic

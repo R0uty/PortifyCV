@@ -511,8 +511,8 @@ header/body-level numbers that most directly drive page count.)
 
 ### G9 — everything else
 
-**F9 — Minimal's flat-renderer link row lets a whole short word fragment,
-via a blanket CSS override.**
+**F9 — fixed (1.4.10).** Minimal's flat-renderer link row lets a whole short word fragment,
+via a blanket CSS override.
 `src/styles/app-shell.css:3046-3052`:
 ```css
 .preview-document h3, .preview-document h4, .preview-document p, .preview-document span {
@@ -552,8 +552,8 @@ is the exact §7 failure mode (a glued token), the walker didn't
 mis-detect anything. Controller finding 5. Template: portrait (example
 tier). Clears 2 entries. Group: **G9**.
 
-**F11 — Graduate's sidebar section heading overflows the card's right edge,
-on every stress fixture, regardless of content.**
+**F11 — fixed (1.4.10).** Graduate's sidebar section heading overflows the card's right edge,
+on every stress fixture, regardless of content.
 `.graduate-showcase__section-title` (`src/styles/templates/graduate.css:185`)
 has no `min-width: 0` or width constraint inside its flex row
 `.graduate-showcase__section-head` (`graduate.css:160`), which sits in the
@@ -570,8 +570,8 @@ the card's right edge. This fires on **all three** stress fixtures
 that matters — confirms the controller's "structural, content-independent"
 read. Template: graduate. Clears 3 entries. Group: **G9**.
 
-**F12 — Placeholder "… will appear here" text reaches the exported PDF for
-every template (controller finding 1).**
+**F12 — fixed (1.4.10).** Placeholder "… will appear here" text reaches the exported PDF for
+every template (controller finding 1).
 Confirmed by Task 4's investigation: `createExportSandbox()`
 (`src/utils/exporters.js:~715-723`) calls `resolveExportRoot(previewElement)`
 then `exportRoot.cloneNode(true)` — a verbatim deep clone of whatever
@@ -629,6 +629,29 @@ No allowlist entries (the stress-tier harness explicitly skips the
 `placeholder` rule — see `e2e/template-layout.spec.js`'s comment — so this
 was never caught by Phase 2's own harness, only by Task 4's separate
 investigation). Group: **G9**.
+
+**Task 9 fix:** `pruneEmptySectionsFromClone(clone, formData)`
+(`src/utils/exporters.js`), called from `createExportSandbox()` immediately
+after `const clone = exportRoot.cloneNode(true)` exactly as this finding
+proposed — walks every `clone.querySelectorAll('[data-export-section]')`
+node and removes any whose section key fails `hasSectionContent(formData,
+sectionKey)` (`src/utils/sectionContent.js`). `createExportSandbox()`
+gained a fourth `formData` parameter, threaded from `exportCvAsPdf`'s
+`options.formData` — already passed at the one call site
+(`ResumeBuilderPage.jsx`'s `exportCvAsPdf(previewRef.current, …, {
+formData, … })`) for the existing text-fallback path, so no new plumbing
+was needed there. Verified this is the single fix point needed: the HTML
+export (`exportCvAsHtml`, same file) was independently checked and never
+had this bug — it builds its markup directly from `formData`'s snapshot
+arrays (`snapshot.skills.length > 0 && isVisible('skills') && …`), never
+clones the live DOM, so an empty section was already omitted outright.
+New test: `e2e/template-pdf-placeholder.spec.js` — loads the `sparse`
+stress fixture into the builder and asserts the export sandbox's clone DOM
+(the exact node `html2canvas` rasterizes, captured via polling for
+`.pdf-export-page` in the live DOM) never contains "will appear here" /
+"näkyvät tässä", for minimal/modern/graduate × Classic/Direct Edit (6
+cases). Confirmed RED by temporarily disabling the prune call — the clone
+carried the placeholder text — then GREEN once restored.
 
 G9 total: **4 fix items (F9, F10, F11, F12), 6 allowlist entries, 18
 templates** (F12 is app-wide; F9/F10/F11 are template-specific — see table
@@ -878,3 +901,53 @@ by file order, mapped to the `F#` that clears it.
 F6 2, F7 2, F8 1) · G8a = 0 entries (F14 — its own task, no allowlist
 coverage) · G8 = 3 entries (F13 3) · G9 = 6 entries (F9 1, F10 2, F11 3) +
 1 non-allowlist item (F12). 31 + 14 + 0 + 3 + 6 = 54.**
+
+---
+
+## 4. Accepted exceptions (Task 9)
+
+All findings above (F1–F14) are fixed as of 1.4.10; `LAYOUT_ALLOWLIST`
+(`e2e/fixtures/layoutAllowlist.js`) carries no entries from G6–G9. Task 9's
+controller item C added a new, deliberately adversarial stress case —
+`e2e/fixtures/stressCvs.js`'s `long-single-word` fixture skills array
+gained `'Kubernetesoperatorreconciliationloopsdesign'`, a 44-character
+single token with no spaces — specifically so every one of the 18
+templates' skill-chip rendering gets checked against an unbreakable token,
+not just Modern Orange's dot-rating row it was first found on (§6, G7 fix
+round 1).
+
+That check surfaced the following, all now **accepted exceptions** rather
+than fixed bugs — recorded here, in `layoutAllowlist.js`'s own header
+comment, and in `task-9-report.md`:
+
+| template | class | without a break | with `overflow-wrap: anywhere` |
+|---|---|---|---|
+| modern | `.modern-showcase__tag` | overflows ~134px past the page edge | breaks mid-word, stays on the page |
+| creative | `.creative-showcase__pill` | overflows past the page edge | breaks mid-word, stays on the page |
+| executive | `.executive-showcase__tag` | overflows past the page edge | breaks mid-word, stays on the page |
+| graduate | `.graduate-showcase__tag` | overflows past the page edge | breaks mid-word, stays on the page |
+| portfolio | `.portfolio-showcase__badge` | overflows ~111px past the page edge | breaks mid-word, stays on the page |
+| colorfulCompact | `.colorful-compact-showcase__skill-pill` | overflows ~116px past the page edge | breaks mid-word, stays on the page |
+| quadrant | `.quadrant-showcase__tag` | overflows past the page edge | breaks mid-word, stays on the page |
+
+In each of these seven, the skill-chip row's column sits flush against the
+card's own right edge with no outer margin (confirmed by measuring the
+rendered DOM: the column's right edge equals the card root's right edge in
+every one), and the token's natural one-line width (~250–280px at the
+chip's font size) is 2–3x the column's width (~106–136px). There is no CSS
+that keeps a token both on one line *and* inside the page at that size
+difference — the only choice is break-it-to-fit (reported by the layout
+harness as `mid-word-break`) or let-it-run-off-the-page (`beyond-page`,
+which would genuinely be cut off in a real PDF export, strictly worse).
+Each carries the single-token `overflow-wrap: anywhere` exception
+documented in `docs/template-design-system.md` §6, and the resulting
+`mid-word-break` is allowlisted for the `stress:long-single-word` fixture
+only — a synthetic, unrealistic 44-character skill with no spaces, not
+real-world content.
+
+The remaining eleven templates (minimal, developer, timeline, compact,
+techExec, classicProfessional, navyProfessional, modernOrange, editorial,
+portrait, european) handle the same token cleanly — either their skill-chip
+column has enough margin to the page edge for an unbroken overflow to stay
+on the page, or the chip naturally wraps to its own full-width line without
+breaking. No allowlist entry for them.
