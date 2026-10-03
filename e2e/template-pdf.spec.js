@@ -71,7 +71,7 @@ const EXPECTED_PDF_PAGES = {
 const PREVIEW_ROOT = '.app-shell__preview [data-export-variant]'
 
 for (const template of cvTemplates) {
-  test(`pdf / ${template.id}`, async ({ page }, testInfo) => {
+  test(`pdf / ${template.id} @slow`, async ({ page }, testInfo) => {
     test.setTimeout(90_000)
     const exampleId = TEMPLATE_EXAMPLES[template.id][0]
     const cv = await loadExampleCv(exampleId, 'en')

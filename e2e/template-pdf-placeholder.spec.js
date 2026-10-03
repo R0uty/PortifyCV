@@ -40,7 +40,7 @@ async function captureExportSandboxHtml(page, timeoutMs = 15_000) {
 
 for (const template of TEMPLATES) {
   for (const builderMode of ['classic', 'direct']) {
-    test(`pdf export has no placeholder text / ${template} / ${builderMode}`, async ({ page }) => {
+    test(`pdf export has no placeholder text / ${template} / ${builderMode} @slow`, async ({ page }) => {
       test.setTimeout(60_000)
       const cv = STRESS_CVS.sparse
       await page.addInitScript((snapshot) => {

@@ -16,6 +16,8 @@
     "check:template-pages": "node scripts/check-template-pages.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test",
+    "test:e2e:fast": "playwright test --grep-invert @slow",
+    "test:e2e:slow": "playwright test --grep @slow",
     "worker:dev": "wrangler dev",
     "deploy": "wrangler deploy"
   },

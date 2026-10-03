@@ -54,7 +54,7 @@ const BUILDER_ROOT = '.app-shell__preview [data-export-variant]'
 
 for (const template of cvTemplates) {
   for (const [fixtureId, cv] of Object.entries(STRESS_CVS)) {
-    test(`${template.id} / stress:${fixtureId}`, async ({ page }) => {
+    test(`${template.id} / stress:${fixtureId} @slow`, async ({ page }) => {
       await page.addInitScript((snapshot) => {
         window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
         window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
