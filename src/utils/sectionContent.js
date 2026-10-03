@@ -1,8 +1,19 @@
-// Used only by the per-template marketing pages (TemplateDetailPage.jsx) to
-// hide a CV section that has no real content in its preview, instead of
-// showing a template's "<Section> will appear here." placeholder. Example
-// data files and the builder are unaffected — this never mutates a CV and
-// is never imported by ResumeBuilderPage.jsx.
+// Two callers, neither of which mutates the CV:
+// - The per-template marketing pages (TemplateDetailPage.jsx) use
+//   `hideEmptySections()` to hide a CV section that has no real content in
+//   its preview, instead of showing a template's "<Section> will appear
+//   here." placeholder.
+// - The PDF export path (`src/utils/exporters.js`'s
+//   `pruneEmptySectionsFromClone()`, called from `createExportSandbox()`)
+//   uses `hasSectionContent()` directly to strip the same placeholder
+//   sections from the detached DOM clone html2canvas rasterizes, so an
+//   exported PDF never carries "will appear here" text either (F12,
+//   docs/template-audit-phase2.md). It reads `formData` to decide, same as
+//   `hideEmptySections()`, and likewise never writes to it.
+// The builder's own on-screen preview is unaffected by either caller —
+// `ResumeBuilderPage.jsx` and `DirectEditPreview.jsx` still render the live
+// placeholder text as an editing affordance; only the exported artifact
+// (PDF) and the read-only marketing-page preview have it stripped.
 
 import { CV_SECTION_ORDER_KEYS } from './cvForm'
 
