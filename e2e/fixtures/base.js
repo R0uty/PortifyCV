@@ -18,7 +18,13 @@ export const test = base.extend({
   // since this is a Playwright fixture, not a React component.
   page: async ({ page }, runWithPage) => {
     for (const pattern of AD_URL_PATTERNS) {
-      await page.route(pattern, (route) => route.abort())
+      // 'blockedbyclient' makes the browser log the request's console
+      // error as "net::ERR_BLOCKED_BY_CLIENT" — the exact string
+      // template-pages.spec.js's "renders without console errors" test
+      // already filters out as an expected AdSense side effect. The
+      // default abort reason logs a generic "net::ERR_FAILED" instead,
+      // which that filter doesn't recognize and would fail the test.
+      await page.route(pattern, (route) => route.abort('blockedbyclient'))
     }
     await runWithPage(page)
   },
