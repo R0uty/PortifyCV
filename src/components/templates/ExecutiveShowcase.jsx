@@ -629,7 +629,10 @@ export default function ExecutiveShowcase({
       // ExecutiveShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className="executive-showcase preview-document--designer tpl-density-standard"
+      // Moved from tpl-density-standard to tpl-density-compact in 1.4.9
+      // (G8 density, docs/template-audit-phase2.md) — see executive.css's
+      // header comment for why.
+      className="executive-showcase preview-document--designer tpl-density-compact"
       style={{
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, EXECUTIVE_DEFAULT_ACCENT_COLOR),

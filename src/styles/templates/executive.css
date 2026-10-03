@@ -12,9 +12,23 @@
      stone scale to sit with the gold.
    - §4 heading: rule-under — a tracked-uppercase label over a 1px gold
      hairline. The old bare section glyph is removed.
-   - §2 ramp: sizes from `--tpl-*` (root carries `tpl-density-standard` —
-     reclassified from the doc's `roomy` starting assignment, since the name
-     lives in a ~210px rail that can't give roomy's 240px floor).
+   - §2 ramp: sizes from `--tpl-*` (root carries `tpl-density-compact` as
+     of 1.4.9 — previously `standard`, itself reclassified from the doc's
+     `roomy` starting assignment because the name lives in a ~210px rail
+     that can't give roomy's 240px floor; compact's 180px floor still
+     clears it).
+
+   1.4.9 (G8, docs/template-audit-phase2.md): `finance-director` ran to
+   2.34 A4 pages after 8a's achievements/technologies lines landed —
+   Experience alone (3+ entries × bullets + the new technologies meta
+   line) was ~60% of the page. `standard` plus a vertical-rhythm trim
+   wasn't enough on its own (still ~2.2 pages even after trimming margin-
+   top/gap/padding ~25%), so this went one step further to `standard` →
+   `compact` (the body/meta line-heights this file sets directly were
+   brought down from standard's 1.55/1.40 to compact's 1.45/1.35 in the
+   same move — §2 only tokenizes `name`'s line-height, the rest are set
+   per rule) plus one clean ~15% trim of the remaining margin-top/gap/
+   padding values. Font sizes beyond the class swap are untouched.
 
    No boxed section containers; only Projects and Links keep a subtle
    bordered card (the template's stated "Professional cards" exception).
@@ -77,7 +91,7 @@
 .executive-showcase__sidebar {
   min-width: 0;
   background: var(--ex-rail);
-  padding: 2.5rem 1rem;
+  padding: 2.2rem 1rem;
 }
 
 .executive-showcase__identity {
@@ -85,7 +99,7 @@
 }
 
 .executive-showcase__photo-wrap {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.05rem;
 }
 
 .executive-showcase__photo {
@@ -106,7 +120,7 @@
 }
 
 .executive-showcase__name {
-  margin-top: 0.4rem;
+  margin-top: 0.35rem;
   /* Steps down to the *compact* row (§2) rather than funding the full
      standard name floor in this narrow rail — see the grid comment above
      (docs/template-audit-phase2.md G7/F6). Every other role here stays
@@ -120,30 +134,30 @@
 }
 
 .executive-showcase__role {
-  margin-top: 0.4rem;
+  margin-top: 0.35rem;
   font-size: var(--tpl-title-size);
   font-weight: 600;
   color: var(--tpl-accent);
 }
 
 .executive-showcase__tagline {
-  margin-top: 0.5rem;
+  margin-top: 0.45rem;
   font-size: var(--tpl-meta-size);
   font-style: italic;
   color: var(--ex-ink-faint);
 }
 
 .executive-showcase__contact {
-  margin-top: 1.1rem;
+  margin-top: 0.9rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.55rem;
 }
 
 .executive-showcase__contact-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   font-size: var(--tpl-meta-size);
   color: var(--ex-ink-faint);
   overflow-wrap: break-word;
@@ -165,13 +179,13 @@
 
 .executive-showcase__main {
   min-width: 0;
-  padding: 2.5rem 2.5rem 2.5rem 2.25rem;
+  padding: 2.2rem 2.5rem 2.2rem 2.25rem;
 }
 
 /* ── Sections — no boxed container; rule-under heading (§4) ── */
 
 .executive-showcase__section + .executive-showcase__section {
-  margin-top: 2rem;
+  margin-top: 1.75rem;
 }
 
 .executive-showcase__section-head {
@@ -188,7 +202,7 @@
 }
 
 .executive-showcase__empty {
-  margin-top: 0.9rem;
+  margin-top: 0.8rem;
   font-size: var(--tpl-meta-size);
   color: var(--ex-ink-faint);
 }
@@ -196,9 +210,9 @@
 /* ── Executive Profile ── */
 
 .executive-showcase__summary {
-  margin-top: 0.9rem;
+  margin-top: 0.8rem;
   font-size: var(--tpl-body-size);
-  line-height: 1.7;
+  line-height: 1.45;
   color: var(--ex-ink-muted);
   white-space: pre-line;
 }
@@ -206,13 +220,13 @@
 /* ── Experience / Leadership / Education — clean entry list, no timeline ── */
 
 .executive-showcase__entry-list {
-  margin-top: 0.9rem;
+  margin-top: 0.8rem;
   display: flex;
   flex-direction: column;
 }
 
 .executive-showcase__entry {
-  padding: 0 0 1.25rem;
+  padding: 0 0 1.05rem;
   border-bottom: 1px solid var(--ex-border);
 }
 
@@ -268,7 +282,7 @@
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.5rem 1rem;
+  gap: 0.45rem 0.8rem;
 }
 
 .executive-showcase__entry-role {
@@ -291,16 +305,16 @@
 }
 
 .executive-showcase__bullets {
-  margin-top: 0.6rem;
+  margin-top: 0.55rem;
   padding-left: 1.05rem;
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
+  gap: 0.35rem;
 }
 
 .executive-showcase__bullets li {
   font-size: var(--tpl-body-size);
-  line-height: 1.6;
+  line-height: 1.45;
   color: var(--ex-ink-muted);
 }
 
@@ -313,7 +327,7 @@
   padding-left: 0;
   white-space: pre-line;
   font-size: var(--tpl-body-size);
-  line-height: 1.6;
+  line-height: 1.45;
   color: var(--ex-ink-muted);
 }
 
@@ -325,17 +339,17 @@
 /* ── Major Projects (subtle bordered "professional card") ── */
 
 .executive-showcase__project-grid {
-  margin-top: 0.9rem;
+  margin-top: 0.8rem;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.05rem;
 }
 
 .executive-showcase__project-card {
   border-radius: 10px;
   border: 1px solid var(--ex-border);
   background: var(--ex-card);
-  padding: 1.1rem 1.25rem;
+  padding: 0.9rem 1.25rem;
 }
 
 .executive-showcase__project-name {
@@ -352,15 +366,15 @@
 }
 
 .executive-showcase__project-desc {
-  margin-top: 0.5rem;
+  margin-top: 0.45rem;
   font-size: var(--tpl-body-size);
-  line-height: 1.6;
+  line-height: 1.45;
   color: var(--ex-ink-muted);
   white-space: pre-line;
 }
 
 .executive-showcase__project-impact {
-  margin-top: 0.5rem;
+  margin-top: 0.45rem;
   font-size: var(--tpl-meta-size);
   font-weight: 700;
   color: var(--tpl-accent);
@@ -369,13 +383,13 @@
 /* ── Sidebar: plain lists — no card wrapper, thin dividers only ── */
 
 .executive-showcase__list {
-  margin-top: 0.9rem;
+  margin-top: 0.8rem;
   display: flex;
   flex-direction: column;
 }
 
 .executive-showcase__list-item {
-  padding: 0.75rem 0;
+  padding: 0.7rem 0;
   border-bottom: 1px solid var(--ex-border);
 }
 
@@ -392,7 +406,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.45rem;
   font-size: var(--tpl-body-size);
   color: var(--ex-ink);
 }
@@ -420,13 +434,13 @@
 /* ── Core Competencies ── */
 
 .executive-showcase__strength-list {
-  margin-top: 0.9rem;
+  margin-top: 0.8rem;
   display: flex;
   flex-direction: column;
 }
 
 .executive-showcase__strength-item {
-  padding: 0.75rem 0;
+  padding: 0.7rem 0;
   border-bottom: 1px solid var(--ex-border);
 }
 
@@ -448,7 +462,7 @@
 .executive-showcase__strength-desc {
   margin-top: 0.2rem;
   font-size: var(--tpl-meta-size);
-  line-height: 1.55;
+  line-height: 1.35;
   color: var(--ex-ink-faint);
   white-space: pre-line;
 }
@@ -456,11 +470,11 @@
 /* ── Executive Skills (flat grouped tags) ── */
 
 .executive-showcase__skill-group {
-  margin-top: 1rem;
+  margin-top: 0.8rem;
 }
 
 .executive-showcase__skill-group:first-of-type {
-  margin-top: 0.9rem;
+  margin-top: 0.8rem;
 }
 
 .executive-showcase__skill-group-label {
@@ -469,7 +483,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--ex-ink-faint);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.45rem;
 }
 
 .executive-showcase__skill-group .direct-edit-chip-group__label {
@@ -483,12 +497,12 @@
 .executive-showcase__tag-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .executive-showcase__tag {
   border-radius: 6px;
-  padding: 0.28rem 0.6rem;
+  padding: 0.25rem 0.6rem;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--ex-ink);
@@ -499,20 +513,20 @@
 /* ── Awards ── */
 
 .executive-showcase__award-list {
-  margin-top: 0.9rem;
+  margin-top: 0.8rem;
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 0.8rem;
 }
 
 .executive-showcase__award-item {
   display: flex;
-  gap: 0.65rem;
+  gap: 0.6rem;
 }
 
 .executive-showcase__award-dot {
   flex-shrink: 0;
-  margin-top: 0.4rem;
+  margin-top: 0.35rem;
   width: 0.4rem;
   height: 0.4rem;
   border-radius: 9999px;
@@ -524,7 +538,7 @@
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: 0.4rem 1rem;
+  gap: 0.35rem 0.8rem;
 }
 
 .executive-showcase__award-title {
@@ -542,7 +556,7 @@
 .executive-showcase__award-desc {
   margin-top: 0.2rem;
   font-size: var(--tpl-meta-size);
-  line-height: 1.5;
+  line-height: 1.35;
   color: var(--ex-ink-faint);
   white-space: pre-line;
 }
@@ -550,20 +564,20 @@
 /* ── Links (minimal "professional cards") ── */
 
 .executive-showcase__link-list {
-  margin-top: 0.9rem;
+  margin-top: 0.8rem;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.55rem;
 }
 
 .executive-showcase__link-card {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
   border-radius: 10px;
   border: 1px solid var(--ex-border);
   background: var(--ex-card);
-  padding: 0.55rem 0.7rem;
+  padding: 0.5rem 0.7rem;
 }
 
 .executive-showcase__link-icon {
@@ -597,11 +611,11 @@
 
 @media (max-width: 560px) {
   .executive-showcase__sidebar {
-    padding: 1.75rem 1.25rem;
+    padding: 1.5rem 1.25rem;
   }
 
   .executive-showcase__main {
-    padding: 1.75rem 1.25rem;
+    padding: 1.5rem 1.25rem;
   }
 
   .executive-showcase__photo {

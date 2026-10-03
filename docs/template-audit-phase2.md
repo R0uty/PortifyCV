@@ -416,6 +416,69 @@ moment they were added. Templates: executive, classicProfessional. Clears
 G8 total: **1 fix item, 5 allowlist entries, 3 templates** (portfolio,
 executive, classicProfessional).
 
+**F13 — fixed (1.4.9), along with the fix-round-1 `executive`/
+`classicProfessional` additions above.** Re-measured before fixing (8a had
+lengthened every example further than the numbers quoted above, since this
+group was written before 8a landed):
+`portfolio/frontend-developer` 2.54, `portfolio/ux-designer` 2.45,
+`portfolio/product-manager` 2.60, `executive/finance-director` 2.34,
+`classicProfessional/finance-director` 2.03 A4 pages.
+
+Per-section `offsetHeight` on `.scaled-preview__page [data-export-section]`
+(the harness's own root) at each template's worst example, before any fix:
+
+| Template / example | Dominant section(s) | Density before |
+|---|---|---|
+| portfolio / product-manager (2865px, 2.60 pages) | projects 434, experience 677, caseStudies 573, skills 355 | `roomy` |
+| executive / finance-director (2576px, 2.34 pages) | experience 1624 (63% of total) | `standard` (already reclassified from the doc's `roomy` starting assignment in the 1.2.11 rework, for an unrelated name-floor reason) |
+| classicProfessional / finance-director (2239px, 2.03 pages) | experience 1335 (60%) | `roomy` |
+
+Fix chosen per template, smallest-first:
+
+- **classicProfessional** — only 1.5% over. A density step would have
+  overshot badly and moved every other Classic Professional example for a
+  rounding error. Fix: a single ~10% trim of this file's own margin-top/
+  gap/padding vertical-rhythm values (header padding, section-gap margins,
+  entry/list gaps) — no font-size or line-height change.
+  `finance-director` → 1.96 pages.
+- **portfolio** — 20–23% over on all three examples; not reachable by
+  rhythm trimming alone within `roomy` (tried first: `roomy`→`standard`
+  alone only bought ~5%, since the template is dominated by wrapped body
+  text, not whitespace). Moved one more step, `standard`→`compact` (the
+  class design-system §2 names as exactly the one a "fit two pages" fix
+  switches into), updated the handful of body/meta line-heights this file
+  sets directly from `standard`'s 1.55/1.40 to `compact`'s 1.45/1.35 (§2:
+  only `name` carries a line-height token — the rest are normative per
+  role/class and this file had still been carrying `roomy`'s numbers mid-
+  fix), then one clean ~25% trim of the remaining margin-top/gap/padding.
+  `frontend-developer` → 1.91, `ux-designer` → 1.94, `product-manager` →
+  1.98 pages.
+- **executive** — 14.5% over, already on `standard` (not `roomy` — see
+  table above). A vertical-rhythm trim alone plateaued around 2.12–2.20
+  pages even after three compounding passes (~30% cumulative), because
+  Experience's bullet text (not whitespace) is 60%+ of the page. Reverted
+  that trial, then: `standard`→`compact` + the same body/meta line-height
+  correction as Portfolio, plus one clean ~15% rhythm trim.
+  `finance-director` → 1.99 pages.
+
+**Re-ran the full example tier for all three templates** (a density change
+moves every example, not just the one that failed): all pass, including
+the ATS variant and the stress tier (`stress:long-single-word`,
+`stress:ten-jobs`, `stress:sparse`) for each. No other example newly
+tripped `name-lines`, `clipped-text`, `mid-word-break`, or `beyond-page` —
+confirmed with the full `template-layout.spec.js`/`template-content.spec.js`
+run (305/305 passing after the fix).
+
+PDF export page counts updated in `EXPECTED_PDF_PAGES`
+(`e2e/template-pdf.spec.js`): `executive` 3→2, `portfolio` 3→2 — both a
+direct, intended consequence of the density fix, not a regression.
+`classicProfessional` stayed at 2 (the fix only pulled it back under the
+on-screen page-count budget, not across a PDF page boundary).
+
+All 5 `length` allowlist entries removed from
+`e2e/fixtures/layoutAllowlist.js`; 4 entries remain (G9's stress-tier
+items — out of this task's scope).
+
 ### G9 — everything else
 
 **F9 — Minimal's flat-renderer link row lets a whole short word fragment,

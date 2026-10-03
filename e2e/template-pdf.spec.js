@@ -42,16 +42,21 @@ const MIN_PDF_BYTES = 60_000
 // genuinely longer — their experience entries now have more content, not a
 // layout regression. executive 2→3, techExec 1→2, classicProfessional 1→2,
 // quadrant 1→2.
+// Task 8 (G8 density, 1.4.9): tightening Portfolio Hybrid and Executive's
+// density to pull their example CVs back under the 2.0-A4-page budget
+// (both had been pushed over by 8a's added content) dropped their PDF
+// export page counts back down. executive 3→2, portfolio 3→2 — a
+// deliberate layout change, not a regression.
 const EXPECTED_PDF_PAGES = {
   minimal: 2,
   developer: 2,
   creative: 2,
   modern: 2,
-  executive: 3,
+  executive: 2,
   timeline: 2,
   graduate: 2,
   compact: 1,
-  portfolio: 3,
+  portfolio: 2,
   techExec: 2,
   classicProfessional: 2,
   navyProfessional: 1,

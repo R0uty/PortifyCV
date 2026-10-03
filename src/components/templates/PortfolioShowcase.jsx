@@ -25,6 +25,14 @@
 // the hairline, section-icon badges, chips, badges and the "Live Demo"
 // button) collapses to a single emerald accent read from `--tpl-accent`,
 // user-customizable via the Settings swatch (`forestGreen` set).
+//
+// Moved from `tpl-density-roomy` to `tpl-density-compact` in 1.4.9 (G8,
+// docs/template-audit-phase2.md): all three example CVs ran past the
+// 2.0-page cap under `roomy`'s card chrome + badge rows, and a single
+// density step plus a token-sized vertical-rhythm trim wasn't enough once
+// 8a's achievements/technologies lines landed — see the design-system doc's
+// own "fit one page" note on `compact` being exactly the class this kind of
+// fix switches into.
 
 import { useMemo } from 'react'
 import '@fontsource/instrument-serif/400.css'
@@ -690,7 +698,7 @@ export default function PortfolioShowcase({
       // PortfolioShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className="portfolio-showcase preview-document--designer tpl-density-roomy"
+      className="portfolio-showcase preview-document--designer tpl-density-compact"
       style={{
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.1, PORTFOLIO_DEFAULT_ACCENT_COLOR),
