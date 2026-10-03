@@ -161,8 +161,8 @@ modern, executive, portfolio, techExec, graduate, european, creative,
 colorfulCompact, editorial, portrait, quadrant, modernOrange). (Fix-round-1
 correction: the first pass of this doc omitted graduate from this rollup
 line even though F1's own template list and the §6 index already counted
-it — graduate's `clipped-text` entries, rows 35 and 40 in §6, were always
-mapped to F1.)
+it — graduate's `clipped-text` entry, row 35 in §6, was always mapped to
+F1.)
 
 ### G7 — names in narrow columns
 
@@ -735,34 +735,34 @@ fixes land.
 T = typography · C = colour · S = structural · D = density · E = content
 edge-cases · A = ATS parity · X = export fidelity
 
-| Template | T | C | S | D | E (before) | A (before) | X (before) | Verdict | Driving axis |
-|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|---|---|
-| Minimal | 2 | 3 | 2 | 2 | 2 | 3 | 2 | keep | — only template passing content-coverage cleanly (F14 doesn't apply — it's always flat-rendered, so normal and ATS mode are literally the same code path, no asymmetry possible); A restored to A.2's 3 (fix-round-1 correction — the first pass of this doc dropped it to 2 with no stated reason); still the flat-renderer `--tpl-*` gap from A.2 |
-| Developer | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14 (no achievements/tech in normal mode); E=1 — F1 clipped links on 3/3 example CVs; A=1 — ATS now shows *more* content than normal (parity break, just inverted) |
-| Creative | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F2 clipped links (2/2 example CVs) + F5/F6 name-wrap on stress |
-| Modern | 3 | 3 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F1 clipped links (3/3 example CVs) |
-| Executive | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F1 clipped links (3/3 example CVs) + F6 mid-word name break |
-| Timeline | 2 | 3 | 3 | 2 | **1** | 2 | **0** | rework | X=0 — F14 (both modes equally wrong, so A stays 2); E=1 — F5 name-wrap on stress |
-| Graduate | 2 | 2 | **1** | 2 | **0** | **1** | **0** | rework | X=0 — F14; S=1 — F11 structural heading overflow on every stress fixture; E=0 — F11 is content-independent (fires on realistic CVs, not just the synthetic name) |
-| Compact | 2 | 2 | 2 | **1** | 2 | **1** | **0** | rework | X=0 — F14; D=1 carried from A.2 (ad-hoc, not on the `compact` class) |
-| Portfolio | 2 | 3 | 2 | **1** | **1** | **1** | **0** | rework | X=0 — F14; D=1 — F13, all 3 example CVs exceed the 2.0-page cap; E=1 — F1 clipped links (3/3 example CVs) |
-| TechExec | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F1 clipped links (2/2 example CVs) |
-| ClassicProfessional | 3 | 3 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F5 name-wrap on stress |
-| NavyProfessional | 2 | 2 | 2 | 2 | **0** | 2 | **0** | rework | X=0 — F14 (A stays 2, same reasoning as Timeline); E=0 — F7, a **real example CV** (`cto`) wraps the name to 4 lines, a documented unresolved §2 gap |
-| ModernOrange | 3 | 3 | 3 | 2 | **0** | 2 | **0** | rework | X=0 — F14 (A stays 2); E=0 — F4 clipped skills (2/2 example CVs) + F6/F8 name mid-word-break and gluing |
-| ColorfulCompact | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F2 clipped links on stress |
-| Quadrant | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F3 clipped links (worse variant, no ellipsis) + F5 name-wrap on stress |
-| Editorial\* | 2 | 2 | 2 | 2 | **1** | **1** | **0** | rework | X=0 — F14; E=1 — F2 clipped links + F5 name-wrap on stress |
-| Portrait\* | 2 | 2 | **3** | 2 | **0** | **1** | **0** | rework | X=0 — F14; S=3 — sole occupant of the `photo-rail + main` family (§5), structure that serves a real use case; E=0 — F10 glued language separator is an **example-tier** failure (real CVs, not stress) + F2/F5 on stress |
-| European\* | 2 | 2 | **3** | **3** | **1** | **1** | **0** | rework | X=0 — F14; S=3 — sole occupant of `label-grid` (§5), a genuinely different reading pattern; D=3 — its own-density-switching (`tpl-density-standard`→`compact`) one-page mechanism is fully realized, per §5's note; E=1 — F1 clipped links on stress |
+| Template | T | C | S | D | E (before) | A (before) | X (before) | E (after) | A (after) | X (after) | Verdict (after) | Driving axis |
+|---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|---|---|
+| Minimal | 2 | 3 | 2 | 2 | 2 | 3 | 2 | 2 | 3 | 2 | keep | unchanged — only template that never had F14 (always flat-rendered, no normal/ATS asymmetry possible); still the flat-renderer `--tpl-*` gap from A.2 |
+| Developer | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1 (clipped links → `.tpl-value-breakable`) and F14 (achievements/technologies now render, normal and ATS) both fixed; `template-layout`/`template-content` pass with no allowlist entries |
+| Creative | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F2 (clipped links) and F5/F6 (stress name-wrap) fixed via `.tpl-value-breakable` + the name-sizing/floor work; F14 fixed |
+| Modern | 3 | 3 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1 and F14 fixed |
+| Executive | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1, F6 (mid-word name break) and F14 fixed; density also stepped `standard`→`compact` (G8/F13 fix-round-1 addition) to pull `finance-director` back under the 2.0-page cap after F14 added real achievement/technology content — D stays 2 (still a declared class, not ad hoc) |
+| Timeline | 2 | 3 | 3 | 2 | **1** | 2 | **0** | 2 | 2 | 2 | keep | F5 (stress name-wrap) and F14 fixed |
+| Graduate | 2 | 2 | **1→2** | 2 | **0** | **1** | **0** | 2 | 2 | 2 | keep | F11 (sidebar heading overflow, structural) fixed 1.4.10 — S restored to 2; F14 fixed |
+| Compact | 2 | 2 | 2 | **1** | 2 | **1** | **0** | 2 | 2 | 2 | keep | F14 fixed; D=1 (ad-hoc, not on the `compact` class) is a carried A.2 finding Task 8/9 did not touch — still open, tracked in `todo.md` follow-ups |
+| Portfolio | 2 | 3 | 2 | **1→2** | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1 and F14 fixed; F13 (all 3 example CVs over the 2.0-page cap) fixed 1.4.9 by stepping `standard`→`compact` with corrected line-heights — D restored to 2 |
+| TechExec | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1 and F14 fixed |
+| ClassicProfessional | 3 | 3 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F5 (stress name-wrap) fixed; F14 fixed; the `finance-director` example's F13 fix-round-1 overage (2.03 pages) resolved with a ~10% rhythm trim within `roomy`, no density-class step needed |
+| NavyProfessional | 2 | 2 | 2 | 2 | **0** | 2 | **0** | 2 | 2 | 2 | keep | F7 (real `cto` example wrapping the name to 4 lines) fixed 1.4.7 by cutting identity-rail padding and stepping the name to a smaller-than-any-density size (documented §2 gap, now without the wrap symptom); F14 fixed |
+| ModernOrange | 3 | 3 | 3 | 2 | **0** | 2 | **0** | 2 | 2 | 2 | keep | F4 (clipped skills), F6 (mid-word break) and F8 (glued name halves) all fixed 1.4.6/1.4.7; F14 fixed |
+| ColorfulCompact | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F2 (stress clipped links) and F14 fixed |
+| Quadrant | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F3 (clipped links, no ellipsis) and F5 (stress name-wrap) fixed; F14 fixed |
+| Editorial\* | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F2 and F5 fixed; F14 fixed |
+| Portrait\* | 2 | 2 | **3** | 2 | **0** | **1** | **0** | 2 | 2 | 2 | keep | F10 (glued language separator, example-tier) fixed 1.4.8; F2/F5 (stress) fixed; F14 fixed; S stays 3 — sole occupant of the `photo-rail + main` family (§5), structure that serves a real use case |
+| European\* | 2 | 2 | **3** | **3** | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1 (stress clipped links) and F14 fixed; S stays 3 (sole occupant of `label-grid`, §5) and D stays 3 (own density-switching one-page mechanism, §5) |
 
-**Everything except Minimal is "rework" once F14 (the universal
-achievements/technologies drop) is scored on Export fidelity, where its own
-0-anchor ("content missing/invisible in an exported PDF") is a literal,
-exact match** — this is not rubric-gaming; `template-audit-a2.md`'s X
-column was explicitly "provisional (2)" pending exactly this check, which
-that session's resize-window tooling couldn't do and this one could by
-reading the renderer code directly.
+**Before this task, everything except Minimal was "rework" once F14 (the
+universal achievements/technologies drop) was scored on Export fidelity,
+where its own 0-anchor ("content missing/invisible in an exported PDF")
+was a literal, exact match** — this was not rubric-gaming;
+`template-audit-a2.md`'s X column was explicitly "provisional (2)" pending
+exactly this check, which that session's resize-window tooling couldn't do
+and this one could by reading the renderer code directly.
 
 For the 15 templates `template-audit-a2.md` (2026-09-09) already scored,
 the T/C/D columns are carried forward unchanged since this audit found no
@@ -794,9 +794,26 @@ for editorial/portrait), and european's dynamic `standard`→`compact`
 one-page mechanism (reusing Compact's measure-and-step technique per §5's
 note) is fully realized, matching D=3's anchor.
 
-**After-fix column:** left for Task 10, once G6, G7, G8a, G8 and G9 fixes
-land and F14 in particular is resolved (which should move every
-template's X back toward 2–3 and several E scores back toward 2).
+**After-fix columns (Task 10, 1.5.0):** filled in above from the final
+evidence — `LAYOUT_ALLOWLIST` is `[]`, every F1–F14 finding is marked
+fixed, and `template-layout.spec.js`/`template-content.spec.js`/
+`template-pdf.spec.js`/`template-pdf-placeholder.spec.js` all pass across
+every template × example × mode. F14's fix (Task 8a, rendering
+achievements/technologies in every bespoke Showcase, both normal and ATS,
+and pruning empty-section placeholders from PDF exports, Task 9) moves X
+back to 2 for all 18 templates — the same value `template-audit-a2.md`
+carried as "provisional" before this phase 2 audit existed. Every E score
+that had dropped to 0 or 1 is fixed and restored to 2: the structural (S)
+and density (D) regressions found along the way (Graduate's heading
+overflow, Portfolio's and, as a direct consequence of F14 adding real
+content, Executive's and Classic Professional's page-count overage) are
+likewise resolved — Graduate's S returns to 2 and Portfolio's D returns to
+2; Executive and Classic Professional keep D=2 throughout (a density-class
+step for Executive, a rhythm trim within the existing class for Classic
+Professional). No template ends in "rework"; all 18 are "keep". Compact's
+pre-existing ad-hoc D=1 (from `template-audit-a2.md`, unrelated to this
+phase's findings) is the one open item this task did not touch — see
+`todo.md`'s follow-ups list.
 
 ---
 

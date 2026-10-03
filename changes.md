@@ -4,6 +4,61 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template polish (Phase 2) — 2026-10-03
+
+A full layout audit of all 18 templates (`docs/template-audit-phase2.md`)
+against three new e2e specs — `template-layout.spec.js` (every template
+× every example CV, normal and ATS view, plus a stress tier of synthetic
+edge-case CVs run through the builder), `template-content.spec.js` (every
+achievement/technology string actually reaches the rendered preview), and
+a shared `e2e/helpers/layoutAudit.js` harness (clipped text, mid-word
+breaks, name-row line limits, page-length budget) — found and fixed 14
+distinct findings across 18 templates, tracked through a
+`LAYOUT_ALLOWLIST` (`e2e/fixtures/layoutAllowlist.js`) that is empty again
+as of this release; a stale allowlist entry fails its own test, so the
+list can't silently rot.
+
+**Biggest user-visible fix:** 17 of the 18 bespoke template Showcases were
+silently dropping every experience entry's `achievements` and
+`technologies` strings — only `description` ever reached the rendered CV
+in non-ATS mode (Minimal's always-flat rendering was the one exception).
+All 18 templates now render both fields via shared helpers in
+`directEditExperienceEntry.jsx`, in both normal and ATS view, and in PDF
+exports. A related export-only bug is also fixed: a visible-but-empty
+section's "… will appear here" builder placeholder text used to reach the
+exported PDF verbatim; the export clone now prunes any
+`[data-export-section]` node whose form data has no real content.
+
+**Other fixes:** sidebar link values that used to truncate with an
+ellipsis (or, on Quadrant, clip with no ellipsis at all) now wrap via a
+new shared primitive, `.tpl-value-breakable`
+(`src/styles/templates/_system.css`); the same file adds
+`.tpl-text-wrappable` for ordinary word text and `.tpl-chip-wrappable` for
+skill chips, replacing a blunter `overflow-wrap: anywhere` that had been
+re-opening the door to fracturing ordinary words once a row got crowded.
+Several templates' name rendering is fixed for long/compound names and
+narrow sidebar columns (Navy Professional's identity rail padding, Modern
+Orange's glued first/last name spans, Executive's and Modern Orange's
+mid-word fragmentation under a tight column floor). Portfolio Hybrid and
+Executive stepped from `standard` to `compact` density (with corrected
+line-heights) to pull their example CVs back under the 2.0-A4-page
+budget after the achievements/technologies fix added real content;
+Classic Professional got a smaller rhythm trim within its existing
+`roomy` class for the same reason. Net effect on PDF page counts
+(`EXPECTED_PDF_PAGES`, `e2e/template-pdf.spec.js`): Executive 2→3→2,
+Tech Executive 1→2, Classic Professional 1→2, Quadrant 1→2 (all from the
+content fix), Portfolio 3→2 (from the density fix) — a deliberate,
+recorded net change, not a regression.
+
+**Test suite:** the new specs roughly doubled e2e run time (523 tests,
+~2.5 min, up from ~1.1 min pre-Phase-2), so CI now splits the suite:
+`npm run test:e2e:fast` (`--grep-invert @slow`, 427 tests, ~2.0 min) runs
+in the existing `e2e` job, and a new `e2e-slow` job runs
+`npm run test:e2e:slow` (`--grep @slow`, 96 tests, ~36s) — the stress
+tier, `template-pdf.spec.js`, and `template-pdf-placeholder.spec.js`.
+`npm run test:e2e` (no filter) still runs everything locally. Lint and
+all seven `check:*` scripts pass; the full suite is 523/523.
+
 ## Template pages fix wave — 2026-10-02
 
 Fixes from the final whole-branch review of the `v1.4.0` template pages,

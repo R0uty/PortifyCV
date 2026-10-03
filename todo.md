@@ -2150,11 +2150,17 @@ Full reasoning per item is in `changes.md`; per-commit detail is in git.
   Direct Edit. Any standalone Playwright script you write for measurement must
   do the same or it will not find Classic's "Load demo CV" button.
 
-## Phase 2 inputs (from template-page examples)
+## Phase 2 inputs (from template-page examples) — RESOLVED (1.5.0)
 
-Observed by the controller's visual audits of the template pages (desktop, dev server, 2026-10). Deferred to Phase 2 (template polish).
+Observed by the controller's visual audits of the template pages (desktop, dev server, 2026-10). All four items below were fixed during Phase 2 template polish (`docs/template-audit-phase2.md` has the full fix write-up and evidence per item); `LAYOUT_ALLOWLIST` (`e2e/fixtures/layoutAllowlist.js`) is `[]`.
 
-- Sidebar link values are ellipsis-truncated (e.g. "linkedin.com/in/example-…", "github.com/example-…") in Modern Professional, Portfolio Hybrid, Executive and Tech Executive (product-manager, finance-director, operations-manager, engineering-director, cto examples).
-- Navy Professional: the long name "Maximilian Alexander Vandenberg-Lindqvist" (cto example) wraps to 4 lines at 24px in the narrow sidebar header (clean word/hyphen breaks, but tall); Tech Executive keeps it on 1 line.
-- Long previews: ux-designer in Portfolio Hybrid ≈ 2.6 A4 pages; product-manager in Portfolio Hybrid ≈ 2.25; data-engineer in Developer ≈ 1.99; business-graduate in Graduate ≈ 1.81 — check whether these templates' density/spacing is the cause.
-- Modern Orange clips long skill names with an ellipsis in its skill list (customer-success example: "Voice-of-customer program", "Cross-functional collaboration").
+- ~~Sidebar link values are ellipsis-truncated...~~ — fixed 1.4.6 (F1/G6): replaced the ellipsis rule with the shared `.tpl-value-breakable` primitive (`src/styles/templates/_system.css`).
+- ~~Navy Professional: the long name "Maximilian Alexander Vandenberg-Lindqvist" (cto example) wraps to 4 lines...~~ — fixed 1.4.7 (F7/G7): cut the identity-rail's own padding and stepped the name to a smaller size; the 180px rail (narrower than the standard 210px floor) stays a documented §2 gap, but the wrap symptom is gone.
+- ~~Long previews... check whether these templates' density/spacing is the cause.~~ — fixed 1.4.9 (F13/G8): Portfolio and Executive stepped `standard`→`compact` with corrected line-heights, Classic Professional got a ~10% rhythm trim within `roomy`; all examples now fit the 2.0-A4-page budget.
+- ~~Modern Orange clips long skill names with an ellipsis...~~ — fixed 1.4.6 (F4/G6): same `.tpl-value-breakable` primitive applied to `.modern-orange-showcase__skill-name`.
+
+### Follow-ups (not fixed in Phase 2, left for a future pass)
+
+- Developer's and Graduate's `__project-link` value, and Timeline's `__contact-item`, still use a raw `overflow-wrap: anywhere` (`src/styles/templates/developer.css:684`, `graduate.css:411`, `timeline.css:131`) instead of the shared `.tpl-value-breakable` primitive (§6 of `docs/template-design-system.md`) — works today, but doesn't get the primitive's future improvements for free and is inconsistent with every other template's link/value rendering.
+- Navy Professional's short names render visibly smaller than every other template's name row (the 180px identity-rail floor, narrower than the standard 210px floor) — this is deliberate (see `docs/template-design-system.md` §2 "Adoption state" and `docs/template-audit-phase2.md`'s F7), not a bug to fix reflexively.
+- Several templates' "technologies" line in the experience entry reuses the company-name CSS class instead of its own role — e.g. `CreativeShowcase.jsx`'s `creative-showcase__exp-company`, `CompactShowcase.jsx`'s `compact-showcase__entry-company`, `ModernShowcase.jsx`'s `modern-showcase__company`. Cosmetically fine today but makes future company-name-specific styling bleed into the technologies line.

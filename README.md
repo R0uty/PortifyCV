@@ -89,6 +89,12 @@ npm run check:template-pages
 
 # Run the end-to-end smoke suite against a production build
 npm run test:e2e
+
+# Same suite minus the slow stress/PDF tier — what CI's main e2e job runs
+npm run test:e2e:fast
+
+# Only the slow stress/PDF tier — a separate CI job
+npm run test:e2e:slow
 ```
 
 `check:share` round-trips a full CV through the share-link encoder and decoder.
@@ -124,11 +130,17 @@ harnesses, no test runner required; CI runs them all on every push and
 pull request.
 
 `test:e2e` runs the Playwright suite in `e2e/` (landing page, live preview,
-template-gated sections, the Export menu) against `npm run build` +
-`npm run preview`, not the dev server, so it exercises the app the way a real
-user gets it — lazy chunks, manual vendor chunking, and all. Downloads and
-installs a Chromium build the first time it runs
-(`npx playwright install chromium`).
+template-gated sections, the Export menu, the per-template layout/content
+harness, PDF export) against `npm run build` + `npm run preview`, not the
+dev server, so it exercises the app the way a real user gets it — lazy
+chunks, manual vendor chunking, and all. Downloads and installs a Chromium
+build the first time it runs (`npx playwright install chromium`).
+`test:e2e:fast`/`test:e2e:slow` run a subset by Playwright tag
+(`--grep-invert @slow`/`--grep @slow`): the slow tier is the layout
+harness's stress-fixture tests plus `template-pdf.spec.js` and
+`template-pdf-placeholder.spec.js`, which together roughly double full-suite
+time; CI runs them as a separate `e2e-slow` job so the main `e2e` job stays
+fast.
 
 ## Production Build
 
