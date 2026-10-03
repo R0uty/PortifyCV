@@ -798,7 +798,16 @@ note) is fully realized, matching D=3's anchor.
 evidence — `LAYOUT_ALLOWLIST` is `[]`, every F1–F14 finding is marked
 fixed, and `template-layout.spec.js`/`template-content.spec.js`/
 `template-pdf.spec.js`/`template-pdf-placeholder.spec.js` all pass across
-every template × example × mode. F14's fix (Task 8a, rendering
+every template × example × mode. The Export-fidelity (X) after-score
+specifically rests on three pieces of evidence — `template-content.spec.js`
+asserting every achievement/technology string reaches the live preview text,
+`template-pdf-placeholder.spec.js` asserting the export sandbox clone
+(the exact DOM html2canvas rasterizes) never contains placeholder text, and
+`template-pdf.spec.js`'s exact `EXPECTED_PDF_PAGES` match per template —
+not a manual re-inspection of every exported PDF's rendered image; that
+manual check (per the plan's original F12/F14 verification step) was done
+once, earlier in Phase 2, not repeated for every template at this
+after-score pass. F14's fix (Task 8a, rendering
 achievements/technologies in every bespoke Showcase, both normal and ATS,
 and pruning empty-section placeholders from PDF exports, Task 9) moves X
 back to 2 for all 18 templates — the same value `template-audit-a2.md`
