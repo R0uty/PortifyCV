@@ -201,7 +201,12 @@ shipped — never rename one. Example people live one file per person in
 fit is real rather than duplicated. Every example must fill every
 `primarySections` entry of each template it's listed under, in both
 locales — `check:template-pages` enforces this, so an empty section never
-reaches a visitor. On the template page only (never the builder, and
-never mutating the CV itself), `src/utils/sectionContent.js` hides a
-section that has no real content instead of rendering its placeholder
-text.
+reaches a visitor. `src/utils/sectionContent.js`'s `hideEmptySections()`
+hides a section that has no real content instead of rendering its
+placeholder text, read by the per-template marketing page (its only
+preview) and by the builder's dedicated off-screen, read-only, inert
+`CVPreview` that each mode's `previewRef` (the PDF export source) points
+at — Classic mode's in `ResumeBuilderPage.jsx`, Direct Edit's in
+`DirectEditPreview.jsx` — never mutating the CV and never touching either
+mode's visible, editable preview, which still shows the live placeholder
+text as an editing affordance.
