@@ -239,14 +239,11 @@
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--qd-text);
-  /* Sidebar column sits flush against the card's right edge with no outer
-     margin — see the identical note on .modern-showcase__tag
-     (styles/templates/modern.css). A genuinely unbreakable 40+ character
-     token would run off the page rather than just overflow its own
-     column, so this is the single-token `overflow-wrap: anywhere`
-     exception (docs/template-design-system.md §6), not the default
-     `.tpl-text-wrappable` treatment. */
-  overflow-wrap: anywhere;
+  /* Wrap behavior (break-word + max-width:100%, so a crowded row wraps
+     ordinary chips instead of fracturing them) comes from
+     `.tpl-chip-wrappable` in the JSX (§6, docs/template-design-system.md;
+     see _system.css's own comment for why this replaced a per-template
+     `overflow-wrap: anywhere` in Task 9's fix round 1). */
 }
 
 /* ── Experience / entries ── */

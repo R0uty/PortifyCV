@@ -320,7 +320,7 @@ export default function GraduateShowcase({
                     {chips.length > 0 ? (
                       <div className="graduate-showcase__tag-row">
                         {chips.map((chip) => (
-                          <span key={chip} className="graduate-showcase__tag">{chip}</span>
+                          <span key={chip} className="graduate-showcase__tag tpl-chip-wrappable">{chip}</span>
                         ))}
                       </div>
                     ) : null}
@@ -513,7 +513,7 @@ export default function GraduateShowcase({
                 <p className="graduate-showcase__skill-group-label">{cat.label}</p>
                 <div className="graduate-showcase__tag-row">
                   {cat.items.map((skill) => (
-                    <span key={skill} data-export-skill="true" className="graduate-showcase__tag">{skill}</span>
+                    <span key={skill} data-export-skill="true" className="graduate-showcase__tag tpl-chip-wrappable">{skill}</span>
                   ))}
                 </div>
               </div>

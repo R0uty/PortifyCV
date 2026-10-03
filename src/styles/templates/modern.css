@@ -434,15 +434,11 @@
   font-weight: 600;
   color: var(--ms-text);
   background: transparent;
-  /* The sidebar column (.modern-showcase__sidebar) sits flush against the
-     card's own right edge with no outer margin, so a genuinely unbreakable
-     40+ character skill token would overflow past the page itself if left
-     to wrap normally — worse than breaking it. `overflow-wrap: anywhere`
-     here is the single-token exception documented in docs/
-     template-design-system.md §6 (not the default `.tpl-text-wrappable`
-     treatment, which only breaks a word as a last resort and would still
-     let this one run off the page). */
-  overflow-wrap: anywhere;
+  /* Wrap behavior (break-word + max-width:100%, so a crowded row wraps
+     ordinary chips instead of fracturing them) comes from
+     `.tpl-chip-wrappable` in the JSX (§6, docs/template-design-system.md;
+     see _system.css's own comment for why this replaced a per-template
+     `overflow-wrap: anywhere` in Task 9's fix round 1). */
 }
 
 /* ── Achievements (professional list) ── */

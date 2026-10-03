@@ -367,7 +367,7 @@ export default function ModernShowcase({
                     {stackTags.length > 0 ? (
                       <div className="modern-showcase__tag-row">
                         {stackTags.map((chip) => (
-                          <span key={chip} className="modern-showcase__tag">{chip}</span>
+                          <span key={chip} className="modern-showcase__tag tpl-chip-wrappable">{chip}</span>
                         ))}
                       </div>
                     ) : null}
@@ -436,7 +436,7 @@ export default function ModernShowcase({
                 <p className="modern-showcase__skill-group-label">{cat.label}</p>
                 <div className="modern-showcase__tag-row">
                   {cat.items.map((skill) => (
-                    <span key={skill} data-export-skill="true" className="modern-showcase__tag">{skill}</span>
+                    <span key={skill} data-export-skill="true" className="modern-showcase__tag tpl-chip-wrappable">{skill}</span>
                   ))}
                 </div>
               </div>

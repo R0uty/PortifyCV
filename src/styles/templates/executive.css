@@ -507,7 +507,11 @@
   font-weight: 600;
   color: var(--ex-ink);
   background: var(--tpl-accent-soft);
-  overflow-wrap: anywhere;
+  /* Wrap behavior (break-word + max-width:100%, so a crowded row wraps
+     ordinary chips instead of fracturing them) comes from
+     `.tpl-chip-wrappable` in the JSX (§6, docs/template-design-system.md;
+     see _system.css's own comment for why this replaced a per-template
+     `overflow-wrap: anywhere` in Task 9's fix round 1). */
 }
 
 /* ── Awards ── */

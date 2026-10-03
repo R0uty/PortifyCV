@@ -305,7 +305,7 @@ export default function QuadrantShowcase({
                     {chips.length > 0 ? (
                       <div className="quadrant-showcase__tag-row">
                         {chips.map((chip) => (
-                          <span key={chip} data-export-skill="true" className="quadrant-showcase__tag">{chip}</span>
+                          <span key={chip} data-export-skill="true" className="quadrant-showcase__tag tpl-chip-wrappable">{chip}</span>
                         ))}
                       </div>
                     ) : null}
@@ -540,7 +540,7 @@ export default function QuadrantShowcase({
                   <p className="quadrant-showcase__skill-group-label">{cat.label}</p>
                   <div className="quadrant-showcase__tag-row">
                     {cat.items.map((skill) => (
-                      <span key={skill} data-export-skill="true" className="quadrant-showcase__tag">{skill}</span>
+                      <span key={skill} data-export-skill="true" className="quadrant-showcase__tag tpl-chip-wrappable">{skill}</span>
                     ))}
                   </div>
                 </div>

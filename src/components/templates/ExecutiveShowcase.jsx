@@ -487,7 +487,7 @@ export default function ExecutiveShowcase({
                 <p className="executive-showcase__skill-group-label">{cat.label}</p>
                 <div className="executive-showcase__tag-row">
                   {cat.items.map((skill) => (
-                    <span key={skill} data-export-skill="true" className="executive-showcase__tag">{skill}</span>
+                    <span key={skill} data-export-skill="true" className="executive-showcase__tag tpl-chip-wrappable">{skill}</span>
                   ))}
                 </div>
               </div>

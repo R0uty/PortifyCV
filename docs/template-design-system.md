@@ -440,17 +440,41 @@ named.
   (e.g. a 60-character skill string with no spaces) can overflow its row
   instead of being forced to wrap — for an ordinary long word this is a
   few pixels, but for a truly unbreakable 40+ character token it can be
-  far more than that. Accepted, since it still reads as one word rather
-  than a fragmented one. If a chip/row is narrow enough that this would
-  visibly clip or break the layout, apply `overflow-wrap: anywhere`
-  directly to that one token's own element (not back onto
-  `.tpl-text-wrappable` itself) — acceptable only for a single token
-  longer than its chip.
+  far more than that. Accepted for a plain text row with no visible box of
+  its own (Modern Orange's skill-name, the one current user — overflowing
+  past the row just extends the text, since there's no background/border/
+  padding for it to visibly spill out of).
+  **Do not reach for `overflow-wrap: anywhere` directly on the token** to
+  avoid that overflow — that was tried (Task 9 fix round 1, on 7 templates'
+  skill-chip classes) and reverted (fix round 2): `anywhere` lowers
+  min-content the same way `.tpl-value-breakable` does, so it quietly
+  reopens this exact primitive's own bug one level down, on the chip
+  itself. For an actual padded/bordered chip — where overflow would
+  visibly spill text outside its own background box — use
+  `.tpl-chip-wrappable` below instead.
   Introduced in 1.4.7 (`docs/template-audit-phase2.md` G7 fix round 1)
   after `.tpl-value-breakable` on Modern Orange's skill-name row turned
   out to fracture ordinary skill words, not just the one long synthetic
   test string it was added for; use it for every template's skill/label
-  values.
+  values that render as plain text, not a chip.
+- **Skill/tag chips — `.tpl-chip-wrappable`** (`src/styles/templates/
+  _system.css`). Applied alongside a template's own class on a padded,
+  often bordered or filled-background skill/tag chip (as opposed to
+  `.tpl-text-wrappable`'s plain text row, above): `overflow-wrap:
+  break-word` (same reasoning as `.tpl-text-wrappable` — doesn't lower
+  min-content, so a crowded flex-wrap row wraps an ordinary chip to the
+  next line instead of fracturing it) plus `max-width: 100%`. The flex
+  sizing spec bounds a flex item's *automatic minimum size* by any
+  specified `max-width`, so `max-width: 100%` clamps that floor down to
+  the available row width — a token genuinely wider than the whole row
+  still breaks (inside the chip, not spilling past its background), while
+  an ordinary chip that's merely crowded off its current line wraps whole
+  to the next one. Introduced in 1.4.10 (Task 9 fix round 2,
+  `docs/template-audit-phase2.md` §4) to replace `overflow-wrap: anywhere`
+  on 7 templates' skill-chip classes (modern, creative, graduate,
+  portfolio, colorfulCompact, quadrant, executive) — use this, not
+  `anywhere`, for every chip that needs to survive an unrealistically long
+  single skill token.
 - **Accent color — one custom property, one per-template default.** Each
   template's CSS reads its accent from **`--tpl-accent`**, and declares its
   default value in that template's entry in `src/utils/cvTemplates.js`. The

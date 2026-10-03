@@ -545,7 +545,7 @@ export default function PortfolioShowcase({
                     <span
                       key={skill}
                       data-export-skill="true"
-                      className="portfolio-showcase__badge"
+                      className="portfolio-showcase__badge tpl-chip-wrappable"
                     >
                       {skill}
                     </span>

@@ -354,7 +354,7 @@ export default function ColorfulCompactShowcase({
                 <span
                   key={skill}
                   data-export-skill="true"
-                  className={`colorful-compact-showcase__skill-pill colorful-compact-showcase__skill-pill--${color}`}
+                  className={`colorful-compact-showcase__skill-pill tpl-chip-wrappable colorful-compact-showcase__skill-pill--${color}`}
                 >
                   {skill}
                 </span>

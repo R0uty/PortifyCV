@@ -69,4 +69,36 @@ export const STRESS_CVS = {
     title: 'Accountant',
     experience: [{ ...createEmptyExperience(), role: 'Accountant', company: 'Example Oy', startDate: 'Jan 2020', isCurrent: true }],
   },
+  // Task 9 fix round 1 regression case: several *ordinary* longish skill
+  // words (none of them a single unbreakable 40+ char token) crowding a
+  // skill-chip row. `.tpl-chip-wrappable`'s `max-width: 100%`
+  // (src/styles/templates/_system.css) must let a chip that doesn't fit
+  // the current line wrap to the next one intact — none of these words
+  // should ever break mid-word. This is exactly the crowded-row scenario
+  // where a per-template `overflow-wrap: anywhere` (reverted in this fix
+  // round) fractured an ordinary word, the same defect class as G7's
+  // original Modern Orange bug.
+  'crowded-skills': {
+    ...base(),
+    fullName: 'Noora Example',
+    title: 'Platform Engineer',
+    email: 'noora.example@example.com',
+    phone: '+358 40 000 9903',
+    location: 'Oulu, Finland',
+    about: 'Platform engineer specializing in resilient, observable distributed infrastructure.',
+    skills: [
+      'Infrastructure-as-code',
+      'Observability engineering',
+      'Distributed systems',
+      'Container orchestration',
+      'Continuous integration',
+      'Service mesh architecture',
+      'Incident response',
+      'Capacity planning',
+      'Configuration management',
+      'Platform reliability',
+    ],
+    experience: [job(0), job(1)],
+    education: [{ ...createEmptyEducation(), school: 'University of Oulu', degree: 'M.Sc. Computer Science', startDate: '2014', endDate: '2019' }],
+  },
 }

@@ -249,7 +249,7 @@ export default function CreativeShowcase({
             <div className="creative-showcase__pill-row">
               {snapshot.coreStrengths.slice(0, 3).map((item, index) => (
                 item.title ? (
-                  <span key={`${item.title}-${index}`} className="creative-showcase__pill" data-direct-edit-index={snapshot.sourceIndices.coreStrengths[index]}>
+                  <span key={`${item.title}-${index}`} className="creative-showcase__pill tpl-chip-wrappable" data-direct-edit-index={snapshot.sourceIndices.coreStrengths[index]}>
                     {item.title}
                   </span>
                 ) : null
@@ -334,7 +334,7 @@ export default function CreativeShowcase({
           <div className="creative-showcase__pill-row">
             {directEditDispatch ? null : flatSkills.length > 0 ? (
               flatSkills.map((skill) => (
-                <span key={skill} data-export-skill="true" className="creative-showcase__pill">
+                <span key={skill} data-export-skill="true" className="creative-showcase__pill tpl-chip-wrappable">
                   {skill}
                 </span>
               ))
