@@ -51,9 +51,15 @@ test.describe('auditLayout', () => {
   })
 
   test('flags a word broken mid-word but not a URL', async ({ page }) => {
-    await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:60px;overflow-wrap:anywhere">Kristiansen</p>'))
+    // "Kristiansen" (~79px unbroken) fits easily inside this 150px flex row —
+    // it's only forced to break because a flex-shrink:0 sibling eats 100px,
+    // leaving a ~50px leftover `overflow-wrap:anywhere` shrinks it into.
+    // Narrower-than-its-row but still broken: a real defect, must be flagged
+    // (Task 9 fix round 2 — see the "mid-word-break: exempts/flags by
+    // available width" describe block below for the full before/after proof).
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="display:flex;width:150px;justify-content:space-between;align-items:center"><span style="overflow-wrap:anywhere">Kristiansen</span><span style="flex-shrink:0;width:100px;height:10px"></span></div>'))
     expect(rules(await auditLayout(page, '#root'))).toContain('mid-word-break')
-    await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:60px;overflow-wrap:anywhere">github.com/example-person</p>'))
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="display:flex;width:150px;justify-content:space-between;align-items:center"><span style="overflow-wrap:anywhere">github.com/example-person</span><span style="flex-shrink:0;width:100px;height:10px"></span></div>'))
     expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
   })
 
@@ -94,7 +100,9 @@ test.describe('auditLayout', () => {
   })
 
   test('flags mid-word-break across text nodes', async ({ page }) => {
-    await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:60px;overflow-wrap:anywhere">Kristian<b>sen</b></p>'))
+    // Same squeeze shape as above — the word is split across a <b> sibling
+    // (Kristian + sen) but still narrower than its row, so still a defect.
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="display:flex;width:150px;justify-content:space-between;align-items:center"><span style="overflow-wrap:anywhere">Kristian<b>sen</b></span><span style="flex-shrink:0;width:100px;height:10px"></span></div>'))
     expect(rules(await auditLayout(page, '#root'))).toContain('mid-word-break')
   })
 
@@ -141,7 +149,7 @@ test.describe('auditLayout', () => {
   })
 
   test('mid-word-break still catches Kristian<b>sen</b> across nodes', async ({ page }) => {
-    await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:60px;overflow-wrap:anywhere">Kristian<b>sen</b></p>'))
+    await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="display:flex;width:150px;justify-content:space-between;align-items:center"><span style="overflow-wrap:anywhere">Kristian<b>sen</b></span><span style="flex-shrink:0;width:100px;height:10px"></span></div>'))
     expect(rules(await auditLayout(page, '#root'))).toContain('mid-word-break')
   })
 
@@ -159,6 +167,58 @@ test.describe('auditLayout', () => {
   test('does not glue words across a real inter-element space', async ({ page }) => {
     await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:90px;overflow-wrap:anywhere"><span>Navy Professional</span> <span>Template</span></p>'))
     expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
+  })
+
+  // Task 9 fix round 2 (controller ruling 2): a word wider than its own
+  // containing block can't avoid breaking no matter what CSS the page
+  // uses, so that's not a layout defect — the mid-word-break rule now
+  // measures the word's natural (unbroken) width and exempts it when that
+  // exceeds the content width of the widest line it could ever occupy
+  // (the nearest flex/grid row ancestor, not the word's own possibly-
+  // shrunk flex item — see `widestAvailableWidth` in layoutAudit.js for
+  // why the item's own current box isn't the right measure). This
+  // directly replaced the 7 "accepted exception" allowlist entries Task 9
+  // fix round 1 added for a 44-char unbreakable skill token — those
+  // entries are gone; LAYOUT_ALLOWLIST is `[]` again.
+  test.describe('mid-word-break: exempts only genuinely-too-wide words', () => {
+    test('a 44-char token wider than its 60px box is exempt — not a defect', async ({ page }) => {
+      await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:60px;overflow-wrap:anywhere">Kubernetesoperatorreconciliationloopsdesign</p>'))
+      expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
+    })
+
+    test('the same 44-char token in a box wide enough to hold it does not break at all', async ({ page }) => {
+      // Sanity check for the fixture above: the token itself is ~330px
+      // unbroken, so a 600px box — comfortably wider — renders it on one
+      // line with no break, confirming the 60px case above was exempted
+      // for being genuinely too wide, not because this helper never
+      // flags anything for that token.
+      await page.setContent(page780('<h1 data-cv-name>Ada</h1><p style="width:600px;overflow-wrap:anywhere">Kubernetesoperatorreconciliationloopsdesign</p>'))
+      expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
+    })
+
+    test('a word narrower than its row, but broken by a shrunk flex sibling, is flagged', async ({ page }) => {
+      // "Kristiansen" (~79px unbroken) fits easily inside this 150px row —
+      // only the flex-shrink:0 100px sibling forces the word's own flex
+      // item down to a ~50px leftover, where `overflow-wrap: anywhere`
+      // breaks it. This is the real defect class (Task 7's original
+      // Modern Orange bug, and Task 9 fix round 1's `anywhere`-on-chips
+      // mistake): avoidable by better CSS, so it must still be flagged.
+      await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="display:flex;width:150px;justify-content:space-between;align-items:center"><span style="overflow-wrap:anywhere">Kristiansen</span><span style="flex-shrink:0;width:100px;height:10px"></span></div>'))
+      expect(rules(await auditLayout(page, '#root'))).toContain('mid-word-break')
+    })
+
+    test('.tpl-chip-wrappable (break-word + max-width:100%) does not reproduce the shrunk-sibling break', async ({ page }) => {
+      // Exact same squeeze geometry as the previous test — only the word's
+      // own wrap CSS changes, from `overflow-wrap: anywhere` (Task 9 fix
+      // round 1's mistake on 7 templates' skill chips) to
+      // `.tpl-chip-wrappable`'s `overflow-wrap: break-word; max-width:
+      // 100%` (src/styles/templates/_system.css). `break-word` doesn't
+      // lower min-content the way `anywhere` does, so the word's flex item
+      // keeps its own min-content floor (its full width) and is never
+      // shrunk small enough to need a mid-word break.
+      await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="display:flex;width:150px;justify-content:space-between;align-items:center"><span style="overflow-wrap:break-word;max-width:100%">Kristiansen</span><span style="flex-shrink:0;width:100px;height:10px"></span></div>'))
+      expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
+    })
   })
 
   test('filterAllowlisted distinguishes by template, subject, and mode', () => {

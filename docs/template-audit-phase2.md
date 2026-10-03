@@ -658,7 +658,12 @@ templates** (F12 is app-wide; F9/F10/F11 are template-specific — see table
 below for the full template list per item). (Fix-round-1 correction: the
 first pass of this doc miscounted this as "6 fix items" by listing F9–F11
 twice and including F14, which fix round 1 moved to its own task, G8a,
-above.)
+above.) This "6 allowlist entries" is this group's **original Phase 2
+baseline count** (F9 1, F10 2, F11 3), not a running total of G9's current
+state — all 6 are cleared as of Task 9 (1.4.10); see §4 "Accepted
+exceptions" below for the one additional, later complication (Task 9's
+own controller item C, resolved without needing any new allowlist entry
+either) and the final, current `LAYOUT_ALLOWLIST` state.
 
 | F# | one-line cause | templates | allowlist entries |
 |---|---|---|---|
@@ -900,54 +905,75 @@ by file order, mapped to the `F#` that clears it.
 **Totals: G6 = 31 entries (F1 21, F2 6, F3 1, F4 3) · G7 = 14 entries (F5 9,
 F6 2, F7 2, F8 1) · G8a = 0 entries (F14 — its own task, no allowlist
 coverage) · G8 = 3 entries (F13 3) · G9 = 6 entries (F9 1, F10 2, F11 3) +
-1 non-allowlist item (F12). 31 + 14 + 0 + 3 + 6 = 54.**
+1 non-allowlist item (F12). 31 + 14 + 0 + 3 + 6 = 54.** This is the
+**original Phase 2 baseline** (the 54 entries this doc's "Method &
+evidence" section cites as the starting point) — every one of these 54
+is cleared as of Task 9 (1.4.10). It does not include the 7 entries Task
+9 fix round 1 briefly added and fix round 2 then removed again (§4
+"Accepted exceptions" has the full story) — those were never part of this
+baseline. Current `LAYOUT_ALLOWLIST`: `[]`.
 
 ---
 
-## 4. Accepted exceptions (Task 9)
+## 4. Accepted exceptions
 
-All findings above (F1–F14) are fixed as of 1.4.10; `LAYOUT_ALLOWLIST`
-(`e2e/fixtures/layoutAllowlist.js`) carries no entries from G6–G9. Task 9's
-controller item C added a new, deliberately adversarial stress case —
+None. `LAYOUT_ALLOWLIST` (`e2e/fixtures/layoutAllowlist.js`) is `[]` as of
+1.4.10. All findings above (F1–F14) are fixed; see "Task 9 fix round 2"
+below for how the one group of entries this doc previously carried here
+was resolved away rather than accepted.
+
+### Task 9 fix round 1→2: the 44-char skill-chip token
+
+Task 9's controller item C added a deliberately adversarial stress case —
 `e2e/fixtures/stressCvs.js`'s `long-single-word` fixture skills array
 gained `'Kubernetesoperatorreconciliationloopsdesign'`, a 44-character
-single token with no spaces — specifically so every one of the 18
-templates' skill-chip rendering gets checked against an unbreakable token,
-not just Modern Orange's dot-rating row it was first found on (§6, G7 fix
-round 1).
+single token with no spaces — so every one of the 18 templates'
+skill-chip rendering gets checked against an unbreakable token, not just
+Modern Orange's dot-rating row it was first found on (§6, G7 fix round 1).
 
-That check surfaced the following, all now **accepted exceptions** rather
-than fixed bugs — recorded here, in `layoutAllowlist.js`'s own header
-comment, and in `task-9-report.md`:
+**Fix round 1** found seven templates (modern, creative, executive,
+graduate, portfolio, colorfulCompact, quadrant) whose skill-chip column
+sits flush against the card's own right edge with no outer margin, where
+the token (~250–280px unbroken) is 2–3x the column's own width
+(~106–136px) — and gave each chip class `overflow-wrap: anywhere` plus a
+"this is unavoidable" allowlist entry, reasoning that the only choice was
+break-it-to-fit or run-it-off-the-page.
 
-| template | class | without a break | with `overflow-wrap: anywhere` |
-|---|---|---|---|
-| modern | `.modern-showcase__tag` | overflows ~134px past the page edge | breaks mid-word, stays on the page |
-| creative | `.creative-showcase__pill` | overflows past the page edge | breaks mid-word, stays on the page |
-| executive | `.executive-showcase__tag` | overflows past the page edge | breaks mid-word, stays on the page |
-| graduate | `.graduate-showcase__tag` | overflows past the page edge | breaks mid-word, stays on the page |
-| portfolio | `.portfolio-showcase__badge` | overflows ~111px past the page edge | breaks mid-word, stays on the page |
-| colorfulCompact | `.colorful-compact-showcase__skill-pill` | overflows ~116px past the page edge | breaks mid-word, stays on the page |
-| quadrant | `.quadrant-showcase__tag` | overflows past the page edge | breaks mid-word, stays on the page |
+**Fix round 2 found that reasoning incomplete in two ways**, both per
+controller ruling, and resolved all seven without any allowlist entry:
 
-In each of these seven, the skill-chip row's column sits flush against the
-card's own right edge with no outer margin (confirmed by measuring the
-rendered DOM: the column's right edge equals the card root's right edge in
-every one), and the token's natural one-line width (~250–280px at the
-chip's font size) is 2–3x the column's width (~106–136px). There is no CSS
-that keeps a token both on one line *and* inside the page at that size
-difference — the only choice is break-it-to-fit (reported by the layout
-harness as `mid-word-break`) or let-it-run-off-the-page (`beyond-page`,
-which would genuinely be cut off in a real PDF export, strictly worse).
-Each carries the single-token `overflow-wrap: anywhere` exception
-documented in `docs/template-design-system.md` §6, and the resulting
-`mid-word-break` is allowlisted for the `stress:long-single-word` fixture
-only — a synthetic, unrealistic 44-character skill with no spaces, not
-real-world content.
+1. `overflow-wrap: anywhere` lowers the element's min-content size the
+   same way `.tpl-value-breakable` does — it doesn't just fix the one
+   44-char token, it also re-opens the door to fracturing an *ordinary*
+   skill word if a crowded row ever squeezes its flex item narrower than
+   the word's own natural width (the exact Task 7/G7 defect this doc's §6
+   primitives exist to prevent, now reintroduced one level down, on the
+   chip itself). Replaced with a new primitive,
+   `.tpl-chip-wrappable` (`overflow-wrap: break-word` + `max-width: 100%`,
+   `src/styles/templates/_system.css`): `break-word` doesn't lower
+   min-content, so an ordinary crowded chip wraps to the next line intact;
+   `max-width: 100%` still clamps the *automatic minimum* down to the
+   row's own width for a token that's wider than the whole row, so that
+   one case still breaks rather than running off the page. Applied to all
+   seven templates' chip classes in place of `overflow-wrap: anywhere`.
+2. The layout harness's `mid-word-break` rule didn't distinguish "this
+   word is being fractured because something squeezed it narrower than
+   its own content" (an avoidable defect) from "this word genuinely
+   cannot fit anywhere in this column, full stop" (not fixable by any
+   CSS, not a defect) — it flagged both the same way, which is why fix
+   round 1 reached for an allowlist entry instead of a real fix.
+   `e2e/helpers/layoutAudit.js` now measures each broken word's natural
+   (unbroken) width against the content width of the widest line it could
+   ever occupy — its nearest flex/grid row ancestor, not its own
+   (possibly squeezed) flex item — and only flags the break when the word
+   would have fit. The 44-char token still breaks inside these seven
+   templates' chips (it's still too wide for the column even with the
+   fix), but the harness no longer reports it, since that's accepted by
+   construction rather than needing a recorded exception.
 
-The remaining eleven templates (minimal, developer, timeline, compact,
-techExec, classicProfessional, navyProfessional, modernOrange, editorial,
-portrait, european) handle the same token cleanly — either their skill-chip
-column has enough margin to the page edge for an unbroken overflow to stay
-on the page, or the chip naturally wraps to its own full-width line without
-breaking. No allowlist entry for them.
+Both are verified with RED/GREEN fixtures in `e2e/layout-audit-helper.spec.js`
+(the `mid-word-break: exempts only genuinely-too-wide words` block) and a
+real-render regression case, `e2e/fixtures/stressCvs.js`'s
+`crowded-skills` fixture (several ordinary longish skills, checked across
+all 18 templates for any mid-word break). Full RED/GREEN transcript in
+`task-9-report.md`.

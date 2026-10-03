@@ -30,6 +30,74 @@ export async function auditLayout(page, rootSelector, opts = {}) {
       const label = (el) => `${el.tagName.toLowerCase()}.${String(el.className).trim().split(/\s+/)[0] || ''} "${(el.textContent || '').trim().slice(0, 40)}"`
       const ownText = (el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim())
 
+      // A word wider than its own containing block can't be rendered on one
+      // line no matter what CSS the page uses — breaking it is unavoidable,
+      // not a defect. Measures the word's natural (unbroken) width with an
+      // off-DOM span cloned from the word's own element's computed font
+      // properties, and compares it against `container`'s content width
+      // (clientWidth minus horizontal padding). Reused across every word
+      // this audit checks; one measuring span, its font re-set per word.
+      const measuringSpan = document.createElement('span')
+      measuringSpan.style.position = 'absolute'
+      measuringSpan.style.visibility = 'hidden'
+      measuringSpan.style.whiteSpace = 'nowrap'
+      measuringSpan.style.left = '-99999px'
+      measuringSpan.style.top = '0'
+      document.body.appendChild(measuringSpan)
+
+      const measureUnbrokenWidth = (word, fontEl) => {
+        const cs = getComputedStyle(fontEl)
+        measuringSpan.style.font = cs.font
+        measuringSpan.style.fontFamily = cs.fontFamily
+        measuringSpan.style.fontSize = cs.fontSize
+        measuringSpan.style.fontWeight = cs.fontWeight
+        measuringSpan.style.letterSpacing = cs.letterSpacing
+        measuringSpan.style.textTransform = cs.textTransform
+        measuringSpan.textContent = word
+        return measuringSpan.getBoundingClientRect().width
+      }
+
+      // `clientWidth` is defined as 0 for a plain inline element (most of
+      // the skill-chip `<span>`s this exemption exists for aren't
+      // `display: block`/`inline-block`/flex themselves), so content width
+      // has to come from `getBoundingClientRect()` instead — which is in
+      // viewport (post-transform) px, unlike the off-DOM `measureUnbrokenWidth`
+      // span above (outside any zoom transform the preview applies, so
+      // always intrinsic px). Divide by `scale` to bring it back to the
+      // same intrinsic frame before subtracting the (always intrinsic,
+      // CSS-declared) padding.
+      const elementContentWidth = (el) => {
+        const cs = getComputedStyle(el)
+        const paddingLeft = parseFloat(cs.paddingLeft) || 0
+        const paddingRight = parseFloat(cs.paddingRight) || 0
+        return el.getBoundingClientRect().width / scale - paddingLeft - paddingRight
+      }
+
+      // The width to compare a word's natural size against must be the
+      // *most room this word could ever get*, not whatever width its own
+      // flex item happens to render at right now — a flex item inside a
+      // flex/grid row can itself be squeezed narrower than the row's own
+      // available width (that squeeze, via a lowered min-content, is
+      // exactly the defect this audit exists to catch). So walk up from
+      // the word's own element to the nearest flex/grid *formatting
+      // context* ancestor (the row/column itself, not the item) and use
+      // its content width instead — stable regardless of how its children
+      // currently happen to be laid out. Falls back to the word's nearest
+      // block container (this file's existing `getBlockContainer`,
+      // computed by the caller) when the word isn't inside a flex/grid row
+      // at all.
+      const widestAvailableWidth = (fontEl, fallbackContainer) => {
+        let ancestor = fontEl
+        while (ancestor && ancestor !== root.parentElement) {
+          const display = getComputedStyle(ancestor).display
+          if (['flex', 'grid', 'inline-flex', 'inline-grid'].includes(display)) {
+            return elementContentWidth(ancestor)
+          }
+          ancestor = ancestor.parentElement
+        }
+        return elementContentWidth(fallbackContainer)
+      }
+
       // Find ancestor that clips this element; return first clipping ancestor or null
       // Checks all four edges based on overflow-x/overflow-y settings
       const findClippingAncestor = (el) => {
@@ -231,8 +299,17 @@ export async function auditLayout(page, rootSelector, opts = {}) {
                 if (r.width >= 1 && !tops.some((t) => Math.abs(t - r.top) < 3 * scale)) tops.push(r.top)
               }
               if (tops.length > 1) {
-                reported.add(word)
-                add('mid-word-break', `"${word}" in ${label(container)}`)
+                // Exempt a word that genuinely cannot fit its own row/
+                // column on one line regardless of CSS — breaking it is
+                // unavoidable there, not a layout defect (controller
+                // ruling, Task 9 fix round 1).
+                const fontEl = startNodeInfo.node.parentElement
+                const unbrokenWidth = measureUnbrokenWidth(word, fontEl)
+                const availableWidth = widestAvailableWidth(fontEl, container)
+                if (unbrokenWidth <= availableWidth + thresholds.overflowTolerancePx) {
+                  reported.add(word)
+                  add('mid-word-break', `"${word}" in ${label(container)}`)
+                }
               }
             } catch {
               // Skip if range is invalid
@@ -245,6 +322,8 @@ export async function auditLayout(page, rootSelector, opts = {}) {
         const pages = root.offsetHeight / (root.offsetWidth * 1.414)
         if (pages > thresholds.maxPages) add('length', `${pages.toFixed(2)} A4 pages`)
       }
+
+      measuringSpan.remove()
 
       return violations
     },
