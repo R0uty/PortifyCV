@@ -219,6 +219,27 @@ test.describe('auditLayout', () => {
       await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="display:flex;width:150px;justify-content:space-between;align-items:center"><span style="overflow-wrap:break-word;max-width:100%">Kristiansen</span><span style="flex-shrink:0;width:100px;height:10px"></span></div>'))
       expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
     })
+
+    // Task 9 fix round 2 (confirmed regression): a word inside
+    // `[data-cv-name]` must NEVER be exempt, no matter how wide it is
+    // relative to its column — §7.1 is precisely the rule that a
+    // template's name column needs a floor wide enough that a real name
+    // doesn't fracture. The genuinely-too-wide exemption above was
+    // silently waiving that check for any name wide enough to trigger it
+    // (e.g. a 1.65rem "Kristiansen" in a 100px flex-column sidebar).
+    test('a name word wider than its flex column is still flagged (never exempt)', async ({ page }) => {
+      await page.setContent(page780('<div style="display:flex;flex-direction:column;width:100px"><h1 data-cv-name style="font-size:1.65rem;font-weight:700;overflow-wrap:break-word">Kristiansen</h1></div>'))
+      expect(rules(await auditLayout(page, '#root'))).toContain('mid-word-break')
+    })
+
+    test('the same word as ordinary (non-name) text in the same shape is exempt', async ({ page }) => {
+      // Proves the carve-out above is name-specific, not a general
+      // loosening: identical width/font/column, only the `data-cv-name`
+      // marker is removed, and it reverts to the genuinely-too-wide
+      // exemption.
+      await page.setContent(page780('<h1 data-cv-name>Ada</h1><div style="display:flex;flex-direction:column;width:100px"><p style="font-size:1.65rem;font-weight:700;overflow-wrap:break-word">Kristiansen</p></div>'))
+      expect(rules(await auditLayout(page, '#root'))).not.toContain('mid-word-break')
+    })
   })
 
   test('filterAllowlisted distinguishes by template, subject, and mode', () => {

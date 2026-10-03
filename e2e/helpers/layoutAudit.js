@@ -299,16 +299,33 @@ export async function auditLayout(page, rootSelector, opts = {}) {
                 if (r.width >= 1 && !tops.some((t) => Math.abs(t - r.top) < 3 * scale)) tops.push(r.top)
               }
               if (tops.length > 1) {
-                // Exempt a word that genuinely cannot fit its own row/
-                // column on one line regardless of CSS — breaking it is
-                // unavoidable there, not a layout defect (controller
-                // ruling, Task 9 fix round 1).
                 const fontEl = startNodeInfo.node.parentElement
-                const unbrokenWidth = measureUnbrokenWidth(word, fontEl)
-                const availableWidth = widestAvailableWidth(fontEl, container)
-                if (unbrokenWidth <= availableWidth + thresholds.overflowTolerancePx) {
+                // A word inside the identity name is NEVER exempt, no
+                // matter how wide: §7.1 is precisely the rule that a
+                // template must give the name column enough width (a
+                // floor) that a real name doesn't fracture — "the word is
+                // too wide for its column" is not an excuse there, it's
+                // the defect itself. Exempting it here would silently
+                // drop that check for any name wide enough to trigger it
+                // (Task 9 fix round 2 — confirmed regression: a name word
+                // wider than a 100px flex-column sidebar stopped being
+                // flagged). Every other word gets the genuinely-too-wide
+                // exemption (Task 9 fix round 1 below).
+                const isNameWord = Boolean(fontEl.closest('[data-cv-name]'))
+                if (isNameWord) {
                   reported.add(word)
                   add('mid-word-break', `"${word}" in ${label(container)}`)
+                } else {
+                  // Exempt a word that genuinely cannot fit its own row/
+                  // column on one line regardless of CSS — breaking it is
+                  // unavoidable there, not a layout defect (controller
+                  // ruling, Task 9 fix round 1).
+                  const unbrokenWidth = measureUnbrokenWidth(word, fontEl)
+                  const availableWidth = widestAvailableWidth(fontEl, container)
+                  if (unbrokenWidth <= availableWidth + thresholds.overflowTolerancePx) {
+                    reported.add(word)
+                    add('mid-word-break', `"${word}" in ${label(container)}`)
+                  }
                 }
               }
             } catch {
