@@ -3115,16 +3115,33 @@ select.floating-field__control {
   animation: none !important;
 }
 
-.pdf-export-root[data-export-root='true'] {
+/* The layout-affecting export rules below also target
+   `.direct-edit-export-source` — the inert, off-screen CVPreview copy that
+   previewRef points at in both builder modes (ResumeBuilderPage.jsx,
+   DirectEditPreview.jsx) and that createExportSandbox() clones. Templates
+   that measure themselves (CompactShowcase's and EuropeanShowcase's
+   density auto-fit) pick their tier from that copy's rendered height, so
+   it has to lay out exactly as the PDF clone will: without these rules
+   Compact's data-engineer example measured 1123px at the snug tier (fits
+   one page), then grew to ~1230px once the clone gained this per-section
+   spacing, and its PDF spilled onto a second page. Same selectors in the
+   same rules (not a copy elsewhere) so the two can't drift apart.
+   e2e/template-pdf.spec.js's "export source lays out like the PDF clone"
+   tests guard this. */
+.pdf-export-root[data-export-root='true'],
+.direct-edit-export-source [data-export-root='true'] {
   border: 0 !important;
 }
 
 .pdf-export-root [data-export-primary],
-.pdf-export-root [data-export-secondary] {
+.pdf-export-root [data-export-secondary],
+.direct-edit-export-source [data-export-primary],
+.direct-edit-export-source [data-export-secondary] {
   min-width: 0 !important;
 }
 
-.pdf-export-root [data-export-section] {
+.pdf-export-root [data-export-section],
+.direct-edit-export-source [data-export-section] {
   break-inside: avoid-page;
   break-inside: avoid;
   page-break-inside: avoid;
@@ -3132,7 +3149,8 @@ select.floating-field__control {
   padding-bottom: 0.75rem;
 }
 
-.pdf-export-root [data-export-ignore='true'] {
+.pdf-export-root [data-export-ignore='true'],
+.direct-edit-export-source [data-export-ignore='true'] {
   display: none !important;
 }
 

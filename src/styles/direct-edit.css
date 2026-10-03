@@ -166,14 +166,17 @@
   box-sizing: border-box;
 }
 
-/* The read-only copy PDF export captures (see DirectEditPreview.jsx).
-   Moved off-screen, not hidden: the exporter reads computed styles from
-   these source nodes, and visibility/display would leak into them. Its
-   width is the editable CV's content box at its 68rem cap (less the 1.5rem
-   side padding above), so on a desktop-width window templates that measure
-   themselves (Compact's and European's density auto-fit) settle on the
-   same tier as the CV on screen. On a narrower window the two can differ;
-   the PDF sandbox re-lays the clone out at paper width either way. */
+/* The read-only copy PDF export captures, in both builder modes (see
+   DirectEditPreview.jsx and ResumeBuilderPage.jsx). Moved off-screen, not
+   hidden: the exporter reads computed styles from these source nodes, and
+   visibility/display would leak into them. Its fixed 65rem width is wider
+   than --preview-paper-width, so the CV inside always renders at the full
+   220mm paper width the PDF sandbox uses, whatever the window size — and
+   app-shell.css applies the `.pdf-export-root` layout rules to it too —
+   so templates that measure themselves (Compact's and European's density
+   auto-fit) pick their tier from the same layout the PDF paginates, not
+   from the on-screen copy (which can be narrower, or carry editing
+   chrome, and so settle on a different tier). */
 .direct-edit-export-source {
   position: fixed;
   top: 0;

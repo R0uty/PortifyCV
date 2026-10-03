@@ -16,9 +16,11 @@
 // floor (the `--preview-paper-min-height: 297mm` CSS variable, resolved to
 // px by the browser) and steps through three density tiers — cozy, snug,
 // tight — shrinking spacing/typography via a class swap until the content
-// fits one page or the tightest tier is reached. Because this measures the
-// live DOM node that PDF export also captures, the auto-fit applies to the
-// exported PDF too, not just the on-screen preview.
+// fits one page or the tightest tier is reached. Each rendered copy fits
+// itself: PDF export captures the off-screen export-source copy (see
+// .direct-edit-export-source in direct-edit.css/app-shell.css), which lays
+// out at paper width under the same rules as the PDF clone, so its tier is
+// the one that fits the exported page — not necessarily the on-screen one.
 
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 
