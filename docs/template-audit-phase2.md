@@ -768,7 +768,7 @@ edge-cases · A = ATS parity · X = export fidelity
 | Executive | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1, F6 (mid-word name break) and F14 fixed; density also stepped `standard`→`compact` (G8/F13 fix-round-1 addition) to pull `finance-director` back under the 2.0-page cap after F14 added real achievement/technology content — D stays 2 (still a declared class, not ad hoc) |
 | Timeline | 2 | 3 | 3 | 2 | **1** | 2 | **0** | 2 | 2 | 2 | keep | F5 (stress name-wrap) and F14 fixed |
 | Graduate | 2 | 2 | **1→2** | 2 | **0** | **1** | **0** | 2 | 2 | 2 | keep | F11 (sidebar heading overflow, structural) fixed 1.4.10 — S restored to 2; F14 fixed |
-| Compact | 2 | 2 | 2 | **1** | 2 | **1** | **0** | 2 | 2 | 2 | keep | F14 fixed; D=1 (ad-hoc, not on the `compact` class) is a carried A.2 finding Task 8/9 did not touch — still open, tracked in `todo.md` follow-ups |
+| Compact | 2 | 2 | 2 | **1** | 2 | **1** | **0** | 2 | 2 | 2 | keep | F14 fixed; D=1 (ad-hoc, not on the `compact` class) is a carried A.2 finding Task 8/9 did not touch — settled 2026-10-04 as a documented exception (design-system §2, "Auto-fit tiers below `compact`"), no code change |
 | Portfolio | 2 | 3 | 2 | **1→2** | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1 and F14 fixed; F13 (all 3 example CVs over the 2.0-page cap) fixed 1.4.9 by stepping `standard`→`compact` with corrected line-heights — D restored to 2 |
 | TechExec | 2 | 2 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F1 and F14 fixed; I-2 (final fix wave) stepped density `standard`→`compact` plus a rhythm trim to pull `engineering-director` back under 1 PDF page (~7.4% margin) after F14 added real achievement/technology content pushed it to 2 — D stays 2 |
 | ClassicProfessional | 3 | 3 | 2 | 2 | **1** | **1** | **0** | 2 | 2 | 2 | keep | F5 (stress name-wrap) fixed; F14 fixed; the `finance-director` example's F13 fix-round-1 overage (2.03 pages) resolved with a ~10% rhythm trim within `roomy`, no density-class step needed |
@@ -845,8 +845,11 @@ likewise resolved — Graduate's S returns to 2 and Portfolio's D returns to
 step for Executive, a rhythm trim within the existing class for Classic
 Professional). No template ends in "rework"; all 18 are "keep". Compact's
 pre-existing ad-hoc D=1 (from `template-audit-a2.md`, unrelated to this
-phase's findings) is the one open item this task did not touch — see
-`todo.md`'s follow-ups list.
+phase's findings) was the one open item this task did not touch. It was
+settled on 2026-10-04 without a code change: Compact's snug/tight auto-fit
+tiers are now a documented, sanctioned exception
+(`docs/template-design-system.md` §2, "Auto-fit tiers below `compact`").
+The D score above is left as audited.
 
 ---
 

@@ -173,6 +173,40 @@ but by only 1.5%; it stayed on `roomy` and was fixed with a template-local
 vertical-rhythm trim instead (see docs/template-audit-phase2.md's G8
 writeup for the per-template values).
 
+### Auto-fit tiers below `compact` (Compact only)
+
+A template with a "fit one page" auto-fit steps between the declared
+classes first: European starts at `standard` and steps to `compact` when
+its content overflows (`EuropeanShowcase.jsx`). `compact` is the floor of
+the shared ramp, so a template that already declares `compact` has no
+shared step left. **Compact is the one sanctioned exception** (decided
+2026-10-04): its promise is one page, so its auto-fit
+(`DENSITY_STEPS` in `CompactShowcase.jsx`) may go below `compact` through
+two template-local tiers in `compact.css`:
+
+| Tier | name | body | meta | Spacing (`--cp-*` gaps) |
+|---|---|---|---|---|
+| `cozy` (default) | `compact` ramp | `compact` ramp | `compact` ramp | Compact's own default gaps |
+| `.compact-showcase--snug` | 1.50rem | 0.76rem | 0.66rem | tighter |
+| `.compact-showcase--tight` | 1.40rem | 0.68rem | 0.60rem | tightest |
+
+Title, section-heading and entry-title stay on the `compact` ramp at every
+tier. These tiers are **not** density classes: they get no
+`tpl-density-*` class or shared token values, and no other template uses
+them. The exception holds only while all of these stay true:
+
+- The root always carries `tpl-density-compact`; the tiers override the
+  `--tpl-*` tokens on top of it and never replace the class.
+- A tier is engaged only by measured overflow of the one-page floor,
+  never as a default or a user choice.
+- The auto-fit resets to `cozy` whenever the content changes, so removing
+  content brings the type back up to the ramp.
+- The tier values live in `compact.css`, not in `_system.css`.
+
+Any other template that needs to fit one page steps between the shared
+classes, as European does, and takes a further tier below `compact` only
+by extending this exception explicitly, here.
+
 **Adoption state (v1.2.13–1.2.14):** every bespoke Showcase now carries a
 `tpl-density-*` class on its root and reads the six roles from `--tpl-*`.
 Two documented size overrides remain: Navy Professional's sidebar identity

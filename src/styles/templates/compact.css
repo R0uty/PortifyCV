@@ -9,7 +9,9 @@
      `2.25rem` name + `0.68rem` body). The cozy/snug/tight auto-fit tiers
      (CompactShowcase.jsx) still shrink density until the CV fits one page:
      they now progressively override the `--tpl-*` type tokens plus the
-     `--cp-*` spacing gaps.
+     `--cp-*` spacing gaps. Going below the `compact` ramp this way is a
+     documented exception, Compact only — see the design doc's §2
+     "Auto-fit tiers below `compact`" for the rules it must keep to.
    - §3: one accent — sky, read from `--tpl-accent` (set inline from the
      `accentColor` prop). `--cp-blue` (the second blue, used only for the
      metric highlight) is gone. The header tint band is the single tint
