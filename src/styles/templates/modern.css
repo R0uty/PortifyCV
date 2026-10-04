@@ -293,7 +293,8 @@
   color: var(--ms-navy);
 }
 
-.modern-showcase__company {
+.modern-showcase__company,
+.modern-showcase__technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   color: var(--ms-muted);

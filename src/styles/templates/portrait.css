@@ -232,7 +232,8 @@
   white-space: nowrap;
 }
 
-.portrait-showcase__entry-meta {
+.portrait-showcase__entry-meta,
+.portrait-showcase__entry-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   font-style: italic;

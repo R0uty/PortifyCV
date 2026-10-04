@@ -158,7 +158,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, 
         </ul>
       ) : null}
       {technologies.length > 0 ? (
-        <p className="timeline-showcase__entry-meta">{technologies.join(' · ')}</p>
+        <p className="timeline-showcase__entry-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </TimelineRow>
   )

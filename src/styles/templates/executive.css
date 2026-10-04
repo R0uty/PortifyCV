@@ -291,7 +291,8 @@
   color: var(--ex-ink);
 }
 
-.executive-showcase__entry-meta {
+.executive-showcase__entry-meta,
+.executive-showcase__entry-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   color: var(--ex-ink-faint);

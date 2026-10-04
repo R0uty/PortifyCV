@@ -131,7 +131,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, color, i
         </ul>
       ) : null}
       {technologies.length > 0 ? (
-        <p className="colorful-compact-showcase__exp-meta">{technologies.join(' · ')}</p>
+        <p className="colorful-compact-showcase__exp-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )

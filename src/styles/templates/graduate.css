@@ -265,7 +265,8 @@
   color: var(--gr-ink);
 }
 
-.graduate-showcase__edu-meta {
+.graduate-showcase__edu-meta,
+.graduate-showcase__edu-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   color: var(--gr-ink-muted);

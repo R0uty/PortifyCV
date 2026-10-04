@@ -286,7 +286,8 @@
   color: var(--qd-text);
 }
 
-.quadrant-showcase__entry-meta {
+.quadrant-showcase__entry-meta,
+.quadrant-showcase__entry-technologies {
   margin-top: 0.05rem;
   font-size: var(--tpl-meta-size);
   color: var(--qd-muted);

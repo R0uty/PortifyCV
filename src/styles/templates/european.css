@@ -231,7 +231,8 @@
   color: var(--eu-ink);
 }
 
-.european-showcase__entry-meta {
+.european-showcase__entry-meta,
+.european-showcase__entry-technologies {
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   font-style: italic;

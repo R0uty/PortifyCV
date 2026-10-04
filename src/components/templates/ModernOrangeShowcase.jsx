@@ -230,7 +230,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, 
         </ul>
       ) : null}
       {technologies.length > 0 ? (
-        <p className="modern-orange-showcase__exp-meta">{technologies.join(' · ')}</p>
+        <p className="modern-orange-showcase__exp-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </ExperienceRow>
   )

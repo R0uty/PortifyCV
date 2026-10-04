@@ -572,7 +572,8 @@
   color: var(--dev-primary);
 }
 
-.dev-showcase__company {
+.dev-showcase__company,
+.dev-showcase__technologies {
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   font-weight: 600;

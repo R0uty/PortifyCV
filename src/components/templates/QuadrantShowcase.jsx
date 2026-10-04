@@ -123,7 +123,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst,
         </ul>
       ) : null}
       {technologies.length > 0 ? (
-        <p className="quadrant-showcase__entry-meta">{technologies.join(' · ')}</p>
+        <p className="quadrant-showcase__entry-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )

@@ -494,7 +494,8 @@
   color: var(--mo-text);
 }
 
-.modern-orange-showcase__exp-meta {
+.modern-orange-showcase__exp-meta,
+.modern-orange-showcase__exp-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   color: var(--tpl-accent);

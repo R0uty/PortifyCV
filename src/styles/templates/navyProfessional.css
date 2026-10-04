@@ -334,7 +334,8 @@
   white-space: nowrap;
 }
 
-.navy-professional-showcase__entry-meta {
+.navy-professional-showcase__entry-meta,
+.navy-professional-showcase__entry-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   font-style: italic;
@@ -577,6 +578,7 @@
 
 .navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-dates,
 .navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-meta,
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-technologies,
 .navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__empty {
   color: rgba(255, 255, 255, 0.7);
 }

@@ -307,7 +307,8 @@
   color: var(--cr-ink);
 }
 
-.creative-showcase__exp-company {
+.creative-showcase__exp-company,
+.creative-showcase__exp-technologies {
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   color: var(--cr-ink-faint);

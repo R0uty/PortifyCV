@@ -266,7 +266,8 @@
   color: #111827;
 }
 
-.timeline-showcase__entry-meta {
+.timeline-showcase__entry-meta,
+.timeline-showcase__entry-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   color: var(--tpl-accent);

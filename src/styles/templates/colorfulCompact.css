@@ -313,7 +313,8 @@
   color: var(--cc-ink);
 }
 
-.colorful-compact-showcase__exp-meta {
+.colorful-compact-showcase__exp-meta,
+.colorful-compact-showcase__exp-technologies {
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   color: var(--cc-muted);

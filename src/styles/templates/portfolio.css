@@ -433,7 +433,8 @@
   color: var(--pf-slate);
 }
 
-.portfolio-showcase__company {
+.portfolio-showcase__company,
+.portfolio-showcase__technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   color: var(--pf-gray);

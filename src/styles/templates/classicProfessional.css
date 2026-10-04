@@ -206,7 +206,8 @@
   white-space: nowrap;
 }
 
-.classic-professional-showcase__entry-meta {
+.classic-professional-showcase__entry-meta,
+.classic-professional-showcase__entry-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   font-style: italic;

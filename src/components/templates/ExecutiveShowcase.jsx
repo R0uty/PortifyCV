@@ -166,7 +166,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetr
         </ul>
       ) : null}
       {technologies.length > 0 ? (
-        <p className="executive-showcase__entry-meta">{technologies.join(' · ')}</p>
+        <p className="executive-showcase__entry-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )

@@ -120,7 +120,7 @@ export function renderExperienceEntry(item, index, { directEditDispatch, copy, c
         </ul>
       ) : null}
       {technologies.length > 0 ? (
-        <p className={`${classPrefix}__entry-meta`}>{technologies.join(separator)}</p>
+        <p className={`${classPrefix}__entry-technologies`}>{technologies.join(separator)}</p>
       ) : null}
     </div>
   )
