@@ -408,7 +408,6 @@
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--tpl-accent);
-  overflow-wrap: anywhere;
 }
 
 /* ── Internships — small dedicated timeline treatment ── */

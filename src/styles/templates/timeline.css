@@ -127,8 +127,6 @@
   gap: 0.4rem;
   font-size: var(--tpl-meta-size);
   color: var(--tl-muted);
-  white-space: nowrap;
-  overflow-wrap: anywhere;
 }
 
 .timeline-showcase__contact-icon {

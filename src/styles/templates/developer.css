@@ -681,7 +681,6 @@
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--dev-accent);
-  overflow-wrap: anywhere;
 }
 
 /* ── Achievements (trophy cards) ── */

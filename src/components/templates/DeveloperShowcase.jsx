@@ -487,7 +487,7 @@ export default function DeveloperShowcase({
                             href={getSafeHref(item.githubUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="dev-showcase__project-link"
+                            className="dev-showcase__project-link tpl-value-breakable"
                             title={item.githubUrl}
                           >
                             {formatLinkDisplayValue(item.githubUrl)}
@@ -498,7 +498,7 @@ export default function DeveloperShowcase({
                             href={getSafeHref(item.demoUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="dev-showcase__project-link"
+                            className="dev-showcase__project-link tpl-value-breakable"
                             title={item.demoUrl}
                           >
                             {formatLinkDisplayValue(item.demoUrl)}

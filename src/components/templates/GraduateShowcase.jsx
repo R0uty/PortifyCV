@@ -331,7 +331,7 @@ export default function GraduateShowcase({
                             href={getSafeHref(item.githubUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="graduate-showcase__project-link"
+                            className="graduate-showcase__project-link tpl-value-breakable"
                             title={item.githubUrl}
                           >
                             {formatLinkDisplayValue(item.githubUrl)}
@@ -342,7 +342,7 @@ export default function GraduateShowcase({
                             href={getSafeHref(item.demoUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="graduate-showcase__project-link"
+                            className="graduate-showcase__project-link tpl-value-breakable"
                             title={item.demoUrl}
                           >
                             {formatLinkDisplayValue(item.demoUrl)}

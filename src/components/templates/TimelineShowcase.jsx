@@ -523,7 +523,7 @@ export default function TimelineShowcase({
           {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="timeline-showcase__contact">
               {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
-                <span key={key} className="timeline-showcase__contact-item">
+                <span key={key} className="timeline-showcase__contact-item tpl-value-breakable">
                   <span className="timeline-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
                   {directEditDispatch ? (
                     <EditableField
@@ -543,7 +543,7 @@ export default function TimelineShowcase({
           {linkContactItems.length > 0 ? (
             <div className="timeline-showcase__contact">
               {linkContactItems.map(([key, value]) => (
-                <span key={key} className="timeline-showcase__contact-item">
+                <span key={key} className="timeline-showcase__contact-item tpl-value-breakable">
                   <span className="timeline-showcase__contact-icon" aria-hidden="true">{devIcons[key]}</span>
                   {formatLinkDisplayValue(value)}
                 </span>
