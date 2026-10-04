@@ -2315,13 +2315,47 @@ select.floating-field__control {
   color: #111111;
 }
 
+/* The hero's actions — "Start building", "View templates" and the "See
+   how it works" link — as one row that wraps on narrow screens instead of
+   leaving the wrapped items indented by a margin-left. */
+.landing-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  margin-top: var(--space-8);
+}
+
+.landing-hero__actions .landing-cta {
+  margin-top: 0;
+}
+
+/* Outline twin of .landing-cta (same size, so the two read as a pair) for
+   the hero's secondary action. */
+.landing-hero__templates {
+  display: inline-block;
+  border: 2px solid #111111;
+  background: transparent;
+  color: #111111;
+  padding: 1rem 2rem;
+  font-size: var(--text-body);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.landing-hero__templates:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
 /* Lightweight text link next to the hero's primary CTA — the hero is
    left-aligned, so .landing-secondary-cta's centered block button (built
    for the templates section below) doesn't fit here. */
 .landing-hero__link {
   display: inline-block;
-  margin-top: var(--space-8);
-  margin-left: var(--space-5);
   color: var(--app-text);
   font-size: var(--text-body-sm);
   font-weight: 600;

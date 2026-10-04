@@ -17,4 +17,15 @@ test.describe('Landing page', () => {
     await expect(page.getByRole('heading', { name: 'Profile', exact: true })).toBeVisible()
     await expect(page.getByRole('navigation', { name: 'Section navigation' })).toBeVisible()
   })
+
+  test('View templates, next to Start building, opens the templates page', async ({ page }) => {
+    await page.goto('/')
+
+    const viewTemplates = page.locator('.landing-hero').getByRole('link', { name: 'View templates' })
+    await expect(viewTemplates).toHaveAttribute('href', '/free-cv-templates')
+    await viewTemplates.click()
+
+    await expect(page).toHaveURL(/\/free-cv-templates$/)
+    await expect(page.getByRole('heading', { level: 1, name: 'Free CV Templates' })).toBeVisible()
+  })
 })

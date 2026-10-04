@@ -11,7 +11,8 @@ to its own page (`/free-cv-templates/<slug>`), opened in a new tab so the
 user's CV and chosen template stay as they are. The public Free CV
 Templates page (`/free-cv-templates`) gets the same "View examples" button
 beside each card's "Use this template", opening the template page in the
-same tab.
+same tab. The landing page's hero has a "View templates" button next to
+"Start building", leading to that templates page.
 
 Direct Edit now has the same nav rail as Classic mode, from the desktop
 breakpoint up, sticky under the toolbar. It lists the sections the
