@@ -4,6 +4,7 @@ import Modal from './Modal'
 import TemplateThumbnail from './TemplateThumbnail'
 import { buildThumbnailCv } from '../utils/thumbnailCv'
 import { getCvFontStack } from '../utils/cvFonts'
+import { templatePath } from '../utils/routes'
 
 function TemplateGalleryModal({
   isOpen,
@@ -47,40 +48,58 @@ function TemplateGalleryModal({
         {templates.map((template) => {
           const isActive = template.id === selectedTemplateId
 
+          // The card is a container, not one big button, so it can hold a
+          // second control: a link can't be nested inside a <button>.
           return (
-            <button
+            <div
               key={template.id}
-              type="button"
               className={`template-gallery__card${isActive ? ' template-gallery__card--active' : ''}`}
-              onClick={() => {
-                onSelectTemplate(template.id)
-                onClose()
-              }}
             >
-              <div className="template-gallery__thumb">
-                <TemplateThumbnail
-                  templateId={template.id}
-                  formData={thumbnailCv}
-                  locale={locale}
-                  fontStack={fontStack}
-                  headingColor={cvHeadingColor}
-                />
-              </div>
-              <div className="template-gallery__meta">
-                {isActive ? (
-                  <span className="template-gallery__active-badge">
-                    {isFinnish ? 'Käytössä' : 'Active'}
+              <button
+                type="button"
+                className="template-gallery__select"
+                onClick={() => {
+                  onSelectTemplate(template.id)
+                  onClose()
+                }}
+              >
+                <div className="template-gallery__thumb">
+                  <TemplateThumbnail
+                    templateId={template.id}
+                    formData={thumbnailCv}
+                    locale={locale}
+                    fontStack={fontStack}
+                    headingColor={cvHeadingColor}
+                  />
+                </div>
+                <div className="template-gallery__meta">
+                  {isActive ? (
+                    <span className="template-gallery__active-badge">
+                      {isFinnish ? 'Käytössä' : 'Active'}
+                    </span>
+                  ) : null}
+                  <p className="template-gallery__name">{template.label}</p>
+                  <p className="template-gallery__desc">{template.description}</p>
+                  <span className="template-gallery__use">
+                    {isActive
+                      ? (isFinnish ? 'Käytössä' : 'In use')
+                      : (isFinnish ? 'Käytä pohjaa' : 'Use template')}
                   </span>
-                ) : null}
-                <p className="template-gallery__name">{template.label}</p>
-                <p className="template-gallery__desc">{template.description}</p>
-                <span className="template-gallery__use">
-                  {isActive
-                    ? (isFinnish ? 'Käytössä' : 'In use')
-                    : (isFinnish ? 'Käytä pohjaa' : 'Use template')}
-                </span>
-              </div>
-            </button>
+                </div>
+              </button>
+              {/* Opens the template's own page, which shows every example CV
+                  for it, in a new tab — the builder and the user's CV stay
+                  exactly as they are. */}
+              <a
+                className="template-gallery__examples"
+                href={templatePath(template.slug)}
+                target="_blank"
+                rel="noopener"
+                aria-label={`${isFinnish ? 'Katso esimerkit' : 'View examples'}: ${template.label}`}
+              >
+                {isFinnish ? 'Katso esimerkit' : 'View examples'}
+              </a>
+            </div>
           )
         })}
       </div>

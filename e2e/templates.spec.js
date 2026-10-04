@@ -361,3 +361,34 @@ test.describe('Colorful Compact skill pills', () => {
     }
   })
 })
+
+test.describe('Template gallery example links', () => {
+  test('every card links to its template page without switching template', async ({ page }) => {
+    const { cvTemplates } = await import('../src/utils/cvTemplates.js')
+    await page.goto('/cv')
+    await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Minimalist')
+
+    await page.getByRole('button', { name: /^Select template:/ }).click()
+    const dialog = page.getByRole('dialog', { name: 'Template gallery' })
+    const links = dialog.getByRole('link', { name: /^View examples/ })
+    await expect(links).toHaveCount(cvTemplates.length)
+
+    for (const template of cvTemplates) {
+      const link = dialog.getByRole('link', { name: `View examples: ${template.label}` })
+      await expect(link).toHaveAttribute('href', `/free-cv-templates/${template.slug}`)
+      await expect(link).toHaveAttribute('target', '_blank')
+    }
+
+    const developer = cvTemplates.find((template) => template.id === 'developer')
+    const popupPromise = page.waitForEvent('popup')
+    await dialog.getByRole('link', { name: `View examples: ${developer.label}` }).click()
+    const popup = await popupPromise
+    await expect(popup).toHaveURL(new RegExp(`/free-cv-templates/${developer.slug}$`))
+    await popup.close()
+
+    // The gallery stays open and the selected template is unchanged.
+    await expect(dialog).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Minimalist')
+  })
+})

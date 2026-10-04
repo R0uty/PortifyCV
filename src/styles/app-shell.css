@@ -884,6 +884,39 @@ select.floating-field__control {
   box-shadow: 0 0 0 1px var(--accent-solid);
 }
 
+/* The card's main control (thumbnail + name + "Use template"); the card
+   itself is a plain container so it can also hold the examples link. */
+.template-gallery__select {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.template-gallery__examples {
+  margin: 0 0.85rem 0.85rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--app-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+
+.template-gallery__examples:hover {
+  background: var(--app-surface-strong);
+}
+
 .template-gallery__thumb {
   padding: 0.75rem;
   border-bottom: 1px solid var(--app-border);
