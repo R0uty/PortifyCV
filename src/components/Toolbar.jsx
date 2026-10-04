@@ -288,9 +288,11 @@ function Toolbar({
             )}
           </button>
 
+          {/* Desktop widths reach Settings from the nav rail, which both
+              builder modes show from lg up; this is the narrow-screen way in. */}
           <button
             type="button"
-            className={`app-toolbar__icon-button${builderMode === 'direct' ? '' : ' lg:hidden'}`}
+            className="app-toolbar__icon-button lg:hidden"
             onClick={onOpenSettings}
             aria-label={isFinnish ? 'Asetukset' : 'Settings'}
             title={isFinnish ? 'Asetukset' : 'Settings'}

@@ -16,6 +16,7 @@ export default function DirectEditPreview({
   classicNameAlignment,
   previewRef,
   cvFontId,
+  overlayApiRef = null,
 }) {
   // Shadows the --font-sans token (tokens.css) for this subtree only —
   // matches Classic mode's .preview-zoom-wrapper inline style in
@@ -54,6 +55,7 @@ export default function DirectEditPreview({
           dispatchFormData={dispatchFormData}
           templateConfig={templateConfig}
           locale={locale}
+          apiRef={overlayApiRef}
         />
       </div>
       {/* What PDF export captures. The PDF exporter clones previewRef's

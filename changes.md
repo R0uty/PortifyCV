@@ -4,6 +4,26 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Builder usability — 2026-10-04
+
+The builder's template gallery gives each template a "View examples" link
+to its own page (`/free-cv-templates/<slug>`), opened in a new tab so the
+user's CV and chosen template stay as they are.
+
+Direct Edit now has the same nav rail as Classic mode, from the desktop
+breakpoint up, sticky under the toolbar. It lists the sections the
+template shows (minus any the user has hidden) plus the Settings,
+Templates and Cover letter shortcuts. Clicking a section scrolls the CV to
+it and opens its edit popup; Personal Information opens the header popup.
+The active item follows scrolling. With Settings reachable from the rail,
+the toolbar's Settings icon is now narrow-screen only in both modes.
+
+While the cursor is in any field of an entry (a job, degree, project…),
+that whole entry gets a light accent tint and an accent bar on its left
+edge. An empty field's placeholder now stays visible after the field is
+clicked and disappears on the first character typed, coming back if the
+field is emptied again.
+
 ## Template polish (Phase 2) — 2026-10-03
 
 A full layout audit of all 18 templates (`docs/template-audit-phase2.md`)

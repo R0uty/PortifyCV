@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
 import SectionEditorPopup from './SectionEditorPopup'
 import { getSectionSchema } from '../utils/sectionSchema'
 
@@ -43,6 +43,9 @@ export default function SectionEditOverlay({
   dispatchFormData,
   templateConfig,
   locale,
+  // Filled with { openSectionFromNav(sectionKey) } for the builder's nav
+  // rail, which lives outside this component.
+  apiRef = null,
 }) {
   const containerRef = useRef(null)
   const popupAnchorRef = useRef(null)
@@ -370,6 +373,23 @@ export default function SectionEditOverlay({
 
     setPopupPosition((prev) => (prev && prev.top === top && prev.left === left ? prev : { top, left }))
   }, [openSectionKey, hovered, focusEntry])
+
+  useImperativeHandle(apiRef, () => ({
+    openSectionFromNav(sectionKey) {
+      const element = findSectionElement(sectionKey)
+
+      if (!element) {
+        return
+      }
+
+      // Instant rather than smooth: the popup-into-view scroll below runs
+      // as soon as the popup opens and would cut a smooth scroll short.
+      // scroll-margin-top (direct-edit.css) keeps the section clear of the
+      // sticky toolbar.
+      element.scrollIntoView({ block: 'start', behavior: 'auto' })
+      openSection(sectionKey)
+    },
+  }), [findSectionElement, openSection])
 
   // Bring the popup fully into view once it opens (e.g. a section near
   // the bottom of a long, scrollable preview) — complements the clamp

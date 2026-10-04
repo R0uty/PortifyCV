@@ -460,6 +460,13 @@ function ResumeBuilderPage({
   const [isResponsivePreview, setIsResponsivePreview] = useState(false)
   const [zoomPercent, setZoomPercent] = useState(100)
   const [isTemplateGalleryOpen, setIsTemplateGalleryOpen] = useState(false)
+  // SectionEditOverlay's handle, for Direct Edit's nav rail; see
+  // handleDirectEditNavigate.
+  const directEditOverlayRef = useRef(null)
+  // Set by a rail click so scroll-spy doesn't immediately re-pick a
+  // neighbouring section; cleared once the user scrolls by hand.
+  const directEditNavLockRef = useRef(false)
+  const [directEditToolbarHeight, setDirectEditToolbarHeight] = useState(0)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
@@ -1369,6 +1376,125 @@ function ResumeBuilderPage({
     // mount-only observer would miss anchors that show up after a later switch.
   }, [selectedTemplate])
 
+  // Direct Edit scrolls the whole page under the sticky toolbar (App.jsx),
+  // so its nav rail sticks just below that toolbar and a section scrolled
+  // to by the rail stops just below it too. The toolbar's height depends
+  // on how its controls wrap, so it's measured rather than assumed. App
+  // renders the toolbar from this page's onHeaderChange, i.e. after this
+  // effect first runs, so wait for it to appear before measuring.
+  useEffect(() => {
+    if (builderMode !== 'direct') {
+      return undefined
+    }
+
+    let resizeObserver = null
+    const attach = () => {
+      const toolbar = document.querySelector('.app-toolbar')
+
+      if (!toolbar) {
+        return false
+      }
+
+      resizeObserver = new ResizeObserver(() => setDirectEditToolbarHeight(toolbar.offsetHeight))
+      resizeObserver.observe(toolbar)
+      return true
+    }
+    let mutationObserver = null
+
+    if (!attach()) {
+      mutationObserver = new MutationObserver(() => {
+        if (attach()) {
+          mutationObserver.disconnect()
+        }
+      })
+      mutationObserver.observe(document.body, { childList: true, subtree: true })
+    }
+
+    return () => {
+      mutationObserver?.disconnect()
+      resizeObserver?.disconnect()
+    }
+  }, [builderMode])
+
+  // Direct Edit's scroll-spy. The active item is the section whose top
+  // most recently scrolled past a line a quarter of the way down the
+  // viewport. Classic's "topmost section in a band" rule (above) doesn't
+  // carry over: here a tall section above the one just scrolled to can
+  // still reach into the band and win. Sections are re-queried on every
+  // pass, since showing/hiding one or loading a template's Showcase chunk
+  // changes the set. A rail click locks the clicked item in until the user
+  // scrolls by hand, so a two-column template's sidebar section level
+  // with it can't immediately take over.
+  useEffect(() => {
+    if (builderMode !== 'direct') {
+      return undefined
+    }
+
+    const navIdBySectionKey = new Map(
+      NAV_SECTIONS.filter((item) => item.sectionKey).map((item) => [item.sectionKey, item.id]),
+    )
+    let frame = 0
+
+    const update = () => {
+      frame = 0
+
+      if (directEditNavLockRef.current) {
+        return
+      }
+
+      const sections = document.querySelectorAll(
+        '.direct-edit-preview [data-export-section], .direct-edit-preview [data-export-header]',
+      )
+      const marker = window.innerHeight * 0.25
+      let active = null
+      let activeTop = -Infinity
+
+      sections.forEach((element) => {
+        const { top } = element.getBoundingClientRect()
+
+        if (top <= marker && top > activeTop) {
+          active = element
+          activeTop = top
+        }
+      })
+
+      const navId = !active || active.hasAttribute('data-export-header')
+        ? 'personal'
+        : navIdBySectionKey.get(active.getAttribute('data-export-section'))
+
+      if (navId) {
+        setActiveSectionId(navId)
+      }
+    }
+    const scheduleUpdate = () => {
+      if (!frame) {
+        frame = window.requestAnimationFrame(update)
+      }
+    }
+    const unlock = () => {
+      directEditNavLockRef.current = false
+    }
+    const unlockOnScrollKey = (event) => {
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) {
+        unlock()
+      }
+    }
+
+    scheduleUpdate()
+    window.addEventListener('scroll', scheduleUpdate, { passive: true })
+    window.addEventListener('wheel', unlock, { passive: true })
+    window.addEventListener('touchmove', unlock, { passive: true })
+    window.addEventListener('keydown', unlockOnScrollKey)
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', scheduleUpdate)
+      window.removeEventListener('wheel', unlock)
+      window.removeEventListener('touchmove', unlock)
+      window.removeEventListener('keydown', unlockOnScrollKey)
+    }
+  }, [builderMode, selectedTemplate])
+
   // A template switch can add or remove editor sections; if the user was
   // scrolled deep into the form, those changes happen off-screen with no
   // cue. Jump the editor back to the top so the (possibly new) section list
@@ -1798,6 +1924,51 @@ function ResumeBuilderPage({
     return NAV_UTILITY_ITEMS.filter((item) => (item.label[locale] ?? item.label.en).toLowerCase().includes(query))
   }, [searchQuery, locale])
 
+  // Direct Edit renders only the sections the template supports AND the
+  // user hasn't hidden, so the rail lists exactly those — a rail item for
+  // a hidden section would have nothing to scroll to. Classic's rail keeps
+  // hidden sections, because their form stays editable there.
+  const directEditNavSections = useMemo(
+    () => NAV_SECTIONS.filter((item) => (
+      item.sectionKey === null
+      || (templateSectionKeySet.has(item.sectionKey) && formData.sectionVisibility?.[item.sectionKey] !== false)
+    )),
+    [templateSectionKeySet, formData.sectionVisibility],
+  )
+
+  const handleDirectEditNavigate = useCallback((item) => {
+    if (item.kind === 'action') {
+      handleNavigate(item)
+      return
+    }
+
+    setActiveSectionId(item.id)
+    directEditNavLockRef.current = true
+    // Personal Information is the header block, which the section overlay
+    // models under the synthetic key "identity".
+    directEditOverlayRef.current?.openSectionFromNav(item.sectionKey ?? 'identity')
+  }, [handleNavigate])
+
+  const directEditNavRail = useMemo(() => (
+    <NavRail
+      sections={directEditNavSections}
+      utilityItems={NAV_UTILITY_ITEMS}
+      activeSectionId={activeSectionId}
+      onNavigate={handleDirectEditNavigate}
+      locale={locale}
+      version={APP_VERSION_RAW}
+      isCollapsed={navRailCollapsed}
+      onToggleCollapsed={handleToggleNavRail}
+    />
+  ), [
+    directEditNavSections,
+    activeSectionId,
+    handleDirectEditNavigate,
+    locale,
+    navRailCollapsed,
+    handleToggleNavRail,
+  ])
+
   const navRailContent = useMemo(() => (
     <NavRail
       sections={filteredNavSections}
@@ -2091,23 +2262,34 @@ function ResumeBuilderPage({
     <>
       <h1 className="sr-only">{locale === 'fi' ? 'Rakenna CV:si' : 'Build Your CV'}</h1>
       {builderMode === 'direct' ? (
-        <AppErrorBoundary
-          panelTitle={locale === 'fi' ? 'Suoran muokkauksen esikatselu' : 'Direct Edit preview'}
-          locale={locale}
+        <div
+          className={`direct-edit-layout${navRailCollapsed ? ' direct-edit-layout--nav-collapsed' : ''}`}
+          style={{ '--direct-edit-sticky-top': `${directEditToolbarHeight}px` }}
         >
-          <DirectEditPreview
-            formData={formData}
-            dispatchFormData={dispatchFormData}
-            selectedTemplate={selectedTemplate}
-            templateConfig={currentTemplate}
-            locale={locale}
-            accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
-            headingColor={cvHeadingColor}
-            classicNameAlignment={classicNameAlignment}
-            previewRef={previewRef}
-            cvFontId={cvFontId}
-          />
-        </AppErrorBoundary>
+          <div className="direct-edit-layout__nav print:hidden">
+            {directEditNavRail}
+          </div>
+          <div className="direct-edit-layout__main">
+            <AppErrorBoundary
+              panelTitle={locale === 'fi' ? 'Suoran muokkauksen esikatselu' : 'Direct Edit preview'}
+              locale={locale}
+            >
+              <DirectEditPreview
+                overlayApiRef={directEditOverlayRef}
+                formData={formData}
+                dispatchFormData={dispatchFormData}
+                selectedTemplate={selectedTemplate}
+                templateConfig={currentTemplate}
+                locale={locale}
+                accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
+                headingColor={cvHeadingColor}
+                classicNameAlignment={classicNameAlignment}
+                previewRef={previewRef}
+                cvFontId={cvFontId}
+              />
+            </AppErrorBoundary>
+          </div>
+        </div>
       ) : (
         <>
           <AppShell

@@ -1799,3 +1799,94 @@ test.describe('Direct Edit column control in Finnish', () => {
     await expect(firstEntry.locator('.direct-edit-entry__remove')).toHaveAttribute('aria-label', 'Poista kohta')
   })
 })
+
+test.describe('Direct Edit nav rail, entry highlight and placeholders', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/cv')
+  })
+
+  test('the nav rail scrolls to a section and opens its popup, including the header', async ({ page }) => {
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const rail = page.getByRole('navigation', { name: 'Section navigation' })
+    await expect(rail).toBeVisible()
+
+    await rail.getByRole('button', { name: 'Experience' }).click()
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+    await expect(popup).toContainText('Experience')
+    await expect(page.locator('[data-export-section="experience"]').first()).toBeInViewport()
+    await expect(rail.getByRole('button', { name: 'Experience' })).toHaveAttribute('aria-current', 'true')
+
+    await page.keyboard.press('Escape')
+    await expect(popup).toHaveCount(0)
+
+    // "Personal Information" is the header block, not a data-export-section.
+    await rail.getByRole('button', { name: 'Personal Information' }).click()
+    await expect(popup).toBeVisible()
+    await expect(popup.locator('.direct-edit-popup__label', { hasText: 'Full name' })).toBeVisible()
+  })
+
+  test('the nav rail lists only the sections the template shows, and not hidden ones', async ({ page }) => {
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const rail = page.getByRole('navigation', { name: 'Section navigation' })
+    await expect(rail.getByRole('button', { name: 'Summary' })).toBeVisible()
+
+    await page.getByRole('button', { name: 'Sections', exact: true }).click()
+    // Clicked twice: right after "Load demo CV" the first toggle is a
+    // documented no-op (see the Sections-menu test above).
+    const aboutCheckbox = page.locator('.direct-edit-sections__row', { hasText: 'About' }).getByRole('checkbox')
+    await aboutCheckbox.click()
+    await aboutCheckbox.click()
+    await expect(aboutCheckbox).not.toBeChecked()
+
+    await expect(rail.getByRole('button', { name: 'Summary' })).toHaveCount(0)
+  })
+
+  test('the entry being edited is highlighted while one of its fields has focus', async ({ page }) => {
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const entries = page.locator('.direct-edit-preview [data-export-section="experience"] .direct-edit-entry')
+    const first = entries.nth(0)
+    const second = entries.nth(1)
+    const highlight = (locator) => locator.evaluate((el) => getComputedStyle(el).boxShadow)
+
+    const unfocused = await highlight(first)
+    await first.locator('.direct-edit-field').first().click()
+
+    await expect.poll(() => highlight(first)).not.toBe(unfocused)
+    expect(await highlight(second)).toBe(unfocused)
+
+    // Moving the cursor to the next entry moves the highlight with it.
+    await second.locator('.direct-edit-field').first().click()
+    await expect.poll(() => highlight(second)).not.toBe(unfocused)
+    await expect.poll(() => highlight(first)).toBe(unfocused)
+  })
+
+  test('an empty field keeps its placeholder on focus until the user types', async ({ page }) => {
+    // A first visit to /cv loads the demo CV; the template pages' "Start
+    // blank" link (?blank=1) is the way in with every field empty.
+    await page.goto('/cv?template=minimal&blank=1')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const nameField = page.locator('.direct-edit-preview h3 .direct-edit-field')
+    const placeholderShown = () => nameField.evaluate((el) => getComputedStyle(el, '::before').content !== 'none')
+
+    expect(await placeholderShown()).toBe(true)
+    await nameField.click()
+    await expect(nameField).toBeFocused()
+    expect(await placeholderShown()).toBe(true)
+
+    await page.keyboard.type('J')
+    await expect.poll(placeholderShown).toBe(false)
+
+    // Deleting back to empty brings it back, even if the browser leaves a
+    // stray <br> behind in the contentEditable.
+    await page.keyboard.press('Backspace')
+    await expect.poll(placeholderShown).toBe(true)
+  })
+})

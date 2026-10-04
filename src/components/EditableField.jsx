@@ -60,7 +60,11 @@ export default function EditableField({
 
   const handleInput = useCallback(
     (event) => {
-      dispatchFormData(buildAction(path, event.currentTarget.innerText ?? ''))
+      const text = event.currentTarget.innerText ?? ''
+      // Deleting a field's last character can leave a lone <br> behind,
+      // which innerText reports as "\n". Treat that as empty, or the field
+      // would never get its placeholder back.
+      dispatchFormData(buildAction(path, text === '\n' ? '' : text))
     },
     [dispatchFormData, path],
   )

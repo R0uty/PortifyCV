@@ -17,7 +17,9 @@
   box-shadow: 0 0 0 1.5px var(--ds-accent, #0f766e);
 }
 
-.direct-edit-field--empty:not(:focus)::before {
+/* Shown while focused too, so the hint stays until the first keystroke
+   rather than vanishing the moment the field is clicked. */
+.direct-edit-field--empty::before {
   content: attr(data-placeholder);
   color: var(--ds-text-muted, #a1a1aa);
   pointer-events: none;
@@ -32,6 +34,15 @@
 
 .direct-edit-entry:hover {
   background: var(--ds-surface-muted, #fafaf9);
+}
+
+/* The entry the cursor is in (a job, degree, project…): a light accent
+   tint plus an accent bar on its left edge, so it's clear which entry a
+   field belongs to. Only the editable preview renders .direct-edit-entry,
+   so PDF export and Classic mode never see it. */
+.direct-edit-entry:focus-within {
+  background: color-mix(in srgb, var(--ds-accent, #0f766e) 7%, transparent);
+  box-shadow: inset 3px 0 0 var(--ds-accent, #0f766e);
 }
 
 .direct-edit-entry--dragging {
@@ -301,4 +312,54 @@
    the page. */
 .one-pager--direct-edit .builder-section {
   min-height: auto;
+}
+
+/* Direct Edit's nav rail (ResumeBuilderPage.jsx) — the same NavRail as
+   Classic mode. Like Classic's, it only shows from the lg breakpoint up;
+   below that the preview keeps the full width. The page itself scrolls in
+   Direct Edit, so the rail sticks just under the sticky toolbar, whose
+   measured height arrives as --direct-edit-sticky-top. */
+.direct-edit-layout {
+  width: 100%;
+}
+
+.direct-edit-layout__nav {
+  display: none;
+}
+
+.direct-edit-layout__main {
+  min-width: 0;
+}
+
+/* Sections the rail scrolls to, and the popup it then opens, stop just
+   below the toolbar, not under it. */
+.direct-edit-preview [data-export-section],
+.direct-edit-preview [data-export-header],
+.direct-edit-popup {
+  scroll-margin-top: calc(var(--direct-edit-sticky-top, 0px) + 1rem);
+}
+
+@media (min-width: 1024px) {
+  .direct-edit-layout {
+    display: grid;
+    grid-template-columns: var(--nav-width) minmax(0, 1fr);
+    align-items: start;
+    transition: grid-template-columns 180ms ease;
+  }
+
+  .direct-edit-layout--nav-collapsed {
+    grid-template-columns: var(--nav-width-collapsed) minmax(0, 1fr);
+  }
+
+  .direct-edit-layout__nav {
+    display: block;
+    position: sticky;
+    top: var(--direct-edit-sticky-top, 0px);
+    height: calc(100dvh - var(--direct-edit-sticky-top, 0px));
+    overflow-y: auto;
+    border-right: 1px solid var(--app-border);
+    background: var(--app-bg-elevated);
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
 }
