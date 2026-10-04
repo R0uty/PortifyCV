@@ -72,15 +72,19 @@ function FreeCvTemplatesPage({ locale = 'en', onGetStarted = () => {}, onNavigat
         <div className="templates-page-grid">
           {templates.map((template) => (
             <div className="templates-page-card" key={template.id}>
-              <InternalNavLink
-                to={templatePath(template.slug)}
-                onNavigate={() => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${template.id}`)}
+              {/* Not a link: the thumbnail is a real CV, and several
+                  templates render <a> links inside it, which can't be
+                  nested in another <a>. Clicking it still opens the
+                  template page; keyboard and screen-reader users get the
+                  name link and "View examples" below, so it stays
+                  aria-hidden and out of the tab order. */}
+              <div
                 className="templates-page-card__thumb"
                 aria-hidden="true"
-                tabIndex={-1}
+                onClick={() => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${template.id}`)}
               >
                 <TemplateThumbnail templateId={template.id} formData={thumbnailCv} locale={resolvedLocale} />
-              </InternalNavLink>
+              </div>
               <InternalNavLink
                 to={templatePath(template.slug)}
                 onNavigate={() => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${template.id}`)}

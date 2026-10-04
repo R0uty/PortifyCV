@@ -182,6 +182,23 @@ test.describe('Template pages', () => {
     await expect(page.getByRole('radiogroup', { name: 'Examples' })).toBeVisible()
   })
 
+  // The thumbnails render real CVs, and several templates put <a> links in
+  // them (project and credential links), so a thumbnail must never sit
+  // inside a link or button.
+  test('the templates page nests no link inside a link and its thumbnails still open the template page', async ({ page }) => {
+    const errors = []
+    page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()) })
+
+    await page.goto('/free-cv-templates')
+    await expect(page.locator('.templates-page-card [data-export-variant]')).toHaveCount(18)
+    await expect(page.locator('.templates-page-card', { hasText: 'Developer' }).locator('.templates-page-card__thumb a').first()).toBeAttached()
+    expect(await page.locator('a a, button a, a button').count()).toBe(0)
+    expect(errors.filter((text) => /cannot contain a nested|cannot be a descendant of/.test(text))).toEqual([])
+
+    await page.locator('.templates-page-card', { hasText: 'Developer' }).locator('.templates-page-card__thumb').click()
+    await expect(page).toHaveURL(/\/free-cv-templates\/developer$/)
+  })
+
   test('every template page renders without console errors', async ({ page }) => {
     const errors = []
     page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()) })

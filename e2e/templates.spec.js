@@ -391,4 +391,21 @@ test.describe('Template gallery example links', () => {
     await page.keyboard.press('Escape')
     await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Minimalist')
   })
+
+  // Thumbnails render real CVs with <a> links in them, so they can't sit
+  // inside the card's select <button>; clicking one still selects.
+  test('no thumbnail sits inside a button or link, and clicking one selects its template', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: /^Select template:/ }).click()
+    const dialog = page.getByRole('dialog', { name: 'Template gallery' })
+    // Wait for every thumbnail's Showcase chunk, and confirm Developer's
+    // really renders links, so the nesting check below can't pass vacuously.
+    await expect(dialog.locator('.template-gallery__thumb [data-export-variant]')).toHaveCount(18)
+    await expect(dialog.locator('.template-gallery__card', { hasText: 'Developer' }).locator('.template-gallery__thumb a').first()).toBeAttached()
+    expect(await dialog.locator('a a, button a, a button').count()).toBe(0)
+
+    await dialog.locator('.template-gallery__card', { hasText: 'Developer' }).locator('.template-gallery__thumb').click()
+    await expect(dialog).toBeHidden()
+    await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Developer')
+  })
 })

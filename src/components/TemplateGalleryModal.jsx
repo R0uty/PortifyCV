@@ -48,30 +48,36 @@ function TemplateGalleryModal({
         {templates.map((template) => {
           const isActive = template.id === selectedTemplateId
 
-          // The card is a container, not one big button, so it can hold a
-          // second control: a link can't be nested inside a <button>.
+          const selectTemplate = () => {
+            onSelectTemplate(template.id)
+            onClose()
+          }
+
+          // The card is a container, not one big button: a <button> can't
+          // contain links, and both the thumbnail (a real CV — several
+          // templates render <a> links in it) and the examples link need
+          // to live in the card.
           return (
             <div
               key={template.id}
               className={`template-gallery__card${isActive ? ' template-gallery__card--active' : ''}`}
             >
+              {/* Clickable, but aria-hidden and out of the tab order: the
+                  select button right below is the accessible control. */}
+              <div className="template-gallery__thumb" aria-hidden="true" onClick={selectTemplate}>
+                <TemplateThumbnail
+                  templateId={template.id}
+                  formData={thumbnailCv}
+                  locale={locale}
+                  fontStack={fontStack}
+                  headingColor={cvHeadingColor}
+                />
+              </div>
               <button
                 type="button"
                 className="template-gallery__select"
-                onClick={() => {
-                  onSelectTemplate(template.id)
-                  onClose()
-                }}
+                onClick={selectTemplate}
               >
-                <div className="template-gallery__thumb">
-                  <TemplateThumbnail
-                    templateId={template.id}
-                    formData={thumbnailCv}
-                    locale={locale}
-                    fontStack={fontStack}
-                    headingColor={cvHeadingColor}
-                  />
-                </div>
                 <div className="template-gallery__meta">
                   {isActive ? (
                     <span className="template-gallery__active-badge">
