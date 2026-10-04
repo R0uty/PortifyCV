@@ -73,17 +73,23 @@ console.log('\ncvFormReducer\n')
 }
 
 {
-  // The toggle negates the raw (possibly absent) map, not the merged default -
-  // so a missing map always lands on `true` regardless of the section's actual
-  // default. Harmless today because every section defaults to visible, but this
-  // pins the current behavior so a future default of `false` doesn't silently
-  // invert without anyone noticing.
+  // The toggle flips a section's *effective* visibility (stored value over
+  // the defaults), so a CV with no visibility map at all — the demo CV, or
+  // any CV loaded wholesale — hides the section on the first toggle. It used
+  // to negate the raw (absent) value, landing on `true`, so the first click
+  // on a section's checkbox did nothing.
   const state = { ...createInitialCvData(), sectionVisibility: undefined }
   const next = cvFormReducer(state, { type: FORM_ACTION.TOGGLE_SECTION_VISIBILITY, section: 'about' })
-  check(
-    'TOGGLE_SECTION_VISIBILITY on a missing map resolves to the (coincidental) default of true',
-    next.sectionVisibility.about === true,
-  )
+  check('TOGGLE_SECTION_VISIBILITY on a missing map hides the section on the first toggle', next.sectionVisibility.about === false)
+  check('TOGGLE_SECTION_VISIBILITY on a missing map keeps other sections visible', next.sectionVisibility.skills === true)
+  const backAgain = cvFormReducer(next, { type: FORM_ACTION.TOGGLE_SECTION_VISIBILITY, section: 'about' })
+  check('TOGGLE_SECTION_VISIBILITY on a missing map is reversible', backAgain.sectionVisibility.about === true)
+
+  // Same for a map that exists but lacks the section's key.
+  const partial = { ...createInitialCvData(), sectionVisibility: { skills: false } }
+  const partialNext = cvFormReducer(partial, { type: FORM_ACTION.TOGGLE_SECTION_VISIBILITY, section: 'about' })
+  check('TOGGLE_SECTION_VISIBILITY on a key missing from the map hides it on the first toggle', partialNext.sectionVisibility.about === false)
+  check('TOGGLE_SECTION_VISIBILITY keeps the map\'s other stored values', partialNext.sectionVisibility.skills === false)
 }
 
 {

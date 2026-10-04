@@ -32,6 +32,22 @@ test.describe('CV editor', () => {
     await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('')
   })
 
+  // The demo CV carries no sectionVisibility map; the first toggle from that
+  // state used to be a no-op, so hiding a section took two clicks.
+  test('one click on a Visible sections toggle hides the section right after Load demo CV', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    const previewSkills = page.locator('.app-shell__preview [data-export-section="skills"]')
+    await expect(previewSkills).toBeVisible()
+
+    await page.getByRole('button', { name: 'Visible sections' }).click()
+    const skillsToggle = page.getByRole('checkbox', { name: 'Skills: On' })
+    await skillsToggle.locator('xpath=..').click()
+
+    await expect(page.getByRole('checkbox', { name: 'Skills: Off' })).not.toBeChecked()
+    await expect(previewSkills).toHaveCount(0)
+  })
+
   // Fit Page must size the zoom from the CV the user actually sees, not
   // from previewRef's off-screen export source — that copy hides empty
   // sections' placeholders and carries .pdf-export-root's PDF-only spacing,

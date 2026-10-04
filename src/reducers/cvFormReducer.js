@@ -195,15 +195,21 @@ export function cvFormReducer(state, action) {
         links: { ...state.links, [action.field]: action.value },
       }
 
-    case FORM_ACTION.TOGGLE_SECTION_VISIBILITY:
+    case FORM_ACTION.TOGGLE_SECTION_VISIBILITY: {
+      // Flip the *effective* value (stored over the defaults; anything but
+      // false is visible), not the raw stored one: a CV loaded without a
+      // visibility map (e.g. the demo CV) would otherwise flip "missing" to
+      // true — already visible — and the first click would do nothing.
+      const sectionVisibility = { ...createSectionVisibility(), ...(state.sectionVisibility ?? {}) }
+
       return {
         ...state,
         sectionVisibility: {
-          ...createSectionVisibility(),
-          ...(state.sectionVisibility ?? {}),
-          [action.section]: !(state.sectionVisibility ?? {})[action.section],
+          ...sectionVisibility,
+          [action.section]: sectionVisibility[action.section] === false,
         },
       }
+    }
 
     case FORM_ACTION.TOGGLE_SECTION_ITEM_VISIBILITY: {
       const normalizedItemKey = String(action.itemKey)

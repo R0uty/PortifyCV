@@ -1063,18 +1063,9 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('button', { name: 'Sections' }).click()
     const skillsCheckbox = page.getByRole('checkbox', { name: 'Skills' })
 
-    // TOGGLE_SECTION_VISIBILITY negates the raw (possibly unset) visibility
-    // map, not the merged default — see scripts/check-reducers.mjs's pinned
-    // "TOGGLE_SECTION_VISIBILITY on a missing map resolves to the
-    // (coincidental) default of true" check. Loading the demo CV replaces
-    // formData wholesale with an object that carries no sectionVisibility
-    // map at all (src/utils/cvForm.js's demoCvData never sets one), so the
-    // very first toggle of any section from that state lands back on
-    // "visible" instead of flipping — documented, intentional reducer
-    // behavior, not a Direct Edit bug. The second click, now against an
-    // explicit map, behaves normally, which is what the rest of this test
-    // actually exercises.
-    await skillsCheckbox.click()
+    // One click, straight after "Load demo CV": the demo CV carries no
+    // sectionVisibility map, and the first toggle from that state used to
+    // be a no-op (the reducer flipped the raw missing value to true).
     await skillsCheckbox.click()
     await expect(skillsCheckbox).not.toBeChecked()
     await expect(page.locator('[data-export-section="skills"]')).toHaveCount(0)
@@ -1836,10 +1827,7 @@ test.describe('Direct Edit nav rail, entry highlight and placeholders', () => {
     await expect(rail.getByRole('button', { name: 'Summary' })).toBeVisible()
 
     await page.getByRole('button', { name: 'Sections', exact: true }).click()
-    // Clicked twice: right after "Load demo CV" the first toggle is a
-    // documented no-op (see the Sections-menu test above).
     const aboutCheckbox = page.locator('.direct-edit-sections__row', { hasText: 'About' }).getByRole('checkbox')
-    await aboutCheckbox.click()
     await aboutCheckbox.click()
     await expect(aboutCheckbox).not.toBeChecked()
 
