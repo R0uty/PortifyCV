@@ -2611,6 +2611,13 @@ select.floating-field__control {
   color: var(--app-text-muted);
 }
 
+.templates-page-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .templates-page-card__cta {
   align-self: flex-start;
   border: 1.5px solid #111111;
@@ -2628,6 +2635,28 @@ select.floating-field__control {
 .templates-page-card__cta:hover {
   background: #111111;
   color: #ffffff;
+}
+
+/* Secondary to "Use this template": same size and type, lighter border. */
+.templates-page-card__examples {
+  border: 1.5px solid var(--app-border-strong);
+  color: #111111;
+  padding: 0.55rem 1.1rem;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color 140ms ease;
+}
+
+.templates-page-card__examples:hover {
+  border-color: #111111;
+}
+
+.templates-page-card__examples:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
 }
 
 /* Per-template page (/free-cv-templates/<slug>). Two columns: copy and

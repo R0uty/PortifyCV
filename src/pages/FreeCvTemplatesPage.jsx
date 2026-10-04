@@ -20,6 +20,7 @@ function getCopy(locale) {
       intro:
         `Kaikki ${TEMPLATE_COUNT} pohjaa ovat täysin ilmaisia, ilman vesileimaa ja ilman tiliä. Vaihda pohjaa milloin tahansa rakentaessasi — sisältösi säilyy, vain asettelu vaihtuu.`,
       useTemplate: 'Käytä tätä pohjaa',
+      viewExamples: 'Katso esimerkit',
       notSureTitle: 'Et ole varma mistä aloittaa?',
       notSureBody:
         'Valitse mikä tahansa pohja — voit vaihtaa toiseen milloin tahansa menettämättä yhtään kirjoittamaasi tekstiä. Jos hait rooliin, jossa hakemus kulkee hakijaseurantajärjestelmän läpi, kytke ATS-ystävällinen tila päälle mistä tahansa pohjasta ennen vientiä.',
@@ -39,6 +40,7 @@ function getCopy(locale) {
     intro:
       `All ${TEMPLATE_COUNT} templates are completely free, with no watermark and no account. Swap templates any time while you build — your content stays, only the layout changes.`,
     useTemplate: 'Use this template',
+    viewExamples: 'View examples',
     notSureTitle: 'Not sure where to start?',
     notSureBody:
       'Pick any template — you can switch to another one at any point without losing a single word you’ve written. If you’re applying somewhere your application goes through an applicant tracking system, switch on ATS-friendly mode from any template before exporting.',
@@ -87,13 +89,25 @@ function FreeCvTemplatesPage({ locale = 'en', onGetStarted = () => {}, onNavigat
                 {template.label}
               </InternalNavLink>
               <p className="templates-page-card__description">{template.description}</p>
-              <button
-                type="button"
-                className="templates-page-card__cta"
-                onClick={() => onGetStarted(template.id)}
-              >
-                {copy.useTemplate}
-              </button>
+              <div className="templates-page-card__actions">
+                <button
+                  type="button"
+                  className="templates-page-card__cta"
+                  onClick={() => onGetStarted(template.id)}
+                >
+                  {copy.useTemplate}
+                </button>
+                {/* Same destination as the thumbnail and name links above,
+                    spelled out: the template's page shows its example CVs. */}
+                <InternalNavLink
+                  to={templatePath(template.slug)}
+                  onNavigate={() => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${template.id}`)}
+                  className="templates-page-card__examples"
+                  aria-label={`${copy.viewExamples}: ${template.label}`}
+                >
+                  {copy.viewExamples}
+                </InternalNavLink>
+              </div>
             </div>
           ))}
         </div>

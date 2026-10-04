@@ -164,6 +164,24 @@ test.describe('Template pages', () => {
     await expect(graduatePreview).not.toContainText(/näky\S* tässä/i)
   })
 
+  test('every card on the templates page has a View examples link to its template page', async ({ page }) => {
+    const { cvTemplates } = await import('../src/utils/cvTemplates.js')
+    await page.goto('/free-cv-templates')
+
+    const links = page.getByRole('link', { name: /^View examples/ })
+    await expect(links).toHaveCount(cvTemplates.length)
+    for (const template of cvTemplates) {
+      await expect(page.getByRole('link', { name: `View examples: ${template.label}` }))
+        .toHaveAttribute('href', `/free-cv-templates/${template.slug}`)
+    }
+
+    // An in-site link: it opens the template page in the same tab.
+    const developer = cvTemplates.find((template) => template.id === 'developer')
+    await page.getByRole('link', { name: `View examples: ${developer.label}` }).click()
+    await expect(page).toHaveURL(new RegExp(`/free-cv-templates/${developer.slug}$`))
+    await expect(page.getByRole('radiogroup', { name: 'Examples' })).toBeVisible()
+  })
+
   test('every template page renders without console errors', async ({ page }) => {
     const errors = []
     page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()) })
