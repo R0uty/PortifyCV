@@ -1980,6 +1980,16 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
+> **Superseded, 2026-10-04.** Everything below describes the `v1.3.0`
+> branch as it stood before its merge. Since then: `v1.3.0` merged into
+> `main` (PR #1, `a66c67e`); `v1.4.0` (the per-template pages) merged into
+> `main` on 2026-10-04 (`5a814e3`); and `v1.5.0` (Phase 2 template polish,
+> version 1.5.0, `changes.md`'s 2026-10-03 entry) is pushed to
+> `origin/v1.5.0` but deliberately **not** merged into `main` yet, at the
+> user's request. The "`main` untouched" note below is out of date. Open
+> work is the Phase 2 follow-ups at the end of this file and item 23
+> (branch protection).
+
 **State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.80**,
 pushed to `origin/v1.3.0` with CI green there (run `git log -1` for the exact
 commit; it is deliberately not recorded here, because every refresh commit

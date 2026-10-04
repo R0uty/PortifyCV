@@ -26,8 +26,10 @@ All 18 templates now render both fields via shared helpers in
 `directEditExperienceEntry.jsx`, in both normal and ATS view, and in PDF
 exports. A related export-only bug is also fixed: a visible-but-empty
 section's "… will appear here" builder placeholder text used to reach the
-exported PDF verbatim; the export clone now prunes any
-`[data-export-section]` node whose form data has no real content.
+exported PDF verbatim; PDF export now renders from a separate, off-screen
+copy of the CV with empty sections hidden, so the placeholder never
+reaches it (and templates that number their sections, Creative and
+Editorial, number only the sections the PDF actually contains).
 
 **Other fixes:** sidebar link values that used to truncate with an
 ellipsis (or, on Quadrant, clip with no ellipsis at all) now wrap via a
@@ -49,9 +51,11 @@ wrapped body text, not whitespace), plus a rhythm trim within `compact`;
 Classic Professional got a smaller rhythm trim within its existing
 `roomy` class for the same reason. Net effect on PDF page counts
 (`EXPECTED_PDF_PAGES`, `e2e/template-pdf.spec.js`): Executive 2→3→2,
-Tech Executive 1→2, Classic Professional 1→2, Quadrant 1→2 (all from the
-content fix), Portfolio 3→2 (from the density fix) — a deliberate,
-recorded net change, not a regression.
+Classic Professional 1→2 (from the content fix), Portfolio 3→2 (from
+the density fix), and Tech Executive and Quadrant back at 1 (the content
+fix pushed each to 2; a final rhythm trim brought their featured examples
+back under one page) — a deliberate, recorded net change, not a
+regression.
 
 **Test suite:** the new specs roughly doubled e2e run time (523 tests,
 ~2.5 min, up from ~1.1 min pre-Phase-2), so CI now splits the suite:

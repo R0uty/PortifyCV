@@ -92,9 +92,9 @@ invalidates.
 
 All 18 templates now export with an exact, deterministic page-count guard
 (`EXPECTED_PDF_PAGES` in `e2e/template-pdf.spec.js`) — that work is closed,
-not part of this doc's fix list. The one PDF-related item still open is the
-**placeholder-text-in-export** finding (controller finding 1, below), which
-no committed test catches yet.
+not part of this doc's fix list. The other PDF-related item, the
+**placeholder-text-in-export** finding (controller finding 1, F12 below),
+is fixed too and guarded by `e2e/template-pdf-placeholder.spec.js`.
 
 ---
 
@@ -655,6 +655,27 @@ stress fixture into the builder and asserts the export sandbox's clone DOM
 "näkyvät tässä", for minimal/modern/graduate × Classic/Direct Edit (6
 cases). Confirmed RED by temporarily disabling the prune call — the clone
 carried the placeholder text — then GREEN once restored.
+
+**Superseded by the final fix wave's I-1.** Pruning the clone after render
+was the wrong layer: the CV had already been laid out with the empty
+sections in it, so Creative's and Editorial's running section numbers kept
+their gaps ("01, 02, 04…") and Creative's About lost its `coreStrengths`
+pills whenever About's own text was blank. I-1 moved the filtering before
+render instead. Both builder modes now point `previewRef` at a dedicated
+off-screen, inert, read-only `CVPreview` rendered from
+`hideEmptySections(formData)` (Classic mode's in `ResumeBuilderPage.jsx`,
+Direct Edit's in `DirectEditPreview.jsx`), so the export source never
+contains an empty section at all. `pruneEmptySectionsFromClone` and
+`createExportSandbox()`'s `formData` parameter were removed as dead code.
+This also makes the per-mode description above historical: Classic's
+visible preview is no longer the export source, and `hideEmptySections()`
+is no longer used only by `TemplateDetailPage.jsx`. Both modes' visible
+previews still render raw `formData`, placeholders included, as an editing
+affordance. `e2e/template-pdf-placeholder.spec.js` still guards the
+finding by inspecting the clone `html2canvas` rasterizes. Since I-1 it
+also covers every template across both builder modes, consecutive section
+numbering with an empty middle section, a visible section whose items are
+all hidden, and Creative's About pills with empty About text.
 
 G9 total: **4 fix items (F9, F10, F11, F12), 6 allowlist entries, 18
 templates** (F12 is app-wide; F9/F10/F11 are template-specific — see table
