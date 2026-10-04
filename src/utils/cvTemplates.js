@@ -1,8 +1,13 @@
 export const defaultTemplateId = 'minimal'
 
+// `slug` is each template's public page URL (/free-cv-templates/<slug>,
+// see routes.js templatePath). Slugs are permanent once shipped: renaming
+// one breaks every link and search result pointing at it. If a template is
+// retired, map its slug to the surviving template instead of deleting it.
 const templateMap = {
   minimal: {
     id: 'minimal',
+    slug: 'minimalist',
     // Wiring a new template's accent is a 3-step opt-in — see docs/template-design-system.md §6.
     // `accent.default` must be the lowercase hex of that template's
     // `*_DEFAULT_ACCENT_COLOR` constant in `src/components/templates/<id>.js`
@@ -28,6 +33,7 @@ const templateMap = {
   },
   developer: {
     id: 'developer',
+    slug: 'developer',
     // Opts out of the Settings accent swatch (§6): the fixed teal→blue→purple
     // cool-spectrum gradient is the template's concept, like Colorful Compact's
     // capped rainbow — not a single configurable hue.
@@ -52,6 +58,7 @@ const templateMap = {
   },
   creative: {
     id: 'creative',
+    slug: 'creative',
     accent: { default: '#e2572a', swatchSet: 'warmCoral' },
     label: 'Creative',
     description: 'Editorial two-column layout with numbered section headings, a full-width header, and a single customizable accent color. Suits any creative profession.',
@@ -73,6 +80,7 @@ const templateMap = {
   },
   modern: {
     id: 'modern',
+    slug: 'modern-professional',
     accent: null,
     label: 'Modern Professional',
     description: 'Consulting-style layout with a rose timeline and circular photo — built for a clear, step-by-step career story.',
@@ -94,6 +102,7 @@ const templateMap = {
   },
   executive: {
     id: 'executive',
+    slug: 'executive',
     accent: { default: '#b45309', swatchSet: 'warmGold' },
     label: 'Executive',
     description: 'Restrained boardroom layout with one customizable accent and no timeline — suits a CV that leads with outcomes over a chronological story.',
@@ -115,6 +124,7 @@ const templateMap = {
   },
   timeline: {
     id: 'timeline',
+    slug: 'modern-timeline',
     accent: { default: '#6d28d9', swatchSet: 'cool' },
     label: 'Modern Timeline',
     description: 'Single-column layout with a clean vertical timeline for your career story and a customizable accent color — restrained, modern, and suited to almost any profession.',
@@ -135,6 +145,7 @@ const templateMap = {
   },
   graduate: {
     id: 'graduate',
+    slug: 'graduate',
     accent: { default: '#4f46e5', swatchSet: 'coolIndigo' },
     label: 'Graduate',
     description: 'An education-first layout that leads with your degree, academic projects, and internships, with a customizable accent color — a strong fit when those are the strongest part of your story.',
@@ -156,6 +167,7 @@ const templateMap = {
   },
   compact: {
     id: 'compact',
+    slug: 'compact',
     accent: { default: '#0284c7', swatchSet: 'coolBlue' },
     label: 'Compact',
     description: 'A tight single-column one-pager with a customizable accent that shrinks its own spacing until everything fits one page — built for a long, detailed history.',
@@ -176,6 +188,7 @@ const templateMap = {
   },
   portfolio: {
     id: 'portfolio',
+    slug: 'portfolio-hybrid',
     accent: { default: '#047857', swatchSet: 'forestGreen' },
     label: 'Portfolio Hybrid',
     description: 'Featured project cards, case studies, and tech-stack badges — a strong fit when your work speaks for itself through projects.',
@@ -197,6 +210,7 @@ const templateMap = {
   },
   techExec: {
     id: 'techExec',
+    slug: 'tech-executive',
     accent: { default: '#2563eb', swatchSet: 'royalBlue' },
     label: 'Tech Executive',
     description: 'An annual-report layout — a deep-navy masthead and footer band around a two-column body, with a core-strengths sidebar and a customizable accent. Built for leadership-style narratives.',
@@ -218,6 +232,7 @@ const templateMap = {
   },
   classicProfessional: {
     id: 'classicProfessional',
+    slug: 'classic-professional',
     accent: null,
     label: 'Classic Professional',
     description: 'Traditional single-column layout with thin dividers and a serif name you can centre or left-align — a universally safe choice for any industry.',
@@ -238,6 +253,7 @@ const templateMap = {
   },
   navyProfessional: {
     id: 'navyProfessional',
+    slug: 'navy-professional',
     accent: null,
     label: 'Navy Professional',
     description: 'Modern two-column layout with a dark navy sidebar and blue accents — professional and ATS-friendly.',
@@ -259,6 +275,7 @@ const templateMap = {
   },
   modernOrange: {
     id: 'modernOrange',
+    slug: 'modern-orange',
     accent: { default: '#f28c00', swatchSet: 'warm' },
     label: 'Modern Orange',
     description: 'Premium two-column layout with a warm cream sidebar, orange accents, dot-rated skills, and timelines for education and experience — suits almost any profession.',
@@ -280,6 +297,7 @@ const templateMap = {
   },
   colorfulCompact: {
     id: 'colorfulCompact',
+    slug: 'colorful-compact',
     accent: null,
     label: 'Colorful Compact',
     description: 'Dark editorial header over a tight two-column body, with every section — Skills, Experience, Projects, Languages — in its own rainbow accent color. Suits any creative or product profile.',
@@ -301,6 +319,7 @@ const templateMap = {
   },
   quadrant: {
     id: 'quadrant',
+    slug: 'quadrant',
     accent: { default: '#0e7490', swatchSet: 'coolCyan' },
     label: 'Quadrant',
     description: 'A literal 2x2 grid — identity, summary and skills, work history, and everything else split into four scannable quarters, with a single customizable accent. A strong fit if you want your CV to read at a glance rather than top to bottom.',
@@ -321,6 +340,7 @@ const templateMap = {
   },
   editorial: {
     id: 'editorial',
+    slug: 'editorial',
     accent: { default: '#9f1239', swatchSet: 'inkCrimson' },
     label: 'Editorial',
     description: 'A magazine-style single column — an oversized byline name, numbered sections, and a wide reading measure. No sidebar, no clutter.',
@@ -341,6 +361,7 @@ const templateMap = {
   },
   portrait: {
     id: 'portrait',
+    slug: 'portrait',
     accent: { default: '#0f766e', swatchSet: 'quietTeal' },
     label: 'Portrait',
     description: 'A full-height photo fills the left column; identity and every section flow on the right, with one customizable accent. The photo is the structure, not an accent — the strongest fit if you want your face to lead.',
@@ -361,6 +382,7 @@ const templateMap = {
   },
   european: {
     id: 'european',
+    slug: 'european',
     accent: { default: '#1d4ed8', swatchSet: 'civicBlue' },
     label: 'European',
     description: 'A Europass-adjacent, genuinely minimal one-page format — every section reads as a label/value table (dates, categories, link types) instead of flowing prose, with one customizable accent. Auto-fits one page.',
@@ -530,6 +552,10 @@ export function getCvTemplate(templateId, locale = 'en') {
 
 export function isValidTemplateId(templateId) {
   return typeof templateId === 'string' && Object.hasOwn(templateMap, templateId)
+}
+
+export function getTemplateSlug(templateId) {
+  return templateMap[templateId]?.slug ?? null
 }
 
 // A template's accent-color config: `{ default, swatchSet }` for templates

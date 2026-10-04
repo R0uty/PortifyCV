@@ -84,6 +84,9 @@ npm run check:section-schema
 # Verify the section column-move rules (no browser needed)
 npm run check:section-columns
 
+# Verify the per-template page slugs, examples, and copy (no browser needed)
+npm run check:template-pages
+
 # Run the end-to-end smoke suite against a production build
 npm run test:e2e
 ```
@@ -106,9 +109,19 @@ experience entry's description and achievement bullets.
 (`src/utils/docxExport.js`), `check:section-schema` validates the Direct Edit
 popup's section schema (`src/utils/sectionSchema.js`), and
 `check:section-columns` covers which sections may move between the main
-column and the sidebar, and how imports validate that. All six scripts are
-framework-free Node harnesses, no test runner required; CI runs them all on
-every push and pull request.
+column and the sidebar, and how imports validate that.
+
+`check:template-pages` validates the per-template pages
+(`/free-cv-templates/<slug>`): every template has a unique kebab-case slug
+and 2–3 examples, every example loads and round-trips through
+`parseImportedCvData` in both locales with a fictional `@example.com`
+email, every example fills every primary section of each template it's
+listed under, every template has a 3-tip, bilingual `templatePageCopy`
+entry and a 50–160 character English `metaDescription` (in the separate
+`templateMetaDescriptions.js`), and every slug appears in
+`public/sitemap.xml`. All seven scripts are framework-free Node
+harnesses, no test runner required; CI runs them all on every push and
+pull request.
 
 `test:e2e` runs the Playwright suite in `e2e/` (landing page, live preview,
 template-gated sections, the Export menu) against `npm run build` +
@@ -248,6 +261,10 @@ for the history and the remaining dashboard-side steps.
 - `/cv` — opens the builder directly
 - `/about` — about + contact
 - `/privacy` — privacy policy
+- `/free-cv-templates/<slug>` — a public page per template (18 slugs,
+  e.g. `/free-cv-templates/developer`), showing it filled with 2–3
+  switchable example CVs and a link into the builder with that template
+  and example preloaded
 - guide/content pages (`/free-cv-templates`, `/how-to-write-a-cv`, `/cv-examples`, …) — see `src/utils/routes.js` for the full list
 - `#data=<payload>` — restores a CV from a share link (works on any route)
 

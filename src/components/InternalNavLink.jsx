@@ -2,9 +2,10 @@
 // work), but its click is intercepted for an in-app SPA transition via
 // App.jsx's goToView/goToBuilder instead of a full page reload — same
 // pattern as the footer's guide links and the privacy page's logo link.
-function InternalNavLink({ to, onNavigate, className, children }) {
+function InternalNavLink({ to, onNavigate, className, children, ...rest }) {
   return (
     <a
+      {...rest}
       href={to}
       className={className}
       onClick={(event) => {

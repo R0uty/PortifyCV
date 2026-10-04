@@ -4,6 +4,79 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template pages fix wave — 2026-10-02
+
+Fixes from the final whole-branch review of the `v1.4.0` template pages,
+before the PR into `main`. "Start blank with this template" now opens
+`/cv?template=<id>&blank=1`, a new branch in `loadInitialCvSession`
+(after the share-link and session-snapshot branches) that returns a
+blank CV with no onboarding-demo toast, instead of falling into the
+first-time-visitor demo branch; the `blank` param is stripped from the
+URL on mount the same way `example` is. When a session snapshot is
+restored and the URL also carries a valid `?example=` for the selected
+template, the init toast now says "Kept your restored CV. Use 'Load demo
+CV' to start over." instead of the generic restore toast, so the visitor
+knows why the example link didn't take over. On `TemplateDetailPage`, the
+preview shows a same-sized loading placeholder (with `aria-busy` on the
+preview container) while an example is in flight, including on first
+paint — the demo CV only ever shows once a load has resolved to null
+(missing/failed example). The builder now shows an error toast
+("Couldn't load that example." / fi) when a `?example=` link resolves
+null instead of silently staying blank. Accessibility: the preview gets a
+visually hidden caption ("Preview: <role> example in the <Label>
+template" / fi), and the pager's `<nav aria-label>` is now "Template
+navigation" / "Pohjien selaus" instead of duplicating the "All templates"
+link text.
+
+## Template pages — 2026-10-02
+
+Closes out the `v1.4.0` branch for its pull request into `main`. Each of
+the 18 templates now has its own public page at
+`/free-cv-templates/<slug>` (slugs are permanent once shipped): the
+template rendered full-size with 2–3 switchable example CVs, per-template
+copy (who it suits, three layout tips, an English `metaDescription`), the
+breadcrumb structured data the worker now attaches to every template
+page, and a "Use this example" link that opens the builder with that template
+and example preloaded. 24 fictional example people (`src/utils/examples/`,
+registered in `exampleCvs.js`) cover the 18 templates' 2–3 example slots,
+shared across templates where the fit is real; each person fills every
+`primarySections` entry of every template listing them, in both locales,
+so no template page ever shows an empty-section placeholder — the
+preview-only `src/utils/sectionContent.js` hides what has no content
+instead. A new `npm run check:template-pages` (the seventh `check:*`
+script, now in CI) enforces slugs, example coverage, section fill, and
+copy bounds; `e2e/template-pages.spec.js` covers the page itself.
+
+Verification on this commit: lint clean, all seven `check:*` scripts pass,
+196/196 e2e pass against a production build. Manual worker check
+(`npm run build` + `npm run worker:dev`) confirmed `/free-cv-templates/developer`
+serves the Developer title, a canonical link ending
+`/free-cv-templates/developer`, and the BreadcrumbList JSON-LD; an unknown
+slug (`/free-cv-templates/not-a-template`) returns a real `404`; and a
+case/trailing-slash variant (`/free-cv-templates/Developer/`) redirects
+`301` to the canonical slug.
+
+Bundle check: a first pass found the entry chunk had grown from 35.17 kB
+gzip (`v1.3.0`, built from `origin/v1.3.0` in a scratch worktree) to 45.06
+kB gzip — about 9.9 kB — because `pageMeta.js`'s `VIEW_HEAD` imported
+`templatePageCopy.js` for `metaDescription` alone, dragging every
+template's bilingual `bestFor`/tips copy into the entry graph along with
+it. Fixed by splitting the English-only `metaDescription` strings out
+into their own `src/utils/templateMetaDescriptions.js`
+(`{ [templateId]: string }`), which `pageMeta.js` now imports instead;
+`templatePageCopy.js` keeps only the bilingual `bestFor`/tips and is read
+solely by the lazy-loaded `TemplateDetailPage.jsx`. Re-measured: the entry
+chunk is now **36.46 kB gzip**, +1.29 kB over the `v1.3.0` baseline — under
+the ~2 KB target. Each example CV is still its own small lazy chunk
+(verified via `ls dist/assets`).
+
+Four visual issues were observed in example previews during this work
+and deliberately left for Phase 2 template polish rather than fixed here
+(sidebar link truncation, a long name wrapping to four lines in Navy
+Professional, long previews running to 2+ A4 pages, Modern Orange
+clipping long skill names) — see "Phase 2 inputs" in `todo.md` for the
+full list and which templates/examples triggered each one.
+
 ## 1.3.0 release — 2026-10-01
 
 Closes out the `v1.3.0` branch for its pull request into `main`. The

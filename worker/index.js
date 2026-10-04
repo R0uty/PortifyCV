@@ -17,7 +17,7 @@
 //   4. returns a real 404 (with noindex) for paths that aren't a known
 //      route, instead of the soft-404 the SPA fallback produced (200,
 //      indexable, homepage content, for literally any typo'd URL).
-import { VIEW_HEAD, SITE_ORIGIN, buildArticleSchema } from '../src/utils/pageMeta.js'
+import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema } from '../src/utils/pageMeta.js'
 
 const PATH_TO_HEAD = new Map(Object.values(VIEW_HEAD).map((head) => [head.path, head]))
 
@@ -81,11 +81,11 @@ function rewriteForRoute(response, head, canonicalUrl) {
     rewriter.on('#ld-faq', new RemoveElement())
   }
 
-  if (head.isArticle) {
-    const schema = JSON.stringify(buildArticleSchema(head))
+  const schema = buildViewSchema(head)
+  if (schema) {
     rewriter.on(
       'head',
-      new AppendToHead(`<script type="application/ld+json" id="view-structured-data">${schema}</script>`),
+      new AppendToHead(`<script type="application/ld+json" id="view-structured-data">${JSON.stringify(schema)}</script>`),
     )
   }
 

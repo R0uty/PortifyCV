@@ -2,9 +2,10 @@ name: CI
 
 on:
   push:
-    # v1.3.0 is the long-lived Direct Edit branch; it pushes directly rather
-    # than through a PR, so without this its commits never ran CI at all.
-    branches: [main, v1.3.0]
+    # v1.4.0 is the long-lived template-pages branch; it pushes directly
+    # rather than through a PR, so without this its commits never ran CI at
+    # all.
+    branches: [main, v1.4.0]
   pull_request:
 
 jobs:
@@ -45,6 +46,9 @@ jobs:
 
       - name: Section column-move rules checks
         run: npm run check:section-columns
+
+      - name: Template page checks
+        run: npm run check:template-pages
 
   e2e:
     name: End-to-end smoke tests

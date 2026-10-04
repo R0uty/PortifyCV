@@ -15,6 +15,25 @@ const PLACEHOLDER_PROFILE_PHOTO = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgA
 // demo CV below carries a placeholder photo.
 const PHOTO_FREE_TEMPLATE_IDS = ['minimal', 'classicProfessional']
 
+// Fills the profile-photo slot with the neutral silhouette, so a
+// photo-capable template doesn't render an empty gap in a marketing
+// preview. Text-only templates keep the photo hidden. Only for
+// previews of sample CVs, never for a user's own CV or the builder.
+export function withPlaceholderPhoto(cv) {
+  if (cv.photo) {
+    return cv
+  }
+
+  return {
+    ...cv,
+    photo: PLACEHOLDER_PROFILE_PHOTO,
+    photoVisibilityByTemplate: {
+      ...cv.photoVisibilityByTemplate,
+      ...Object.fromEntries(PHOTO_FREE_TEMPLATE_IDS.map((id) => [id, false])),
+    },
+  }
+}
+
 // Each thumbnail renders a real CVPreview (see components/TemplateThumbnail.jsx),
 // so the card shows the layout the user is actually choosing rather than an
 // abstract skeleton. A full preview would be needlessly heavy, so the CV is
@@ -47,22 +66,10 @@ export function buildThumbnailCv(formData) {
   const source = usingDemo ? demoCvData : formData
   const take = (value, count) => (Array.isArray(value) ? value.slice(0, count) : [])
 
-  // Fill the profile-photo slot for the demo-CV fallback only, so photo-capable
-  // templates preview with a portrait instead of an empty gap. A real
-  // in-progress CV keeps whatever photo (or none) the user actually set.
-  const photoFallback = usingDemo && !source.photo
-    ? {
-      photo: PLACEHOLDER_PROFILE_PHOTO,
-      photoVisibilityByTemplate: {
-        ...source.photoVisibilityByTemplate,
-        ...Object.fromEntries(PHOTO_FREE_TEMPLATE_IDS.map((id) => [id, false])),
-      },
-    }
-    : null
+  const withPhoto = usingDemo ? withPlaceholderPhoto(source) : source
 
   return {
-    ...source,
-    ...photoFallback,
+    ...withPhoto,
     about: (source.about ?? '').slice(0, THUMBNAIL_ABOUT_LENGTH),
     experience: take(source.experience, THUMBNAIL_EXPERIENCE_COUNT),
     education: take(source.education, THUMBNAIL_EDUCATION_COUNT),

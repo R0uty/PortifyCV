@@ -1,7 +1,7 @@
 {
   "name": "portifycv",
   "private": true,
-  "version": "1.3.0",
+  "version": "1.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "check:docx-export": "node scripts/check-docx-export.mjs",
     "check:section-schema": "node scripts/check-section-schema.mjs",
     "check:section-columns": "node scripts/check-section-columns.mjs",
+    "check:template-pages": "node scripts/check-template-pages.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "worker:dev": "wrangler dev",

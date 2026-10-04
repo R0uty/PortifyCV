@@ -2548,14 +2548,27 @@ select.floating-field__control {
 }
 
 .templates-page-card__thumb {
+  display: block;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
 }
 
 .templates-page-card__name {
+  display: inline-block;
   font-size: var(--text-body);
   font-weight: 700;
   color: var(--app-text);
+  text-decoration: none;
+}
+
+.templates-page-card__name:hover,
+.templates-page-card__name:focus-visible {
+  text-decoration: underline;
+}
+
+.templates-page-card__name:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
 }
 
 .templates-page-card__description {
@@ -2582,6 +2595,151 @@ select.floating-field__control {
 .templates-page-card__cta:hover {
   background: #111111;
   color: #ffffff;
+}
+
+/* Per-template page (/free-cv-templates/<slug>). Two columns: copy and
+   actions on the left, a live scaled preview on the right. Stacks under
+   1024px, the same breakpoint as the landing hero.
+
+   .landing-page (the shared shell) is a column flexbox with
+   align-items: center, so a direct child with no explicit width shrinks to
+   its own content and gets centered instead of left-aligned — harmless for
+   .landing-section elsewhere, which always sets its own width, but it threw
+   the breadcrumb (short text, so it visibly drifted to the middle) out of
+   line with the grid below it. Stretch every direct child of .template-page
+   to the full row width instead, so this and the Task 5 pager both align
+   to the same left edge as the grid's own content. */
+.template-page > * {
+  align-self: stretch;
+}
+
+.template-page__breadcrumb {
+  font-size: var(--text-caption);
+  color: var(--app-text-muted);
+  margin-bottom: var(--space-6);
+}
+
+.template-page__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: var(--space-10);
+  align-items: start;
+}
+
+.template-page__info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.template-page__best-for {
+  font-size: var(--text-body-sm);
+  line-height: 1.6;
+  color: var(--app-text);
+}
+
+.template-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.template-page__preview-placeholder {
+  aspect-ratio: 1 / 1.414;
+  background: #ffffff;
+  border: 1px solid var(--app-border);
+}
+
+.scaled-preview {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.scaled-preview__page {
+  width: 780px;
+  transform-origin: top left;
+  pointer-events: none;
+  user-select: none;
+}
+
+@media (max-width: 1023px) {
+  .template-page__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.template-page__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.template-page__facts li {
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  font-size: var(--text-caption);
+  color: var(--app-text-muted);
+}
+
+.template-page__examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.template-page__example input,
+.template-page__ats-toggle input {
+  accent-color: #111111;
+}
+
+.template-page__example {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border: 1.5px solid var(--app-border);
+  padding: 0.4rem 0.8rem;
+  font-size: var(--text-body-sm);
+  cursor: pointer;
+}
+
+.template-page__example:has(input:checked) {
+  border-color: #111111;
+}
+
+.template-page__example:has(input:focus-visible) {
+  outline: 2px solid #111111;
+  outline-offset: 2px;
+}
+
+.template-page__ats-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-body-sm);
+}
+
+.template-page__tips {
+  display: grid;
+  gap: var(--space-3);
+  padding-left: 1.2rem;
+  line-height: 1.6;
+}
+
+.template-page__pager {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: var(--space-8) 0;
+  font-size: var(--text-body-sm);
 }
 
 .templates-page-links {

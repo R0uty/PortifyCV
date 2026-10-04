@@ -19,3 +19,10 @@ export const ROUTES = {
   cybersecurityCv: '/cybersecurity-cv-examples',
   finnishCv: '/finnish-cv-examples',
 }
+
+// Per-template pages (one per cvTemplates entry, keyed by its permanent
+// slug). Not in ROUTES because the list is generated from the template
+// registry. See pageMeta.js for the matching VIEW_HEAD entries.
+export function templatePath(slug) {
+  return `${ROUTES.freeTemplates}/${slug}`
+}

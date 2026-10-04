@@ -10,7 +10,7 @@ import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
 import { safeStorageGet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
 import { ROUTES } from './utils/routes'
-import { VIEW_HEAD, SITE_ORIGIN, buildArticleSchema } from './utils/pageMeta'
+import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema, TEMPLATE_VIEW_PREFIX } from './utils/pageMeta'
 import { APP_VERSION } from './utils/appVersion'
 
 const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
@@ -26,6 +26,7 @@ const DeveloperCvExamplesPage = lazy(() => import('./pages/DeveloperCvExamplesPa
 const ItCvExamplesPage = lazy(() => import('./pages/ItCvExamplesPage'))
 const CybersecurityCvExamplesPage = lazy(() => import('./pages/CybersecurityCvExamplesPage'))
 const FinnishCvExamplesPage = lazy(() => import('./pages/FinnishCvExamplesPage'))
+const TemplateDetailPage = lazy(() => import('./pages/TemplateDetailPage'))
 
 function NotFoundView({ locale, onNavigateToView }) {
   const isFinnish = locale === 'fi'
@@ -135,11 +136,12 @@ function useDocumentHead(view) {
     setMetaContent('meta[name="twitter:description"]', head.description)
 
     const existingScript = document.getElementById(VIEW_STRUCTURED_DATA_SCRIPT_ID)
-    if (head.isArticle) {
+    const schema = buildViewSchema(head)
+    if (schema) {
       const script = existingScript ?? document.createElement('script')
       script.type = 'application/ld+json'
       script.id = VIEW_STRUCTURED_DATA_SCRIPT_ID
-      script.textContent = JSON.stringify(buildArticleSchema(head))
+      script.textContent = JSON.stringify(schema)
       if (!existingScript) {
         document.head.appendChild(script)
       }
@@ -334,14 +336,23 @@ function App() {
   // templateId is optional — passed when a link should open the builder with
   // a specific template already selected (e.g. "Use this template" on the
   // Free CV Templates page) instead of always landing on the default.
-  // uiReducer's createInitialUiState reads it back off the URL on mount.
-  const goToBuilder = useCallback((templateId) => {
+  // exampleId is also optional — passed by a template page's "Use this
+  // example" button so the builder loads that example's CV instead of the
+  // blank/demo default. uiReducer's createInitialUiState reads templateId
+  // back off the URL on mount; ResumeBuilderPage reads exampleId.
+  // options.blank is set by a template page's "Start blank with this
+  // template" button: it must NOT fall into the onboarding-demo branch of
+  // loadInitialCvSession just because this is a first-time visitor — the
+  // visitor explicitly asked for blank, not a demo.
+  const goToBuilder = useCallback((templateId, exampleId, options = {}) => {
     setView('builder')
 
     if (typeof window !== 'undefined') {
-      const query = typeof templateId === 'string' && templateId
-        ? `?template=${encodeURIComponent(templateId)}`
-        : ''
+      const params = new URLSearchParams()
+      if (typeof templateId === 'string' && templateId) params.set('template', templateId)
+      if (typeof exampleId === 'string' && exampleId) params.set('example', exampleId)
+      if (options.blank) params.set('blank', '1')
+      const query = params.toString() ? `?${params}` : ''
       const nextPath = `${VIEW_HEAD.builder.path}${query}`
 
       if (`${window.location.pathname}${window.location.search}` !== nextPath) {
@@ -380,7 +391,8 @@ function App() {
   }, [])
 
   if (view !== 'builder') {
-    const PageComponent = STATIC_PAGES[view] ?? LandingPage
+    const templatePageId = view.startsWith(TEMPLATE_VIEW_PREFIX) ? VIEW_HEAD[view]?.templateId : null
+    const PageComponent = templatePageId ? TemplateDetailPage : (STATIC_PAGES[view] ?? LandingPage)
 
     return (
       <div className="one-pager">
@@ -424,7 +436,13 @@ function App() {
         </header>
 
         <Suspense fallback={null}>
-          <PageComponent locale={locale} onGetStarted={goToBuilder} onNavigateToView={goToView} />
+          <PageComponent
+            key={view}
+            locale={locale}
+            templateId={templatePageId ?? undefined}
+            onGetStarted={goToBuilder}
+            onNavigateToView={goToView}
+          />
         </Suspense>
 
         <SiteFooter locale={locale} onNavigate={goToView} />
