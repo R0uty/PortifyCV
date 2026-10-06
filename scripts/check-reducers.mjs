@@ -133,6 +133,28 @@ console.log('\ncvFormReducer\n')
   const state = {
     ...createInitialCvData(),
     skills: ['Figma', 'Research', 'Writing'],
+    sectionItemVisibility: { ...createSectionItemVisibility(), skills: { 2: false } },
+  }
+  const renamed = cvFormReducer(state, { type: FORM_ACTION.UPDATE_SKILL, index: 1, skill: '  User Research  ' })
+  check('UPDATE_SKILL replaces the named skill, trimmed', renamed.skills.join('|') === 'Figma|User Research|Writing')
+  check('UPDATE_SKILL keeps item visibility (same index)', renamed.sectionItemVisibility.skills['2'] === false)
+  const recased = cvFormReducer(state, { type: FORM_ACTION.UPDATE_SKILL, index: 0, skill: 'FIGMA' })
+  check('UPDATE_SKILL allows changing only a skill\'s own case', recased.skills[0] === 'FIGMA')
+  const dupe = cvFormReducer(state, { type: FORM_ACTION.UPDATE_SKILL, index: 1, skill: 'writing' })
+  check('UPDATE_SKILL refuses a duplicate of another skill, case-insensitively', dupe === state)
+  const emptied = cvFormReducer(state, { type: FORM_ACTION.UPDATE_SKILL, index: 0, skill: '   ' })
+  check('UPDATE_SKILL to an empty skill removes it', emptied.skills.join('|') === 'Research|Writing')
+  check('UPDATE_SKILL removal shifts visibility like REMOVE_SKILL', emptied.sectionItemVisibility.skills['1'] === false)
+  const unchanged = cvFormReducer(state, { type: FORM_ACTION.UPDATE_SKILL, index: 1, skill: 'Research' })
+  check('UPDATE_SKILL with the same text returns the same state', unchanged === state)
+  const outOfRange = cvFormReducer(state, { type: FORM_ACTION.UPDATE_SKILL, index: 9, skill: 'X' })
+  check('UPDATE_SKILL ignores an out-of-range index', outOfRange === state)
+}
+
+{
+  const state = {
+    ...createInitialCvData(),
+    skills: ['Figma', 'Research', 'Writing'],
     sectionItemVisibility: { ...createSectionItemVisibility(), skills: { 1: false, 2: false } },
   }
   const next = cvFormReducer(state, { type: FORM_ACTION.REMOVE_SKILL, index: 0 })

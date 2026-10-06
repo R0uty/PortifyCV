@@ -218,8 +218,20 @@
 }
 
 .direct-edit-popup__skill-text {
+  flex: 1 1 auto;
   margin-right: auto;
   overflow-wrap: anywhere;
+}
+
+/* The row's skill is an always-editable input (InlineTagEditor). */
+.direct-edit-popup__skill-text .inline-tag-editor__input {
+  width: 100%;
+  border-bottom-color: transparent;
+}
+
+.direct-edit-popup__skill-text .inline-tag-editor__input:hover,
+.direct-edit-popup__skill-text .inline-tag-editor__input:focus {
+  border-bottom-color: currentColor;
 }
 
 .direct-edit-popup__skill button {

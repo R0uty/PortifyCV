@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { SECTION_SHAPE, getSectionSchema, getColumnNeighbourSection } from '../utils/sectionSchema'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
+import InlineTagEditor from './fields/InlineTagEditor'
 import { isPhotoVisibleForTemplate, normalizeSectionOrder } from '../utils/cvForm'
 import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/profilePhoto'
 import { canMoveSection, getSectionColumn, setSectionColumn } from '../utils/sectionColumns'
@@ -547,7 +548,24 @@ export default function SectionEditorPopup({
       <>
         {items.map((skill, index) => (
           <div key={`${skill}-${index}`} className="direct-edit-popup__skill">
-            <span className="direct-edit-popup__skill-text">{skill}</span>
+            {/* Editable in place: Enter or clicking away saves, Escape
+                reverts. Same rules as adding (no duplicates); emptying it
+                removes the skill (UPDATE_SKILL). */}
+            <InlineTagEditor
+              value={skill}
+              persistent
+              autoFocus={false}
+              className="direct-edit-popup__skill-text"
+              ariaLabel={isFinnish ? `Taito ${index + 1}` : `Skill ${index + 1}`}
+              duplicateMessage={isFinnish ? 'Tämä taito on jo listalla.' : 'That skill is already listed.'}
+              onCommit={(text) => {
+                if (text && items.some((other, otherIndex) => otherIndex !== index && other.toLowerCase() === text.toLowerCase())) {
+                  return false
+                }
+                dispatchFormData({ type: FORM_ACTION.UPDATE_SKILL, index, skill: text })
+                return true
+              }}
+            />
             <button
               type="button"
               onClick={() => dispatchFormData({ type: FORM_ACTION.MOVE_SKILL, index, direction: -1 })}

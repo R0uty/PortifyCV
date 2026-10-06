@@ -403,6 +403,60 @@ select.floating-field__control {
   background: var(--accent-soft-strong);
 }
 
+/* A tag's text is a button that opens InlineTagEditor in place. */
+.tags-input__label {
+  border: none;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: text;
+}
+
+.tags-input__label:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* Shared inline editor for one tag/skill (fields/InlineTagEditor.jsx), used
+   in Classic's tags, Direct Edit's skill chips and the Skills popup. The
+   input inherits the surrounding chip's font and colour, so editing a tag
+   looks like the tag itself became editable. */
+.inline-tag-editor {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.inline-tag-editor__input {
+  min-width: 3ch;
+  max-width: 100%;
+  border: none;
+  border-bottom: 1px solid currentColor;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.inline-tag-editor__input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.inline-tag-editor__input[aria-invalid='true'] {
+  border-bottom-color: var(--ds-danger, #b3261e);
+}
+
+.inline-tag-editor__notice {
+  font-size: 0.72em;
+  font-weight: 600;
+  color: var(--ds-danger, #b3261e);
+}
+
 .tags-input__input {
   flex: 1 1 8rem;
   min-width: 6rem;

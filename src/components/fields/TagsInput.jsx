@@ -1,13 +1,18 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 
+import InlineTagEditor from './InlineTagEditor'
+
 function TagsInput({
   value = [],
   onChange = () => {},
   placeholder = '',
   ariaLabel = 'Tags',
+  locale = 'en',
 }) {
+  const isFinnish = locale === 'fi'
   const [draft, setDraft] = useState('')
+  const [editingIndex, setEditingIndex] = useState(null)
 
   const commit = (rawTag) => {
     const tag = rawTag.trim()
@@ -40,6 +45,22 @@ function TagsInput({
 
   const removeAt = (index) => {
     onChange(value.filter((_, itemIndex) => itemIndex !== index))
+  }
+
+  // Renames one tag in place: empty removes it, and a case-insensitive
+  // duplicate of another tag is refused (same rule as adding one).
+  const renameAt = (index, text) => {
+    if (!text) {
+      removeAt(index)
+      return true
+    }
+
+    if (value.some((existing, itemIndex) => itemIndex !== index && existing.toLowerCase() === text.toLowerCase())) {
+      return false
+    }
+
+    onChange(value.map((existing, itemIndex) => (itemIndex === index ? text : existing)))
+    return true
   }
 
   // Pasting a comma- or newline-separated list (e.g. copied from a job post)
@@ -78,12 +99,30 @@ function TagsInput({
     <div className="tags-input">
       {value.map((tag, index) => (
         <span className="tags-input__tag" key={`${tag}-${index}`}>
-          {tag}
+          {editingIndex === index ? (
+            <InlineTagEditor
+              value={tag}
+              onCommit={(text) => renameAt(index, text)}
+              onDone={() => setEditingIndex(null)}
+              ariaLabel={isFinnish ? `Muokkaa: ${tag}` : `Edit ${tag}`}
+              duplicateMessage={isFinnish ? 'Tämä on jo listalla.' : 'Already listed.'}
+            />
+          ) : (
+            <button
+              type="button"
+              className="tags-input__label"
+              onClick={() => setEditingIndex(index)}
+              aria-label={isFinnish ? `Muokkaa: ${tag}` : `Edit ${tag}`}
+              title={isFinnish ? 'Muokkaa' : 'Edit'}
+            >
+              {tag}
+            </button>
+          )}
           <button
             type="button"
             className="tags-input__remove"
             onClick={() => removeAt(index)}
-            aria-label={`Remove ${tag}`}
+            aria-label={isFinnish ? `Poista: ${tag}` : `Remove ${tag}`}
           >
             <X size={12} strokeWidth={2.5} aria-hidden="true" />
           </button>

@@ -13,7 +13,9 @@ import {
   useSortable,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useState } from 'react'
 import { useDirectEdit } from './DirectEditContext'
+import InlineTagEditor from './fields/InlineTagEditor'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 
 function EditableListEntry({ id, onRemove, dragLabel, removeLabel, children }) {
@@ -104,37 +106,117 @@ export default function EditableList({ section, items, addLabel, removeLabel, ch
   )
 }
 
+// Is `text` already one of `allSkills`, other than the skill at `ownIndex`?
+// Same case-insensitive rule ADD_SKILL and UPDATE_SKILL apply.
+function isDuplicateSkill(allSkills, text, ownIndex = -1) {
+  const lower = text.toLowerCase()
+  return allSkills.some((skill, index) => index !== ownIndex && skill.toLowerCase() === lower)
+}
+
+function skillCopy(locale) {
+  const isFinnish = locale === 'fi'
+  return {
+    edit: (skill) => (isFinnish ? `Muokkaa taitoa: ${skill}` : `Edit skill: ${skill}`),
+    remove: (skill) => (isFinnish ? `Poista taito: ${skill}` : `Remove skill: ${skill}`),
+    newSkill: isFinnish ? 'Uusi taito' : 'New skill',
+    duplicate: isFinnish ? 'Jo listalla' : 'Already listed',
+  }
+}
+
+// One skill chip: its text is a button that turns into an inline editor,
+// and the × is a separate button. (The whole chip used to be the remove
+// button, so any click on a skill deleted it and nothing could rename it.)
+// The outer element keeps .direct-edit-chip because template stylesheets
+// select on it (e.g. modernOrange.css's `:has(> .direct-edit-chip)`).
+function SkillChip({ skill, index, allSkills }) {
+  const { dispatchFormData, locale } = useDirectEdit()
+  const [isEditing, setIsEditing] = useState(false)
+  const copy = skillCopy(locale)
+
+  return (
+    <span className="direct-edit-chip direct-edit-chip--removable">
+      {isEditing ? (
+        <InlineTagEditor
+          value={skill}
+          className="direct-edit-chip__editor"
+          ariaLabel={copy.edit(skill)}
+          duplicateMessage={copy.duplicate}
+          onCommit={(text) => {
+            if (text && isDuplicateSkill(allSkills, text, index)) return false
+            dispatchFormData({ type: FORM_ACTION.UPDATE_SKILL, index, skill: text })
+            return true
+          }}
+          onDone={() => setIsEditing(false)}
+        />
+      ) : (
+        <button
+          type="button"
+          className="direct-edit-chip__label"
+          aria-label={copy.edit(skill)}
+          onClick={() => setIsEditing(true)}
+        >
+          {skill}
+        </button>
+      )}
+      <button
+        type="button"
+        className="direct-edit-chip__remove"
+        aria-label={copy.remove(skill)}
+        onClick={() => dispatchFormData({ type: FORM_ACTION.REMOVE_SKILL, index })}
+      >
+        <span aria-hidden="true">×</span>
+      </button>
+    </span>
+  )
+}
+
+// "+ Add" opens an empty chip with the cursor in it; nothing is added until
+// the user types a skill, and leaving it empty adds nothing.
+function AddSkillChip({ allSkills, addLabel }) {
+  const { dispatchFormData, locale } = useDirectEdit()
+  const [isAdding, setIsAdding] = useState(false)
+  const copy = skillCopy(locale)
+
+  if (!isAdding) {
+    return (
+      <button type="button" className="direct-edit-chip-add" onClick={() => setIsAdding(true)}>
+        {addLabel}
+      </button>
+    )
+  }
+
+  return (
+    <span className="direct-edit-chip direct-edit-chip--removable direct-edit-chip--new">
+      <InlineTagEditor
+        value=""
+        className="direct-edit-chip__editor"
+        ariaLabel={copy.newSkill}
+        duplicateMessage={copy.duplicate}
+        onCommit={(text) => {
+          if (!text) return true
+          if (isDuplicateSkill(allSkills, text)) return false
+          dispatchFormData({ type: FORM_ACTION.ADD_SKILL, skill: text })
+          return true
+        }}
+        onDone={() => setIsAdding(false)}
+      />
+    </span>
+  )
+}
+
 export function EditableChip({ skills, addLabel = '+ Add' }) {
-  const { isEditing, dispatchFormData } = useDirectEdit()
+  const { isEditing } = useDirectEdit()
 
   if (!isEditing) {
     return null
   }
 
-  const handleRemove = (index) => {
-    dispatchFormData({ type: FORM_ACTION.REMOVE_SKILL, index })
-  }
-
-  const handleAdd = () => {
-    const nextLabel = `New skill ${skills.length + 1}`
-    dispatchFormData({ type: FORM_ACTION.ADD_SKILL, skill: nextLabel })
-  }
-
   return (
     <>
       {skills.map((skill, index) => (
-        <button
-          key={`${skill}:${index}`}
-          type="button"
-          className="direct-edit-chip direct-edit-chip--removable"
-          onClick={() => handleRemove(index)}
-        >
-          {skill} <span aria-hidden="true">×</span>
-        </button>
+        <SkillChip key={`${skill}:${index}`} skill={skill} index={index} allSkills={skills} />
       ))}
-      <button type="button" className="direct-edit-chip-add" onClick={handleAdd}>
-        {addLabel}
-      </button>
+      <AddSkillChip allSkills={skills} addLabel={addLabel} />
     </>
   )
 }
@@ -158,21 +240,15 @@ export function EditableChip({ skills, addLabel = '+ Add' }) {
 // render, so a per-category add button would misleadingly imply the new
 // chip lands in that group.
 export function EditableCategorizedChip({ categories, addLabel = '+ Add' }) {
-  const { isEditing, dispatchFormData } = useDirectEdit()
+  const { isEditing } = useDirectEdit()
 
   if (!isEditing) {
     return null
   }
 
-  const handleRemove = (index) => {
-    dispatchFormData({ type: FORM_ACTION.REMOVE_SKILL, index })
-  }
-
-  const handleAdd = () => {
-    const totalSkills = categories.reduce((sum, cat) => sum + cat.items.length, 0)
-    const nextLabel = `New skill ${totalSkills + 1}`
-    dispatchFormData({ type: FORM_ACTION.ADD_SKILL, skill: nextLabel })
-  }
+  // Back to the flat list, in formData order, for the duplicate check.
+  const allSkills = []
+  categories.forEach((cat) => cat.items.forEach(({ skill, index }) => { allSkills[index] = skill }))
 
   return (
     <>
@@ -181,21 +257,12 @@ export function EditableCategorizedChip({ categories, addLabel = '+ Add' }) {
           <span className="direct-edit-chip-group__label">{cat.label}</span>
           <div className="direct-edit-chip-group__chips">
             {cat.items.map(({ skill, index }) => (
-              <button
-                key={`${skill}:${index}`}
-                type="button"
-                className="direct-edit-chip direct-edit-chip--removable"
-                onClick={() => handleRemove(index)}
-              >
-                {skill} <span aria-hidden="true">×</span>
-              </button>
+              <SkillChip key={`${skill}:${index}`} skill={skill} index={index} allSkills={allSkills} />
             ))}
           </div>
         </div>
       ))}
-      <button type="button" className="direct-edit-chip-add" onClick={handleAdd}>
-        {addLabel}
-      </button>
+      <AddSkillChip allSkills={allSkills} addLabel={addLabel} />
     </>
   )
 }
