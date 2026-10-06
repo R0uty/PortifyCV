@@ -14,8 +14,8 @@ test.describe('CV editor', () => {
 
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
 
-    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Alex Morgan')
-    await expect(page.locator('.preview-panel')).toContainText('Alex Morgan')
+    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('John Doe')
+    await expect(page.locator('.preview-panel')).toContainText('John Doe')
     await expect(page.locator('.preview-panel')).toContainText('Senior Product Designer')
   })
 
@@ -23,7 +23,7 @@ test.describe('CV editor', () => {
     await page.goto('/cv')
 
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Alex Morgan')
+    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('John Doe')
 
     // "Reset form" is a two-step button: first click arms it, second click clears.
     await page.getByRole('button', { name: 'Reset form' }).click()

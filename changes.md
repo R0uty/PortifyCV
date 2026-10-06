@@ -4,6 +4,22 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## No real information in example CVs — 1.5.1, 2026-10-06
+
+Every example CV (the per-template pages' 24 people) and the demo CV now
+use one placeholder identity: John Doe, john.doe@example.com, 0123456789.
+Employers and organisations are "Example Oy", schools "Example
+University", certificate issuers and publishers "Example Oy", open-source
+projects "Example project", and events "Example Conference" and similar.
+Certificate titles keep their subject without the brand. Every link points
+at a reserved example.com host. The demo CV used to link to a real GitHub
+user and a real registered domain, and the examples named real
+universities, hospitals, certificate bodies and open-source projects.
+Skills and tools (React, Figma, SAP…) and cities stay, since they aren't
+claims about an organisation or a person. `check:template-pages` now
+fails if an example or the demo CV strays from the placeholders or links
+anywhere but example.com.
+
 ## Builder usability — 2026-10-04
 
 The builder's template gallery gives each template a "View examples" link

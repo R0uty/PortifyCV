@@ -2,12 +2,12 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: executive, techExec.
 const shared = {
-  fullName: 'Petteri Hautala',
-  email: 'petteri.hautala@example.com',
-  phone: '+358 40 000 2201',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    github: 'https://github.com/example-phautala',
-    linkedin: 'https://linkedin.com/in/example-phautala',
+    github: 'https://github.example.com/john-doe',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -21,7 +21,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Engineering Director',
-      company: 'Pielinen Software Group',
+      company: 'Example Oy',
       location: 'Joensuu, Finland',
       employmentType: 'Full-time',
       startDate: 'Jan 2019',
@@ -37,7 +37,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Engineering Manager',
-      company: 'Karjalan Datasysteemit',
+      company: 'Example Oy',
       location: 'Joensuu, Finland',
       employmentType: 'Full-time',
       startDate: 'Mar 2014',
@@ -53,7 +53,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'University of Eastern Finland',
+      school: 'Example University',
       degree: 'M.Sc. Computer Science',
       location: 'Joensuu, Finland',
       startDate: '2004',
@@ -66,7 +66,7 @@ const en = buildExampleCv({
   leadership: [
     {
       role: 'Advisory Board Member',
-      organization: 'Joensuu Tech Founders',
+      organization: 'Example Oy',
       description: 'Advise early-stage founders on building and scaling engineering teams.',
       startDate: '2022',
       endDate: '',
@@ -79,7 +79,7 @@ const en = buildExampleCv({
       stack: 'AWS, feature flags',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Pielinen Software Group',
+      organization: 'Example Oy',
       impact: 'Release cycle time cut from 6 weeks to 2.',
       date: '2021',
       teamSize: '60',
@@ -88,10 +88,10 @@ const en = buildExampleCv({
     },
   ],
   achievements: [
-    { title: 'Speaker, Nordic Engineering Leadership Summit', description: 'Talk: "Scaling an engineering org without scaling attrition".', year: '2023' },
+    { title: 'Speaker, Example Conference', description: 'Talk: "Scaling an engineering org without scaling attrition".', year: '2023' },
   ],
   certificates: [
-    { name: 'AWS Certified Solutions Architect – Professional', issuer: 'Amazon Web Services', year: '2020', credentialUrl: '', expiry: '2026' },
+    { name: 'Certified Solutions Architect – Professional', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '2026' },
   ],
 })
 
@@ -105,7 +105,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Kehitysjohtaja',
-      company: 'Pielinen Software Group',
+      company: 'Example Oy',
       location: 'Joensuu',
       employmentType: 'Full-time',
       startDate: '01/2019',
@@ -121,7 +121,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Kehityspäällikkö',
-      company: 'Karjalan Datasysteemit',
+      company: 'Example Oy',
       location: 'Joensuu',
       employmentType: 'Full-time',
       startDate: '03/2014',
@@ -137,7 +137,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Itä-Suomen yliopisto',
+      school: 'Example University',
       degree: 'Filosofian maisteri, tietojenkäsittelytiede',
       location: 'Joensuu',
       startDate: '2004',
@@ -150,7 +150,7 @@ const fi = buildExampleCv({
   leadership: [
     {
       role: 'Neuvonantaja',
-      organization: 'Joensuu Tech Founders',
+      organization: 'Example Oy',
       description: 'Neuvon alkuvaiheen yrittäjiä kehitystiimien rakentamisessa ja skaalauksessa.',
       startDate: '2022',
       endDate: '',
@@ -163,7 +163,7 @@ const fi = buildExampleCv({
       stack: 'AWS, feature flagit',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Pielinen Software Group',
+      organization: 'Example Oy',
       impact: 'Julkaisusykli lyheni 6 viikosta 2 viikkoon.',
       date: '2021',
       teamSize: '60',
@@ -172,10 +172,10 @@ const fi = buildExampleCv({
     },
   ],
   achievements: [
-    { title: 'Puhuja, Nordic Engineering Leadership Summit', description: 'Esitys: "Kehitysorganisaation kasvattaminen vaihtuvuutta kasvattamatta".', year: '2023' },
+    { title: 'Puhuja, Example Conference', description: 'Esitys: "Kehitysorganisaation kasvattaminen vaihtuvuutta kasvattamatta".', year: '2023' },
   ],
   certificates: [
-    { name: 'AWS Certified Solutions Architect – Professional', issuer: 'Amazon Web Services', year: '2020', credentialUrl: '', expiry: '2026' },
+    { name: 'Certified Solutions Architect – Professional', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '2026' },
   ],
 })
 

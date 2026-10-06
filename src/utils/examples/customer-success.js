@@ -2,12 +2,12 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: modernOrange, colorfulCompact.
 const shared = {
-  fullName: 'Emilia Rautio',
-  email: 'emilia.rautio@example.com',
-  phone: '+358 40 000 2507',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-erautio',
-    website: 'https://erautio.example.com',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
+    website: 'https://johndoe.example.com',
   },
 }
 
@@ -24,7 +24,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Customer Success Manager',
-      company: 'Pilvikumpu Oy',
+      company: 'Example Oy',
       location: 'Kerava, Finland',
       employmentType: 'Full-time',
       startDate: 'Jun 2021',
@@ -40,7 +40,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Customer Success Specialist',
-      company: 'Kajala Software',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'Jan 2018',
@@ -56,7 +56,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Haaga-Helia University of Applied Sciences',
+      school: 'Example University',
       degree: 'B.B.A. International Business',
       location: 'Helsinki, Finland',
       startDate: '2014',
@@ -73,7 +73,7 @@ const en = buildExampleCv({
       stack: 'Looker, Salesforce, SQL',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Pilvikumpu Oy',
+      organization: 'Example Oy',
       impact: 'Adopted by 8 CSMs; flags risk 6 weeks before renewal on average.',
       date: '2023',
       teamSize: '3',
@@ -86,7 +86,7 @@ const en = buildExampleCv({
       stack: 'Notion, Zendesk',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Pilvikumpu Oy',
+      organization: 'Example Oy',
       impact: 'Cut portfolio churn from 14% to 6% within a year.',
       date: '2022',
       teamSize: '',
@@ -95,8 +95,8 @@ const en = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'Certified Customer Success Manager (CCSM)', issuer: 'SuccessCOACHING', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'HubSpot Customer Success Certification', issuer: 'HubSpot Academy', year: '2019', credentialUrl: '', expiry: '' },
+    { name: 'Certified Customer Success Manager', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Customer Success Certification', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -118,7 +118,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Asiakkuuspäällikkö',
-      company: 'Pilvikumpu Oy',
+      company: 'Example Oy',
       location: 'Kerava',
       employmentType: 'Full-time',
       startDate: '06/2021',
@@ -134,7 +134,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Asiakkuusasiantuntija',
-      company: 'Kajala Software',
+      company: 'Example Oy',
       location: 'Helsinki',
       employmentType: 'Full-time',
       startDate: '01/2018',
@@ -150,7 +150,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Haaga-Helia ammattikorkeakoulu',
+      school: 'Example University',
       degree: 'Tradenomi, kansainvälinen liiketoiminta',
       location: 'Helsinki',
       startDate: '2014',
@@ -167,7 +167,7 @@ const fi = buildExampleCv({
       stack: 'Looker, Salesforce, SQL',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Pilvikumpu Oy',
+      organization: 'Example Oy',
       impact: 'Käytössä 8 asiakkuuspäälliköllä; havaitsee riskin keskimäärin 6 viikkoa etukäteen.',
       date: '2023',
       teamSize: '3',
@@ -180,7 +180,7 @@ const fi = buildExampleCv({
       stack: 'Notion, Zendesk',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Pilvikumpu Oy',
+      organization: 'Example Oy',
       impact: 'Laski salkun asiakaspoistuman 14 %:sta 6 %:iin vuodessa.',
       date: '2022',
       teamSize: '',
@@ -189,8 +189,8 @@ const fi = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'Certified Customer Success Manager (CCSM)', issuer: 'SuccessCOACHING', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'HubSpot Customer Success Certification', issuer: 'HubSpot Academy', year: '2019', credentialUrl: '', expiry: '' },
+    { name: 'Certified Customer Success Manager', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Customer Success Certification', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },

@@ -2,12 +2,12 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: developer, compact. Stress case: 20+ skills.
 const shared = {
-  fullName: 'Elina Virtanen',
-  email: 'elina.virtanen@example.com',
-  phone: '+358 40 000 1301',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    github: 'https://github.com/example-evirtanen',
-    linkedin: 'https://linkedin.com/in/example-evirtanen',
+    github: 'https://github.example.com/john-doe',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -25,7 +25,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Senior Data Engineer',
-      company: 'Arcticom Data Oy',
+      company: 'Example Oy',
       location: 'Oulu, Finland',
       employmentType: 'Full-time',
       startDate: 'Jan 2021',
@@ -41,7 +41,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Data Engineer',
-      company: 'Polarnet Analytics',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'Jun 2018',
@@ -57,7 +57,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'University of Oulu',
+      school: 'Example University',
       degree: 'M.Sc. Computer Science',
       location: 'Oulu, Finland',
       startDate: '2016',
@@ -72,7 +72,7 @@ const en = buildExampleCv({
       name: 'realtime-pipeline-metrics',
       description: 'Open-source Grafana dashboard templates for monitoring Airflow and Spark pipeline health, used by 15+ teams.',
       stack: 'Python, Grafana, Prometheus',
-      githubUrl: 'https://github.com/example-evirtanen/realtime-pipeline-metrics',
+      githubUrl: 'https://github.example.com/john-doe/realtime-pipeline-metrics',
       demoUrl: '',
       organization: '',
       impact: 'Adopted by 15+ data teams.',
@@ -99,13 +99,13 @@ const en = buildExampleCv({
     { title: 'Speaker, Data Engineering Nordics 2023', description: 'Talk: "Taming late-arriving data".', year: '2023' },
   ],
   openSource: [
-    { name: 'Apache Airflow', description: 'Fixed a race condition in the Kubernetes executor task cleanup.', language: 'Python', stars: '37k', forks: '15k', url: 'https://github.com/apache/airflow' },
+    { name: 'Example project', description: 'Fixed a race condition in the Kubernetes executor task cleanup.', language: 'Python', stars: '37k', forks: '15k', url: 'https://github.example.com/john-doe/example-project' },
   ],
   publications: [
-    { title: 'Cutting pipeline latency without rewriting everything', publisher: 'dev.to', year: '2023', url: 'https://dev.to/example-evirtanen' },
+    { title: 'Cutting pipeline latency without rewriting everything', publisher: 'Example Oy', year: '2023', url: 'https://devto.example.com/john-doe' },
   ],
   certificates: [
-    { name: 'AWS Certified Data Analytics – Specialty', issuer: 'Amazon Web Services', year: '2022', credentialUrl: '', expiry: '' },
+    { name: 'Certified Data Analytics – Specialty', issuer: 'Example Oy', year: '2022', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -131,7 +131,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Senior Data Engineer',
-      company: 'Arcticom Data Oy',
+      company: 'Example Oy',
       location: 'Oulu',
       employmentType: 'Full-time',
       startDate: '01/2021',
@@ -147,7 +147,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Data Engineer',
-      company: 'Polarnet Analytics',
+      company: 'Example Oy',
       location: 'Helsinki',
       employmentType: 'Full-time',
       startDate: '06/2018',
@@ -163,7 +163,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Oulun yliopisto',
+      school: 'Example University',
       degree: 'Filosofian maisteri, tietojenkäsittelytiede',
       location: 'Oulu',
       startDate: '2016',
@@ -178,7 +178,7 @@ const fi = buildExampleCv({
       name: 'realtime-pipeline-metrics',
       description: 'Avoimen lähdekoodin Grafana-paneelimallit Airflow- ja Spark-putkien terveyden seurantaan, käytössä 15+ tiimillä.',
       stack: 'Python, Grafana, Prometheus',
-      githubUrl: 'https://github.com/example-evirtanen/realtime-pipeline-metrics',
+      githubUrl: 'https://github.example.com/john-doe/realtime-pipeline-metrics',
       demoUrl: '',
       organization: '',
       impact: 'Käytössä yli 15 datatiimillä.',
@@ -205,13 +205,13 @@ const fi = buildExampleCv({
     { title: 'Puhuja, Data Engineering Nordics 2023', description: 'Esitys: "Myöhässä saapuvan datan hallinta".', year: '2023' },
   ],
   openSource: [
-    { name: 'Apache Airflow', description: 'Korjasin kilpailutilanteen Kubernetes-suorittajan tehtäväsiivouksessa.', language: 'Python', stars: '37k', forks: '15k', url: 'https://github.com/apache/airflow' },
+    { name: 'Example project', description: 'Korjasin kilpailutilanteen Kubernetes-suorittajan tehtäväsiivouksessa.', language: 'Python', stars: '37k', forks: '15k', url: 'https://github.example.com/john-doe/example-project' },
   ],
   publications: [
-    { title: 'Putkien viiveen lyhentäminen ilman kaiken uudelleenkirjoittamista', publisher: 'dev.to', year: '2023', url: 'https://dev.to/example-evirtanen' },
+    { title: 'Putkien viiveen lyhentäminen ilman kaiken uudelleenkirjoittamista', publisher: 'Example Oy', year: '2023', url: 'https://devto.example.com/john-doe' },
   ],
   certificates: [
-    { name: 'AWS Certified Data Analytics – Specialty', issuer: 'Amazon Web Services', year: '2022', credentialUrl: '', expiry: '' },
+    { name: 'Certified Data Analytics – Specialty', issuer: 'Example Oy', year: '2022', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Suomi', level: 'Äidinkieli' },

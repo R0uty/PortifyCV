@@ -3,13 +3,13 @@ import { buildExampleCv } from './buildExampleCv.js'
 // Fictional person. Listed under: classicProfessional, navyProfessional, editorial.
 // Lives abroad (Netherlands), after a PhD and postdoc in Finland.
 const shared = {
-  fullName: 'Elisa Rantala',
-  email: 'elisa.rantala@example.com',
-  phone: '+358 40 000 2505',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    scholar: 'https://scholar.example.com/citations?user=example-erantala',
-    linkedin: 'https://linkedin.com/in/example-erantala',
-    researchGate: 'https://researchgate.example.com/profile/example-erantala',
+    scholar: 'https://scholar.example.com/citations?user=john-doe',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
+    researchGate: 'https://researchgate.example.com/profile/john-doe',
   },
 }
 
@@ -26,7 +26,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Senior Research Scientist',
-      company: 'Delft Materials Institute',
+      company: 'Example Oy',
       location: 'Delft, Netherlands',
       employmentType: 'Full-time',
       startDate: 'Sep 2020',
@@ -42,7 +42,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Postdoctoral Researcher',
-      company: 'Nordic Battery Materials Lab',
+      company: 'Example Oy',
       location: 'Espoo, Finland',
       employmentType: 'Full-time',
       startDate: 'Jan 2017',
@@ -58,7 +58,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Aalto University',
+      school: 'Example University',
       degree: 'D.Sc. (Tech.) Materials Science',
       location: 'Espoo, Finland',
       startDate: '2013',
@@ -68,7 +68,7 @@ const en = buildExampleCv({
       grade: '',
     },
     {
-      school: 'Helsinki University of Technology',
+      school: 'Example University',
       degree: 'M.Sc. (Tech.) Materials Science',
       location: 'Espoo, Finland',
       startDate: '2005',
@@ -85,7 +85,7 @@ const en = buildExampleCv({
       stack: 'XRD, SEM, Python',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Delft Materials Institute',
+      organization: 'Example Oy',
       impact: 'Ionic conductivity improved 3x; adopted by 1 industry partner for pilot cells.',
       date: '2023',
       teamSize: '6',
@@ -94,12 +94,12 @@ const en = buildExampleCv({
     },
   ],
   publications: [
-    { title: 'High-conductivity solid-state electrolytes via sulfide doping', publisher: 'Journal of Materials Chemistry (example)', year: '2023', url: 'https://example.com/doi/10.0000/jmat-2023-0147' },
-    { title: 'Electrode coating strategies for extended battery cycle life', publisher: 'Energy Storage Materials (example)', year: '2019', url: 'https://example.com/doi/10.0000/esm-2019-0098' },
+    { title: 'High-conductivity solid-state electrolytes via sulfide doping', publisher: 'Example Oy', year: '2023', url: 'https://example.com/doi/10.0000/jmat-2023-0147' },
+    { title: 'Electrode coating strategies for extended battery cycle life', publisher: 'Example Oy', year: '2019', url: 'https://example.com/doi/10.0000/esm-2019-0098' },
   ],
   certificates: [
-    { name: 'EU Horizon Grant Writing Certificate', issuer: 'European Research Council Academy', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'Battery Safety & Handling (UN38.3)', issuer: 'TÜV Rheinland', year: '2019', credentialUrl: '', expiry: '' },
+    { name: 'Research Grant Writing Certificate', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Battery Safety & Handling (UN38.3)', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -121,7 +121,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Senior-tutkija',
-      company: 'Delft Materials Institute',
+      company: 'Example Oy',
       location: 'Delft, Alankomaat',
       employmentType: 'Full-time',
       startDate: '09/2020',
@@ -137,7 +137,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Tutkijatohtori',
-      company: 'Nordic Battery Materials Lab',
+      company: 'Example Oy',
       location: 'Espoo',
       employmentType: 'Full-time',
       startDate: '01/2017',
@@ -153,7 +153,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Aalto-yliopisto',
+      school: 'Example University',
       degree: 'Tekniikan tohtori (TkT), materiaalitekniikka',
       location: 'Espoo',
       startDate: '2013',
@@ -163,7 +163,7 @@ const fi = buildExampleCv({
       grade: '',
     },
     {
-      school: 'Teknillinen korkeakoulu',
+      school: 'Example University',
       degree: 'Diplomi-insinööri (DI), materiaalitekniikka',
       location: 'Espoo',
       startDate: '2005',
@@ -180,7 +180,7 @@ const fi = buildExampleCv({
       stack: 'XRD, SEM, Python',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Delft Materials Institute',
+      organization: 'Example Oy',
       impact: 'Ionijohtavuus parani 3-kertaiseksi; käytössä 1 teollisuuskumppanin pilottikennoissa.',
       date: '2023',
       teamSize: '6',
@@ -189,12 +189,12 @@ const fi = buildExampleCv({
     },
   ],
   publications: [
-    { title: 'Korkean johtavuuden kiinteän olomuodon elektrolyytit sulfidiseostuksella', publisher: 'Journal of Materials Chemistry (esimerkki)', year: '2023', url: 'https://example.com/doi/10.0000/jmat-2023-0147' },
-    { title: 'Elektrodien pinnoitusstrategiat akun kestoiän pidentämiseksi', publisher: 'Energy Storage Materials (esimerkki)', year: '2019', url: 'https://example.com/doi/10.0000/esm-2019-0098' },
+    { title: 'Korkean johtavuuden kiinteän olomuodon elektrolyytit sulfidiseostuksella', publisher: 'Example Oy', year: '2023', url: 'https://example.com/doi/10.0000/jmat-2023-0147' },
+    { title: 'Elektrodien pinnoitusstrategiat akun kestoiän pidentämiseksi', publisher: 'Example Oy', year: '2019', url: 'https://example.com/doi/10.0000/esm-2019-0098' },
   ],
   certificates: [
-    { name: 'EU Horizon -rahoitushakemuskoulutus', issuer: 'European Research Council Academy', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'Akkujen turvallinen käsittely (UN38.3)', issuer: 'TÜV Rheinland', year: '2019', credentialUrl: '', expiry: '' },
+    { name: 'Tutkimusrahoitushakemusten kirjoittamisen koulutus', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Akkujen turvallinen käsittely (UN38.3)', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Suomi', level: 'Äidinkieli' },

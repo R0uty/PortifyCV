@@ -2,11 +2,11 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: modern, timeline.
 const shared = {
-  fullName: 'Juha Rantanen',
-  email: 'juha.rantanen@example.com',
-  phone: '+358 40 000 1801',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-jrantanen',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -20,7 +20,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Senior Project Manager',
-      company: 'Savolinna Construction',
+      company: 'Example Oy',
       location: 'Kuopio, Finland',
       employmentType: 'Full-time',
       startDate: 'Mar 2019',
@@ -36,7 +36,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Project Manager',
-      company: 'Pohjanmaa Logistics',
+      company: 'Example Oy',
       location: 'Vaasa, Finland',
       employmentType: 'Full-time',
       startDate: 'Jan 2015',
@@ -52,7 +52,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Savonia University of Applied Sciences',
+      school: 'Example University',
       degree: 'B.Eng. Construction Management',
       location: 'Kuopio, Finland',
       startDate: '2011',
@@ -99,7 +99,7 @@ const en = buildExampleCv({
     { language: 'Swedish', level: 'Intermediate' },
   ],
   certificates: [
-    { name: 'PMP – Project Management Professional', issuer: 'Project Management Institute', year: '2020', credentialUrl: '', expiry: '2026' },
+    { name: 'Certified Project Manager', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '2026' },
   ],
 })
 
@@ -113,7 +113,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Senior projektipäällikkö',
-      company: 'Savolinna Construction',
+      company: 'Example Oy',
       location: 'Kuopio',
       employmentType: 'Full-time',
       startDate: '03/2019',
@@ -129,7 +129,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Projektipäällikkö',
-      company: 'Pohjanmaa Logistics',
+      company: 'Example Oy',
       location: 'Vaasa',
       employmentType: 'Full-time',
       startDate: '01/2015',
@@ -145,7 +145,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Savonia-ammattikorkeakoulu',
+      school: 'Example University',
       degree: 'Insinööri (AMK), rakennustuotanto',
       location: 'Kuopio',
       startDate: '2011',
@@ -192,7 +192,7 @@ const fi = buildExampleCv({
     { language: 'Ruotsi', level: 'Keskitaso' },
   ],
   certificates: [
-    { name: 'PMP – Project Management Professional', issuer: 'Project Management Institute', year: '2020', credentialUrl: '', expiry: '2026' },
+    { name: 'Certified Project Manager', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '2026' },
   ],
 })
 

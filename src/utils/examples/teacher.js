@@ -2,11 +2,11 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: timeline, european.
 const shared = {
-  fullName: 'Kaisa Niemelä',
-  email: 'kaisa.niemela@example.com',
-  phone: '+358 40 000 2503',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-kniemela',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -23,7 +23,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Senior Subject Teacher (Mathematics)',
-      company: 'Seinäjoki Upper Secondary School',
+      company: 'Example Oy',
       location: 'Seinäjoki, Finland',
       employmentType: 'Full-time',
       startDate: 'Aug 2015',
@@ -39,7 +39,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Mathematics & Physics Teacher',
-      company: 'Kyrönmaa School',
+      company: 'Example Oy',
       location: 'Seinäjoki, Finland',
       employmentType: 'Full-time',
       startDate: 'Aug 2010',
@@ -55,7 +55,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'University of Helsinki',
+      school: 'Example University',
       degree: 'M.Sc. Mathematics',
       location: 'Helsinki, Finland',
       startDate: '2005',
@@ -65,7 +65,7 @@ const en = buildExampleCv({
       grade: '',
     },
     {
-      school: 'University of Helsinki',
+      school: 'Example University',
       degree: 'Teacher Qualification (Pedagogical Studies)',
       location: 'Helsinki, Finland',
       startDate: '2010',
@@ -82,7 +82,7 @@ const en = buildExampleCv({
       stack: 'Peda.net, Socrative',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Seinäjoki Upper Secondary School',
+      organization: 'Example Oy',
       impact: 'Adopted by 12 teachers; raised the pass rate from 82% to 95%.',
       date: '2021',
       teamSize: '12',
@@ -95,7 +95,7 @@ const en = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kyrönmaa School',
+      organization: 'Example Oy',
       impact: '40 regular students; average grade rose by half a point.',
       date: '2013',
       teamSize: '',
@@ -104,8 +104,8 @@ const en = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'Special Needs Education Certificate (15 ECTS)', issuer: 'University of Helsinki', year: '2016', credentialUrl: '', expiry: '' },
-    { name: 'Google Certified Educator, Level 2', issuer: 'Google for Education', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Special Needs Education Certificate (15 ECTS)', issuer: 'Example Oy', year: '2016', credentialUrl: '', expiry: '' },
+    { name: 'Certified Digital Educator, Level 2', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -127,7 +127,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Lehtori (matematiikka)',
-      company: 'Seinäjoen lukio',
+      company: 'Example Oy',
       location: 'Seinäjoki',
       employmentType: 'Full-time',
       startDate: '08/2015',
@@ -143,7 +143,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Matematiikan ja fysiikan opettaja',
-      company: 'Kyrönmaan koulu',
+      company: 'Example Oy',
       location: 'Seinäjoki',
       employmentType: 'Full-time',
       startDate: '08/2010',
@@ -159,7 +159,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Helsingin yliopisto',
+      school: 'Example University',
       degree: 'Filosofian maisteri, matematiikka',
       location: 'Helsinki',
       startDate: '2005',
@@ -169,7 +169,7 @@ const fi = buildExampleCv({
       grade: '',
     },
     {
-      school: 'Helsingin yliopisto',
+      school: 'Example University',
       degree: 'Opettajan pedagogiset opinnot',
       location: 'Helsinki',
       startDate: '2010',
@@ -186,7 +186,7 @@ const fi = buildExampleCv({
       stack: 'Peda.net, Socrative',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Seinäjoen lukio',
+      organization: 'Example Oy',
       impact: 'Käytössä 12 opettajalla; nosti läpäisyprosentin 82 %:sta 95 %:iin.',
       date: '2021',
       teamSize: '12',
@@ -199,7 +199,7 @@ const fi = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kyrönmaan koulu',
+      organization: 'Example Oy',
       impact: '40 vakio-oppilasta; keskiarvo nousi puolella numerolla.',
       date: '2013',
       teamSize: '',
@@ -208,8 +208,8 @@ const fi = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'Erityisopetuksen opinnot (15 op)', issuer: 'Helsingin yliopisto', year: '2016', credentialUrl: '', expiry: '' },
-    { name: 'Google Certified Educator, Level 2', issuer: 'Google for Education', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Erityisopetuksen opinnot (15 op)', issuer: 'Example Oy', year: '2016', credentialUrl: '', expiry: '' },
+    { name: 'Certified Digital Educator, Level 2', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Suomi', level: 'Äidinkieli' },

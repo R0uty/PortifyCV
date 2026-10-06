@@ -2,12 +2,12 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: creative, portfolio, modernOrange.
 const shared = {
-  fullName: 'Sofia Nieminen',
-  email: 'sofia.nieminen@example.com',
-  phone: '+358 40 000 1501',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-snieminen',
-    portfolio: 'https://snieminen.example.com',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
+    portfolio: 'https://johndoe.example.com',
   },
 }
 
@@ -21,7 +21,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Senior UX Designer',
-      company: 'Lumio Studios',
+      company: 'Example Oy',
       location: 'Turku, Finland',
       employmentType: 'Full-time',
       startDate: 'Feb 2021',
@@ -37,7 +37,7 @@ const en = buildExampleCv({
     },
     {
       role: 'UX Designer',
-      company: 'Rantapolku Design',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'Mar 2018',
@@ -53,7 +53,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Turku University of Applied Sciences',
+      school: 'Example University',
       degree: 'B.A. Industrial Design',
       location: 'Turku, Finland',
       startDate: '2014',
@@ -81,7 +81,7 @@ const en = buildExampleCv({
       name: 'Accessible color contrast checker',
       description: 'Browser extension that flags low-contrast text while designers work in Figma.',
       stack: 'Figma plugin API, TypeScript',
-      githubUrl: 'https://github.com/example-snieminen/contrast-checker',
+      githubUrl: 'https://github.example.com/john-doe/contrast-checker',
       demoUrl: '',
       organization: '',
       impact: '900+ installs.',
@@ -102,13 +102,13 @@ const en = buildExampleCv({
     },
   ],
   openSource: [
-    { name: 'Storybook', description: 'Improved the accessibility addon documentation with clearer setup examples.', language: 'TypeScript', stars: '84k', forks: '9k', url: 'https://github.com/storybookjs/storybook' },
+    { name: 'Example project', description: 'Improved the accessibility addon documentation with clearer setup examples.', language: 'TypeScript', stars: '84k', forks: '9k', url: 'https://github.example.com/john-doe/example-project' },
   ],
   testimonials: [
-    { quote: 'Sofia turned a confusing onboarding flow into the thing our sales team now demos first.', author: 'Head of Product', role: 'Lumio Studios' },
+    { quote: 'John turned a confusing onboarding flow into the thing our sales team now demos first.', author: 'Head of Product', role: 'Example Oy' },
   ],
   certificates: [
-    { name: 'Certified Usability Analyst (CUA)', issuer: 'Human Factors International', year: '2020', credentialUrl: '', expiry: '' },
+    { name: 'Certified Usability Analyst', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '' },
   ],
 })
 
@@ -122,7 +122,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Senior UX-suunnittelija',
-      company: 'Lumio Studios',
+      company: 'Example Oy',
       location: 'Turku',
       employmentType: 'Full-time',
       startDate: '02/2021',
@@ -138,7 +138,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'UX-suunnittelija',
-      company: 'Rantapolku Design',
+      company: 'Example Oy',
       location: 'Helsinki',
       employmentType: 'Full-time',
       startDate: '03/2018',
@@ -154,7 +154,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Turun ammattikorkeakoulu',
+      school: 'Example University',
       degree: 'Muotoilija (AMK), teollinen muotoilu',
       location: 'Turku',
       startDate: '2014',
@@ -182,7 +182,7 @@ const fi = buildExampleCv({
       name: 'Saavutettavuuden kontrastintarkistin',
       description: 'Selainlaajennus, joka merkitsee heikosti kontrastoidun tekstin suunnittelijan työskennellessä Figmassa.',
       stack: 'Figma-lisäosa-API, TypeScript',
-      githubUrl: 'https://github.com/example-snieminen/contrast-checker',
+      githubUrl: 'https://github.example.com/john-doe/contrast-checker',
       demoUrl: '',
       organization: '',
       impact: 'Yli 900 asennusta.',
@@ -203,13 +203,13 @@ const fi = buildExampleCv({
     },
   ],
   openSource: [
-    { name: 'Storybook', description: 'Paransin saavutettavuuslisäosan dokumentaatiota selkeämmillä käyttöönotto-esimerkeillä.', language: 'TypeScript', stars: '84k', forks: '9k', url: 'https://github.com/storybookjs/storybook' },
+    { name: 'Example project', description: 'Paransin saavutettavuuslisäosan dokumentaatiota selkeämmillä käyttöönotto-esimerkeillä.', language: 'TypeScript', stars: '84k', forks: '9k', url: 'https://github.example.com/john-doe/example-project' },
   ],
   testimonials: [
-    { quote: 'Sofia muutti sekavan onboarding-polun asiaksi, jota myyntitiimimme nyt esittelee ensimmäisenä.', author: 'Tuotejohtaja', role: 'Lumio Studios' },
+    { quote: 'John muutti sekavan onboarding-polun asiaksi, jota myyntitiimimme nyt esittelee ensimmäisenä.', author: 'Tuotejohtaja', role: 'Example Oy' },
   ],
   certificates: [
-    { name: 'Certified Usability Analyst (CUA)', issuer: 'Human Factors International', year: '2020', credentialUrl: '', expiry: '' },
+    { name: 'Certified Usability Analyst', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '' },
   ],
 })
 

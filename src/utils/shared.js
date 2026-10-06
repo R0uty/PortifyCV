@@ -18,8 +18,8 @@ export function formatLinkLabel(key) {
 
 /**
  * Shortens a URL for display in narrow sidebar link cards — strips the
- * scheme and a trailing slash so "https://github.com/alexmorgan/" reads as
- * "github.com/alexmorgan" instead of wrapping across 2-3 lines in a ~250px
+ * scheme and a trailing slash so "https://github.com/username/" reads as
+ * "github.com/username" instead of wrapping across 2-3 lines in a ~250px
  * column. The full original value is still used for the actual href.
  */
 export function formatLinkDisplayValue(value) {

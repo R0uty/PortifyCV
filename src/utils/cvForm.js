@@ -340,13 +340,13 @@ export const createInitialCvData = () => ({
 export const initialCvData = createInitialCvData()
 
 export const demoCvData = {
-  fullName: 'Alex Morgan',
+  fullName: 'John Doe',
   title: 'Senior Product Designer',
   about:
     'Product designer with 7+ years of experience shaping SaaS workflows, design systems, and portfolio-ready product storytelling across startup and enterprise teams.',
   tagline: 'Helping ideas become reality.',
-  email: 'alex@alexmorgan.dev',
-  phone: '+358 40 123 4567',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   location: 'Helsinki, Finland',
   photo: '',
   photoVisibilityByTemplate: createTemplatePhotoVisibility(),
@@ -363,7 +363,7 @@ export const demoCvData = {
   experience: [
     {
       role: 'Senior Product Designer',
-      company: 'Studio North',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'Jan 2022',
@@ -379,7 +379,7 @@ export const demoCvData = {
     },
     {
       role: 'Product Designer',
-      company: 'Atlas Labs',
+      company: 'Example Oy',
       location: 'Remote',
       employmentType: 'Full-time',
       startDate: 'Jun 2019',
@@ -395,7 +395,7 @@ export const demoCvData = {
   ],
   education: [
     {
-      school: 'University of the Arts',
+      school: 'Example University',
       degree: 'B.A. Graphic Design',
       location: 'Helsinki, Finland',
       startDate: '2014',
@@ -406,14 +406,14 @@ export const demoCvData = {
     },
   ],
   links: {
-    github: 'https://github.com/alexmorgan',
-    linkedin: 'https://linkedin.com/in/alexmorgan',
-    portfolio: 'https://alexmorgan.design',
-    website: 'https://alexmorgan.dev',
-    behance: 'https://behance.net/alexmorgan',
-    dribbble: 'https://dribbble.com/alexmorgan',
-    medium: 'https://medium.com/@alexmorgan',
-    devto: 'https://dev.to/alexmorgan',
+    github: 'https://github.example.com/john-doe',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
+    portfolio: 'https://johndoe.example.com',
+    website: 'https://www.example.com',
+    behance: 'https://behance.example.com/john-doe',
+    dribbble: 'https://dribbble.example.com/john-doe',
+    medium: 'https://medium.example.com/@john-doe',
+    devto: 'https://devto.example.com/john-doe',
     scholar: '',
     boardProfile: '',
     blog: '',
@@ -434,15 +434,15 @@ export const demoCvData = {
   ],
   certificates: [
     {
-      name: 'Certified Scrum Product Owner (CSPO)',
-      issuer: 'Scrum Alliance',
+      name: 'Certified Product Owner',
+      issuer: 'Example Oy',
       year: '2023',
       credentialUrl: '',
       expiry: '',
     },
     {
-      name: 'Google UX Design Professional Certificate',
-      issuer: 'Google',
+      name: 'UX Design Professional Certificate',
+      issuer: 'Example Oy',
       year: '2021',
       credentialUrl: '',
       expiry: '',
@@ -453,9 +453,9 @@ export const demoCvData = {
       name: 'Atlas Design System',
       description: 'A shared component library adopted across six product teams.',
       stack: 'Figma, React, Storybook',
-      githubUrl: 'https://github.com/alexmorgan/atlas-design-system',
-      demoUrl: 'https://atlas-design-system.alexmorgan.design',
-      organization: 'Studio North',
+      githubUrl: 'https://github.example.com/john-doe/atlas-design-system',
+      demoUrl: 'https://atlas-design-system.example.com',
+      organization: 'Example Oy',
       impact: 'Cut cross-team design handoff time by 35%.',
       date: '2023',
       teamSize: 'Team of 4',
@@ -481,18 +481,18 @@ export const demoCvData = {
   ],
   openSource: [
     {
-      name: 'storybook-a11y-kit',
+      name: 'Example project',
       description: 'Accessibility addons and presets for Storybook design systems.',
       language: 'TypeScript',
       stars: '412',
       forks: '38',
-      url: 'https://github.com/alexmorgan/storybook-a11y-kit',
+      url: 'https://github.example.com/john-doe/example-project',
     },
   ],
   publications: [
     {
       title: 'Designing Systems That Scale With Teams, Not Against Them',
-      publisher: 'UX Collective',
+      publisher: 'Example Oy',
       year: '2022',
       url: '',
     },
@@ -500,7 +500,7 @@ export const demoCvData = {
   leadership: [
     {
       role: 'Design Guild Chair',
-      organization: 'Studio North',
+      organization: 'Example Oy',
       description: 'Set design-quality standards and ran quarterly critique sessions for 20+ designers.',
       startDate: '2022',
       endDate: 'Present',
@@ -508,14 +508,14 @@ export const demoCvData = {
   ],
   memberships: [
     {
-      organization: 'AIGA',
+      organization: 'Example Oy',
       role: 'Member',
       year: '2020',
     },
   ],
   speaking: [
     {
-      conference: 'Config',
+      conference: 'Example Conference',
       topic: 'Design Systems at Scale',
       audience: '400+ product designers',
       date: '2023',
@@ -523,7 +523,7 @@ export const demoCvData = {
   ],
   volunteering: [
     {
-      organization: 'Design for Good',
+      organization: 'Example Oy',
       role: 'Volunteer Mentor',
       description: 'Mentored early-career designers transitioning into product roles.',
     },
@@ -531,7 +531,7 @@ export const demoCvData = {
   internships: [
     {
       role: 'Design Intern',
-      company: 'Atlas Labs',
+      company: 'Example Oy',
       location: 'Remote',
       startDate: 'Jun 2018',
       endDate: 'Aug 2018',
@@ -551,9 +551,9 @@ export const demoCvData = {
   ],
   testimonials: [
     {
-      quote: 'Alex turned a chaotic component library into the backbone of our entire product suite.',
-      author: 'Jordan Lee',
-      role: 'Engineering Manager, Studio North',
+      quote: 'John turned a chaotic component library into the backbone of our entire product suite.',
+      author: 'Jane Doe',
+      role: 'Engineering Manager, Example Oy',
     },
   ],
 }

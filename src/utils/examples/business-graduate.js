@@ -3,11 +3,11 @@ import { buildExampleCv } from './buildExampleCv.js'
 // Fictional person. Listed under: graduate, compact. Stress case: thin
 // experience — a part-time retail job plus one internship, no full-time role.
 const shared = {
-  fullName: 'Noora Aaltonen',
-  email: 'noora.aaltonen@example.com',
-  phone: '+358 40 000 2504',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-naaltonen',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -24,7 +24,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Sales Assistant (Part-time)',
-      company: 'Vaskikello Boutique',
+      company: 'Example Oy',
       location: 'Hämeenlinna, Finland',
       employmentType: 'Part-time',
       startDate: 'Sep 2021',
@@ -41,7 +41,7 @@ const en = buildExampleCv({
   internships: [
     {
       role: 'Finance Intern',
-      company: 'Vaskikello Consulting',
+      company: 'Example Oy',
       location: 'Hämeenlinna, Finland',
       startDate: 'Jun 2023',
       endDate: 'Aug 2023',
@@ -51,7 +51,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Hanken School of Economics',
+      school: 'Example University',
       degree: "M.Sc. (Econ.) Economics and Business Administration",
       location: 'Helsinki, Finland',
       startDate: '2022',
@@ -61,7 +61,7 @@ const en = buildExampleCv({
       grade: '',
     },
     {
-      school: 'Hanken School of Economics',
+      school: 'Example University',
       degree: 'B.Sc. (Econ.) Economics and Business Administration',
       location: 'Helsinki, Finland',
       startDate: '2019',
@@ -73,12 +73,12 @@ const en = buildExampleCv({
   ],
   projects: [
     {
-      name: 'Nordic Case Competition — Retail Pricing Strategy',
+      name: 'Example Case Competition — Retail Pricing Strategy',
       description: 'Developed a pricing-strategy recommendation for a Nordic retail chain as part of a 4-person team in a regional case competition.',
       stack: 'Excel, PowerPoint',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Nordic Student Case Competition',
+      organization: 'Example Oy',
       impact: 'Placed 2nd out of 18 teams.',
       date: '2023',
       teamSize: '4',
@@ -91,7 +91,7 @@ const en = buildExampleCv({
       stack: 'SPSS, Excel',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Hanken School of Economics',
+      organization: 'Example Oy',
       impact: 'Findings presented to 2 partner companies.',
       date: '2024',
       teamSize: '',
@@ -102,20 +102,20 @@ const en = buildExampleCv({
   publications: [
     {
       title: 'Customer churn drivers in subscription retail: a Nordic case study',
-      publisher: "Hanken School of Economics (Master's thesis)",
+      publisher: "Example Oy",
       year: '2024',
       url: 'https://example.com/thesis/aaltonen-2024',
     },
   ],
   volunteering: [
     {
-      organization: 'Hanken Student Union',
+      organization: 'Example Oy',
       role: 'Treasurer',
       description: 'Managed an annual budget of 25,000 EUR for 15 student clubs and events over 3 years.',
     },
   ],
   certificates: [
-    { name: 'Bloomberg Market Concepts', issuer: 'Bloomberg', year: '2023', credentialUrl: '', expiry: '' },
+    { name: 'Market Concepts Certificate', issuer: 'Example Oy', year: '2023', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -142,7 +142,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Myyjä (osa-aikainen)',
-      company: 'Vaskikello Boutique',
+      company: 'Example Oy',
       location: 'Hämeenlinna',
       employmentType: 'Part-time',
       startDate: '09/2021',
@@ -159,7 +159,7 @@ const fi = buildExampleCv({
   internships: [
     {
       role: 'Talousharjoittelija',
-      company: 'Vaskikello Consulting',
+      company: 'Example Oy',
       location: 'Hämeenlinna',
       startDate: '06/2023',
       endDate: '08/2023',
@@ -169,7 +169,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Svenska handelshögskolan (Hanken)',
+      school: 'Example University',
       degree: 'Kauppatieteiden maisteri (KTM)',
       location: 'Helsinki',
       startDate: '2022',
@@ -179,7 +179,7 @@ const fi = buildExampleCv({
       grade: '',
     },
     {
-      school: 'Svenska handelshögskolan (Hanken)',
+      school: 'Example University',
       degree: 'Kauppatieteiden kandidaatti (KTK)',
       location: 'Helsinki',
       startDate: '2019',
@@ -191,12 +191,12 @@ const fi = buildExampleCv({
   ],
   projects: [
     {
-      name: 'Pohjoismainen case-kilpailu — vähittäiskaupan hinnoittelustrategia',
+      name: 'Example Case Competition — vähittäiskaupan hinnoittelustrategia',
       description: 'Kehitin hinnoittelustrategiasuosituksen pohjoismaiselle vähittäiskauppaketjulle 4 hengen tiimissä alueellisessa case-kilpailussa.',
       stack: 'Excel, PowerPoint',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Nordic Student Case Competition',
+      organization: 'Example Oy',
       impact: 'Sijoitus 2. sija 18 joukkueesta.',
       date: '2023',
       teamSize: '4',
@@ -209,7 +209,7 @@ const fi = buildExampleCv({
       stack: 'SPSS, Excel',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Svenska handelshögskolan (Hanken)',
+      organization: 'Example Oy',
       impact: 'Tulokset esiteltiin 2 yhteistyöyritykselle.',
       date: '2024',
       teamSize: '',
@@ -220,20 +220,20 @@ const fi = buildExampleCv({
   publications: [
     {
       title: 'Asiakaspoistuman syyt tilausvähittäiskaupassa: pohjoismainen tapaustutkimus',
-      publisher: 'Svenska handelshögskolan (Hanken), pro gradu -tutkielma',
+      publisher: 'Example Oy',
       year: '2024',
       url: 'https://example.com/thesis/aaltonen-2024',
     },
   ],
   volunteering: [
     {
-      organization: 'Hankenin ylioppilaskunta',
+      organization: 'Example Oy',
       role: 'Rahastonhoitaja',
       description: 'Vastasin 25 000 euron vuosibudjetista 15 opiskelijakerholle ja tapahtumalle kolmen vuoden ajan.',
     },
   ],
   certificates: [
-    { name: 'Bloomberg Market Concepts', issuer: 'Bloomberg', year: '2023', credentialUrl: '', expiry: '' },
+    { name: 'Market Concepts Certificate', issuer: 'Example Oy', year: '2023', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Suomi', level: 'Äidinkieli' },

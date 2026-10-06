@@ -2,13 +2,13 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: portrait.
 const shared = {
-  fullName: 'Saara Vainio',
-  email: 'saara.vainio@example.com',
-  phone: '+358 40 000 2511',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    portfolio: 'https://vainio.example.com',
-    behance: 'https://behance.net/example-svainio',
-    linkedin: 'https://linkedin.com/in/example-svainio',
+    portfolio: 'https://johndoe.example.com',
+    behance: 'https://behance.example.com/example-sjohn-doe',
+    linkedin: 'https://linkedin.example.com/in/example-sjohn-doe',
   },
 }
 
@@ -25,7 +25,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Architect',
-      company: 'Kaarisilta Architects',
+      company: 'Example Oy',
       location: 'Rauma, Finland',
       employmentType: 'Full-time',
       startDate: 'May 2019',
@@ -41,7 +41,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Junior Architect',
-      company: 'Rantakivi Design Studio',
+      company: 'Example Oy',
       location: 'Turku, Finland',
       employmentType: 'Full-time',
       startDate: 'Aug 2015',
@@ -57,7 +57,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Aalto University',
+      school: 'Example University',
       degree: 'M.Sc. (Architecture)',
       location: 'Espoo, Finland',
       startDate: '2010',
@@ -74,7 +74,7 @@ const en = buildExampleCv({
       stack: 'Revit, Rhino',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kaarisilta Architects',
+      organization: 'Example Oy',
       impact: 'Delivered 8% under budget; sold out within 4 months of completion.',
       date: '2023',
       teamSize: '6',
@@ -87,7 +87,7 @@ const en = buildExampleCv({
       stack: 'AutoCAD, Revit',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kaarisilta Architects',
+      organization: 'Example Oy',
       impact: 'Daily visitor count rose 55% after reopening.',
       date: '2021',
       teamSize: '4',
@@ -96,8 +96,8 @@ const en = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'LEED Green Associate', issuer: 'U.S. Green Building Council', year: '2020', credentialUrl: '', expiry: '' },
-    { name: 'Qualified Principal Designer (pääsuunnittelija)', issuer: 'Finnish Association of Architects (SAFA)', year: '2019', credentialUrl: '', expiry: '' },
+    { name: 'Green Building Associate', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '' },
+    { name: 'Qualified Principal Designer (pääsuunnittelija)', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -119,7 +119,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Arkkitehti',
-      company: 'Kaarisilta Architects',
+      company: 'Example Oy',
       location: 'Rauma',
       employmentType: 'Full-time',
       startDate: '05/2019',
@@ -135,7 +135,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Nuorempi arkkitehti',
-      company: 'Rantakivi Design Studio',
+      company: 'Example Oy',
       location: 'Turku',
       employmentType: 'Full-time',
       startDate: '08/2015',
@@ -151,7 +151,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Aalto-yliopisto',
+      school: 'Example University',
       degree: 'Arkkitehti',
       location: 'Espoo',
       startDate: '2010',
@@ -168,7 +168,7 @@ const fi = buildExampleCv({
       stack: 'Revit, Rhino',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kaarisilta Architects',
+      organization: 'Example Oy',
       impact: 'Valmistui 8 % budjetin alle; myytiin loppuun 4 kuukaudessa valmistumisesta.',
       date: '2023',
       teamSize: '6',
@@ -181,7 +181,7 @@ const fi = buildExampleCv({
       stack: 'AutoCAD, Revit',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kaarisilta Architects',
+      organization: 'Example Oy',
       impact: 'Päivittäinen kävijämäärä nousi 55 % uudelleenavauksen jälkeen.',
       date: '2021',
       teamSize: '4',
@@ -190,8 +190,8 @@ const fi = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'LEED Green Associate', issuer: 'U.S. Green Building Council', year: '2020', credentialUrl: '', expiry: '' },
-    { name: 'Pääsuunnittelijakelpoisuus', issuer: 'Suomen Arkkitehtiliitto (SAFA)', year: '2019', credentialUrl: '', expiry: '' },
+    { name: 'Green Building Associate', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '' },
+    { name: 'Pääsuunnittelijakelpoisuus', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
