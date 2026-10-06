@@ -198,7 +198,7 @@ test.describe('Direct Edit builder', () => {
 
     await aboutSection.hover()
 
-    const pencil = page.locator('.direct-edit-pencil')
+    const pencil = page.locator('.direct-edit-pencil--active')
     await expect(pencil).toBeVisible()
 
     await pencil.click()
@@ -215,7 +215,7 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await page.locator('[data-export-section="experience"]').first().hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
 
     const popup = page.locator('.direct-edit-popup')
     await expect(popup).toBeVisible()
@@ -270,7 +270,7 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await page.locator('[data-export-section="experience"]').first().hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
 
     const popup = page.locator('.direct-edit-popup')
     await expect(popup).toBeVisible()
@@ -299,7 +299,7 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await page.locator('[data-export-header]').first().hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
 
     const popup = page.locator('.direct-edit-popup')
     await expect(popup).toBeVisible()
@@ -320,7 +320,7 @@ test.describe('Direct Edit builder', () => {
     const sectionKey = await section.getAttribute('data-export-section')
 
     await section.hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
     await expect(page.locator('.direct-edit-popup')).toBeVisible()
 
     const geo = await popupGeometry(page, sectionKey)
@@ -343,7 +343,7 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await page.locator('[data-export-section="experience"]').first().hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
     await expect(page.locator('.direct-edit-popup')).toBeVisible()
 
     const geo = await popupGeometry(page, 'experience')
@@ -359,7 +359,7 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await page.locator('[data-export-section="experience"]').first().hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
 
     const popup = page.locator('.direct-edit-popup')
     const firstEntry = popup.locator('.direct-edit-popup__entry').first()
@@ -394,7 +394,7 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await page.locator('[data-export-section="experience"]').first().hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
 
     const popup = page.locator('.direct-edit-popup')
     const list = popup
@@ -480,7 +480,7 @@ test.describe('Direct Edit builder', () => {
     await expect(page.locator('[data-export-photo]')).toHaveCount(0)
 
     await page.locator('[data-export-header]').first().hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
 
     const popup = page.locator('.direct-edit-popup')
     await expect(popup).toBeVisible()
@@ -520,7 +520,7 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await page.locator('[data-export-section="skills"]').first().hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
 
     const popup = page.locator('.direct-edit-popup')
     const rows = popup.locator('.direct-edit-popup__skill')
@@ -565,7 +565,7 @@ test.describe('Direct Edit builder', () => {
     const target = sidebarOrderBefore[1]
 
     await page.locator(`[data-export-section="${target}"]`).first().hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
     await page.locator('.direct-edit-popup__move-up').click()
 
     const sidebarOrderAfter = await page
@@ -595,7 +595,7 @@ test.describe('Direct Edit builder', () => {
       await selectTemplate(page, label)
 
       await page.locator(`[data-export-section="${sectionKey}"]`).first().hover()
-      await page.locator('.direct-edit-pencil').click()
+      await page.locator('.direct-edit-pencil--active').click()
 
       const popup = page.locator('.direct-edit-popup')
       await expect(popup).toBeVisible()
@@ -676,7 +676,7 @@ test.describe('Direct Edit builder', () => {
     await selectTemplate(page, 'European')
 
     await page.locator('[data-export-section="certificates"]').first().hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
     const popup = page.locator('.direct-edit-popup')
     await popup.locator('.direct-edit-popup__entry').first().locator('.direct-edit-popup__entry-visibility').click()
     await page.keyboard.press('Escape')
@@ -701,7 +701,7 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await page.locator('[data-export-section="experience"]').first().hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
     await page.locator('.direct-edit-popup__entry').first().locator('.direct-edit-popup__entry-visibility').click()
     await page.keyboard.press('Escape')
 
@@ -1184,7 +1184,7 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await page.locator('[data-export-section="about"]').first().hover()
-    await expect(page.locator('.direct-edit-pencil')).toBeVisible()
+    await expect(page.locator('.direct-edit-pencil--active')).toBeVisible()
 
     // The overlay must live outside the element previewRef points at, or
     // html2canvas captures the pencil and popup chrome into the PDF.
@@ -1733,7 +1733,7 @@ test.describe('Direct Edit builder', () => {
       await expect(section).toBeVisible()
 
       await section.hover()
-      await page.locator('.direct-edit-pencil').click()
+      await page.locator('.direct-edit-pencil--active').click()
 
       const popup = page.locator('.direct-edit-popup')
       await expect(popup).toBeVisible()
@@ -1757,7 +1757,7 @@ test.describe('Direct Edit popup on an empty CV', () => {
     await expect(section).toBeVisible()
 
     await section.hover()
-    await page.locator('.direct-edit-pencil').click()
+    await page.locator('.direct-edit-pencil--active').click()
 
     const popup = page.locator('.direct-edit-popup')
     await popup.locator('.direct-edit-popup__add').click()
@@ -1997,5 +1997,91 @@ test.describe('Editing a skill', () => {
 
     await expect(skillsSection.getByRole('button', { name: 'Edit Figma Prototyping', exact: true })).toHaveCount(1)
     await expect(page.locator('.app-shell__preview [data-export-section="skills"]')).toContainText('Figma Prototyping')
+  })
+})
+
+test.describe('Direct Edit pencils and Load demo CV', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+  })
+
+  // The section pencil used to appear only while the pointer was over a
+  // section, which was easy to miss and near-unreachable on touch.
+  test('every section shows its pencil without hovering, and each opens its own section', async ({ page }) => {
+    await selectTemplate(page, 'Creative')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await page.mouse.move(0, 0)
+
+    const sectionKeys = await page.locator('.direct-edit-preview [data-export-section]').evaluateAll(
+      (nodes) => [...new Set(nodes.map((node) => node.getAttribute('data-export-section')))],
+    )
+    expect(sectionKeys.length).toBeGreaterThan(3)
+    for (const key of [...sectionKeys, 'identity']) {
+      await expect(page.locator(`[data-direct-edit-pencil="${key}"]`)).toBeVisible()
+    }
+
+    // Each pencil sits at its own section's top-right corner.
+    const geometry = await page.evaluate(() => {
+      const pencil = document.querySelector('[data-direct-edit-pencil="experience"]').getBoundingClientRect()
+      const section = document.querySelector('.direct-edit-preview [data-export-section="experience"]').getBoundingClientRect()
+      return { pencilTop: pencil.top, pencilRight: pencil.right, sectionTop: section.top, sectionRight: section.right }
+    })
+    expect(Math.abs(geometry.pencilTop - geometry.sectionTop)).toBeLessThan(6)
+    expect(Math.abs(geometry.pencilRight - geometry.sectionRight)).toBeLessThan(6)
+
+    await page.locator('[data-direct-edit-pencil="experience"]').click()
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+    await expect(popup).toContainText('Experience')
+    await page.keyboard.press('Escape')
+
+    await page.locator('[data-direct-edit-pencil="identity"]').click()
+    await expect(popup.locator('.direct-edit-popup__label', { hasText: 'Full name' })).toBeVisible()
+  })
+
+  test('pencils follow their sections when an edit moves them', async ({ page }) => {
+    await selectTemplate(page, 'Modern Timeline')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const offset = (key) => page.evaluate((sectionKey) => {
+      const pencil = document.querySelector(`[data-direct-edit-pencil="${sectionKey}"]`).getBoundingClientRect()
+      const section = document.querySelector(`.direct-edit-preview [data-export-section="${sectionKey}"]`).getBoundingClientRect()
+      return { dy: Math.round(pencil.top - section.top), sectionTop: Math.round(section.top) }
+    }, key)
+
+    const before = await offset('education')
+
+    // Making the summary much longer pushes every later section down.
+    const summary = page.locator('.direct-edit-preview [data-export-section="about"] .direct-edit-field').first()
+    await summary.click()
+    await page.keyboard.press('End')
+    await page.keyboard.type(' A much longer summary sentence that adds several more lines of text to this section.'.repeat(4))
+
+    await expect.poll(async () => (await offset('education')).sectionTop).toBeGreaterThan(before.sectionTop + 20)
+    await expect.poll(async () => (await offset('education')).dy).toBe(before.dy)
+  })
+
+  test('Load demo CV is available in Direct Edit, and Undo restores the previous CV', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const nameField = page.locator('.direct-edit-preview h3 .direct-edit-field')
+    await nameField.click()
+    await page.keyboard.press('Control+A')
+    await page.keyboard.type('Someone Else')
+    await nameField.blur()
+    await expect(nameField).toHaveText('Someone Else')
+    // Undo history groups changes made within HISTORY_COMMIT_DELAY_MS
+    // (600 ms, ResumeBuilderPage.jsx) into one step; wait past it so the
+    // name edit and the demo load are separate steps, as for a real user.
+    await page.waitForTimeout(800)
+
+    await page.locator('.direct-edit-actions').getByRole('button', { name: 'Load demo CV' }).click()
+    // .last(): the beforeEach's own Load demo CV toast may still be up.
+    await expect(page.getByText('Demo CV loaded.').last()).toBeVisible()
+    await expect(nameField).toHaveText('John Doe')
+
+    await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+    await expect(nameField).toHaveText('Someone Else')
   })
 })

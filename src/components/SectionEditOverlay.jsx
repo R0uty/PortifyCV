@@ -62,6 +62,9 @@ export default function SectionEditOverlay({
   // triggers below. Derived from the same attributes the pointer path
   // uses, so it stays template-agnostic.
   const [sections, setSections] = useState([])
+  // Where every section's always-visible pencil sits, in the same
+  // container coordinates as `hovered` (see measure below).
+  const [pencils, setPencils] = useState([])
 
   // Measured in container coordinates (sectionRect - containerRect), not
   // viewport coordinates: the overlay and the preview scroll together, so
@@ -281,6 +284,68 @@ export default function SectionEditOverlay({
     )
   }, [formData, templateConfig])
 
+  // Every section shows its pencil all the time, not only while hovered —
+  // a hover-only pencil was easy to miss and near-unreachable on touch.
+  // Re-measured after every content change and whenever the preview
+  // resizes (a template's Showcase chunk loading, an edit reflowing the
+  // page, a window resize), so the pencils follow their sections.
+  const measurePencils = useCallback(() => (
+    sections
+      .map((sectionKey) => measure(findSectionElement(sectionKey), sectionKey))
+      .filter(Boolean)
+  ), [sections, measure, findSectionElement])
+
+  // Keeps the same array when nothing moved, so a re-measure that changes
+  // nothing doesn't re-render every pencil.
+  const keepIfUnchanged = (next) => (prev) => (
+    prev.length === next.length
+      && prev.every((pencil, index) => (
+        pencil.sectionKey === next[index].sectionKey
+        && pencil.top === next[index].top
+        && pencil.right === next[index].right
+      ))
+      ? prev
+      : next
+  )
+
+  // Measured inline from the container ref (like the section enumeration
+  // above) rather than through measurePencils, which the hooks lint rule
+  // can't see into.
+  useLayoutEffect(() => {
+    const container = containerRef.current
+    const parent = container?.parentElement
+
+    if (!container || !parent) {
+      return
+    }
+
+    const base = container.getBoundingClientRect()
+    const next = []
+
+    for (const sectionKey of sections) {
+      const element = parent.querySelector(sectionSelectorFor(sectionKey))
+
+      if (element) {
+        const rect = element.getBoundingClientRect()
+        next.push({ sectionKey, top: rect.top - base.top, right: rect.right - base.left })
+      }
+    }
+
+    setPencils(keepIfUnchanged(next))
+  }, [sections, formData])
+
+  useEffect(() => {
+    const parent = containerRef.current?.parentElement
+
+    if (!parent) {
+      return undefined
+    }
+
+    const observer = new ResizeObserver(() => setPencils(keepIfUnchanged(measurePencils())))
+    observer.observe(parent)
+    return () => observer.disconnect()
+  }, [measurePencils])
+
   const openSection = useCallback(
     (sectionKey) => {
       // The popup renders only while `hovered` describes its section, so
@@ -433,21 +498,26 @@ export default function SectionEditOverlay({
         </div>
       ) : null}
 
-      {hovered && !openSectionKey ? (
-        <button
-          type="button"
-          className="direct-edit-pencil"
-          style={{ top: `${hovered.top}px`, left: `${hovered.right}px` }}
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={() => {
-            setFocusEntry(null)
-            setOpenSectionKey(hovered.sectionKey)
-          }}
-          aria-label={locale === 'fi' ? 'Muokkaa osiota' : 'Edit section'}
-        >
-          &#9998;
-        </button>
-      ) : null}
+      {/* Pointer targets only (tabIndex -1): the keyboard triggers above
+          already give every section one tab stop. The hovered section's
+          pencil is marked active and drawn a little stronger. */}
+      {!openSectionKey
+        ? pencils.map((pencil) => (
+          <button
+            key={pencil.sectionKey}
+            type="button"
+            tabIndex={-1}
+            className={`direct-edit-pencil${hovered?.sectionKey === pencil.sectionKey ? ' direct-edit-pencil--active' : ''}`}
+            data-direct-edit-pencil={pencil.sectionKey}
+            style={{ top: `${pencil.top}px`, left: `${pencil.right}px` }}
+            onPointerDown={(event) => event.stopPropagation()}
+            onClick={() => openSection(pencil.sectionKey)}
+            aria-label={locale === 'fi' ? 'Muokkaa osiota' : 'Edit section'}
+          >
+            &#9998;
+          </button>
+        ))
+        : null}
 
       {/* Pointer-only on purpose: the section's keyboard trigger already
           reaches every entry, and one extra tab stop per entry would bury

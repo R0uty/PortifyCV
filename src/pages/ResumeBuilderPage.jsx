@@ -575,18 +575,30 @@ function ResumeBuilderPage({
   const canRedo = historyFuture.length > 0
 
   const handleUndo = useCallback(() => {
-    if (historyPast.length === 0) {
+    // A change from the last HISTORY_COMMIT_DELAY_MS isn't in historyPast
+    // yet. Record it as its own step first, so Undo straight after it
+    // (e.g. right after "Load demo CV") undoes that change and not also the
+    // step before it.
+    let past = historyPast
+    let current = historyCommittedRef.current
+
+    if (formData !== current) {
+      past = [...past, current]
+      current = formData
+    }
+
+    if (past.length === 0) {
       return
     }
 
-    const previousFormData = historyPast[historyPast.length - 1]
+    const previousFormData = past[past.length - 1]
 
-    setHistoryPast(historyPast.slice(0, -1))
-    setHistoryFuture([...historyFuture, historyCommittedRef.current])
+    setHistoryPast(past.slice(0, -1))
+    setHistoryFuture([...historyFuture, current])
     historyCommittedRef.current = previousFormData
     historySkipNextCommitRef.current = true
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: previousFormData })
-  }, [dispatchFormData, historyPast, historyFuture])
+  }, [dispatchFormData, formData, historyPast, historyFuture])
 
   const handleRedo = useCallback(() => {
     if (historyFuture.length === 0) {
@@ -2276,6 +2288,7 @@ function ResumeBuilderPage({
             >
               <DirectEditPreview
                 overlayApiRef={directEditOverlayRef}
+                onLoadDemo={handleLoadDemo}
                 formData={formData}
                 dispatchFormData={dispatchFormData}
                 selectedTemplate={selectedTemplate}

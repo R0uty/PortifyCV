@@ -259,9 +259,21 @@
 }
 
 .direct-edit-sections {
+  position: relative;
+}
+
+/* "Sections" with "Load demo CV" stacked below it, in the preview's
+   top-right corner. Stacked, not side by side, so the pair stays out of
+   the CV's own top-right corner, where the header's always-visible edit
+   pencil sits. */
+.direct-edit-actions {
   position: absolute;
   top: 14px;
   right: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
   /* z-index:auto (the brief's original omission) is not enough here: the
      CV header content it overlaps is deep inside a plain, non-positioned
      ARTICLE/HEADER subtree, yet real-browser paint/hit-testing still put
@@ -284,6 +296,8 @@
 
 .direct-edit-sections__panel {
   position: absolute;
+  /* Above "Load demo CV", which sits right below the trigger. */
+  z-index: 1;
   top: 38px;
   right: 0;
   min-width: 168px;

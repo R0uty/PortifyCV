@@ -17,6 +17,7 @@ export default function DirectEditPreview({
   previewRef,
   cvFontId,
   overlayApiRef = null,
+  onLoadDemo = null,
 }) {
   // Shadows the --font-sans token (tokens.css) for this subtree only —
   // matches Classic mode's .preview-zoom-wrapper inline style in
@@ -43,12 +44,21 @@ export default function DirectEditPreview({
   return (
     <>
       <div className="direct-edit-preview" style={fontStyle}>
-        <SectionsMenu
-          formData={formData}
-          dispatchFormData={dispatchFormData}
-          templateConfig={templateConfig}
-          locale={locale}
-        />
+        {/* The preview's own top-right controls. Classic mode keeps "Load
+            demo CV" in its form column, which Direct Edit doesn't have. */}
+        <div className="direct-edit-actions">
+          <SectionsMenu
+            formData={formData}
+            dispatchFormData={dispatchFormData}
+            templateConfig={templateConfig}
+            locale={locale}
+          />
+          {onLoadDemo ? (
+            <button type="button" className="direct-edit-sections__trigger" onClick={onLoadDemo}>
+              {locale === 'fi' ? 'Lataa demo-CV' : 'Load demo CV'}
+            </button>
+          ) : null}
+        </div>
         <CVPreview {...previewProps} directEditDispatch={dispatchFormData} />
         <SectionEditOverlay
           formData={formData}
