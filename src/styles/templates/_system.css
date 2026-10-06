@@ -48,3 +48,87 @@
   --tpl-body-size: 0.82rem;
   --tpl-meta-size: 0.70rem;
 }
+
+/* Shared primitive — long unbreakable values (links/emails/URLs — anything
+   with no internal space to wrap at, see docs/template-design-system.md
+   §6). Never truncate an information-bearing value: let it break anywhere
+   instead of hiding content behind an ellipsis or pushing its flex/grid
+   container wider. The `min-width: 0` matters as much as `overflow-wrap` —
+   without it a flex or grid child refuses to shrink below its content's
+   intrinsic width and the wrap rule never gets a chance to apply.
+   LINK/URL/EMAIL VALUES ONLY — see `.tpl-text-wrappable` below for
+   ordinary word text (skills, etc.): `overflow-wrap: anywhere` doesn't
+   just permit a break at the *last resort* character, it lowers the
+   element's min-content size to effectively zero, so inside a flex/grid
+   row this can let the row shrink the element below a single *ordinary*
+   word's width and break words that would otherwise fit — a real bug
+   found on Modern Orange's skill-name row (docs/template-audit-phase2.md
+   G7 fix round 1), not a harness quirk. */
+.tpl-value-breakable {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+/* Shared primitive — long word-text values with internal spaces (skills,
+   category labels, etc., see docs/template-design-system.md §6). Unlike
+   `.tpl-value-breakable` above, `overflow-wrap: break-word` only breaks a
+   word when it's too long to fit a line *by itself* — it does not lower
+   the element's min-content size, so a flex/grid row can't shrink an
+   ordinary word below its own width and break it prematurely. Use this
+   (not `.tpl-value-breakable`) for anything that isn't a URL/email: a
+   single very long token (one 60-character skill with no spaces) still
+   wraps instead of overflowing, but a row of normal words wraps at its
+   spaces first.
+   Deliberately NO `min-width: 0` here (unlike `.tpl-value-breakable`
+   above) — tested and confirmed necessary, not an oversight. A flex/grid
+   item's automatic minimum width is its min-content size, which is what
+   actually stops the row from shrinking the element below one word's
+   width; `min-width: 0` overrides that protection and *reintroduces* the
+   exact bug this primitive exists to fix (confirmed with a RED run:
+   adding `min-width: 0` back made Modern Orange's skill-name mid-word
+   -break again). The element can still overflow its row in the
+   single-very-long-token case instead of forcing a break — for an
+   ordinary long word this is a few pixels, but a genuinely unbreakable
+   40+ character token (no spaces to wrap at) can overflow by far more
+   than that, up to the token's full width. That's the accepted
+   trade-off for a plain text row with no visible box of its own (Modern
+   Orange's skill-name, the one current user — it has no background,
+   border or padding, so overflowing past the row just extends the text,
+   it doesn't spill outside a visible chip). For an actual padded/
+   bordered chip, where overflow would visibly spill text outside its own
+   background box, use `.tpl-chip-wrappable` below instead — NOT
+   `overflow-wrap: anywhere` directly on the token (Task 9's fix-round-1
+   mistake: `anywhere` lowers min-content the same way
+   `.tpl-value-breakable` does, so it reintroduces the exact
+   fracture-on-ordinary-words bug this primitive exists to prevent, this
+   time inside a crowded flex-wrap chip row). */
+.tpl-text-wrappable {
+  overflow-wrap: break-word;
+}
+
+/* Shared primitive — skill/tag CHIPS specifically (a padded, often
+   bordered or filled background box, as opposed to `.tpl-text-wrappable`'s
+   plain text row): same `overflow-wrap: break-word` as `.tpl-text-wrappable`
+   (does not lower min-content, so a crowded flex-wrap row can't shrink an
+   ordinary chip below its own word's width and fracture it), plus
+   `max-width: 100%`. `max-width` clamps a flex item's *automatic minimum
+   size* to the available row width (the flex sizing spec bounds the
+   automatic minimum by any specified max-width) — so a token that's
+   genuinely wider than the whole row still breaks (inside the chip, not
+   spilling past its background), while an ordinary chip that's merely
+   crowded out of its current line wraps to the next line intact instead
+   of being force-shrunk and fractured. Task 9 fix-round-1 used
+   `overflow-wrap: anywhere` directly on 7 templates' chip classes (modern,
+   creative, graduate, portfolio, colorfulCompact, quadrant, plus
+   pre-existing executive) to handle a 44-character unbreakable skill
+   token — `anywhere` fixed that one case but, like
+   `.tpl-value-breakable`, also lowers min-content, which let a crowded
+   row fracture an ordinary skill word the same way G7's original Modern
+   Orange bug did. `.tpl-chip-wrappable` replaces `anywhere` on all seven;
+   confirmed with a RED run (temporarily reverting to `anywhere`
+   reproduced a mid-word break on an ordinary skill like "Infrastructure-
+   as-code" in a crowded row) before switching back to this primitive. */
+.tpl-chip-wrappable {
+  overflow-wrap: break-word;
+  max-width: 100%;
+}

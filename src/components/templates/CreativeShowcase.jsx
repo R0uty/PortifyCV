@@ -32,10 +32,7 @@ import { accentSoftFill, accentInkMix } from '../../utils/templateAccents'
 import { CREATIVE_DEFAULT_ACCENT_COLOR } from './creative'
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // Creative's own Experience-entry renderer — deliberately NOT
 // directEditExperienceEntry.jsx (the shared module for Classic
@@ -52,7 +49,9 @@ function splitToBullets(text) {
 // call site.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div
@@ -90,21 +89,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIn
         <p className="creative-showcase__exp-dates">{dateRange || copy.datesPending}</p>
       </div>
       {directEditDispatch ? (
-        <p className="creative-showcase__exp-desc creative-showcase__exp-desc--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="creative-showcase__exp-desc creative-showcase__exp-desc--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="creative-showcase__exp-desc">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="creative-showcase__exp-desc">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="creative-showcase__exp-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )
@@ -155,10 +166,16 @@ export default function CreativeShowcase({
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
-  const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
+  const aboutPlaceholder = isFinnish
+    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
+    : 'Your professional summary will appear here as you fill out the CV form.'
+  // In the read-only export/preview render (no directEditDispatch), never
+  // fall back to the "will appear here" placeholder when About's own text
+  // is blank but coreStrengths pills are present — those pills render
+  // inside this same section (I-1), so an otherwise-empty About still has
+  // real content and must not show editing-affordance copy in an export.
+  const hasAboutPills = snapshot.coreStrengths.some((item) => item.title)
+  const about = snapshot.about || (hasAboutPills ? '' : aboutPlaceholder)
 
   const personalContactItems = [
     ['email', snapshot.email],
@@ -219,26 +236,24 @@ export default function CreativeShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about" placement={placement} movedFrom={movedFrom} number={sectionNumber(key)} title={copy.about}>
-          <p className="creative-showcase__intro">
-            {directEditDispatch ? (
-              <EditableField
-                as="span"
-                path={{ kind: 'root', field: 'about' }}
-                value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-                    : 'Your professional summary will appear here as you fill out the CV form.'
-                }
-                multiline
-              />
-            ) : about}
-          </p>
+          {about || directEditDispatch ? (
+            <p className="creative-showcase__intro">
+              {directEditDispatch ? (
+                <EditableField
+                  as="span"
+                  path={{ kind: 'root', field: 'about' }}
+                  value={formData.about}
+                  placeholder={aboutPlaceholder}
+                  multiline
+                />
+              ) : about}
+            </p>
+          ) : null}
           {snapshot.coreStrengths.length > 0 ? (
             <div className="creative-showcase__pill-row">
               {snapshot.coreStrengths.slice(0, 3).map((item, index) => (
                 item.title ? (
-                  <span key={`${item.title}-${index}`} className="creative-showcase__pill" data-direct-edit-index={snapshot.sourceIndices.coreStrengths[index]}>
+                  <span key={`${item.title}-${index}`} className="creative-showcase__pill tpl-chip-wrappable" data-direct-edit-index={snapshot.sourceIndices.coreStrengths[index]}>
                     {item.title}
                   </span>
                 ) : null
@@ -296,7 +311,7 @@ export default function CreativeShowcase({
                     {tags.length > 0 ? (
                       <div className="creative-showcase__tag-row">
                         {tags.map((tag) => (
-                          <span key={tag} className="creative-showcase__tag">{tag}</span>
+                          <span key={tag} className="creative-showcase__tag tpl-chip-wrappable">{tag}</span>
                         ))}
                       </div>
                     ) : null}
@@ -323,7 +338,7 @@ export default function CreativeShowcase({
           <div className="creative-showcase__pill-row">
             {directEditDispatch ? null : flatSkills.length > 0 ? (
               flatSkills.map((skill) => (
-                <span key={skill} data-export-skill="true" className="creative-showcase__pill">
+                <span key={skill} data-export-skill="true" className="creative-showcase__pill tpl-chip-wrappable">
                   {skill}
                 </span>
               ))
@@ -397,7 +412,7 @@ export default function CreativeShowcase({
           <div className="creative-showcase__arrow-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
-                <p key={linkKey} className="creative-showcase__arrow-item" data-export-card="true" title={value}>
+                <p key={linkKey} className="creative-showcase__arrow-item tpl-value-breakable" data-export-card="true" title={value}>
                   <span className="creative-showcase__arrow" aria-hidden="true">&rarr;</span>
                   {formatLinkDisplayValue(value)}
                 </p>
@@ -439,7 +454,7 @@ export default function CreativeShowcase({
           <div className="creative-showcase__pill-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span key={`${item.name}-${index}`} className="creative-showcase__tag" data-direct-edit-index={snapshot.sourceIndices.interests[index]}>
+                <span key={`${item.name}-${index}`} className="creative-showcase__tag tpl-chip-wrappable" data-direct-edit-index={snapshot.sourceIndices.interests[index]}>
                   {item.name}
                 </span>
               ))
@@ -476,7 +491,7 @@ export default function CreativeShowcase({
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),
       }}
     >
-      <div className="creative-showcase__bg" data-export-ignore="true" aria-hidden="true">
+      <div className="creative-showcase__bg" data-export-ignore="true" data-decorative aria-hidden="true">
         <span className="creative-showcase__blob creative-showcase__blob--top" />
         <span className="creative-showcase__blob creative-showcase__blob--bottom" />
       </div>
@@ -486,7 +501,7 @@ export default function CreativeShowcase({
           <p className="creative-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="creative-showcase__name">
+          <h1 className="creative-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

@@ -16,9 +16,11 @@
 // floor (the `--preview-paper-min-height: 297mm` CSS variable, resolved to
 // px by the browser) and steps through three density tiers — cozy, snug,
 // tight — shrinking spacing/typography via a class swap until the content
-// fits one page or the tightest tier is reached. Because this measures the
-// live DOM node that PDF export also captures, the auto-fit applies to the
-// exported PDF too, not just the on-screen preview.
+// fits one page or the tightest tier is reached. Each rendered copy fits
+// itself: PDF export captures the off-screen export-source copy (see
+// .direct-edit-export-source in direct-edit.css/app-shell.css), which lays
+// out at paper width under the same rules as the PDF clone, so its tier is
+// the one that fits the exported page — not necessarily the on-screen one.
 
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 
@@ -37,12 +39,9 @@ import {
   formatLinkLabel,
   formatLinkDisplayValue,
 } from './shared'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 const DENSITY_STEPS = ['cozy', 'snug', 'tight']
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
 
 // Bolds metric-shaped tokens so quantified impact stands out in the tight
 // bullet format, per the spec's "Metrics should be bold."
@@ -69,7 +68,9 @@ function highlightMetrics(text) {
 // role and company are independently editable there too).
 function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div key={`${item.role}-${item.company}-${index}`} className="compact-showcase__entry" data-export-card="true" data-direct-edit-index={sourceIndex}>
@@ -103,21 +104,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIn
         <span className="compact-showcase__entry-dates">{dateRange || copy.datesPending}</span>
       </div>
       {directEditDispatch ? (
-        <p className="compact-showcase__bullets compact-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="compact-showcase__bullets compact-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="compact-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{highlightMetrics(line)}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="compact-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{highlightMetrics(line)}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="compact-showcase__entry-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )
@@ -486,7 +499,7 @@ export default function CompactShowcase({
           <p className="compact-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="compact-showcase__name">
+          <h1 className="compact-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

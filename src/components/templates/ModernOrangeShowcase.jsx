@@ -34,16 +34,13 @@ import {
   createSectionRouter,
 } from './shared'
 import { MODERN_ORANGE_DEFAULT_ACCENT_COLOR } from './modernOrange'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // ATS mode is monochrome for every template in this app (see
 // CVPreview.jsx's generic-path comments) — this template is no exception,
 // even though it otherwise keeps rendering itself (rather than bypassing
 // to the generic renderer) in ATS mode.
 const MODERN_ORANGE_ATS_ACCENT_COLOR = '#374151'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
 
 // Best-effort mapping from free-text proficiency ("Fluent", "B2",
 // "Edistynyt", ...) to a 1-5 dot count. Falls back to a neutral middle
@@ -172,7 +169,9 @@ function EducationRow({ isLast, entryIndex, children }) {
 // snapshot.experience's own (filtered) indices in the read-only call site.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <ExperienceRow
@@ -205,21 +204,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, 
         </p>
       ) : null}
       {directEditDispatch ? (
-        <p className="modern-orange-showcase__bullets modern-orange-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="modern-orange-showcase__bullets modern-orange-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="modern-orange-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="modern-orange-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="modern-orange-showcase__exp-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </ExperienceRow>
   )
@@ -442,7 +453,7 @@ export default function ModernOrangeShowcase({
             {directEditDispatch ? null : snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill, index) => (
                 <div key={skill} data-export-skill="true" className="modern-orange-showcase__skill-row">
-                  <span className="modern-orange-showcase__skill-name">{skill}</span>
+                  <span className="modern-orange-showcase__skill-name tpl-text-wrappable">{skill}</span>
                   <DotRow count={skillOrderDotCount(index, snapshot.skills.length)} />
                 </div>
               ))
@@ -549,7 +560,7 @@ export default function ModernOrangeShowcase({
         <p className="modern-orange-showcase__kicker" data-export-ignore="true">
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
-        <h1 className="modern-orange-showcase__name">
+        <h1 className="modern-orange-showcase__name" data-cv-name>
           {directEditDispatch ? (
             <EditableField
               as="span"
@@ -562,6 +573,13 @@ export default function ModernOrangeShowcase({
               <span className="modern-orange-showcase__name-first">{nameFirst}</span>
               {nameRest ? (
                 <>
+                  {/* A literal space so el.textContent reads "First Rest"
+                      (copy-paste, screen readers, this app's own layout
+                      harness) — the <br/> alone only gives a *visual* line
+                      break (docs/template-audit-phase2.md G7/F8). Trailing
+                      whitespace before a line break collapses visually, so
+                      this doesn't reintroduce a visible gap. */}
+                  {' '}
                   <br />
                   <span className="modern-orange-showcase__name-last">{nameRest}</span>
                 </>

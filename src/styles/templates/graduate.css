@@ -154,14 +154,22 @@
 /* ── Sections — no card box, no tint; icon-badge heading ── */
 
 .graduate-showcase__section + .graduate-showcase__section {
-  margin-top: 1.875rem;
+  /* Trimmed from 1.875rem alongside section-head's padding-bottom above —
+     absorbs the rest of the height the title's unconditional wrap adds,
+     to keep example CVs under the 2.0-A4-page budget. */
+  margin-top: 1.5rem;
 }
 
 .graduate-showcase__section-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.6rem;
-  padding-bottom: 0.55rem;
+  /* Trimmed from 0.55rem — the title now always wraps onto its own line
+     below the icon badge (see .graduate-showcase__section-title), which
+     adds a line of height to every section head; this absorbs most of
+     that so the example CVs stay under the 2.0-A4-page budget. */
+  padding-bottom: 0.35rem;
   border-bottom: 1px solid var(--gr-border);
 }
 
@@ -183,10 +191,33 @@
 }
 
 .graduate-showcase__section-title {
+  /* Always own full-width flex line, below the icon badge, rather than
+     shrinking to whatever width is left beside the icon (which forced
+     even short headings like "Certificates" to break mid-word at the
+     sidebar's narrower builder-zoom renders — F11, docs/template-audit-
+     phase2.md). A `flex-shrink: 0` + conditional wrap was tried first,
+     but the browser still sizes a wrapped flex item to its own
+     *unwrapped* single-line content width rather than clamping it to the
+     line it wrapped onto, so "Extracurricular Activities" kept
+     overflowing the sidebar at some builder-zoom renders anyway.
+     Unconditional full-width wrap is the one approach that reliably
+     constrains the title to the sidebar's actual width at every render
+     scale. The small added height (icon badge gets its own line even
+     when the title would have fit beside it) is absorbed by trimming
+     `.graduate-showcase__section-head`'s padding-bottom below. */
+  flex: 1 1 100%;
+  min-width: 0;
   font-size: var(--tpl-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  /* 0.16em's tracking left the single longest sidebar label
+     ("Extracurricular Activities", the memberships section) too wide to
+     fit its own word on one line at the sidebar's narrowest (builder-zoom)
+     width, forcing a mid-word break even with the full-width wrap above —
+     F11, docs/template-audit-phase2.md. 0.08em alone measured 133px vs the
+     132px sidebar at the builder's default zoom — 0.06em keeps the same
+     uppercase tracked treatment with enough margin to fit. */
+  letter-spacing: 0.06em;
   color: var(--cv-heading-color, var(--gr-ink));
 }
 
@@ -234,7 +265,8 @@
   color: var(--gr-ink);
 }
 
-.graduate-showcase__edu-meta {
+.graduate-showcase__edu-meta,
+.graduate-showcase__edu-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   color: var(--gr-ink-muted);
@@ -359,7 +391,11 @@
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--gr-ink);
-  overflow-wrap: anywhere;
+  /* Wrap behavior (break-word + max-width:100%, so a crowded row wraps
+     ordinary chips instead of fracturing them) comes from
+     `.tpl-chip-wrappable` in the JSX (§6, docs/template-design-system.md;
+     see _system.css's own comment for why this replaced a per-template
+     `overflow-wrap: anywhere` in Task 9's fix round 1). */
 }
 
 .graduate-showcase__link-row {
@@ -373,7 +409,6 @@
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--tpl-accent);
-  overflow-wrap: anywhere;
 }
 
 /* ── Internships — small dedicated timeline treatment ── */
@@ -540,12 +575,9 @@
 
 .graduate-showcase__link-value {
   display: block;
-  overflow: hidden;
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   color: var(--gr-ink);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .graduate-showcase__interest-row {

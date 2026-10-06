@@ -32,16 +32,13 @@ import {
   getSafeHref,
 } from './shared'
 import { TIMELINE_DEFAULT_ACCENT_COLOR } from './timeline'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // ATS mode is monochrome for every template in this app (see
 // CVPreview.jsx's generic-path comments) — this template is no exception,
 // even though it otherwise keeps rendering itself (rather than bypassing
 // to the generic renderer) in ATS mode.
 const TIMELINE_ATS_ACCENT_COLOR = '#374151'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
 
 // Best-effort mapping from free-text proficiency ("Fluent", "B2",
 // "Edistynyt", ...) to a 1-5 dot count. Falls back to a neutral middle
@@ -96,7 +93,9 @@ function TimelineRow({ date, isLast, entryIndex, children }) {
 
 function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <TimelineRow
@@ -133,21 +132,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, 
         </p>
       ) : null}
       {directEditDispatch ? (
-        <p className="timeline-showcase__bullets timeline-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="timeline-showcase__bullets timeline-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="timeline-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="timeline-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="timeline-showcase__entry-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </TimelineRow>
   )
@@ -488,7 +499,7 @@ export default function TimelineShowcase({
           <p className="timeline-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="timeline-showcase__name">
+          <h1 className="timeline-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
@@ -512,7 +523,7 @@ export default function TimelineShowcase({
           {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="timeline-showcase__contact">
               {(directEditDispatch ? directEditContactFields : personalContactItems).map(([key, value, placeholderLabel]) => (
-                <span key={key} className="timeline-showcase__contact-item">
+                <span key={key} className="timeline-showcase__contact-item tpl-value-breakable">
                   <span className="timeline-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
                   {directEditDispatch ? (
                     <EditableField
@@ -532,7 +543,7 @@ export default function TimelineShowcase({
           {linkContactItems.length > 0 ? (
             <div className="timeline-showcase__contact">
               {linkContactItems.map(([key, value]) => (
-                <span key={key} className="timeline-showcase__contact-item">
+                <span key={key} className="timeline-showcase__contact-item tpl-value-breakable">
                   <span className="timeline-showcase__contact-icon" aria-hidden="true">{devIcons[key]}</span>
                   {formatLinkDisplayValue(value)}
                 </span>

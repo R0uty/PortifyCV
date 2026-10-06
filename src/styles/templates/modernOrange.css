@@ -33,8 +33,20 @@
 
   position: relative;
   display: grid;
-  /* Second column holds the name (header + main share it); 210px floor per
-     §2's standard-density name rule. */
+  /* Second column holds the name (header + main share it). The header's
+     own horizontal padding used to be 2.5rem/2.25rem (76px), which ate
+     almost all of this track's 210px floor before the name or title badge
+     ever saw it, fragmenting both (docs/template-audit-phase2.md G7/F6).
+     Widening this floor to compensate is the wrong fix here: it shares the
+     card's total width with the sidebar's own 180px floor via `fr`, and
+     growing it by even ~10-20px starves the sidebar enough to mid-word
+     -break its own long skill string (a *different*, already-accepted
+     break — see `.modern-orange-showcase__skill-name`'s comment). So the
+     floor stays at the original 210px; the header/main padding below is
+     cut instead (to 1.25rem each side, see `__header`/`__main`), and the
+     name itself steps down to the *compact* row (§2) rather than funding
+     the full standard floor. Both together give the name/title badge
+     enough content width within the unchanged 210px track. */
   grid-template-columns: minmax(180px, 0.29fr) minmax(210px, 0.71fr);
   grid-template-rows: auto 1fr;
   grid-template-areas:
@@ -140,24 +152,33 @@
 
 .modern-orange-showcase__skill-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.25rem 0.75rem;
 }
 
 .modern-orange-showcase__skill-name {
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--mo-text);
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* Carries `.tpl-text-wrappable` in the JSX (§6, docs/
+     template-design-system.md): a single very long skill string with no
+     internal space (docs/template-audit-phase2.md §7.6's 60-char case)
+     still wraps instead of clipping or pushing the sidebar wider.
+     G7 fix round 1 switched this from `.tpl-value-breakable`
+     (overflow-wrap: anywhere) — that primitive also lowers the element's
+     min-content size, which let this flex row shrink the skill-name span
+     below an *ordinary* word's width and break it even when the word
+     would otherwise fit; `.tpl-text-wrappable`'s `overflow-wrap:
+     break-word` doesn't lower min-content, so a single long token still
+     wraps but normal words no longer fracture. */
 }
 
 .modern-orange-showcase__dots {
   display: inline-flex;
   flex-shrink: 0;
+  margin-left: auto;
   gap: 0.24rem;
 }
 
@@ -277,13 +298,13 @@
 .modern-orange-showcase__main {
   grid-area: main;
   min-width: 0;
-  padding: 0 2.5rem 2.5rem 2.25rem;
+  padding: 0 1.25rem 2.5rem 1.25rem;
 }
 
 .modern-orange-showcase__header {
   grid-area: header;
   min-width: 0;
-  padding: 2.5rem 2.5rem 0 2.25rem;
+  padding: 2.5rem 1.25rem 0 1.25rem;
 }
 
 .modern-orange-showcase__kicker {
@@ -296,9 +317,14 @@
 
 .modern-orange-showcase__name {
   margin-top: 0.35rem;
-  font-size: var(--tpl-name-size);
+  /* §2 names this column's own narrow-column case: the header track can't
+     fund the full *standard* name floor (210px of content) without
+     starving the sidebar's fr share (docs/template-audit-phase2.md G7/F6),
+     so the name itself steps down to the *compact* row (1.65rem / 1.15)
+     while every other role here stays standard. */
+  font-size: 1.65rem;
   font-weight: 800;
-  line-height: var(--tpl-name-lh);
+  line-height: 1.15;
   letter-spacing: -0.01em;
   color: var(--cv-heading-color, var(--mo-text));
   overflow-wrap: break-word;
@@ -468,7 +494,8 @@
   color: var(--mo-text);
 }
 
-.modern-orange-showcase__exp-meta {
+.modern-orange-showcase__exp-meta,
+.modern-orange-showcase__exp-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   color: var(--tpl-accent);

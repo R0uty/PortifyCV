@@ -313,7 +313,8 @@
   color: var(--cc-ink);
 }
 
-.colorful-compact-showcase__exp-meta {
+.colorful-compact-showcase__exp-meta,
+.colorful-compact-showcase__exp-technologies {
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   color: var(--cc-muted);
@@ -425,6 +426,11 @@
   padding: 0.3rem 0.65rem;
   font-size: var(--tpl-meta-size);
   font-weight: 700;
+  /* Wrap behavior (break-word + max-width:100%, so a crowded row wraps
+     ordinary chips instead of fracturing them) comes from
+     `.tpl-chip-wrappable` in the JSX (§6, docs/template-design-system.md;
+     see _system.css's own comment for why this replaced a per-template
+     `overflow-wrap: anywhere` in Task 9's fix round 1). */
 }
 
 /* Filled with each hue's deep `-text` shade, not the bright swatch: white
@@ -462,12 +468,9 @@
 }
 
 .colorful-compact-showcase__link-item {
-  overflow: hidden;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: #3f3f46;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .colorful-compact-showcase__extra-line {

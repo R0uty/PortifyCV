@@ -44,7 +44,7 @@ const en = buildExampleCv({
       startDate: 'Jan 2016',
       endDate: 'Apr 2019',
       isCurrent: false,
-      description: 'Designed brand identities and marketing materials for small businesses.',
+      description: 'Ran design projects independently for small-business clients across the Lahti area, from first client meeting to final delivery.',
       achievements: [
         'Designed brand identities for 20+ small businesses, including logo, packaging, and social templates.',
         'Grew a client’s social engagement 3x with a redesigned visual template set.',
@@ -126,7 +126,7 @@ const fi = buildExampleCv({
       startDate: '01/2016',
       endDate: '04/2019',
       isCurrent: false,
-      description: 'Suunnittelin brändi-identiteettejä ja markkinointimateriaaleja pienyrityksille.',
+      description: 'Toimin itsenäisenä suunnittelijana pienyritysasiakkaille Lahden alueella, ensitapaamisesta valmiiseen toimitukseen.',
       achievements: [
         'Suunnittelin brändi-identiteetit yli 20 pienyritykselle, mukaan lukien logo, pakkaukset ja sosiaalisen median mallit.',
         'Kasvatin asiakkaan sosiaalisen median sitoutumisen kolminkertaiseksi uudistetulla visuaalisella mallistolla.',

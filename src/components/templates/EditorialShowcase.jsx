@@ -210,7 +210,7 @@ export default function EditorialShowcase({
           ) : snapshot.skills.length > 0 ? (
             <div className="editorial-showcase__tag-row">
               {snapshot.skills.map((skill) => (
-                <span key={skill} data-export-skill="true" className="editorial-showcase__tag">{skill}</span>
+                <span key={skill} data-export-skill="true" className="editorial-showcase__tag tpl-chip-wrappable">{skill}</span>
               ))}
             </div>
           ) : (
@@ -239,7 +239,7 @@ export default function EditorialShowcase({
                     {tags.length > 0 ? (
                       <div className="editorial-showcase__tag-row">
                         {tags.map((tag) => (
-                          <span key={tag} className="editorial-showcase__tag">{tag}</span>
+                          <span key={tag} className="editorial-showcase__tag tpl-chip-wrappable">{tag}</span>
                         ))}
                       </div>
                     ) : null}
@@ -264,7 +264,7 @@ export default function EditorialShowcase({
           <div className="editorial-showcase__plain-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
-                <p key={linkKey} className="editorial-showcase__link-item" data-export-card="true" title={value}>
+                <p key={linkKey} className="editorial-showcase__link-item tpl-value-breakable" data-export-card="true" title={value}>
                   {formatLinkDisplayValue(value)}
                 </p>
               ))
@@ -340,7 +340,7 @@ export default function EditorialShowcase({
           <p className="editorial-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="editorial-showcase__name">
+          <h1 className="editorial-showcase__name" data-cv-name>
             <EditableField
               as="span"
               path={{ kind: 'root', field: 'fullName' }}

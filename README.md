@@ -11,12 +11,17 @@ A modern, minimal CV builder for creating and exporting professional resumes in 
 - **Live Preview**: See your CV update instantly as you edit
 - **Direct Edit**: Edit the CV right on the preview — click any text to change it,
   add/remove/reorder entries, upload a photo, and move sections between the main
-  column and the sidebar; the classic form editor is one toggle away
+  column and the sidebar; the same section nav rail as the form editor jumps to
+  any section and opens its editor, and the entry being edited is highlighted;
+  the classic form editor is one toggle away
 - **18 Templates**: Minimalist, Developer, Creative, Modern Professional, Executive,
   Modern Timeline, Graduate, Compact, Portfolio Hybrid, Tech Executive, Classic
   Professional, Navy Professional, Modern Orange, Colorful Compact, Quadrant,
   Editorial, Portrait, and European — each template supports its own set of CV
-  sections, and the editor only shows what the selected template actually renders
+  sections, and the editor only shows what the selected template actually renders.
+  Every template has its own page (`/free-cv-templates/<slug>`) showing it filled
+  with example CVs, reachable from the builder's template gallery ("View
+  examples") and the Free CV Templates page
 - **ATS Optimization**: Parser-readiness score, job-description keyword matching, and a
   dedicated ATS-friendly mode that flattens any template for applicant tracking systems
 - **CV Suggestions**: Rule-based feedback on clarity, impact, and completeness
@@ -89,6 +94,12 @@ npm run check:template-pages
 
 # Run the end-to-end smoke suite against a production build
 npm run test:e2e
+
+# Same suite minus the slow stress/PDF tier — what CI's main e2e job runs
+npm run test:e2e:fast
+
+# Only the slow stress/PDF tier — a separate CI job
+npm run test:e2e:slow
 ```
 
 `check:share` round-trips a full CV through the share-link encoder and decoder.
@@ -124,11 +135,17 @@ harnesses, no test runner required; CI runs them all on every push and
 pull request.
 
 `test:e2e` runs the Playwright suite in `e2e/` (landing page, live preview,
-template-gated sections, the Export menu) against `npm run build` +
-`npm run preview`, not the dev server, so it exercises the app the way a real
-user gets it — lazy chunks, manual vendor chunking, and all. Downloads and
-installs a Chromium build the first time it runs
-(`npx playwright install chromium`).
+template-gated sections, the Export menu, the per-template layout/content
+harness, PDF export) against `npm run build` + `npm run preview`, not the
+dev server, so it exercises the app the way a real user gets it — lazy
+chunks, manual vendor chunking, and all. Downloads and installs a Chromium
+build the first time it runs (`npx playwright install chromium`).
+`test:e2e:fast`/`test:e2e:slow` run a subset by Playwright tag
+(`--grep-invert @slow`/`--grep @slow`): the slow tier is the layout
+harness's stress-fixture tests plus `template-pdf.spec.js` and
+`template-pdf-placeholder.spec.js`, which together roughly double full-suite
+time; CI runs them as a separate `e2e-slow` job so the main `e2e` job stays
+fast.
 
 ## Production Build
 

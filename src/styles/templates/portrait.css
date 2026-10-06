@@ -232,7 +232,8 @@
   white-space: nowrap;
 }
 
-.portrait-showcase__entry-meta {
+.portrait-showcase__entry-meta,
+.portrait-showcase__entry-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   font-style: italic;
@@ -291,7 +292,6 @@
   font-weight: 500;
   color: var(--pt-ink);
   background: transparent;
-  overflow-wrap: anywhere;
 }
 
 /* ── Links: plain stacked lines ── */
@@ -307,9 +307,6 @@
   font-size: var(--tpl-body-size);
   font-weight: 600;
   color: var(--pt-ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* ── Languages: inline row separated by a thin middle dot ── */
@@ -325,8 +322,7 @@
 }
 
 .portrait-showcase__language-sep {
-  display: inline-block;
-  margin: 0 0.75rem;
+  margin: 0 0.4rem;
   color: var(--pt-border);
 }
 

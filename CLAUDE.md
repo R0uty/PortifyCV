@@ -19,7 +19,9 @@ npm run check:section-schema   # validates the Direct Edit popup's section schem
 npm run check:section-columns  # exercises the section column-move rules (src/utils/sectionColumns.js)
 npm run check:template-pages   # validates per-template page slugs, examples, and copy (src/utils/templatePageCopy.js, src/utils/templateMetaDescriptions.js, src/utils/exampleCvs.js)
 
-npm run test:e2e           # Playwright suite in e2e/, against a prod build+preview
+npm run test:e2e           # full Playwright suite in e2e/, against a prod build+preview
+npm run test:e2e:fast      # same suite minus the @slow tier (--grep-invert @slow) — what CI's main e2e job runs
+npm run test:e2e:slow      # only the @slow tier (--grep @slow) — the stress tier plus the PDF specs, a separate CI job
 npx playwright test e2e/templates.spec.js   # run a single e2e spec file
 npx playwright test -g "some test name"     # run a single e2e test by name
 
@@ -38,13 +40,20 @@ per-template pages' slugs, examples, and copy (`check:template-pages`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.
 CI (`.github/workflows/ci.yml`) runs all seven on every push to `main` and
-`v1.4.0` and on every pull request.
+`v1.6.0` (the current long-lived branch) and on every pull request.
 
-`test:e2e` builds and serves the app first (`playwright.config.js`'s
-`webServer`), deliberately not the dev server, so it exercises real lazy
-chunks and the manual vendor chunking in `vite.config.js` the way a user's
-browser actually sees them. First run downloads Chromium
-(`npx playwright install chromium`).
+`test:e2e` (and its `:fast`/`:slow` variants) build and serve the app first
+(`playwright.config.js`'s `webServer`), deliberately not the dev server, so
+they exercise real lazy chunks and the manual vendor chunking in
+`vite.config.js` the way a user's browser actually sees them. First run
+downloads Chromium (`npx playwright install chromium`).
+
+The `template-layout.spec.js`/`template-pdf.spec.js`/
+`template-pdf-placeholder.spec.js` stress and PDF tests (`@slow` in their
+test titles) roughly double full-suite time, so CI (`.github/workflows/
+ci.yml`) splits them into their own `e2e-slow` job; the main `e2e` job runs
+`test:e2e:fast`. Tag a new slow test the same way (append ` @slow` to the
+test title) rather than adding a third script.
 
 ## Architecture
 
@@ -105,6 +114,31 @@ at once — doesn't pay for a dynamic import at that moment). Every
 template should follow the same three-file pattern and get added to both the
 lazy-import list in `CVPreview.jsx` and the prefetch list in
 `templates/index.js`.
+
+**A new bespoke Showcase must also satisfy the Phase 2 layout harness**
+(`docs/template-audit-phase2.md`, `e2e/template-layout.spec.js`,
+`e2e/template-content.spec.js`, `e2e/helpers/layoutAudit.js`): put
+`data-cv-name` on the name element (every existing `*Showcase.jsx`'s `<h1>`
+has it — the harness's name-line-count rule keys off it) and `data-decorative`
+on any purely-visual background/decoration node (the harness ignores
+clipped/overflow violations inside one, since those never carry real
+content). Render each experience entry's `achievements` and `technologies`
+through the shared helpers in `directEditExperienceEntry.jsx`
+(`getExperienceBullets`/`getExperienceAchievements`/
+`getExperienceTechnologies`) rather than reading `item.description` alone —
+this is the exact bug Task 8a's fix closed for the other 17 templates. Use
+the §6 wrap primitives from `src/styles/templates/_system.css`
+(`.tpl-value-breakable` for URLs/emails/long values, `.tpl-text-wrappable`
+for ordinary word text, `.tpl-chip-wrappable` for skill chips) instead of a
+bare `overflow-wrap: anywhere` — the latter lowers an element's min-content
+size and can fracture an ordinary word once a row gets crowded. A new
+template should pass `template-layout.spec.js`/`template-content.spec.js`
+with zero new entries in `e2e/fixtures/layoutAllowlist.js` — that file is
+`[]` as of this release, and a stale entry fails its own test, so treat any
+addition as a real, temporary finding, not a way to ship around a failure.
+If a template's PDF pagination changes (a density/content change, not a
+regression), update `EXPECTED_PDF_PAGES` in `e2e/template-pdf.spec.js`
+deliberately, in the same commit, and say why the count changed.
 
 **Styling is hand-written utility CSS, not Tailwind.** `src/index.css`
 imports `src/styles/tokens.css` (design tokens + reset),
@@ -167,7 +201,12 @@ shipped — never rename one. Example people live one file per person in
 fit is real rather than duplicated. Every example must fill every
 `primarySections` entry of each template it's listed under, in both
 locales — `check:template-pages` enforces this, so an empty section never
-reaches a visitor. On the template page only (never the builder, and
-never mutating the CV itself), `src/utils/sectionContent.js` hides a
-section that has no real content instead of rendering its placeholder
-text.
+reaches a visitor. `src/utils/sectionContent.js`'s `hideEmptySections()`
+hides a section that has no real content instead of rendering its
+placeholder text, read by the per-template marketing page (its only
+preview) and by the builder's dedicated off-screen, read-only, inert
+`CVPreview` that each mode's `previewRef` (the PDF export source) points
+at — Classic mode's in `ResumeBuilderPage.jsx`, Direct Edit's in
+`DirectEditPreview.jsx` — never mutating the CV and never touching either
+mode's visible, editable preview, which still shows the live placeholder
+text as an editing affordance.

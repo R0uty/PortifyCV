@@ -127,8 +127,6 @@
   gap: 0.4rem;
   font-size: var(--tpl-meta-size);
   color: var(--tl-muted);
-  white-space: nowrap;
-  overflow-wrap: anywhere;
 }
 
 .timeline-showcase__contact-icon {
@@ -268,7 +266,8 @@
   color: #111827;
 }
 
-.timeline-showcase__entry-meta {
+.timeline-showcase__entry-meta,
+.timeline-showcase__entry-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   color: var(--tpl-accent);

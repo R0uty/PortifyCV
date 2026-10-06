@@ -1193,7 +1193,7 @@ function CVPreview({
                   links.map(([key, value]) => (
                     <div key={key} data-export-card="true" className="flex items-center gap-1.5 text-sm">
                       <span className="text-xs font-semibold uppercase tracking-[0.14em] text-gray-400">{formatLinkLabel(key)}</span>
-                      <span className="text-gray-600">{formatLinkDisplayValue(value)}</span>
+                      <span className="tpl-value-breakable text-gray-600">{formatLinkDisplayValue(value)}</span>
                     </div>
                   ))
                 ) : (
@@ -1916,6 +1916,7 @@ function CVPreview({
 
             {/* Full name heading — uses template-specific font size and weight */}
             <h3
+              data-cv-name
               className={`leading-none ${
                 atsFriendlyMode ? 'mt-2 text-4xl font-semibold tracking-tight text-gray-900' : t.headerTitle()
               }`}

@@ -1980,6 +1980,16 @@ running app, not from reading code. Ordered by impact. None fixed yet.
 
 ## Next session — handoff, 2026-09-24
 
+> **Superseded, 2026-10-04.** Everything below describes the `v1.3.0`
+> branch as it stood before its merge. Since then: `v1.3.0` merged into
+> `main` (PR #1, `a66c67e`); `v1.4.0` (the per-template pages) merged into
+> `main` on 2026-10-04 (`5a814e3`); and `v1.5.0` (Phase 2 template polish,
+> version 1.5.0, `changes.md`'s 2026-10-03 entry) is pushed to
+> `origin/v1.5.0` but deliberately **not** merged into `main` yet, at the
+> user's request. The "`main` untouched" note below is out of date. Open
+> work is the Phase 2 follow-ups at the end of this file and item 23
+> (branch protection).
+
 **State (refreshed 2026-09-29):** branch `v1.3.0`, version **1.2.80**,
 pushed to `origin/v1.3.0` with CI green there (run `git log -1` for the exact
 commit; it is deliberately not recorded here, because every refresh commit
@@ -2150,11 +2160,18 @@ Full reasoning per item is in `changes.md`; per-commit detail is in git.
   Direct Edit. Any standalone Playwright script you write for measurement must
   do the same or it will not find Classic's "Load demo CV" button.
 
-## Phase 2 inputs (from template-page examples)
+## Phase 2 inputs (from template-page examples) — RESOLVED (1.5.0)
 
-Observed by the controller's visual audits of the template pages (desktop, dev server, 2026-10). Deferred to Phase 2 (template polish).
+Observed by the controller's visual audits of the template pages (desktop, dev server, 2026-10). All four items below were fixed during Phase 2 template polish (`docs/template-audit-phase2.md` has the full fix write-up and evidence per item); `LAYOUT_ALLOWLIST` (`e2e/fixtures/layoutAllowlist.js`) is `[]`.
 
-- Sidebar link values are ellipsis-truncated (e.g. "linkedin.com/in/example-…", "github.com/example-…") in Modern Professional, Portfolio Hybrid, Executive and Tech Executive (product-manager, finance-director, operations-manager, engineering-director, cto examples).
-- Navy Professional: the long name "Maximilian Alexander Vandenberg-Lindqvist" (cto example) wraps to 4 lines at 24px in the narrow sidebar header (clean word/hyphen breaks, but tall); Tech Executive keeps it on 1 line.
-- Long previews: ux-designer in Portfolio Hybrid ≈ 2.6 A4 pages; product-manager in Portfolio Hybrid ≈ 2.25; data-engineer in Developer ≈ 1.99; business-graduate in Graduate ≈ 1.81 — check whether these templates' density/spacing is the cause.
-- Modern Orange clips long skill names with an ellipsis in its skill list (customer-success example: "Voice-of-customer program", "Cross-functional collaboration").
+- ~~Sidebar link values are ellipsis-truncated...~~ — fixed 1.4.6 (F1/G6): replaced the ellipsis rule with the shared `.tpl-value-breakable` primitive (`src/styles/templates/_system.css`).
+- ~~Navy Professional: the long name "Maximilian Alexander Vandenberg-Lindqvist" (cto example) wraps to 4 lines...~~ — fixed 1.4.7 (F7/G7): cut the identity-rail's own padding and stepped the name to a smaller size; the 180px rail (narrower than the standard 210px floor) stays a documented §2 gap, but the wrap symptom is gone.
+- ~~Long previews... check whether these templates' density/spacing is the cause.~~ — fixed 1.4.9 (F13/G8): Executive stepped `standard`→`compact` with corrected line-heights; Portfolio needed two steps, `roomy`→`standard`→`compact` (its content is dominated by wrapped body text, so one step alone only closed ~5% of the overage), plus its own rhythm trim within `compact`; Classic Professional got a ~10% rhythm trim within `roomy`; all examples now fit the 2.0-A4-page budget.
+- ~~Modern Orange clips long skill names with an ellipsis...~~ — fixed 1.4.6 (F4/G6): the `.tpl-text-wrappable` primitive (ordinary word text — a skill name isn't an unbreakable URL/email value) applied to `.modern-orange-showcase__skill-name`.
+
+### Follow-ups (not fixed in Phase 2, left for a future pass)
+
+- ~~Developer's and Graduate's `__project-link` value, and Timeline's `__contact-item`, still use a raw `overflow-wrap: anywhere`~~ — fixed 2026-10-04: all three now carry `.tpl-value-breakable` instead. Timeline's contact item also dropped its `white-space: nowrap`, which had made the old `anywhere` rule inert — a long contact value (the `long-single-word` stress fixture's LinkedIn URL) used to run past the header's divider; it now wraps inside the column. Every other template × example × mode and stress screenshot was byte-identical before and after.
+- Navy Professional's short names render visibly smaller than every other template's name row (the 180px identity-rail floor, narrower than the standard 210px floor) — this is deliberate (see `docs/template-design-system.md` §2 "Adoption state" and `docs/template-audit-phase2.md`'s F7), not a bug to fix reflexively.
+- ~~Several templates' "technologies" line in the experience entry reuses the company-name CSS class instead of its own role~~ — fixed 2026-10-04, and wider than first noted: all 17 bespoke Showcases shared the technologies line's class with another meta line (company, or the `__entry-meta`/`__exp-meta`/`__edu-meta` company/location line), including the shared `renderExperienceEntry` in `directEditExperienceEntry.jsx` (Classic Professional, Editorial, Portrait). Each now renders it with its own `…technologies` class (e.g. `creative-showcase__exp-technologies`, `${classPrefix}__entry-technologies`), and every CSS rule that targeted the old class lists the new one alongside it, so the look is unchanged (screenshots byte-identical) while a future company-only rule no longer reaches the technologies line.
+- ~~Compact's density axis (D=1, `docs/template-audit-phase2.md`'s rubric) is still ad hoc~~ — settled 2026-10-04 (user's decision): kept as is and documented as the one sanctioned exception to the three-class ramp, `docs/template-design-system.md` §2 "Auto-fit tiers below `compact` (Compact only)". The snug/tight tiers in `compact.css` are template-local, engaged only by measured one-page overflow, and always sit on top of `tpl-density-compact`. The alternatives were stepping `standard`→`compact` like European (bigger default look) or dropping the tiers; both would have pushed heavy CVs onto a second page.

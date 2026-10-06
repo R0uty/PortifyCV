@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 
 // Per-template pages: /free-cv-templates/<slug>. One page component renders
 // all 18; routing comes from the VIEW_HEAD entries generated in pageMeta.js.
@@ -162,6 +162,41 @@ test.describe('Template pages', () => {
     const graduatePreview = page.locator('.template-page__preview')
     await expect(graduatePreview).toBeVisible()
     await expect(graduatePreview).not.toContainText(/näky\S* tässä/i)
+  })
+
+  test('every card on the templates page has a View examples link to its template page', async ({ page }) => {
+    const { cvTemplates } = await import('../src/utils/cvTemplates.js')
+    await page.goto('/free-cv-templates')
+
+    const links = page.getByRole('link', { name: /^View examples/ })
+    await expect(links).toHaveCount(cvTemplates.length)
+    for (const template of cvTemplates) {
+      await expect(page.getByRole('link', { name: `View examples: ${template.label}` }))
+        .toHaveAttribute('href', `/free-cv-templates/${template.slug}`)
+    }
+
+    // An in-site link: it opens the template page in the same tab.
+    const developer = cvTemplates.find((template) => template.id === 'developer')
+    await page.getByRole('link', { name: `View examples: ${developer.label}` }).click()
+    await expect(page).toHaveURL(new RegExp(`/free-cv-templates/${developer.slug}$`))
+    await expect(page.getByRole('radiogroup', { name: 'Examples' })).toBeVisible()
+  })
+
+  // The thumbnails render real CVs, and several templates put <a> links in
+  // them (project and credential links), so a thumbnail must never sit
+  // inside a link or button.
+  test('the templates page nests no link inside a link and its thumbnails still open the template page', async ({ page }) => {
+    const errors = []
+    page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()) })
+
+    await page.goto('/free-cv-templates')
+    await expect(page.locator('.templates-page-card [data-export-variant]')).toHaveCount(18)
+    await expect(page.locator('.templates-page-card', { hasText: 'Developer' }).locator('.templates-page-card__thumb a').first()).toBeAttached()
+    expect(await page.locator('a a, button a, a button').count()).toBe(0)
+    expect(errors.filter((text) => /cannot contain a nested|cannot be a descendant of/.test(text))).toEqual([])
+
+    await page.locator('.templates-page-card', { hasText: 'Developer' }).locator('.templates-page-card__thumb').click()
+    await expect(page).toHaveURL(/\/free-cv-templates\/developer$/)
   })
 
   test('every template page renders without console errors', async ({ page }) => {

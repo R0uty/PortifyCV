@@ -29,6 +29,7 @@ function getLandingCopy(locale) {
     return {
       kicker: 'Ei kirjautumista. Ei tallennettua dataa.',
       startButton: 'Aloita rakentaminen',
+      viewTemplatesButton: 'Katso pohjat',
       howItWorksLink: 'Katso miten se toimii',
       title: 'Rakenna CV:si. Ota se mukaan. Siinä kaikki.',
       subtitle: 'Ei tiliä, ei kirjautumista, ei mitään tallennettua — kaikki tapahtuu tässä selaimessasi ja katoaa, kun suljet välilehden.',
@@ -95,6 +96,7 @@ function getLandingCopy(locale) {
   return {
     kicker: 'No login. No data saved.',
     startButton: 'Start building',
+    viewTemplatesButton: 'View templates',
     howItWorksLink: 'See how it works',
     title: 'Build your CV. Take it. That’s it.',
     subtitle: 'No login, no account, nothing saved — everything happens right here in your browser, and disappears the moment you close the tab.',
@@ -177,16 +179,25 @@ function LandingPage({
               <li key={highlight}>{highlight}</li>
             ))}
           </ul>
-          <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
-            {copy.startButton}
-          </button>
-          <InternalNavLink
-            to={ROUTES.howToUse}
-            onNavigate={() => onNavigateToView('howToUse')}
-            className="landing-hero__link"
-          >
-            {copy.howItWorksLink}
-          </InternalNavLink>
+          <div className="landing-hero__actions">
+            <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
+              {copy.startButton}
+            </button>
+            <InternalNavLink
+              to={ROUTES.freeTemplates}
+              onNavigate={() => onNavigateToView('freeTemplates')}
+              className="landing-hero__templates"
+            >
+              {copy.viewTemplatesButton}
+            </InternalNavLink>
+            <InternalNavLink
+              to={ROUTES.howToUse}
+              onNavigate={() => onNavigateToView('howToUse')}
+              className="landing-hero__link"
+            >
+              {copy.howItWorksLink}
+            </InternalNavLink>
+          </div>
         </div>
 
         <div className="landing-preview">

@@ -371,7 +371,6 @@
   font-weight: 600;
   background: rgba(20, 184, 166, 0.16);
   color: #5eead4;
-  overflow-wrap: anywhere;
 }
 
 .dev-showcase__main .dev-showcase__skill-tag {
@@ -413,11 +412,8 @@
 
 .dev-showcase__link-value {
   display: block;
-  overflow: hidden;
   font-size: var(--tpl-meta-size);
   color: #e2e8f0;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* ── Certificates (sidebar, divider-line list — no card) ── */
@@ -576,7 +572,8 @@
   color: var(--dev-primary);
 }
 
-.dev-showcase__company {
+.dev-showcase__company,
+.dev-showcase__technologies {
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
@@ -668,7 +665,10 @@
   font-weight: 600;
   background: rgba(15, 118, 110, 0.1);
   color: var(--dev-accent);
-  overflow-wrap: anywhere;
+  /* Wrap behavior comes from `.tpl-chip-wrappable` in the JSX (§6, docs/
+     template-design-system.md) — see that primitive's own comment in
+     _system.css for why `overflow-wrap: anywhere` directly on a chip is
+     the wrong tool (Task 9 fix round 1's mistake on other templates). */
 }
 
 .dev-showcase__link-row {
@@ -682,7 +682,6 @@
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--dev-accent);
-  overflow-wrap: anywhere;
 }
 
 /* ── Achievements (trophy cards) ── */

@@ -268,7 +268,11 @@
   font-weight: 600;
   background: var(--tpl-accent-soft);
   color: var(--cr-ink);
-  overflow-wrap: anywhere;
+  /* Wrap behavior (break-word + max-width:100%, so a crowded row wraps
+     ordinary chips instead of fracturing them) comes from
+     `.tpl-chip-wrappable` in the JSX (§6, docs/template-design-system.md;
+     see _system.css's own comment for why this replaced a per-template
+     `overflow-wrap: anywhere` in Task 9's fix round 1). */
 }
 
 /* ── Experience (bordered cards, single accent left-border) ── */
@@ -303,7 +307,8 @@
   color: var(--cr-ink);
 }
 
-.creative-showcase__exp-company {
+.creative-showcase__exp-company,
+.creative-showcase__exp-technologies {
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   color: var(--cr-ink-faint);
@@ -385,7 +390,11 @@
   font-weight: 600;
   background: var(--tpl-accent-soft);
   color: var(--cr-ink);
-  overflow-wrap: anywhere;
+  /* Wrap behavior comes from `.tpl-chip-wrappable` in the JSX (§6, docs/
+     template-design-system.md) — see that primitive's own comment in
+     _system.css for why `overflow-wrap: anywhere` directly on a chip is
+     the wrong tool (Task 9 fix round 1's mistake on other templates).
+     Not the same class as `.creative-showcase__pill` (fix round 1). */
 }
 
 /* ── Sidebar: plain stacked lists (School, Certificates) ── */
@@ -419,12 +428,9 @@
 }
 
 .creative-showcase__arrow-item {
-  overflow: hidden;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
   color: var(--cr-ink);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .creative-showcase__arrow {

@@ -265,7 +265,7 @@ export default function PortraitShowcase({
           <div className="portrait-showcase__plain-list">
             {linkEntries.length > 0 ? (
               linkEntries.map(([linkKey, value]) => (
-                <p key={linkKey} className="portrait-showcase__link-item" data-export-card="true" title={value}>
+                <p key={linkKey} className="portrait-showcase__link-item tpl-value-breakable" data-export-card="true" title={value}>
                   {formatLinkDisplayValue(value)}
                 </p>
               ))
@@ -286,7 +286,7 @@ export default function PortraitShowcase({
             <p className="portrait-showcase__language-row">
               {snapshot.languages.map((item, index) => (
                 <span key={`${item.language}-${index}`} className="portrait-showcase__language-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
-                  {index > 0 ? <span className="portrait-showcase__language-sep" aria-hidden="true">·</span> : null}
+                  {index > 0 ? <span className="portrait-showcase__language-sep" aria-hidden="true"> · </span> : null}
                   {item.language}
                   {item.level ? <> – {item.level}</> : null}
                 </span>
@@ -361,7 +361,7 @@ export default function PortraitShowcase({
           <p className="portrait-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="portrait-showcase__name">
+          <h1 className="portrait-showcase__name" data-cv-name>
             <EditableField
               as="span"
               path={{ kind: 'root', field: 'fullName' }}

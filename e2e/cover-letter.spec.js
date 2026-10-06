@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 
 // Coverage for the cover-letter generator (todo items 20 / 26). It has
 // check:reducers coverage for its UI-state transitions but no end-to-end

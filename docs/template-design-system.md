@@ -39,14 +39,14 @@ case, tracking and color freely.
 template should be rebuilt on, and the class a future "fit one page" toggle
 on any other template switches into.
 
-| Role | `roomy` | `standard` | `compact` |
-|---|---|---|---|
-| **name** | 2.30rem / 1.10 | 1.95rem / 1.12 | 1.65rem / 1.15 |
-| **title** (professional-title line) | 1.05rem / 1.35 | 0.95rem / 1.35 | 0.85rem / 1.30 |
-| **section-heading** (uppercase, tracked) | 0.80rem / 1.20 | 0.75rem / 1.20 | 0.70rem / 1.20 |
-| **entry-title** (job title, degree, project name) | 1.05rem / 1.30 | 1.00rem / 1.30 | 0.90rem / 1.25 |
-| **body** | 0.95rem / 1.60 | 0.90rem / 1.55 | 0.82rem / 1.45 |
-| **meta** (dates, location, employer line, captions) | 0.80rem / 1.40 | 0.75rem / 1.40 | 0.70rem / 1.35 |
+| Role | `roomy` | `standard` | `compact` | narrow-column name |
+|---|---|---|---|---|
+| **name** | 2.30rem / 1.10 | 1.95rem / 1.12 | 1.65rem / 1.15 | **1.20rem / 1.10** |
+| **title** (professional-title line) | 1.05rem / 1.35 | 0.95rem / 1.35 | 0.85rem / 1.30 | — |
+| **section-heading** (uppercase, tracked) | 0.80rem / 1.20 | 0.75rem / 1.20 | 0.70rem / 1.20 | — |
+| **entry-title** (job title, degree, project name) | 1.05rem / 1.30 | 1.00rem / 1.30 | 0.90rem / 1.25 | — |
+| **body** | 0.95rem / 1.60 | 0.90rem / 1.55 | 0.82rem / 1.45 | — |
+| **meta** (dates, location, employer line, captions) | 0.80rem / 1.40 | 0.75rem / 1.40 | 0.70rem / 1.35 | — |
 
 Section-heading tracking, since these are always uppercase and small:
 `roomy` `0.14em`, `standard` `0.16em`, `compact` `0.18em`. Tracking goes
@@ -98,6 +98,40 @@ normative — set them directly in the rule that sets the size.
   Creative and Executive never hit this bug only because their name happens
   to live in the floored column.
 
+- **The `narrow-column name` row (1.20rem / 1.10) is for a name-bearing
+  column that can't be grown to even `compact`'s 180px floor without
+  trading away width that another column genuinely needs.** Introduced
+  1.4.7 for Navy Professional's identity rail (G7 fix round 1,
+  `docs/template-audit-phase2.md`): its sidebar is fixed at ~180px total,
+  and after the rail's own padding, the real content width is closer to
+  ~148px — below every density's name floor. Widening the rail competes
+  with the main column for the card's fixed total width (tried and
+  reverted elsewhere in the same fix round — see Executive/Modern Orange's
+  G7/F6 notes — it cost an example CV a 3rd PDF page), so for a column this
+  narrow, shrinking the name is the only lever left that doesn't regress
+  something else. 1.20rem / 1.10 is the smallest size that still wraps a
+  genuinely long real name (Navy Professional's `cto` example, a 4-part
+  name, "Maximilian Alexander Vandenberg-Lindqvist") to 2 lines in ~148px
+  of content width, while staying bigger than that same rail's own role
+  text (0.8rem) and the main column's section headings (0.75rem
+  `standard`) — it stays the visually dominant line in its own block.
+  **This row is unconditional, not responsive to the name's actual
+  length:** a template using it sizes its name at 1.20rem/1.10 for every
+  CV, including short ones. A short name ("Alex Tan") *could* comfortably
+  render at `compact` or even `standard` size in that same rail — this row
+  deliberately renders it smaller than it needs to be. That's a conscious
+  trade-off against a per-CV length heuristic (sizing the name down only
+  when it's actually long): a fixed size keeps every CV rendered through
+  that template visually consistent and avoids a separate "does this name
+  fit" measurement step in the render path, at the cost of a short name
+  not using the room it has. Use this row only when a density step
+  (`compact`) has already been tried and confirmed insufficient for the
+  column's real content width — it is a last resort, not a fourth density
+  class, and does not get its own `tpl-density-*` class or token; apply it
+  as a direct size/line-height override on the template's own name rule,
+  same as Navy Professional's `__name` does, with a comment pointing back
+  here.
+
 - **Display compresses harder than text.** `name` steps ~0.85 between
   classes; every text row steps ~0.90. Shrinking body copy at the same rate
   as a headline destroys readability long before it saves a page.
@@ -117,17 +151,68 @@ Where each template starts. The A.2 triage confirms or changes these; a
 template that fights its class is a density-handling finding, not a reason
 to invent a fourth class:
 
-- **`roomy`** — Classic Professional, Minimalist, Creative,
-  Executive, Portfolio Hybrid
+- **`roomy`** — Classic Professional, Minimalist, Creative
 - **`standard`** — Modern Professional, Modern Orange, Navy Professional,
   Modern Timeline, Developer, Graduate, Tech Executive
-- **`compact`** — Compact, Colorful Compact, Quadrant
+- **`compact`** — Compact, Colorful Compact, Quadrant, Executive, Portfolio
+  Hybrid
+
+**Executive and Portfolio Hybrid moved to `compact`, 1.4.9 (G8,
+docs/template-audit-phase2.md):** both started at `roomy` here, but each
+had already drifted (Executive to `standard`, in the 1.2.11 rework, for a
+name-floor reason unrelated to density) or needed to move further, once
+Task 8a's rendering of every experience entry's `achievements`/
+`technologies` pushed their example CVs past the ≤2.0-A4-page budget (§7).
+A rhythm-only trim plateaued short of budget for both (Executive's and
+Portfolio's page height is dominated by wrapped body text, not
+whitespace, once that content landed), so both took the one step `compact`
+itself exists for — §2's own "fit one page" role for the class — rather
+than inventing a fourth density tier. Classic Professional's
+`finance-director` example also went over budget from the same 8a content,
+but by only 1.5%; it stayed on `roomy` and was fixed with a template-local
+vertical-rhythm trim instead (see docs/template-audit-phase2.md's G8
+writeup for the per-template values).
+
+### Auto-fit tiers below `compact` (Compact only)
+
+A template with a "fit one page" auto-fit steps between the declared
+classes first: European starts at `standard` and steps to `compact` when
+its content overflows (`EuropeanShowcase.jsx`). `compact` is the floor of
+the shared ramp, so a template that already declares `compact` has no
+shared step left. **Compact is the one sanctioned exception** (decided
+2026-10-04): its promise is one page, so its auto-fit
+(`DENSITY_STEPS` in `CompactShowcase.jsx`) may go below `compact` through
+two template-local tiers in `compact.css`:
+
+| Tier | name | body | meta | Spacing (`--cp-*` gaps) |
+|---|---|---|---|---|
+| `cozy` (default) | `compact` ramp | `compact` ramp | `compact` ramp | Compact's own default gaps |
+| `.compact-showcase--snug` | 1.50rem | 0.76rem | 0.66rem | tighter |
+| `.compact-showcase--tight` | 1.40rem | 0.68rem | 0.60rem | tightest |
+
+Title, section-heading and entry-title stay on the `compact` ramp at every
+tier. These tiers are **not** density classes: they get no
+`tpl-density-*` class or shared token values, and no other template uses
+them. The exception holds only while all of these stay true:
+
+- The root always carries `tpl-density-compact`; the tiers override the
+  `--tpl-*` tokens on top of it and never replace the class.
+- A tier is engaged only by measured overflow of the one-page floor,
+  never as a default or a user choice.
+- The auto-fit resets to `cozy` whenever the content changes, so removing
+  content brings the type back up to the ramp.
+- The tier values live in `compact.css`, not in `_system.css`.
+
+Any other template that needs to fit one page steps between the shared
+classes, as European does, and takes a further tier below `compact` only
+by extending this exception explicitly, here.
 
 **Adoption state (v1.2.13–1.2.14):** every bespoke Showcase now carries a
 `tpl-density-*` class on its root and reads the six roles from `--tpl-*`.
 Two documented size overrides remain: Navy Professional's sidebar identity
 block (kicker/name/role — white knockout in a ~180px rail, narrower than any
-density's name-column floor) and per-template mobile tweaks. Minimalist is
+density's name-column floor; the `name` line now uses the `narrow-column
+name` row above, 1.4.7) and per-template mobile tweaks. Minimalist is
 the lone exception — it has no bespoke Showcase (it *is* the flat renderer),
 so its ramp adoption waits on teaching the flat path to read `--tpl-*`.
 
@@ -356,6 +441,74 @@ named.
     feed one.
   - One very long single skill string must wrap inside its chip or line, not
     push the column (see §7).
+- **Long unbreakable values — `.tpl-value-breakable`**
+  (`src/styles/templates/_system.css`). Applied alongside a template's own
+  class on any element holding a URL or email — a value with **no internal
+  space to wrap at**: `overflow-wrap: anywhere; min-width: 0`. Never
+  truncate an information-bearing value with `overflow: hidden` /
+  `text-overflow: ellipsis` / `white-space: nowrap` — let it break anywhere
+  instead and make sure the flex/grid ancestor isn't holding it to its
+  intrinsic width (`min-width: 0`). Introduced in 1.4.6 once the
+  ellipsis-truncation pattern turned up copy-pasted across 13 templates
+  (`docs/template-audit-phase2.md` G6); use it for every new template's
+  link values rather than reintroducing the ellipsis pattern.
+  **Link/URL/email values only** — do not use this for ordinary word text
+  (skills, labels); see `.tpl-text-wrappable` below.
+- **Long word-text values — `.tpl-text-wrappable`**
+  (`src/styles/templates/_system.css`). Applied alongside a template's own
+  class on any element holding ordinary word text that may run long — a
+  skill name, a category label: `overflow-wrap: break-word` (deliberately
+  **no** `min-width: 0`). `overflow-wrap: anywhere` on
+  `.tpl-value-breakable` also lowers the element's *min-content* size
+  (effectively to a single character), which is exactly what's wanted for
+  a URL/email with no spaces — but inside a flex/grid row that lets the
+  row shrink the element below even an *ordinary* word's width and
+  fracture it, which is never wanted for prose-like text.
+  `overflow-wrap: break-word` only breaks a word when there is no other
+  way to fit it on its own line and does not lower min-content, so the
+  item's automatic flex/grid minimum (its min-content size — the width of
+  its longest unbreakable segment) keeps a normal word intact; adding
+  `min-width: 0` here would override that protection and reintroduce the
+  same mid-word fracture `.tpl-value-breakable` would cause, so it's
+  intentionally left off. The one trade-off: a genuinely long single token
+  (e.g. a 60-character skill string with no spaces) can overflow its row
+  instead of being forced to wrap — for an ordinary long word this is a
+  few pixels, but for a truly unbreakable 40+ character token it can be
+  far more than that. Accepted for a plain text row with no visible box of
+  its own (Modern Orange's skill-name, the one current user — overflowing
+  past the row just extends the text, since there's no background/border/
+  padding for it to visibly spill out of).
+  **Do not reach for `overflow-wrap: anywhere` directly on the token** to
+  avoid that overflow — that was tried (Task 9 fix round 1, on 7 templates'
+  skill-chip classes) and reverted (fix round 2): `anywhere` lowers
+  min-content the same way `.tpl-value-breakable` does, so it quietly
+  reopens this exact primitive's own bug one level down, on the chip
+  itself. For an actual padded/bordered chip — where overflow would
+  visibly spill text outside its own background box — use
+  `.tpl-chip-wrappable` below instead.
+  Introduced in 1.4.7 (`docs/template-audit-phase2.md` G7 fix round 1)
+  after `.tpl-value-breakable` on Modern Orange's skill-name row turned
+  out to fracture ordinary skill words, not just the one long synthetic
+  test string it was added for; use it for every template's skill/label
+  values that render as plain text, not a chip.
+- **Skill/tag chips — `.tpl-chip-wrappable`** (`src/styles/templates/
+  _system.css`). Applied alongside a template's own class on a padded,
+  often bordered or filled-background skill/tag chip (as opposed to
+  `.tpl-text-wrappable`'s plain text row, above): `overflow-wrap:
+  break-word` (same reasoning as `.tpl-text-wrappable` — doesn't lower
+  min-content, so a crowded flex-wrap row wraps an ordinary chip to the
+  next line instead of fracturing it) plus `max-width: 100%`. The flex
+  sizing spec bounds a flex item's *automatic minimum size* by any
+  specified `max-width`, so `max-width: 100%` clamps that floor down to
+  the available row width — a token genuinely wider than the whole row
+  still breaks (inside the chip, not spilling past its background), while
+  an ordinary chip that's merely crowded off its current line wraps whole
+  to the next one. Introduced in 1.4.10 (Task 9 fix round 2,
+  `docs/template-audit-phase2.md` §4) to replace `overflow-wrap: anywhere`
+  on 7 templates' skill-chip classes (modern, creative, graduate,
+  portfolio, colorfulCompact, quadrant, executive) — use this, not
+  `anywhere`, for every chip that needs to survive an unrealistically long
+  single skill token.
 - **Accent color — one custom property, one per-template default.** Each
   template's CSS reads its accent from **`--tpl-accent`**, and declares its
   default value in that template's entry in `src/utils/cvTemplates.js`. The

@@ -222,7 +222,8 @@
   white-space: nowrap;
 }
 
-.editorial-showcase__entry-meta {
+.editorial-showcase__entry-meta,
+.editorial-showcase__entry-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   font-style: italic;
@@ -282,7 +283,10 @@
   font-weight: 500;
   color: var(--ed-ink);
   background: transparent;
-  overflow-wrap: anywhere;
+  /* Wrap behavior comes from `.tpl-chip-wrappable` in the JSX (§6, docs/
+     template-design-system.md) — see that primitive's own comment in
+     _system.css for why `overflow-wrap: anywhere` directly on a chip is
+     the wrong tool (Task 9 fix round 1's mistake on other templates). */
 }
 
 /* ── Links: plain stacked lines ── */
@@ -298,9 +302,6 @@
   font-size: var(--tpl-body-size);
   font-weight: 600;
   color: var(--ed-ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* ── Languages: inline row separated by a thin middle dot ── */

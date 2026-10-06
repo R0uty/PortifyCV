@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures/base.js'
 
 // Coverage for the opt-in "Restore last session" feature (todo items 24 /
 // 26). Off by default; when on, a debounced effect writes formData to

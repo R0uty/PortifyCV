@@ -34,14 +34,11 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // The fixed cool-spectrum gradient — Developer's one accent form. Used for
 // the name text, photo ring, section-icon badges and timeline marker.
 const SECTION_ICON_GRADIENT = 'linear-gradient(135deg, var(--dev-teal), var(--dev-blue), var(--dev-purple))'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
 
 // Developer's own Experience-entry renderer: a timeline rail beside a
 // card, like Modern Professional's (not directEditExperienceEntry.jsx's
@@ -55,7 +52,9 @@ function splitToBullets(text) {
 // entry in its own .direct-edit-entry div, making every item a last child.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, showTimeline, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div
@@ -102,21 +101,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, showTime
           <p className="dev-showcase__dates">{dateRange || copy.datesPending}</p>
         </div>
         {directEditDispatch ? (
-          <p className="dev-showcase__bullets dev-showcase__bullets--editing">
-            <EditableField
-              as="span"
-              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-              value={item.description}
-              placeholder={copy.descriptionPlaceholder}
-              multiline
-            />
-          </p>
+          <>
+            <p className="dev-showcase__bullets dev-showcase__bullets--editing">
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+                value={item.description}
+                placeholder={copy.descriptionPlaceholder}
+                multiline
+              />
+            </p>
+            {achievements.length > 0 ? (
+              <ul className="dev-showcase__bullets">
+                {achievements.map((line, lineIndex) => (
+                  <li key={lineIndex}>{line}</li>
+                ))}
+              </ul>
+            ) : null}
+          </>
         ) : bullets.length > 0 ? (
           <ul className="dev-showcase__bullets">
             {bullets.map((line, lineIndex) => (
               <li key={lineIndex}>{line}</li>
             ))}
           </ul>
+        ) : null}
+        {technologies.length > 0 ? (
+          <p className="dev-showcase__technologies">{technologies.join(' · ')}</p>
         ) : null}
       </div>
     </div>
@@ -287,7 +298,7 @@ export default function DeveloperShowcase({
                 <span className="dev-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                 <div className="min-w-0">
                   <p className="dev-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                  <p className="dev-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
+                  <p className="dev-showcase__link-value tpl-value-breakable" title={value}>{formatLinkDisplayValue(value)}</p>
                 </div>
               </div>
             ))
@@ -465,7 +476,7 @@ export default function DeveloperShowcase({
                     {chips.length > 0 ? (
                       <div className="dev-showcase__chip-row">
                         {chips.map((chip) => (
-                          <span key={chip} className="dev-showcase__chip">{chip}</span>
+                          <span key={chip} className="dev-showcase__chip tpl-chip-wrappable">{chip}</span>
                         ))}
                       </div>
                     ) : null}
@@ -476,7 +487,7 @@ export default function DeveloperShowcase({
                             href={getSafeHref(item.githubUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="dev-showcase__project-link"
+                            className="dev-showcase__project-link tpl-value-breakable"
                             title={item.githubUrl}
                           >
                             {formatLinkDisplayValue(item.githubUrl)}
@@ -487,7 +498,7 @@ export default function DeveloperShowcase({
                             href={getSafeHref(item.demoUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="dev-showcase__project-link"
+                            className="dev-showcase__project-link tpl-value-breakable"
                             title={item.demoUrl}
                           >
                             {formatLinkDisplayValue(item.demoUrl)}
@@ -628,7 +639,7 @@ export default function DeveloperShowcase({
       className={`dev-showcase preview-document--designer tpl-density-standard ${animationEnabled ? '' : 'dev-showcase--no-animation'}`}
     >
       {showDecorations ? (
-        <div className="dev-showcase__bg" data-export-ignore="true" aria-hidden="true">
+        <div className="dev-showcase__bg" data-export-ignore="true" data-decorative aria-hidden="true">
           <span className="dev-showcase__blob dev-showcase__blob--teal" />
           <span className="dev-showcase__blob dev-showcase__blob--purple" />
           <span className="dev-showcase__blob dev-showcase__blob--blue" />
@@ -641,7 +652,7 @@ export default function DeveloperShowcase({
           <p className="dev-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`}>
+          <h1 className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`} data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

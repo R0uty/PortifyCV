@@ -53,7 +53,7 @@
 .navy-professional-showcase__sidebar {
   background: var(--np-navy);
   color: #ffffff;
-  padding: 2.5rem 1.75rem;
+  padding: 2.5rem 1rem;
   min-width: 0;
 }
 
@@ -75,9 +75,16 @@
   border: 3px solid rgba(255, 255, 255, 0.85);
 }
 
-/* Identity block — kicker / name / role. Ad-hoc sizes on purpose: white
-   knockout in the ~180px navy rail, narrower than the standard ramp's
-   210px name-column floor (see the file header). */
+/* Identity block — kicker / name / role. The `__name` size below is §2's
+   `narrow-column name` row (1.20rem / 1.10) — read the full rationale
+   there, not restated here: white knockout in the ~180px navy rail
+   (sidebar padding cut from 1.75rem to 1rem each side, see `__sidebar`
+   above, to leave ~148px of content width), narrower than even
+   `compact`'s 180px name-column floor. This is the documented §2
+   "Adoption state" gap, resolved 1.4.7 (G7 fix round 1,
+   docs/template-audit-phase2.md G7/F7) by using that row instead of an
+   undocumented ad-hoc number. Kicker/role stay their own ad-hoc sizes —
+   §2's narrow-column exception only covers the `name` role. */
 .navy-professional-showcase__kicker {
   margin-top: 1rem;
   font-size: 0.62rem;
@@ -89,9 +96,9 @@
 
 .navy-professional-showcase__name {
   margin-top: 0.35rem;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.1;
   letter-spacing: -0.01em;
   color: #ffffff;
 }
@@ -327,7 +334,8 @@
   white-space: nowrap;
 }
 
-.navy-professional-showcase__entry-meta {
+.navy-professional-showcase__entry-meta,
+.navy-professional-showcase__entry-technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   font-style: italic;
@@ -570,6 +578,7 @@
 
 .navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-dates,
 .navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-meta,
+.navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__entry-technologies,
 .navy-professional-showcase:not(.navy-professional-showcase--ats) .navy-professional-showcase__sidebar [data-moved-from='main'] .navy-professional-showcase__empty {
   color: rgba(255, 255, 255, 0.7);
 }

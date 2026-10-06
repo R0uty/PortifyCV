@@ -33,10 +33,7 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // Experience and Education share the `entry` class, whose spacing and
 // divider depend on position. Both pass isFirst/isLast from their own
@@ -58,7 +55,9 @@ function entryClassName(isFirst, isLast) {
 // snapshot's `sourceIndex`.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div key={`${item.role}-${item.company}-${index}`} className={entryClassName(isFirst, isLast)} data-export-card="true" data-direct-edit-index={sourceIndex}>
@@ -91,21 +90,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst,
         </p>
       ) : null}
       {directEditDispatch ? (
-        <p className="tech-exec-showcase__bullets tech-exec-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="tech-exec-showcase__bullets tech-exec-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="tech-exec-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="tech-exec-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="tech-exec-showcase__entry-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )
@@ -434,7 +445,7 @@ export default function TechExecShowcase({
                   <span className="tech-exec-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="tech-exec-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="tech-exec-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
+                    <p className="tech-exec-showcase__link-value tpl-value-breakable" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))
@@ -503,7 +514,7 @@ export default function TechExecShowcase({
       // of its own) that ResumeBuilderPage's export handler polls for before
       // starting a PDF export. TechExecShowcase only ever renders in non-ATS
       // mode, so it's always "designer" — omitting it hangs the export.
-      className="tech-exec-showcase preview-document--designer tpl-density-standard"
+      className="tech-exec-showcase preview-document--designer tpl-density-compact"
       style={{
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, TECHEXEC_DEFAULT_ACCENT_COLOR),
@@ -515,7 +526,7 @@ export default function TechExecShowcase({
           <p className="tech-exec-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="tech-exec-showcase__name">
+          <h1 className="tech-exec-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

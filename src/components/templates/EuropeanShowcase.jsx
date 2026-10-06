@@ -40,12 +40,9 @@ import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { EUROPEAN_DEFAULT_ACCENT_COLOR } from './european'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 const DENSITY_STEPS = ['standard', 'compact']
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
 
 function SectionHead({ title }) {
   return (
@@ -73,7 +70,9 @@ function Row({ label, entryIndex, children }) {
 // site passes the snapshot's `sourceIndex`.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
   const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
 
   return (
@@ -101,21 +100,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIn
           </p>
         ) : metaLine ? <p className="european-showcase__entry-meta">{metaLine}</p> : null}
         {directEditDispatch ? (
-          <p className="european-showcase__bullets european-showcase__bullets--editing">
-            <EditableField
-              as="span"
-              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-              value={item.description}
-              placeholder={copy.descriptionPlaceholder}
-              multiline
-            />
-          </p>
+          <>
+            <p className="european-showcase__bullets european-showcase__bullets--editing">
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+                value={item.description}
+                placeholder={copy.descriptionPlaceholder}
+                multiline
+              />
+            </p>
+            {achievements.length > 0 ? (
+              <ul className="european-showcase__bullets">
+                {achievements.map((line, lineIndex) => (
+                  <li key={lineIndex}>{line}</li>
+                ))}
+              </ul>
+            ) : null}
+          </>
         ) : bullets.length > 0 ? (
           <ul className="european-showcase__bullets">
             {bullets.map((line, lineIndex) => (
               <li key={lineIndex}>{line}</li>
             ))}
           </ul>
+        ) : null}
+        {technologies.length > 0 ? (
+          <p className="european-showcase__entry-technologies">{technologies.join(' · ')}</p>
         ) : null}
       </Row>
     </div>
@@ -432,7 +443,7 @@ export default function EuropeanShowcase({
           {linkEntries.length > 0 ? (
             linkEntries.map(([linkKey, value]) => (
               <Row key={linkKey} label={formatLinkLabel(linkKey)}>
-                <p className="european-showcase__link-value" data-export-card="true" title={value}>
+                <p className="european-showcase__link-value tpl-value-breakable" data-export-card="true" title={value}>
                   {formatLinkDisplayValue(value)}
                 </p>
               </Row>
@@ -520,7 +531,7 @@ export default function EuropeanShowcase({
           <p className="european-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="european-showcase__name">
+          <h1 className="european-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

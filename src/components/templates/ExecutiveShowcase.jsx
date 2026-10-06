@@ -39,6 +39,7 @@ import {
   getSafeHref,
   createSectionRouter,
 } from './shared'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -94,7 +95,9 @@ function highlightMetrics(text, showMetrics) {
 // around an entry.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetrics, isFirst, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
   const entryClassName = [
     'executive-showcase__entry',
     // Unconditional marker opting this entry out of executive.css's
@@ -137,21 +140,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetr
         <p className="executive-showcase__entry-dates">{dateRange || copy.datesPending}</p>
       </div>
       {directEditDispatch ? (
-        <p className="executive-showcase__bullets executive-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="executive-showcase__bullets executive-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="executive-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{highlightMetrics(line, showMetrics)}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="executive-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{highlightMetrics(line, showMetrics)}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="executive-showcase__entry-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )
@@ -472,7 +487,7 @@ export default function ExecutiveShowcase({
                 <p className="executive-showcase__skill-group-label">{cat.label}</p>
                 <div className="executive-showcase__tag-row">
                   {cat.items.map((skill) => (
-                    <span key={skill} data-export-skill="true" className="executive-showcase__tag">{skill}</span>
+                    <span key={skill} data-export-skill="true" className="executive-showcase__tag tpl-chip-wrappable">{skill}</span>
                   ))}
                 </div>
               </div>
@@ -580,7 +595,7 @@ export default function ExecutiveShowcase({
                   <span className="executive-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="executive-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="executive-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
+                    <p className="executive-showcase__link-value tpl-value-breakable" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))
@@ -614,7 +629,10 @@ export default function ExecutiveShowcase({
       // ExecutiveShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className="executive-showcase preview-document--designer tpl-density-standard"
+      // Moved from tpl-density-standard to tpl-density-compact in 1.4.9
+      // (G8 density, docs/template-audit-phase2.md) — see executive.css's
+      // header comment for why.
+      className="executive-showcase preview-document--designer tpl-density-compact"
       style={{
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, EXECUTIVE_DEFAULT_ACCENT_COLOR),
@@ -637,7 +655,7 @@ export default function ExecutiveShowcase({
           <p className="executive-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="executive-showcase__name">
+          <h1 className="executive-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

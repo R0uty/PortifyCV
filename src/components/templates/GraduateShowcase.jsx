@@ -33,6 +33,7 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -55,7 +56,9 @@ function isInProgress(endDate) {
 // index); the read-only call site passes the snapshot's `sourceIndex`.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div key={`${item.role}-${item.company}-${index}`} className="graduate-showcase__edu-card" data-export-card="true" data-direct-edit-index={sourceIndex}>
@@ -90,19 +93,29 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, sourceIn
         <p className="graduate-showcase__edu-dates">{dateRange || copy.datesPending}</p>
       </div>
       {directEditDispatch ? (
-        <p className="graduate-showcase__bullets graduate-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="graduate-showcase__bullets graduate-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="graduate-showcase__bullets">
+              {achievements.map((line, lineIndex) => <li key={lineIndex}>{line}</li>)}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="graduate-showcase__bullets">
           {bullets.map((line, lineIndex) => <li key={lineIndex}>{line}</li>)}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="graduate-showcase__edu-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )
@@ -114,7 +127,7 @@ function SectionHead({ icon, title }) {
       <span className="graduate-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
-      <h2 className="graduate-showcase__section-title">{title}</h2>
+      <h2 className="graduate-showcase__section-title tpl-text-wrappable">{title}</h2>
     </div>
   )
 }
@@ -307,7 +320,7 @@ export default function GraduateShowcase({
                     {chips.length > 0 ? (
                       <div className="graduate-showcase__tag-row">
                         {chips.map((chip) => (
-                          <span key={chip} className="graduate-showcase__tag">{chip}</span>
+                          <span key={chip} className="graduate-showcase__tag tpl-chip-wrappable">{chip}</span>
                         ))}
                       </div>
                     ) : null}
@@ -318,7 +331,7 @@ export default function GraduateShowcase({
                             href={getSafeHref(item.githubUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="graduate-showcase__project-link"
+                            className="graduate-showcase__project-link tpl-value-breakable"
                             title={item.githubUrl}
                           >
                             {formatLinkDisplayValue(item.githubUrl)}
@@ -329,7 +342,7 @@ export default function GraduateShowcase({
                             href={getSafeHref(item.demoUrl)}
                             target="_blank"
                             rel="noreferrer"
-                            className="graduate-showcase__project-link"
+                            className="graduate-showcase__project-link tpl-value-breakable"
                             title={item.demoUrl}
                           >
                             {formatLinkDisplayValue(item.demoUrl)}
@@ -500,7 +513,7 @@ export default function GraduateShowcase({
                 <p className="graduate-showcase__skill-group-label">{cat.label}</p>
                 <div className="graduate-showcase__tag-row">
                   {cat.items.map((skill) => (
-                    <span key={skill} data-export-skill="true" className="graduate-showcase__tag">{skill}</span>
+                    <span key={skill} data-export-skill="true" className="graduate-showcase__tag tpl-chip-wrappable">{skill}</span>
                   ))}
                 </div>
               </div>
@@ -580,7 +593,7 @@ export default function GraduateShowcase({
                   <span className="graduate-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="graduate-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="graduate-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
+                    <p className="graduate-showcase__link-value tpl-value-breakable" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))
@@ -649,7 +662,7 @@ export default function GraduateShowcase({
           <div className="graduate-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`} className="graduate-showcase__interest-chip">{item.name}</span>
+                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`} className="graduate-showcase__interest-chip tpl-chip-wrappable">{item.name}</span>
               ))
             ) : (
               <p className="graduate-showcase__empty">
@@ -692,7 +705,7 @@ export default function GraduateShowcase({
           <p className="graduate-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="graduate-showcase__name">
+          <h1 className="graduate-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

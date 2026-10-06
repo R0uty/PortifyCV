@@ -42,10 +42,7 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // Quadrant's own Experience-entry renderer: role and company/location nest
 // in one `min-w-0` div with the dates as its sibling. Only role and company
@@ -58,7 +55,9 @@ function splitToBullets(text) {
 // .direct-edit-entry div, making every entry both.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
   const className = [
     'quadrant-showcase__entry',
     isFirst ? 'quadrant-showcase__entry--first' : '',
@@ -98,21 +97,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst,
         <p className="quadrant-showcase__entry-dates">{dateRange || copy.datesPending}</p>
       </div>
       {directEditDispatch ? (
-        <p className="quadrant-showcase__bullets quadrant-showcase__bullets--editing">
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className="quadrant-showcase__bullets quadrant-showcase__bullets--editing">
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className="quadrant-showcase__bullets">
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className="quadrant-showcase__bullets">
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className="quadrant-showcase__entry-technologies">{technologies.join(' · ')}</p>
       ) : null}
     </div>
   )
@@ -294,7 +305,7 @@ export default function QuadrantShowcase({
                     {chips.length > 0 ? (
                       <div className="quadrant-showcase__tag-row">
                         {chips.map((chip) => (
-                          <span key={chip} data-export-skill="true" className="quadrant-showcase__tag">{chip}</span>
+                          <span key={chip} data-export-skill="true" className="quadrant-showcase__tag tpl-chip-wrappable">{chip}</span>
                         ))}
                       </div>
                     ) : null}
@@ -402,7 +413,7 @@ export default function QuadrantShowcase({
                   <span className="quadrant-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="quadrant-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="quadrant-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
+                    <p className="quadrant-showcase__link-value tpl-value-breakable" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))
@@ -452,7 +463,7 @@ export default function QuadrantShowcase({
         <p className="quadrant-showcase__kicker" data-export-ignore="true">
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
-        <h1 className="quadrant-showcase__name">
+        <h1 className="quadrant-showcase__name" data-cv-name>
           {directEditDispatch ? (
             <EditableField
               as="span"
@@ -529,7 +540,7 @@ export default function QuadrantShowcase({
                   <p className="quadrant-showcase__skill-group-label">{cat.label}</p>
                   <div className="quadrant-showcase__tag-row">
                     {cat.items.map((skill) => (
-                      <span key={skill} data-export-skill="true" className="quadrant-showcase__tag">{skill}</span>
+                      <span key={skill} data-export-skill="true" className="quadrant-showcase__tag tpl-chip-wrappable">{skill}</span>
                     ))}
                   </div>
                 </div>

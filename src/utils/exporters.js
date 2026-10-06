@@ -712,6 +712,15 @@ function createPdfMode(mode) {
   return PDF_MODES[mode] ?? PDF_MODES.designer
 }
 
+// `previewElement` (Classic mode: ResumeBuilderPage.jsx's dedicated
+// off-screen export-source CVPreview; Direct Edit: DirectEditPreview.jsx's)
+// already rendered from `hideEmptySections(formData)`, so its DOM never
+// contains a template's editing-affordance placeholder ("… will appear
+// here") for an empty section in the first place — see
+// docs/template-audit-phase2.md F12/I-1 for why this moved upstream of the
+// clone instead of pruning `[data-export-section]` nodes out of it here
+// after the fact (that ordering is what broke Creative/Editorial's running
+// section numbers whenever a middle section was empty).
 function createExportSandbox(previewElement, mode, expectedVariant = '') {
   const pdfMode = createPdfMode(mode)
   const exportRoot = resolveExportRoot(previewElement)

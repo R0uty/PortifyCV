@@ -293,7 +293,8 @@
   color: var(--ms-navy);
 }
 
-.modern-showcase__company {
+.modern-showcase__company,
+.modern-showcase__technologies {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
   color: var(--ms-muted);
@@ -434,6 +435,11 @@
   font-weight: 600;
   color: var(--ms-text);
   background: transparent;
+  /* Wrap behavior (break-word + max-width:100%, so a crowded row wraps
+     ordinary chips instead of fracturing them) comes from
+     `.tpl-chip-wrappable` in the JSX (§6, docs/template-design-system.md;
+     see _system.css's own comment for why this replaced a per-template
+     `overflow-wrap: anywhere` in Task 9's fix round 1). */
 }
 
 /* ── Achievements (professional list) ── */
@@ -609,12 +615,9 @@
 
 .modern-showcase__link-value {
   display: block;
-  overflow: hidden;
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   color: var(--ms-text);
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* ── Interests (simple outline icons) ── */

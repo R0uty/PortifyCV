@@ -25,6 +25,14 @@
 // the hairline, section-icon badges, chips, badges and the "Live Demo"
 // button) collapses to a single emerald accent read from `--tpl-accent`,
 // user-customizable via the Settings swatch (`forestGreen` set).
+//
+// Moved from `tpl-density-roomy` to `tpl-density-compact` in 1.4.9 (G8,
+// docs/template-audit-phase2.md): all three example CVs ran past the
+// 2.0-page cap under `roomy`'s card chrome + badge rows, and a single
+// density step plus a token-sized vertical-rhythm trim wasn't enough once
+// 8a's achievements/technologies lines landed — see the design-system doc's
+// own "fit one page" note on `compact` being exactly the class this kind of
+// fix switches into.
 
 import { useMemo } from 'react'
 import '@fontsource/instrument-serif/400.css'
@@ -48,10 +56,7 @@ import {
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
-
-function splitToBullets(text) {
-  return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
-}
+import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 
 // Bolds metric-shaped tokens so quantified impact stands out, consistent
 // with every other Showcase's "metrics should be emphasised" treatment.
@@ -79,7 +84,9 @@ function highlightMetrics(text) {
 // entry in its own .direct-edit-entry div, making every item a last child.
 function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div
@@ -124,21 +131,33 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, 
           <p className="portfolio-showcase__dates">{dateRange || copy.datesPending}</p>
         </div>
         {directEditDispatch ? (
-          <p className="portfolio-showcase__bullets portfolio-showcase__bullets--editing">
-            <EditableField
-              as="span"
-              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-              value={item.description}
-              placeholder={copy.descriptionPlaceholder}
-              multiline
-            />
-          </p>
+          <>
+            <p className="portfolio-showcase__bullets portfolio-showcase__bullets--editing">
+              <EditableField
+                as="span"
+                path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+                value={item.description}
+                placeholder={copy.descriptionPlaceholder}
+                multiline
+              />
+            </p>
+            {achievements.length > 0 ? (
+              <ul className="portfolio-showcase__bullets">
+                {achievements.map((line, lineIndex) => (
+                  <li key={lineIndex}>{highlightMetrics(line)}</li>
+                ))}
+              </ul>
+            ) : null}
+          </>
         ) : bullets.length > 0 ? (
           <ul className="portfolio-showcase__bullets">
             {bullets.map((line, lineIndex) => (
               <li key={lineIndex}>{highlightMetrics(line)}</li>
             ))}
           </ul>
+        ) : null}
+        {technologies.length > 0 ? (
+          <p className="portfolio-showcase__technologies">{technologies.join(' · ')}</p>
         ) : null}
       </div>
     </div>
@@ -526,7 +545,7 @@ export default function PortfolioShowcase({
                     <span
                       key={skill}
                       data-export-skill="true"
-                      className="portfolio-showcase__badge"
+                      className="portfolio-showcase__badge tpl-chip-wrappable"
                     >
                       {skill}
                     </span>
@@ -583,7 +602,7 @@ export default function PortfolioShowcase({
                   <span className="portfolio-showcase__link-icon" aria-hidden="true">{devIcons[linkKey]}</span>
                   <div className="min-w-0">
                     <p className="portfolio-showcase__link-label">{formatLinkLabel(linkKey)}</p>
-                    <p className="portfolio-showcase__link-value" title={value}>{formatLinkDisplayValue(value)}</p>
+                    <p className="portfolio-showcase__link-value tpl-value-breakable" title={value}>{formatLinkDisplayValue(value)}</p>
                   </div>
                 </div>
               ))
@@ -648,7 +667,7 @@ export default function PortfolioShowcase({
           <div className="portfolio-showcase__interest-row">
             {snapshot.interests.length > 0 ? (
               snapshot.interests.map((item, index) => (
-                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`} className="portfolio-showcase__interest-chip">{item.name}</span>
+                <span data-direct-edit-index={snapshot.sourceIndices.interests[index]} key={`${item.name}-${index}`} className="portfolio-showcase__interest-chip tpl-chip-wrappable">{item.name}</span>
               ))
             ) : (
               <p className="portfolio-showcase__empty">
@@ -679,7 +698,7 @@ export default function PortfolioShowcase({
       // PortfolioShowcase only ever renders in non-ATS mode, so it's always
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
-      className="portfolio-showcase preview-document--designer tpl-density-roomy"
+      className="portfolio-showcase preview-document--designer tpl-density-compact"
       style={{
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.1, PORTFOLIO_DEFAULT_ACCENT_COLOR),
@@ -691,7 +710,7 @@ export default function PortfolioShowcase({
           <p className="portfolio-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="portfolio-showcase__name">
+          <h1 className="portfolio-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"

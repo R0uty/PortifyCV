@@ -73,6 +73,7 @@ import {
 import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
+import { hideEmptySections } from '../utils/sectionContent'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
 import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
@@ -428,6 +429,12 @@ function ResumeBuilderPage({
   } = uiState
   const ui = getUiTheme()
   const previewRef = useRef(null)
+  // The CV the user sees in Classic mode's preview panel. previewRef is the
+  // off-screen export source (see the .direct-edit-export-source copy
+  // below), which hides empty sections and gets .pdf-export-root's PDF-only
+  // spacing — so anything sizing the visible preview, like Fit Page, has to
+  // measure this one instead.
+  const visiblePreviewRef = useRef(null)
   const importInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
   const storageWarningShownRef = useRef(false)
@@ -453,6 +460,13 @@ function ResumeBuilderPage({
   const [isResponsivePreview, setIsResponsivePreview] = useState(false)
   const [zoomPercent, setZoomPercent] = useState(100)
   const [isTemplateGalleryOpen, setIsTemplateGalleryOpen] = useState(false)
+  // SectionEditOverlay's handle, for Direct Edit's nav rail; see
+  // handleDirectEditNavigate.
+  const directEditOverlayRef = useRef(null)
+  // Set by a rail click so scroll-spy doesn't immediately re-pick a
+  // neighbouring section; cleared once the user scrolls by hand.
+  const directEditNavLockRef = useRef(false)
+  const [directEditToolbarHeight, setDirectEditToolbarHeight] = useState(0)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
@@ -1232,24 +1246,43 @@ function ResumeBuilderPage({
 
   const handleFitPage = useCallback(() => {
     const viewport = previewViewportRef.current
-    const content = previewRef.current
+    const content = visiblePreviewRef.current
+    const zoomWrapper = content?.closest('.preview-zoom-wrapper')
+    const availableHeight = viewport ? viewport.clientHeight - 48 : 0
 
-    if (!viewport || !content) {
+    if (!zoomWrapper || availableHeight <= 0 || content.getBoundingClientRect().height <= 0) {
       setZoomPercent(100)
       return
     }
 
-    const currentZoom = zoomPercent / 100
-    const naturalHeight = content.offsetHeight / currentZoom
-    const availableHeight = viewport.clientHeight - 48
+    // The CV reflows to its zoomed width — zooming in narrows its layout box
+    // and makes it taller — so its height at the current zoom doesn't
+    // predict its height at any other. Binary-search the largest zoom whose
+    // rendered height fits instead, writing each candidate straight onto the
+    // wrapper so getBoundingClientRect forces a synchronous layout at it,
+    // then restore React's value before committing the result. Falls back to
+    // the 40% floor when even that overflows.
+    const committedZoom = zoomWrapper.style.getPropertyValue('--preview-zoom')
+    const fitsAt = (percent) => {
+      zoomWrapper.style.setProperty('--preview-zoom', String(percent / 100))
+      return content.getBoundingClientRect().height <= availableHeight
+    }
+    let low = 40
+    let high = 200
 
-    if (naturalHeight <= 0 || availableHeight <= 0) {
-      setZoomPercent(100)
-      return
+    while (low < high) {
+      const mid = Math.ceil((low + high) / 2)
+
+      if (fitsAt(mid)) {
+        low = mid
+      } else {
+        high = mid - 1
+      }
     }
 
-    setZoomPercent(clampZoomPercent((availableHeight / naturalHeight) * 100))
-  }, [clampZoomPercent, zoomPercent])
+    zoomWrapper.style.setProperty('--preview-zoom', committedZoom)
+    setZoomPercent(low)
+  }, [])
 
   useEffect(() => {
     const viewport = previewViewportRef.current
@@ -1342,6 +1375,125 @@ function ResumeBuilderPage({
     // from the DOM (CVForm only renders sections the template supports), so a
     // mount-only observer would miss anchors that show up after a later switch.
   }, [selectedTemplate])
+
+  // Direct Edit scrolls the whole page under the sticky toolbar (App.jsx),
+  // so its nav rail sticks just below that toolbar and a section scrolled
+  // to by the rail stops just below it too. The toolbar's height depends
+  // on how its controls wrap, so it's measured rather than assumed. App
+  // renders the toolbar from this page's onHeaderChange, i.e. after this
+  // effect first runs, so wait for it to appear before measuring.
+  useEffect(() => {
+    if (builderMode !== 'direct') {
+      return undefined
+    }
+
+    let resizeObserver = null
+    const attach = () => {
+      const toolbar = document.querySelector('.app-toolbar')
+
+      if (!toolbar) {
+        return false
+      }
+
+      resizeObserver = new ResizeObserver(() => setDirectEditToolbarHeight(toolbar.offsetHeight))
+      resizeObserver.observe(toolbar)
+      return true
+    }
+    let mutationObserver = null
+
+    if (!attach()) {
+      mutationObserver = new MutationObserver(() => {
+        if (attach()) {
+          mutationObserver.disconnect()
+        }
+      })
+      mutationObserver.observe(document.body, { childList: true, subtree: true })
+    }
+
+    return () => {
+      mutationObserver?.disconnect()
+      resizeObserver?.disconnect()
+    }
+  }, [builderMode])
+
+  // Direct Edit's scroll-spy. The active item is the section whose top
+  // most recently scrolled past a line a quarter of the way down the
+  // viewport. Classic's "topmost section in a band" rule (above) doesn't
+  // carry over: here a tall section above the one just scrolled to can
+  // still reach into the band and win. Sections are re-queried on every
+  // pass, since showing/hiding one or loading a template's Showcase chunk
+  // changes the set. A rail click locks the clicked item in until the user
+  // scrolls by hand, so a two-column template's sidebar section level
+  // with it can't immediately take over.
+  useEffect(() => {
+    if (builderMode !== 'direct') {
+      return undefined
+    }
+
+    const navIdBySectionKey = new Map(
+      NAV_SECTIONS.filter((item) => item.sectionKey).map((item) => [item.sectionKey, item.id]),
+    )
+    let frame = 0
+
+    const update = () => {
+      frame = 0
+
+      if (directEditNavLockRef.current) {
+        return
+      }
+
+      const sections = document.querySelectorAll(
+        '.direct-edit-preview [data-export-section], .direct-edit-preview [data-export-header]',
+      )
+      const marker = window.innerHeight * 0.25
+      let active = null
+      let activeTop = -Infinity
+
+      sections.forEach((element) => {
+        const { top } = element.getBoundingClientRect()
+
+        if (top <= marker && top > activeTop) {
+          active = element
+          activeTop = top
+        }
+      })
+
+      const navId = !active || active.hasAttribute('data-export-header')
+        ? 'personal'
+        : navIdBySectionKey.get(active.getAttribute('data-export-section'))
+
+      if (navId) {
+        setActiveSectionId(navId)
+      }
+    }
+    const scheduleUpdate = () => {
+      if (!frame) {
+        frame = window.requestAnimationFrame(update)
+      }
+    }
+    const unlock = () => {
+      directEditNavLockRef.current = false
+    }
+    const unlockOnScrollKey = (event) => {
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) {
+        unlock()
+      }
+    }
+
+    scheduleUpdate()
+    window.addEventListener('scroll', scheduleUpdate, { passive: true })
+    window.addEventListener('wheel', unlock, { passive: true })
+    window.addEventListener('touchmove', unlock, { passive: true })
+    window.addEventListener('keydown', unlockOnScrollKey)
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+      window.removeEventListener('scroll', scheduleUpdate)
+      window.removeEventListener('wheel', unlock)
+      window.removeEventListener('touchmove', unlock)
+      window.removeEventListener('keydown', unlockOnScrollKey)
+    }
+  }, [builderMode, selectedTemplate])
 
   // A template switch can add or remove editor sections; if the user was
   // scrolled deep into the form, those changes happen off-screen with no
@@ -1772,6 +1924,51 @@ function ResumeBuilderPage({
     return NAV_UTILITY_ITEMS.filter((item) => (item.label[locale] ?? item.label.en).toLowerCase().includes(query))
   }, [searchQuery, locale])
 
+  // Direct Edit renders only the sections the template supports AND the
+  // user hasn't hidden, so the rail lists exactly those — a rail item for
+  // a hidden section would have nothing to scroll to. Classic's rail keeps
+  // hidden sections, because their form stays editable there.
+  const directEditNavSections = useMemo(
+    () => NAV_SECTIONS.filter((item) => (
+      item.sectionKey === null
+      || (templateSectionKeySet.has(item.sectionKey) && formData.sectionVisibility?.[item.sectionKey] !== false)
+    )),
+    [templateSectionKeySet, formData.sectionVisibility],
+  )
+
+  const handleDirectEditNavigate = useCallback((item) => {
+    if (item.kind === 'action') {
+      handleNavigate(item)
+      return
+    }
+
+    setActiveSectionId(item.id)
+    directEditNavLockRef.current = true
+    // Personal Information is the header block, which the section overlay
+    // models under the synthetic key "identity".
+    directEditOverlayRef.current?.openSectionFromNav(item.sectionKey ?? 'identity')
+  }, [handleNavigate])
+
+  const directEditNavRail = useMemo(() => (
+    <NavRail
+      sections={directEditNavSections}
+      utilityItems={NAV_UTILITY_ITEMS}
+      activeSectionId={activeSectionId}
+      onNavigate={handleDirectEditNavigate}
+      locale={locale}
+      version={APP_VERSION_RAW}
+      isCollapsed={navRailCollapsed}
+      onToggleCollapsed={handleToggleNavRail}
+    />
+  ), [
+    directEditNavSections,
+    activeSectionId,
+    handleDirectEditNavigate,
+    locale,
+    navRailCollapsed,
+    handleToggleNavRail,
+  ])
+
   const navRailContent = useMemo(() => (
     <NavRail
       sections={filteredNavSections}
@@ -1921,7 +2118,7 @@ function ResumeBuilderPage({
             >
               <CVPreview
                 formData={formData}
-                previewRef={previewRef}
+                previewRef={visiblePreviewRef}
                 template={selectedTemplate}
                 locale={locale}
                 atsFriendlyMode={atsFriendlyMode}
@@ -2065,32 +2262,75 @@ function ResumeBuilderPage({
     <>
       <h1 className="sr-only">{locale === 'fi' ? 'Rakenna CV:si' : 'Build Your CV'}</h1>
       {builderMode === 'direct' ? (
-        <AppErrorBoundary
-          panelTitle={locale === 'fi' ? 'Suoran muokkauksen esikatselu' : 'Direct Edit preview'}
-          locale={locale}
+        <div
+          className={`direct-edit-layout${navRailCollapsed ? ' direct-edit-layout--nav-collapsed' : ''}`}
+          style={{ '--direct-edit-sticky-top': `${directEditToolbarHeight}px` }}
         >
-          <DirectEditPreview
-            formData={formData}
-            dispatchFormData={dispatchFormData}
-            selectedTemplate={selectedTemplate}
-            templateConfig={currentTemplate}
-            locale={locale}
-            accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
-            headingColor={cvHeadingColor}
-            classicNameAlignment={classicNameAlignment}
-            previewRef={previewRef}
-            cvFontId={cvFontId}
-          />
-        </AppErrorBoundary>
+          <div className="direct-edit-layout__nav print:hidden">
+            {directEditNavRail}
+          </div>
+          <div className="direct-edit-layout__main">
+            <AppErrorBoundary
+              panelTitle={locale === 'fi' ? 'Suoran muokkauksen esikatselu' : 'Direct Edit preview'}
+              locale={locale}
+            >
+              <DirectEditPreview
+                overlayApiRef={directEditOverlayRef}
+                formData={formData}
+                dispatchFormData={dispatchFormData}
+                selectedTemplate={selectedTemplate}
+                templateConfig={currentTemplate}
+                locale={locale}
+                accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
+                headingColor={cvHeadingColor}
+                classicNameAlignment={classicNameAlignment}
+                previewRef={previewRef}
+                cvFontId={cvFontId}
+              />
+            </AppErrorBoundary>
+          </div>
+        </div>
       ) : (
-        <AppShell
-          shellStyle={shellStyle}
-          showContentOnMobile={mobilePreviewVisible}
-          nav={navRailContent}
-          sidebar={sidebarContent}
-          content={previewContent}
-          navCollapsed={navRailCollapsed}
-        />
+        <>
+          <AppShell
+            shellStyle={shellStyle}
+            showContentOnMobile={mobilePreviewVisible}
+            nav={navRailContent}
+            sidebar={sidebarContent}
+            content={previewContent}
+            navCollapsed={navRailCollapsed}
+          />
+          {/* What PDF export captures in Classic mode — same off-screen,
+              inert, read-only pattern as Direct Edit's export-source copy
+              (DirectEditPreview.jsx), reused via the same
+              .direct-edit-export-source CSS, and deliberately rendered
+              OUTSIDE .app-shell__preview so it's never picked up by a
+              `[data-export-variant]` query scoped to that visible preview.
+              Rendered from hideEmptySections(formData) so an empty
+              section's placeholder never reaches the clone and a
+              template's running section numbering (Creative, Editorial)
+              is computed over the same sections the export actually
+              contains (I-1). The visible preview above keeps the raw
+              formData/placeholder editing affordance and is no longer the
+              export source — previewRef points here instead. */}
+          <div
+            className="direct-edit-export-source"
+            style={{ '--font-sans': getCvFontStack(cvFontId) }}
+            aria-hidden="true"
+            inert
+          >
+            <CVPreview
+              formData={hideEmptySections(formData)}
+              previewRef={previewRef}
+              template={selectedTemplate}
+              locale={locale}
+              atsFriendlyMode={atsFriendlyMode}
+              accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
+              headingColor={cvHeadingColor}
+              classicNameAlignment={classicNameAlignment}
+            />
+          </div>
+        </>
       )}
 
       {builderMode === 'direct' ? null : mobileBottomActions}

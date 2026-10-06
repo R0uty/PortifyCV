@@ -884,8 +884,42 @@ select.floating-field__control {
   box-shadow: 0 0 0 1px var(--accent-solid);
 }
 
+/* The card's main control (thumbnail + name + "Use template"); the card
+   itself is a plain container so it can also hold the examples link. */
+.template-gallery__select {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.template-gallery__examples {
+  margin: 0 0.85rem 0.85rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--app-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+
+.template-gallery__examples:hover {
+  background: var(--app-surface-strong);
+}
+
 .template-gallery__thumb {
   padding: 0.75rem;
+  cursor: pointer;
   border-bottom: 1px solid var(--app-border);
   background: var(--app-surface-strong);
 }
@@ -2282,13 +2316,47 @@ select.floating-field__control {
   color: #111111;
 }
 
+/* The hero's actions — "Start building", "View templates" and the "See
+   how it works" link — as one row that wraps on narrow screens instead of
+   leaving the wrapped items indented by a margin-left. */
+.landing-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  margin-top: var(--space-8);
+}
+
+.landing-hero__actions .landing-cta {
+  margin-top: 0;
+}
+
+/* Outline twin of .landing-cta (same size, so the two read as a pair) for
+   the hero's secondary action. */
+.landing-hero__templates {
+  display: inline-block;
+  border: 2px solid #111111;
+  background: transparent;
+  color: #111111;
+  padding: 1rem 2rem;
+  font-size: var(--text-body);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.landing-hero__templates:hover {
+  background: #111111;
+  color: #ffffff;
+}
+
 /* Lightweight text link next to the hero's primary CTA — the hero is
    left-aligned, so .landing-secondary-cta's centered block button (built
    for the templates section below) doesn't fit here. */
 .landing-hero__link {
   display: inline-block;
-  margin-top: var(--space-8);
-  margin-left: var(--space-5);
   color: var(--app-text);
   font-size: var(--text-body-sm);
   font-weight: 600;
@@ -2549,6 +2617,7 @@ select.floating-field__control {
 
 .templates-page-card__thumb {
   display: block;
+  cursor: pointer;
   border-radius: var(--radius-sm);
   box-shadow: var(--shadow-sm);
 }
@@ -2578,6 +2647,13 @@ select.floating-field__control {
   color: var(--app-text-muted);
 }
 
+.templates-page-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .templates-page-card__cta {
   align-self: flex-start;
   border: 1.5px solid #111111;
@@ -2595,6 +2671,28 @@ select.floating-field__control {
 .templates-page-card__cta:hover {
   background: #111111;
   color: #ffffff;
+}
+
+/* Secondary to "Use this template": same size and type, lighter border. */
+.templates-page-card__examples {
+  border: 1.5px solid var(--app-border-strong);
+  color: #111111;
+  padding: 0.55rem 1.1rem;
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color 140ms ease;
+}
+
+.templates-page-card__examples:hover {
+  border-color: #111111;
+}
+
+.templates-page-card__examples:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
 }
 
 /* Per-template page (/free-cv-templates/<slug>). Two columns: copy and
@@ -3043,13 +3141,20 @@ select.floating-field__control {
   min-width: 0;
 }
 
+/* `overflow-wrap: break-word` only breaks a word when it has no other way
+   to fit its own line; it does not lower the element's min-content size.
+   Deliberately no `word-break: break-word` / `min-width: 0` here (F9,
+   docs/template-audit-phase2.md G9) — that combination let a flex-shrunk
+   ancestor (e.g. the minimal-inline links row, CVPreview.jsx) force even a
+   short, ordinary label like "LinkedIn" to fracture mid-word. A genuinely
+   unbreakable value (a URL/email) should carry `.tpl-value-breakable`
+   (src/styles/templates/_system.css) itself instead of relying on this
+   blanket rule to lower its min-content size. */
 .preview-document h3,
 .preview-document h4,
 .preview-document p,
 .preview-document span {
   overflow-wrap: break-word;
-  word-break: break-word;
-  min-width: 0;
 }
 
 .preview-document [data-export-primary],
@@ -3108,16 +3213,33 @@ select.floating-field__control {
   animation: none !important;
 }
 
-.pdf-export-root[data-export-root='true'] {
+/* The layout-affecting export rules below also target
+   `.direct-edit-export-source` — the inert, off-screen CVPreview copy that
+   previewRef points at in both builder modes (ResumeBuilderPage.jsx,
+   DirectEditPreview.jsx) and that createExportSandbox() clones. Templates
+   that measure themselves (CompactShowcase's and EuropeanShowcase's
+   density auto-fit) pick their tier from that copy's rendered height, so
+   it has to lay out exactly as the PDF clone will: without these rules
+   Compact's data-engineer example measured 1123px at the snug tier (fits
+   one page), then grew to ~1230px once the clone gained this per-section
+   spacing, and its PDF spilled onto a second page. Same selectors in the
+   same rules (not a copy elsewhere) so the two can't drift apart.
+   e2e/template-pdf.spec.js's "export source lays out like the PDF clone"
+   tests guard this. */
+.pdf-export-root[data-export-root='true'],
+.direct-edit-export-source [data-export-root='true'] {
   border: 0 !important;
 }
 
 .pdf-export-root [data-export-primary],
-.pdf-export-root [data-export-secondary] {
+.pdf-export-root [data-export-secondary],
+.direct-edit-export-source [data-export-primary],
+.direct-edit-export-source [data-export-secondary] {
   min-width: 0 !important;
 }
 
-.pdf-export-root [data-export-section] {
+.pdf-export-root [data-export-section],
+.direct-edit-export-source [data-export-section] {
   break-inside: avoid-page;
   break-inside: avoid;
   page-break-inside: avoid;
@@ -3125,7 +3247,8 @@ select.floating-field__control {
   padding-bottom: 0.75rem;
 }
 
-.pdf-export-root [data-export-ignore='true'] {
+.pdf-export-root [data-export-ignore='true'],
+.direct-edit-export-source [data-export-ignore='true'] {
   display: none !important;
 }
 

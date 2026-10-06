@@ -264,7 +264,7 @@ export default function ClassicProfessionalShowcase({
         <p className="classic-professional-showcase__kicker" data-export-ignore="true">
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
-        <h1 className="classic-professional-showcase__name">
+        <h1 className="classic-professional-showcase__name" data-cv-name>
           <EditableField
             as="span"
             path={{ kind: 'root', field: 'fullName' }}

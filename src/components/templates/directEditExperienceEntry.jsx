@@ -21,6 +21,33 @@ function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
 }
 
+function nonBlank(list) {
+  return Array.isArray(list) ? list.map((value) => (typeof value === 'string' ? value.trim() : '')).filter(Boolean) : []
+}
+
+// Shared across all 17 bespoke Showcases (3 through this module's own
+// renderExperienceEntry, 14 as local copies of the identical pattern) so
+// "what bullets/technologies an experience entry shows" has exactly one
+// definition — see docs/template-audit-phase2.md F14/G8a. `description`
+// bullets come first, then `achievements` (both are further bullets in the
+// template's existing bullet-list style); blank/whitespace-only strings
+// are dropped from both sources so an empty field never renders an empty
+// bullet or line.
+export function getExperienceBullets(item) {
+  return [...(item.description ? splitToBullets(item.description) : []), ...nonBlank(item.achievements)]
+}
+
+// Direct Edit's editing branch shows `description` through its own
+// EditableField (not as bullets), so it needs achievements on their own —
+// this is that subset of getExperienceBullets().
+export function getExperienceAchievements(item) {
+  return nonBlank(item.achievements)
+}
+
+export function getExperienceTechnologies(item) {
+  return nonBlank(item.technologies)
+}
+
 // `index` is always formData.experience-relative (only ever read inside
 // directEditDispatch-gated branches below) — never assume it lines up with
 // snapshot.experience's own (filtered) indices in the read-only call site.
@@ -30,7 +57,9 @@ function splitToBullets(text) {
 // snapshot call site passes snapshot.sourceIndices.experience[index].
 export function renderExperienceEntry(item, index, { directEditDispatch, copy, classPrefix, separator = ' · ', sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
-  const bullets = item.description ? splitToBullets(item.description) : []
+  const bullets = getExperienceBullets(item)
+  const achievements = getExperienceAchievements(item)
+  const technologies = getExperienceTechnologies(item)
 
   return (
     <div key={`${item.role}-${item.company}-${index}`} className={`${classPrefix}__entry`} data-export-card="true" data-direct-edit-index={sourceIndex}>
@@ -65,21 +94,33 @@ export function renderExperienceEntry(item, index, { directEditDispatch, copy, c
         </p>
       ) : null}
       {directEditDispatch ? (
-        <p className={`${classPrefix}__bullets ${classPrefix}__bullets--editing`}>
-          <EditableField
-            as="span"
-            path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
-            value={item.description}
-            placeholder={copy.descriptionPlaceholder}
-            multiline
-          />
-        </p>
+        <>
+          <p className={`${classPrefix}__bullets ${classPrefix}__bullets--editing`}>
+            <EditableField
+              as="span"
+              path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
+              value={item.description}
+              placeholder={copy.descriptionPlaceholder}
+              multiline
+            />
+          </p>
+          {achievements.length > 0 ? (
+            <ul className={`${classPrefix}__bullets`}>
+              {achievements.map((line, lineIndex) => (
+                <li key={lineIndex}>{line}</li>
+              ))}
+            </ul>
+          ) : null}
+        </>
       ) : bullets.length > 0 ? (
         <ul className={`${classPrefix}__bullets`}>
           {bullets.map((line, lineIndex) => (
             <li key={lineIndex}>{line}</li>
           ))}
         </ul>
+      ) : null}
+      {technologies.length > 0 ? (
+        <p className={`${classPrefix}__entry-technologies`}>{technologies.join(separator)}</p>
       ) : null}
     </div>
   )
