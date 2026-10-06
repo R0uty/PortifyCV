@@ -31,7 +31,7 @@ test.describe('Template pages', () => {
     await page.goto('/free-cv-templates/developer')
     const examples = page.getByRole('radiogroup', { name: 'Examples' })
     await expect(examples.getByRole('radio', { name: 'Frontend developer' })).toBeChecked()
-    await expect(page.locator('.template-page__preview')).toContainText('Mikael Laine')
+    await expect(page.locator('.template-page__preview')).toContainText('Frontend Developer')
 
     await examples.getByRole('radio', { name: 'Data engineer' }).click()
     await expect(page).toHaveURL(/\?example=data-engineer$/)
@@ -53,7 +53,7 @@ test.describe('Template pages', () => {
     await page.goto('/free-cv-templates/developer')
     const examples = page.getByRole('radiogroup', { name: 'Examples' })
     const preview = page.locator('.template-page__preview')
-    await expect(preview).toContainText('Mikael Laine')
+    await expect(preview).toContainText('Frontend Developer')
 
     await examples.getByRole('radio', { name: 'Data engineer' }).click()
     // The data-engineer chunk's dynamic import is delayed above. Read the
@@ -62,16 +62,17 @@ test.describe('Template pages', () => {
     // flight: it must already have dropped the frontend-developer
     // example's content, not keep showing it until the import settles —
     // and (Finding 3) it must show the loading placeholder, not the demo
-    // CV, while waiting.
+    // CV, while waiting. Every example and the demo CV are "John Doe",
+    // so each is told apart by its job title.
     const immediateText = await preview.innerText()
-    expect(immediateText).not.toContain('Mikael Laine')
-    expect(immediateText).not.toContain('Alex Morgan')
+    expect(immediateText).not.toContain('Frontend Developer')
+    expect(immediateText).not.toContain('Senior Product Designer')
     await expect(preview).toHaveAttribute('aria-busy', 'true')
 
     // Once the delayed chunk resolves, the preview must show the
     // data-engineer person, proving the race was real and is now won by
-    // the right example (not just "not Mikael Laine").
-    await expect(preview).toContainText('Elina Virtanen')
+    // the right example (not just "not the frontend developer").
+    await expect(preview).toContainText('Data Engineer')
     await expect(preview).not.toHaveAttribute('aria-busy', 'true')
   })
 
@@ -85,8 +86,9 @@ test.describe('Template pages', () => {
     await page.goto('/free-cv-templates/developer')
     const preview = page.locator('.template-page__preview')
     const immediateText = await preview.innerText()
-    expect(immediateText).not.toContain('Alex Morgan')
-    await expect(preview).toContainText('Mikael Laine')
+    // The demo CV's title; the example and the demo share the name.
+    expect(immediateText).not.toContain('Senior Product Designer')
+    await expect(preview).toContainText('Frontend Developer')
   })
 
   test('an unknown ?example= falls back to the first example', async ({ page }) => {
@@ -131,7 +133,7 @@ test.describe('Template pages', () => {
     await expect(page).toHaveURL(/\/cv\?template=developer$/)
     await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Developer')
     await expect(page.getByText('Loaded the Frontend developer example.')).toBeVisible()
-    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Mikael Laine')
+    await expect(page.getByLabel('Professional title')).toHaveValue('Frontend Developer')
   })
 
   test('the preview hides empty sections instead of showing placeholder text', async ({ page }) => {
@@ -257,7 +259,7 @@ test.describe('Template pages', () => {
     await expect(page).toHaveURL(/\/cv\?template=developer$/)
     await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Developer')
     await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('')
-    await expect(page.getByText('Alex Morgan')).toHaveCount(0)
+    await expect(page.getByText('Senior Product Designer')).toHaveCount(0)
     await expect(page.getByText('Loaded a sample CV')).toHaveCount(0)
   })
 

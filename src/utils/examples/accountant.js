@@ -2,11 +2,11 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: minimal, classicProfessional.
 const shared = {
-  fullName: 'Mari Lehtonen',
-  email: 'mari.lehtonen@example.com',
-  phone: '+358 40 000 2501',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-mlehtonen',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -23,7 +23,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Senior Accountant',
-      company: 'Kymijoki Accounting Oy',
+      company: 'Example Oy',
       location: 'Kotka, Finland',
       employmentType: 'Full-time',
       startDate: 'Jan 2019',
@@ -39,7 +39,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Accountant',
-      company: 'Satama Tilipalvelu',
+      company: 'Example Oy',
       location: 'Kotka, Finland',
       employmentType: 'Full-time',
       startDate: 'Jun 2014',
@@ -55,7 +55,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Kymenlaakso University of Applied Sciences',
+      school: 'Example University',
       degree: 'B.B.A. Accounting',
       location: 'Kotka, Finland',
       startDate: '2011',
@@ -71,7 +71,7 @@ const en = buildExampleCv({
     { language: 'Swedish', level: 'Intermediate' },
   ],
   certificates: [
-    { name: 'KLT – Certified Bookkeeper (Taloushallintoliitto)', issuer: 'Finnish Accounting Firms Association', year: '2017', credentialUrl: '', expiry: '' },
+    { name: 'KLT – Certified Bookkeeper', issuer: 'Example Oy', year: '2017', credentialUrl: '', expiry: '' },
   ],
 })
 
@@ -88,7 +88,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Senior-kirjanpitäjä',
-      company: 'Kymijoki Accounting Oy',
+      company: 'Example Oy',
       location: 'Kotka',
       employmentType: 'Full-time',
       startDate: '01/2019',
@@ -104,7 +104,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Kirjanpitäjä',
-      company: 'Satama Tilipalvelu',
+      company: 'Example Oy',
       location: 'Kotka',
       employmentType: 'Full-time',
       startDate: '06/2014',
@@ -120,7 +120,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Kymenlaakson ammattikorkeakoulu',
+      school: 'Example University',
       degree: 'Tradenomi (AMK), laskentatoimi',
       location: 'Kotka',
       startDate: '2011',
@@ -136,7 +136,7 @@ const fi = buildExampleCv({
     { language: 'Ruotsi', level: 'Keskitaso' },
   ],
   certificates: [
-    { name: 'KLT – Kirjanpidon ja laskentatoimen tutkinto (Taloushallintoliitto)', issuer: 'Taloushallintoliitto', year: '2017', credentialUrl: '', expiry: '' },
+    { name: 'KLT – Kirjanpidon ja laskentatoimen tutkinto', issuer: 'Example Oy', year: '2017', credentialUrl: '', expiry: '' },
   ],
 })
 

@@ -2,12 +2,12 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: modern, modernOrange, quadrant.
 const shared = {
-  fullName: 'Hanna Koskinen',
-  email: 'hanna.koskinen@example.com',
-  phone: '+358 40 000 1701',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-hkoskinen',
-    website: 'https://hkoskinen.example.com',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
+    website: 'https://johndoe.example.com',
   },
 }
 
@@ -21,7 +21,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Marketing Manager',
-      company: 'Merituuli Marketing',
+      company: 'Example Oy',
       location: 'Vaasa, Finland',
       employmentType: 'Full-time',
       startDate: 'Apr 2020',
@@ -37,7 +37,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Marketing Specialist',
-      company: 'Kivipuisto Retail',
+      company: 'Example Oy',
       location: 'Vaasa, Finland',
       employmentType: 'Full-time',
       startDate: 'Jun 2016',
@@ -53,7 +53,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Hanken School of Economics',
+      school: 'Example University',
       degree: 'M.Sc. Marketing',
       location: 'Vaasa, Finland',
       startDate: '2014',
@@ -79,7 +79,7 @@ const en = buildExampleCv({
     },
     {
       name: 'Loyalty program launch',
-      description: 'Designed and launched a tiered loyalty program for Kivipuisto Retail’s 40,000 subscribers.',
+      description: 'Designed and launched a tiered loyalty program for Example Oy’s 40,000 subscribers.',
       stack: '',
       githubUrl: '',
       demoUrl: '',
@@ -95,8 +95,8 @@ const en = buildExampleCv({
     { title: 'Marketer of the Year (regional), Vaasa Chamber of Commerce', description: 'Recognized for the organic-traffic turnaround campaign.', year: '2023' },
   ],
   certificates: [
-    { name: 'Google Analytics Certification', issuer: 'Google', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'HubSpot Content Marketing Certification', issuer: 'HubSpot Academy', year: '2020', credentialUrl: '', expiry: '' },
+    { name: 'Web Analytics Certification', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Content Marketing Certification', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '' },
   ],
 })
 
@@ -110,7 +110,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Markkinointipäällikkö',
-      company: 'Merituuli Marketing',
+      company: 'Example Oy',
       location: 'Vaasa',
       employmentType: 'Full-time',
       startDate: '04/2020',
@@ -126,7 +126,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Markkinointiasiantuntija',
-      company: 'Kivipuisto Retail',
+      company: 'Example Oy',
       location: 'Vaasa',
       employmentType: 'Full-time',
       startDate: '06/2016',
@@ -142,7 +142,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Svenska handelshögskolan (Hanken)',
+      school: 'Example University',
       degree: 'Kauppatieteiden maisteri, markkinointi',
       location: 'Vaasa',
       startDate: '2014',
@@ -168,7 +168,7 @@ const fi = buildExampleCv({
     },
     {
       name: 'Kanta-asiakasohjelman lanseeraus',
-      description: 'Suunnittelin ja lanseerasin tasoihin perustuvan kanta-asiakasohjelman Kivipuisto Retailin 40 000 tilaajalle.',
+      description: 'Suunnittelin ja lanseerasin tasoihin perustuvan kanta-asiakasohjelman Example Oyin 40 000 tilaajalle.',
       stack: '',
       githubUrl: '',
       demoUrl: '',
@@ -184,8 +184,8 @@ const fi = buildExampleCv({
     { title: 'Vuoden markkinoija (alueellinen), Vaasan kauppakamari', description: 'Tunnustus organisen liikenteen kääntämisestä kasvuun.', year: '2023' },
   ],
   certificates: [
-    { name: 'Google Analytics Certification', issuer: 'Google', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'HubSpot Content Marketing Certification', issuer: 'HubSpot Academy', year: '2020', credentialUrl: '', expiry: '' },
+    { name: 'Web Analytics Certification', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Content Marketing Certification', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '' },
   ],
 })
 

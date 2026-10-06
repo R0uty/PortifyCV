@@ -2,13 +2,13 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: developer (default), portfolio.
 const shared = {
-  fullName: 'Mikael Laine',
-  email: 'mikael.laine@example.com',
-  phone: '+358 40 000 1201',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    github: 'https://github.com/example-mlaine',
-    linkedin: 'https://linkedin.com/in/example-mlaine',
-    portfolio: 'https://mlaine.example.com',
+    github: 'https://github.example.com/john-doe',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
+    portfolio: 'https://johndoe.example.com',
   },
 }
 
@@ -22,7 +22,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Frontend Developer',
-      company: 'Northpay Oy',
+      company: 'Example Oy',
       location: 'Tampere, Finland',
       employmentType: 'Full-time',
       startDate: 'Mar 2022',
@@ -38,7 +38,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Junior Frontend Developer',
-      company: 'Kauppakatu Digital',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'Aug 2019',
@@ -54,7 +54,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Tampere University of Applied Sciences',
+      school: 'Example University',
       degree: 'B.Eng. Software Engineering',
       location: 'Tampere, Finland',
       startDate: '2015',
@@ -69,7 +69,7 @@ const en = buildExampleCv({
       name: 'a11y-lint-action',
       description: 'GitHub Action that runs axe-core on preview deployments and comments the diff on the PR. 600+ stars.',
       stack: 'TypeScript, axe-core, GitHub Actions',
-      githubUrl: 'https://github.com/example-mlaine/a11y-lint-action',
+      githubUrl: 'https://github.example.com/john-doe/a11y-lint-action',
       demoUrl: '',
       organization: '',
       impact: '600+ stars, adopted by 40+ repositories.',
@@ -83,7 +83,7 @@ const en = buildExampleCv({
       description: 'Offline-first PWA showing live Tampere tram departures; 3,000 weekly users.',
       stack: 'Preact, Service Workers',
       githubUrl: '',
-      demoUrl: 'https://trams.mlaine.example.com',
+      demoUrl: 'https://trams.johndoe.example.com',
       organization: '',
       impact: '3,000 weekly active users.',
       date: '2022',
@@ -93,13 +93,13 @@ const en = buildExampleCv({
     },
   ],
   achievements: [
-    { title: 'Speaker, React Finland 2024', description: 'Talk: "Shipping accessible charts".', year: '2024' },
+    { title: 'Speaker, Example Conference 2024', description: 'Talk: "Shipping accessible charts".', year: '2024' },
   ],
   openSource: [
-    { name: 'Vite', description: 'Fixed CSS source-map handling for nested imports.', language: 'TypeScript', stars: '66k', forks: '6k', url: 'https://github.com/vitejs/vite' },
+    { name: 'Example project', description: 'Fixed CSS source-map handling for nested imports.', language: 'TypeScript', stars: '66k', forks: '6k', url: 'https://github.example.com/john-doe/example-project' },
   ],
   publications: [
-    { title: 'Making dashboards fast without a rewrite', publisher: 'dev.to', year: '2023', url: 'https://dev.to/example-mlaine' },
+    { title: 'Making dashboards fast without a rewrite', publisher: 'Example Oy', year: '2023', url: 'https://devto.example.com/john-doe' },
   ],
   caseStudies: [
     {
@@ -113,9 +113,9 @@ const en = buildExampleCv({
   ],
   testimonials: [
     {
-      quote: 'Mikael turned a dashboard nobody wanted to touch into the fastest part of our product.',
+      quote: 'John turned a dashboard nobody wanted to touch into the fastest part of our product.',
       author: 'Head of Engineering',
-      role: 'Northpay Oy',
+      role: 'Example Oy',
     },
   ],
 })
@@ -130,7 +130,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Frontend-kehittäjä',
-      company: 'Northpay Oy',
+      company: 'Example Oy',
       location: 'Tampere',
       employmentType: 'Full-time',
       startDate: '03/2022',
@@ -146,7 +146,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Nuorempi frontend-kehittäjä',
-      company: 'Kauppakatu Digital',
+      company: 'Example Oy',
       location: 'Helsinki',
       employmentType: 'Full-time',
       startDate: '08/2019',
@@ -162,7 +162,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Tampereen ammattikorkeakoulu',
+      school: 'Example University',
       degree: 'Insinööri (AMK), ohjelmistotekniikka',
       location: 'Tampere',
       startDate: '2015',
@@ -177,7 +177,7 @@ const fi = buildExampleCv({
       name: 'a11y-lint-action',
       description: 'GitHub Action, joka ajaa axe-corea esikatseluympäristöissä ja kommentoi muutokset pull requestiin. Yli 600 tähteä.',
       stack: 'TypeScript, axe-core, GitHub Actions',
-      githubUrl: 'https://github.com/example-mlaine/a11y-lint-action',
+      githubUrl: 'https://github.example.com/john-doe/a11y-lint-action',
       demoUrl: '',
       organization: '',
       impact: 'Yli 600 tähteä, käytössä 40+ repositoriossa.',
@@ -191,7 +191,7 @@ const fi = buildExampleCv({
       description: 'Offline-tilassa toimiva PWA, joka näyttää Tampereen ratikoiden lähtöajat reaaliajassa; 3 000 käyttäjää viikossa.',
       stack: 'Preact, Service Workers',
       githubUrl: '',
-      demoUrl: 'https://trams.mlaine.example.com',
+      demoUrl: 'https://trams.johndoe.example.com',
       organization: '',
       impact: '3 000 viikoittaista aktiivista käyttäjää.',
       date: '2022',
@@ -201,13 +201,13 @@ const fi = buildExampleCv({
     },
   ],
   achievements: [
-    { title: 'Puhuja, React Finland 2024', description: 'Esitys: "Saavutettavat kaaviot tuotannossa".', year: '2024' },
+    { title: 'Puhuja, Example Conference 2024', description: 'Esitys: "Saavutettavat kaaviot tuotannossa".', year: '2024' },
   ],
   openSource: [
-    { name: 'Vite', description: 'Korjasin CSS-lähdekarttojen käsittelyn sisäkkäisille importeille.', language: 'TypeScript', stars: '66k', forks: '6k', url: 'https://github.com/vitejs/vite' },
+    { name: 'Example project', description: 'Korjasin CSS-lähdekarttojen käsittelyn sisäkkäisille importeille.', language: 'TypeScript', stars: '66k', forks: '6k', url: 'https://github.example.com/john-doe/example-project' },
   ],
   publications: [
-    { title: 'Nopeampi hallintanäkymä ilman uudelleenkirjoitusta', publisher: 'dev.to', year: '2023', url: 'https://dev.to/example-mlaine' },
+    { title: 'Nopeampi hallintanäkymä ilman uudelleenkirjoitusta', publisher: 'Example Oy', year: '2023', url: 'https://devto.example.com/john-doe' },
   ],
   caseStudies: [
     {
@@ -221,9 +221,9 @@ const fi = buildExampleCv({
   ],
   testimonials: [
     {
-      quote: 'Mikael muutti näkymän, jota kukaan ei halunnut koskea, tuotteemme nopeimmaksi osaksi.',
+      quote: 'John muutti näkymän, jota kukaan ei halunnut koskea, tuotteemme nopeimmaksi osaksi.',
       author: 'Kehitysjohtaja',
-      role: 'Northpay Oy',
+      role: 'Example Oy',
     },
   ],
 })

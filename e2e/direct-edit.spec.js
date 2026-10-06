@@ -629,7 +629,7 @@ test.describe('Direct Edit builder', () => {
     const focusedEntry = popup.locator('.direct-edit-popup__entry--focused')
     await expect(focusedEntry).toHaveCount(1)
     await expect(focusedEntry.locator('.direct-edit-popup__entry-index')).toHaveText('#2')
-    await expect(focusedEntry.locator('input[data-field="company"]')).toHaveValue('Atlas Labs')
+    await expect(focusedEntry.locator('input[data-field="role"]')).toHaveValue('Product Designer')
     await expect(focusedEntry.locator('input[data-field="role"]')).toBeFocused()
   })
 
@@ -683,13 +683,13 @@ test.describe('Direct Edit builder', () => {
     await expect(popup).toHaveCount(0)
 
     const firstRendered = page.locator('[data-export-section="certificates"] [data-direct-edit-index]').first()
-    await expect(firstRendered).toContainText('Google UX Design')
+    await expect(firstRendered).toContainText('UX Design Professional Certificate')
     await firstRendered.hover()
     await page.locator('.direct-edit-entry-pencil').click()
 
     const focusedEntry = popup.locator('.direct-edit-popup__entry--focused')
     await expect(focusedEntry.locator('.direct-edit-popup__entry-index')).toHaveText('#2')
-    await expect(focusedEntry.locator('input[data-field="name"]')).toHaveValue('Google UX Design Professional Certificate')
+    await expect(focusedEntry.locator('input[data-field="name"]')).toHaveValue('UX Design Professional Certificate')
   })
 
   // Every template, with entry #1 hidden so snapshot-driven templates
@@ -705,7 +705,10 @@ test.describe('Direct Edit builder', () => {
     await page.locator('.direct-edit-popup__entry').first().locator('.direct-edit-popup__entry-visibility').click()
     await page.keyboard.press('Escape')
 
-    const companies = ['Studio North', 'Atlas Labs']
+    // A phrase unique to each demo entry's description: both entries share
+    // the placeholder employer "Example Oy", and entry 1's role is a
+    // substring of entry 0's.
+    const companies = ['B2B collaboration suite', 'customer interview loops']
 
     for (const label of ALL_TEMPLATES) {
       await selectTemplate(page, label)
@@ -1122,8 +1125,8 @@ test.describe('Direct Edit builder', () => {
         if (deep && this.getAttribute?.('data-export-root') === 'true') {
           window.__exportClones.push({
             editingChrome: copy.querySelectorAll('[class*="direct-edit-"], [contenteditable]').length,
-            hasHiddenEntry: copy.textContent.includes('Studio North'),
-            hasVisibleEntry: copy.textContent.includes('Atlas Labs'),
+            hasHiddenEntry: copy.textContent.includes('B2B collaboration suite'),
+            hasVisibleEntry: copy.textContent.includes('customer interview loops'),
             commaSkillLines: copy.querySelectorAll('.tech-exec-showcase__skill-items').length,
           })
         }

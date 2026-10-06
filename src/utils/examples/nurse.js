@@ -2,11 +2,11 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: minimal, european.
 const shared = {
-  fullName: 'Riikka Hämäläinen',
-  email: 'riikka.hamalainen@example.com',
-  phone: '+358 40 000 2401',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-rhamalainen',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -20,7 +20,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Registered Nurse, Emergency Department',
-      company: 'Lapland Central Hospital',
+      company: 'Example Oy',
       location: 'Rovaniemi, Finland',
       employmentType: 'Full-time',
       startDate: 'Aug 2018',
@@ -36,7 +36,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Staff Nurse, Medical Ward',
-      company: 'Kemijoki Health Centre',
+      company: 'Example Oy',
       location: 'Rovaniemi, Finland',
       employmentType: 'Full-time',
       startDate: 'Sep 2015',
@@ -52,7 +52,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Lapland University of Applied Sciences',
+      school: 'Example University',
       degree: 'B.Sc. Nursing',
       location: 'Rovaniemi, Finland',
       startDate: '2011',
@@ -69,7 +69,7 @@ const en = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Lapland Central Hospital',
+      organization: 'Example Oy',
       impact: 'Triage-to-treatment time cut from 38 to 21 minutes.',
       date: '2022',
       teamSize: '3',
@@ -83,8 +83,8 @@ const en = buildExampleCv({
     { language: 'Swedish', level: 'Basic' },
   ],
   certificates: [
-    { name: 'Advanced Cardiac Life Support (ACLS)', issuer: 'American Heart Association', year: '2023', credentialUrl: '', expiry: '2025' },
-    { name: 'Registered Nurse License', issuer: 'Valvira (Finland)', year: '2015', credentialUrl: '', expiry: '' },
+    { name: 'Advanced Cardiac Life Support (ACLS)', issuer: 'Example Oy', year: '2023', credentialUrl: '', expiry: '2025' },
+    { name: 'Registered Nurse License', issuer: 'Example Oy', year: '2015', credentialUrl: '', expiry: '' },
   ],
 })
 
@@ -98,7 +98,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Sairaanhoitaja, päivystys',
-      company: 'Lapland Central Hospital',
+      company: 'Example Oy',
       location: 'Rovaniemi',
       employmentType: 'Full-time',
       startDate: '08/2018',
@@ -114,7 +114,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Sairaanhoitaja, sisätautiosasto',
-      company: 'Kemijoki Health Centre',
+      company: 'Example Oy',
       location: 'Rovaniemi',
       employmentType: 'Full-time',
       startDate: '09/2015',
@@ -130,7 +130,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Lapin ammattikorkeakoulu',
+      school: 'Example University',
       degree: 'Sairaanhoitaja (AMK)',
       location: 'Rovaniemi',
       startDate: '2011',
@@ -147,7 +147,7 @@ const fi = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Lapland Central Hospital',
+      organization: 'Example Oy',
       impact: 'Triagesta hoitoon kuluva aika laski 38 minuutista 21 minuuttiin.',
       date: '2022',
       teamSize: '3',
@@ -161,8 +161,8 @@ const fi = buildExampleCv({
     { language: 'Ruotsi', level: 'Perustaso' },
   ],
   certificates: [
-    { name: 'Advanced Cardiac Life Support (ACLS)', issuer: 'American Heart Association', year: '2023', credentialUrl: '', expiry: '2025' },
-    { name: 'Sairaanhoitajan ammatinharjoittamisoikeus', issuer: 'Valvira', year: '2015', credentialUrl: '', expiry: '' },
+    { name: 'Advanced Cardiac Life Support (ACLS)', issuer: 'Example Oy', year: '2023', credentialUrl: '', expiry: '2025' },
+    { name: 'Sairaanhoitajan ammatinharjoittamisoikeus', issuer: 'Example Oy', year: '2015', credentialUrl: '', expiry: '' },
   ],
 })
 

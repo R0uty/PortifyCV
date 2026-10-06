@@ -3,11 +3,11 @@ import { buildExampleCv } from './buildExampleCv.js'
 // Fictional person. Listed under: executive, classicProfessional.
 // Stress case: 6 roles, two-page history.
 const shared = {
-  fullName: 'Tuomas Kivelä',
-  email: 'tuomas.kivela@example.com',
-  phone: '+358 40 000 2001',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-tkivela',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -21,7 +21,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Finance Director',
-      company: 'Tervaset Industrial Oy',
+      company: 'Example Oy',
       location: 'Espoo, Finland',
       employmentType: 'Full-time',
       startDate: 'Feb 2019',
@@ -37,7 +37,7 @@ const en = buildExampleCv({
     },
     {
       role: 'VP Finance',
-      company: 'Rautaranta Group',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'Mar 2015',
@@ -52,7 +52,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Finance Director',
-      company: 'Pajamäki Manufacturing',
+      company: 'Example Oy',
       location: 'Tampere, Finland',
       employmentType: 'Full-time',
       startDate: 'Apr 2011',
@@ -67,7 +67,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Senior Financial Controller',
-      company: 'Koivuranta Logistics',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'Jun 2007',
@@ -82,7 +82,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Financial Controller',
-      company: 'Nummela Paper Mills',
+      company: 'Example Oy',
       location: 'Lahti, Finland',
       employmentType: 'Full-time',
       startDate: 'Aug 2004',
@@ -97,7 +97,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Financial Analyst',
-      company: 'Hiekkaharju Trading',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'Jul 2001',
@@ -113,7 +113,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Helsinki School of Economics',
+      school: 'Example University',
       degree: 'M.Sc. Economics and Business Administration',
       location: 'Espoo, Finland',
       startDate: '1996',
@@ -126,7 +126,7 @@ const en = buildExampleCv({
   leadership: [
     {
       role: 'Board Member',
-      organization: 'Finnish Association of Finance Directors',
+      organization: 'Example Oy',
       description: 'Advise on continuing-education programs for mid-career finance leaders.',
       startDate: '2021',
       endDate: '',
@@ -139,7 +139,7 @@ const en = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Tervaset Industrial Oy',
+      organization: 'Example Oy',
       impact: 'Monthly close time cut from 12 days to 4.',
       date: '2021',
       teamSize: '9',
@@ -148,7 +148,7 @@ const en = buildExampleCv({
     },
   ],
   achievements: [
-    { title: 'CFO Finland "Finance Transformation" shortlist', description: 'Shortlisted for the SAP consolidation program at Tervaset Industrial Oy.', year: '2022' },
+    { title: 'CFO Finland "Finance Transformation" shortlist', description: 'Shortlisted for the SAP consolidation program at Example Oy.', year: '2022' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -156,7 +156,7 @@ const en = buildExampleCv({
     { language: 'Swedish', level: 'Intermediate' },
   ],
   certificates: [
-    { name: 'KHT – Authorized Public Accountant', issuer: 'Finnish Patent and Registration Office', year: '2006', credentialUrl: '', expiry: '' },
+    { name: 'KHT – Authorized Public Accountant', issuer: 'Example Oy', year: '2006', credentialUrl: '', expiry: '' },
   ],
 })
 
@@ -170,7 +170,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Talousjohtaja',
-      company: 'Tervaset Industrial Oy',
+      company: 'Example Oy',
       location: 'Espoo',
       employmentType: 'Full-time',
       startDate: '02/2019',
@@ -186,7 +186,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'VP Finance',
-      company: 'Rautaranta Group',
+      company: 'Example Oy',
       location: 'Helsinki',
       employmentType: 'Full-time',
       startDate: '03/2015',
@@ -201,7 +201,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Talousjohtaja',
-      company: 'Pajamäki Manufacturing',
+      company: 'Example Oy',
       location: 'Tampere',
       employmentType: 'Full-time',
       startDate: '04/2011',
@@ -216,7 +216,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Senior controller',
-      company: 'Koivuranta Logistics',
+      company: 'Example Oy',
       location: 'Helsinki',
       employmentType: 'Full-time',
       startDate: '06/2007',
@@ -231,7 +231,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Controller',
-      company: 'Nummela Paper Mills',
+      company: 'Example Oy',
       location: 'Lahti',
       employmentType: 'Full-time',
       startDate: '08/2004',
@@ -246,7 +246,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Talousanalyytikko',
-      company: 'Hiekkaharju Trading',
+      company: 'Example Oy',
       location: 'Helsinki',
       employmentType: 'Full-time',
       startDate: '07/2001',
@@ -262,7 +262,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Helsingin kauppakorkeakoulu',
+      school: 'Example University',
       degree: 'Kauppatieteiden maisteri, laskentatoimi ja rahoitus',
       location: 'Espoo',
       startDate: '1996',
@@ -275,7 +275,7 @@ const fi = buildExampleCv({
   leadership: [
     {
       role: 'Hallituksen jäsen',
-      organization: 'Suomen talousjohtajien yhdistys',
+      organization: 'Example Oy',
       description: 'Neuvonannan tehtävässä keskiuran talousjohtajien täydennyskoulutusohjelmissa.',
       startDate: '2021',
       endDate: '',
@@ -288,7 +288,7 @@ const fi = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Tervaset Industrial Oy',
+      organization: 'Example Oy',
       impact: 'Kuukausittainen tilinpäätösaika laski 12 päivästä 4 päivään.',
       date: '2021',
       teamSize: '9',
@@ -297,7 +297,7 @@ const fi = buildExampleCv({
     },
   ],
   achievements: [
-    { title: 'CFO Finland "Vuoden talousmuutos" -ehdokas', description: 'Ehdolla SAP-konsolidointiohjelmasta Tervaset Industrial Oy:ssä.', year: '2022' },
+    { title: 'CFO Finland "Vuoden talousmuutos" -ehdokas', description: 'Ehdolla SAP-konsolidointiohjelmasta Example Oy:ssä.', year: '2022' },
   ],
   languages: [
     { language: 'Suomi', level: 'Äidinkieli' },
@@ -305,7 +305,7 @@ const fi = buildExampleCv({
     { language: 'Ruotsi', level: 'Keskitaso' },
   ],
   certificates: [
-    { name: 'KHT-tilintarkastaja', issuer: 'Patentti- ja rekisterihallitus', year: '2006', credentialUrl: '', expiry: '' },
+    { name: 'KHT-tilintarkastaja', issuer: 'Example Oy', year: '2006', credentialUrl: '', expiry: '' },
   ],
 })
 

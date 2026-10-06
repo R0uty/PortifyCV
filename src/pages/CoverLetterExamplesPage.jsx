@@ -21,7 +21,7 @@ function getCopy(locale) {
             weakLabel: 'Heikko',
             weak: '"Kenelle asia kuuluukin, haen ilmoittamaanne avointa tehtävää."',
             strongLabel: 'Vahva',
-            strong: '"Haen Studio Northin Senior Product Designer -tehtävää. Olen viimeiset viisi vuotta rakentanut suunnittelujärjestelmiä, jotka selviävät kosketuksesta oikeisiin insinööritiimeihin."',
+            strong: '"Haen Example Oy:n Senior Product Designer -tehtävää. Olen viimeiset viisi vuotta rakentanut suunnittelujärjestelmiä, jotka selviävät kosketuksesta oikeisiin insinööritiimeihin."',
           },
           paragraphsAfter: [
             'Nimeä rooli ja yritys ensimmäisessä lauseessa. Jos tiedät rekrytoijan nimen, käytä sitä "Kenelle asia kuuluukin" -tervehdyksen sijaan — se kertoo, että teit läksysi.',
@@ -33,7 +33,7 @@ function getCopy(locale) {
             weakLabel: 'Heikko',
             weak: '"Minulla on kokemusta monilta alueilta ja uskon sopivani hyvin tehtävään."',
             strongLabel: 'Vahva',
-            strong: '"Nykyisessä roolissani Senior Product Designerina Studio Northissa: johdin B2B-yhteistyöalustan päästä päähän -suunnittelun, parantaen aktivointia 21 %."',
+            strong: '"Nykyisessä roolissani Senior Product Designerina Example Oy:ssä: johdin B2B-yhteistyöalustan päästä päähän -suunnittelun, parantaen aktivointia 21 %."',
           },
           paragraphsAfter: [
             'Poimi yksi konkreettinen saavutus CV:stäsi ja yhdistä se suoraan siihen, mitä työpaikkailmoitus pyytää — älä toista koko CV:täsi proosana.',
@@ -100,7 +100,7 @@ function getCopy(locale) {
           weakLabel: 'Weak',
           weak: '"To Whom It May Concern, I am writing to apply for the position I saw advertised."',
           strongLabel: 'Strong',
-          strong: '"I’m writing to apply for the Senior Product Designer role at Studio North. I’ve spent the last five years building design systems that survive contact with real engineering teams."',
+          strong: '"I’m writing to apply for the Senior Product Designer role at Example Oy. I’ve spent the last five years building design systems that survive contact with real engineering teams."',
         },
         paragraphsAfter: [
           'Name the role and the company in the first sentence. If you know the hiring manager’s name, use it instead of "To Whom It May Concern" — it signals you did your homework.',
@@ -112,7 +112,7 @@ function getCopy(locale) {
           weakLabel: 'Weak',
           weak: '"I have experience in many areas and am confident I would be a good fit."',
           strongLabel: 'Strong',
-          strong: '"In my current role as Senior Product Designer at Studio North: led end-to-end design for a B2B collaboration suite, improving activation by 21%."',
+          strong: '"In my current role as Senior Product Designer at Example Oy: led end-to-end design for a B2B collaboration suite, improving activation by 21%."',
         },
         paragraphsAfter: [
           'Pick one concrete achievement from your CV and connect it directly to what the job posting is asking for — don’t restate your whole CV as prose.',

@@ -3,12 +3,12 @@ import { buildExampleCv } from './buildExampleCv.js'
 // Fictional person. Listed under: techExec, navyProfessional.
 // Stress case: long name.
 const shared = {
-  fullName: 'Maximilian Alexander Vandenberg-Lindqvist',
-  email: 'maximilian.vandenberg-lindqvist@example.com',
-  phone: '+358 40 000 2301',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    github: 'https://github.com/example-mvlindqvist',
-    linkedin: 'https://linkedin.com/in/example-mvlindqvist',
+    github: 'https://github.example.com/john-doe',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -22,7 +22,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Chief Technology Officer',
-      company: 'Nordkredit Technologies',
+      company: 'Example Oy',
       location: 'Stockholm, Sweden',
       employmentType: 'Full-time',
       startDate: 'Jun 2020',
@@ -38,7 +38,7 @@ const en = buildExampleCv({
     },
     {
       role: 'VP Engineering',
-      company: 'Fjordline Payments',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'Jan 2016',
@@ -54,7 +54,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'KTH Royal Institute of Technology',
+      school: 'Example University',
       degree: 'M.Sc. Computer Science and Engineering',
       location: 'Stockholm, Sweden',
       startDate: '2004',
@@ -65,8 +65,8 @@ const en = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'AWS Certified Solutions Architect – Professional', issuer: 'Amazon Web Services', year: '2019', credentialUrl: '', expiry: '2025' },
-    { name: 'CISSP – Certified Information Systems Security Professional', issuer: '(ISC)²', year: '2021', credentialUrl: '', expiry: '2027' },
+    { name: 'Certified Solutions Architect – Professional', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '2025' },
+    { name: 'Information Systems Security Professional Certificate', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '2027' },
   ],
 })
 
@@ -80,7 +80,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Teknologiajohtaja',
-      company: 'Nordkredit Technologies',
+      company: 'Example Oy',
       location: 'Tukholma, Ruotsi',
       employmentType: 'Full-time',
       startDate: '06/2020',
@@ -96,7 +96,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Kehitysjohtaja (VP Engineering)',
-      company: 'Fjordline Payments',
+      company: 'Example Oy',
       location: 'Helsinki',
       employmentType: 'Full-time',
       startDate: '01/2016',
@@ -112,7 +112,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Kungliga Tekniska Högskolan (KTH)',
+      school: 'Example University',
       degree: 'Filosofian maisteri, tietotekniikka',
       location: 'Tukholma, Ruotsi',
       startDate: '2004',
@@ -123,8 +123,8 @@ const fi = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'AWS Certified Solutions Architect – Professional', issuer: 'Amazon Web Services', year: '2019', credentialUrl: '', expiry: '2025' },
-    { name: 'CISSP – Certified Information Systems Security Professional', issuer: '(ISC)²', year: '2021', credentialUrl: '', expiry: '2027' },
+    { name: 'Certified Solutions Architect – Professional', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '2025' },
+    { name: 'Information Systems Security Professional Certificate', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '2027' },
   ],
 })
 

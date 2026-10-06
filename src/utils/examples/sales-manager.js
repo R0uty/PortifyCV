@@ -2,11 +2,11 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: navyProfessional, quadrant.
 const shared = {
-  fullName: 'Ville Mattila',
-  email: 'ville.mattila@example.com',
-  phone: '+358 40 000 2506',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-vmattila',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -23,7 +23,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Sales Manager',
-      company: 'Keskikaari Sales Group',
+      company: 'Example Oy',
       location: 'Kokkola, Finland',
       employmentType: 'Full-time',
       startDate: 'Apr 2019',
@@ -39,7 +39,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Senior Account Executive',
-      company: 'Pohjanlahti Distribution',
+      company: 'Example Oy',
       location: 'Kokkola, Finland',
       employmentType: 'Full-time',
       startDate: 'Feb 2014',
@@ -55,7 +55,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Centria University of Applied Sciences',
+      school: 'Example University',
       degree: 'B.B.A. International Business',
       location: 'Kokkola, Finland',
       startDate: '2010',
@@ -72,7 +72,7 @@ const en = buildExampleCv({
       stack: 'Salesforce',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Keskikaari Sales Group',
+      organization: 'Example Oy',
       impact: 'Now generates 25% of total new business.',
       date: '2022',
       teamSize: '4',
@@ -85,7 +85,7 @@ const en = buildExampleCv({
       stack: 'HubSpot',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Keskikaari Sales Group',
+      organization: 'Example Oy',
       impact: 'Forecast accuracy improved; adopted by all 12 reps within 6 weeks.',
       date: '2021',
       teamSize: '12',
@@ -94,8 +94,8 @@ const en = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'Miller Heiman Strategic Selling Certification', issuer: 'Miller Heiman Group', year: '2018', credentialUrl: '', expiry: '' },
-    { name: 'HubSpot Sales Software Certification', issuer: 'HubSpot Academy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Strategic Selling Certification', issuer: 'Example Oy', year: '2018', credentialUrl: '', expiry: '' },
+    { name: 'Sales Software Certification', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -117,7 +117,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Myyntipäällikkö',
-      company: 'Keskikaari Sales Group',
+      company: 'Example Oy',
       location: 'Kokkola',
       employmentType: 'Full-time',
       startDate: '04/2019',
@@ -133,7 +133,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Senior-asiakasvastaava',
-      company: 'Pohjanlahti Distribution',
+      company: 'Example Oy',
       location: 'Kokkola',
       employmentType: 'Full-time',
       startDate: '02/2014',
@@ -149,7 +149,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Centria-ammattikorkeakoulu',
+      school: 'Example University',
       degree: 'Tradenomi (AMK), kansainvälinen kauppa',
       location: 'Kokkola',
       startDate: '2010',
@@ -166,7 +166,7 @@ const fi = buildExampleCv({
       stack: 'Salesforce',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Keskikaari Sales Group',
+      organization: 'Example Oy',
       impact: 'Tuottaa nyt 25 % kaikesta uudesta liiketoiminnasta.',
       date: '2022',
       teamSize: '4',
@@ -179,7 +179,7 @@ const fi = buildExampleCv({
       stack: 'HubSpot',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Keskikaari Sales Group',
+      organization: 'Example Oy',
       impact: 'Ennustetarkkuus parani; käyttöön otti kaikki 12 myyjää 6 viikossa.',
       date: '2021',
       teamSize: '12',
@@ -188,8 +188,8 @@ const fi = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'Miller Heiman Strategic Selling -sertifikaatti', issuer: 'Miller Heiman Group', year: '2018', credentialUrl: '', expiry: '' },
-    { name: 'HubSpot Sales Software -sertifikaatti', issuer: 'HubSpot Academy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Strategisen myynnin sertifikaatti', issuer: 'Example Oy', year: '2018', credentialUrl: '', expiry: '' },
+    { name: 'Myyntiohjelmistojen sertifikaatti', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Suomi', level: 'Äidinkieli' },

@@ -120,7 +120,53 @@ check('every template page is in sitemap.xml', missingFromSitemap.length === 0, 
 
 // --- Example CVs -------------------------------------------------------------
 const { EXAMPLES, TEMPLATE_EXAMPLES, loadExampleCv } = await importSrc('utils/exampleCvs.js')
-const { parseImportedCvData, createInitialCvData, CV_SECTION_ORDER_KEYS } = await importSrc('utils/cvForm.js')
+const { parseImportedCvData, createInitialCvData, CV_SECTION_ORDER_KEYS, demoCvData } = await importSrc('utils/cvForm.js')
+
+// Example and demo CVs must contain no real information: one placeholder
+// identity, placeholder organisations, and links that can only ever resolve
+// to the reserved example.com domain — never a real person's profile, a real
+// company or school, or a real open-source project.
+const PLACEHOLDER = {
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
+  organisation: 'Example Oy',
+  school: 'Example University',
+  openSource: 'Example project',
+}
+const ORGANISATION_FIELDS = ['company', 'organization', 'publisher', 'issuer']
+
+function collectStrings(value, out = []) {
+  if (typeof value === 'string') out.push(value)
+  else if (Array.isArray(value)) value.forEach((item) => collectStrings(item, out))
+  else if (value && typeof value === 'object') Object.values(value).forEach((item) => collectStrings(item, out))
+  return out
+}
+
+function checkNoRealInformation(tag, cv) {
+  check(`${tag}: placeholder name`, cv.fullName === PLACEHOLDER.fullName, cv.fullName)
+  check(`${tag}: placeholder email`, cv.email === PLACEHOLDER.email, cv.email)
+  check(`${tag}: placeholder phone`, cv.phone === PLACEHOLDER.phone, cv.phone)
+
+  const realHosts = collectStrings(cv)
+    .flatMap((text) => [...text.matchAll(/https?:\/\/([^/\s'")]+)/g)].map((match) => match[1].toLowerCase()))
+    .filter((host) => host !== 'example.com' && !host.endsWith('.example.com'))
+  check(`${tag}: every link is on example.com`, realHosts.length === 0, realHosts.join(', '))
+
+  const entries = Object.values(cv).filter(Array.isArray).flat().filter((item) => item && typeof item === 'object')
+  const realOrganisations = entries
+    .flatMap((item) => ORGANISATION_FIELDS.map((field) => item[field]))
+    .filter((value) => typeof value === 'string' && value.trim() && value !== PLACEHOLDER.organisation)
+  check(`${tag}: every organisation is ${PLACEHOLDER.organisation}`, realOrganisations.length === 0, realOrganisations.join(', '))
+  const realSchools = entries
+    .map((item) => item.school)
+    .filter((value) => typeof value === 'string' && value.trim() && value !== PLACEHOLDER.school)
+  check(`${tag}: every school is ${PLACEHOLDER.school}`, realSchools.length === 0, realSchools.join(', '))
+  const realProjects = (cv.openSource ?? []).map((item) => item.name).filter((name) => name && name !== PLACEHOLDER.openSource)
+  check(`${tag}: every open-source project is ${PLACEHOLDER.openSource}`, realProjects.length === 0, realProjects.join(', '))
+}
+
+checkNoRealInformation('demo CV', demoCvData)
 const { hasSectionContent, hideEmptySections } = await importSrc('utils/sectionContent.js')
 
 for (const template of cvTemplates) {
@@ -156,6 +202,7 @@ for (const [exampleId, entry] of Object.entries(EXAMPLES)) {
 
     check(`${tag}: has fullName and title`, Boolean(cv.fullName?.trim() && cv.title?.trim()))
     check(`${tag}: email is @example.com`, /@example\.com$/.test(cv.email ?? ''), cv.email)
+    checkNoRealInformation(tag, cv)
     check(`${tag}: no photo baked in`, !cv.photo)
     const missing = requiredSections.filter((key) => !hasSectionContent(cv, key))
     check(`${tag}: fills every primary section of ${templatesUsingIt.map((t) => t.id).join(', ')}`, missing.length === 0, `missing: ${missing.join(', ')}`)

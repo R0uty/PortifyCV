@@ -2,12 +2,12 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: modern, portfolio.
 const shared = {
-  fullName: 'Essi Laaksonen',
-  email: 'essi.laaksonen@example.com',
-  phone: '+358 40 000 1901',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-elaaksonen',
-    portfolio: 'https://elaaksonen.example.com',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
+    portfolio: 'https://johndoe.example.com',
   },
 }
 
@@ -21,7 +21,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Senior Product Manager',
-      company: 'Nordiq Software',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'Apr 2021',
@@ -37,7 +37,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Product Manager',
-      company: 'Kanttiini Analytics',
+      company: 'Example Oy',
       location: 'Tampere, Finland',
       employmentType: 'Full-time',
       startDate: 'Jun 2017',
@@ -53,7 +53,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Aalto University',
+      school: 'Example University',
       degree: 'M.Sc. (Tech.) Industrial Engineering and Management',
       location: 'Espoo, Finland',
       startDate: '2013',
@@ -70,7 +70,7 @@ const en = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Nordiq Software',
+      organization: 'Example Oy',
       impact: '24% growth in expansion revenue in the first year.',
       date: '2022',
       teamSize: '6',
@@ -83,7 +83,7 @@ const en = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kanttiini Analytics',
+      organization: 'Example Oy',
       impact: 'Weekly active usage of reporting rose from 31% to 58%.',
       date: '2020',
       teamSize: '5',
@@ -92,7 +92,7 @@ const en = buildExampleCv({
     },
   ],
   achievements: [
-    { title: 'Internal "Product Launch of the Year"', description: 'Awarded for the usage-based billing launch at Nordiq Software.', year: '2022' },
+    { title: 'Internal "Product Launch of the Year"', description: 'Awarded for the usage-based billing launch at Example Oy.', year: '2022' },
   ],
   caseStudies: [
     {
@@ -105,13 +105,13 @@ const en = buildExampleCv({
     },
   ],
   openSource: [
-    { name: 'Metabase', description: 'Filed and triaged a reproducible bug report for a dashboard export edge case; fix shipped in the next release.', language: 'Clojure', stars: '38k', forks: '4.9k', url: 'https://github.com/metabase/metabase' },
+    { name: 'Example project', description: 'Filed and triaged a reproducible bug report for a dashboard export edge case; fix shipped in the next release.', language: 'Clojure', stars: '38k', forks: '4.9k', url: 'https://github.example.com/john-doe/example-project' },
   ],
   testimonials: [
     {
-      quote: 'Essi is the rare PM who can run a pricing workshop in the morning and read a SQL query in the afternoon.',
+      quote: 'John is the rare PM who can run a pricing workshop in the morning and read a SQL query in the afternoon.',
       author: 'VP of Engineering',
-      role: 'Nordiq Software',
+      role: 'Example Oy',
     },
   ],
 })
@@ -126,7 +126,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Senior tuotepäällikkö',
-      company: 'Nordiq Software',
+      company: 'Example Oy',
       location: 'Helsinki',
       employmentType: 'Full-time',
       startDate: '04/2021',
@@ -142,7 +142,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Tuotepäällikkö',
-      company: 'Kanttiini Analytics',
+      company: 'Example Oy',
       location: 'Tampere',
       employmentType: 'Full-time',
       startDate: '06/2017',
@@ -158,7 +158,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Aalto-yliopisto',
+      school: 'Example University',
       degree: 'Diplomi-insinööri, tuotantotalous',
       location: 'Espoo',
       startDate: '2013',
@@ -175,7 +175,7 @@ const fi = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Nordiq Software',
+      organization: 'Example Oy',
       impact: '24 % kasvu laajennusmyynnissä ensimmäisenä vuonna.',
       date: '2022',
       teamSize: '6',
@@ -188,7 +188,7 @@ const fi = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kanttiini Analytics',
+      organization: 'Example Oy',
       impact: 'Raportoinnin viikoittainen aktiivikäyttö nousi 31 %:sta 58 %:iin.',
       date: '2020',
       teamSize: '5',
@@ -197,7 +197,7 @@ const fi = buildExampleCv({
     },
   ],
   achievements: [
-    { title: 'Sisäinen "Vuoden tuotelanseeraus"', description: 'Palkittu käyttöperusteisen laskutuksen lanseerauksesta Nordiq Softwarella.', year: '2022' },
+    { title: 'Sisäinen "Vuoden tuotelanseeraus"', description: 'Palkittu käyttöperusteisen laskutuksen lanseerauksesta Example Oylla.', year: '2022' },
   ],
   caseStudies: [
     {
@@ -210,13 +210,13 @@ const fi = buildExampleCv({
     },
   ],
   openSource: [
-    { name: 'Metabase', description: 'Raportoin toistettavan virheen hallintapaneelin vientitoiminnon reunatapauksesta; korjaus julkaistiin seuraavassa versiossa.', language: 'Clojure', stars: '38k', forks: '4.9k', url: 'https://github.com/metabase/metabase' },
+    { name: 'Example project', description: 'Raportoin toistettavan virheen hallintapaneelin vientitoiminnon reunatapauksesta; korjaus julkaistiin seuraavassa versiossa.', language: 'Clojure', stars: '38k', forks: '4.9k', url: 'https://github.example.com/john-doe/example-project' },
   ],
   testimonials: [
     {
-      quote: 'Essi on harvinainen tuotepäällikkö, joka vetää hinnoitteluworkshopin aamulla ja lukee SQL-kyselyn iltapäivällä.',
+      quote: 'John on harvinainen tuotepäällikkö, joka vetää hinnoitteluworkshopin aamulla ja lukee SQL-kyselyn iltapäivällä.',
       author: 'Kehitysjohtaja',
-      role: 'Nordiq Software',
+      role: 'Example Oy',
     },
   ],
 })

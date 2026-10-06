@@ -86,7 +86,7 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
   // Distinguish "still loading" (loadedExample doesn't match yet, so the
   // caller should show a placeholder) from "loaded, but resolved to null"
   // (a missing/failed example file — the only case that falls back to the
-  // demo CV). Without this, the demo CV (Alex Morgan) would flash under
+  // demo CV). Without this, the demo CV (John Doe) would flash under
   // the selected radio while a real example is still in flight.
   const exampleMatchesSelection = Boolean(
     loadedExample && loadedExample.id === exampleId && loadedExample.locale === resolvedLocale,

@@ -2,12 +2,12 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: minimal, compact.
 const shared = {
-  fullName: 'Antti Salminen',
-  email: 'antti.salminen@example.com',
-  phone: '+358 40 000 2502',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-asalminen',
-    github: 'https://github.com/example-asalminen',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
+    github: 'https://github.example.com/john-doe',
   },
 }
 
@@ -18,13 +18,13 @@ const en = buildExampleCv({
   about:
     'Cybersecurity analyst with 9 years in SOC operations, incident response, and vulnerability management. I turn noisy alert queues into detections people actually trust.',
   skills: [
-    'SIEM (Splunk)', 'Incident response', 'Vulnerability management', 'Network security',
+    'SIEM (Example Oy)', 'Incident response', 'Vulnerability management', 'Network security',
     'Threat intelligence', 'SOC operations', 'Python scripting', 'Firewall/IDS/IPS', 'Cloud security (AWS)',
   ],
   experience: [
     {
       role: 'Senior Cybersecurity Analyst',
-      company: 'Rajavalli Security',
+      company: 'Example Oy',
       location: 'Lappeenranta, Finland',
       employmentType: 'Full-time',
       startDate: 'Mar 2021',
@@ -33,14 +33,14 @@ const en = buildExampleCv({
       description: 'Lead SOC monitoring and incident response for 1,200 monitored endpoints across 20 client accounts.',
       achievements: [
         'Led incident response for 50+ security incidents a year, cutting mean containment time from 6 hours to 90 minutes.',
-        'Built a Splunk detection ruleset that cut false positives by 60% across 1,200 monitored endpoints.',
+        'Built a Example Oy detection ruleset that cut false positives by 60% across 1,200 monitored endpoints.',
         'Ran a phishing-simulation program across 900 employees, cutting the click-through rate from 18% to 4%.',
       ],
-      technologies: ['Splunk', 'Python'],
+      technologies: ['Example Oy', 'Python'],
     },
     {
       role: 'Security Operations Analyst',
-      company: 'Itäportti IT Services',
+      company: 'Example Oy',
       location: 'Lappeenranta, Finland',
       employmentType: 'Full-time',
       startDate: 'Aug 2017',
@@ -56,7 +56,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Lappeenranta University of Technology',
+      school: 'Example University',
       degree: 'B.Sc. Information Technology (Cybersecurity)',
       location: 'Lappeenranta, Finland',
       startDate: '2013',
@@ -71,7 +71,7 @@ const en = buildExampleCv({
       name: 'Home-lab SOC',
       description: 'Personal detection lab built on an ELK stack to practice building and tuning SIEM detections outside work.',
       stack: 'Elasticsearch, Logstash, Kibana, Suricata',
-      githubUrl: 'https://github.com/example-asalminen/home-lab-soc',
+      githubUrl: 'https://github.example.com/john-doe/home-lab-soc',
       demoUrl: '',
       organization: '',
       impact: 'Used to prototype 12 detection rules before they went into production at work.',
@@ -86,7 +86,7 @@ const en = buildExampleCv({
       stack: 'Python, GoPhish',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Rajavalli Security',
+      organization: 'Example Oy',
       impact: 'Rolled out to 900 employees across 5 client companies.',
       date: '2023',
       teamSize: '2',
@@ -95,9 +95,9 @@ const en = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'CompTIA Security+', issuer: 'CompTIA', year: '2018', credentialUrl: '', expiry: '' },
-    { name: 'Splunk Core Certified Power User', issuer: 'Splunk', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'OSCP – Offensive Security Certified Professional', issuer: 'Offensive Security', year: '2023', credentialUrl: '', expiry: '' },
+    { name: 'Security Fundamentals Certificate', issuer: 'Example Oy', year: '2018', credentialUrl: '', expiry: '' },
+    { name: 'Certified SIEM Power User', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Certified Penetration Testing Professional', issuer: 'Example Oy', year: '2023', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -117,13 +117,13 @@ const fi = buildExampleCv({
   about:
     'Kyberturvallisuusanalyytikko, jolla on 9 vuoden kokemus SOC-toiminnasta, häiriötilanteiden hoidosta ja haavoittuvuuksien hallinnasta. Muutan meluisat hälytysjonot havainnoiksi, joihin ihmiset oikeasti luottavat.',
   skills: [
-    'SIEM (Splunk)', 'Häiriötilanteiden hoito', 'Haavoittuvuuksien hallinta', 'Verkkoturvallisuus',
+    'SIEM (Example Oy)', 'Häiriötilanteiden hoito', 'Haavoittuvuuksien hallinta', 'Verkkoturvallisuus',
     'Uhkatiedustelu', 'SOC-toiminta', 'Python-skriptaus', 'Palomuurit/IDS/IPS', 'Pilviturvallisuus (AWS)',
   ],
   experience: [
     {
       role: 'Senior-kyberturvallisuusanalyytikko',
-      company: 'Rajavalli Security',
+      company: 'Example Oy',
       location: 'Lappeenranta',
       employmentType: 'Full-time',
       startDate: '03/2021',
@@ -132,14 +132,14 @@ const fi = buildExampleCv({
       description: 'Vastaan SOC-valvonnasta ja häiriötilanteiden hoidosta 1 200 valvotulle päätelaitteelle 20 asiakastilillä.',
       achievements: [
         'Johdin yli 50 tietoturvahäiriön vuosittaisen hoidon ja lyhensin rajaamisajan 6 tunnista 90 minuuttiin.',
-        'Rakensin Splunk-havaintosäännöstön, joka vähensi vääriä hälytyksiä 60 % 1 200 valvotulla päätelaitteella.',
+        'Rakensin Example Oy-havaintosäännöstön, joka vähensi vääriä hälytyksiä 60 % 1 200 valvotulla päätelaitteella.',
         'Vedin tietojenkalastelusimulaatio-ohjelman 900 työntekijälle ja laskin klikkausprosentin 18 %:sta 4 %:iin.',
       ],
-      technologies: ['Splunk', 'Python'],
+      technologies: ['Example Oy', 'Python'],
     },
     {
       role: 'Security Operations -analyytikko',
-      company: 'Itäportti IT Services',
+      company: 'Example Oy',
       location: 'Lappeenranta',
       employmentType: 'Full-time',
       startDate: '08/2017',
@@ -155,7 +155,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Lappeenrannan teknillinen yliopisto',
+      school: 'Example University',
       degree: 'Tekniikan kandidaatti, tietotekniikka (kyberturvallisuus)',
       location: 'Lappeenranta',
       startDate: '2013',
@@ -170,7 +170,7 @@ const fi = buildExampleCv({
       name: 'Kotilabra-SOC',
       description: 'Henkilökohtainen havaintolaboratorio ELK-pinolla, jolla harjoittelin SIEM-havaintojen rakentamista ja viritystä työn ulkopuolella.',
       stack: 'Elasticsearch, Logstash, Kibana, Suricata',
-      githubUrl: 'https://github.com/example-asalminen/home-lab-soc',
+      githubUrl: 'https://github.example.com/john-doe/home-lab-soc',
       demoUrl: '',
       organization: '',
       impact: 'Käytetty 12 havaintosäännön prototypointiin ennen tuotantoon viemistä.',
@@ -185,7 +185,7 @@ const fi = buildExampleCv({
       stack: 'Python, GoPhish',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Rajavalli Security',
+      organization: 'Example Oy',
       impact: 'Käytössä 900 työntekijälle 5 asiakasyrityksessä.',
       date: '2023',
       teamSize: '2',
@@ -194,9 +194,9 @@ const fi = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'CompTIA Security+', issuer: 'CompTIA', year: '2018', credentialUrl: '', expiry: '' },
-    { name: 'Splunk Core Certified Power User', issuer: 'Splunk', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'OSCP – Offensive Security Certified Professional', issuer: 'Offensive Security', year: '2023', credentialUrl: '', expiry: '' },
+    { name: 'Security Fundamentals Certificate', issuer: 'Example Oy', year: '2018', credentialUrl: '', expiry: '' },
+    { name: 'Certified SIEM Power User', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Certified Penetration Testing Professional', issuer: 'Example Oy', year: '2023', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Suomi', level: 'Äidinkieli' },

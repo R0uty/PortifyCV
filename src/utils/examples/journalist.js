@@ -2,13 +2,13 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: quadrant, editorial.
 const shared = {
-  fullName: 'Olli Mäenpää',
-  email: 'olli.maenpaa@example.com',
-  phone: '+358 40 000 2508',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    website: 'https://maenpaa.example.com',
-    linkedin: 'https://linkedin.com/in/example-omaenpaa',
-    youtube: 'https://youtube.com/@example-omaenpaa',
+    website: 'https://johndoe.example.com',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
+    youtube: 'https://youtube.example.com/@john-doe',
   },
 }
 
@@ -25,7 +25,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Senior Reporter',
-      company: 'Pohjanmaan Sanomat',
+      company: 'Example Oy',
       location: 'Mikkeli, Finland',
       employmentType: 'Full-time',
       startDate: 'Mar 2019',
@@ -41,7 +41,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Reporter',
-      company: 'Keski-Suomen Viikko',
+      company: 'Example Oy',
       location: 'Jyväskylä, Finland',
       employmentType: 'Full-time',
       startDate: 'Aug 2013',
@@ -57,7 +57,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'University of Tampere',
+      school: 'Example University',
       degree: 'M.Soc.Sc. Journalism and Mass Communication',
       location: 'Tampere, Finland',
       startDate: '2008',
@@ -74,7 +74,7 @@ const en = buildExampleCv({
       stack: 'Python, public records requests',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Pohjanmaan Sanomat',
+      organization: 'Example Oy',
       impact: 'City council froze rents for 1,200 tenants for one year.',
       date: '2022',
       teamSize: '2',
@@ -87,7 +87,7 @@ const en = buildExampleCv({
       stack: 'Audacity, Adobe Premiere',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Keski-Suomen Viikko',
+      organization: 'Example Oy',
       impact: '8,000 monthly listeners at peak.',
       date: '2018',
       teamSize: '',
@@ -96,8 +96,8 @@ const en = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'Data Journalism Certificate', issuer: 'Google News Initiative', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'Audio Storytelling Certificate', issuer: 'YLE Academy', year: '2017', credentialUrl: '', expiry: '' },
+    { name: 'Data Journalism Certificate', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Audio Storytelling Certificate', issuer: 'Example Oy', year: '2017', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -119,7 +119,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Erikoistoimittaja',
-      company: 'Pohjanmaan Sanomat',
+      company: 'Example Oy',
       location: 'Mikkeli',
       employmentType: 'Full-time',
       startDate: '03/2019',
@@ -135,7 +135,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Toimittaja',
-      company: 'Keski-Suomen Viikko',
+      company: 'Example Oy',
       location: 'Jyväskylä',
       employmentType: 'Full-time',
       startDate: '08/2013',
@@ -151,7 +151,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Tampereen yliopisto',
+      school: 'Example University',
       degree: 'Valtiotieteiden maisteri, journalistiikka ja viestintä',
       location: 'Tampere',
       startDate: '2008',
@@ -168,7 +168,7 @@ const fi = buildExampleCv({
       stack: 'Python, tietopyynnöt',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Pohjanmaan Sanomat',
+      organization: 'Example Oy',
       impact: 'Kaupunginvaltuusto jäädytti vuokrat 1 200 vuokralaiselle vuodeksi.',
       date: '2022',
       teamSize: '2',
@@ -181,7 +181,7 @@ const fi = buildExampleCv({
       stack: 'Audacity, Adobe Premiere',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Keski-Suomen Viikko',
+      organization: 'Example Oy',
       impact: '8 000 kuukausittaista kuuntelijaa huippuhetkellä.',
       date: '2018',
       teamSize: '',
@@ -190,8 +190,8 @@ const fi = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'Datajournalismin sertifikaatti', issuer: 'Google News Initiative', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'Äänikerronnan sertifikaatti', issuer: 'Yle Akatemia', year: '2017', credentialUrl: '', expiry: '' },
+    { name: 'Datajournalismin sertifikaatti', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Äänikerronnan sertifikaatti', issuer: 'Example Oy', year: '2017', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },

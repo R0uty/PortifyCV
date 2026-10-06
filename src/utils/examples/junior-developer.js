@@ -3,12 +3,12 @@ import { buildExampleCv } from './buildExampleCv.js'
 // Fictional person. Listed under: developer, graduate. Stress case: thin
 // experience — one part-time/summer role plus one internship, no full-time job.
 const shared = {
-  fullName: 'Joonas Mäkelä',
-  email: 'joonas.makela@example.com',
-  phone: '+358 40 000 1401',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    github: 'https://github.com/example-jmakela',
-    linkedin: 'https://linkedin.com/in/example-jmakela',
+    github: 'https://github.example.com/john-doe',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -22,7 +22,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Junior Developer (Summer)',
-      company: 'CodeCamp Jyväskylä',
+      company: 'Example Oy',
       location: 'Jyväskylä, Finland',
       employmentType: 'Part-time',
       startDate: 'Jun 2023',
@@ -39,7 +39,7 @@ const en = buildExampleCv({
   internships: [
     {
       role: 'Software Engineering Intern',
-      company: 'Vaaka Software',
+      company: 'Example Oy',
       location: 'Jyväskylä, Finland',
       startDate: 'Jan 2024',
       endDate: 'Apr 2024',
@@ -49,7 +49,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'University of Jyväskylä',
+      school: 'Example University',
       degree: 'B.Sc. Computer Science',
       location: 'Jyväskylä, Finland',
       startDate: '2021',
@@ -64,7 +64,7 @@ const en = buildExampleCv({
       name: 'habit-tracker-cli',
       description: 'Command-line habit tracker with local SQLite storage, built to learn Node.js.',
       stack: 'Node.js, SQLite',
-      githubUrl: 'https://github.com/example-jmakela/habit-tracker-cli',
+      githubUrl: 'https://github.example.com/john-doe/habit-tracker-cli',
       demoUrl: '',
       organization: '',
       impact: '40+ GitHub stars.',
@@ -78,7 +78,7 @@ const en = buildExampleCv({
       description: 'Small React widget showing live bus departures for the university campus.',
       stack: 'React, Public transport API',
       githubUrl: '',
-      demoUrl: 'https://bus.jmakela.example.com',
+      demoUrl: 'https://bus.johndoe.example.com',
       organization: '',
       impact: 'Used by about 150 students weekly.',
       date: '2023',
@@ -88,16 +88,16 @@ const en = buildExampleCv({
     },
   ],
   achievements: [
-    { title: '1st place, Jyväskylä Student Hackathon', description: 'Built a campus bus-tracking widget with a 3-person team in 24 hours.', year: '2023' },
+    { title: '1st place, Example Hackathon', description: 'Built a campus bus-tracking widget with a 3-person team in 24 hours.', year: '2023' },
   ],
   openSource: [
-    { name: 'Node.js', description: 'Fixed a documentation example that did not compile in the stream API guide.', language: 'JavaScript', stars: '108k', forks: '29k', url: 'https://github.com/nodejs/node' },
+    { name: 'Example project', description: 'Fixed a documentation example that did not compile in the stream API guide.', language: 'JavaScript', stars: '108k', forks: '29k', url: 'https://github.example.com/john-doe/example-project' },
   ],
   publications: [
-    { title: 'What I learned building my first CLI tool', publisher: 'dev.to', year: '2024', url: 'https://dev.to/example-jmakela' },
+    { title: 'What I learned building my first CLI tool', publisher: 'Example Oy', year: '2024', url: 'https://devto.example.com/john-doe' },
   ],
   volunteering: [
-    { organization: 'Jyväskylä Code Club', role: 'Volunteer mentor', description: 'Taught basic HTML and CSS to teenagers at a weekly after-school coding club.' },
+    { organization: 'Example Oy', role: 'Volunteer mentor', description: 'Taught basic HTML and CSS to teenagers at a weekly after-school coding club.' },
   ],
 })
 
@@ -111,7 +111,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Juniorikehittäjä (kesätyö)',
-      company: 'CodeCamp Jyväskylä',
+      company: 'Example Oy',
       location: 'Jyväskylä',
       employmentType: 'Part-time',
       startDate: '06/2023',
@@ -128,7 +128,7 @@ const fi = buildExampleCv({
   internships: [
     {
       role: 'Ohjelmistoharjoittelija',
-      company: 'Vaaka Software',
+      company: 'Example Oy',
       location: 'Jyväskylä',
       startDate: '01/2024',
       endDate: '04/2024',
@@ -138,7 +138,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Jyväskylän yliopisto',
+      school: 'Example University',
       degree: 'Luonnontieteiden kandidaatti, tietojenkäsittelytiede',
       location: 'Jyväskylä',
       startDate: '2021',
@@ -153,7 +153,7 @@ const fi = buildExampleCv({
       name: 'habit-tracker-cli',
       description: 'Komentorivipohjainen tapaseurantatyökalu paikallisella SQLite-tallennuksella, rakennettu Node.js:n oppimiseksi.',
       stack: 'Node.js, SQLite',
-      githubUrl: 'https://github.com/example-jmakela/habit-tracker-cli',
+      githubUrl: 'https://github.example.com/john-doe/habit-tracker-cli',
       demoUrl: '',
       organization: '',
       impact: 'Yli 40 tähteä GitHubissa.',
@@ -167,7 +167,7 @@ const fi = buildExampleCv({
       description: 'Pieni React-widgetti, joka näyttää yliopiston kampuksen bussien lähtöajat reaaliajassa.',
       stack: 'React, joukkoliikenteen API',
       githubUrl: '',
-      demoUrl: 'https://bus.jmakela.example.com',
+      demoUrl: 'https://bus.johndoe.example.com',
       organization: '',
       impact: 'Noin 150 opiskelijaa käyttää viikoittain.',
       date: '2023',
@@ -177,16 +177,16 @@ const fi = buildExampleCv({
     },
   ],
   achievements: [
-    { title: '1. sija, Jyväskylän opiskelijahackathon', description: 'Rakensin kampuksen bussiwidgetin 3 hengen tiimissä 24 tunnissa.', year: '2023' },
+    { title: '1. sija, Example Hackathon', description: 'Rakensin kampuksen bussiwidgetin 3 hengen tiimissä 24 tunnissa.', year: '2023' },
   ],
   openSource: [
-    { name: 'Node.js', description: 'Korjasin dokumentaatioesimerkin, joka ei kääntynyt stream-API-oppaassa.', language: 'JavaScript', stars: '108k', forks: '29k', url: 'https://github.com/nodejs/node' },
+    { name: 'Example project', description: 'Korjasin dokumentaatioesimerkin, joka ei kääntynyt stream-API-oppaassa.', language: 'JavaScript', stars: '108k', forks: '29k', url: 'https://github.example.com/john-doe/example-project' },
   ],
   publications: [
-    { title: 'Mitä opin rakentaessani ensimmäisen CLI-työkaluni', publisher: 'dev.to', year: '2024', url: 'https://dev.to/example-jmakela' },
+    { title: 'Mitä opin rakentaessani ensimmäisen CLI-työkaluni', publisher: 'Example Oy', year: '2024', url: 'https://devto.example.com/john-doe' },
   ],
   volunteering: [
-    { organization: 'Jyväskylän Code Club', role: 'Vapaaehtoinen mentori', description: 'Opetin teini-ikäisille HTML:n ja CSS:n perusteita viikoittaisessa koulun jälkeisessä koodauskerhossa.' },
+    { organization: 'Example Oy', role: 'Vapaaehtoinen mentori', description: 'Opetin teini-ikäisille HTML:n ja CSS:n perusteita viikoittaisessa koulun jälkeisessä koodauskerhossa.' },
   ],
 })
 

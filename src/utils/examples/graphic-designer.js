@@ -2,13 +2,13 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: creative, colorfulCompact.
 const shared = {
-  fullName: 'Aleksi Hakkarainen',
-  email: 'aleksi.hakkarainen@example.com',
-  phone: '+358 40 000 1601',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-ahakkarainen',
-    behance: 'https://behance.net/example-ahakkarainen',
-    portfolio: 'https://ahakkarainen.example.com',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
+    behance: 'https://behance.example.com/john-doe',
+    portfolio: 'https://johndoe.example.com',
   },
 }
 
@@ -22,7 +22,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Senior Graphic Designer',
-      company: 'Kuvapaja Oy',
+      company: 'Example Oy',
       location: 'Lahti, Finland',
       employmentType: 'Full-time',
       startDate: 'May 2019',
@@ -38,7 +38,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Graphic Designer (Freelance)',
-      company: 'Studio Kuusi',
+      company: 'Example Oy',
       location: 'Lahti, Finland',
       employmentType: 'Freelance',
       startDate: 'Jan 2016',
@@ -54,7 +54,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Lahti University of Applied Sciences',
+      school: 'Example University',
       degree: 'B.A. Graphic Design',
       location: 'Lahti, Finland',
       startDate: '2012',
@@ -104,7 +104,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Senior graafinen suunnittelija',
-      company: 'Kuvapaja Oy',
+      company: 'Example Oy',
       location: 'Lahti',
       employmentType: 'Full-time',
       startDate: '05/2019',
@@ -120,7 +120,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Graafinen suunnittelija (freelancer)',
-      company: 'Studio Kuusi',
+      company: 'Example Oy',
       location: 'Lahti',
       employmentType: 'Freelance',
       startDate: '01/2016',
@@ -136,7 +136,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Lahden ammattikorkeakoulu',
+      school: 'Example University',
       degree: 'Medianomi (AMK), graafinen suunnittelu',
       location: 'Lahti',
       startDate: '2012',

@@ -27,7 +27,7 @@ test.describe('Cover letter', () => {
 
     await dialog.getByRole('button', { name: 'Generate draft' }).click()
 
-    await expect(draft).toHaveValue(/Alex Morgan/)
+    await expect(draft).toHaveValue(/John Doe/)
     await expect(dialog.getByRole('button', { name: 'Copy to clipboard' })).toBeEnabled()
     await expect(dialog.getByRole('button', { name: 'Download .txt' })).toBeEnabled()
     await expect(dialog.getByRole('button', { name: 'Download PDF' })).toBeEnabled()
@@ -52,7 +52,7 @@ test.describe('Cover letter', () => {
     await dialog.getByRole('button', { name: 'Copy to clipboard' }).click()
 
     await expect(page.getByText('Cover letter copied to clipboard.')).toBeVisible()
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('Alex Morgan')
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('John Doe')
   })
 
   test('downloads the draft as a .txt file', async ({ page }) => {

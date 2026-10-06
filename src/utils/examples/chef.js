@@ -3,13 +3,13 @@ import { buildExampleCv } from './buildExampleCv.js'
 // Fictional person. Listed under: portrait, european. Lives abroad (Denmark)
 // per the brief's allowance for chef/architect.
 const shared = {
-  fullName: 'Markus Ahonen',
-  email: 'markus.ahonen@example.com',
-  phone: '+358 40 000 2510',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    website: 'https://ahonen.example.com',
-    linkedin: 'https://linkedin.com/in/example-mahonen',
-    youtube: 'https://youtube.com/@example-mahonen',
+    website: 'https://johndoe.example.com',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
+    youtube: 'https://youtube.example.com/@john-doe',
   },
 }
 
@@ -26,7 +26,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Head Chef',
-      company: 'Nordisk Kökshus',
+      company: 'Example Oy',
       location: 'Copenhagen, Denmark',
       employmentType: 'Full-time',
       startDate: 'Apr 2021',
@@ -42,7 +42,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Sous Chef',
-      company: 'Kustaankartano Ravintola',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'May 2016',
@@ -58,7 +58,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Perho Culinary, Tourism and Business College',
+      school: 'Example University',
       degree: 'Vocational Qualification in Catering, Chef',
       location: 'Helsinki, Finland',
       startDate: '2012',
@@ -75,7 +75,7 @@ const en = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Nordisk Kökshus',
+      organization: 'Example Oy',
       impact: 'Food cost dropped from 34% to 27% of revenue.',
       date: '2022',
       teamSize: '9',
@@ -88,7 +88,7 @@ const en = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Nordisk Kökshus',
+      organization: 'Example Oy',
       impact: 'Sold out all 8 editions, 40 covers each.',
       date: '2023',
       teamSize: '',
@@ -97,8 +97,8 @@ const en = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'HACCP Food Safety Certification', issuer: 'Danish Veterinary and Food Administration', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'Nordic Chef Competition, Regional Finalist', issuer: 'Nordic Chefs Association', year: '2019', credentialUrl: '', expiry: '' },
+    { name: 'HACCP Food Safety Certification', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Example Chef Competition, Regional Finalist', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -120,7 +120,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Keittiöpäällikkö',
-      company: 'Nordisk Kökshus',
+      company: 'Example Oy',
       location: 'Kopenhamina, Tanska',
       employmentType: 'Full-time',
       startDate: '04/2021',
@@ -136,7 +136,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Apulaiskeittiöpäällikkö',
-      company: 'Kustaankartano Ravintola',
+      company: 'Example Oy',
       location: 'Helsinki',
       employmentType: 'Full-time',
       startDate: '05/2016',
@@ -152,7 +152,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Perho Liiketalousopisto',
+      school: 'Example University',
       degree: 'Ammattitutkinto, kokki',
       location: 'Helsinki',
       startDate: '2012',
@@ -169,7 +169,7 @@ const fi = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Nordisk Kökshus',
+      organization: 'Example Oy',
       impact: 'Ruokakustannukset laskivat 34 %:sta 27 %:iin liikevaihdosta.',
       date: '2022',
       teamSize: '9',
@@ -182,7 +182,7 @@ const fi = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Nordisk Kökshus',
+      organization: 'Example Oy',
       impact: 'Kaikki 8 kertaa loppuunmyyty, 40 asiakaspaikkaa kerrallaan.',
       date: '2023',
       teamSize: '',
@@ -191,8 +191,8 @@ const fi = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'HACCP-elintarviketurvallisuussertifikaatti', issuer: 'Danish Veterinary and Food Administration', year: '2021', credentialUrl: '', expiry: '' },
-    { name: 'Pohjoismainen kokkikilpailu, aluefinalisti', issuer: 'Nordic Chefs Association', year: '2019', credentialUrl: '', expiry: '' },
+    { name: 'HACCP-elintarviketurvallisuussertifikaatti', issuer: 'Example Oy', year: '2021', credentialUrl: '', expiry: '' },
+    { name: 'Example Chef Competition, aluefinalisti', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },

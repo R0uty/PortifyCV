@@ -2,13 +2,13 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: portrait.
 const shared = {
-  fullName: 'Venla Kallio',
-  email: 'venla.kallio@example.com',
-  phone: '+358 40 000 2509',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    portfolio: 'https://kallio.example.com',
-    behance: 'https://behance.net/example-vkallio',
-    linkedin: 'https://linkedin.com/in/example-vkallio',
+    portfolio: 'https://johndoe.example.com',
+    behance: 'https://behance.example.com/example-vjohn-doe',
+    linkedin: 'https://linkedin.example.com/in/example-vjohn-doe',
   },
 }
 
@@ -25,7 +25,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Brand Specialist',
-      company: 'Kulkuri Brands',
+      company: 'Example Oy',
       location: 'Hyvinkää, Finland',
       employmentType: 'Full-time',
       startDate: 'Feb 2020',
@@ -41,7 +41,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Marketing Assistant',
-      company: 'Metsäpolku Studio',
+      company: 'Example Oy',
       location: 'Helsinki, Finland',
       employmentType: 'Full-time',
       startDate: 'Jun 2017',
@@ -57,7 +57,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Metropolia University of Applied Sciences',
+      school: 'Example University',
       degree: 'B.B.A. Marketing',
       location: 'Helsinki, Finland',
       startDate: '2013',
@@ -74,7 +74,7 @@ const en = buildExampleCv({
       stack: 'Adobe Illustrator, Adobe InDesign',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kulkuri Brands',
+      organization: 'Example Oy',
       impact: 'Unaided brand recall rose from 22% to 41%.',
       date: '2023',
       teamSize: '5',
@@ -87,7 +87,7 @@ const en = buildExampleCv({
       stack: 'Figma, Adobe Creative Suite',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kulkuri Brands',
+      organization: 'Example Oy',
       impact: 'Adopted by 20+ people across 3 teams.',
       date: '2021',
       teamSize: '',
@@ -96,8 +96,8 @@ const en = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'Certified Brand Strategist', issuer: 'Branding Institute', year: '2022', credentialUrl: '', expiry: '' },
-    { name: 'Google Analytics Certification', issuer: 'Google', year: '2020', credentialUrl: '', expiry: '' },
+    { name: 'Certified Brand Strategist', issuer: 'Example Oy', year: '2022', credentialUrl: '', expiry: '' },
+    { name: 'Web Analytics Certification', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
@@ -118,7 +118,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Brändiasiantuntija',
-      company: 'Kulkuri Brands',
+      company: 'Example Oy',
       location: 'Hyvinkää',
       employmentType: 'Full-time',
       startDate: '02/2020',
@@ -134,7 +134,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Markkinointiassistentti',
-      company: 'Metsäpolku Studio',
+      company: 'Example Oy',
       location: 'Helsinki',
       employmentType: 'Full-time',
       startDate: '06/2017',
@@ -150,7 +150,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Metropolia ammattikorkeakoulu',
+      school: 'Example University',
       degree: 'Tradenomi, markkinointi',
       location: 'Helsinki',
       startDate: '2013',
@@ -167,7 +167,7 @@ const fi = buildExampleCv({
       stack: 'Adobe Illustrator, Adobe InDesign',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kulkuri Brands',
+      organization: 'Example Oy',
       impact: 'Spontaani brändimuistaminen nousi 22 %:sta 41 %:iin.',
       date: '2023',
       teamSize: '5',
@@ -180,7 +180,7 @@ const fi = buildExampleCv({
       stack: 'Figma, Adobe Creative Suite',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Kulkuri Brands',
+      organization: 'Example Oy',
       impact: 'Käytössä yli 20 henkilöllä kolmessa tiimissä.',
       date: '2021',
       teamSize: '',
@@ -189,8 +189,8 @@ const fi = buildExampleCv({
     },
   ],
   certificates: [
-    { name: 'Certified Brand Strategist', issuer: 'Branding Institute', year: '2022', credentialUrl: '', expiry: '' },
-    { name: 'Google Analytics -sertifikaatti', issuer: 'Google', year: '2020', credentialUrl: '', expiry: '' },
+    { name: 'Certified Brand Strategist', issuer: 'Example Oy', year: '2022', credentialUrl: '', expiry: '' },
+    { name: 'Verkkoanalytiikan sertifikaatti', issuer: 'Example Oy', year: '2020', credentialUrl: '', expiry: '' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },

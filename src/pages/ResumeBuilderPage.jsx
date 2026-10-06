@@ -1761,7 +1761,7 @@ function ResumeBuilderPage({
                 aria-label={locale === 'fi' ? 'Liitetty CV-teksti' : 'Pasted CV text'}
                 placeholder={locale === 'fi'
                   ? `Matti Meikäläinen\nSenior Product Designer\nTaidot: Figma, käyttäjätutkimus, design systemit`
-                  : `Alex Morgan\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
+                  : `John Doe\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
               />
               <div className="mt-4 flex flex-wrap gap-2">
                 <button

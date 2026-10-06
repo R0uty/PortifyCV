@@ -2,11 +2,11 @@ import { buildExampleCv } from './buildExampleCv.js'
 
 // Fictional person. Listed under: executive, timeline.
 const shared = {
-  fullName: 'Laura Peltonen',
-  email: 'laura.peltonen@example.com',
-  phone: '+358 40 000 2101',
+  fullName: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '0123456789',
   links: {
-    linkedin: 'https://linkedin.com/in/example-lpeltonen',
+    linkedin: 'https://linkedin.example.com/in/john-doe',
   },
 }
 
@@ -20,7 +20,7 @@ const en = buildExampleCv({
   experience: [
     {
       role: 'Operations Manager',
-      company: 'Satalahti Fulfillment',
+      company: 'Example Oy',
       location: 'Pori, Finland',
       employmentType: 'Full-time',
       startDate: 'May 2018',
@@ -36,7 +36,7 @@ const en = buildExampleCv({
     },
     {
       role: 'Warehouse Operations Supervisor',
-      company: 'Rantasilta Retail Group',
+      company: 'Example Oy',
       location: 'Turku, Finland',
       employmentType: 'Full-time',
       startDate: 'Feb 2014',
@@ -52,7 +52,7 @@ const en = buildExampleCv({
   ],
   education: [
     {
-      school: 'Satakunta University of Applied Sciences',
+      school: 'Example University',
       degree: 'B.Eng. Logistics Engineering',
       location: 'Pori, Finland',
       startDate: '2010',
@@ -65,7 +65,7 @@ const en = buildExampleCv({
   leadership: [
     {
       role: 'Mentor',
-      organization: 'Satakunta Logistics Network',
+      organization: 'Example Oy',
       description: 'Mentor early-career operations supervisors on workforce planning and safety programs.',
       startDate: '2020',
       endDate: '',
@@ -78,7 +78,7 @@ const en = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Satalahti Fulfillment',
+      organization: 'Example Oy',
       impact: 'Order-to-ship time cut from 36 to 9 hours.',
       date: '2021',
       teamSize: '14',
@@ -87,14 +87,14 @@ const en = buildExampleCv({
     },
   ],
   achievements: [
-    { title: 'Operational Excellence Award', description: 'Regional award for the fulfillment center turnaround at Satalahti Fulfillment.', year: '2022' },
+    { title: 'Operational Excellence Award', description: 'Regional award for the fulfillment center turnaround at Example Oy.', year: '2022' },
   ],
   languages: [
     { language: 'Finnish', level: 'Native' },
     { language: 'English', level: 'Fluent' },
   ],
   certificates: [
-    { name: 'Lean Six Sigma Green Belt', issuer: 'ASQ', year: '2019', credentialUrl: '', expiry: '' },
+    { name: 'Lean Six Sigma Green Belt', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '' },
   ],
 })
 
@@ -108,7 +108,7 @@ const fi = buildExampleCv({
   experience: [
     {
       role: 'Operatiivinen päällikkö',
-      company: 'Satalahti Fulfillment',
+      company: 'Example Oy',
       location: 'Pori',
       employmentType: 'Full-time',
       startDate: '05/2018',
@@ -124,7 +124,7 @@ const fi = buildExampleCv({
     },
     {
       role: 'Varaston toiminnan esimies',
-      company: 'Rantasilta Retail Group',
+      company: 'Example Oy',
       location: 'Turku',
       employmentType: 'Full-time',
       startDate: '02/2014',
@@ -140,7 +140,7 @@ const fi = buildExampleCv({
   ],
   education: [
     {
-      school: 'Satakunnan ammattikorkeakoulu',
+      school: 'Example University',
       degree: 'Insinööri (AMK), logistiikka',
       location: 'Pori',
       startDate: '2010',
@@ -153,7 +153,7 @@ const fi = buildExampleCv({
   leadership: [
     {
       role: 'Mentori',
-      organization: 'Satakunnan logistiikkaverkosto',
+      organization: 'Example Oy',
       description: 'Mentoroin uran alkuvaiheessa olevia operatiivisia esimiehiä työvoimasuunnittelussa ja turvallisuusohjelmissa.',
       startDate: '2020',
       endDate: '',
@@ -166,7 +166,7 @@ const fi = buildExampleCv({
       stack: '',
       githubUrl: '',
       demoUrl: '',
-      organization: 'Satalahti Fulfillment',
+      organization: 'Example Oy',
       impact: 'Tilauksen käsittelyaika laski 36 tunnista 9 tuntiin.',
       date: '2021',
       teamSize: '14',
@@ -175,14 +175,14 @@ const fi = buildExampleCv({
     },
   ],
   achievements: [
-    { title: 'Operatiivisen erinomaisuuden palkinto', description: 'Alueellinen palkinto toimituskeskuksen käänteestä Satalahti Fulfillmentissa.', year: '2022' },
+    { title: 'Operatiivisen erinomaisuuden palkinto', description: 'Alueellinen palkinto toimituskeskuksen käänteestä Example Oyissa.', year: '2022' },
   ],
   languages: [
     { language: 'Suomi', level: 'Äidinkieli' },
     { language: 'Englanti', level: 'Sujuva' },
   ],
   certificates: [
-    { name: 'Lean Six Sigma Green Belt', issuer: 'ASQ', year: '2019', credentialUrl: '', expiry: '' },
+    { name: 'Lean Six Sigma Green Belt', issuer: 'Example Oy', year: '2019', credentialUrl: '', expiry: '' },
   ],
 })
 
