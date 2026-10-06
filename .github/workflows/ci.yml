@@ -2,10 +2,10 @@ name: CI
 
 on:
   push:
-    # v1.4.0 is the long-lived template-pages branch; it pushes directly
-    # rather than through a PR, so without this its commits never ran CI at
-    # all.
-    branches: [main, v1.4.0]
+    # v1.6.0 is the long-lived Phase 3 (template style variants) branch; it
+    # pushes directly rather than through a PR, so without this its commits
+    # never run CI at all. Update this when the next long-lived branch starts.
+    branches: [main, v1.6.0]
   pull_request:
 
 jobs:

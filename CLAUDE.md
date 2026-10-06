@@ -40,7 +40,7 @@ per-template pages' slugs, examples, and copy (`check:template-pages`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.
 CI (`.github/workflows/ci.yml`) runs all seven on every push to `main` and
-`v1.4.0` and on every pull request.
+`v1.6.0` (the current long-lived branch) and on every pull request.
 
 `test:e2e` (and its `:fast`/`:slow` variants) build and serve the app first
 (`playwright.config.js`'s `webServer`), deliberately not the dev server, so
