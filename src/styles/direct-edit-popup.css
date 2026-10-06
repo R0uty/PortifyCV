@@ -12,6 +12,11 @@
   pointer-events: auto;
 }
 
+/* Every section's pencil is always shown (SectionEditOverlay renders one
+   per section), in Direct Edit's own teal — the colour of its focus ring
+   and editing highlight — so it reads as an editing tool rather than part
+   of any template's design. The hovered section's pencil is marked
+   --active and drawn a little larger and darker. */
 .direct-edit-pencil {
   position: absolute;
   transform: translate(-100%, 0);
@@ -21,18 +26,21 @@
   width: 28px;
   height: 28px;
   border-radius: 999px;
-  border: 1px solid var(--color-border, #d4d4d8);
-  background: var(--color-surface, #ffffff);
-  color: var(--color-ink, #18181b);
+  border: 2px solid #ffffff;
+  background: var(--ds-accent, #0f766e);
+  color: #ffffff;
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.45);
+  transition: transform 120ms ease, background-color 120ms ease;
 }
 
+.direct-edit-pencil--active,
 .direct-edit-pencil:hover,
 .direct-edit-pencil:focus-visible {
-  background: var(--color-surface-strong, #f4f4f5);
+  background: #0b5d56;
+  transform: translate(-100%, 0) scale(1.12);
 }
 
 /* One entry's pencil: smaller than the section pencil and hung just
@@ -51,18 +59,18 @@
   width: 22px;
   height: 22px;
   border-radius: 999px;
-  border: 1px solid var(--color-border, #d4d4d8);
-  background: var(--color-surface, #ffffff);
-  color: var(--color-ink, #18181b);
+  border: 2px solid #ffffff;
+  background: var(--ds-accent, #0f766e);
+  color: #ffffff;
   font-size: 11px;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, 0.45);
 }
 
 .direct-edit-entry-pencil:hover,
 .direct-edit-entry-pencil:focus-visible {
-  background: var(--color-surface-strong, #f4f4f5);
+  background: #0b5d56;
 }
 
 .direct-edit-popup-anchor {

@@ -4,6 +4,20 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Visible edit pencils and Load demo CV in Direct Edit — 1.5.3, 2026-10-07
+
+Every section's edit pencil is now always visible in Direct Edit, not
+only while the pointer is over the section, and it's drawn in Direct
+Edit's teal with a white pencil and rim so it reads as an editing tool on
+any template, light or dark. The hovered section's pencil grows slightly.
+Pencils are re-measured after every edit and whenever the preview
+resizes, so they follow their sections. The smaller per-entry pencils stay
+hover-only, in the same teal. Direct Edit also gets its own "Load demo
+CV" button, under "Sections" at the preview's top right. Undo now
+records a change made in the last moment before undoing it, so Undo
+straight after "Load demo CV" (or any other change) undoes just that
+change instead of also the one before it.
+
 ## Editable skills — 1.5.2, 2026-10-07
 
 Skills can now be renamed, not just added and removed. In Direct Edit each
