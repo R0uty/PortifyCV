@@ -621,6 +621,7 @@ function CVForm({
               dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'skills', value: nextSkills })
             }
             ariaLabel={isFinnish ? 'Taitotagit' : 'Skill tags'}
+            locale={locale}
           />
           <p className={`text-xs ${helperTextClasses}`}>
             {isFinnish
@@ -805,6 +806,7 @@ function CVForm({
                             onChange={(next) => updateArrayItem('experience', index, 'technologies', next)}
                             placeholder={isFinnish ? 'Lisää teknologia' : 'Add a technology'}
                             ariaLabel={isFinnish ? 'Teknologiat' : 'Technologies'}
+                            locale={locale}
                           />
                         </div>
                         <div className="mt-4">

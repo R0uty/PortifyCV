@@ -1043,11 +1043,13 @@ test.describe('Direct Edit builder', () => {
     // No plain read-only tags left in the Skills section while editing.
     await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
 
-    // Every demo-CV skill shows up exactly once as a removable chip.
+    // Every demo-CV skill shows up exactly once as a chip with its own
+    // edit and remove controls.
     const chips = skillsSection.locator('.direct-edit-chip--removable')
     await expect(chips).toHaveCount(DEMO_SKILLS.length)
     for (const skill of DEMO_SKILLS) {
-      await expect(skillsSection.getByRole('button', { name: new RegExp(`^${skill}`) })).toHaveCount(1)
+      await expect(skillsSection.getByRole('button', { name: `Edit skill: ${skill}`, exact: true })).toHaveCount(1)
+      await expect(skillsSection.getByRole('button', { name: `Remove skill: ${skill}`, exact: true })).toHaveCount(1)
     }
   })
 
@@ -1374,7 +1376,7 @@ test.describe('Direct Edit builder', () => {
       const skillsSection = page.locator('[data-export-section="skills"]')
       await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length + 1)
 
-      await skillsSection.getByRole('button', { name: /^Docker/ }).click()
+      await skillsSection.getByRole('button', { name: 'Remove skill: Docker', exact: true }).click()
 
       await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
 
@@ -1464,7 +1466,7 @@ test.describe('Direct Edit builder', () => {
       await expect(skillsSection.locator('[data-export-skill="true"]')).toHaveCount(0)
       await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
 
-      await skillsSection.getByRole('button', { name: /^Figma/ }).click()
+      await skillsSection.getByRole('button', { name: 'Remove skill: Figma', exact: true }).click()
       await expect(skillsSection.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length - 1)
 
       await page.getByRole('tab', { name: 'Classic' }).click()
@@ -1879,5 +1881,121 @@ test.describe('Direct Edit nav rail, entry highlight and placeholders', () => {
     // stray <br> behind in the contentEditable.
     await page.keyboard.press('Backspace')
     await expect.poll(placeholderShown).toBe(true)
+  })
+})
+
+// Skills used to be add-or-remove only: clicking anywhere on a chip deleted
+// it, "+ Add" inserted "New skill N" that nothing could rename, and the
+// popup and Classic's tags had no way to edit a skill's text.
+test.describe('Editing a skill', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+  })
+
+  // Creative uses plain chips (EditableChip); Compact groups them by a
+  // category derived from each skill's text (EditableCategorizedChip).
+  for (const template of ['Creative', 'Compact']) {
+    test(`renames, refuses a duplicate, cancels and removes a skill on the CV (${template})`, async ({ page }) => {
+      await selectTemplate(page, template)
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
+      const skills = page.locator('.direct-edit-preview [data-export-section="skills"]')
+
+      // Rename with Enter.
+      await skills.getByRole('button', { name: 'Edit skill: Figma', exact: true }).click()
+      const editor = skills.getByRole('textbox', { name: 'Edit skill: Figma' })
+      await expect(editor).toBeFocused()
+      await editor.fill('Figma Prototyping')
+      await editor.press('Enter')
+      await expect(skills.getByRole('button', { name: 'Edit skill: Figma Prototyping', exact: true })).toHaveCount(1)
+      await expect(skills.getByRole('button', { name: 'Edit skill: Figma', exact: true })).toHaveCount(0)
+
+      // A duplicate of another skill is refused and the editor stays open.
+      await skills.getByRole('button', { name: 'Edit skill: Figma Prototyping', exact: true }).click()
+      const again = skills.getByRole('textbox', { name: 'Edit skill: Figma Prototyping' })
+      await again.fill('user research')
+      await again.press('Enter')
+      await expect(skills.getByText('Already listed')).toBeVisible()
+      await expect(again).toBeVisible()
+
+      // Escape cancels without changing anything.
+      await again.press('Escape')
+      await expect(skills.getByRole('button', { name: 'Edit skill: Figma Prototyping', exact: true })).toHaveCount(1)
+      await expect(skills.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length)
+
+      // Clicking away (blurring the input) saves.
+      await skills.getByRole('button', { name: 'Edit skill: Accessibility', exact: true }).click()
+      const blurred = skills.getByRole('textbox', { name: 'Edit skill: Accessibility' })
+      await blurred.fill('Accessibility (WCAG)')
+      await blurred.blur()
+      await expect(skills.getByRole('button', { name: 'Edit skill: Accessibility (WCAG)', exact: true })).toHaveCount(1)
+
+      // Emptying a skill removes it.
+      await skills.getByRole('button', { name: 'Edit skill: Prototyping', exact: true }).click()
+      const emptied = skills.getByRole('textbox', { name: 'Edit skill: Prototyping' })
+      await emptied.fill('')
+      await emptied.press('Enter')
+      await expect(skills.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length - 1)
+
+      // The × still removes, on its own.
+      await skills.getByRole('button', { name: 'Remove skill: Design Systems', exact: true }).click()
+      await expect(skills.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length - 2)
+    })
+  }
+
+  test('"+ Add" opens an empty chip and adds nothing if left empty', async ({ page }) => {
+    await selectTemplate(page, 'Creative')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    const skills = page.locator('.direct-edit-preview [data-export-section="skills"]')
+
+    await skills.getByRole('button', { name: '+ Add' }).click()
+    const newSkill = skills.getByRole('textbox', { name: 'New skill' })
+    await expect(newSkill).toBeFocused()
+    await newSkill.fill('Docker')
+    await newSkill.press('Enter')
+    await expect(skills.getByRole('button', { name: 'Edit skill: Docker', exact: true })).toHaveCount(1)
+
+    await skills.getByRole('button', { name: '+ Add' }).click()
+    await expect(skills.getByRole('textbox', { name: 'New skill' })).toBeFocused()
+    await skills.getByRole('textbox', { name: 'New skill' }).blur()
+    await expect(skills.getByRole('textbox', { name: 'New skill' })).toHaveCount(0)
+    await expect(skills.locator('.direct-edit-chip--removable')).toHaveCount(DEMO_SKILLS.length + 1)
+    await expect(skills).not.toContainText('New skill')
+  })
+
+  test('the Skills popup edits a skill in place', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await openSectionPopup(page, 'skills')
+    const popup = page.locator('.direct-edit-popup')
+
+    const first = popup.getByRole('textbox', { name: 'Skill 1' })
+    await expect(first).toHaveValue(DEMO_SKILLS[0])
+    await first.fill('Product Discovery')
+    await first.press('Enter')
+    await expect(page.locator('.direct-edit-preview [data-export-section="skills"]')).toContainText('Product Discovery')
+
+    // Escape reverts an unsaved edit without closing the popup.
+    const second = popup.getByRole('textbox', { name: 'Skill 2' })
+    await second.fill('Something else')
+    await second.press('Escape')
+    await expect(second).toHaveValue(DEMO_SKILLS[1])
+    await expect(popup).toBeVisible()
+
+    // A duplicate is refused with a notice.
+    await second.fill('figma')
+    await second.press('Enter')
+    await expect(popup.getByText('That skill is already listed.')).toBeVisible()
+  })
+
+  test('Classic mode edits a skill tag in place', async ({ page }) => {
+    const skillsSection = page.locator('#section-skills')
+    await skillsSection.getByRole('button', { name: 'Edit Figma', exact: true }).click()
+    const editor = skillsSection.getByRole('textbox', { name: 'Edit Figma' })
+    await expect(editor).toBeFocused()
+    await editor.fill('Figma Prototyping')
+    await editor.press('Enter')
+
+    await expect(skillsSection.getByRole('button', { name: 'Edit Figma Prototyping', exact: true })).toHaveCount(1)
+    await expect(page.locator('.app-shell__preview [data-export-section="skills"]')).toContainText('Figma Prototyping')
   })
 })

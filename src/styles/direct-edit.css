@@ -114,6 +114,41 @@
   border: none;
   background: var(--ds-accent-soft, #e1f5ee);
   color: var(--ds-accent-ink, #04342c);
+  cursor: default;
+}
+
+/* A skill chip's text (click to rename) and its own × (remove). */
+.direct-edit-chip__label,
+.direct-edit-chip__remove {
+  border: none;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+}
+
+.direct-edit-chip__label {
+  cursor: text;
+}
+
+.direct-edit-chip__label:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.direct-edit-chip__remove {
+  margin-left: 2px;
+  opacity: 0.65;
+  cursor: pointer;
+}
+
+.direct-edit-chip__remove:hover {
+  opacity: 1;
+  color: var(--ds-danger, #b3261e);
+}
+
+.direct-edit-chip--new {
+  outline: 1.5px solid var(--ds-accent, #0f766e);
 }
 
 .direct-edit-chip-add {

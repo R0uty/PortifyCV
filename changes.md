@@ -4,6 +4,18 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Editable skills — 1.5.2, 2026-10-07
+
+Skills can now be renamed, not just added and removed. In Direct Edit each
+skill chip on the CV has its text (click to edit in place) and a separate
+×; a click on the chip used to delete the skill outright. "+ Add" opens an
+empty chip to type into instead of inserting "New skill 3", and adds
+nothing if left empty. The Skills popup's rows are editable text boxes, and
+Classic mode's skill and technology tags edit in place too. Everywhere,
+Enter or clicking away saves, Escape cancels, a duplicate of another skill
+is refused with a note, and emptying a skill removes it (new
+`UPDATE_SKILL` form action, covered by `check:reducers`).
+
 ## No real information in example CVs — 1.5.1, 2026-10-06
 
 Every example CV (the per-template pages' 24 people) and the demo CV now

@@ -51,6 +51,7 @@ export const FORM_ACTION = {
   TOGGLE_PHOTO_VISIBILITY: 'TOGGLE_PHOTO_VISIBILITY',
   ADD_SKILL: 'ADD_SKILL',
   REMOVE_SKILL: 'REMOVE_SKILL',
+  UPDATE_SKILL: 'UPDATE_SKILL',
   DUPLICATE_SKILL: 'DUPLICATE_SKILL',
   MOVE_SKILL: 'MOVE_SKILL',
   MOVE_SECTION_ORDER: 'MOVE_SECTION_ORDER',
@@ -263,6 +264,33 @@ export function cvFormReducer(state, action) {
       }
 
       return { ...state, skills: [...state.skills, trimmed] }
+    }
+
+    // Renames one skill in place. Same rules as ADD_SKILL (trimmed, no
+    // case-insensitive duplicate of another skill); emptying it removes it,
+    // exactly like REMOVE_SKILL, so visibility keys shift with it.
+    case FORM_ACTION.UPDATE_SKILL: {
+      if (!Array.isArray(state.skills) || !Number.isInteger(action.index) || !(action.index in state.skills)) {
+        return state
+      }
+
+      const trimmed = String(action.skill ?? '').trim()
+
+      if (!trimmed) {
+        return cvFormReducer(state, { type: FORM_ACTION.REMOVE_SKILL, index: action.index })
+      }
+
+      if (trimmed === state.skills[action.index]) {
+        return state
+      }
+
+      const lower = trimmed.toLowerCase()
+
+      if (state.skills.some((s, i) => i !== action.index && s.toLowerCase() === lower)) {
+        return state
+      }
+
+      return { ...state, skills: state.skills.map((s, i) => (i === action.index ? trimmed : s)) }
     }
 
     case FORM_ACTION.REMOVE_SKILL:
