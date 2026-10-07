@@ -4,6 +4,13 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Clear CV in Direct Edit — 1.5.4, 2026-10-07
+
+Direct Edit gets a "Clear CV" button under "Load demo CV". It works like
+Classic's "Reset form": the first click turns it into a red "Confirm
+clear", a second click within a few seconds clears the CV, and the
+toolbar's Undo brings it back.
+
 ## Visible edit pencils and Load demo CV in Direct Edit — 1.5.3, 2026-10-07
 
 Every section's edit pencil is now always visible in Direct Edit, not

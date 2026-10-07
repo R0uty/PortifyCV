@@ -999,12 +999,21 @@ function ResumeBuilderPage({
 
     setResetConfirmArmed(false)
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
-    showToast(
-      locale === 'fi'
-        ? 'Lomake nollattu. Palauta työkalupalkin kumoa-nuolella.'
-        : 'Form reset. Restore it with the toolbar undo arrow.',
-    )
-  }, [dispatchFormData, locale, resetConfirmArmed])
+    // Direct Edit has no form, so its "Clear CV" button gets its own wording.
+    if (builderMode === 'direct') {
+      showToast(
+        locale === 'fi'
+          ? 'CV tyhjennetty. Palauta työkalupalkin kumoa-nuolella.'
+          : 'CV cleared. Restore it with the toolbar undo arrow.',
+      )
+    } else {
+      showToast(
+        locale === 'fi'
+          ? 'Lomake nollattu. Palauta työkalupalkin kumoa-nuolella.'
+          : 'Form reset. Restore it with the toolbar undo arrow.',
+      )
+    }
+  }, [builderMode, dispatchFormData, locale, resetConfirmArmed])
 
   useEffect(() => () => window.clearTimeout(resetConfirmTimeoutRef.current), [])
 
@@ -2289,6 +2298,8 @@ function ResumeBuilderPage({
               <DirectEditPreview
                 overlayApiRef={directEditOverlayRef}
                 onLoadDemo={handleLoadDemo}
+                onClear={handleResetForm}
+                clearArmed={resetConfirmArmed}
                 formData={formData}
                 dispatchFormData={dispatchFormData}
                 selectedTemplate={selectedTemplate}

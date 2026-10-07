@@ -18,6 +18,11 @@ export default function DirectEditPreview({
   cvFontId,
   overlayApiRef = null,
   onLoadDemo = null,
+  // Classic's two-step "Reset form" (ResumeBuilderPage's handleResetForm):
+  // the first click arms it (`clearArmed`), a second one within its
+  // window clears the CV.
+  onClear = null,
+  clearArmed = false,
 }) {
   // Shadows the --font-sans token (tokens.css) for this subtree only —
   // matches Classic mode's .preview-zoom-wrapper inline style in
@@ -56,6 +61,18 @@ export default function DirectEditPreview({
           {onLoadDemo ? (
             <button type="button" className="direct-edit-sections__trigger" onClick={onLoadDemo}>
               {locale === 'fi' ? 'Lataa demo-CV' : 'Load demo CV'}
+            </button>
+          ) : null}
+          {onClear ? (
+            <button
+              type="button"
+              className={`direct-edit-sections__trigger direct-edit-clear${clearArmed ? ' direct-edit-clear--armed' : ''}`}
+              aria-live="polite"
+              onClick={onClear}
+            >
+              {clearArmed
+                ? locale === 'fi' ? 'Vahvista tyhjennys' : 'Confirm clear'
+                : locale === 'fi' ? 'Tyhjennä CV' : 'Clear CV'}
             </button>
           ) : null}
         </div>
