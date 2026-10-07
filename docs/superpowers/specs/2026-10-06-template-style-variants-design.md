@@ -35,9 +35,9 @@ existing CV, share link or JSON file looks any different after this phase.
 - **Implementation approach:** a JS variant registry whose palettes are
   applied as inline CSS variables on each Showcase root (approach A of
   three considered — see "Alternatives considered").
-- **Versioning:** 1.5.4, 1.5.5, … per unit of work (1.5.1–1.5.3 were
-  hotfixes on `main`: placeholder example data, editable skills, and
-  visible edit pencils), with 1.6.0 at the end;
+- **Versioning:** 1.5.5, 1.5.6, … per unit of work (1.5.1–1.5.4 were
+  hotfixes on `main`: placeholder example data, editable skills, visible
+  edit pencils, and Clear CV in Direct Edit), with 1.6.0 at the end;
   its own PR after 1.5.0 merges.
 
 ## Non-goals
