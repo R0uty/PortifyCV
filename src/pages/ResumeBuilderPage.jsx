@@ -74,6 +74,7 @@ import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
 import { hideEmptySections } from '../utils/sectionContent'
+import { resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
 import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
@@ -428,6 +429,10 @@ function ResumeBuilderPage({
     toasts,
   } = uiState
   const ui = getUiTheme()
+  // The style variant in effect for the current template (variant #1
+  // unless the CV stores another). Passed to the visible preview AND the
+  // off-screen export source, so the PDF matches the screen.
+  const styleVariantId = resolveStyleVariantId(formData, selectedTemplate)
   const previewRef = useRef(null)
   // The CV the user sees in Classic mode's preview panel. previewRef is the
   // off-screen export source (see the .direct-edit-export-source copy
@@ -2145,6 +2150,7 @@ function ResumeBuilderPage({
                 atsFriendlyMode={atsFriendlyMode}
                 accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
                 headingColor={cvHeadingColor}
+                styleVariantId={styleVariantId}
                 classicNameAlignment={classicNameAlignment}
               />
             </AppErrorBoundary>
@@ -2169,6 +2175,7 @@ function ResumeBuilderPage({
     isResponsivePreview,
     locale,
     selectedTemplate,
+    styleVariantId,
     templateAccentColors,
     zoomPercent,
     ui.button,
@@ -2307,6 +2314,7 @@ function ResumeBuilderPage({
                 locale={locale}
                 accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
                 headingColor={cvHeadingColor}
+                styleVariantId={styleVariantId}
                 classicNameAlignment={classicNameAlignment}
                 previewRef={previewRef}
                 cvFontId={cvFontId}
@@ -2351,6 +2359,7 @@ function ResumeBuilderPage({
               atsFriendlyMode={atsFriendlyMode}
               accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
               headingColor={cvHeadingColor}
+              styleVariantId={styleVariantId}
               classicNameAlignment={classicNameAlignment}
             />
           </div>

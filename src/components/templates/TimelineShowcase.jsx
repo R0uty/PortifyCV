@@ -168,6 +168,7 @@ export default function TimelineShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   showcaseConfig = {},
   accentColor = TIMELINE_DEFAULT_ACCENT_COLOR,
@@ -479,6 +480,7 @@ export default function TimelineShowcase({
       // export: the handler polls forever for a class that never appears.
       className={`timeline-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'} tpl-density-standard`}
       style={{
+        ...paletteStyle,
         '--tpl-accent': effectiveAccentColor,
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),
       }}

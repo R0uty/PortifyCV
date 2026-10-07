@@ -43,6 +43,7 @@ export default function ClassicProfessionalShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   headingColor = null,
   nameAlignment = 'center',
@@ -258,7 +259,7 @@ export default function ClassicProfessionalShowcase({
       // handler polls forever waiting for a class that can never appear,
       // hanging the export.
       className="classic-professional-showcase preview-document--designer tpl-density-roomy"
-      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
+      style={{ ...paletteStyle, ...(headingColor ? { '--cv-heading-color': headingColor } : null) }}
     >
       <header data-export-header="true" className="classic-professional-showcase__header">
         <p className="classic-professional-showcase__kicker" data-export-ignore="true">

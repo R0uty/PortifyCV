@@ -240,6 +240,7 @@ export default function ModernOrangeShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   showcaseConfig = {},
   accentColor = MODERN_ORANGE_DEFAULT_ACCENT_COLOR,
@@ -552,6 +553,7 @@ export default function ModernOrangeShowcase({
       // claims ("no columns") promise to remove.
       className={`modern-orange-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'} tpl-density-standard${atsFriendlyMode ? ' modern-orange-showcase--ats' : ''}`}
       style={{
+        ...paletteStyle,
         '--tpl-accent': effectiveAccentColor,
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),
       }}

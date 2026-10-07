@@ -157,6 +157,7 @@ export default function QuadrantShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   showcaseConfig = {},
   headingColor = null,
@@ -444,6 +445,7 @@ export default function QuadrantShowcase({
       // forever waiting for a class that can never appear, hanging the export.
       className="quadrant-showcase preview-document--designer tpl-density-compact"
       style={{
+        ...paletteStyle,
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, QUADRANT_DEFAULT_ACCENT_COLOR),
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),

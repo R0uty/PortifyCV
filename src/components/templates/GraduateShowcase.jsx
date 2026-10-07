@@ -150,6 +150,7 @@ export default function GraduateShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   showcaseConfig = {},
   headingColor = null,
@@ -695,6 +696,7 @@ export default function GraduateShowcase({
       // forever waiting for a class that can never appear, hanging the export.
       className="graduate-showcase preview-document--designer tpl-density-standard"
       style={{
+        ...paletteStyle,
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, GRADUATE_DEFAULT_ACCENT_COLOR),
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),

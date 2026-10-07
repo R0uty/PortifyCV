@@ -9,6 +9,7 @@ import { createCvSnapshot } from '../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../utils/cvForm'
 import { getUiTheme } from '../utils/designSystem'
 import { getEffectiveCvTemplate } from '../utils/sectionColumns'
+import { getVariantPaletteStyle } from '../utils/templateVariants'
 import { DirectEditProvider } from './DirectEditContext'
 import EditableField from './EditableField'
 import EditableList, { EditableChip } from './EditableList'
@@ -70,6 +71,10 @@ function CVPreview({
   // its dark sidebar) — see utils/cvHeadingColors.js for why those are
   // excluded. `null`/undefined means "use the template's own color".
   headingColor = null,
+  // The active style variant's id (templateVariants.js) — only the builder
+  // passes one; every other caller (gallery thumbnails, template pages,
+  // landing) renders variant #1, which equals the stylesheet defaults.
+  styleVariantId = 'default',
   // 'center' (default) | 'left' — Classic Professional's name-alignment
   // option, folded in from the retired Classic template (v1.2.10).
   classicNameAlignment = 'center',
@@ -95,6 +100,12 @@ function CVPreview({
   const variant = templateConfig.variant
   const isFinnish = locale === 'fi'
   const isCompact = t.isCompact === true
+  // The variant's palette, set as inline CSS variables on the Showcase
+  // root (Minimalist: the flat renderer's article, normal view only).
+  const paletteStyle = useMemo(
+    () => getVariantPaletteStyle(variant, styleVariantId),
+    [variant, styleVariantId],
+  )
 
   // ── CV data extraction ─────────────────────────────────────────────
   // Pull all CV data from the form state, with fallback placeholders
@@ -112,6 +123,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <DeveloperShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -132,6 +144,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <CreativeShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -153,6 +166,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <ModernShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -174,6 +188,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <ExecutiveShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -201,6 +216,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <TimelineShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -225,6 +241,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <GraduateShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -248,6 +265,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <CompactShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -271,6 +289,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <PortfolioShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -297,6 +316,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <ClassicProfessionalShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -329,6 +349,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <NavyProfessionalShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -354,6 +375,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <ModernOrangeShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -380,6 +402,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <ColorfulCompactShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -400,6 +423,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <QuadrantShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -424,6 +448,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <TechExecShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -447,6 +472,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <EditorialShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -469,6 +495,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <PortraitShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -491,6 +518,7 @@ function CVPreview({
       <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
         <Suspense fallback={null}>
           <EuropeanShowcase
+            paletteStyle={paletteStyle}
             formData={formData}
             locale={locale}
             previewRef={previewRef}
@@ -1884,6 +1912,7 @@ function CVPreview({
       ref={previewRef}
       data-export-root="true"
       data-export-variant={variant}
+      style={variant === 'minimal' && !atsFriendlyMode ? paletteStyle : undefined}
       className={`preview-document fade-in-soft overflow-hidden rounded-[2rem] border shadow-xl transition-all duration-300 print:rounded-none print:border-0 print:bg-white print:shadow-none ${
         atsFriendlyMode ? 'preview-document--ats' : 'preview-document--designer'
       } ${

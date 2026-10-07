@@ -193,6 +193,7 @@ export default function ExecutiveShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   showcaseConfig = {},
   headingColor = null,
@@ -634,6 +635,7 @@ export default function ExecutiveShowcase({
       // header comment for why.
       className="executive-showcase preview-document--designer tpl-density-compact"
       style={{
+        ...paletteStyle,
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, EXECUTIVE_DEFAULT_ACCENT_COLOR),
         ...(!showSidebar ? { gridTemplateColumns: 'minmax(0, 1fr)' } : null),

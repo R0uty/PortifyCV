@@ -195,6 +195,7 @@ export default function PortfolioShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   showcaseConfig = {},
   accentColor = PORTFOLIO_DEFAULT_ACCENT_COLOR,
@@ -700,6 +701,7 @@ export default function PortfolioShowcase({
       // forever waiting for a class that can never appear, hanging the export.
       className="portfolio-showcase preview-document--designer tpl-density-compact"
       style={{
+        ...paletteStyle,
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.1, PORTFOLIO_DEFAULT_ACCENT_COLOR),
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),

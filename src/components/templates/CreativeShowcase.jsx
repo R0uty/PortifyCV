@@ -150,6 +150,7 @@ export default function CreativeShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   headingColor = null,
   accentColor = CREATIVE_DEFAULT_ACCENT_COLOR,
@@ -483,11 +484,12 @@ export default function CreativeShowcase({
       data-export-variant="creative"
       className="creative-showcase preview-document--designer tpl-density-roomy"
       style={{
+        ...paletteStyle,
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, CREATIVE_DEFAULT_ACCENT_COLOR),
-        // The kicker's accent, darkened 25% toward --cr-ink (#1a1a1a) so every
+        // The kicker's accent, darkened 25% toward the variant's `--cr-ink` (#1a1a1a for variant #1) so every
         // swatch clears 4.5:1 on the peach page — see creative.css.
-        '--cr-kicker': accentInkMix(accentColor, '#1a1a1a', 0.25, CREATIVE_DEFAULT_ACCENT_COLOR),
+        '--cr-kicker': accentInkMix(accentColor, paletteStyle['--cr-ink'] ?? '#1a1a1a', 0.25, CREATIVE_DEFAULT_ACCENT_COLOR),
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),
       }}
     >
