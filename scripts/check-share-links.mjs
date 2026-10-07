@@ -116,6 +116,42 @@ check('sectionColumnsByTemplate survives the round trip',
 check('an empty sectionColumnsByTemplate adds nothing to the payload',
   share.encodeCvStateForUrl(demo) === demoEncoded)
 
+// styleVariantByTemplate travels under its own short key ('va').
+const rawPayload = (encoded) => JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8'))
+const withVariants = parseImportedCvData({
+  ...structuredClone(demoCvData),
+  styleVariantByTemplate: { developer: 'graphite', creative: 'sage' },
+})
+const variantsEncoded = share.encodeCvStateForUrl(withVariants)
+check('styleVariantByTemplate survives the round trip',
+  JSON.stringify(share.decodeCvStateFromUrl(variantsEncoded).styleVariantByTemplate)
+    === JSON.stringify(withVariants.styleVariantByTemplate))
+check('styleVariantByTemplate travels as va',
+  JSON.stringify(rawPayload(variantsEncoded).d.va) === JSON.stringify({ developer: 'graphite', creative: 'sage' }))
+check('a CV with no stored variants encodes no va key', !('va' in rawPayload(demoEncoded).d))
+check('a stray variant #1 entry is not encoded',
+  !('va' in rawPayload(share.encodeCvStateForUrl({ ...demo, styleVariantByTemplate: { developer: 'default' } })).d))
+check('an unknown variant id still decodes (rendered as variant #1 later)',
+  share.decodeCvStateFromUrl(share.encodeCvStateForUrl({ ...demo, styleVariantByTemplate: { developer: 'fromTheFuture' } }))
+    .styleVariantByTemplate.developer === 'fromTheFuture')
+
+for (const [label, value] of [
+  ['an array', []],
+  ['a string', 'developer'],
+  ['a non-string value', { developer: 3 }],
+]) {
+  let threw = false
+  try {
+    parseImportedCvData({ ...structuredClone(demoCvData), styleVariantByTemplate: value })
+  } catch {
+    threw = true
+  }
+  check(`import rejects styleVariantByTemplate as ${label}`, threw)
+}
+const { styleVariantByTemplate: _omitVariants, ...legacyCv } = structuredClone(demoCvData)
+check('a file from before Phase 3 imports with no stored variants',
+  JSON.stringify(parseImportedCvData(legacyCv).styleVariantByTemplate) === '{}')
+
 for (const [label, value] of [
   ['unparseable input', '!!!not-base64!!!'],
   ['an empty string', ''],

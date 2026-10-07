@@ -256,6 +256,19 @@ function compressCvData(formData) {
     }
   }
 
+  // 'va' — permanent once shipped, like every other key here.
+  if (isPlainObject(formData.styleVariantByTemplate)) {
+    const chosen = Object.fromEntries(
+      Object.entries(formData.styleVariantByTemplate).filter(
+        ([, variantId]) => typeof variantId === 'string' && variantId && variantId !== 'default',
+      ),
+    )
+
+    if (Object.keys(chosen).length > 0) {
+      data.va = chosen
+    }
+  }
+
   return { v: SHARE_PAYLOAD_VERSION, d: data }
 }
 
@@ -302,6 +315,10 @@ function expandCurrentPayload(data) {
 
   if (data.sc !== undefined) {
     formData.sectionColumnsByTemplate = data.sc
+  }
+
+  if (data.va !== undefined) {
+    formData.styleVariantByTemplate = data.va
   }
 
   return formData

@@ -120,6 +120,30 @@ console.log('\ncvFormReducer\n')
 }
 
 {
+  const state = createInitialCvData()
+  check('a new CV stores no style variants', JSON.stringify(state.styleVariantByTemplate) === '{}')
+
+  const picked = cvFormReducer(state, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId: 'developer', variantId: 'graphite' })
+  check('SET_STYLE_VARIANT stores the variant for the named template', picked.styleVariantByTemplate.developer === 'graphite')
+  check('SET_STYLE_VARIANT does not mutate the previous state', JSON.stringify(state.styleVariantByTemplate) === '{}')
+
+  const both = cvFormReducer(picked, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId: 'creative', variantId: 'sage' })
+  check('SET_STYLE_VARIANT leaves other templates untouched',
+    both.styleVariantByTemplate.developer === 'graphite' && both.styleVariantByTemplate.creative === 'sage')
+
+  const backToDefault = cvFormReducer(both, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId: 'developer', variantId: 'default' })
+  check('choosing variant #1 deletes the entry',
+    !('developer' in backToDefault.styleVariantByTemplate) && backToDefault.styleVariantByTemplate.creative === 'sage')
+
+  check('re-picking the stored variant returns the same state',
+    cvFormReducer(both, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId: 'creative', variantId: 'sage' }) === both)
+  check('picking variant #1 with nothing stored returns the same state',
+    cvFormReducer(state, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId: 'developer', variantId: 'default' }) === state)
+  check('SET_STYLE_VARIANT ignores a missing template id',
+    cvFormReducer(state, { type: FORM_ACTION.SET_STYLE_VARIANT, variantId: 'sage' }) === state)
+}
+
+{
   const state = { ...createInitialCvData(), skills: ['Figma'] }
   const added = cvFormReducer(state, { type: FORM_ACTION.ADD_SKILL, skill: '  Design Systems  ' })
   check('ADD_SKILL trims whitespace before storing', added.skills[1] === 'Design Systems')

@@ -22,6 +22,7 @@ import {
   createEmptyCaseStudy,
   createEmptyTestimonial,
 } from '../utils/cvForm'
+import { DEFAULT_STYLE_VARIANT_ID } from '../utils/templateVariants'
 
 const ARRAY_ITEM_FACTORIES = {
   experience: createEmptyExperience,
@@ -49,6 +50,7 @@ export const FORM_ACTION = {
   TOGGLE_SECTION_VISIBILITY: 'TOGGLE_SECTION_VISIBILITY',
   TOGGLE_SECTION_ITEM_VISIBILITY: 'TOGGLE_SECTION_ITEM_VISIBILITY',
   TOGGLE_PHOTO_VISIBILITY: 'TOGGLE_PHOTO_VISIBILITY',
+  SET_STYLE_VARIANT: 'SET_STYLE_VARIANT',
   ADD_SKILL: 'ADD_SKILL',
   REMOVE_SKILL: 'REMOVE_SKILL',
   UPDATE_SKILL: 'UPDATE_SKILL',
@@ -247,6 +249,30 @@ export function cvFormReducer(state, action) {
           ),
         },
       }
+
+    case FORM_ACTION.SET_STYLE_VARIANT: {
+      if (typeof action.templateId !== 'string' || !action.templateId
+        || typeof action.variantId !== 'string' || !action.variantId) {
+        return state
+      }
+
+      const current = state.styleVariantByTemplate ?? {}
+      const isDefault = action.variantId === DEFAULT_STYLE_VARIANT_ID
+
+      if (isDefault ? !(action.templateId in current) : current[action.templateId] === action.variantId) {
+        return state
+      }
+
+      // Variant #1 is never stored, so existing CVs and links are unchanged.
+      const others = Object.fromEntries(
+        Object.entries(current).filter(([templateId]) => templateId !== action.templateId),
+      )
+
+      return {
+        ...state,
+        styleVariantByTemplate: isDefault ? others : { ...others, [action.templateId]: action.variantId },
+      }
+    }
 
     case FORM_ACTION.ADD_SKILL: {
       if (!Array.isArray(state.skills)) {

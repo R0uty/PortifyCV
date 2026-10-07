@@ -231,6 +231,8 @@ export interface CvData {
   photoVisibilityByTemplate: Record<string, boolean>
   /** Per template id, the sections the user moved out of their home column. Overrides only. */
   sectionColumnsByTemplate: Record<string, Record<string, 'main' | 'sidebar'>>
+  /** Per template id, the chosen style variant (templateVariants.js). Variant #1 ('default') is never stored. */
+  styleVariantByTemplate: Record<string, string>
   sectionOrder: CvSectionKey[]
   skills: string[]
   experience: CvExperienceItem[]
