@@ -1,8 +1,8 @@
 # Template style variants — design (v1.6, Phase 3)
 
 **Date:** 2026-10-06
-**Branch:** `v1.6.0`, stacked on `v1.5.0` (rebase onto `main` once 1.5.0 merges)
-**Status:** draft, awaiting review
+**Branch:** `v1.6.0`, based on `main` at 1.5.4
+**Status:** approved 2026-10-07
 
 ## Goal
 
@@ -38,7 +38,7 @@ existing CV, share link or JSON file looks any different after this phase.
 - **Versioning:** 1.5.5, 1.5.6, … per unit of work (1.5.1–1.5.4 were
   hotfixes on `main`: placeholder example data, editable skills, visible
   edit pencils, and Clear CV in Direct Edit), with 1.6.0 at the end;
-  its own PR after 1.5.0 merges.
+  its own PR into `main` (merged only with the user's OK).
 
 ## Non-goals
 
