@@ -2062,6 +2062,30 @@ test.describe('Direct Edit pencils and Load demo CV', () => {
     await expect.poll(async () => (await offset('education')).dy).toBe(before.dy)
   })
 
+  // Two-step, like Classic's "Reset form": one stray click can't wipe the CV.
+  test('Clear CV arms on the first click, clears on the second, and Undo restores the CV', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    const actions = page.locator('.direct-edit-actions')
+    const nameField = page.locator('.direct-edit-preview h3 .direct-edit-field')
+    await expect(nameField).toHaveText('John Doe')
+    // Let the demo load settle into its own undo step (HISTORY_COMMIT_DELAY_MS).
+    await page.waitForTimeout(800)
+
+    await actions.getByRole('button', { name: 'Clear CV' }).click()
+    await expect(actions.getByRole('button', { name: 'Confirm clear' })).toBeVisible()
+    await expect(nameField).toHaveText('John Doe')
+
+    await actions.getByRole('button', { name: 'Confirm clear' }).click()
+    await expect(page.getByText('CV cleared. Restore it with the toolbar undo arrow.')).toBeVisible()
+    await expect(nameField).toHaveText('')
+    await expect(page.locator('.direct-edit-preview [data-export-section="experience"]').first())
+      .not.toContainText('Senior Product Designer')
+    await expect(actions.getByRole('button', { name: 'Clear CV' })).toBeVisible()
+
+    await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
+    await expect(nameField).toHaveText('John Doe')
+  })
+
   test('Load demo CV is available in Direct Edit, and Undo restores the previous CV', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
