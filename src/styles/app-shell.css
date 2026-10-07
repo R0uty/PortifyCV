@@ -1808,7 +1808,7 @@ select.floating-field__control {
 }
 
 /* ── Style-variant picker (CvStyleSwitcher.jsx) — same trigger/panel
-   language as .cv-font-switcher above. Below 640px the trigger keeps
+   language as .cv-font-switcher above. Below 1440px the trigger keeps
    only the colour strip; its aria-label still carries the name. ── */
 .cv-style-switcher {
   position: relative;
@@ -1914,10 +1914,31 @@ select.floating-field__control {
   font-size: 0.75rem;
 }
 
-@media (max-width: 639.98px) {
+.cv-style-switcher__dot {
+  display: none;
+  flex-shrink: 0;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--app-text-muted);
+}
+
+/* Below 1440px the toolbar is tight (the 1280px row must not wrap), so the
+   trigger keeps only the colour strip plus a dot when modified; the
+   aria-label still carries the name and "Modified". */
+@media (max-width: 1439.98px) {
+  .cv-style-switcher__trigger {
+    gap: 0.35rem;
+    padding: 0 0.5rem;
+  }
+
   .cv-style-switcher__trigger-label,
   .cv-style-switcher__modified {
     display: none;
+  }
+
+  .cv-style-switcher__dot {
+    display: block;
   }
 }
 
