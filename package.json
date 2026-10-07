@@ -14,6 +14,7 @@
     "check:section-schema": "node scripts/check-section-schema.mjs",
     "check:section-columns": "node scripts/check-section-columns.mjs",
     "check:template-pages": "node scripts/check-template-pages.mjs",
+    "check:template-variants": "node scripts/check-template-variants.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "test:e2e:fast": "playwright test --grep-invert @slow",

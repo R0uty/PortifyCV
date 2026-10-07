@@ -1,0 +1,489 @@
+// Template style variants (Phase 3, v1.6). Each template has an ordered
+// list of curated looks; variant #1 (`id: 'default'`) is today's look,
+// unchanged. A variant is:
+//   - `palette`: values for the template's OWN local CSS variables
+//     (`--dev-*`, `--np-*` …), declared with their defaults on the
+//     template's root rule in src/styles/templates/<name>.css. CVPreview
+//     sets them as inline CSS variables on the Showcase root.
+//   - `accent`: the starting value of the existing per-template accent
+//     picker (`null` for a template without one).
+//   - `fontId`: one of CV_FONT_OPTIONS (utils/cvFonts.js).
+//   - `headingColor`: a hex, or '' for the template's own heading colour.
+// Never layout or spacing. Values are hex/rgba() only — never color-mix()
+// or oklch(), which the html2canvas PDF export can't rasterize
+// (docs/template-design-system.md §8).
+//
+// Variant ids are PERMANENT once shipped (share links store them under
+// `va`, see shareLinks.js); labels may change. Variant #1 is never stored
+// in the CV — choosing it deletes the template's entry.
+//
+// `scripts/check-template-variants.mjs` enforces: variant #1's palette
+// equals the stylesheet defaults character for character, every variant
+// sets exactly the same variables, contrast of every `textPairs` entry,
+// valid fonts, and accents drawn from the template's swatch set.
+//
+// Relative imports here carry an explicit `.js` (unlike most of src/) so
+// Playwright specs can import this module under plain Node ESM.
+import { getTemplateAccent, resolveTemplateAccent } from './cvTemplates.js'
+import { DEFAULT_CV_FONT_ID } from './cvFonts.js'
+
+export const DEFAULT_STYLE_VARIANT_ID = 'default'
+
+const ORIGINAL_LABEL = { en: 'Original', fi: 'Alkuperäinen' }
+
+function original(templateId, palette) {
+  return {
+    id: DEFAULT_STYLE_VARIANT_ID,
+    label: ORIGINAL_LABEL,
+    palette,
+    accent: getTemplateAccent(templateId)?.default ?? null,
+    fontId: DEFAULT_CV_FONT_ID,
+    headingColor: '',
+  }
+}
+
+const ACCENT = '--tpl-accent'
+
+export const TEMPLATE_VARIANTS = {
+  minimal: {
+    // Tokenised in Task 7 (Minimalist is the flat renderer — no stylesheet yet).
+    swatchVariables: [],
+    textPairs: [],
+    defaultContrastExceptions: [],
+    variants: [original('minimal', {})],
+  },
+  developer: {
+    swatchVariables: ['--dev-sidebar', '--dev-teal', '--dev-purple'],
+    textPairs: [
+      { foreground: '--dev-text', background: '--dev-bg', size: 'body' },
+      { foreground: '--dev-muted', background: '--dev-bg', size: 'body' },
+      { foreground: '--dev-accent', background: '--dev-bg', size: 'body' },
+      { foreground: '--dev-muted', background: '--dev-surface', size: 'body' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('developer', {
+        '--dev-primary': '#0f172a',
+        '--dev-teal': '#14b8a6',
+        '--dev-blue': '#3b82f6',
+        '--dev-purple': '#8b5cf6',
+        '--dev-accent': '#0f766e',
+        '--dev-gray': '#64748b',
+        '--dev-border': '#e2e8f0',
+        '--dev-bg': '#ffffff',
+        '--dev-surface': '#f8fafc',
+        '--dev-header-border': '#e2e8f0',
+        '--dev-sidebar': '#0f172a',
+        '--dev-text': '#0f172a',
+        '--dev-muted': '#64748b',
+      }),
+    ],
+  },
+  creative: {
+    swatchVariables: ['--cr-page', '--cr-sidebar'],
+    textPairs: [
+      { foreground: '--cr-ink', background: '--cr-page', size: 'body' },
+      { foreground: '--cr-ink-muted', background: '--cr-page', size: 'body' },
+      { foreground: '--cr-ink-faint', background: '--cr-page', size: 'body' },
+      { foreground: '--cr-ink-muted', background: '--cr-sidebar', size: 'body' },
+      { foreground: '--cr-ink-faint', background: '--cr-sidebar', size: 'body' },
+      { foreground: '--cr-ink', background: '--cr-card', size: 'body' },
+      { foreground: ACCENT, background: '--cr-page', size: 'large' },
+    ],
+    defaultContrastExceptions: [
+      { foreground: '--cr-ink-faint', background: '--cr-sidebar', ratio: '4.25', reason: 'Faint meta text on the sand sidebar, below 4.5:1 since before Phase 3; variant #1 must not change.' },
+    ],
+    variants: [
+      original('creative', {
+        '--cr-ink': '#1a1a1a',
+        '--cr-ink-muted': '#4b4b4b',
+        '--cr-ink-faint': '#6b6b6b',
+        '--cr-border': '#ecdfc9',
+        '--cr-page': '#fdf1e2',
+        '--cr-sidebar': '#f7e3c4',
+        '--cr-card': '#fffcf6',
+      }),
+    ],
+  },
+  modern: {
+    swatchVariables: ['--ms-navy', '--ms-rose', '--ms-bg'],
+    textPairs: [
+      { foreground: '--ms-navy', background: '--ms-card', size: 'body' },
+      { foreground: '--ms-navy-muted', background: '--ms-card', size: 'body' },
+      { foreground: '--ms-text', background: '--ms-card', size: 'body' },
+      { foreground: '--ms-muted', background: '--ms-card', size: 'body' },
+      { foreground: '--ms-muted', background: '--ms-bg-subtle', size: 'body' },
+      { foreground: '--ms-rose', background: '--ms-card', size: 'body' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('modern', {
+        '--ms-navy': '#0f172a',
+        '--ms-navy-muted': '#334155',
+        '--ms-rose': '#be123c',
+        '--ms-blush': '#fb7185',
+        '--ms-border': '#e2e8f0',
+        '--ms-border-soft': '#f1f5f9',
+        '--ms-text': '#1e293b',
+        '--ms-muted': '#64748b',
+        '--ms-bg': '#f7f7fa',
+        '--ms-bg-subtle': '#fafafa',
+        '--ms-card': '#ffffff',
+      }),
+    ],
+  },
+  executive: {
+    swatchVariables: ['--ex-ink', '--ex-rail'],
+    textPairs: [
+      { foreground: '--ex-ink', background: '--ex-card', size: 'body' },
+      { foreground: '--ex-ink-muted', background: '--ex-card', size: 'body' },
+      { foreground: '--ex-ink-faint', background: '--ex-bg', size: 'body' },
+      { foreground: '--ex-ink-faint', background: '--ex-rail', size: 'body' },
+      { foreground: ACCENT, background: '--ex-card', size: 'body' },
+      { foreground: ACCENT, background: '--ex-rail', size: 'body' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('executive', {
+        '--ex-ink': '#1c1917',
+        '--ex-ink-muted': '#44403c',
+        '--ex-ink-faint': '#6b645e',
+        '--ex-border': '#d6d3d1',
+        '--ex-rail': '#f7f4ef',
+        '--ex-bg': '#faf9f7',
+        '--ex-card': '#ffffff',
+      }),
+    ],
+  },
+  timeline: {
+    swatchVariables: ['--tl-text', '--tl-bg'],
+    textPairs: [
+      { foreground: '--tl-text', background: '--tl-bg', size: 'body' },
+      { foreground: '--tl-muted', background: '--tl-bg', size: 'body' },
+      { foreground: ACCENT, background: '--tl-bg', size: 'body' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('timeline', {
+        '--tl-text': '#1f2937',
+        '--tl-muted': '#6b7280',
+        '--tl-border': '#e5e7eb',
+        '--tl-bg': '#fdfdfd',
+      }),
+    ],
+  },
+  graduate: {
+    swatchVariables: ['--gr-ink', '--gr-bg'],
+    textPairs: [
+      { foreground: '--gr-ink', background: '--gr-bg', size: 'body' },
+      { foreground: '--gr-ink-muted', background: '--gr-bg', size: 'body' },
+      { foreground: ACCENT, background: '--gr-bg', size: 'body' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('graduate', {
+        '--gr-ink': '#1e293b',
+        '--gr-ink-muted': '#475569',
+        '--gr-border': '#e2e8f0',
+        '--gr-bg': '#f7f7fa',
+      }),
+    ],
+  },
+  compact: {
+    swatchVariables: ['--cp-ink', '--cp-bg'],
+    textPairs: [
+      { foreground: '--cp-ink', background: '--cp-card', size: 'body' },
+      { foreground: '--cp-ink-muted', background: '--cp-card', size: 'body' },
+      { foreground: ACCENT, background: '--cp-card', size: 'body' },
+    ],
+    defaultContrastExceptions: [
+      { foreground: ACCENT, background: '--cp-card', ratio: '4.10', reason: 'Sky accent text on white, below 4.5:1 since before Phase 3; variant #1 must not change.' },
+    ],
+    variants: [
+      original('compact', {
+        '--cp-ink': '#0f172a',
+        '--cp-ink-muted': '#475569',
+        '--cp-border': '#cbd5e1',
+        '--cp-card': '#ffffff',
+        '--cp-bg': '#f7f7fa',
+      }),
+    ],
+  },
+  portfolio: {
+    swatchVariables: ['--pf-slate', '--pf-sidebar-tint'],
+    textPairs: [
+      { foreground: '--pf-slate', background: '--pf-card', size: 'body' },
+      { foreground: '--pf-text', background: '--pf-card', size: 'body' },
+      { foreground: '--pf-gray', background: '--pf-card', size: 'body' },
+      { foreground: '--pf-gray', background: '--pf-sidebar-tint', size: 'body' },
+      { foreground: ACCENT, background: '--pf-card', size: 'body' },
+    ],
+    defaultContrastExceptions: [
+      { foreground: '--pf-gray', background: '--pf-sidebar-tint', ratio: '4.48', reason: 'Grey meta text on the sidebar tint, below 4.5:1 since before Phase 3; variant #1 must not change.' },
+    ],
+    variants: [
+      original('portfolio', {
+        '--pf-slate': '#0f172a',
+        '--pf-gray': '#64748b',
+        '--pf-border': '#e2e8f0',
+        '--pf-border-soft': '#eef1f6',
+        '--pf-text': '#1e293b',
+        '--pf-card': '#ffffff',
+        '--pf-sidebar-tint': '#f7f8fa',
+        '--pf-bg': '#f7f7fa',
+      }),
+    ],
+  },
+  techExec: {
+    swatchVariables: ['--te-navy', '--te-bg'],
+    textPairs: [
+      { foreground: '--te-ink', background: '--te-bg', size: 'body' },
+      { foreground: '--te-ink-muted', background: '--te-bg', size: 'body' },
+      { foreground: '--te-ink-faint', background: '--te-bg', size: 'body' },
+      { foreground: ACCENT, background: '--te-bg', size: 'body' },
+      { foreground: '#ffffff', background: '--te-navy', size: 'large' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('techExec', {
+        '--te-navy': '#163d7a',
+        '--te-ink': '#1e293b',
+        '--te-ink-muted': '#475569',
+        '--te-ink-faint': '#64748b',
+        '--te-border': '#e2e8f0',
+        '--te-bg': '#f8fafc',
+      }),
+    ],
+  },
+  classicProfessional: {
+    swatchVariables: ['--cp-text', '--cp-border', '--cp-bg'],
+    textPairs: [
+      { foreground: '--cp-text', background: '--cp-bg', size: 'body' },
+      { foreground: '--cp-muted', background: '--cp-bg', size: 'body' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('classicProfessional', {
+        '--cp-text': '#111111',
+        '--cp-muted': '#52525b',
+        '--cp-border': '#d4d4d8',
+        '--cp-bg': '#fdfdfd',
+      }),
+    ],
+  },
+  navyProfessional: {
+    swatchVariables: ['--np-navy', '--np-blue', '--np-bg'],
+    textPairs: [
+      { foreground: '#ffffff', background: '--np-navy', size: 'body' },
+      { foreground: 'rgba(255, 255, 255, 0.85)', background: '--np-navy', size: 'body' },
+      { foreground: 'rgba(255, 255, 255, 0.55)', background: '--np-navy', size: 'body' },
+      { foreground: 'rgba(255, 255, 255, 0.5)', background: '--np-navy', size: 'body' },
+      { foreground: '--np-blue-light', background: '--np-navy', size: 'body' },
+      { foreground: '--np-text', background: '--np-bg', size: 'body' },
+      { foreground: '--np-muted', background: '--np-bg', size: 'body' },
+      { foreground: '--np-blue', background: '--np-bg', size: 'body' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('navyProfessional', {
+        '--np-navy': '#16233a',
+        '--np-navy-line': 'rgba(255, 255, 255, 0.14)',
+        '--np-blue': '#2563eb',
+        '--np-blue-light': '#93c5fd',
+        '--np-text': '#1f2937',
+        '--np-muted': '#6b7280',
+        '--np-border': '#e5e7eb',
+        '--np-bg': '#fdfdfd',
+      }),
+    ],
+  },
+  modernOrange: {
+    swatchVariables: ['--mo-text', '--mo-sidebar-bg'],
+    textPairs: [
+      { foreground: '--mo-text', background: '--mo-bg', size: 'body' },
+      { foreground: '--mo-muted', background: '--mo-bg', size: 'body' },
+      { foreground: '--mo-text', background: '--mo-sidebar-bg', size: 'body' },
+      { foreground: '--mo-muted', background: '--mo-sidebar-bg', size: 'body' },
+      { foreground: ACCENT, background: '--mo-bg', size: 'large' },
+      { foreground: '#ffffff', background: ACCENT, size: 'body' },
+    ],
+    defaultContrastExceptions: [
+      { foreground: ACCENT, background: '--mo-bg', ratio: '2.42', reason: 'Orange accent marks/text on the page, below 3:1 since before Phase 3; variant #1 must not change.' },
+      { foreground: '#ffffff', background: ACCENT, ratio: '2.46', reason: 'White title-badge text on orange, below 4.5:1 since before Phase 3; variant #1 must not change.' },
+    ],
+    variants: [
+      original('modernOrange', {
+        '--mo-text': '#151a22',
+        '--mo-muted': '#6b7280',
+        '--mo-border': '#ece1d2',
+        '--mo-sidebar-bg': '#fdf6ec',
+        '--mo-dot-empty': '#e6dcc9',
+        '--mo-bg': '#fdfdfd',
+      }),
+    ],
+  },
+  colorfulCompact: {
+    swatchVariables: ['--cc-dark', '--cc-pink', '--cc-blue', '--cc-green'],
+    textPairs: [
+      { foreground: '--cc-ink', background: '--cc-card', size: 'body' },
+      { foreground: '--cc-muted', background: '--cc-card', size: 'body' },
+      { foreground: '--cc-muted', background: '--cc-sidebar', size: 'body' },
+      { foreground: '#ffffff', background: '--cc-dark', size: 'body' },
+      ...['pink', 'orange', 'green', 'teal', 'blue', 'purple'].flatMap((hue) => [
+        { foreground: `--cc-${hue}-text`, background: '--cc-card', size: 'body' },
+        { foreground: '#ffffff', background: `--cc-${hue}-text`, size: 'body' },
+      ]),
+    ],
+    defaultContrastExceptions: [
+      { foreground: '--cc-muted', background: '--cc-sidebar', ratio: '4.39', reason: 'Grey meta text on the sidebar, below 4.5:1 since before Phase 3; variant #1 must not change.' },
+    ],
+    variants: [
+      original('colorfulCompact', {
+        '--cc-pink': '#ec4899',
+        '--cc-pink-text': '#be185d',
+        '--cc-orange': '#f97316',
+        '--cc-orange-text': '#c2410c',
+        '--cc-green': '#22c55e',
+        '--cc-green-text': '#15803d',
+        '--cc-teal': '#14b8a6',
+        '--cc-teal-text': '#0f766e',
+        '--cc-blue': '#3b82f6',
+        '--cc-blue-text': '#1d4ed8',
+        '--cc-purple': '#a855f7',
+        '--cc-purple-text': '#7e22ce',
+        '--cc-dark': '#16132a',
+        '--cc-ink': '#18181b',
+        '--cc-muted': '#6b7280',
+        '--cc-sidebar': '#f2f4f8',
+        '--cc-border': '#e5e7eb',
+        '--cc-card': '#ffffff',
+      }),
+    ],
+  },
+  quadrant: {
+    swatchVariables: ['--qd-text', '--qd-border'],
+    textPairs: [
+      { foreground: '--qd-text', background: '--qd-card', size: 'body' },
+      { foreground: '--qd-muted', background: '--qd-card', size: 'body' },
+      { foreground: '--qd-muted', background: '--qd-bg', size: 'body' },
+      { foreground: ACCENT, background: '--qd-card', size: 'body' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('quadrant', {
+        '--qd-text': '#0f172a',
+        '--qd-muted': '#475569',
+        '--qd-border': '#bfe0e6',
+        '--qd-bg': '#f7fafa',
+        '--qd-card': '#ffffff',
+      }),
+    ],
+  },
+  editorial: {
+    swatchVariables: ['--ed-ink', '--ed-bg'],
+    textPairs: [
+      { foreground: '--ed-ink', background: '--ed-bg', size: 'body' },
+      { foreground: '--ed-muted', background: '--ed-bg', size: 'body' },
+      { foreground: '--ed-faint', background: '--ed-bg', size: 'body' },
+      { foreground: ACCENT, background: '--ed-bg', size: 'body' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('editorial', {
+        '--ed-ink': '#1a1a1a',
+        '--ed-muted': '#52525b',
+        '--ed-faint': '#71717a',
+        '--ed-border': '#e4e4e7',
+        '--ed-bg': '#fdfdfd',
+      }),
+    ],
+  },
+  portrait: {
+    swatchVariables: ['--pt-ink', '--pt-bg'],
+    textPairs: [
+      { foreground: '--pt-ink', background: '--pt-bg', size: 'body' },
+      { foreground: '--pt-muted', background: '--pt-bg', size: 'body' },
+      { foreground: '--pt-faint', background: '--pt-bg', size: 'body' },
+      { foreground: ACCENT, background: '--pt-bg', size: 'body' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('portrait', {
+        '--pt-ink': '#1a1a1a',
+        '--pt-muted': '#52525b',
+        '--pt-faint': '#71717a',
+        '--pt-border': '#e4e4e7',
+        '--pt-bg': '#fdfdfd',
+      }),
+    ],
+  },
+  european: {
+    swatchVariables: ['--eu-ink', '--eu-bg'],
+    textPairs: [
+      { foreground: '--eu-ink', background: '--eu-bg', size: 'body' },
+      { foreground: '--eu-muted', background: '--eu-bg', size: 'body' },
+      { foreground: '--eu-faint', background: '--eu-bg', size: 'body' },
+      { foreground: ACCENT, background: '--eu-bg', size: 'body' },
+    ],
+    defaultContrastExceptions: [],
+    variants: [
+      original('european', {
+        '--eu-ink': '#1a1a1a',
+        '--eu-muted': '#52525b',
+        '--eu-faint': '#71717a',
+        '--eu-border': '#e4e4e7',
+        '--eu-bg': '#fdfdfd',
+      }),
+    ],
+  },
+}
+
+export function getTemplateVariants(templateId) {
+  return TEMPLATE_VARIANTS[templateId]?.variants ?? []
+}
+
+// Falls back to variant #1 for an unknown id, so a CV from a newer
+// version (or a typo in a hand-edited file) still renders.
+export function getTemplateVariant(templateId, variantId) {
+  const variants = getTemplateVariants(templateId)
+  if (variants.length === 0) {
+    return null
+  }
+  return variants.find((variant) => variant.id === variantId) ?? variants[0]
+}
+
+export function resolveStyleVariantId(formData, templateId) {
+  const stored = formData?.styleVariantByTemplate?.[templateId]
+  return getTemplateVariant(templateId, stored)?.id ?? DEFAULT_STYLE_VARIANT_ID
+}
+
+export function getPaletteVariables(templateId) {
+  return Object.keys(getTemplateVariants(templateId)[0]?.palette ?? {})
+}
+
+export function getVariantPaletteStyle(templateId, variantId) {
+  return { ...(getTemplateVariant(templateId, variantId)?.palette ?? {}) }
+}
+
+export function getVariantSwatches(templateId, variant) {
+  const swatchVariables = TEMPLATE_VARIANTS[templateId]?.swatchVariables ?? []
+  return [variant?.accent, ...swatchVariables.map((name) => variant?.palette[name])]
+    .filter(Boolean)
+    .slice(0, 4)
+}
+
+// True when the tab-only accent, font or headings colour has been tweaked
+// away from the active variant's values — drives the Style picker's
+// "Modified" marker.
+export function isStyleVariantModified({ templateId, variantId, templateAccentColors, cvFontId, cvHeadingColor }) {
+  const variant = getTemplateVariant(templateId, variantId)
+  if (!variant) {
+    return false
+  }
+  const accent = resolveTemplateAccent(templateAccentColors, templateId)
+  if (variant.accent && String(accent).toLowerCase() !== variant.accent.toLowerCase()) {
+    return true
+  }
+  return cvFontId !== variant.fontId
+    || String(cvHeadingColor || '').toLowerCase() !== variant.headingColor.toLowerCase()
+}
