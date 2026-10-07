@@ -74,7 +74,7 @@ import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
 import { hideEmptySections } from '../utils/sectionContent'
-import { resolveStyleVariantId } from '../utils/templateVariants'
+import { getTemplateVariant, resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
 import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
@@ -579,6 +579,17 @@ function ResumeBuilderPage({
   const canUndo = historyPast.length > 0
   const canRedo = historyFuture.length > 0
 
+  // Applies the look of the variant `nextFormData` stores for `templateId`.
+  // Called wherever a whole CV arrives (JSON import, ?example=) — share
+  // links and session restore get it from createInitialUiState instead.
+  const applyStoredStyleVariantLook = useCallback((nextFormData, templateId) => {
+    dispatchUi({
+      type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK,
+      templateId,
+      variant: getTemplateVariant(templateId, resolveStyleVariantId(nextFormData, templateId)),
+    })
+  }, [])
+
   const handleUndo = useCallback(() => {
     // A change from the last HISTORY_COMMIT_DELAY_MS isn't in historyPast
     // yet. Record it as its own step first, so Undo straight after it
@@ -603,7 +614,12 @@ function ResumeBuilderPage({
     historyCommittedRef.current = previousFormData
     historySkipNextCommitRef.current = true
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: previousFormData })
-  }, [dispatchFormData, formData, historyPast, historyFuture])
+    // Undoing a variant pick also restores that variant's look, so the
+    // font/accent don't linger from the undone pick.
+    if (resolveStyleVariantId(previousFormData, selectedTemplate) !== resolveStyleVariantId(formData, selectedTemplate)) {
+      applyStoredStyleVariantLook(previousFormData, selectedTemplate)
+    }
+  }, [applyStoredStyleVariantLook, dispatchFormData, formData, historyPast, historyFuture, selectedTemplate])
 
   const handleRedo = useCallback(() => {
     if (historyFuture.length === 0) {
@@ -617,7 +633,12 @@ function ResumeBuilderPage({
     historyCommittedRef.current = nextFormData
     historySkipNextCommitRef.current = true
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: nextFormData })
-  }, [dispatchFormData, historyFuture, historyPast])
+    // Undoing a variant pick also restores that variant's look, so the
+    // font/accent don't linger from the undone pick.
+    if (resolveStyleVariantId(nextFormData, selectedTemplate) !== resolveStyleVariantId(formData, selectedTemplate)) {
+      applyStoredStyleVariantLook(nextFormData, selectedTemplate)
+    }
+  }, [applyStoredStyleVariantLook, dispatchFormData, formData, historyFuture, historyPast, selectedTemplate])
 
   useEffect(() => {
     setStorageValue(UI_LOCALE_STORAGE_KEY, locale)
@@ -714,6 +735,7 @@ function ResumeBuilderPage({
         return
       }
       dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: exampleCv })
+      applyStoredStyleVariantLook(exampleCv, selectedTemplate)
       const roleLabel = EXAMPLES[exampleId].role[locale === 'fi' ? 'fi' : 'en']
       showToast(locale === 'fi' ? `Esimerkki ladattu: ${roleLabel}.` : `Loaded the ${roleLabel} example.`)
     })
@@ -967,6 +989,7 @@ function ResumeBuilderPage({
       const importedData = parseImportedCvData(parsedValue)
 
       dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: importedData })
+      applyStoredStyleVariantLook(importedData, selectedTemplate)
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
       showToast(locale === 'fi' ? `CV-tiedot tuotu tiedostosta ${file.name}.` : `Imported CV data from ${file.name}.`)
     } catch (error) {
@@ -989,7 +1012,7 @@ function ResumeBuilderPage({
       dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: false })
       event.target.value = ''
     }
-  }, [dispatchFormData, locale, setStorageValue])
+  }, [applyStoredStyleVariantLook, dispatchFormData, locale, selectedTemplate, setStorageValue])
 
   const handleResetForm = useCallback(() => {
     window.clearTimeout(resetConfirmTimeoutRef.current)
@@ -1148,6 +1171,17 @@ function ResumeBuilderPage({
   const handleSelectTemplate = useCallback((templateId) => {
     dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
   }, [])
+
+  // Picking a variant — even the active one again — stores it and resets
+  // the accent, font and headings colour to its values.
+  const handleSelectStyleVariant = useCallback((variantId) => {
+    dispatchFormData({ type: FORM_ACTION.SET_STYLE_VARIANT, templateId: selectedTemplate, variantId })
+    dispatchUi({
+      type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK,
+      templateId: selectedTemplate,
+      variant: getTemplateVariant(selectedTemplate, variantId),
+    })
+  }, [dispatchFormData, selectedTemplate])
 
   const handleCvFontChange = useCallback((fontId) => {
     dispatchUi({ type: UI_ACTION.SET_CV_FONT, fontId })

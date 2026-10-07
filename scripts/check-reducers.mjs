@@ -516,5 +516,27 @@ console.log('\nuiReducer\n')
   check('An unknown action type returns the same state reference', next === state)
 }
 
+{
+  const state = createInitialUiState({})
+  const look = { id: 'sage', accent: '#1f7a6c', fontId: 'lato', headingColor: '#166534', palette: {}, label: { en: 'Sage', fi: 'Salvia' } }
+  const next = uiReducer(state, { type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK, templateId: 'creative', variant: look })
+  check('APPLY_STYLE_VARIANT_LOOK sets the template accent', next.templateAccentColors.creative === '#1f7a6c')
+  check('APPLY_STYLE_VARIANT_LOOK leaves other accents alone', next.templateAccentColors.timeline === state.templateAccentColors.timeline)
+  check('APPLY_STYLE_VARIANT_LOOK sets the font and headings colour', next.cvFontId === 'lato' && next.cvHeadingColor === '#166534')
+
+  const accentless = uiReducer(state, {
+    type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK, templateId: 'developer', variant: { ...look, accent: null },
+  })
+  check('an accent-less variant adds no accent entry', !('developer' in accentless.templateAccentColors))
+  check('APPLY_STYLE_VARIANT_LOOK with no variant is a no-op',
+    uiReducer(state, { type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK, templateId: 'creative', variant: null }) === state)
+
+  const fresh = createInitialUiState({ formData: createInitialCvData() })
+  check('a session without stored variants starts on Inter with no headings colour',
+    fresh.cvFontId === 'inter' && fresh.cvHeadingColor === '')
+  check('an unknown stored variant starts on variant #1',
+    createInitialUiState({ formData: { ...createInitialCvData(), styleVariantByTemplate: { minimal: 'fromTheFuture' } } }).cvFontId === 'inter')
+}
+
 console.log(`\n${failures === 0 ? 'All reducer checks passed.' : `${failures} check(s) failed.`}`)
 process.exit(failures === 0 ? 0 : 1)

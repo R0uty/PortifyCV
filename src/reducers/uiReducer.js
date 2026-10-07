@@ -3,6 +3,7 @@ import { defaultTemplateId, getAllTemplateAccents, isValidTemplateId } from '../
 import { UI_LOCALE_STORAGE_KEY, UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, UI_BUILDER_MODE_STORAGE_KEY } from '../utils/designSystem'
 import { DEFAULT_CV_FONT_ID } from '../utils/cvFonts'
 import { DEFAULT_CV_HEADING_COLOR } from '../utils/cvHeadingColors'
+import { getTemplateVariant, resolveStyleVariantId } from '../utils/templateVariants'
 
 export const UI_ACTION = {
   ADD_TOAST: 'ADD_TOAST',
@@ -26,6 +27,7 @@ export const UI_ACTION = {
   TOGGLE_NAV_RAIL_COLLAPSED: 'TOGGLE_NAV_RAIL_COLLAPSED',
   SET_CLASSIC_NAME_ALIGNMENT: 'SET_CLASSIC_NAME_ALIGNMENT',
   SET_BUILDER_MODE: 'SET_BUILDER_MODE',
+  APPLY_STYLE_VARIANT_LOOK: 'APPLY_STYLE_VARIANT_LOOK',
 }
 
 // Retired template ids that map onto a surviving template, so an old
@@ -57,13 +59,32 @@ function readInitialClassicNameAlignment() {
     : 'center'
 }
 
+// A style variant's look: its accent (for a template that has one), font
+// and headings colour. Applied when a variant is picked and when a CV
+// carrying a stored variant is loaded; the user's later tweaks stay
+// tab-only, as before variants existed.
+function applyStyleVariantLook(state, templateId, variant) {
+  if (!variant) {
+    return state
+  }
+
+  return {
+    ...state,
+    templateAccentColors: variant.accent
+      ? { ...state.templateAccentColors, [templateId]: variant.accent }
+      : state.templateAccentColors,
+    cvFontId: variant.fontId,
+    cvHeadingColor: variant.headingColor,
+  }
+}
+
 export function createInitialUiState(initialSession) {
   const storedLocale = safeStorageGet(UI_LOCALE_STORAGE_KEY).value
   const storedSessionRestore = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value
   const storedNavRailCollapsed = safeStorageGet(UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, 'false').value
   const storedBuilderMode = safeStorageGet(UI_BUILDER_MODE_STORAGE_KEY, 'direct').value
 
-  return {
+  const state = {
     selectedTemplate: readInitialTemplateId(),
     atsFriendlyMode: false,
     locale: storedLocale === 'fi' ? 'fi' : 'en',
@@ -85,10 +106,20 @@ export function createInitialUiState(initialSession) {
     builderMode: storedBuilderMode === 'classic' ? 'classic' : 'direct',
     toasts: initialSession.initialToast ? [initialSession.initialToast] : [],
   }
+
+  // A share link or restored session opens in its stored variant's look.
+  return applyStyleVariantLook(
+    state,
+    state.selectedTemplate,
+    getTemplateVariant(state.selectedTemplate, resolveStyleVariantId(initialSession?.formData, state.selectedTemplate)),
+  )
 }
 
 export function uiReducer(state, action) {
   switch (action.type) {
+    case UI_ACTION.APPLY_STYLE_VARIANT_LOOK:
+      return applyStyleVariantLook(state, action.templateId, action.variant)
+
     case UI_ACTION.ADD_TOAST:
       return { ...state, toasts: [...state.toasts, action.toast] }
 
