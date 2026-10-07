@@ -235,7 +235,7 @@ function Toolbar({
               </button>
             </div>
 
-            <div className="app-toolbar__labeled-control">
+            <div className="app-toolbar__labeled-control app-toolbar__labeled-control--style">
               <span className="app-toolbar__control-label">{isFinnish ? 'Tyyli' : 'Style'}</span>
               <CvStyleSwitcher
                 variants={styleVariants}
