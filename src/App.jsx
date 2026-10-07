@@ -468,6 +468,10 @@ function App() {
           templates={headerProps.templates}
           selectedTemplateId={headerProps.selectedTemplateId}
           onOpenTemplateGallery={headerProps.onOpenTemplateGallery}
+          styleVariants={headerProps.styleVariants}
+          styleVariantId={headerProps.styleVariantId}
+          isStyleVariantModified={headerProps.isStyleVariantModified}
+          onSelectStyleVariant={headerProps.onSelectStyleVariant}
           cvFontId={headerProps.cvFontId}
           onCvFontChange={headerProps.onCvFontChange}
           cvHeadingColor={headerProps.cvHeadingColor}

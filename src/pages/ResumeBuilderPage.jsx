@@ -74,7 +74,7 @@ import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
 import { hideEmptySections } from '../utils/sectionContent'
-import { getTemplateVariant, resolveStyleVariantId } from '../utils/templateVariants'
+import { getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
 import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
@@ -433,6 +433,20 @@ function ResumeBuilderPage({
   // unless the CV stores another). Passed to the visible preview AND the
   // off-screen export source, so the PDF matches the screen.
   const styleVariantId = resolveStyleVariantId(formData, selectedTemplate)
+  const styleVariants = useMemo(
+    () => getTemplateVariants(selectedTemplate).map((variant) => ({
+      ...variant,
+      swatches: getVariantSwatches(selectedTemplate, variant),
+    })),
+    [selectedTemplate],
+  )
+  const styleVariantModified = isStyleVariantModified({
+    templateId: selectedTemplate,
+    variantId: styleVariantId,
+    templateAccentColors,
+    cvFontId,
+    cvHeadingColor,
+  })
   const previewRef = useRef(null)
   // The CV the user sees in Classic mode's preview panel. previewRef is the
   // off-screen export source (see the .direct-edit-export-source copy
@@ -633,8 +647,8 @@ function ResumeBuilderPage({
     historyCommittedRef.current = nextFormData
     historySkipNextCommitRef.current = true
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: nextFormData })
-    // Undoing a variant pick also restores that variant's look, so the
-    // font/accent don't linger from the undone pick.
+    // Redoing a variant pick also re-applies that variant's look, so the
+    // font/accent match the redone pick.
     if (resolveStyleVariantId(nextFormData, selectedTemplate) !== resolveStyleVariantId(formData, selectedTemplate)) {
       applyStoredStyleVariantLook(nextFormData, selectedTemplate)
     }
@@ -1588,6 +1602,10 @@ function ResumeBuilderPage({
       templates,
       selectedTemplateId: selectedTemplate,
       onOpenTemplateGallery: handleOpenTemplateGallery,
+      styleVariants,
+      styleVariantId,
+      isStyleVariantModified: styleVariantModified,
+      onSelectStyleVariant: handleSelectStyleVariant,
       cvFontId,
       onCvFontChange: handleCvFontChange,
       cvHeadingColor,
@@ -1607,6 +1625,7 @@ function ResumeBuilderPage({
     handleExport, handleCopyShareLink, handleLocaleChange,
     canUndo, canRedo, handleUndo, handleRedo,
     templates, selectedTemplate, handleOpenTemplateGallery,
+    styleVariants, styleVariantId, styleVariantModified, handleSelectStyleVariant,
     cvFontId, handleCvFontChange,
     cvHeadingColor, handleCvHeadingColorChange,
     searchQuery,
