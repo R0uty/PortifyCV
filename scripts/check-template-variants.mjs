@@ -73,6 +73,14 @@ const CSS_SOURCES = {
   european: { file: 'european.css', root: '.european-showcase' },
 }
 
+// Known non-colour custom properties declared on a root rule (spacing,
+// font stacks). Anything else that isn't a plain hex/rgba colour fails the
+// check, so a color-mix()/oklch() default can't slip into a root unnoticed.
+const NON_COLOUR_ROOT_VARIABLES = {
+  'compact.css': ['--cp-header-pad-top', '--cp-section-gap', '--cp-element-gap', '--cp-bullet-gap'],
+  'classicProfessional.css': ['--cp-serif'],
+}
+
 // Templates whose two designed variants have landed (Part 2 adds each
 // batch here). Every other template must still have exactly variant #1.
 // Task 14 deletes this set and requires 3 everywhere.
@@ -98,6 +106,17 @@ function readRootColourVariables({ file, root }) {
     if (!name.startsWith('--tpl-') && COLOUR_VALUE.test(value.trim())) variables[name] = value.trim()
   }
   return variables
+}
+
+function readRootNonColourVariables({ file, root }) {
+  const css = readStylesheet(file)
+  const start = css.indexOf(`\n${root} {\n`)
+  const end = css.indexOf('\n}', start + 1)
+  const names = []
+  for (const [, name, value] of css.slice(start, end).matchAll(/^\s*(--[a-z0-9-]+)\s*:\s*([^;]+);/gim)) {
+    if (!name.startsWith('--tpl-') && !COLOUR_VALUE.test(value.trim())) names.push(name)
+  }
+  return names
 }
 
 function toRgb(value, over = [255, 255, 255]) {
@@ -198,6 +217,10 @@ for (const templateId of templateIds) {
   for (const [name, value] of Object.entries(declared)) {
     check(`${templateId}: ${name} is '${value}' in both places`, palette[name] === value, `registry has '${palette[name]}'`)
   }
+  const allowed = NON_COLOUR_ROOT_VARIABLES[source.file] ?? []
+  const unexpected = readRootNonColourVariables(source).filter((name) => !allowed.includes(name))
+  check(`${templateId}: every non-colour root variable is on the allowlist (no color-mix()/oklch() defaults)`,
+    unexpected.length === 0, `not hex/rgba and not allowlisted: ${unexpected.join(', ')}`)
   // An inline palette variable silently overrides any second declaration
   // (a modifier class, a media query), so each must be declared once.
   const css = readStylesheet(source.file)
