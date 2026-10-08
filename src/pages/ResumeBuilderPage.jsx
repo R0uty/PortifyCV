@@ -74,7 +74,7 @@ import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
 import { hideEmptySections } from '../utils/sectionContent'
-import { getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, resolveStyleVariantId } from '../utils/templateVariants'
+import { TEMPLATE_VARIANTS, getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
 import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
@@ -149,6 +149,12 @@ const NAV_UTILITY_ITEMS = [
 ]
 
 const ALL_SCROLL_NAV_ITEMS = [...NAV_SECTIONS, ...NAV_UTILITY_ITEMS].filter((item) => item.kind === 'scroll')
+
+// The templates whose stored (resolved) style variant differs between two CVs.
+function changedStyleVariantTemplates(a, b) {
+  return Object.keys(TEMPLATE_VARIANTS)
+    .filter((templateId) => resolveStyleVariantId(a, templateId) !== resolveStyleVariantId(b, templateId))
+}
 
 function createToast(message, type = 'success') {
   return {
@@ -593,15 +599,13 @@ function ResumeBuilderPage({
   const canUndo = historyPast.length > 0
   const canRedo = historyFuture.length > 0
 
-  // Applies the look of the variant `nextFormData` stores for `templateId`.
-  // Called wherever a whole CV arrives (JSON import, ?example=) — share
-  // links and session restore get it from createInitialUiState instead.
-  const applyStoredStyleVariantLook = useCallback((nextFormData, templateId) => {
-    dispatchUi({
-      type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK,
-      templateId,
-      variant: getTemplateVariant(templateId, resolveStyleVariantId(nextFormData, templateId)),
-    })
+  // Applies the looks `nextFormData` stores: every template's accent, plus
+  // the selected template's font and headings colour. Called wherever a
+  // whole CV arrives (JSON import, ?example=, Load demo CV, Clear CV) —
+  // share links and session restore get it from createInitialUiState.
+  // Undo/redo pass `templateIds`, the templates whose stored variant changed.
+  const applyStoredStyleVariantLook = useCallback((nextFormData, templateId, templateIds) => {
+    dispatchUi({ type: UI_ACTION.APPLY_STORED_STYLE_LOOKS, formData: nextFormData, templateId, templateIds })
   }, [])
 
   const handleUndo = useCallback(() => {
@@ -628,10 +632,11 @@ function ResumeBuilderPage({
     historyCommittedRef.current = previousFormData
     historySkipNextCommitRef.current = true
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: previousFormData })
-    // Undoing a variant pick also restores that variant's look, so the
-    // font/accent don't linger from the undone pick.
-    if (resolveStyleVariantId(previousFormData, selectedTemplate) !== resolveStyleVariantId(formData, selectedTemplate)) {
-      applyStoredStyleVariantLook(previousFormData, selectedTemplate)
+    // Undoing a variant pick (or a Clear CV / Load demo CV) also restores
+    // the stored looks, so the font/accent don't linger from the undone step.
+    const changedTemplateIds = changedStyleVariantTemplates(previousFormData, formData)
+    if (changedTemplateIds.length > 0) {
+      applyStoredStyleVariantLook(previousFormData, selectedTemplate, changedTemplateIds)
     }
   }, [applyStoredStyleVariantLook, dispatchFormData, formData, historyPast, historyFuture, selectedTemplate])
 
@@ -647,10 +652,11 @@ function ResumeBuilderPage({
     historyCommittedRef.current = nextFormData
     historySkipNextCommitRef.current = true
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: nextFormData })
-    // Redoing a variant pick also re-applies that variant's look, so the
-    // font/accent match the redone pick.
-    if (resolveStyleVariantId(nextFormData, selectedTemplate) !== resolveStyleVariantId(formData, selectedTemplate)) {
-      applyStoredStyleVariantLook(nextFormData, selectedTemplate)
+    // Redoing a variant pick also re-applies the stored looks, so the
+    // font/accent match the redone step.
+    const changedTemplateIds = changedStyleVariantTemplates(nextFormData, formData)
+    if (changedTemplateIds.length > 0) {
+      applyStoredStyleVariantLook(nextFormData, selectedTemplate, changedTemplateIds)
     }
   }, [applyStoredStyleVariantLook, dispatchFormData, formData, historyFuture, historyPast, selectedTemplate])
 

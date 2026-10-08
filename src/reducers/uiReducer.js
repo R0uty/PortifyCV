@@ -3,7 +3,7 @@ import { defaultTemplateId, getAllTemplateAccents, isValidTemplateId } from '../
 import { UI_LOCALE_STORAGE_KEY, UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, UI_BUILDER_MODE_STORAGE_KEY } from '../utils/designSystem'
 import { DEFAULT_CV_FONT_ID } from '../utils/cvFonts'
 import { DEFAULT_CV_HEADING_COLOR } from '../utils/cvHeadingColors'
-import { getTemplateVariant, resolveStyleVariantId } from '../utils/templateVariants'
+import { TEMPLATE_VARIANTS, getTemplateVariant, resolveStyleVariantId } from '../utils/templateVariants'
 
 export const UI_ACTION = {
   ADD_TOAST: 'ADD_TOAST',
@@ -28,6 +28,7 @@ export const UI_ACTION = {
   SET_CLASSIC_NAME_ALIGNMENT: 'SET_CLASSIC_NAME_ALIGNMENT',
   SET_BUILDER_MODE: 'SET_BUILDER_MODE',
   APPLY_STYLE_VARIANT_LOOK: 'APPLY_STYLE_VARIANT_LOOK',
+  APPLY_STORED_STYLE_LOOKS: 'APPLY_STORED_STYLE_LOOKS',
 }
 
 // Retired template ids that map onto a surviving template, so an old
@@ -78,6 +79,31 @@ function applyStyleVariantLook(state, templateId, variant) {
   }
 }
 
+// The looks a whole CV stores (share link, session restore, JSON import,
+// ?example=, Load demo CV, Clear CV): every template in `templateIds`
+// (default: all) gets its stored variant's accent — variant #1's, the
+// registry default, when nothing is stored — and, when the selected
+// template is among them, its variant's font and headings colour, which
+// are global (spec §4). Undo/redo pass only the templates whose stored
+// variant changed, so other templates' tab-only accent tweaks survive.
+export function applyStoredLooks(state, formData, selectedTemplate, templateIds = Object.keys(TEMPLATE_VARIANTS)) {
+  const templateAccentColors = { ...state.templateAccentColors }
+  templateIds.forEach((templateId) => {
+    const accent = getTemplateVariant(templateId, resolveStyleVariantId(formData, templateId))?.accent
+    if (accent) {
+      templateAccentColors[templateId] = accent
+    }
+  })
+
+  const next = { ...state, templateAccentColors }
+  const selected = templateIds.includes(selectedTemplate)
+    ? getTemplateVariant(selectedTemplate, resolveStyleVariantId(formData, selectedTemplate))
+    : null
+  return selected
+    ? { ...next, cvFontId: selected.fontId, cvHeadingColor: selected.headingColor }
+    : next
+}
+
 export function createInitialUiState(initialSession) {
   const storedLocale = safeStorageGet(UI_LOCALE_STORAGE_KEY).value
   const storedSessionRestore = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value
@@ -107,18 +133,17 @@ export function createInitialUiState(initialSession) {
     toasts: initialSession.initialToast ? [initialSession.initialToast] : [],
   }
 
-  // A share link or restored session opens in its stored variant's look.
-  return applyStyleVariantLook(
-    state,
-    state.selectedTemplate,
-    getTemplateVariant(state.selectedTemplate, resolveStyleVariantId(initialSession?.formData, state.selectedTemplate)),
-  )
+  // A share link or restored session opens in its stored looks.
+  return applyStoredLooks(state, initialSession?.formData, state.selectedTemplate)
 }
 
 export function uiReducer(state, action) {
   switch (action.type) {
     case UI_ACTION.APPLY_STYLE_VARIANT_LOOK:
       return applyStyleVariantLook(state, action.templateId, action.variant)
+
+    case UI_ACTION.APPLY_STORED_STYLE_LOOKS:
+      return applyStoredLooks(state, action.formData, action.templateId, action.templateIds)
 
     case UI_ACTION.ADD_TOAST:
       return { ...state, toasts: [...state.toasts, action.toast] }

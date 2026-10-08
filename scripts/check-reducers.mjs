@@ -545,5 +545,40 @@ console.log('\nuiReducer\n')
   check('a restored CV opens in its stored variant\'s font', restored.cvFontId === stored.fontId)
 }
 
+{
+  const { getTemplateVariant, getTemplateVariants } = await importSrc('utils/templateVariants.js')
+  const { applyStoredLooks } = await importSrc('reducers/uiReducer.js')
+  const { getAllTemplateAccents } = await importSrc('utils/cvTemplates.js')
+  const sage = getTemplateVariant('creative', 'sage')
+  const graphite = getTemplateVariant('developer', 'graphite')
+  const defaults = getAllTemplateAccents()
+  const formData = { ...createInitialCvData(), styleVariantByTemplate: { creative: 'sage', developer: 'graphite' } }
+  // A tweaked accent on a template with no stored variant must reset.
+  const tweaked = { ...createInitialUiState({}), templateAccentColors: { ...defaults, timeline: '#123456' } }
+  const loaded = applyStoredLooks(tweaked, formData, 'developer')
+  check('a loaded CV seeds a non-selected template\'s stored accent', loaded.templateAccentColors.creative === sage.accent)
+  check('a loaded CV resets a template without a stored variant to its registry default',
+    loaded.templateAccentColors.timeline === defaults.timeline
+      && loaded.templateAccentColors.timeline === getTemplateVariants('timeline')[0].accent)
+  check('a loaded CV takes the font and headings colour from the selected template\'s variant',
+    loaded.cvFontId === graphite.fontId && loaded.cvHeadingColor === graphite.headingColor)
+  check('a loaded CV with the selected template unstored takes variant #1\'s font',
+    applyStoredLooks(tweaked, formData, 'minimal').cvFontId === getTemplateVariants('minimal')[0].fontId)
+
+  const viaAction = uiReducer(tweaked, { type: UI_ACTION.APPLY_STORED_STYLE_LOOKS, formData, templateId: 'developer' })
+  check('APPLY_STORED_STYLE_LOOKS matches applyStoredLooks', JSON.stringify(viaAction) === JSON.stringify(loaded))
+
+  const partial = uiReducer({ ...tweaked, cvFontId: 'georgia' }, {
+    type: UI_ACTION.APPLY_STORED_STYLE_LOOKS, formData, templateId: 'minimal', templateIds: ['creative'],
+  })
+  check('APPLY_STORED_STYLE_LOOKS with templateIds touches only those accents',
+    partial.templateAccentColors.creative === sage.accent && partial.templateAccentColors.timeline === '#123456')
+  check('APPLY_STORED_STYLE_LOOKS leaves the font alone when the selected template is not listed', partial.cvFontId === 'georgia')
+
+  const initialised = createInitialUiState({ formData })
+  check('createInitialUiState seeds every stored accent, not only the selected template\'s',
+    initialised.templateAccentColors.creative === sage.accent)
+}
+
 console.log(`\n${failures === 0 ? 'All reducer checks passed.' : `${failures} check(s) failed.`}`)
 process.exit(failures === 0 ? 0 : 1)
