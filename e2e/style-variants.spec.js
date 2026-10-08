@@ -236,3 +236,25 @@ test('a share link restores another template\'s look accent', async ({ page, con
     .evaluate((el) => getComputedStyle(el).getPropertyValue('--tpl-accent').trim().toLowerCase()))
     .toBe(creativeVariant.accent.toLowerCase())
 })
+
+// Load demo CV and Clear CV replace the whole CV, so they apply the new
+// CV's look like every other whole-CV load; undo restores the old look.
+for (const action of ['Load demo CV', 'Reset form']) {
+  test(`${action} resets to the CV's look and undo restores it`, async ({ page }) => {
+    await page.goto('/cv?template=minimal')
+    await styleTrigger(page).click()
+    await styleGroup(page).getByRole('radio', { name: minimalVariant.label.en }).click()
+    await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${minimalVariant.label.en}`)
+    // Undo history groups changes made within HISTORY_COMMIT_DELAY_MS
+    // (600 ms, ResumeBuilderPage.jsx); wait past it so the pick and the
+    // whole-CV replacement are separate steps, as for a real user.
+    await page.waitForTimeout(800)
+    await page.getByRole('button', { name: action }).first().click()
+    if (action === 'Reset form') await page.getByRole('button', { name: 'Confirm reset' }).click()
+    await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original')
+    await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
+    await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${minimalVariant.label.en}`)
+    await expect(fontTrigger(page)).toHaveAccessibleName(new RegExp(`^Select font: ${minimalVariant.fontId === 'georgia' ? 'Georgia' : 'Helvetica'}$`))
+  })
+}

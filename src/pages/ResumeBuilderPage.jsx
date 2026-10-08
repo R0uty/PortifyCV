@@ -1047,6 +1047,9 @@ function ResumeBuilderPage({
 
     setResetConfirmArmed(false)
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
+    // A cleared CV stores no variants, so every template goes back to its
+    // original look (accent, plus the selected template's font/headings).
+    applyStoredStyleVariantLook(null, selectedTemplate)
     // Direct Edit has no form, so its "Clear CV" button gets its own wording.
     if (builderMode === 'direct') {
       showToast(
@@ -1061,15 +1064,17 @@ function ResumeBuilderPage({
           : 'Form reset. Restore it with the toolbar undo arrow.',
       )
     }
-  }, [builderMode, dispatchFormData, locale, resetConfirmArmed])
+  }, [applyStoredStyleVariantLook, builderMode, dispatchFormData, locale, resetConfirmArmed, selectedTemplate])
 
   useEffect(() => () => window.clearTimeout(resetConfirmTimeoutRef.current), [])
 
   const handleLoadDemo = useCallback(() => {
-    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: structuredClone(demoCvData) })
+    const demo = structuredClone(demoCvData)
+    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: demo })
+    applyStoredStyleVariantLook(demo, selectedTemplate)
     setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
     showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
-  }, [dispatchFormData, locale, setStorageValue])
+  }, [applyStoredStyleVariantLook, dispatchFormData, locale, selectedTemplate, setStorageValue])
 
   const handlePasteCvImport = useCallback(() => {
     try {
