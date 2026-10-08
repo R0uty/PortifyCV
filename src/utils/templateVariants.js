@@ -98,7 +98,7 @@ export const TEMPLATE_VARIANTS = {
       { foreground: 'rgba(255, 255, 255, 0.85)', background: '--dev-sidebar-end', size: 'body' },
     ],
     defaultContrastExceptions: [
-      { foreground: '--dev-teal', background: '--dev-bg', ratio: '2.49', reason: 'Bright teal cert link on a sidebar section moved onto the light main column (developer.css:946), below 4.5:1 since before Phase 3; variant #1 must not change.' },
+      { foreground: '--dev-teal', background: '--dev-bg', ratio: '2.49', reason: 'Bright teal cert link on a sidebar section moved onto the light main column (.dev-showcase__cert-link), below 4.5:1 since before Phase 3; variant #1 must not change.' },
     ],
     variants: [
       original('developer', {
@@ -145,9 +145,9 @@ export const TEMPLATE_VARIANTS = {
     ],
     defaultContrastExceptions: [
       { foreground: '--cr-ink-faint', background: '--cr-sidebar', ratio: '4.25', reason: 'Faint meta text on the sand sidebar, below 4.5:1 since before Phase 3; variant #1 must not change.' },
-      { foreground: ACCENT, background: '--cr-page', ratio: '3.35', reason: 'Coral accent role/section number on the peach page (creative.css:128, 222), below 4.5:1 since before Phase 3; variant #1 must not change.' },
+      { foreground: ACCENT, background: '--cr-page', ratio: '3.35', reason: 'Coral accent role/section number on the peach page (.creative-showcase__role, .creative-showcase__section-num), below 4.5:1 since before Phase 3; variant #1 must not change.' },
       { foreground: ACCENT, background: '--cr-sidebar', ratio: '2.97', reason: 'Coral accent section number/dates on the sand sidebar, below 4.5:1 since before Phase 3; variant #1 must not change.' },
-      { foreground: ACCENT, background: '--cr-card', ratio: '3.64', reason: 'Coral accent dates on experience cards (creative.css:317), below 4.5:1 since before Phase 3; variant #1 must not change.' },
+      { foreground: ACCENT, background: '--cr-card', ratio: '3.64', reason: 'Coral accent dates on experience cards (.creative-showcase__exp-dates), below 4.5:1 since before Phase 3; variant #1 must not change.' },
     ],
     variants: [
       original('creative', {
@@ -176,7 +176,7 @@ export const TEMPLATE_VARIANTS = {
       { foreground: '--ms-rose', background: '--ms-bg-subtle', size: 'body' },
     ],
     defaultContrastExceptions: [
-      { foreground: '--ms-muted', background: '--ms-bg', ratio: '4.45', reason: 'Slate meta text on the page background (modern.css:119), just below 4.5:1 since before Phase 3; variant #1 must not change.' },
+      { foreground: '--ms-muted', background: '--ms-bg', ratio: '4.45', reason: 'Slate meta text on the page background (.modern-showcase__contact-item), just below 4.5:1 since before Phase 3; variant #1 must not change.' },
     ],
     variants: [
       original('modern', {
@@ -229,7 +229,7 @@ export const TEMPLATE_VARIANTS = {
       { foreground: '--tl-text', background: '--tl-bg', size: 'body' },
       { foreground: '--tl-muted', background: '--tl-bg', size: 'body' },
       { foreground: ACCENT, background: '--tl-bg', size: 'body' },
-      { foreground: '#111827', background: '--tl-bg', size: 'body' },
+      { foreground: '--tl-ink', background: '--tl-bg', size: 'body' },
     ],
     defaultContrastExceptions: [],
     variants: [
@@ -238,6 +238,7 @@ export const TEMPLATE_VARIANTS = {
         '--tl-muted': '#6b7280',
         '--tl-border': '#e5e7eb',
         '--tl-bg': '#fdfdfd',
+        '--tl-ink': '#111827',
       }),
     ],
   },
@@ -266,7 +267,7 @@ export const TEMPLATE_VARIANTS = {
       { foreground: ACCENT, background: '--cp-bg', size: 'body' },
     ],
     defaultContrastExceptions: [
-      { foreground: ACCENT, background: '--cp-bg', ratio: '3.83', reason: 'Sky accent text on the page background (compact.css:117, 250), below 4.5:1 since before Phase 3; variant #1 must not change.' },
+      { foreground: ACCENT, background: '--cp-bg', ratio: '3.83', reason: 'Sky accent text on the page background (.compact-showcase__role, .compact-showcase__entry-dates), below 4.5:1 since before Phase 3; variant #1 must not change.' },
     ],
     variants: [
       original('compact', {
@@ -283,16 +284,16 @@ export const TEMPLATE_VARIANTS = {
     textPairs: [
       { foreground: '--pf-slate', background: '--pf-card', size: 'body' },
       { foreground: '--pf-slate', background: '--pf-sidebar-tint', size: 'body' },
-      { foreground: '--pf-slate', background: '#fafbfc', size: 'body' },
+      { foreground: '--pf-slate', background: '--pf-header-top', size: 'body' },
       { foreground: '--pf-text', background: '--pf-card', size: 'body' },
       { foreground: '--pf-text', background: '--pf-sidebar-tint', size: 'body' },
-      { foreground: '--pf-text', background: '#fafbfc', size: 'body' },
+      { foreground: '--pf-text', background: '--pf-header-top', size: 'body' },
       { foreground: '--pf-gray', background: '--pf-card', size: 'body' },
       { foreground: '--pf-gray', background: '--pf-sidebar-tint', size: 'body' },
-      { foreground: '--pf-gray', background: '#fafbfc', size: 'body' },
+      { foreground: '--pf-gray', background: '--pf-header-top', size: 'body' },
       { foreground: ACCENT, background: '--pf-card', size: 'body' },
       { foreground: ACCENT, background: '--pf-sidebar-tint', size: 'body' },
-      { foreground: ACCENT, background: '#fafbfc', size: 'body' },
+      { foreground: ACCENT, background: '--pf-header-top', size: 'body' },
     ],
     defaultContrastExceptions: [
       { foreground: '--pf-gray', background: '--pf-sidebar-tint', ratio: '4.48', reason: 'Grey meta text on the sidebar tint, below 4.5:1 since before Phase 3; variant #1 must not change.' },
@@ -307,6 +308,8 @@ export const TEMPLATE_VARIANTS = {
         '--pf-card': '#ffffff',
         '--pf-sidebar-tint': '#f7f8fa',
         '--pf-bg': '#f7f7fa',
+        '--pf-header-top': '#fafbfc',
+        '--pf-header-bottom': '#ffffff',
       }),
     ],
   },
@@ -318,9 +321,10 @@ export const TEMPLATE_VARIANTS = {
       { foreground: '--te-ink-faint', background: '--te-bg', size: 'body' },
       { foreground: ACCENT, background: '--te-bg', size: 'body' },
       { foreground: '#ffffff', background: '--te-navy', size: 'large' },
-      { foreground: '#a8b5c8', background: '--te-navy', size: 'body' },
-      { foreground: '#bfdbfe', background: '--te-navy', size: 'body' },
-      { foreground: '#cbd5e1', background: '--te-navy', size: 'body' },
+      { foreground: '--te-masthead-kicker', background: '--te-navy', size: 'body' },
+      { foreground: '--te-masthead-role', background: '--te-navy', size: 'body' },
+      { foreground: '--te-masthead-contact', background: '--te-navy', size: 'body' },
+      { foreground: '--te-masthead-icon', background: '--te-navy', size: 'body' },
     ],
     defaultContrastExceptions: [],
     variants: [
@@ -331,6 +335,10 @@ export const TEMPLATE_VARIANTS = {
         '--te-ink-faint': '#64748b',
         '--te-border': '#e2e8f0',
         '--te-bg': '#f8fafc',
+        '--te-masthead-kicker': '#a8b5c8',
+        '--te-masthead-role': '#bfdbfe',
+        '--te-masthead-contact': '#cbd5e1',
+        '--te-masthead-icon': '#93c5fd',
       }),
     ],
   },
@@ -389,8 +397,8 @@ export const TEMPLATE_VARIANTS = {
     ],
     defaultContrastExceptions: [
       { foreground: ACCENT, background: '--mo-bg', ratio: '2.42', reason: 'Orange accent dates/meta/name on the page, below 4.5:1 since before Phase 3; variant #1 must not change.' },
-      { foreground: ACCENT, background: '--mo-sidebar-bg', ratio: '2.30', reason: 'Orange accent sidebar headings on the cream sidebar (modernOrange.css:107), below 4.5:1 since before Phase 3; variant #1 must not change.' },
-      { foreground: '#ffffff', background: ACCENT, ratio: '2.46', reason: 'White title-badge text on orange (modernOrange.css:337), below 4.5:1 since before Phase 3; variant #1 must not change.' },
+      { foreground: ACCENT, background: '--mo-sidebar-bg', ratio: '2.30', reason: 'Orange accent sidebar headings on the cream sidebar (.modern-orange-showcase__sidebar-heading), below 4.5:1 since before Phase 3; variant #1 must not change.' },
+      { foreground: '#ffffff', background: ACCENT, ratio: '2.46', reason: 'White title-badge text on orange (.modern-orange-showcase__title-badge), below 4.5:1 since before Phase 3; variant #1 must not change.' },
     ],
     variants: [
       original('modernOrange', {

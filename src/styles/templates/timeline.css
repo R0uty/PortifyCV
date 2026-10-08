@@ -23,6 +23,7 @@
   /* Deliberately not pure #ffffff — same blank-canvas PDF export guard used
      by the Creative/Modern/Executive Showcases (see those files' CSS). */
   --tl-bg: #fdfdfd;
+  --tl-ink: #111827;
 
   position: relative;
   background: var(--tl-bg);
@@ -80,7 +81,7 @@
   letter-spacing: -0.01em;
   line-height: var(--tpl-name-lh);
   text-transform: uppercase;
-  color: var(--cv-heading-color, #111827);
+  color: var(--cv-heading-color, var(--tl-ink));
 }
 
 .timeline-showcase__name-accent {
@@ -132,7 +133,7 @@
 .timeline-showcase__contact-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: #111827;
+  color: var(--tl-ink);
 }
 
 .timeline-showcase__header-divider {
@@ -179,7 +180,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
-  color: var(--cv-heading-color, #111827);
+  color: var(--cv-heading-color, var(--tl-ink));
 }
 
 .timeline-showcase__empty {
@@ -263,7 +264,7 @@
 .timeline-showcase__entry-role {
   font-size: var(--tpl-entry-title-size);
   font-weight: 700;
-  color: #111827;
+  color: var(--tl-ink);
 }
 
 .timeline-showcase__entry-meta,
@@ -335,7 +336,7 @@
 .timeline-showcase__project-name {
   font-size: var(--tpl-entry-title-size);
   font-weight: 700;
-  color: #111827;
+  color: var(--tl-ink);
 }
 
 .timeline-showcase__project-desc {
@@ -400,7 +401,7 @@
 .timeline-showcase__language-name {
   font-size: var(--tpl-body-size);
   font-weight: 700;
-  color: #111827;
+  color: var(--tl-ink);
 }
 
 .timeline-showcase__language-level {
@@ -459,7 +460,7 @@
 .timeline-showcase__cert-name {
   font-size: var(--tpl-entry-title-size);
   font-weight: 700;
-  color: #111827;
+  color: var(--tl-ink);
 }
 
 .timeline-showcase__cert-issuer {

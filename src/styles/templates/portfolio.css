@@ -55,6 +55,8 @@
   /* Deliberately NOT pure #ffffff — same blank-canvas PDF export guard used
      by the other Showcases (see their blocks' comments above). */
   --pf-bg: #f7f7fa;
+  --pf-header-top: #fafbfc;
+  --pf-header-bottom: #ffffff;
 
   position: relative;
   overflow: hidden;
@@ -104,7 +106,7 @@
   padding: 1.85rem 2.75rem 1.1rem;
   background:
     radial-gradient(ellipse 80% 120% at 100% 0%, var(--tpl-accent-soft) 0%, transparent 50%),
-    linear-gradient(180deg, #fafbfc 0%, #ffffff 100%);
+    linear-gradient(180deg, var(--pf-header-top) 0%, var(--pf-header-bottom) 100%);
   border-bottom: 1px solid var(--pf-border);
   border-radius: 22px 22px 0 0;
 }
