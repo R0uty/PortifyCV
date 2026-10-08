@@ -2175,3 +2175,30 @@ Observed by the controller's visual audits of the template pages (desktop, dev s
 - Navy Professional's short names render visibly smaller than every other template's name row (the 180px identity-rail floor, narrower than the standard 210px floor) — this is deliberate (see `docs/template-design-system.md` §2 "Adoption state" and `docs/template-audit-phase2.md`'s F7), not a bug to fix reflexively.
 - ~~Several templates' "technologies" line in the experience entry reuses the company-name CSS class instead of its own role~~ — fixed 2026-10-04, and wider than first noted: all 17 bespoke Showcases shared the technologies line's class with another meta line (company, or the `__entry-meta`/`__exp-meta`/`__edu-meta` company/location line), including the shared `renderExperienceEntry` in `directEditExperienceEntry.jsx` (Classic Professional, Editorial, Portrait). Each now renders it with its own `…technologies` class (e.g. `creative-showcase__exp-technologies`, `${classPrefix}__entry-technologies`), and every CSS rule that targeted the old class lists the new one alongside it, so the look is unchanged (screenshots byte-identical) while a future company-only rule no longer reaches the technologies line.
 - ~~Compact's density axis (D=1, `docs/template-audit-phase2.md`'s rubric) is still ad hoc~~ — settled 2026-10-04 (user's decision): kept as is and documented as the one sanctioned exception to the three-class ramp, `docs/template-design-system.md` §2 "Auto-fit tiers below `compact` (Compact only)". The snug/tight tiers in `compact.css` are template-local, engaged only by measured one-page overflow, and always sit on top of `tpl-density-compact`. The alternatives were stepping `standard`→`compact` like European (bigger default look) or dropping the tiers; both would have pushed heavy CVs onto a second page.
+
+## Phase 3: template style variants — DONE (1.6.0, 2026-10-08)
+
+Spec: `docs/superpowers/specs/2026-10-06-template-style-variants-design.md`.
+All 18 templates have three looks in `src/utils/templateVariants.js`; the
+`TEMPLATES_WITH_DESIGNED_VARIANTS` gate in `scripts/check-template-variants.mjs`
+is gone and the script requires 3 everywhere. Shipped across 1.5.5-1.5.17:
+registry and check, `styleVariantByTemplate` + share key `va` +
+`SET_STYLE_VARIANT`, applying a look's accent/font/headings colour on pick
+and load (undo/redo included), the Style/Tyyli toolbar picker, tokenising
+Minimalist, Developer, Colorful Compact, Tech Executive, Timeline and
+Portfolio, the variant layout and PDF-budget harness
+(`e2e/template-variants.spec.js`; `EXPECTED_PDF_PAGES` moved to
+`e2e/fixtures/pdfPages.js`), and the 36 looks in three approved batches.
+1.5.16 also fixed Portrait's language row overflowing the page.
+
+Known gaps: the `defaultContrastExceptions` in `templateVariants.js` (13
+pairs across 8 templates, listed in `changes.md`), first look only.
+
+Verification (1.6.0): see `.superpowers/sdd/2026-10-07-template-style-variants/task-14-report.md`
+for the lint, eight `check:*`, full e2e and build counts.
+
+### Phase 4 follow-up (not started)
+
+Show the looks outside the builder: variants on the gallery cards, the
+per-template pages and the Free CV Templates grid. These stay on each
+template's first look today.

@@ -4,6 +4,47 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template style variants — 1.6.0, 2026-10-08
+
+Every one of the 18 templates now comes in three looks, so a CV no longer
+has to wear a template's one default colour scheme. Pick a look from the new
+"Style" ("Tyyli") button in the toolbar, right after Template, in both
+Classic and Direct Edit. Under 1600px wide the button shows only the look's
+colour strip (a dot appears when the look is modified) with the name in its
+tooltip and label; wider, it shows the name and a "Modified" ("Muokattu")
+pill.
+
+A look changes the template's own palette, its font and its headings
+colour. It never changes the type ramp, density, layout or page count
+(a new variant layout and PDF-budget suite guards that). Picking a look,
+even the one already active, resets accent, font and headings colour to that
+look's values, and the same applies when a CV is loaded or an undo/redo
+crosses a look change. Tweaking the accent, font or headings colour after
+that stays tab-only and marks the look as Modified; it is not saved
+anywhere. The first look of every template is the template's existing
+design, so old CVs, share links and exported JSON look exactly as before.
+The chosen look is stored per template in the CV (`styleVariantByTemplate`)
+and travels in share links under the new `va` key.
+
+Under the hood each template's colours became CSS variables (Minimalist
+gets its own stylesheet, and Developer, Colorful Compact, Tech Executive,
+Timeline and Portfolio were tokenised) and the looks live in
+`src/utils/templateVariants.js`. The new `check:template-variants` makes
+sure the first look matches the stylesheet defaults, every variable is
+declared once, and text pairs meet WCAG contrast, traced from real CSS
+usage. While testing, Portrait's language row was found overflowing the page
+in the builder; it now wraps between languages (1.5.16).
+
+Known gaps, kept as first-look-only `defaultContrastExceptions` because they
+predate this work and changing them would change the original designs:
+Minimalist amber project names on white (3.19), Developer teal cert link on
+white (2.49), Creative faint meta on the sidebar (4.25) and coral accent on
+page, sidebar and cards (3.35, 2.97, 3.64), Modern Professional slate
+contact text (4.45), Compact sky accent text (3.83), Portfolio Hybrid grey on
+the sidebar tint (4.48), Modern Orange accent on page and sidebar (2.42,
+2.30) and white title text on orange (2.46), and Colorful Compact grey on
+the sidebar (4.39). The other two looks of each template pass.
+
 ## Clear CV in Direct Edit — 1.5.4, 2026-10-07
 
 Direct Edit gets a "Clear CV" button under "Load demo CV". It works like
