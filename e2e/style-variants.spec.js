@@ -136,6 +136,10 @@ test('picking a variant changes the look and its font', async ({ page }) => {
   await expect.poll(() => page.locator('.app-shell__preview [data-export-variant="minimal"]')
     .evaluate((el) => getComputedStyle(el).getPropertyValue('--min-accent-ink').trim()))
     .toBe(minimalVariant.palette['--min-accent-ink'])
+  // The off-screen export source (the PDF's source) gets the variant too.
+  await expect.poll(() => page.locator('.direct-edit-export-source [data-export-root="true"]')
+    .evaluate((el) => getComputedStyle(el).getPropertyValue('--min-accent-ink').trim()))
+    .toBe(minimalVariant.palette['--min-accent-ink'])
 })
 
 test('a variant survives a share link', async ({ page, context }) => {
