@@ -1,33 +1,33 @@
 export default {
   // Document
-  preview: () => 'border border-black/10 bg-white shadow-sm',
+  preview: () => 'min-doc border border-black/10 shadow-sm',
 
   // Header
-  headerColor: () => 'bg-amber-50/60 text-gray-900 border-b border-amber-100',
+  headerColor: () => 'min-header border-b',
 
   headerTitle: () =>
-    'text-4xl font-bold tracking-tight text-gray-900 lg:text-5xl',
+    'text-4xl font-bold tracking-tight min-ink lg:text-5xl',
 
   headerSubtitle: () =>
-    'mt-2 text-base text-gray-500',
+    'mt-2 text-base min-muted',
 
   // Section headings
   sectionTitle: () =>
-    'text-[0.7rem] font-bold uppercase tracking-[0.32em] text-amber-700',
+    'text-[0.7rem] font-bold uppercase tracking-[0.32em] min-accent-ink',
 
   // Content sections
   mainSection: () =>
-    'border-b border-gray-200 pb-7 last:border-none',
+    'border-b min-border pb-7 last:border-none',
 
   sideContainer: () => '',
   sideSection: () => '',
 
   // Skills
   skillTag: () =>
-    'rounded border border-amber-200 bg-amber-50 px-2.5 py-1 text-[0.72rem] font-medium text-amber-700',
+    'rounded border min-tag px-2.5 py-1 text-[0.72rem] font-medium',
 
   // Experience
-  timelineBorder: () => 'border-amber-300',
+  timelineBorder: () => 'min-rule',
   timelineDot: () => 'border-white bg-amber-500',
 
   // Cards
@@ -39,17 +39,18 @@ export default {
     'grid gap-8 md:grid-cols-[minmax(0,1.7fr)_minmax(220px,0.85fr)] print:grid-cols-1',
 
   // Accent
+  accentTextClass: 'min-accent-text',
   accentColor: () => ({
     light: 'amber',
     dark: 'amber',
   }),
 
   summaryBadge: () =>
-    'rounded bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700',
+    'rounded min-badge px-2 py-1 text-xs font-medium',
 
-  photoBorder: () => 'border border-gray-200',
+  photoBorder: () => 'border min-border',
 
-  aboutBorder: () => 'border-gray-200',
+  aboutBorder: () => 'min-border',
 
   // Rendering modes
   experienceLayout: 'clean',
@@ -58,7 +59,7 @@ export default {
   // Links appear ONLY in the dedicated Links section
   linksLayout: 'minimal-inline',
 
-  categoryLabelColor: 'text-amber-700',
+  categoryLabelColor: 'min-accent-ink',
   linkIconColor: '',
 
   // Header contact — plain pipe-separated email/phone/location, no icons (matches
@@ -67,6 +68,6 @@ export default {
   headerContactMode: 'piped',
   headerContactGap: 'gap-x-3',
   headerContactTextSize: 'text-xs',
-  headerContactTextColor: 'text-gray-500',
+  headerContactTextColor: 'min-muted',
   headerContactIconColor: null,
 }

@@ -53,7 +53,7 @@ const { ACCENT_SWATCH_SETS } = await importSrc('utils/templateAccents.js')
 // its stylesheet. `null` = no stylesheet yet (Minimalist until Task 7), in
 // which case variant #1's palette must be empty.
 const CSS_SOURCES = {
-  minimal: null,
+  minimal: { file: 'minimal.css', root: '.min-doc' },
   developer: { file: 'developer.css', root: '.dev-showcase' },
   creative: { file: 'creative.css', root: '.creative-showcase' },
   modern: { file: 'modern.css', root: '.modern-showcase' },

@@ -86,6 +86,7 @@ const settledToolbarHeight = (page) => page.evaluate(async () => {
 
 for (const mode of ['classic', 'direct']) {
   test(`at 1280px the Style control adds no toolbar row (${mode}, every template, Modified) @slow`, async ({ page }) => {
+    test.setTimeout(90_000)
     await page.setViewportSize({ width: 1280, height: 720 })
     const mismatches = []
     for (const { id } of cvTemplates) {

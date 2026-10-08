@@ -46,11 +46,31 @@ const ACCENT = '--tpl-accent'
 
 export const TEMPLATE_VARIANTS = {
   minimal: {
-    // Tokenised in Task 7 (Minimalist is the flat renderer — no stylesheet yet).
-    swatchVariables: [],
-    textPairs: [],
-    defaultContrastExceptions: [],
-    variants: [original('minimal', {})],
+    swatchVariables: ['--min-accent-ink', '--min-accent-line', '--min-ink'],
+    textPairs: [
+      { foreground: '--min-ink', background: '--min-bg', size: 'body' },
+      { foreground: '--min-muted', background: '--min-bg', size: 'body' },
+      { foreground: '--min-accent-ink', background: '--min-bg', size: 'body' },
+      { foreground: '--min-accent-ink', background: '--min-accent-soft', size: 'body' },
+      { foreground: '--min-accent-text', background: '--min-bg', size: 'body' },
+    ],
+    defaultContrastExceptions: [
+      { foreground: '--min-accent-text', background: '--min-bg', ratio: '3.19', reason: 'Amber-600 project names on white, below 4.5:1 since before Phase 3; variant #1 must not change.' },
+    ],
+    variants: [
+      original('minimal', {
+        '--min-ink': '#111827',
+        '--min-muted': '#6b7280',
+        '--min-accent-ink': '#b45309',
+        '--min-accent-text': '#d97706',
+        '--min-accent-soft': '#fffbeb',
+        '--min-accent-line': '#fde68a',
+        '--min-header-line': '#fef3c7',
+        '--min-rule': '#fcd34d',
+        '--min-border': '#e5e7eb',
+        '--min-bg': '#ffffff',
+      }),
+    ],
   },
   developer: {
     swatchVariables: ['--dev-sidebar', '--dev-teal', '--dev-purple'],
