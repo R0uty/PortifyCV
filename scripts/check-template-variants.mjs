@@ -87,6 +87,7 @@ const NON_COLOUR_ROOT_VARIABLES = {
 // Task 14 deletes this set and requires 3 everywhere.
 const TEMPLATES_WITH_DESIGNED_VARIANTS = new Set([
   'minimal', 'developer', 'modern', 'classicProfessional', 'navyProfessional', 'colorfulCompact',
+  'creative', 'executive', 'timeline', 'graduate', 'compact', 'portfolio',
 ])
 
 const COLOUR_VALUE = /^(#[0-9a-f]{3}|#[0-9a-f]{6}|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\))$/i
