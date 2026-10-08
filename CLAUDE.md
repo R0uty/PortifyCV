@@ -137,7 +137,7 @@ with zero new entries in `e2e/fixtures/layoutAllowlist.js` — that file is
 `[]` as of this release, and a stale entry fails its own test, so treat any
 addition as a real, temporary finding, not a way to ship around a failure.
 If a template's PDF pagination changes (a density/content change, not a
-regression), update `EXPECTED_PDF_PAGES` in `e2e/template-pdf.spec.js`
+regression), update `EXPECTED_PDF_PAGES` in `e2e/fixtures/pdfPages.js`
 deliberately, in the same commit, and say why the count changed.
 
 **Styling is hand-written utility CSS, not Tailwind.** `src/index.css`
