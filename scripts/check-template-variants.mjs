@@ -202,8 +202,8 @@ console.log('\nVariant #1 matches the stylesheet defaults\n')
 for (const templateId of templateIds) {
   const source = CSS_SOURCES[templateId]
   const palette = TEMPLATE_VARIANTS[templateId]?.variants[0]?.palette ?? {}
-  if (source === null) {
-    check(`${templateId}: no stylesheet yet, so variant #1's palette is empty`, Object.keys(palette).length === 0)
+  if (!source) {
+    check(`${templateId}: has a CSS_SOURCES entry`, false, 'no CSS_SOURCES entry')
     continue
   }
   const declared = readRootColourVariables(source)
