@@ -1808,8 +1808,8 @@ select.floating-field__control {
 }
 
 /* ── Style-variant picker (CvStyleSwitcher.jsx) — same trigger/panel
-   language as .cv-font-switcher above. Below 1440px the trigger keeps
-   only the colour strip; its aria-label still carries the name. ── */
+   language as .cv-font-switcher above. Below 1600px the trigger keeps
+   only the colour strip; its aria-label/title still carry the name. ── */
 .cv-style-switcher {
   position: relative;
 }
@@ -1923,10 +1923,13 @@ select.floating-field__control {
   background: var(--app-text-muted);
 }
 
-/* Below 1600px the toolbar is tight (the Style control must never add a
-   row), so the trigger keeps only the colour strip plus a dot when
-   modified; the aria-label/title still carry the name and "Modified". The
-   caption goes too (the label names it) and the control cluster tightens. */
+/* Below 1600px the toolbar is tight, so the trigger keeps only the colour
+   strip plus a dot when modified; the aria-label/title still carry the name
+   and "Modified". The caption goes too (the label names it) and the control
+   cluster tightens, which keeps the Style control from adding a toolbar row
+   at 1280px (guarded in e2e/style-variants.spec.js). Between roughly 1280px
+   and 1700px some template/mode combinations can still wrap a row that the
+   toolbar without Style would not -- an accepted trade-off. */
 @media (max-width: 1599.98px) {
   .cv-style-switcher__trigger-label,
   .cv-style-switcher__modified,
