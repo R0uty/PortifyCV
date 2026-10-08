@@ -143,7 +143,7 @@ function SectionHeading({ icon, label, placement }) {
     <div>
       <h2
         className="dev-showcase__section-title"
-        style={{ color: placement === 'side' ? '#f1f5f9' : 'var(--dev-primary)' }}
+        style={{ color: placement === 'side' ? 'var(--dev-sidebar-heading)' : 'var(--dev-primary)' }}
       >
         <span
           className="dev-showcase__section-icon"

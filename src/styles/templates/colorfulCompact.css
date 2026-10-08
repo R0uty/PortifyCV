@@ -51,10 +51,18 @@
   --cc-sidebar: #f2f4f8;
   --cc-border: #e5e7eb;
   --cc-card: #ffffff;
+  --cc-page: #ffffff;
+  --cc-body: #3f3f46;
+  --cc-pink-soft: #fce7f3;
+  --cc-orange-soft: #ffedd5;
+  --cc-green-soft: #dcfce7;
+  --cc-teal-soft: #ccfbf1;
+  --cc-blue-soft: #dbeafe;
+  --cc-purple-soft: #f3e8ff;
 
   position: relative;
   overflow: hidden;
-  background: #ffffff;
+  background: var(--cc-page);
   color: var(--cc-ink);
   font-family: var(--font-sans);
   border-radius: 24px;
@@ -269,7 +277,7 @@
   margin-top: 0.65rem;
   font-size: var(--tpl-body-size);
   line-height: 1.65;
-  color: #3f3f46;
+  color: var(--cc-body);
   white-space: pre-line;
 }
 
@@ -341,7 +349,7 @@
 .colorful-compact-showcase__bullets li {
   font-size: var(--tpl-body-size);
   line-height: 1.55;
-  color: #3f3f46;
+  color: var(--cc-body);
 }
 
 .colorful-compact-showcase__bullets li::marker {
@@ -356,7 +364,7 @@
   padding-left: 0;
   font-size: var(--tpl-body-size);
   line-height: 1.55;
-  color: #3f3f46;
+  color: var(--cc-body);
 }
 
 /* ── Projects — bordered white cards, section-coloured tag pills ── */
@@ -385,7 +393,7 @@
   margin-top: 0.3rem;
   font-size: var(--tpl-body-size);
   line-height: 1.55;
-  color: #3f3f46;
+  color: var(--cc-body);
   white-space: pre-line;
 }
 
@@ -403,12 +411,12 @@
   font-weight: 700;
 }
 
-.colorful-compact-showcase__tag--pink { background: #fce7f3; color: var(--cc-pink-text); }
-.colorful-compact-showcase__tag--orange { background: #ffedd5; color: var(--cc-orange-text); }
-.colorful-compact-showcase__tag--green { background: #dcfce7; color: var(--cc-green-text); }
-.colorful-compact-showcase__tag--teal { background: #ccfbf1; color: var(--cc-teal-text); }
-.colorful-compact-showcase__tag--blue { background: #dbeafe; color: var(--cc-blue-text); }
-.colorful-compact-showcase__tag--purple { background: #f3e8ff; color: var(--cc-purple-text); }
+.colorful-compact-showcase__tag--pink { background: var(--cc-pink-soft); color: var(--cc-pink-text); }
+.colorful-compact-showcase__tag--orange { background: var(--cc-orange-soft); color: var(--cc-orange-text); }
+.colorful-compact-showcase__tag--green { background: var(--cc-green-soft); color: var(--cc-green-text); }
+.colorful-compact-showcase__tag--teal { background: var(--cc-teal-soft); color: var(--cc-teal-text); }
+.colorful-compact-showcase__tag--blue { background: var(--cc-blue-soft); color: var(--cc-blue-text); }
+.colorful-compact-showcase__tag--purple { background: var(--cc-purple-soft); color: var(--cc-purple-text); }
 
 /* ── Sidebar: Skills — solid section-coloured pills, flat wrap ── */
 
@@ -470,13 +478,13 @@
 .colorful-compact-showcase__link-item {
   font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: #3f3f46;
+  color: var(--cc-body);
 }
 
 .colorful-compact-showcase__extra-line {
   font-size: var(--tpl-body-size);
   line-height: 1.55;
-  color: #3f3f46;
+  color: var(--cc-body);
 }
 
 /* ── Sidebar: Languages — name + section-coloured level badge ── */
@@ -509,12 +517,12 @@
   font-weight: 700;
 }
 
-.colorful-compact-showcase__lang-badge--pink { background: #fce7f3; color: var(--cc-pink-text); }
-.colorful-compact-showcase__lang-badge--orange { background: #ffedd5; color: var(--cc-orange-text); }
-.colorful-compact-showcase__lang-badge--green { background: #dcfce7; color: var(--cc-green-text); }
-.colorful-compact-showcase__lang-badge--teal { background: #ccfbf1; color: var(--cc-teal-text); }
-.colorful-compact-showcase__lang-badge--blue { background: #dbeafe; color: var(--cc-blue-text); }
-.colorful-compact-showcase__lang-badge--purple { background: #f3e8ff; color: var(--cc-purple-text); }
+.colorful-compact-showcase__lang-badge--pink { background: var(--cc-pink-soft); color: var(--cc-pink-text); }
+.colorful-compact-showcase__lang-badge--orange { background: var(--cc-orange-soft); color: var(--cc-orange-text); }
+.colorful-compact-showcase__lang-badge--green { background: var(--cc-green-soft); color: var(--cc-green-text); }
+.colorful-compact-showcase__lang-badge--teal { background: var(--cc-teal-soft); color: var(--cc-teal-text); }
+.colorful-compact-showcase__lang-badge--blue { background: var(--cc-blue-soft); color: var(--cc-blue-text); }
+.colorful-compact-showcase__lang-badge--purple { background: var(--cc-purple-soft); color: var(--cc-purple-text); }
 
 /* ── Animations ── */
 

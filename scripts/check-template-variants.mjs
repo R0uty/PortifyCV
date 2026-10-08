@@ -50,8 +50,9 @@ const { CV_FONT_OPTIONS } = await importSrc('utils/cvFonts.js')
 const { ACCENT_SWATCH_SETS } = await importSrc('utils/templateAccents.js')
 
 // Where each template's palette defaults are declared: the root rule of
-// its stylesheet. `null` = no stylesheet yet (Minimalist until Task 7), in
-// which case variant #1's palette must be empty.
+// its stylesheet. `null` = no stylesheet yet, in which case variant
+// #1's palette must be empty (no template is null today; the branch is kept
+// in case a new template lands before its stylesheet).
 const CSS_SOURCES = {
   minimal: { file: 'minimal.css', root: '.min-doc' },
   developer: { file: 'developer.css', root: '.dev-showcase' },

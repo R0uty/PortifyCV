@@ -40,6 +40,15 @@
   --dev-sidebar: #0f172a;
   --dev-text: #0f172a;
   --dev-muted: #64748b;
+  --dev-sidebar-end: #1e293b;
+  --dev-sidebar-text: #e2e8f0;
+  --dev-sidebar-muted: #94a3b8;
+  --dev-sidebar-heading: #f1f5f9;
+  --dev-sidebar-chip-bg: rgba(20, 184, 166, 0.16);
+  --dev-sidebar-chip-text: #5eead4;
+  --dev-sidebar-line: rgba(148, 163, 184, 0.25);
+  --dev-body: #334155;
+  --dev-accent-soft: rgba(15, 118, 110, 0.1);
 
   position: relative;
   overflow: hidden;
@@ -261,8 +270,8 @@
 }
 
 .dev-showcase__sidebar {
-  background: linear-gradient(180deg, var(--dev-sidebar) 0%, #1e293b 100%);
-  color: #e2e8f0;
+  background: linear-gradient(180deg, var(--dev-sidebar) 0%, var(--dev-sidebar-end) 100%);
+  color: var(--dev-sidebar-text);
   padding: 1.5rem 1.35rem 2rem;
 }
 
@@ -270,7 +279,7 @@
    labels and "+ Add" read ~3.7:1 on this dark rail. The labels take the
    read-only group label's colour. */
 .dev-showcase__sidebar .direct-edit-chip-group__label {
-  color: #94a3b8;
+  color: var(--dev-sidebar-muted);
 }
 
 .dev-showcase__sidebar .direct-edit-chip-add {
@@ -330,7 +339,7 @@
   margin-top: 0.9rem;
   font-size: var(--tpl-body-size);
   line-height: 1.7;
-  color: #334155;
+  color: var(--dev-body);
   white-space: pre-line;
 }
 
@@ -350,7 +359,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: #94a3b8;
+  color: var(--dev-sidebar-muted);
   margin-bottom: 0.45rem;
 }
 
@@ -369,12 +378,12 @@
   padding: 0.25rem 0.55rem;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
-  background: rgba(20, 184, 166, 0.16);
-  color: #5eead4;
+  background: var(--dev-sidebar-chip-bg);
+  color: var(--dev-sidebar-chip-text);
 }
 
 .dev-showcase__main .dev-showcase__skill-tag {
-  background: rgba(15, 118, 110, 0.1);
+  background: var(--dev-accent-soft);
   color: var(--dev-accent);
 }
 
@@ -407,20 +416,20 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #94a3b8;
+  color: var(--dev-sidebar-muted);
 }
 
 .dev-showcase__link-value {
   display: block;
   font-size: var(--tpl-meta-size);
-  color: #e2e8f0;
+  color: var(--dev-sidebar-text);
 }
 
 /* ── Certificates (sidebar, divider-line list — no card) ── */
 
 .dev-showcase__cert-card {
   padding-bottom: 0.6rem;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  border-bottom: 1px solid var(--dev-sidebar-line);
 }
 
 .dev-showcase__cert-card + .dev-showcase__cert-card {
@@ -435,20 +444,20 @@
 .dev-showcase__cert-name {
   font-size: var(--tpl-body-size);
   font-weight: 600;
-  color: #f1f5f9;
+  color: var(--dev-sidebar-heading);
 }
 
 .dev-showcase__cert-meta {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
-  color: #94a3b8;
+  color: var(--dev-sidebar-muted);
 }
 
 .dev-showcase__cert-link {
   margin-top: 0.3rem;
   display: inline-block;
   font-size: var(--tpl-meta-size);
-  color: #5eead4;
+  color: var(--dev-sidebar-chip-text);
   word-break: break-all;
 }
 
@@ -463,13 +472,13 @@
 .dev-showcase__edu-degree {
   font-size: var(--tpl-body-size);
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--dev-sidebar-heading);
 }
 
 .dev-showcase__edu-meta {
   margin-top: 0.15rem;
   font-size: var(--tpl-meta-size);
-  color: #94a3b8;
+  color: var(--dev-sidebar-muted);
 }
 
 /* ── Languages (sidebar, plain rows — no card) ── */
@@ -479,7 +488,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: var(--tpl-body-size);
-  color: #e2e8f0;
+  color: var(--dev-sidebar-text);
 }
 
 .dev-showcase__lang-item + .dev-showcase__lang-item {
@@ -495,7 +504,7 @@
 }
 
 .dev-showcase__lang-level {
-  color: #94a3b8;
+  color: var(--dev-sidebar-muted);
 }
 
 /* ── Experience timeline (main column) ── */
@@ -577,7 +586,7 @@
   margin-top: 0.1rem;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
-  color: #334155;
+  color: var(--dev-body);
 }
 
 .dev-showcase__dates {
@@ -601,13 +610,13 @@
   white-space: pre-line;
   font-size: var(--tpl-body-size);
   line-height: 1.65;
-  color: #334155;
+  color: var(--dev-body);
 }
 
 .dev-showcase__bullets li {
   font-size: var(--tpl-body-size);
   line-height: 1.65;
-  color: #334155;
+  color: var(--dev-body);
 }
 
 .dev-showcase__bullets li::marker {
@@ -646,7 +655,7 @@
   margin-top: 0.35rem;
   font-size: var(--tpl-body-size);
   line-height: 1.6;
-  color: #334155;
+  color: var(--dev-body);
   white-space: pre-line;
 }
 
@@ -663,7 +672,7 @@
   padding: 0.15rem 0.5rem;
   font-size: var(--tpl-meta-size);
   font-weight: 600;
-  background: rgba(15, 118, 110, 0.1);
+  background: var(--dev-accent-soft);
   color: var(--dev-accent);
   /* Wrap behavior comes from `.tpl-chip-wrappable` in the JSX (§6, docs/
      template-design-system.md) — see that primitive's own comment in
@@ -741,7 +750,7 @@
   margin-top: 0.3rem;
   font-size: var(--tpl-body-size);
   line-height: 1.6;
-  color: #334155;
+  color: var(--dev-body);
   white-space: pre-line;
 }
 
@@ -787,7 +796,7 @@
   margin-top: 0.5rem;
   font-size: var(--tpl-body-size);
   line-height: 1.6;
-  color: #334155;
+  color: var(--dev-body);
   white-space: pre-line;
 }
 
@@ -940,7 +949,7 @@
 .dev-showcase__main [data-moved-from='side'] .dev-showcase__cert-meta,
 .dev-showcase__main [data-moved-from='side'] .dev-showcase__edu-meta,
 .dev-showcase__main [data-moved-from='side'] .dev-showcase__lang-level {
-  color: #64748b;
+  color: var(--dev-muted);
 }
 
 .dev-showcase__main [data-moved-from='side'] .dev-showcase__cert-link {
