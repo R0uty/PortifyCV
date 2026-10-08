@@ -2,8 +2,9 @@ import { test, expect } from './fixtures/base.js'
 import { getTemplateVariants } from '../src/utils/templateVariants.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 
-// The Style picker (Phase 3) in both builder modes. Part 2 adds the
-// persistence tests once real variants exist (Task 11).
+// The Style picker (Phase 3) in both builder modes, and how a picked
+// variant persists (share link, JSON, session restore, template switch,
+// undo).
 const styleTrigger = (page) => page.getByRole('banner').getByRole('button', { name: /^Select style:/ })
 const fontTrigger = (page) => page.getByRole('banner').getByRole('button', { name: /^Select font:/ })
 const styleGroup = (page) => page.getByRole('radiogroup', { name: 'Select style' })
@@ -26,16 +27,26 @@ for (const mode of ['classic', 'direct']) {
     })
 
     test('works from the keyboard', async ({ page }) => {
+      const next = getTemplateVariants('developer')[1]
       await styleTrigger(page).focus()
       await page.keyboard.press('Enter')
-      const checked = styleGroup(page).getByRole('radio', { checked: true })
-      await expect(checked).toBeFocused()
+      const original = styleGroup(page).getByRole('radio', { name: 'Original' })
+      const nextRadio = styleGroup(page).getByRole('radio', { name: next.label.en })
+      await expect(original).toBeFocused()
+      // Arrows move focus to a different look without picking it.
       await page.keyboard.press('ArrowDown')
+      await expect(nextRadio).toBeFocused()
+      await expect(original).not.toBeFocused()
+      await expect(original).toHaveAttribute('aria-checked', 'true')
       await page.keyboard.press('ArrowUp')
-      await expect(checked).toBeFocused()
+      await expect(original).toBeFocused()
+      // Enter on a non-checked look picks it and closes the panel.
+      await page.keyboard.press('ArrowDown')
+      await expect(nextRadio).toBeFocused()
       await page.keyboard.press('Enter')
       await expect(styleGroup(page)).toBeHidden()
       await expect(styleTrigger(page)).toBeFocused()
+      await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${next.label.en}`)
     })
 
     test('a font tweak shows Modified; picking the look again resets it', async ({ page }) => {
@@ -104,3 +115,99 @@ for (const mode of ['classic', 'direct']) {
     expect(mismatches).toEqual([])
   })
 }
+
+const minimalVariant = getTemplateVariants('minimal')[1]
+
+// Picks a template from the gallery, as templates.spec.js does.
+async function pickTemplate(page, label) {
+  await page.getByRole('button', { name: /^Select template:/ }).click()
+  const dialog = page.getByRole('dialog', { name: 'Template gallery' })
+  await dialog.getByText(label, { exact: true }).click()
+  await expect(dialog).toBeHidden()
+}
+
+test('picking a variant changes the look and its font', async ({ page }) => {
+  await page.goto('/cv?template=minimal')
+  await styleTrigger(page).click()
+  await styleGroup(page).getByRole('radio', { name: minimalVariant.label.en }).click()
+  await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${minimalVariant.label.en}`)
+  await expect(fontTrigger(page)).toHaveAccessibleName(/^Select font: (Helvetica|Georgia)$/)
+  // toHaveCSS can't read custom properties, so read the computed value directly.
+  await expect.poll(() => page.locator('.app-shell__preview [data-export-variant="minimal"]')
+    .evaluate((el) => getComputedStyle(el).getPropertyValue('--min-accent-ink').trim()))
+    .toBe(minimalVariant.palette['--min-accent-ink'])
+})
+
+test('a variant survives a share link', async ({ page, context }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('/cv?template=minimal')
+  await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+  await styleTrigger(page).click()
+  await styleGroup(page).getByRole('radio', { name: minimalVariant.label.en }).click()
+  await page.getByRole('button', { name: 'Copy share link' }).click()
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain('#data=')
+  const url = await page.evaluate(() => navigator.clipboard.readText())
+
+  const fresh = await context.newPage()
+  await fresh.goto(url)
+  await expect(fresh.getByRole('banner').getByRole('button', { name: /^Select style:/ }))
+    .toHaveAccessibleName(`Select style: ${minimalVariant.label.en}`)
+})
+
+test('a variant survives a JSON export and import', async ({ page }, testInfo) => {
+  await page.goto('/cv?template=minimal')
+  await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+  await styleTrigger(page).click()
+  await styleGroup(page).getByRole('radio', { name: minimalVariant.label.en }).click()
+  await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
+  const downloadPromise = page.waitForEvent('download')
+  await page.getByRole('menuitem', { name: 'JSON' }).click()
+  const path = testInfo.outputPath('cv.json')
+  await (await downloadPromise).saveAs(path)
+
+  await page.goto('/cv?template=minimal')
+  await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original')
+  await page.locator('input[type="file"][accept=".json,application/json"]').setInputFiles(path)
+  await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${minimalVariant.label.en}`)
+})
+
+test('a variant survives a session restore', async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.setItem('portifycv-session-restore-enabled', 'true'))
+  await page.goto('/cv?template=minimal')
+  await styleTrigger(page).click()
+  await styleGroup(page).getByRole('radio', { name: minimalVariant.label.en }).click()
+  await expect
+    .poll(() => page.evaluate(() => window.sessionStorage.getItem('portifycv-session-snapshot')))
+    .toContain(minimalVariant.id)
+  await page.reload()
+  await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${minimalVariant.label.en}`)
+})
+
+test('switching templates keeps each template\'s own variant', async ({ page }) => {
+  const developerVariant = getTemplateVariants('developer')[2]
+  const label = (id) => cvTemplates.find((template) => template.id === id).label
+  await page.goto('/cv?template=minimal')
+  await styleTrigger(page).click()
+  await styleGroup(page).getByRole('radio', { name: minimalVariant.label.en }).click()
+  // Switching templates keeps the global font (spec §4), so the other
+  // template's look reads as Modified whenever the fonts differ.
+  await pickTemplate(page, label('developer'))
+  await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original, Modified')
+  await expect(fontTrigger(page)).toHaveAccessibleName(new RegExp(`^Select font: ${minimalVariant.fontId === 'georgia' ? 'Georgia' : 'Helvetica'}$`))
+  await styleTrigger(page).click()
+  await styleGroup(page).getByRole('radio', { name: developerVariant.label.en }).click()
+  await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developerVariant.label.en}`)
+  await pickTemplate(page, label('minimal'))
+  await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${minimalVariant.label.en}, Modified`)
+  await pickTemplate(page, label('developer'))
+  await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developerVariant.label.en}`)
+})
+
+test('undo restores the previous look', async ({ page }) => {
+  await page.goto('/cv?template=minimal')
+  await styleTrigger(page).click()
+  await styleGroup(page).getByRole('radio', { name: minimalVariant.label.en }).click()
+  await page.getByRole('button', { name: 'Undo' }).click()
+  await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original')
+  await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
+})

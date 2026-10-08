@@ -42,16 +42,18 @@ for (const template of cvTemplates) {
             const dialog = page.getByRole('dialog', { name: 'Settings' })
             await dialog.locator('.settings-row', { hasText: 'ATS-friendly mode' }).locator('.toggle-switch').click()
             await page.getByRole('button', { name: 'Close' }).click()
+            await expect(page.locator(BUILDER_ROOT)).toHaveClass(/\bpreview-document--ats\b/)
           }
           await waitForStableLayout(page)
 
           // The builder shows placeholders for empty secondary sections by
           // design (as the stress tier), and length is the PDF test's job.
           const violations = await auditLayout(page, BUILDER_ROOT, { skipRules: ['placeholder'] })
-          const { remaining } = filterAllowlisted(violations, LAYOUT_ALLOWLIST, {
+          const { remaining, staleEntries } = filterAllowlisted(violations, LAYOUT_ALLOWLIST, {
             template: template.id, subject: `${variant.id}:${exampleId}`, mode,
           })
           expect(remaining, 'layout violations').toEqual([])
+          expect(staleEntries, 'allowlist entries that no longer fail — remove them').toEqual([])
         })
       }
     }
@@ -61,6 +63,8 @@ for (const template of cvTemplates) {
       const exampleId = TEMPLATE_EXAMPLES[template.id][0]
       const cv = await loadExampleCv(exampleId, 'en')
       await openWithVariant(page, template.id, variant.id, cv)
+      await expect(page.getByRole('banner').getByRole('button', { name: /^Select style:/ }))
+        .toHaveAccessibleName(`Select style: ${variant.label.en}`)
       await waitForStableLayout(page)
 
       await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()

@@ -538,5 +538,12 @@ console.log('\nuiReducer\n')
     createInitialUiState({ formData: { ...createInitialCvData(), styleVariantByTemplate: { minimal: 'fromTheFuture' } } }).cvFontId === 'inter')
 }
 
+{
+  const { getTemplateVariants } = await importSrc('utils/templateVariants.js')
+  const stored = getTemplateVariants('minimal')[1]
+  const restored = createInitialUiState({ formData: { ...createInitialCvData(), styleVariantByTemplate: { minimal: stored.id } } })
+  check('a restored CV opens in its stored variant\'s font', restored.cvFontId === stored.fontId)
+}
+
 console.log(`\n${failures === 0 ? 'All reducer checks passed.' : `${failures} check(s) failed.`}`)
 process.exit(failures === 0 ? 0 : 1)

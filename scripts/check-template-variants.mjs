@@ -85,7 +85,9 @@ const NON_COLOUR_ROOT_VARIABLES = {
 // Templates whose two designed variants have landed (Part 2 adds each
 // batch here). Every other template must still have exactly variant #1.
 // Task 14 deletes this set and requires 3 everywhere.
-const TEMPLATES_WITH_DESIGNED_VARIANTS = new Set([])
+const TEMPLATES_WITH_DESIGNED_VARIANTS = new Set([
+  'minimal', 'developer', 'modern', 'classicProfessional', 'navyProfessional', 'colorfulCompact',
+])
 
 const COLOUR_VALUE = /^(#[0-9a-f]{3}|#[0-9a-f]{6}|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*(,\s*(0|1|0?\.\d+)\s*)?\))$/i
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i
