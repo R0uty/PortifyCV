@@ -1923,30 +1923,19 @@ select.floating-field__control {
   background: var(--app-text-muted);
 }
 
-/* Below 1600px the "Modified" pill shrinks to a dot (the worst case — Times
-   New Roman plus a long template name — would wrap Export at 1440px). */
+/* Below 1600px the toolbar is tight (the Style control must never add a
+   row), so the trigger keeps only the colour strip plus a dot when
+   modified; the aria-label/title still carry the name and "Modified". The
+   caption goes too (the label names it) and the control cluster tightens. */
 @media (max-width: 1599.98px) {
-  .cv-style-switcher__modified {
+  .cv-style-switcher__trigger-label,
+  .cv-style-switcher__modified,
+  .app-toolbar__labeled-control--style .app-toolbar__control-label {
     display: none;
   }
 
   .cv-style-switcher__dot {
     display: block;
-  }
-}
-
-/* Below 1440px the toolbar is tight (the 1280px row must not wrap), so the
-   trigger keeps only the colour strip plus a dot when modified; the
-   aria-label still carries the name and "Modified". */
-@media (max-width: 1439.98px) {
-  /* The caption goes too (the trigger's aria-label names it) — the strip is
-     self-explanatory beside Template and Font, and the row must not wrap. */
-  .app-toolbar__control-cluster {
-    gap: var(--space-3);
-  }
-
-  .app-toolbar__labeled-control--style .app-toolbar__control-label {
-    display: none;
   }
 
   .cv-style-switcher__trigger {
@@ -1954,8 +1943,8 @@ select.floating-field__control {
     padding: 0 0.5rem;
   }
 
-  .cv-style-switcher__trigger-label {
-    display: none;
+  .app-toolbar__control-cluster {
+    gap: var(--space-3);
   }
 }
 

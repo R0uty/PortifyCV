@@ -105,6 +105,7 @@ function CvStyleSwitcher({
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         aria-label={triggerLabel}
+        title={triggerLabel}
         onClick={() => setIsOpen((open) => !open)}
       >
         <span className="cv-style-switcher__strip" aria-hidden="true">
