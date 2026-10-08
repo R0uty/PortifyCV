@@ -36,7 +36,7 @@ codec (`check:share`), the CV schema/reducers (`check:reducers`), the
 rule-based feedback engine (`check:feedback`), the Word exporter
 (`check:docx-export`), the Direct Edit popup schema
 (`check:section-schema`), the section column-move
-rules and their import validation (`check:section-columns`), or the
+rules and their import validation (`check:section-columns`), the
 per-template pages' slugs, examples, and copy (`check:template-pages`), or
 a template's style variants or palette variables (`check:template-variants`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
@@ -107,12 +107,14 @@ variants to the canonical path. If you change a route or its metadata,
    itself in ATS mode or renders a simplified version of the same Showcase
    (Timeline, Navy Professional, Modern Orange do the latter — see the
    comments beside each `if (variant === ...)` block for why).
-
 4. The template's entry in `src/utils/templateVariants.js` — three looks (a
    palette of the template's own CSS variables, a font, a headings colour).
    Variant #1 must equal the stylesheet's root defaults, so declare every
-   colour on the template's root rule as a variable; `check:template-variants`
-   fails on a stray literal or a mismatch. The chosen look is stored per
+   colour on the template's root rule as a variable. `check:template-variants`
+   checks those root custom properties — variant #1 equals them exactly, each
+   is declared once, any non-colour one is on an allowlist — plus contrast;
+   it does not scan the rest of a stylesheet for hard-coded colour literals,
+   so keep those out by review. The chosen look is stored per
    template as `styleVariantByTemplate` (below).
 
 `src/components/templates/index.js` is the variant→config registry and also
@@ -120,7 +122,7 @@ owns `prefetchTemplateShowcases()` (idle-prefetch of every Showcase chunk, so
 switching templates or opening the gallery — which thumbnails all templates
 at once — doesn't pay for a dynamic import at that moment). Every
 `*Showcase.jsx` is `React.lazy()`-loaded from `CVPreview.jsx`; a new bespoke
-template should follow the same three-file pattern and get added to both the
+template should follow the same four-piece pattern and get added to both the
 lazy-import list in `CVPreview.jsx` and the prefetch list in
 `templates/index.js`.
 

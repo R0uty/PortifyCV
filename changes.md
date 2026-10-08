@@ -19,7 +19,13 @@ colour. It never changes the type ramp, density, layout or page count
 (a new variant layout and PDF-budget suite guards that). Picking a look,
 even the one already active, resets accent, font and headings colour to that
 look's values, and the same applies when a CV is loaded or an undo/redo
-crosses a look change. Tweaking the accent, font or headings colour after
+crosses a look change. A loaded CV (share link, session restore, JSON
+import, a template-page example) restores every template's stored look
+accent, not just the open template's, and resets templates without a stored
+look to their original accent; the font and headings colour come from the
+open template's look. Load demo CV and Clear CV replace the whole CV, so
+they also reset to the new CV's look (undo brings the old look back).
+Tweaking the accent, font or headings colour after
 that stays tab-only and marks the look as Modified; it is not saved
 anywhere. The first look of every template is the template's existing
 design, so old CVs, share links and exported JSON look exactly as before.

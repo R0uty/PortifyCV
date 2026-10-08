@@ -2191,11 +2191,27 @@ Portfolio, the variant layout and PDF-budget harness
 `e2e/fixtures/pdfPages.js`), and the 36 looks in three approved batches.
 1.5.16 also fixed Portrait's language row overflowing the page.
 
-Known gaps: the `defaultContrastExceptions` in `templateVariants.js` (13
-pairs across 8 templates, listed in `changes.md`), first look only.
+Final-review fix wave (1.6.0, 2026-10-09): a loaded CV now seeds every
+template's stored look accent (not only the open template's) and resets
+templates without one to their original accent (`applyStoredLooks` in
+`uiReducer.js`); Load demo CV and Clear CV apply the new CV's look; undo/redo
+restore the looks of the templates whose stored variant changed;
+`check:template-variants` reports a missing `CSS_SOURCES` entry as a FAIL
+line; `style-variants.spec.js` also checks the off-screen export source.
 
-Verification (1.6.0): see `.superpowers/sdd/2026-10-07-template-style-variants/task-14-report.md`
-for the lint, eight `check:*`, full e2e and build counts.
+Known gaps: the `defaultContrastExceptions` in `templateVariants.js` (13
+pairs across 8 templates, listed in `changes.md`), first look only. Share
+links don't carry the selected template (they always open on Minimalist), so
+a non-Minimalist look's font and headings colour can't travel via a share
+link; its palette and accent do.
+
+Verification (1.6.0, after the fix wave): `npm run lint` clean, all eight
+`check:*` scripts pass, full `CI=1 npm run test:e2e` 827 passed (4.4m), `npm run
+build` ok.
+
+Possible follow-up: split the check-only `textPairs`/contrast exceptions out
+of the runtime registry (`templateVariants.js`), so the app bundle doesn't
+ship data only `check:template-variants` reads.
 
 ### Phase 4 follow-up (not started)
 
