@@ -7,6 +7,9 @@ const SHARE_PAYLOAD_VERSION = 3
 
 // Short keys keep share URLs as small as possible. Never repurpose a key that is
 // already in use: links generated earlier decode against these exact tables.
+// Root keys written outside these tables are reserved too: s (skills), l (links),
+// so (section order), sv, siv, pv, sc, va, and tp (the sender's selected
+// template, 1.6.8). A new root key must not reuse any of them.
 const ROOT_STRING_KEYS = {
   fullName: 'f',
   title: 't',
@@ -493,7 +496,10 @@ export function buildShareUrl(formData, { templateId = null, currentHref = windo
 // "never sent to a server" privacy promise. Query-string data is no longer
 // read — only cleaned out of the visible URL (see below) — so an old link
 // just opens an empty builder instead of silently leaking its payload again
-// on every subsequent open. Returns the CV and the sender's selected template ('tp'; null for links made before 1.6.8).
+// on every subsequent open.
+//
+// Returns the CV and the sender's selected template ('tp'; null for links
+// made before 1.6.8).
 export function readCvStateFromLocation(currentHref = window.location.href) {
   const currentUrl = new URL(currentHref)
   const hashParams = new URLSearchParams(currentUrl.hash.replace(/^#/, ''))

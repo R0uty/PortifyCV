@@ -260,10 +260,27 @@ test('a share link restores another template\'s look accent', async ({ page, con
   const fresh = await context.newPage()
   await fresh.goto(url)
   await expect(fresh.locator('.app-toolbar__template-trigger-label')).toHaveText('Minimalist')
+  await expect(fresh.getByRole('banner').getByRole('button', { name: /^Select style:/ })).toHaveAccessibleName('Select style: Original')
   await pickTemplate(fresh, creativeLabel)
   await expect.poll(() => fresh.locator('.app-shell__preview [data-export-variant="creative"]')
     .evaluate((el) => getComputedStyle(el).getPropertyValue('--tpl-accent').trim().toLowerCase()))
     .toBe(creativeVariant.accent.toLowerCase())
+})
+
+// The template a link carries wins over a ?template= in the same URL.
+test('a share link\'s template wins over ?template=', async ({ page, context }) => {
+  const developerLabel = cvTemplates.find((template) => template.id === 'developer').label
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('/cv?template=developer')
+  await page.getByRole('button', { name: 'Copy share link' }).click()
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain('#data=')
+  const url = await page.evaluate(() => navigator.clipboard.readText())
+  const conflicting = url.replace('/cv#', '/cv?template=creative#')
+  expect(conflicting).toContain('template=creative')
+
+  const fresh = await context.newPage()
+  await fresh.goto(conflicting)
+  await expect(fresh.locator('.app-toolbar__template-trigger-label')).toHaveText(developerLabel)
 })
 
 // Load demo CV and Clear CV replace the whole CV, so they apply the new
