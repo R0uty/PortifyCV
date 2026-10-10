@@ -2898,6 +2898,11 @@ select.floating-field__control {
   box-shadow: var(--shadow-sm);
 }
 
+/* The card's look swatches (Phase 4), under the thumbnail. */
+.templates-page-card__looks {
+  margin-top: var(--space-2);
+}
+
 .templates-page-card__name {
   display: inline-block;
   font-size: var(--text-body);

@@ -133,3 +133,63 @@ test.describe('Template gallery looks', () => {
     await expect(lookRadio(dialog, group, developer[1])).toBeChecked()
   })
 })
+
+const developerSlug = cvTemplates.find((template) => template.id === 'developer').slug
+
+test.describe('Free CV Templates grid looks', () => {
+  const gridCard = (page, id) => page.locator('.templates-page-card')
+    .filter({ has: lookGroup(page, `Style: ${label(id)}`) })
+
+  test('a swatch previews only its own card and carries into its links', async ({ page }) => {
+    await page.goto('/free-cv-templates')
+    await expect(page.locator('.templates-page-card [data-export-variant]')).toHaveCount(cvTemplates.length)
+    const developerCard = gridCard(page, 'developer')
+    const nameLink = developerCard.locator('a.templates-page-card__name')
+    const examplesLink = developerCard.getByRole('link', { name: `View examples: ${label('developer')}` })
+    await expect(nameLink).toHaveAttribute('href', `/free-cv-templates/${developerSlug}`)
+
+    await lookRadio(page, `Style: ${label('developer')}`, developer[1]).check()
+    await expect.poll(() => paletteVar(developerCard, developerVar)).toBe(developer[1].palette[developerVar])
+    expect(await paletteVar(gridCard(page, 'creative'), creativeVar)).toBe(creative[0].palette[creativeVar])
+    await expect(nameLink).toHaveAttribute('href', `/free-cv-templates/${developerSlug}?style=${developer[1].id}`)
+    await expect(examplesLink).toHaveAttribute('href', `/free-cv-templates/${developerSlug}?style=${developer[1].id}`)
+
+    await developerCard.locator('.templates-page-card__thumb').click()
+    await expect(page).toHaveURL(new RegExp(`/free-cv-templates/${developerSlug}\\?style=${developer[1].id}$`))
+    await expect(lookRadio(page, 'Style', developer[1])).toBeChecked()
+  })
+})
+
+test.describe('Template page looks', () => {
+  test('?style= opens the page on that look; an unknown one on Original', async ({ page }) => {
+    await page.goto(`/free-cv-templates/${developerSlug}?style=${developer[2].id}`)
+    await expect(lookRadio(page, 'Style', developer[2])).toBeChecked()
+    await expect.poll(() => paletteVar(page.locator('.template-page__preview'), differingVar(developer[0], developer[2])))
+      .toBe(developer[2].palette[differingVar(developer[0], developer[2])])
+
+    await page.goto(`/free-cv-templates/${developerSlug}?style=no-such-look`)
+    await expect(lookRadio(page, 'Style', developer[0])).toBeChecked()
+  })
+
+  test('the picker updates the URL and keeps ?example=', async ({ page }) => {
+    await page.goto(`/free-cv-templates/${developerSlug}?example=data-engineer`)
+    await lookRadio(page, 'Style', developer[1]).check()
+    await expect(page).toHaveURL(new RegExp(`\\?example=data-engineer&style=${developer[1].id}$`))
+    await expect.poll(() => paletteVar(page.locator('.template-page__preview'), developerVar)).toBe(developer[1].palette[developerVar])
+    await lookRadio(page, 'Style', developer[0]).check()
+    await expect(page).toHaveURL(/\?example=data-engineer$/)
+  })
+
+  test('moving to another template starts it on Original', async ({ page }) => {
+    await page.goto(`/free-cv-templates/${developerSlug}?style=${developer[1].id}`)
+    await page.getByRole('link', { name: /^Next template:/ }).click()
+    await expect(page).not.toHaveURL(/style=/)
+    await expect(lookGroup(page, 'Style').getByRole('radio').first()).toBeChecked()
+  })
+
+  test('Finnish label', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'fi'))
+    await page.goto(`/free-cv-templates/${developerSlug}`)
+    await expect(page.getByRole('radiogroup', { name: 'Tyyli', exact: true })).toBeVisible()
+  })
+})

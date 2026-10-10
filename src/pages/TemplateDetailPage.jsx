@@ -1,7 +1,9 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 
 import InternalNavLink from '../components/InternalNavLink'
-import { cvTemplates, getCvTemplate, resolveTemplateAccent } from '../utils/cvTemplates'
+import StyleSwatchGroup from '../components/StyleSwatchGroup'
+import { cvTemplates, getCvTemplate } from '../utils/cvTemplates'
+import { DEFAULT_STYLE_VARIANT_ID, getVariantLook, parseStyleVariantParam } from '../utils/templateVariants'
 import { TEMPLATE_PAGE_COPY } from '../utils/templatePageCopy'
 import { getTemplateExamples, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
 import { ROUTES, templatePath } from '../utils/routes'
@@ -22,6 +24,7 @@ function getCopy(locale) {
       heading: (label) => `${label} – CV-pohja`,
       bestFor: 'Sopii:',
       examples: 'Esimerkit',
+      style: 'Tyyli',
       atsView: 'ATS-näkymä',
       useExample: 'Käytä tätä esimerkkiä',
       useTemplate: 'Aloita tyhjästä tällä pohjalla',
@@ -40,6 +43,7 @@ function getCopy(locale) {
     heading: (label) => `${label} CV template`,
     bestFor: 'Best for:',
     examples: 'Examples',
+    style: 'Style',
     atsView: 'ATS view',
     useExample: 'Use this example',
     useTemplate: 'Start blank with this template',
@@ -58,6 +62,15 @@ function readExampleParam() {
   return new URLSearchParams(window.location.search).get('example')
 }
 
+// ?style= (Phase 4): the look to open the page on, from a Free CV
+// Templates card or a builder gallery card's "View examples". An unknown
+// id is Original. The page remounts per template (App's key={view}), so
+// moving to another template reads its own URL afresh.
+function readStyleParam(templateId) {
+  if (typeof window === 'undefined') return DEFAULT_STYLE_VARIANT_ID
+  return parseStyleVariantParam(templateId, new URLSearchParams(window.location.search).get('style'))
+}
+
 function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}, onNavigateToView = () => {} }) {
   const resolvedLocale = locale === 'fi' ? 'fi' : 'en'
   const copy = getCopy(resolvedLocale)
@@ -71,6 +84,7 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
   })
   const [loadedExample, setLoadedExample] = useState(null)
   const [atsView, setAtsView] = useState(false)
+  const [styleId, setStyleId] = useState(() => readStyleParam(templateId))
 
   useEffect(() => {
     let cancelled = false
@@ -98,6 +112,19 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
     setExampleId(nextId)
     const url = new URL(window.location.href)
     url.searchParams.set('example', nextId)
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}`)
+  }
+
+  // Like selectExample: the look lives in the URL, so a reload or a shared
+  // link keeps it. Original is the absence of ?style=.
+  const selectStyle = (nextId) => {
+    setStyleId(nextId)
+    const url = new URL(window.location.href)
+    if (nextId === DEFAULT_STYLE_VARIANT_ID) {
+      url.searchParams.delete('style')
+    } else {
+      url.searchParams.set('style', nextId)
+    }
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}`)
   }
 
@@ -163,6 +190,15 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
               ))}
             </div>
           )}
+          <StyleSwatchGroup
+            templateId={templateId}
+            value={styleId}
+            onChange={selectStyle}
+            locale={resolvedLocale}
+            name="template-style"
+            label={copy.style}
+            size="page"
+          />
 
           <label className="template-page__ats-toggle">
             <input type="checkbox" checked={atsView} onChange={(event) => setAtsView(event.target.checked)} />
@@ -170,13 +206,13 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
           </label>
 
           <div className="template-page__actions">
-            <button type="button" className="landing-cta" onClick={() => onGetStarted(templateId, exampleId)}>
+            <button type="button" className="landing-cta" onClick={() => onGetStarted(templateId, exampleId, { style: styleId })}>
               {copy.useExample}
             </button>
             <button
               type="button"
               className="templates-page-card__cta"
-              onClick={() => onGetStarted(templateId, undefined, { blank: true })}
+              onClick={() => onGetStarted(templateId, undefined, { blank: true, style: styleId })}
             >
               {copy.useTemplate}
             </button>
@@ -196,7 +232,7 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
                 template={templateId}
                 locale={resolvedLocale}
                 atsFriendlyMode={atsView}
-                accentColor={resolveTemplateAccent(null, templateId)}
+                {...getVariantLook(templateId, styleId)}
               />
             </Suspense>
           )}

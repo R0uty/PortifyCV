@@ -157,15 +157,17 @@ function useDocumentHead(view) {
 // leaving the URL frozen at whatever it was on first load — the canonical
 // tag would claim /cv while the address bar still read /, and the back
 // button had nothing to go back to.
-function pushViewUrl(nextView) {
+// `search` (Phase 4) carries a query string into the new view, e.g. a
+// template page's ?style=; without it the view opens at its bare path.
+function pushViewUrl(nextView, search = '') {
   if (typeof window === 'undefined') {
     return
   }
 
-  const path = VIEW_HEAD[nextView]?.path ?? '/'
+  const url = `${VIEW_HEAD[nextView]?.path ?? '/'}${search}`
 
-  if (window.location.pathname !== path) {
-    window.history.pushState({ view: nextView }, '', path)
+  if (`${window.location.pathname}${window.location.search}` !== url) {
+    window.history.pushState({ view: nextView }, '', url)
   }
 }
 
@@ -372,9 +374,9 @@ function App() {
   // Generic version of goToLanding for any non-builder static page (footer
   // guide links, etc.) — builder goes through goToBuilder since it also
   // supports the optional ?template= id.
-  const goToView = useCallback((nextView) => {
+  const goToView = useCallback((nextView, { search = '' } = {}) => {
     setView(nextView)
-    pushViewUrl(nextView)
+    pushViewUrl(nextView, search)
     scrollToTop()
   }, [])
 
