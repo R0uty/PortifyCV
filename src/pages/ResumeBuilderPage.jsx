@@ -298,12 +298,15 @@ function loadInitialCvSession() {
   }
 
   try {
-    const sharedFormData = readCvStateFromLocation()
+    const shared = readCvStateFromLocation()
 
-    if (sharedFormData) {
+    if (shared) {
       markOnboardingSeen()
       return {
-        formData: sharedFormData,
+        formData: shared.formData,
+        // The sender's selected template (1.6.8); createInitialUiState
+        // opens on it when it resolves.
+        sharedTemplateId: shared.templateId,
         initialToast: createToast('Loaded CV from share link.', 'success'),
         clearShareParam: false,
         storageIssue: hasStorageIssue,
@@ -1145,7 +1148,7 @@ function ResumeBuilderPage({
     let shareUrl
 
     try {
-      shareUrl = buildShareUrl(formData)
+      shareUrl = buildShareUrl(formData, { templateId: selectedTemplate })
     } catch (error) {
       showToast(
         error instanceof Error
@@ -1194,7 +1197,7 @@ function ResumeBuilderPage({
     }
 
     showToast(locale === 'fi' ? 'Jakolinkki kopioitu leikepöydälle.' : 'Share link copied to clipboard.')
-  }, [formData, locale])
+  }, [formData, locale, selectedTemplate])
 
   const handleToggleAtsFriendlyMode = useCallback(() => {
     dispatchUi({ type: UI_ACTION.TOGGLE_ATS_MODE })

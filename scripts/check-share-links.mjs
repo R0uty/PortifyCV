@@ -172,10 +172,35 @@ const legacyBack = share.decodeCvStateFromUrl(legacyV2)
 check('legacy v2 links still decode',
   legacyBack.fullName === 'Old Name' && legacyBack.experience[0]?.role === 'Dev')
 
-const url = share.buildShareUrl(demo, 'https://portifycv.app/?stale=1#stale')
+const url = share.buildShareUrl(demo, { currentHref: 'https://portifycv.app/?stale=1#stale' })
 const fromUrl = share.readCvStateFromLocation(url)
-check('buildShareUrl output can be read back', fromUrl.fullName === demo.fullName,
+check('buildShareUrl output can be read back', fromUrl.formData.fullName === demo.fullName,
   `url length ${url.length}, path ${new URL(url).pathname}`)
+check('a link built without a template reads back templateId null', fromUrl.templateId === null)
+
+// The sender's selected template travels under its own key ('tp', 1.6.8).
+const templateUrl = share.buildShareUrl(demo, { templateId: 'developer', currentHref: 'https://portifycv.app/cv' })
+const fromTemplateUrl = share.readCvStateFromLocation(templateUrl)
+check('the selected template survives the round trip', fromTemplateUrl.templateId === 'developer')
+check('the CV is unchanged when a template travels too',
+  diff(demo, fromTemplateUrl.formData).length === 0, diff(demo, fromTemplateUrl.formData).join('; '))
+const templateEncoded = new URLSearchParams(new URL(templateUrl).hash.slice(1)).get('data')
+check('the template travels as tp', rawPayload(templateEncoded).d.tp === 'developer')
+check('decodeCvStateFromUrl still returns only the CV',
+  diff(demo, share.decodeCvStateFromUrl(templateEncoded)).length === 0)
+check('no template encodes no tp key', !('tp' in rawPayload(share.encodeCvStateForUrl(demo)).d))
+check('an empty template encodes no tp key', !('tp' in rawPayload(share.encodeCvStateForUrl(demo, '')).d))
+
+// A link made before 1.6.8 has no tp; a hand-built one may carry junk.
+const oldLink = `https://portifycv.app/cv#data=${demoEncoded}`
+check('an old link (no tp) reads back templateId null',
+  share.readCvStateFromLocation(oldLink).templateId === null
+    && diff(demo, share.readCvStateFromLocation(oldLink).formData).length === 0)
+const junkPayload = { ...rawPayload(demoEncoded) }
+junkPayload.d = { ...junkPayload.d, tp: 42 }
+const junkLink = `https://portifycv.app/cv#data=${Buffer.from(JSON.stringify(junkPayload), 'utf8').toString('base64url')}`
+check('a non-string tp reads back templateId null', share.readCvStateFromLocation(junkLink).templateId === null)
+check('a URL without share data reads back null', share.readCvStateFromLocation('https://portifycv.app/cv') === null)
 
 console.log(`\n${failures === 0 ? 'All share-link checks passed.' : `${failures} check(s) failed.`}`)
 process.exit(failures === 0 ? 0 : 1)
