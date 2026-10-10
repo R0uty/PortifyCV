@@ -74,10 +74,10 @@ import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
 import { hideEmptySections } from '../utils/sectionContent'
-import { TEMPLATE_VARIANTS, getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, resolveStyleVariantId } from '../utils/templateVariants'
+import { DEFAULT_STYLE_VARIANT_ID, TEMPLATE_VARIANTS, getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, parseStyleVariantParam, resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
-import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
+import { uiReducer, createInitialUiState, readInitialTemplateId, UI_ACTION } from '../reducers/uiReducer'
 import {
   createExportFileName,
 } from '../utils/cvSnapshot'
@@ -253,6 +253,16 @@ async function waitForPreviewModeSync(previewElement, expectedMode, maxFrames = 
   return false
 }
 
+// Opens `formData` in look `variantId` for `templateId` (a template page's
+// ?style=, Phase 4) by storing it the way the Style picker does.
+// createInitialUiState / applyStoredStyleVariantLook then apply its
+// accent, font and headings colour like any other stored look.
+function withStyleVariant(formData, templateId, variantId) {
+  return variantId === DEFAULT_STYLE_VARIANT_ID
+    ? formData
+    : cvFormReducer(formData, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId, variantId })
+}
+
 function loadInitialCvSession() {
   if (typeof window === 'undefined') {
     return {
@@ -301,6 +311,13 @@ function loadInitialCvSession() {
 
   markOnboardingSeen()
 
+  const params = new URLSearchParams(window.location.search)
+  // ?style= (Phase 4): the look a template page or Free CV Templates card
+  // asked to open the template in. Like ?example=, a share link (returned
+  // above) or a restored session (below) ignores it.
+  const requestedTemplateId = readInitialTemplateId()
+  const requestedStyleId = parseStyleVariantParam(requestedTemplateId, params.get('style'))
+
   const sessionRestoreEnabled = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value === 'true'
 
   if (sessionRestoreEnabled) {
@@ -310,17 +327,17 @@ function loadInitialCvSession() {
       try {
         const restoredFormData = parseImportedCvData(JSON.parse(snapshotState.value))
 
-        // A valid ?example= for the selected template would otherwise be
+        // A valid ?example= or ?style= for the selected template would otherwise be
         // silently dropped with no explanation — the snapshot still wins
         // (see the comment below), but the toast should say so, pointing at
         // "Load demo CV" as the way to start over instead.
-        const restoreParams = new URLSearchParams(window.location.search)
-        const hasPendingExample = isTemplateExample(restoreParams.get('template'), restoreParams.get('example'))
+        const hasPendingExample = isTemplateExample(params.get('template'), params.get('example'))
+        const hasPendingStyle = requestedStyleId !== DEFAULT_STYLE_VARIANT_ID
 
         return {
           formData: restoredFormData,
           initialToast: createToast(
-            hasPendingExample
+            hasPendingExample || hasPendingStyle
               ? "Kept your restored CV. Use 'Load demo CV' to start over."
               : 'Restored your last session.',
             'success',
@@ -338,8 +355,6 @@ function loadInitialCvSession() {
     }
   }
 
-  const params = new URLSearchParams(window.location.search)
-
   // ?blank=1 from a template page's "Start blank with this template".
   // Reached only when there's no share link and no restored snapshot
   // (both returned above). Onboarding is already marked seen above, so
@@ -348,7 +363,7 @@ function loadInitialCvSession() {
   // explicitly asked for.
   if (params.get('blank') === '1') {
     return {
-      formData: initialCvData,
+      formData: withStyleVariant(initialCvData, requestedTemplateId, requestedStyleId),
       initialToast: null,
       clearShareParam: false,
       storageIssue: hasStorageIssue,
@@ -365,17 +380,18 @@ function loadInitialCvSession() {
   const requestedExampleId = params.get('example')
   if (isTemplateExample(params.get('template'), requestedExampleId)) {
     return {
-      formData: initialCvData,
+      formData: withStyleVariant(initialCvData, requestedTemplateId, requestedStyleId),
       initialToast: null,
       clearShareParam: false,
       storageIssue: hasStorageIssue,
       pendingExampleId: requestedExampleId,
+      pendingStyleVariantId: requestedStyleId,
     }
   }
 
   if (!hasSeenOnboarding) {
     return {
-      formData: structuredClone(demoCvData),
+      formData: withStyleVariant(structuredClone(demoCvData), requestedTemplateId, requestedStyleId),
       initialToast: createToast('Loaded a sample CV to help you get started.', 'success'),
       clearShareParam: false,
       storageIssue: hasStorageIssue,
@@ -384,7 +400,7 @@ function loadInitialCvSession() {
   }
 
   return {
-    formData: initialCvData,
+    formData: withStyleVariant(initialCvData, requestedTemplateId, requestedStyleId),
     initialToast: null,
     clearShareParam: false,
     storageIssue: hasStorageIssue,
@@ -719,9 +735,9 @@ function ResumeBuilderPage({
     }
   }, [initialSession])
 
-  // Strip ?example=/?blank= so a reload doesn't re-apply them on top of
+  // Strip ?example=/?blank=/?style= so a reload doesn't re-apply them on top of
   // edits. Always strip, whether or not the example loaded: a restored
-  // session also ignores both.
+  // session also ignores all three.
   useEffect(() => {
     const url = new URL(window.location.href)
     let paramsChanged = false
@@ -731,6 +747,10 @@ function ResumeBuilderPage({
     }
     if (url.searchParams.has('blank')) {
       url.searchParams.delete('blank')
+      paramsChanged = true
+    }
+    if (url.searchParams.has('style')) {
+      url.searchParams.delete('style')
       paramsChanged = true
     }
     if (paramsChanged) {
@@ -754,8 +774,10 @@ function ResumeBuilderPage({
         showToast(locale === 'fi' ? 'Esimerkkiä ei voitu ladata.' : "Couldn't load that example.", 'error')
         return
       }
-      dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: exampleCv })
-      applyStoredStyleVariantLook(exampleCv, selectedTemplate)
+      // ?style= wins over any look the example stores for this template.
+      const startCv = withStyleVariant(exampleCv, selectedTemplate, initialSession.pendingStyleVariantId ?? DEFAULT_STYLE_VARIANT_ID)
+      dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: startCv })
+      applyStoredStyleVariantLook(startCv, selectedTemplate)
       const roleLabel = EXAMPLES[exampleId].role[locale === 'fi' ? 'fi' : 'en']
       showToast(locale === 'fi' ? `Esimerkki ladattu: ${roleLabel}.` : `Loaded the ${roleLabel} example.`)
     })

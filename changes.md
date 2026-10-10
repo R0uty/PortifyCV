@@ -4,6 +4,40 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template looks outside the builder — 1.6.1-1.6.4, 2026-10-10
+
+The three looks of every template can now be seen and picked outside the
+builder's Style picker:
+
+- **Builder's template gallery.** Each card has three look swatches. A
+  card opens on the look your CV has stored for that template, and the
+  open template's card shows exactly what the preview shows, tweaks
+  included. A swatch only previews the look on that card. "Use template"
+  then opens the template in that look (its accent, font and headings
+  colour), and an open template previewed in another look offers "Use
+  this style" ("Käytä tyyliä").
+- **Free CV Templates grid.** Each card has the same swatches.
+- **Template pages.** A "Style" ("Tyyli") picker sits beside the
+  examples, and the choice is kept in the URL as `?style=`.
+
+A look picked on a template page or grid card travels into the builder:
+"Use this example", "Start blank" and "Use this template" all open it in
+that look. As with `?example=`, a restored session or a share link wins
+and ignores it. Original is never written into a URL.
+
+Switching templates from the gallery now always matches the card. The
+font and headings colour come from the new template's stored look
+instead of carrying over from the previous template (1.6.0 carried
+them). Known limit: using another template on the look it already has
+stored resets the font and headings colour without an undo step,
+because no stored look changed.
+
+Bundle (gzip, before to after): entry index 37.29 to 36.86 KB (-0.43),
+CVPreview 40.73 to 34.72 KB (thumbnailCv, 8.22 KB, now splits out as its
+own chunk), FreeCvTemplatesPage 1.68 to 1.87 KB, TemplateDetailPage 10.97
+to 11.14 KB, ResumeBuilderPage 49.89 to 50.27 KB; new shared chunks
+StyleSwatchGroup (0.46 KB) and preload-helper (0.67 KB).
+
 ## Template style variants — 1.6.0, 2026-10-08
 
 Every one of the 18 templates now comes in three looks, so a CV no longer

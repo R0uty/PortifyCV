@@ -193,3 +193,55 @@ test.describe('Template page looks', () => {
     await expect(page.getByRole('radiogroup', { name: 'Tyyli', exact: true })).toBeVisible()
   })
 })
+
+test.describe('?style= handoff into the builder', () => {
+  test('"Use this example" opens the builder on the page\'s look', async ({ page }) => {
+    await page.goto(`/free-cv-templates/${developerSlug}`)
+    await lookRadio(page, 'Style', developer[1]).check()
+    await page.getByRole('button', { name: 'Use this example' }).click()
+    await expect(page.getByText(/^Loaded the .+ example\.$/)).toBeVisible()
+    await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[1].label.en}`)
+    await expect(fontTrigger(page)).toHaveAccessibleName(`Select font: ${fontLabel(developer[1].fontId)}`)
+    await expect(page).toHaveURL(/\/cv\?template=developer$/)
+  })
+
+  test('"Start blank" opens the builder on the page\'s look', async ({ page }) => {
+    await page.goto(`/free-cv-templates/${developerSlug}?style=${developer[2].id}`)
+    await page.getByRole('button', { name: 'Start blank with this template' }).click()
+    await expect(page).toHaveURL(/\/cv\?template=developer$/)
+    await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[2].label.en}`)
+  })
+
+  test('a grid card\'s "Use this template" opens the builder on the card\'s look', async ({ page }) => {
+    await page.goto('/free-cv-templates')
+    await lookRadio(page, `Style: ${label('developer')}`, developer[2]).check()
+    await page.locator('.templates-page-card')
+      .filter({ has: lookGroup(page, `Style: ${label('developer')}`) })
+      .getByRole('button', { name: 'Use this template' })
+      .click()
+    await expect(templateLabel(page)).toHaveText(label('developer'))
+    await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[2].label.en}`)
+    await expect(page).toHaveURL(/\/cv\?template=developer$/)
+  })
+
+  test('an unknown ?style= opens on Original and is stripped', async ({ page }) => {
+    await page.goto('/cv?template=developer&style=no-such-look')
+    await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original')
+    await expect(page).toHaveURL(/\/cv\?template=developer$/)
+  })
+
+  test('a restored session ignores ?style= and says so', async ({ page }) => {
+    await page.goto('/cv')
+    await page.evaluate(() => window.localStorage.setItem('portifycv-session-restore-enabled', 'true'))
+    await page.reload()
+    await page.getByRole('textbox', { name: /Full name/ }).fill('Grace Hopper')
+    await expect
+      .poll(() => page.evaluate(() => window.sessionStorage.getItem('portifycv-session-snapshot')))
+      .toContain('Grace Hopper')
+
+    await page.goto(`/cv?template=developer&style=${developer[1].id}`)
+    await expect(page.getByText("Kept your restored CV. Use 'Load demo CV' to start over.")).toBeVisible()
+    await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original')
+    await expect(page).toHaveURL(/\/cv\?template=developer$/)
+  })
+})

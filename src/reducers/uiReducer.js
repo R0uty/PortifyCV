@@ -42,7 +42,7 @@ const LEGACY_TEMPLATE_ALIASES = { classic: 'classicProfessional' }
 // already selected instead of always landing on the default. Only trusted
 // once the id is checked against the real template map - an unrecognized or
 // missing id falls back to defaultTemplateId exactly like before.
-function readInitialTemplateId() {
+export function readInitialTemplateId() {
   if (typeof window === 'undefined') {
     return defaultTemplateId
   }

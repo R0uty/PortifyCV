@@ -2213,8 +2213,22 @@ Possible follow-up: split the check-only `textPairs`/contrast exceptions out
 of the runtime registry (`templateVariants.js`), so the app bundle doesn't
 ship data only `check:template-variants` reads.
 
-### Phase 4 follow-up (not started)
+### Phase 4: template looks outside the builder — DONE (1.6.4, 2026-10-10)
 
-Show the looks outside the builder: variants on the gallery cards, the
-per-template pages and the Free CV Templates grid. These stay on each
-template's first look today.
+Spec: `docs/superpowers/specs/2026-10-10-template-looks-outside-builder-design.md`;
+plan: `docs/superpowers/plans/2026-10-10-template-looks-outside-builder.md`.
+The looks show on the builder gallery cards, the Free CV Templates grid
+and the template pages, and `?style=` carries a look into the builder
+(1.6.1 shared pieces, 1.6.2 gallery, 1.6.3 grid and pages, 1.6.4
+handoff). Tests: `e2e/template-looks.spec.js`.
+
+Still open (not in this phase): gallery filters and a per-template photo
+flag (the original roadmap's Phase 4); the selected template in share
+links; the 13 first-look contrast exceptions; moving
+`textPairs`/`defaultContrastExceptions` out of the runtime registry; looks
+on the landing page's marquee and hero.
+
+Verification (1.6.4): `npm run lint` clean; all 8 check:* ok (share,
+reducers, feedback, docx-export, section-schema, section-columns,
+template-pages, template-variants); `CI=1 npm run test:e2e` 843 passed
+(4.9m), 0 failed; `npm run build` ok.

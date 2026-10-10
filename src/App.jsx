@@ -346,6 +346,9 @@ function App() {
   // template" button: it must NOT fall into the onboarding-demo branch of
   // loadInitialCvSession just because this is a first-time visitor — the
   // visitor explicitly asked for blank, not a demo.
+  // options.style is the look picked on a template page or Free CV Templates
+  // card; the builder applies it to whatever CV it starts with, exactly like
+  // ?example=.
   const goToBuilder = useCallback((templateId, exampleId, options = {}) => {
     setView('builder')
 
@@ -354,6 +357,13 @@ function App() {
       if (typeof templateId === 'string' && templateId) params.set('template', templateId)
       if (typeof exampleId === 'string' && exampleId) params.set('example', exampleId)
       if (options.blank) params.set('blank', '1')
+      // A template page's or grid card's look (Phase 4). 'default' is
+      // variant #1's id and never goes into a URL; App deliberately doesn't
+      // import the variant registry (it would join the entry chunk), so the
+      // builder validates the id.
+      if (typeof options.style === 'string' && options.style && options.style !== 'default') {
+        params.set('style', options.style)
+      }
       const query = params.toString() ? `?${params}` : ''
       const nextPath = `${VIEW_HEAD.builder.path}${query}`
 
