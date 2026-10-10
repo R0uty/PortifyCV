@@ -1865,6 +1865,78 @@ select.floating-field__control {
   margin-left: -0.2rem;
 }
 
+/* StyleSwatchGroup (Phase 4): a template's looks as colour strips on the
+   gallery cards, the Free CV Templates grid and the template pages. The
+   radio covers its whole option at opacity 0 (not display:none), so it
+   stays focusable and clickable and the strip is the hit target. */
+.style-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.style-swatches__option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 1.75rem;
+  padding: 0.3rem 0.55rem;
+  border: 1.5px solid var(--app-border);
+  border-radius: 999px;
+  background: var(--app-surface);
+  cursor: pointer;
+}
+
+.style-swatches__option input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.style-swatches__option:has(input:checked) {
+  border-color: var(--app-text);
+}
+
+.style-swatches__option:has(input:focus-visible) {
+  outline: 2px solid var(--app-text);
+  outline-offset: 2px;
+}
+
+.style-swatches__strip {
+  display: inline-flex;
+}
+
+.style-swatches__chip {
+  width: 0.85rem;
+  height: 0.85rem;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 999px;
+}
+
+.style-swatches__chip + .style-swatches__chip {
+  margin-left: -0.25rem;
+}
+
+/* The template page's picker matches its Examples radios beside it. */
+.style-swatches--page .style-swatches__option {
+  border-radius: 0;
+  padding: 0.4rem 0.8rem;
+  font-size: var(--text-body-sm);
+}
+
+.style-swatches--page .style-swatches__option:has(input:checked) {
+  border-color: #111111;
+}
+
+.style-swatches--page .style-swatches__option:has(input:focus-visible) {
+  outline-color: #111111;
+}
+
 .cv-style-switcher__panel {
   /* Positioned by useAnchoredPanelPosition, as .cv-font-switcher__panel. */
   position: fixed;
