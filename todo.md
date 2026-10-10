@@ -2230,11 +2230,13 @@ on the landing page's marquee and hero.
 
 Follow-ups from the Phase 4 final review (not started):
 
-- A gallery "Use" on another template whose stored look doesn't change
-  resets the font and headings colour with no undo step (spec §2 "Known
-  limit"). A user who picked e.g. Georgia loses it on a plain template
-  switch; it's tab-only and can be re-picked. Options: record a UI-only
-  undo step, or keep the user's font when nothing stored changes.
+- ~~A gallery "Use" on another template whose stored look doesn't change
+  resets the font and headings colour with no undo step~~ — fixed 1.6.6
+  (user chose "make Use undoable"): history steps are `{ formData, look }`
+  in `ResumeBuilderPage.jsx`, and only a gallery Use's step carries a
+  `look` (uiReducer's `pickTemplateLook`), restored by
+  `RESTORE_TEMPLATE_LOOK`. Tests: `e2e/template-looks.spec.js` (Use undo,
+  redo, font tweak back, edit-after-Use order), `check:reducers`.
 - On gallery and grid cards a look's name is only in the radio's
   `aria-label` and the option's `title` tooltip, so sighted touch users
   can't see it. Possible fix: a small caption with the checked look's

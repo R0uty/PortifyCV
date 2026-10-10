@@ -162,6 +162,10 @@ Button labels:
   resets the font and headings colour to that look's values without an undo
   step, because no stored variant changed. This is accepted; no new history
   plumbing.
+- **Superseded in 1.6.6:** a Use is now one undo step. The step carries the
+  template look it replaced (template, accents, font, headings colour), so
+  Undo puts it back exactly, and Redo returns to the Use's result. The
+  template switch is still outside undo for every other way of switching.
 
 ### "View examples"
 

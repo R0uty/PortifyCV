@@ -4,6 +4,18 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Undo for a template-gallery Use — 1.6.6, 2026-10-10
+
+Using a template from the builder's gallery is now one Undo step, even
+when the CV itself doesn't change. Undo goes back to the previous template
+with its exact accent, font and headings colour, including tweaks (a font
+you'd picked by hand comes back), and Redo returns to the template you
+used. Before, a Use that changed no stored look reset the font and
+headings colour with nothing to undo. An edit made after the Use is undone
+first, then the Use. Every other way of switching templates, and every
+other undo step, works as before; undoing a text edit never touches your
+font.
+
 ## Template looks outside the builder — 1.6.1-1.6.4, 2026-10-10
 
 The three looks of every template can now be seen and picked outside the
@@ -28,9 +40,8 @@ and ignores it. Original is never written into a URL.
 Switching templates from the gallery now always matches the card. The
 font and headings colour come from the new template's stored look
 instead of carrying over from the previous template (1.6.0 carried
-them). Known limit: using another template on the look it already has
-stored resets the font and headings colour without an undo step,
-because no stored look changed.
+them). Using a template from the gallery is one Undo step since 1.6.6
+(see above).
 
 Bundle (gzip, before to after): entry index 37.29 to 36.86 KB (-0.43),
 CVPreview 40.73 to 34.72 KB (thumbnailCv, 8.22 KB, now splits out as its

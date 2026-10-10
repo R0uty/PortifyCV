@@ -29,6 +29,7 @@ export const UI_ACTION = {
   SET_BUILDER_MODE: 'SET_BUILDER_MODE',
   APPLY_STYLE_VARIANT_LOOK: 'APPLY_STYLE_VARIANT_LOOK',
   APPLY_STORED_STYLE_LOOKS: 'APPLY_STORED_STYLE_LOOKS',
+  RESTORE_TEMPLATE_LOOK: 'RESTORE_TEMPLATE_LOOK',
 }
 
 // Retired template ids that map onto a surviving template, so an old
@@ -104,6 +105,19 @@ export function applyStoredLooks(state, formData, selectedTemplate, templateIds 
     : next
 }
 
+// The part of the UI state a template-gallery Use replaces: the template
+// and the tab-only accent, font and headings colour. ResumeBuilderPage
+// keeps it on that Use's undo step, so Undo/Redo can put it back exactly,
+// Modified tweaks included (RESTORE_TEMPLATE_LOOK).
+export function pickTemplateLook(state) {
+  return {
+    selectedTemplate: state.selectedTemplate,
+    templateAccentColors: state.templateAccentColors,
+    cvFontId: state.cvFontId,
+    cvHeadingColor: state.cvHeadingColor,
+  }
+}
+
 export function createInitialUiState(initialSession) {
   const storedLocale = safeStorageGet(UI_LOCALE_STORAGE_KEY).value
   const storedSessionRestore = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value
@@ -144,6 +158,9 @@ export function uiReducer(state, action) {
 
     case UI_ACTION.APPLY_STORED_STYLE_LOOKS:
       return applyStoredLooks(state, action.formData, action.templateId, action.templateIds)
+
+    case UI_ACTION.RESTORE_TEMPLATE_LOOK:
+      return action.look ? { ...state, ...pickTemplateLook(action.look) } : state
 
     case UI_ACTION.ADD_TOAST:
       return { ...state, toasts: [...state.toasts, action.toast] }

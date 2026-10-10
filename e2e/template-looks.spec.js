@@ -83,7 +83,7 @@ test.describe('Template gallery looks', () => {
     await expect(developerCard.locator('.template-gallery__use')).toHaveText('In use')
   })
 
-  test('Use applies the template and the shown look; Undo restores the stored look', async ({ page }) => {
+  test('Use applies the template and the shown look; Undo and Redo step over it', async ({ page }) => {
     await page.goto('/cv?template=minimal')
     const dialog = await openGallery(page)
     await lookRadio(dialog, `Style: ${label('developer')}`, developer[1]).check()
@@ -94,9 +94,52 @@ test.describe('Template gallery looks', () => {
     await expect(fontTrigger(page)).toHaveAccessibleName(`Select font: ${fontLabel(developer[1].fontId)}`)
     await expect.poll(() => paletteVar(page.locator('.app-shell__preview'), developerVar)).toBe(developer[1].palette[developerVar])
 
+    // A Use is one undo step (1.6.6): Undo goes back to the template and
+    // look it replaced, Redo forward again.
     await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(templateLabel(page)).toHaveText(label('minimal'))
     await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original')
     await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
+
+    await page.getByRole('button', { name: 'Redo' }).click()
+    await expect(templateLabel(page)).toHaveText(label('developer'))
+    await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[1].label.en}`)
+  })
+
+  test('Undo after a Use that changed nothing stored brings back the font tweak', async ({ page }) => {
+    await page.goto('/cv?template=minimal')
+    await fontTrigger(page).click()
+    await page.getByRole('option', { name: 'Georgia' }).click()
+    const dialog = await openGallery(page)
+    await card(dialog, 'developer').getByRole('button').click()
+    await expect(templateLabel(page)).toHaveText(label('developer'))
+    await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
+
+    await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(templateLabel(page)).toHaveText(label('minimal'))
+    await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Georgia')
+    await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original, Modified')
+
+    await page.getByRole('button', { name: 'Redo' }).click()
+    await expect(templateLabel(page)).toHaveText(label('developer'))
+    await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
+  })
+
+  test('an edit made after a Use is undone first, then the Use', async ({ page }) => {
+    await page.goto('/cv?template=minimal')
+    const dialog = await openGallery(page)
+    await card(dialog, 'developer').getByRole('button').click()
+    await expect(templateLabel(page)).toHaveText(label('developer'))
+    const name = page.getByRole('textbox', { name: /Full name/ })
+    const before = await name.inputValue()
+    await name.fill('Grace Hopper')
+
+    await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(name).toHaveValue(before)
+    await expect(templateLabel(page)).toHaveText(label('developer'))
+
+    await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(templateLabel(page)).toHaveText(label('minimal'))
   })
 
   test('Use on the open template\'s stored look keeps the tweaks', async ({ page }) => {

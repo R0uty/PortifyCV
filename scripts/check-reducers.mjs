@@ -32,7 +32,7 @@ const srcDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src')
 const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, relativePath)).href)
 
 const { cvFormReducer, FORM_ACTION } = await importSrc('reducers/cvFormReducer.js')
-const { uiReducer, UI_ACTION, createInitialUiState } = await importSrc('reducers/uiReducer.js')
+const { uiReducer, UI_ACTION, createInitialUiState, pickTemplateLook } = await importSrc('reducers/uiReducer.js')
 const { createInitialCvData, createSectionVisibility, createSectionItemVisibility } =
   await importSrc('utils/cvForm.js')
 
@@ -536,6 +536,29 @@ console.log('\nuiReducer\n')
     fresh.cvFontId === 'inter' && fresh.cvHeadingColor === '')
   check('an unknown stored variant starts on variant #1',
     createInitialUiState({ formData: { ...createInitialCvData(), styleVariantByTemplate: { minimal: 'fromTheFuture' } } }).cvFontId === 'inter')
+}
+
+{
+  // A gallery Use's undo step (1.6.6): snapshot the template look, change
+  // it, restore it.
+  const state = createInitialUiState({})
+  const snapshot = pickTemplateLook(state)
+  check('pickTemplateLook takes the template, accents, font and headings colour',
+    JSON.stringify(Object.keys(snapshot).sort()) === JSON.stringify(['cvFontId', 'cvHeadingColor', 'selectedTemplate', 'templateAccentColors']))
+  const changed = {
+    ...state,
+    selectedTemplate: 'creative',
+    templateAccentColors: { ...state.templateAccentColors, creative: '#1f7a6c' },
+    cvFontId: 'georgia',
+    cvHeadingColor: '#166534',
+  }
+  const restored = uiReducer(changed, { type: UI_ACTION.RESTORE_TEMPLATE_LOOK, look: snapshot })
+  check('RESTORE_TEMPLATE_LOOK restores the template, accents, font and headings colour',
+    JSON.stringify(pickTemplateLook(restored)) === JSON.stringify(snapshot))
+  check('RESTORE_TEMPLATE_LOOK leaves the rest of the UI state alone',
+    restored.locale === changed.locale && restored.builderMode === changed.builderMode)
+  check('RESTORE_TEMPLATE_LOOK with no look is a no-op',
+    uiReducer(changed, { type: UI_ACTION.RESTORE_TEMPLATE_LOOK, look: null }) === changed)
 }
 
 {
