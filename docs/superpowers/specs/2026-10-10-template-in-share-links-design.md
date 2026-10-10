@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-10
 **Branch:** `v1.6.0` (PR R0uty/PortifyCV#2), based on 1.6.7 (`7ac7c61`)
-**Status:** draft, awaiting the user's review
+**Status:** approved 2026-10-10
 
 ## Goal
 
@@ -116,8 +116,9 @@ the toasts and the missing-images warning are unchanged.
     with that look's name in the Style picker and its font in the font
     picker.
   - **Changed:** "a share link restores another template's look accent"
-    now expects the link to open on Creative, with Creative's look
-    applied.
+    sends its link from Minimalist after picking Creative's look. It
+    therefore still proves that another template's stored accent is
+    seeded, now that a link no longer always opens on Minimalist.
 - **Docs:**
   - `CLAUDE.md`'s share-link paragraph mentions `tp`;
   - `changes.md` gets a 1.6.8 entry;
