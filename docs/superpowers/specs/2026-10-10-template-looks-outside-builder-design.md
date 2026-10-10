@@ -56,6 +56,7 @@ back to Original. Returns:
 {
   styleVariantId,   // the resolved variant's id
   accentColor,      // the look's accent, or resolveTemplateAccent(null, templateId) when it has none
+  fontId,           // variant.fontId
   fontStack,        // getCvFontStack(variant.fontId)
   headingColor,     // variant.headingColor ('' = the template's own)
 }
@@ -81,11 +82,16 @@ Playwright specs can still import it under plain Node ESM.
 
 ### Thumbnail and preview props
 
-- `TemplateThumbnail` gains `styleVariantId` and `accentColor` (it already
-  has `fontStack`/`headingColor`) and forwards them to `CVPreview`.
-- `ScaledPreview` gains `styleVariantId`, `fontStack` and `headingColor`.
-  `fontStack` is applied as the `--font-sans` override, exactly as
-  `TemplateThumbnail` does.
+- `TemplateThumbnail` gains `styleVariantId`, `accentColor` and `fontId` (it
+  already has `fontStack`/`headingColor`) and forwards the first two to
+  `CVPreview`.
+- `ScaledPreview` gains `styleVariantId`, `fontId`, `fontStack` and
+  `headingColor`. `fontStack` is applied as the `--font-sans` override,
+  exactly as `TemplateThumbnail` does.
+- Both call `loadCvFont(fontId)` in an effect when `fontId` is set, because
+  Calibri (Carlito) and Lato are lazy-loaded. Without it, a look using one
+  of them would render in the fallback face outside the builder, which
+  loads only the CV's current font.
 - `CVPreview` already applies `getVariantPaletteStyle(variant,
   styleVariantId)` and takes `accentColor`/`headingColor`, so it is
   unchanged.
