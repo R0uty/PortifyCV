@@ -4,6 +4,15 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Look names on template cards — 1.6.7, 2026-10-10
+
+The look swatches on the builder's template gallery cards and the Free CV
+Templates grid now name the checked look in a small caption after them
+("Slate", "Alkuperäinen"), updated as soon as you pick another. Before,
+the names were only in tooltips and for screen readers, so on a phone you
+couldn't tell which look you had. The template pages' Style picker already
+showed every name and is unchanged.
+
 ## Undo for a template-gallery Use — 1.6.6, 2026-10-10
 
 Using a template from the builder's gallery is now one Undo step, even

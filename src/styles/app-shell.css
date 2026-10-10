@@ -1928,6 +1928,14 @@ select.floating-field__control {
   margin-left: -0.25rem;
 }
 
+/* The checked look's name after a card's swatches (1.6.7). On a very
+   narrow card it wraps below them rather than overflowing. */
+.style-swatches__caption {
+  align-self: center;
+  color: var(--app-text-muted);
+  font-size: var(--text-body-sm);
+}
+
 /* The template page's picker matches its Examples radios beside it. */
 .style-swatches--page .style-swatches__option {
   border-radius: 0;

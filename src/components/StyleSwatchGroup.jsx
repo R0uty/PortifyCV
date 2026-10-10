@@ -7,6 +7,10 @@ import { getTemplateVariants, getVariantSwatches } from '../utils/templateVarian
 // option at opacity 0, so the strip itself is the click target. Choosing
 // only reports the id: the caller decides what it means (a card preview,
 // a URL, the builder).
+//
+// The `card` size shows only colour strips, so it names the checked look in
+// a caption after them (1.6.7): touch users can't hover for the tooltip.
+// The caption is aria-hidden — each radio already announces its own name.
 function StyleSwatchGroup({ templateId, value, onChange, locale = 'en', name, label, size = 'card' }) {
   const lang = locale === 'fi' ? 'fi' : 'en'
   const variants = getTemplateVariants(templateId)
@@ -14,6 +18,8 @@ function StyleSwatchGroup({ templateId, value, onChange, locale = 'en', name, la
   if (variants.length < 2) {
     return null
   }
+
+  const checkedLabel = (variants.find((variant) => variant.id === value) ?? variants[0]).label[lang]
 
   return (
     <div role="radiogroup" aria-label={label} className={`style-swatches style-swatches--${size}`}>
@@ -37,6 +43,9 @@ function StyleSwatchGroup({ templateId, value, onChange, locale = 'en', name, la
           ) : null}
         </label>
       ))}
+      {size === 'card' ? (
+        <span className="style-swatches__caption" aria-hidden="true">{checkedLabel}</span>
+      ) : null}
     </div>
   )
 }

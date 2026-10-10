@@ -2237,10 +2237,11 @@ Follow-ups from the Phase 4 final review (not started):
   `look` (uiReducer's `pickTemplateLook`), restored by
   `RESTORE_TEMPLATE_LOOK`. Tests: `e2e/template-looks.spec.js` (Use undo,
   redo, font tweak back, edit-after-Use order), `check:reducers`.
-- On gallery and grid cards a look's name is only in the radio's
-  `aria-label` and the option's `title` tooltip, so sighted touch users
-  can't see it. Possible fix: a small caption with the checked look's
-  name under the strip.
+- ~~On gallery and grid cards a look's name is only in the radio's
+  `aria-label` and the option's `title` tooltip~~ — fixed 1.6.7 (user chose
+  a caption of the checked look): `StyleSwatchGroup`'s `card` size renders
+  an aria-hidden `.style-swatches__caption` after the swatches. Tests:
+  `e2e/template-looks.spec.js` (gallery card, grid card, Finnish).
 
 1.6.5 cleanup: removed a stray blank line in `TemplateGalleryModal.jsx`,
 rewrapped the `?style=` note in `CLAUDE.md`, marked the spec implemented,

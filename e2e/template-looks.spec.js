@@ -165,6 +165,20 @@ test.describe('Template gallery looks', () => {
     await expect(link).toHaveAttribute('href', `/free-cv-templates/${slug}`)
   })
 
+  // Touch users can't hover for a tooltip, so a card names its checked
+  // look in a caption (1.6.7).
+  test('a card names its checked look', async ({ page }) => {
+    await page.goto('/cv?template=developer')
+    await styleTrigger(page).click()
+    await page.getByRole('radiogroup', { name: 'Select style' }).getByRole('radio', { name: developer[1].label.en }).click()
+    const dialog = await openGallery(page)
+    const caption = card(dialog, 'developer').locator('.style-swatches__caption')
+    await expect(caption).toHaveText(developer[1].label.en)
+    await lookRadio(dialog, `Style: ${label('developer')}`, developer[2]).check()
+    await expect(caption).toHaveText(developer[2].label.en)
+    await expect(card(dialog, 'creative').locator('.style-swatches__caption')).toHaveText(creative[0].label.en)
+  })
+
   test('the looks are a keyboard radio group', async ({ page }) => {
     await page.goto('/cv')
     const dialog = await openGallery(page)
@@ -201,6 +215,21 @@ test.describe('Free CV Templates grid looks', () => {
     await expect(page).toHaveURL(new RegExp(`/free-cv-templates/${developerSlug}\\?style=${developer[1].id}$`))
     await expect(lookRadio(page, 'Style', developer[1])).toBeChecked()
   })
+})
+
+test('a grid card names its checked look, in Finnish too', async ({ page }) => {
+  await page.goto('/free-cv-templates')
+  const caption = page.locator('.templates-page-card')
+    .filter({ has: lookGroup(page, `Style: ${label('developer')}`) })
+    .locator('.style-swatches__caption')
+  await expect(caption).toHaveText(developer[0].label.en)
+  await lookRadio(page, `Style: ${label('developer')}`, developer[1]).check()
+  await expect(caption).toHaveText(developer[1].label.en)
+
+  await page.getByRole('button', { name: 'Switch language' }).click()
+  await expect(page.getByRole('radiogroup', { name: /^Tyyli: / }).first()).toBeVisible()
+  const finnishOriginal = page.locator('.templates-page-card .style-swatches__caption', { hasText: 'Alkuperäinen' })
+  await expect(finnishOriginal.first()).toBeVisible()
 })
 
 test.describe('Template page looks', () => {
