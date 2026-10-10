@@ -187,22 +187,22 @@ test('a variant survives a session restore', async ({ page }) => {
   await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${minimalVariant.label.en}`)
 })
 
-test('switching templates keeps each template\'s own variant', async ({ page }) => {
+test('switching templates from the gallery applies each template\'s stored look', async ({ page }) => {
   const developerVariant = getTemplateVariants('developer')[2]
   const label = (id) => cvTemplates.find((template) => template.id === id).label
   await page.goto('/cv?template=minimal')
   await styleTrigger(page).click()
   await styleGroup(page).getByRole('radio', { name: minimalVariant.label.en }).click()
-  // Switching templates keeps the global font (spec §4), so the other
-  // template's look reads as Modified whenever the fonts differ.
+  // A gallery card's Use applies the look the card shows (Phase 4): the
+  // other template's stored look, here Original, font included.
   await pickTemplate(page, label('developer'))
-  await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original, Modified')
-  await expect(fontTrigger(page)).toHaveAccessibleName(new RegExp(`^Select font: ${minimalVariant.fontId === 'georgia' ? 'Georgia' : 'Helvetica'}$`))
+  await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original')
+  await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
   await styleTrigger(page).click()
   await styleGroup(page).getByRole('radio', { name: developerVariant.label.en }).click()
   await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developerVariant.label.en}`)
   await pickTemplate(page, label('minimal'))
-  await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${minimalVariant.label.en}, Modified`)
+  await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${minimalVariant.label.en}`)
   await pickTemplate(page, label('developer'))
   await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developerVariant.label.en}`)
 })

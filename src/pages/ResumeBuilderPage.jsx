@@ -1193,20 +1193,40 @@ function ResumeBuilderPage({
     target?.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' })
   }, [mobilePreviewVisible])
 
-  const handleSelectTemplate = useCallback((templateId) => {
+  // Stores `variantId` for `templateId` and resets the accent, font and
+  // headings colour to its values. The toolbar's Style picker and a
+  // gallery card's Use (Phase 4) share it.
+  const selectStyleVariant = useCallback((templateId, variantId) => {
+    dispatchFormData({ type: FORM_ACTION.SET_STYLE_VARIANT, templateId, variantId })
+    dispatchUi({
+      type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK,
+      templateId,
+      variant: getTemplateVariant(templateId, variantId),
+    })
+  }, [dispatchFormData])
+
+  // A gallery card's Use passes the look its thumbnail shows, and the
+  // builder ends up exactly as the card (Phase 4): the open template on
+  // its stored look changes nothing (tab-only tweaks survive); anything
+  // else switches template and applies the look. Without a variant it's a
+  // plain template switch, as before.
+  const handleSelectTemplate = useCallback((templateId, variantId) => {
+    if (variantId === undefined) {
+      dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
+      return
+    }
+    if (templateId === selectedTemplate && variantId === resolveStyleVariantId(formData, templateId)) {
+      return
+    }
     dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
-  }, [])
+    selectStyleVariant(templateId, variantId)
+  }, [formData, selectedTemplate, selectStyleVariant])
 
   // Picking a variant — even the active one again — stores it and resets
   // the accent, font and headings colour to its values.
   const handleSelectStyleVariant = useCallback((variantId) => {
-    dispatchFormData({ type: FORM_ACTION.SET_STYLE_VARIANT, templateId: selectedTemplate, variantId })
-    dispatchUi({
-      type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK,
-      templateId: selectedTemplate,
-      variant: getTemplateVariant(selectedTemplate, variantId),
-    })
-  }, [dispatchFormData, selectedTemplate])
+    selectStyleVariant(selectedTemplate, variantId)
+  }, [selectStyleVariant, selectedTemplate])
 
   const handleCvFontChange = useCallback((fontId) => {
     dispatchUi({ type: UI_ACTION.SET_CV_FONT, fontId })
@@ -2440,6 +2460,7 @@ function ResumeBuilderPage({
         onSelectTemplate={handleSelectTemplate}
         atsScore={atsScore}
         formData={formData}
+        templateAccentColors={templateAccentColors}
         cvFontId={cvFontId}
         cvHeadingColor={cvHeadingColor}
         locale={locale}

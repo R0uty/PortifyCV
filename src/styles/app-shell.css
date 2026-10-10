@@ -978,6 +978,12 @@ select.floating-field__control {
   background: var(--app-surface-strong);
 }
 
+/* The card's look swatches (Phase 4), between the thumbnail and the
+   select button; a radiogroup can't sit inside the button. */
+.template-gallery__looks {
+  padding: 0.6rem 0.85rem 0;
+}
+
 /* Collapsed disclosures above the CV form ("Import CV" and "ATS score &
    suggestions") — same styling, one class, rendered once each. */
 .editor-tools {
