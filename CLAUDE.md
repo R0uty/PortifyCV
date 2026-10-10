@@ -180,7 +180,8 @@ existing key, since older generated links decode against the same table.
 Uploaded images are stripped from the payload (too large for a URL) with the
 recipient told they're missing; export JSON instead when images need to
 travel too. The per-template style-variant choice travels under the `va`
-key.
+key, and the sender's selected template under `tp` (1.6.8; the link opens
+on it — older links without it open on the default template).
 
 **CV data shape and mutations** are centralized in `src/utils/cvForm.js`
 (the `CvData` shape, including `styleVariantByTemplate`, the chosen look per

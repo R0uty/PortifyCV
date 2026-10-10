@@ -32,7 +32,7 @@ const srcDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src')
 const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, relativePath)).href)
 
 const { cvFormReducer, FORM_ACTION } = await importSrc('reducers/cvFormReducer.js')
-const { uiReducer, UI_ACTION, createInitialUiState, pickTemplateLook } = await importSrc('reducers/uiReducer.js')
+const { uiReducer, UI_ACTION, createInitialUiState, pickTemplateLook, resolveTemplateId } = await importSrc('reducers/uiReducer.js')
 const { createInitialCvData, createSectionVisibility, createSectionItemVisibility } =
   await importSrc('utils/cvForm.js')
 
@@ -559,6 +559,22 @@ console.log('\nuiReducer\n')
     restored.locale === changed.locale && restored.builderMode === changed.builderMode)
   check('RESTORE_TEMPLATE_LOOK with no look is a no-op',
     uiReducer(changed, { type: UI_ACTION.RESTORE_TEMPLATE_LOOK, look: null }) === changed)
+}
+
+{
+  // A share link opens on the sender's template (1.6.8).
+  check('resolveTemplateId accepts a real template', resolveTemplateId('creative') === 'creative')
+  check('resolveTemplateId maps the retired classic id', resolveTemplateId('classic') === 'classicProfessional')
+  check('resolveTemplateId rejects an unknown id', resolveTemplateId('no-such-template') === null)
+  check('resolveTemplateId rejects null', resolveTemplateId(null) === null)
+  const fallback = createInitialUiState({}).selectedTemplate
+  check('a shared template is selected', createInitialUiState({ sharedTemplateId: 'creative' }).selectedTemplate === 'creative')
+  check('a shared retired id opens its successor',
+    createInitialUiState({ sharedTemplateId: 'classic' }).selectedTemplate === 'classicProfessional')
+  check('an unknown shared template falls back as before',
+    createInitialUiState({ sharedTemplateId: 'no-such-template' }).selectedTemplate === fallback)
+  check('no shared template falls back as before',
+    createInitialUiState({ sharedTemplateId: null }).selectedTemplate === fallback)
 }
 
 {

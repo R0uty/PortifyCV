@@ -2201,9 +2201,9 @@ line; `style-variants.spec.js` also checks the off-screen export source.
 
 Known gaps: the `defaultContrastExceptions` in `templateVariants.js` (13
 pairs across 8 templates, listed in `changes.md`), first look only. Share
-links don't carry the selected template (they always open on Minimalist), so
-a non-Minimalist look's font and headings colour can't travel via a share
-link; its palette and accent do.
+links ~~don't carry the selected template~~ — fixed 1.6.8: the link carries
+it as `tp` and opens on it (spec
+`docs/superpowers/specs/2026-10-10-template-in-share-links-design.md`).
 
 Verification (1.6.0, after the fix wave): `npm run lint` clean, all eight
 `check:*` scripts pass, full `CI=1 npm run test:e2e` 827 passed (4.4m), `npm run
@@ -2223,10 +2223,10 @@ and the template pages, and `?style=` carries a look into the builder
 handoff). Tests: `e2e/template-looks.spec.js`.
 
 Still open (not in this phase): gallery filters and a per-template photo
-flag (the original roadmap's Phase 4); the selected template in share
-links; the 13 first-look contrast exceptions; moving
-`textPairs`/`defaultContrastExceptions` out of the runtime registry; looks
-on the landing page's marquee and hero.
+flag (the original roadmap's Phase 4); the 13 first-look contrast
+exceptions; moving `textPairs`/`defaultContrastExceptions` out of the
+runtime registry; looks on the landing page's marquee and hero. The
+selected template in share links was done in 1.6.8.
 
 Follow-ups from the Phase 4 final review (not started):
 

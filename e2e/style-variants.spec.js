@@ -1,6 +1,7 @@
 import { test, expect } from './fixtures/base.js'
 import { getTemplateVariants } from '../src/utils/templateVariants.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
+import { CV_FONT_OPTIONS } from '../src/utils/cvFonts.js'
 
 // The Style picker (Phase 3) in both builder modes, and how a picked
 // variant persists (share link, JSON, session restore, template switch,
@@ -216,9 +217,31 @@ test('undo restores the previous look', async ({ page }) => {
   await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
 })
 
+// A share link opens on the sender's template (1.6.8), so that template's
+// look arrives complete — palette, accent, font and headings colour.
+test('a share link opens on the sender\'s template and look', async ({ page, context }) => {
+  const developerVariant = getTemplateVariants('developer')[1]
+  const developerLabel = cvTemplates.find((template) => template.id === 'developer').label
+  const fontLabel = CV_FONT_OPTIONS.find((font) => font.id === developerVariant.fontId).label
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.goto('/cv?template=developer')
+  await styleTrigger(page).click()
+  await styleGroup(page).getByRole('radio', { name: developerVariant.label.en }).click()
+  await page.getByRole('button', { name: 'Copy share link' }).click()
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain('#data=')
+  const url = await page.evaluate(() => navigator.clipboard.readText())
+
+  const fresh = await context.newPage()
+  await fresh.goto(url)
+  await expect(fresh.locator('.app-toolbar__template-trigger-label')).toHaveText(developerLabel)
+  await expect(fresh.getByRole('banner').getByRole('button', { name: /^Select style:/ }))
+    .toHaveAccessibleName(`Select style: ${developerVariant.label.en}`)
+  await expect(fresh.getByRole('banner').getByRole('button', { name: /^Select font:/ }))
+    .toHaveAccessibleName(`Select font: ${fontLabel}`)
+})
+
 // A loaded CV seeds every template's stored look accent, not only the
-// template open at load: a share link always opens on Minimalist, so
-// Creative's stored look must already carry its accent when switched to.
+// template the link opens on.
 test('a share link restores another template\'s look accent', async ({ page, context }) => {
   const creativeVariant = getTemplateVariants('creative')[1]
   const creativeLabel = cvTemplates.find((template) => template.id === 'creative').label
@@ -227,14 +250,16 @@ test('a share link restores another template\'s look accent', async ({ page, con
   await styleTrigger(page).click()
   await styleGroup(page).getByRole('radio', { name: creativeVariant.label.en }).click()
   await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${creativeVariant.label.en}`)
+  // Send the link from another template, so Creative's look has to come
+  // from the stored looks rather than from the template the link opens on.
+  await pickTemplate(page, cvTemplates.find((template) => template.id === 'minimal').label)
   await page.getByRole('button', { name: 'Copy share link' }).click()
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain('#data=')
   const url = await page.evaluate(() => navigator.clipboard.readText())
 
   const fresh = await context.newPage()
   await fresh.goto(url)
-  await expect(fresh.getByRole('banner').getByRole('button', { name: /^Select style:/ }))
-    .toHaveAccessibleName('Select style: Original')
+  await expect(fresh.locator('.app-toolbar__template-trigger-label')).toHaveText('Minimalist')
   await pickTemplate(fresh, creativeLabel)
   await expect.poll(() => fresh.locator('.app-shell__preview [data-export-variant="creative"]')
     .evaluate((el) => getComputedStyle(el).getPropertyValue('--tpl-accent').trim().toLowerCase()))

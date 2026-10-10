@@ -38,19 +38,23 @@ export const UI_ACTION = {
 // left-aligned name lives on as the `classicNameAlignment` option.
 const LEGACY_TEMPLATE_ALIASES = { classic: 'classicProfessional' }
 
-// A "Use this template" link from the Free CV Templates page (or any other
-// deep link) can pass ?template=<id> to open the builder with that template
-// already selected instead of always landing on the default. Only trusted
-// once the id is checked against the real template map - an unrecognized or
+// A template id from outside — a `?template=<id>` deep link (e.g. "Use this
+// template" on the Free CV Templates page) or a share link's 'tp' (1.6.8) —
+// trusted only once checked against the real template map, after mapping a
+// retired id onto its successor. Null for anything unrecognized.
+export function resolveTemplateId(raw) {
+  const templateId = LEGACY_TEMPLATE_ALIASES[raw] ?? raw
+  return isValidTemplateId(templateId) ? templateId : null
+}
+
+// ?template=<id> opens the builder on that template; an unrecognized or
 // missing id falls back to defaultTemplateId exactly like before.
 export function readInitialTemplateId() {
   if (typeof window === 'undefined') {
     return defaultTemplateId
   }
 
-  const raw = new URLSearchParams(window.location.search).get('template')
-  const requestedTemplateId = LEGACY_TEMPLATE_ALIASES[raw] ?? raw
-  return isValidTemplateId(requestedTemplateId) ? requestedTemplateId : defaultTemplateId
+  return resolveTemplateId(new URLSearchParams(window.location.search).get('template')) ?? defaultTemplateId
 }
 
 // Whether a legacy `?template=classic` link should also start left-aligned.
@@ -125,7 +129,9 @@ export function createInitialUiState(initialSession) {
   const storedBuilderMode = safeStorageGet(UI_BUILDER_MODE_STORAGE_KEY, 'direct').value
 
   const state = {
-    selectedTemplate: readInitialTemplateId(),
+    // A share link opens on the sender's template (1.6.8), ahead of a
+    // ?template= in the same URL; otherwise ?template=, then the default.
+    selectedTemplate: resolveTemplateId(initialSession?.sharedTemplateId) ?? readInitialTemplateId(),
     atsFriendlyMode: false,
     locale: storedLocale === 'fi' ? 'fi' : 'en',
     mobilePreviewVisible: false,

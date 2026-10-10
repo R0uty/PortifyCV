@@ -4,6 +4,17 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Share links open on the sender's template — 1.6.8, 2026-10-10
+
+A share link now remembers which template the sender had open and opens
+on it, so the template's chosen look arrives complete: its colours,
+accent, font and headings colour. Before, every share link opened on
+Minimalist, and a look's font and headings colour couldn't travel. The
+template travels inside the link's `#data=` part, which browsers never
+send to a server, under a new key `tp`. Links made before 1.6.8 have no
+template and still open on Minimalist, exactly as before. Hand-picked
+accent, font or headings-colour tweaks still don't travel; looks do.
+
 ## Look names on template cards — 1.6.7, 2026-10-10
 
 The look swatches on the builder's template gallery cards and the Free CV
