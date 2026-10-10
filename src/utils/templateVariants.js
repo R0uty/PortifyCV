@@ -25,7 +25,7 @@
 // Relative imports here carry an explicit `.js` (unlike most of src/) so
 // Playwright specs can import this module under plain Node ESM.
 import { getTemplateAccent, resolveTemplateAccent } from './cvTemplates.js'
-import { DEFAULT_CV_FONT_ID } from './cvFonts.js'
+import { DEFAULT_CV_FONT_ID, getCvFontStack } from './cvFonts.js'
 
 export const DEFAULT_STYLE_VARIANT_ID = 'default'
 
@@ -1206,6 +1206,38 @@ export function getVariantSwatches(templateId, variant) {
   return [variant?.accent, ...swatchVariables.map((name) => variant?.palette[name])]
     .filter(Boolean)
     .slice(0, 4)
+}
+
+// What a thumbnail or preview outside the builder (gallery cards, the Free
+// CV Templates grid, template pages; Phase 4) needs to render one look:
+// its palette id, accent, font and headings colour. An unknown id falls
+// back to variant #1, like getTemplateVariant.
+export function getVariantLook(templateId, variantId) {
+  const variant = getTemplateVariant(templateId, variantId)
+  const fontId = variant?.fontId ?? DEFAULT_CV_FONT_ID
+  return {
+    styleVariantId: variant?.id ?? DEFAULT_STYLE_VARIANT_ID,
+    accentColor: variant?.accent ?? resolveTemplateAccent(null, templateId),
+    fontId,
+    fontStack: getCvFontStack(fontId),
+    headingColor: variant?.headingColor ?? '',
+  }
+}
+
+// A `?style=` value (template page, builder deep link) checked against the
+// template's own looks; anything else (missing, unknown, another
+// template's id) is variant #1.
+export function parseStyleVariantParam(templateId, raw) {
+  return getTemplateVariants(templateId).find((variant) => variant.id === raw)?.id
+    ?? DEFAULT_STYLE_VARIANT_ID
+}
+
+// The query string that carries a look to another page. Variant #1 is
+// never written into a URL: it's the absence of `?style=`.
+export function styleVariantSearch(variantId) {
+  return variantId && variantId !== DEFAULT_STYLE_VARIANT_ID
+    ? `?style=${encodeURIComponent(variantId)}`
+    : ''
 }
 
 // True when the tab-only accent, font or headings colour has been tweaked

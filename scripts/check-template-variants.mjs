@@ -44,9 +44,12 @@ const {
   getVariantPaletteStyle,
   getVariantSwatches,
   isStyleVariantModified,
+  getVariantLook,
+  parseStyleVariantParam,
+  styleVariantSearch,
 } = await importSrc('utils/templateVariants.js')
-const { cvTemplates, getTemplateAccent } = await importSrc('utils/cvTemplates.js')
-const { CV_FONT_OPTIONS } = await importSrc('utils/cvFonts.js')
+const { cvTemplates, getTemplateAccent, resolveTemplateAccent } = await importSrc('utils/cvTemplates.js')
+const { CV_FONT_OPTIONS, getCvFontStack } = await importSrc('utils/cvFonts.js')
 const { ACCENT_SWATCH_SETS } = await importSrc('utils/templateAccents.js')
 
 // Where each template's palette defaults are declared: the root rule of
@@ -294,6 +297,49 @@ console.log('\nHelpers\n')
     isStyleVariantModified({ ...base, templateAccentColors: { creative: '#E2572A' } }) === false)
   check('isStyleVariantModified: accent-less template ignores accents',
     isStyleVariantModified({ ...base, templateId: 'developer', templateAccentColors: { developer: '#123456' } }) === false)
+}
+
+console.log('\nLooks outside the builder (Phase 4)\n')
+
+{
+  const creativeFirst = getTemplateVariant('creative', 'default')
+  const fallback = getVariantLook('creative', 'no-such-look')
+  check('getVariantLook falls back to variant #1 for an unknown id',
+    fallback.styleVariantId === 'default' && fallback.accentColor === creativeFirst.accent)
+  check('getVariantLook falls back to variant #1 for an undefined id',
+    getVariantLook('creative').styleVariantId === 'default')
+  const mismatches = []
+  templateIds.forEach((id) => getTemplateVariants(id).forEach((variant) => {
+    const look = getVariantLook(id, variant.id)
+    const expected = {
+      styleVariantId: variant.id,
+      accentColor: variant.accent ?? resolveTemplateAccent(null, id),
+      fontId: variant.fontId,
+      fontStack: getCvFontStack(variant.fontId),
+      headingColor: variant.headingColor,
+    }
+    if (JSON.stringify(look) !== JSON.stringify(expected)) mismatches.push(`${id}/${variant.id}`)
+  }))
+  check('getVariantLook returns each look\'s own id, accent, font and headings colour',
+    mismatches.length === 0, mismatches.join(', '))
+  check('getVariantLook: an accent-less template has no accent',
+    getVariantLook('developer', 'default').accentColor === undefined)
+
+  const developerIds = getTemplateVariants('developer').map((variant) => variant.id)
+  check('parseStyleVariantParam accepts the template\'s own look',
+    parseStyleVariantParam('developer', developerIds[1]) === developerIds[1])
+  check('parseStyleVariantParam: missing → default', parseStyleVariantParam('developer', null) === DEFAULT_STYLE_VARIANT_ID)
+  check('parseStyleVariantParam: unknown id → default', parseStyleVariantParam('developer', 'nope') === DEFAULT_STYLE_VARIANT_ID)
+  check('parseStyleVariantParam: unknown template → default', parseStyleVariantParam('no-such-template', developerIds[1]) === DEFAULT_STYLE_VARIANT_ID)
+  const foreignId = templateIds
+    .flatMap((id) => getTemplateVariants(id).map((variant) => variant.id))
+    .find((variantId) => !developerIds.includes(variantId))
+  check('parseStyleVariantParam: another template\'s look id → default',
+    foreignId === undefined || parseStyleVariantParam('developer', foreignId) === DEFAULT_STYLE_VARIANT_ID)
+
+  check('styleVariantSearch: variant #1 writes nothing', styleVariantSearch(DEFAULT_STYLE_VARIANT_ID) === '')
+  check('styleVariantSearch: no id writes nothing', styleVariantSearch(undefined) === '')
+  check('styleVariantSearch: a look writes ?style=', styleVariantSearch(developerIds[1]) === `?style=${developerIds[1]}`)
 }
 
 console.log(failures === 0 ? '\nAll template-variant checks passed.' : `\n${failures} check(s) failed.`)
