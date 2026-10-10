@@ -211,14 +211,15 @@ every visitor on first load. Slugs are public URLs and are permanent once
 shipped — never rename one. Example people live one file per person in
 `src/utils/examples/`, registered in `exampleCvs.js`
 (`EXAMPLES`/`TEMPLATE_EXAMPLES`), and shared across templates where the
-fit is real rather than duplicated. A template page also takes `?style=<variantId>` (one of that template's
-looks in `templateVariants.js`; an unknown id is Original, which is never
-written into a URL), set from its Style picker or a gallery/grid card,
-and passes it to the builder, which applies it to whatever CV it starts
-with, like `?example=`, and strips it. Every example must fill every
+fit is real rather than duplicated. Every example must fill every
 `primarySections` entry of each template it's listed under, in both
 locales — `check:template-pages` enforces this, so an empty section never
-reaches a visitor. `src/utils/sectionContent.js`'s `hideEmptySections()`
+reaches a visitor. A template page also takes `?style=<variantId>` (one
+of that template's looks in `templateVariants.js`; an unknown id is
+Original, which is never written into a URL), set from its Style picker
+or a gallery/grid card, and passes it to the builder, which applies it to
+whatever CV it starts with, like `?example=`, and strips it.
+`src/utils/sectionContent.js`'s `hideEmptySections()`
 hides a section that has no real content instead of rendering its
 placeholder text, read by the per-template marketing page (its only
 preview) and by the builder's dedicated off-screen, read-only, inert

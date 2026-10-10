@@ -159,14 +159,20 @@ function useDocumentHead(view) {
 // button had nothing to go back to.
 // `search` (Phase 4) carries a query string into the new view, e.g. a
 // template page's ?style=; without it the view opens at its bare path.
+// A navigation without `search` compares paths only, as before, so
+// clicking the current view's own link from e.g. `?utm_source=` doesn't
+// push a duplicate entry.
 function pushViewUrl(nextView, search = '') {
   if (typeof window === 'undefined') {
     return
   }
 
   const url = `${VIEW_HEAD[nextView]?.path ?? '/'}${search}`
+  const current = search
+    ? `${window.location.pathname}${window.location.search}`
+    : window.location.pathname
 
-  if (`${window.location.pathname}${window.location.search}` !== url) {
+  if (current !== url) {
     window.history.pushState({ view: nextView }, '', url)
   }
 }

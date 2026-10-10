@@ -149,7 +149,6 @@ function TemplateGalleryModal({
               >
                 {isFinnish ? 'Katso esimerkit' : 'View examples'}
               </a>
-
             </div>
           )
         })}

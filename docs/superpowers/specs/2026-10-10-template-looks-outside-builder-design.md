@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-10
 **Branch:** `v1.6.0` (PR R0uty/PortifyCV#2), based on 1.6.0 (`b5c0444`)
-**Status:** draft, awaiting the user's review
+**Status:** approved 2026-10-10; implemented in 1.6.1-1.6.4 (cleanup 1.6.5)
 
 ## Goal
 

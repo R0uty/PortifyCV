@@ -2228,6 +2228,24 @@ links; the 13 first-look contrast exceptions; moving
 `textPairs`/`defaultContrastExceptions` out of the runtime registry; looks
 on the landing page's marquee and hero.
 
+Follow-ups from the Phase 4 final review (not started):
+
+- A gallery "Use" on another template whose stored look doesn't change
+  resets the font and headings colour with no undo step (spec §2 "Known
+  limit"). A user who picked e.g. Georgia loses it on a plain template
+  switch; it's tab-only and can be re-picked. Options: record a UI-only
+  undo step, or keep the user's font when nothing stored changes.
+- On gallery and grid cards a look's name is only in the radio's
+  `aria-label` and the option's `title` tooltip, so sighted touch users
+  can't see it. Possible fix: a small caption with the checked look's
+  name under the strip.
+
+1.6.5 cleanup: removed a stray blank line in `TemplateGalleryModal.jsx`,
+rewrapped the `?style=` note in `CLAUDE.md`, marked the spec implemented,
+and `pushViewUrl` compares paths only for a navigation without `search`
+again (a same-view click from a URL with a query no longer pushes a
+duplicate history entry).
+
 Verification (1.6.4): `npm run lint` clean; all 8 check:* ok (share,
 reducers, feedback, docx-export, section-schema, section-columns,
 template-pages, template-variants); `CI=1 npm run test:e2e` 843 passed
