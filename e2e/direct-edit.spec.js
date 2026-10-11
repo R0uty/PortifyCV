@@ -1,14 +1,5 @@
 import { test, expect } from './fixtures/base.js'
-
-// Same pattern as e2e/templates.spec.js's selectTemplate helper: the
-// toolbar's template trigger exposes "Select template: <name>" to screen
-// readers (an sr-only prefix span plus the visible label span), and opens
-// the shared TemplateGalleryModal.
-async function selectTemplate(page, label) {
-  await page.getByRole('button', { name: /^Select template:/ }).click()
-  const dialog = page.getByRole('dialog', { name: 'Template gallery' })
-  await dialog.locator('.template-gallery__name').getByText(label, { exact: true }).click()
-}
+import { pickTemplate } from './helpers/templateGallery.js'
 
 // The demo CV's fixed skill list (src/utils/cvForm.js's DEMO_CV-equivalent
 // seed data) — used by the Skills/EditableChip test below so it doesn't
@@ -295,7 +286,7 @@ test.describe('Direct Edit builder', () => {
     // Minimalist template (CVPreview.jsx's shared flat renderer) has no
     // tagline slot anywhere in its header, so this test selects Creative
     // to have somewhere in the DOM to observe the popup's edit land.
-    await selectTemplate(page, 'Creative')
+    await pickTemplate(page, 'Creative')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await page.locator('[data-export-header]').first().hover()
@@ -313,7 +304,7 @@ test.describe('Direct Edit builder', () => {
     // main column free to their left, so this is the case where the old
     // right-align-to-the-section placement put the popup squarely on top
     // of the very content being edited.
-    await selectTemplate(page, 'Creative')
+    await pickTemplate(page, 'Creative')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     const section = page.locator('[data-export-secondary="true"] [data-export-section]').first()
@@ -474,7 +465,7 @@ test.describe('Direct Edit builder', () => {
     // data-export-photo>), so the upload has somewhere visible to land.
     // The demo CV ships with no `photo`, which is exactly the state that
     // used to offer no control at all in Direct Edit.
-    await selectTemplate(page, 'Portfolio Hybrid')
+    await pickTemplate(page, 'Portfolio Hybrid')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await expect(page.locator('[data-export-photo]')).toHaveCount(0)
@@ -506,7 +497,7 @@ test.describe('Direct Edit builder', () => {
     // into src/utils/profilePhoto.js: Classic and the Direct Edit popup
     // share that one implementation, so this asserts the move stayed
     // behaviour-neutral. Photo upload had no e2e coverage before.
-    await selectTemplate(page, 'Portfolio Hybrid')
+    await pickTemplate(page, 'Portfolio Hybrid')
 
     await page
       .getByLabel('Profile image (optional)')
@@ -538,7 +529,7 @@ test.describe('Direct Edit builder', () => {
   })
 
   test('moving a sidebar section up swaps it with its own column neighbour, not a main-column section', async ({ page }) => {
-    await selectTemplate(page, 'Creative')
+    await pickTemplate(page, 'Creative')
 
     // Interleave a main-column section into the flat sectionOrder before
     // testing the popup's move-up. Fresh demo data's sectionOrder is []
@@ -592,7 +583,7 @@ test.describe('Direct Edit builder', () => {
   ]) {
     test(`${label}'s sidebar ${sectionKey} section opens the popup`, async ({ page }) => {
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
 
       await page.locator(`[data-export-section="${sectionKey}"]`).first().hover()
       await page.locator('.direct-edit-pencil--active').click()
@@ -607,14 +598,14 @@ test.describe('Direct Edit builder', () => {
     test.setTimeout(90_000)
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
     for (const label of ['Navy Professional', 'Modern Orange']) {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       await exportPdfAndExpectSuccess(page)
     }
   })
 
   test('hovering one experience entry reveals an entry pencil that opens the popup on that entry', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'Quadrant')
+    await pickTemplate(page, 'Quadrant')
 
     const secondEntry = page.locator('[data-export-section="experience"] [data-direct-edit-index="1"]').first()
     await secondEntry.hover()
@@ -673,7 +664,7 @@ test.describe('Direct Edit builder', () => {
   // Certificates, which the demo CV gives two entries.
   test('an entry pencil still targets the right entry when an earlier entry is hidden', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'European')
+    await pickTemplate(page, 'European')
 
     await page.locator('[data-export-section="certificates"]').first().hover()
     await page.locator('.direct-edit-pencil--active').click()
@@ -711,7 +702,7 @@ test.describe('Direct Edit builder', () => {
     const companies = ['B2B collaboration suite', 'customer interview loops']
 
     for (const label of ALL_TEMPLATES) {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       await expect(page.locator('[data-export-section="experience"]').first()).toBeVisible()
 
       const tagged = await page.evaluate(() =>
@@ -731,7 +722,7 @@ test.describe('Direct Edit builder', () => {
 
   test('Creative: Skills moves to the main column from the popup and back', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'Creative')
+    await pickTemplate(page, 'Creative')
 
     expect(await sectionColumnState(page, 'skills')).toMatchObject({ inSidebar: true, placement: 'side' })
 
@@ -761,7 +752,7 @@ test.describe('Direct Edit builder', () => {
 
   test('Creative: section ↑/↓ follow a moved section into its new column', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'Creative')
+    await pickTemplate(page, 'Creative')
 
     await openSectionPopup(page, 'skills')
     await page.getByRole('group', { name: 'Column' }).getByRole('button', { name: 'Main' }).click()
@@ -787,7 +778,7 @@ test.describe('Direct Edit builder', () => {
 
   test('Creative: a column move survives switching to Classic and back', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'Creative')
+    await pickTemplate(page, 'Creative')
 
     await openSectionPopup(page, 'education')
     await page.getByRole('group', { name: 'Column' }).getByRole('button', { name: 'Main' }).click()
@@ -801,7 +792,7 @@ test.describe('Direct Edit builder', () => {
 
   test('Creative: PDF export succeeds with a section moved to the main column', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'Creative')
+    await pickTemplate(page, 'Creative')
 
     await openSectionPopup(page, 'skills')
     await page.getByRole('group', { name: 'Column' }).getByRole('button', { name: 'Main' }).click()
@@ -812,13 +803,13 @@ test.describe('Direct Edit builder', () => {
 
   test('no column control for sections that cannot move', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'Creative')
+    await pickTemplate(page, 'Creative')
 
     await openSectionPopup(page, 'experience')
     await expect(page.getByRole('group', { name: 'Column' })).toHaveCount(0)
     await page.keyboard.press('Escape')
 
-    await selectTemplate(page, 'Minimalist')
+    await pickTemplate(page, 'Minimalist')
     await openSectionPopup(page, 'skills')
     await expect(page.getByRole('group', { name: 'Column' })).toHaveCount(0)
   })
@@ -843,7 +834,7 @@ test.describe('Direct Edit builder', () => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     for (const label of ALL_TEMPLATES) {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       const keys = await page.evaluate(() =>
         Array.from(document.querySelectorAll('[data-direct-edit-trigger]'), (b) => b.dataset.directEditTrigger),
       )
@@ -896,7 +887,7 @@ test.describe('Direct Edit builder', () => {
   // every sidebar section into main squeezed the whole CV into that track.
   test('Developer: moving every sidebar section to main keeps the main column full width', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'Developer')
+    await pickTemplate(page, 'Developer')
 
     for (const key of ['skills', 'links', 'certificates', 'education', 'languages']) {
       await openSectionPopup(page, key)
@@ -917,7 +908,7 @@ test.describe('Direct Edit builder', () => {
   // not stay at the height the entry used to have.
   test('an entry-opened popup follows its entry when the section changes column', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    await selectTemplate(page, 'Graduate')
+    await pickTemplate(page, 'Graduate')
 
     const entry = page.locator('[data-export-section="education"] [data-direct-edit-index="0"]').first()
     await entry.scrollIntoViewIfNeeded()
@@ -949,7 +940,7 @@ test.describe('Direct Edit builder', () => {
   for (const [label, sectionKey] of [['Navy Professional', 'education'], ['Modern Orange', 'certificates']]) {
     test(`${label}: a section moved to the sidebar stays readable in ATS mode`, async ({ page }) => {
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
 
       await openSectionPopup(page, sectionKey)
       await page.getByRole('group', { name: 'Column' }).getByRole('button', { name: 'Sidebar' }).click()
@@ -1096,10 +1087,10 @@ test.describe('Direct Edit builder', () => {
     await page.keyboard.type('Jordan Rivera')
     await nameField.blur()
 
-    await selectTemplate(page, 'European')
+    await pickTemplate(page, 'European')
     await expect(page.locator('.european-showcase__name .direct-edit-field')).toHaveText('Jordan Rivera')
 
-    await selectTemplate(page, 'Minimalist')
+    await pickTemplate(page, 'Minimalist')
     const nameFieldAgain = page.locator('.direct-edit-preview h3 .direct-edit-field')
     await expect(nameFieldAgain).toHaveText('Jordan Rivera')
     await expect(nameFieldAgain).toHaveAttribute('contenteditable', 'true')
@@ -1112,7 +1103,7 @@ test.describe('Direct Edit builder', () => {
   // editing chrome, the chips shown in place of Tech Executive's comma
   // lines, and entries the user had hidden.
   test('a PDF exported from Direct Edit captures the read-only CV, not the editor', async ({ page }) => {
-    await selectTemplate(page, 'Tech Executive')
+    await pickTemplate(page, 'Tech Executive')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     await openSectionPopup(page, 'experience')
@@ -1223,7 +1214,7 @@ test.describe('Direct Edit builder', () => {
     // pressing Enter in a plain `<textarea>`), then edited to force a
     // dispatch via `Control+End` — never a typed newline.
     test(`${label}: name persists, skills render once as chips, and a multi-line description survives editing`, async ({ page }) => {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
 
       const descriptionInput = page.getByLabel('Description', { exact: true }).first()
       await descriptionInput.fill('Seeded line A\nSeeded line B')
@@ -1340,7 +1331,7 @@ test.describe('Direct Edit builder', () => {
       await page.getByRole('button', { name: 'Reset form' }).click()
       await page.getByRole('button', { name: 'Confirm reset' }).click()
 
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
       const metaFields = page.locator(`.${classPrefix}__${contactRowSuffix} .direct-edit-field`)
@@ -1365,7 +1356,7 @@ test.describe('Direct Edit builder', () => {
   // the index mapping is correct, not just that a chip disappeared.
   for (const label of ['Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid', 'Developer', 'Quadrant', 'Tech Executive', 'European']) {
     test(`${label}: removing a categorized skill chip removes the correct skill, not a same-category neighbor`, async ({ page }) => {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
 
       const skillsInput = page.getByLabel('Skill tags', { exact: true })
       await skillsInput.fill('Docker')
@@ -1408,7 +1399,7 @@ test.describe('Direct Edit builder', () => {
     { label: 'Tech Executive', classPrefix: 'tech-exec-showcase', headerSuffix: 'masthead' },
   ]) {
     test(`${label}: every inline header field stays readable on the dark header`, async ({ page }) => {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
       await expect(page.locator(`.${classPrefix}__name .direct-edit-field`)).toHaveCount(1)
@@ -1420,7 +1411,7 @@ test.describe('Direct Edit builder', () => {
   // The website sits in the contact line as a link field — the first
   // inline field to dispatch SET_LINK_FIELD rather than a root field.
   test('Colorful Compact: the website edited inline reaches Classic mode', async ({ page }) => {
-    await selectTemplate(page, 'Colorful Compact')
+    await pickTemplate(page, 'Colorful Compact')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     const websiteField = page.locator('.colorful-compact-showcase__contact .direct-edit-field').nth(3)
@@ -1438,7 +1429,7 @@ test.describe('Direct Edit builder', () => {
   // the last kept its bottom padding. The runDirectEditDemoDataChecks row
   // covers the divider itself; this covers the padding.
   test('Colorful Compact: the first and last experience rows keep their edge spacing in Direct Edit', async ({ page }) => {
-    await selectTemplate(page, 'Colorful Compact')
+    await pickTemplate(page, 'Colorful Compact')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     const rows = page.locator('.direct-edit-preview .colorful-compact-showcase__exp-row')
@@ -1453,7 +1444,7 @@ test.describe('Direct Edit builder', () => {
   // home is the sidebar everywhere except Tech Executive, where it is main.
   for (const label of ['Colorful Compact', 'Modern Professional', 'Graduate', 'Portfolio Hybrid', 'Navy Professional', 'Developer', 'Tech Executive']) {
     test(`${label}: Skills moved to the other column is still inline-editable`, async ({ page }) => {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
       const wasInSidebar = (await sectionColumnState(page, 'skills')).inSidebar
@@ -1489,7 +1480,7 @@ test.describe('Direct Edit builder', () => {
     { label: 'Executive', kicker: '.executive-showcase__kicker' },
   ]) {
     test(`${label}: the kicker label meets 4.5:1 contrast`, async ({ page }) => {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       const selector = `.preview-document--designer ${kicker}`
       await expect(page.locator(selector).first()).toBeVisible()
       expect(await minTextContrast(page, selector)).toBeGreaterThanOrEqual(4.5)
@@ -1502,7 +1493,7 @@ test.describe('Direct Edit builder', () => {
   // Measured over the whole rail so any rail text that slips under
   // WCAG AA's 4.5:1 fails here.
   test('Executive: every piece of text on the rail meets 4.5:1 contrast', async ({ page }) => {
-    await selectTemplate(page, 'Executive')
+    await pickTemplate(page, 'Executive')
     const rail = '.preview-document--designer .executive-showcase__sidebar'
     await expect(page.locator(`${rail} .executive-showcase__tagline`).first()).toBeVisible()
     expect(await minTextContrast(page, rail)).toBeGreaterThanOrEqual(4.5)
@@ -1516,7 +1507,7 @@ test.describe('Direct Edit builder', () => {
     { label: 'Developer', sidebarSelector: '.dev-showcase__sidebar' },
   ]) {
     test(`${label}: every inline sidebar control stays readable on the dark sidebar`, async ({ page }) => {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
       await expect(page.locator(`${sidebarSelector} .direct-edit-chip-add`)).toHaveCount(1)
@@ -1529,7 +1520,7 @@ test.describe('Direct Edit builder', () => {
   // gradient clipped to the glyphs. An editable field inside inherits the
   // transparent colour, and the caret follows currentColor, so it vanished.
   test('Developer: the inline name field shows a visible caret', async ({ page }) => {
-    await selectTemplate(page, 'Developer')
+    await pickTemplate(page, 'Developer')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     const caret = await page.locator('.dev-showcase__name .direct-edit-field').evaluate((el) => getComputedStyle(el).caretColor)
@@ -1544,7 +1535,7 @@ test.describe('Direct Edit builder', () => {
     { label: 'Tech Executive', classPrefix: 'tech-exec-showcase' },
   ]) {
     test(`${label}: experience entries keep their edge spacing in Direct Edit`, async ({ page }) => {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
       const entries = page.locator(`.direct-edit-preview [data-export-section="experience"] .${classPrefix}__entry`)
@@ -1564,7 +1555,7 @@ test.describe('Direct Edit builder', () => {
     { label: 'European', commaSelector: '.european-showcase__skill-items' },
   ]) {
     test(`${label}: skills show as chips while editing and comma lines otherwise`, async ({ page }) => {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
       const editingSkills = page.locator('.direct-edit-preview [data-export-section="skills"]')
@@ -1584,7 +1575,7 @@ test.describe('Direct Edit builder', () => {
   // mode, exports included. Measured in both modes, since Direct Edit adds
   // EditableList's wrapper around each Experience card.
   test('European: experience entries are spaced apart in Classic and Direct Edit', async ({ page }) => {
-    await selectTemplate(page, 'European')
+    await pickTemplate(page, 'European')
 
     const gapBetweenCards = (scope) => page.evaluate((sel) => {
       const cards = document.querySelectorAll(`${sel} [data-export-section="experience"] [data-export-card]`)
@@ -1604,7 +1595,7 @@ test.describe('Direct Edit builder', () => {
   test('Graduate: an empty Career Objective can be written inline', async ({ page }) => {
     await page.getByRole('button', { name: 'Reset form' }).click()
     await page.getByRole('button', { name: 'Confirm reset' }).click()
-    await selectTemplate(page, 'Graduate')
+    await pickTemplate(page, 'Graduate')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     const aboutField = page.locator('.direct-edit-preview [data-export-section="about"] .graduate-showcase__summary .direct-edit-field')
@@ -1627,7 +1618,7 @@ test.describe('Direct Edit builder', () => {
     { label: 'Developer', classPrefix: 'dev-showcase' },
   ]) {
     test(`${label}: the timeline connector joins entries and stops at the last one in Direct Edit`, async ({ page }) => {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
       const lines = page.locator(`.direct-edit-preview .${classPrefix}__timeline-line`)
@@ -1727,7 +1718,7 @@ test.describe('Direct Edit builder', () => {
   for (const label of ALL_TEMPLATE_LABELS) {
     test(`${label}: a section pencil opens a working popup editor`, async ({ page }) => {
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
 
       const section = page.locator('[data-export-section="experience"]').first()
       await expect(section).toBeVisible()
@@ -1776,8 +1767,7 @@ test.describe('Direct Edit column control in Finnish', () => {
 
   test('the column control is labelled in Finnish', async ({ page }) => {
     await page.getByRole('tab', { name: 'Suora muokkaus' }).click()
-    await page.getByRole('button', { name: /^Valitse pohja:/ }).click()
-    await page.getByRole('dialog', { name: 'Pohjagalleria' }).locator('.template-gallery__name').getByText('Luova', { exact: true }).click()
+    await pickTemplate(page, 'Luova', { locale: 'fi' })
 
     await openSectionPopup(page, 'skills')
     const group = page.getByRole('group', { name: 'Sarake' })
@@ -1897,7 +1887,7 @@ test.describe('Editing a skill', () => {
   // category derived from each skill's text (EditableCategorizedChip).
   for (const template of ['Creative', 'Compact']) {
     test(`renames, refuses a duplicate, cancels and removes a skill on the CV (${template})`, async ({ page }) => {
-      await selectTemplate(page, template)
+      await pickTemplate(page, template)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
       const skills = page.locator('.direct-edit-preview [data-export-section="skills"]')
 
@@ -1944,7 +1934,7 @@ test.describe('Editing a skill', () => {
   }
 
   test('"+ Add" opens an empty chip and adds nothing if left empty', async ({ page }) => {
-    await selectTemplate(page, 'Creative')
+    await pickTemplate(page, 'Creative')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
     const skills = page.locator('.direct-edit-preview [data-export-section="skills"]')
 
@@ -2009,7 +1999,7 @@ test.describe('Direct Edit pencils and Load demo CV', () => {
   // The section pencil used to appear only while the pointer was over a
   // section, which was easy to miss and near-unreachable on touch.
   test('every section shows its pencil without hovering, and each opens its own section', async ({ page }) => {
-    await selectTemplate(page, 'Creative')
+    await pickTemplate(page, 'Creative')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
     await page.mouse.move(0, 0)
 
@@ -2041,7 +2031,7 @@ test.describe('Direct Edit pencils and Load demo CV', () => {
   })
 
   test('pencils follow their sections when an edit moves them', async ({ page }) => {
-    await selectTemplate(page, 'Modern Timeline')
+    await pickTemplate(page, 'Modern Timeline')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
     const offset = (key) => page.evaluate((sectionKey) => {

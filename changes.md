@@ -4,6 +4,16 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Field chip hover and one gallery test helper — 1.6.15, 2026-10-11
+
+The field chips on the Free CV Templates page and in the builder gallery
+now darken their border on hover, like the page's other outlined pills.
+Behind the scenes, the e2e tests that switch templates through the
+gallery share one helper (`e2e/helpers/templateGallery.js`, English and
+Finnish) instead of three copies plus an inline Finnish one; it picks a
+card by its exact name, so labels the field chips share with cards can't
+trip it.
+
 ## Tech example pages link to the Tech templates — 1.6.14, 2026-10-11
 
 The Developer, IT and Cybersecurity CV example pages' "See also" row now

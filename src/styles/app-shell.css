@@ -2944,6 +2944,12 @@ select.floating-field__control {
   cursor: pointer;
 }
 
+/* Hover darkens an unchecked chip's border to the checked one's, like the
+   grid's other outlined pills (.templates-page-card__examples). */
+.template-fields__chip:hover {
+  border-color: var(--app-text);
+}
+
 .template-fields__chip:has(input:checked) {
   border-color: var(--app-text);
   background: var(--app-text);

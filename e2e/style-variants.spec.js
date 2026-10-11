@@ -1,4 +1,5 @@
 import { test, expect } from './fixtures/base.js'
+import { pickTemplate } from './helpers/templateGallery.js'
 import { getTemplateVariants } from '../src/utils/templateVariants.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { CV_FONT_OPTIONS } from '../src/utils/cvFonts.js'
@@ -118,15 +119,6 @@ for (const mode of ['classic', 'direct']) {
 }
 
 const minimalVariant = getTemplateVariants('minimal')[1]
-
-// Picks a template from the gallery, as templates.spec.js does.
-async function pickTemplate(page, label) {
-  await page.getByRole('button', { name: /^Select template:/ }).click()
-  const dialog = page.getByRole('dialog', { name: 'Template gallery' })
-  // Scope to .template-gallery__name with exact match to avoid matching the field filter label
-  await dialog.locator('.template-gallery__name').getByText(label, { exact: true }).click()
-  await expect(dialog).toBeHidden()
-}
 
 test('picking a variant changes the look and its font', async ({ page }) => {
   await page.goto('/cv?template=minimal')

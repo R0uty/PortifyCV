@@ -2295,13 +2295,17 @@ final review called the branch ready to merge; none of these block it.
   also the IT and Cybersecurity pages. The spec left this out on purpose;
   add a small `fieldSearch()` helper in `templateFields.js` then (dropped
   in 1.6.12 because nothing called it).
-- **One shared gallery-pick e2e helper.** "Pick a card in the template
+- ~~**One shared gallery-pick e2e helper.**~~ — done 1.6.15:
+  `pickTemplate(page, label, { locale })` in `e2e/helpers/templateGallery.js`,
+  used by the three specs and the Finnish inline case in direct-edit.
+  Original note: "Pick a card in the template
   gallery by name" is copied in `e2e/templates.spec.js`,
   `e2e/direct-edit.spec.js` and `e2e/style-variants.spec.js`. In 1.6.12 the
   new "Creative"/"Graduate" chips clashed with card names and all three
   copies had to be fixed (now scoped to `.template-gallery__name`, exact);
   one helper in `e2e/helpers/` would stop the next clash.
-- **Chips have no hover state.** `.template-fields__chip` in
+- ~~**Chips have no hover state.**~~ — done 1.6.15 (border darkens to the
+  checked chip's, test in `template-filters.spec.js`). Original note: `.template-fields__chip` in
   `app-shell.css` has checked and focus styles but no `:hover`, unlike the
   other pills on the grid. Polish.
 - ~~**Bug, pre-existing: the dialog Tab trap counts unchecked radios.**~~

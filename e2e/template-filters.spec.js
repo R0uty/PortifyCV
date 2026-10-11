@@ -70,6 +70,19 @@ test.describe('Free CV Templates field filter', () => {
     await expect(status(page)).toHaveText(`Kaikki ${total} pohjaa`)
   })
 
+  test('an unchecked chip darkens its border on hover', async ({ page }) => {
+    await page.goto('/free-cv-templates')
+    const chipLabel = (text) => page.locator('.template-fields__chip').filter({ hasText: new RegExp(`^${text}$`) })
+    const creative = chipLabel('Creative')
+    const checkedBorder = await chipLabel('All')
+      .evaluate((el) => getComputedStyle(el).borderColor)
+    const restBorder = await creative.evaluate((el) => getComputedStyle(el).borderColor)
+    expect(restBorder).not.toBe(checkedBorder)
+
+    await creative.hover()
+    await expect.poll(() => creative.evaluate((el) => getComputedStyle(el).borderColor)).toBe(checkedBorder)
+  })
+
   test('a look picked on a card survives filtering it away and back', async ({ page }) => {
     await page.goto('/free-cv-templates')
     const developerLook = page.getByRole('radiogroup', { name: 'Style: Developer', exact: true })
