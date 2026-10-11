@@ -2274,3 +2274,38 @@ Verification (1.6.4): `npm run lint` clean; all 8 check:* ok (share,
 reducers, feedback, docx-export, section-schema, section-columns,
 template-pages, template-variants); `CI=1 npm run test:e2e` 843 passed
 (4.9m), 0 failed; `npm run build` ok.
+
+### Field filters (1.6.12) — follow-ups (not started)
+
+From the task and final reviews of the field filters (spec
+`docs/superpowers/specs/2026-10-11-template-field-filters-design.md`). The
+final review called the branch ready to merge; none of these block it.
+
+- **The template page's "All templates" link drops the filter.** It goes
+  to bare `/free-cv-templates` (`TemplateDetailPage.jsx:256`), so a visitor
+  who came from `?field=tech` and returns by that link lands on All.
+  Browser Back keeps the filter (the grid re-reads `?field=` on mount),
+  which is all the spec promised. Fixing it needs a choice: carry the field
+  in `history.state` or in a query param on the template page.
+- **Link the per-field example pages to the filter.** e.g. Developer CV
+  examples (`DeveloperCvExamplesPage.jsx`) → `/free-cv-templates?field=tech`;
+  also the IT and Cybersecurity pages. The spec left this out on purpose;
+  add a small `fieldSearch()` helper in `templateFields.js` then (dropped
+  in 1.6.12 because nothing called it).
+- **One shared gallery-pick e2e helper.** "Pick a card in the template
+  gallery by name" is copied in `e2e/templates.spec.js`,
+  `e2e/direct-edit.spec.js` and `e2e/style-variants.spec.js`. In 1.6.12 the
+  new "Creative"/"Graduate" chips clashed with card names and all three
+  copies had to be fixed (now scoped to `.template-gallery__name`, exact);
+  one helper in `e2e/helpers/` would stop the next clash.
+- **Chips have no hover state.** `.template-fields__chip` in
+  `app-shell.css` has checked and focus styles but no `:hover`, unlike the
+  other pills on the grid. Polish.
+- **Bug, pre-existing: the dialog Tab trap counts unchecked radios.**
+  `Modal.jsx:4`'s `FOCUSABLE_SELECTOR` includes every enabled `input`, but
+  only the checked radio of a group is in the tab order. If the last match
+  in a dialog is an unchecked radio, Tab from the real last control isn't
+  wrapped and focus can leave the dialog. Not caused by the filters (their
+  chips aren't last), but the gallery and other dialogs now hold more
+  radio groups. Fix: skip `input[type=radio]:not(:checked)` when a checked
+  radio with the same `name` exists, and add an e2e test that Tab wraps.
