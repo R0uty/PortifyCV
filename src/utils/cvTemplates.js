@@ -59,7 +59,7 @@ const templateMap = {
   creative: {
     id: 'creative',
     slug: 'creative',
-    accent: { default: '#e2572a', swatchSet: 'warmCoral' },
+    accent: { default: '#b43e18', swatchSet: 'warmCoral' },
     label: 'Creative',
     description: 'Editorial two-column layout with numbered section headings, a full-width header, and a single customizable accent color. Suits any creative profession.',
     variant: 'creative',
@@ -168,7 +168,7 @@ const templateMap = {
   compact: {
     id: 'compact',
     slug: 'compact',
-    accent: { default: '#0284c7', swatchSet: 'coolBlue' },
+    accent: { default: '#0277b4', swatchSet: 'coolBlue' },
     label: 'Compact',
     description: 'A tight single-column one-pager with a customizable accent that shrinks its own spacing until everything fits one page — built for a long, detailed history.',
     variant: 'compact',
@@ -276,7 +276,7 @@ const templateMap = {
   modernOrange: {
     id: 'modernOrange',
     slug: 'modern-orange',
-    accent: { default: '#f28c00', swatchSet: 'warm' },
+    accent: { default: '#a56000', swatchSet: 'warm' },
     label: 'Modern Orange',
     description: 'Premium two-column layout with a warm cream sidebar, orange accents, dot-rated skills, and timelines for education and experience — suits almost any profession.',
     variant: 'modernOrange',

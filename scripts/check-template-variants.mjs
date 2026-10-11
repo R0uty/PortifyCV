@@ -283,7 +283,7 @@ console.log('\nHelpers\n')
   check('getVariantPaletteStyle is {} for an unknown template',
     JSON.stringify(getVariantPaletteStyle('no-such-template', 'default')) === '{}')
   check('getVariantSwatches puts the accent first',
-    getVariantSwatches('creative', getTemplateVariant('creative', 'default'))[0] === '#e2572a')
+    getVariantSwatches('creative', getTemplateVariant('creative', 'default'))[0] === '#b43e18')
   check('getVariantSwatches returns at most 4 colours',
     templateIds.every((id) => getTemplateVariants(id).every((v) => getVariantSwatches(id, v).length <= 4)))
 
@@ -294,7 +294,7 @@ console.log('\nHelpers\n')
   check('isStyleVariantModified: other accent → true',
     isStyleVariantModified({ ...base, templateAccentColors: { creative: '#7c3aed' } }) === true)
   check('isStyleVariantModified: accent differs only in case → false',
-    isStyleVariantModified({ ...base, templateAccentColors: { creative: '#E2572A' } }) === false)
+    isStyleVariantModified({ ...base, templateAccentColors: { creative: '#B43E18' } }) === false)
   check('isStyleVariantModified: accent-less template ignores accents',
     isStyleVariantModified({ ...base, templateId: 'developer', templateAccentColors: { developer: '#123456' } }) === false)
 }

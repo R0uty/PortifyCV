@@ -8,7 +8,7 @@
 
 // Registry default accent — must match `accent.default` for `creative` in
 // cvTemplates.js exactly (lowercase hex). See docs/template-design-system.md §6.
-export const CREATIVE_DEFAULT_ACCENT_COLOR = '#e2572a'
+export const CREATIVE_DEFAULT_ACCENT_COLOR = '#b43e18'
 
 export default {
   // Outer document border — rose-tinted border, white bg

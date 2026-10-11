@@ -61,15 +61,13 @@ export const TEMPLATE_VARIANTS = {
       { foreground: '--min-accent-ink', background: '--min-accent-soft', size: 'body' },
       { foreground: '--min-accent-text', background: '--min-bg', size: 'body' },
     ],
-    defaultContrastExceptions: [
-      { foreground: '--min-accent-text', background: '--min-bg', ratio: '3.19', reason: 'Amber-600 project names on white, below 4.5:1 since before Phase 3; variant #1 must not change.' },
-    ],
+    defaultContrastExceptions: [],
     variants: [
       original('minimal', {
         '--min-ink': '#111827',
         '--min-muted': '#6b7280',
         '--min-accent-ink': '#b45309',
-        '--min-accent-text': '#d97706',
+        '--min-accent-text': '#b16105',
         '--min-accent-soft': '#fffbeb',
         '--min-accent-line': '#fde68a',
         '--min-header-line': '#fef3c7',
@@ -126,7 +124,6 @@ export const TEMPLATE_VARIANTS = {
       { foreground: '--dev-muted', background: '--dev-surface', size: 'body' },
       { foreground: '--dev-body', background: '--dev-bg', size: 'body' },
       { foreground: '--dev-body', background: '--dev-surface', size: 'body' },
-      { foreground: '--dev-teal', background: '--dev-bg', size: 'body' },
       { foreground: '--dev-sidebar-text', background: '--dev-sidebar', size: 'body' },
       { foreground: '--dev-sidebar-text', background: '--dev-sidebar-end', size: 'body' },
       { foreground: '--dev-sidebar-muted', background: '--dev-sidebar', size: 'body' },
@@ -138,9 +135,7 @@ export const TEMPLATE_VARIANTS = {
       { foreground: 'rgba(255, 255, 255, 0.85)', background: '--dev-sidebar', size: 'body' },
       { foreground: 'rgba(255, 255, 255, 0.85)', background: '--dev-sidebar-end', size: 'body' },
     ],
-    defaultContrastExceptions: [
-      { foreground: '--dev-teal', background: '--dev-bg', ratio: '2.49', reason: 'Bright teal cert link on a sidebar section moved onto the light main column (.dev-showcase__cert-link), below 4.5:1 since before Phase 3; variant #1 must not change.' },
-    ],
+    defaultContrastExceptions: [],
     variants: [
       original('developer', {
         '--dev-primary': '#0f172a',
@@ -242,17 +237,12 @@ export const TEMPLATE_VARIANTS = {
       { foreground: ACCENT, background: '--cr-sidebar', size: 'body' },
       { foreground: ACCENT, background: '--cr-card', size: 'body' },
     ],
-    defaultContrastExceptions: [
-      { foreground: '--cr-ink-faint', background: '--cr-sidebar', ratio: '4.25', reason: 'Faint meta text on the sand sidebar, below 4.5:1 since before Phase 3; variant #1 must not change.' },
-      { foreground: ACCENT, background: '--cr-page', ratio: '3.35', reason: 'Coral accent role/section number on the peach page (.creative-showcase__role, .creative-showcase__section-num), below 4.5:1 since before Phase 3; variant #1 must not change.' },
-      { foreground: ACCENT, background: '--cr-sidebar', ratio: '2.97', reason: 'Coral accent section number/dates on the sand sidebar, below 4.5:1 since before Phase 3; variant #1 must not change.' },
-      { foreground: ACCENT, background: '--cr-card', ratio: '3.64', reason: 'Coral accent dates on experience cards (.creative-showcase__exp-dates), below 4.5:1 since before Phase 3; variant #1 must not change.' },
-    ],
+    defaultContrastExceptions: [],
     variants: [
       original('creative', {
         '--cr-ink': '#1a1a1a',
         '--cr-ink-muted': '#4b4b4b',
-        '--cr-ink-faint': '#6b6b6b',
+        '--cr-ink-faint': '#666666',
         '--cr-border': '#ecdfc9',
         '--cr-page': '#fdf1e2',
         '--cr-sidebar': '#f7e3c4',
@@ -306,9 +296,7 @@ export const TEMPLATE_VARIANTS = {
       { foreground: '--ms-rose', background: '--ms-bg', size: 'body' },
       { foreground: '--ms-rose', background: '--ms-bg-subtle', size: 'body' },
     ],
-    defaultContrastExceptions: [
-      { foreground: '--ms-muted', background: '--ms-bg', ratio: '4.45', reason: 'Slate meta text on the page background (.modern-showcase__contact-item), just below 4.5:1 since before Phase 3; variant #1 must not change.' },
-    ],
+    defaultContrastExceptions: [],
     variants: [
       original('modern', {
         '--ms-navy': '#0f172a',
@@ -318,7 +306,7 @@ export const TEMPLATE_VARIANTS = {
         '--ms-border': '#e2e8f0',
         '--ms-border-soft': '#f1f5f9',
         '--ms-text': '#1e293b',
-        '--ms-muted': '#64748b',
+        '--ms-muted': '#627289',
         '--ms-bg': '#f7f7fa',
         '--ms-bg-subtle': '#fafafa',
         '--ms-card': '#ffffff',
@@ -513,9 +501,7 @@ export const TEMPLATE_VARIANTS = {
       { foreground: '--cp-ink-muted', background: '--cp-bg', size: 'body' },
       { foreground: ACCENT, background: '--cp-bg', size: 'body' },
     ],
-    defaultContrastExceptions: [
-      { foreground: ACCENT, background: '--cp-bg', ratio: '3.83', reason: 'Sky accent text on the page background (.compact-showcase__role, .compact-showcase__entry-dates), below 4.5:1 since before Phase 3; variant #1 must not change.' },
-    ],
+    defaultContrastExceptions: [],
     variants: [
       original('compact', {
         '--cp-ink': '#0f172a',
@@ -568,13 +554,11 @@ export const TEMPLATE_VARIANTS = {
       { foreground: ACCENT, background: '--pf-sidebar-tint', size: 'body' },
       { foreground: ACCENT, background: '--pf-header-top', size: 'body' },
     ],
-    defaultContrastExceptions: [
-      { foreground: '--pf-gray', background: '--pf-sidebar-tint', ratio: '4.48', reason: 'Grey meta text on the sidebar tint, below 4.5:1 since before Phase 3; variant #1 must not change.' },
-    ],
+    defaultContrastExceptions: [],
     variants: [
       original('portfolio', {
         '--pf-slate': '#0f172a',
-        '--pf-gray': '#64748b',
+        '--pf-gray': '#627289',
         '--pf-border': '#e2e8f0',
         '--pf-border-soft': '#eef1f6',
         '--pf-text': '#1e293b',
@@ -794,11 +778,7 @@ export const TEMPLATE_VARIANTS = {
       { foreground: ACCENT, background: '--mo-sidebar-bg', size: 'body' },
       { foreground: '#ffffff', background: ACCENT, size: 'body' },
     ],
-    defaultContrastExceptions: [
-      { foreground: ACCENT, background: '--mo-bg', ratio: '2.42', reason: 'Orange accent dates/meta/name on the page, below 4.5:1 since before Phase 3; variant #1 must not change.' },
-      { foreground: ACCENT, background: '--mo-sidebar-bg', ratio: '2.30', reason: 'Orange accent sidebar headings on the cream sidebar (.modern-orange-showcase__sidebar-heading), below 4.5:1 since before Phase 3; variant #1 must not change.' },
-      { foreground: '#ffffff', background: ACCENT, ratio: '2.46', reason: 'White title-badge text on orange (.modern-orange-showcase__title-badge), below 4.5:1 since before Phase 3; variant #1 must not change.' },
-    ],
+    defaultContrastExceptions: [],
     variants: [
       original('modernOrange', {
         '--mo-text': '#151a22',
@@ -885,9 +865,7 @@ export const TEMPLATE_VARIANTS = {
       { foreground: 'rgba(255, 255, 255, 0.65)', background: '--cc-dark', size: 'body' },
       { foreground: 'rgba(255, 255, 255, 0.8)', background: '--cc-dark', size: 'body' },
     ],
-    defaultContrastExceptions: [
-      { foreground: '--cc-muted', background: '--cc-sidebar', ratio: '4.39', reason: 'Grey meta text on the sidebar, below 4.5:1 since before Phase 3; variant #1 must not change.' },
-    ],
+    defaultContrastExceptions: [],
     variants: [
       original('colorfulCompact', {
         '--cc-pink': '#ec4899',
@@ -912,7 +890,7 @@ export const TEMPLATE_VARIANTS = {
         '--cc-purple-soft': '#f3e8ff',
         '--cc-dark': '#16132a',
         '--cc-ink': '#18181b',
-        '--cc-muted': '#6b7280',
+        '--cc-muted': '#686f7d',
         '--cc-sidebar': '#f2f4f8',
         '--cc-border': '#e5e7eb',
         '--cc-card': '#ffffff',

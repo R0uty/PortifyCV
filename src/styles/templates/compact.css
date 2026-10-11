@@ -23,7 +23,7 @@
 .compact-showcase {
   /* Accent — overridden inline per render. Kept in sync with
      COMPACT_DEFAULT_ACCENT_COLOR in components/templates/compact.js. */
-  --tpl-accent: #0284c7;
+  --tpl-accent: #0277b4;
   --tpl-accent-soft: rgba(2, 132, 199, 0.1);
 
   --cp-ink: #0f172a;

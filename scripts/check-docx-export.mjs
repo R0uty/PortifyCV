@@ -309,7 +309,7 @@ console.log('\ndocxExport: heading color (monochrome by default, accent when pro
 
 {
   // accentColor passed — headings use it; body text stays monochrome.
-  const doc = await buildDocxDocument(demoCvData, { template: 'creative', locale: 'en', accentColor: '#e2572a' })
+  const doc = await buildDocxDocument(demoCvData, { template: 'creative', locale: 'en', accentColor: '#b43e18' })
   const buffer = await Packer.toBuffer(doc)
 
   const { default: JSZip } = await import('jszip')
@@ -318,10 +318,10 @@ console.log('\ndocxExport: heading color (monochrome by default, accent when pro
   const colorMatches = [...documentXml.matchAll(/w:color w:val="([0-9A-Fa-f]{6})"/g)]
   const colorsUsed = new Set(colorMatches.map(([, hex]) => hex.toUpperCase()))
 
-  check('with accentColor #e2572a, the accent hex E2572A appears in the document', colorsUsed.has('E2572A'))
+  check('with accentColor #b43e18, the accent hex B43E18 appears in the document', colorsUsed.has('B43E18'))
   check(
-    'with accentColor set, every color is still one of the three expected tokens (1A1A1A / 666666 / E2572A) — no stray hues',
-    [...colorsUsed].every((hex) => hex === '1A1A1A' || hex === '666666' || hex === 'E2572A'),
+    'with accentColor set, every color is still one of the three expected tokens (1A1A1A / 666666 / B43E18) — no stray hues',
+    [...colorsUsed].every((hex) => hex === '1A1A1A' || hex === '666666' || hex === 'B43E18'),
     `colors found: ${[...colorsUsed].join(', ')}`,
   )
 }

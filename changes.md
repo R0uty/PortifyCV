@@ -4,6 +4,37 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Contrast fixes for the first looks — 1.6.9, 2026-10-11
+
+The 13 text/background pairs listed under 1.6.0's "Known gaps" now meet
+WCAG AA's 4.5:1, so `templateVariants.js` has no `defaultContrastExceptions`
+left. What you'll see:
+
+- Creative, Compact and Modern Orange open on a darker default accent:
+  Creative's coral #e2572a → #b43e18, Compact's sky #0284c7 → #0277b4,
+  Modern Orange's orange #f28c00 → #a56000 (the first swatch of each
+  template's colour picker changes with it, keeping its name). Modern
+  Orange's white title badge now reads on the accent too (2.46 → 4.91).
+- Developer: a certificate link on a sidebar section moved onto the white
+  main column uses the template's text teal (#0f766e) instead of the bright
+  gradient teal (2.49 → 5.47). No palette colour changed.
+- Small greys and one amber, too slight to notice: Minimalist's project
+  names #d97706 → #b16105 (3.19 → 4.58), Creative's faint sidebar meta
+  #6b6b6b → #666666, Modern Professional's muted slate and Portfolio
+  Hybrid's grey #64748b → #627289, Colorful Compact's muted grey
+  #6b7280 → #686f7d.
+
+Only each template's first look changed; the other two already passed.
+Accent tweaks live only in the open tab, so every CV on Creative, Compact
+or Modern Orange shows the new default accent the next time it's opened;
+share links and exported JSON don't carry a hand-picked accent, so nothing
+saved keeps the old one.
+
+Known limit: the accent pickers still offer light swatches (for example
+Amber #d97706 in Modern Orange's set). A user who picks one by hand can
+still get accent text below 4.5:1; only the defaults and the looks are
+checked.
+
 ## Share links open on the sender's template — 1.6.8, 2026-10-10
 
 A share link now remembers which template the sender had open and opens
@@ -106,7 +137,7 @@ declared once, and text pairs meet WCAG contrast, traced from real CSS
 usage. While testing, Portrait's language row was found overflowing the page
 in the builder; it now wraps between languages (1.5.16).
 
-Known gaps, kept as first-look-only `defaultContrastExceptions` because they
+Known gaps (all fixed in 1.6.9), kept as first-look-only `defaultContrastExceptions` because they
 predate this work and changing them would change the original designs:
 Minimalist amber project names on white (3.19), Developer teal cert link on
 white (2.49), Creative faint meta on the sidebar (4.25) and coral accent on

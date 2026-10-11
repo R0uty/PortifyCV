@@ -934,7 +934,8 @@
    rail-only text colours of a sidebar section moved onto the light main
    column. Same mapping the print block above uses to put the rail on
    white: light text to --dev-primary, the rail's #94a3b8 meta to the main
-   column's own muted slate, the rail's bright link teal to --dev-teal.
+   column's own muted slate, the rail's bright link teal to --dev-accent
+   (the template's text-on-white teal; --dev-teal is 2.49:1 on white).
    Main sections moved onto the rail need nothing here: their cards carry
    their own white background. */
 .dev-showcase__main [data-moved-from='side'] .dev-showcase__link-value,
@@ -953,7 +954,7 @@
 }
 
 .dev-showcase__main [data-moved-from='side'] .dev-showcase__cert-link {
-  color: var(--dev-teal);
+  color: var(--dev-accent);
 }
 
 .dev-showcase__main [data-moved-from='side'] .dev-showcase__cert-card {

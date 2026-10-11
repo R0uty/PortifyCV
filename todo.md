@@ -2199,8 +2199,12 @@ restore the looks of the templates whose stored variant changed;
 `check:template-variants` reports a missing `CSS_SOURCES` entry as a FAIL
 line; `style-variants.spec.js` also checks the off-screen export source.
 
-Known gaps: the `defaultContrastExceptions` in `templateVariants.js` (13
-pairs across 8 templates, listed in `changes.md`), first look only. Share
+Known gaps: ~~the `defaultContrastExceptions` in `templateVariants.js` (13
+pairs across 8 templates, listed in `changes.md`), first look only~~ — fixed
+1.6.9: the colours changed instead (Creative, Compact and Modern Orange
+default accents darker, Developer's moved cert link uses `--dev-accent`,
+small greys), so the list is empty. A hand-picked light swatch can still
+fall below 4.5:1 (see `changes.md`). Share
 links ~~don't carry the selected template~~ — fixed 1.6.8: the link carries
 it as `tp` and opens on it (spec
 `docs/superpowers/specs/2026-10-10-template-in-share-links-design.md`).
@@ -2223,8 +2227,8 @@ and the template pages, and `?style=` carries a look into the builder
 handoff). Tests: `e2e/template-looks.spec.js`.
 
 Still open (not in this phase): gallery filters and a per-template photo
-flag (the original roadmap's Phase 4); the 13 first-look contrast
-exceptions; moving `textPairs`/`defaultContrastExceptions` out of the
+flag (the original roadmap's Phase 4); ~~the 13 first-look contrast
+exceptions~~ (fixed 1.6.9); moving `textPairs`/`defaultContrastExceptions` out of the
 runtime registry; looks on the landing page's marquee and hero. The
 selected template in share links was done in 1.6.8.
 

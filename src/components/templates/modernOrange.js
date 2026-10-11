@@ -10,7 +10,7 @@
 // and the bespoke Showcase itself isn't rendering — though this template's
 // Showcase renders in both modes, same as Navy Professional, so these
 // mostly matter as a defensive default).
-export const MODERN_ORANGE_DEFAULT_ACCENT_COLOR = '#F28C00'
+export const MODERN_ORANGE_DEFAULT_ACCENT_COLOR = '#a56000'
 
 export default {
   // Outer document border — plain white, no shadow

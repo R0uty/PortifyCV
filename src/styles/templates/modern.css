@@ -29,7 +29,7 @@
   --ms-border: #e2e8f0;
   --ms-border-soft: #f1f5f9;
   --ms-text: #1e293b;
-  --ms-muted: #64748b;
+  --ms-muted: #627289;
   /* Deliberately NOT pure #ffffff — same blank-canvas PDF export guard used
      by the Creative Showcase (see that block's comment above): this design
      is mostly whitespace with thin 1px borders, so an all-#ffffff page
