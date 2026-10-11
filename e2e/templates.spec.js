@@ -12,7 +12,7 @@ import { test, expect } from './fixtures/base.js'
 async function selectTemplate(page, label) {
   await page.getByRole('button', { name: /^Select template:/ }).click()
   const dialog = page.getByRole('dialog', { name: 'Template gallery' })
-  await dialog.getByText(label, { exact: true }).click()
+  await dialog.locator('.template-gallery__name').getByText(label, { exact: true }).click()
 }
 
 test.describe('Template-gated sections', () => {
@@ -267,8 +267,8 @@ test.describe('Classic Professional name alignment', () => {
     await page.goto('/cv')
     await page.getByRole('button', { name: /^Select template:/ }).click()
     const dialog = page.getByRole('dialog', { name: 'Template gallery' })
-    await expect(dialog.getByText('Classic Professional', { exact: true })).toBeVisible()
-    await expect(dialog.getByText('Classic', { exact: true })).toHaveCount(0)
+    await expect(dialog.locator('.template-gallery__name').getByText('Classic Professional', { exact: true })).toBeVisible()
+    await expect(dialog.locator('.template-gallery__name').getByText('Classic', { exact: true })).toHaveCount(0)
   })
 
   test('the Settings option toggles the header alignment', async ({ page }) => {

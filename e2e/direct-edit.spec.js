@@ -7,7 +7,7 @@ import { test, expect } from './fixtures/base.js'
 async function selectTemplate(page, label) {
   await page.getByRole('button', { name: /^Select template:/ }).click()
   const dialog = page.getByRole('dialog', { name: 'Template gallery' })
-  await dialog.getByText(label, { exact: true }).click()
+  await dialog.locator('.template-gallery__name').getByText(label, { exact: true }).click()
 }
 
 // The demo CV's fixed skill list (src/utils/cvForm.js's DEMO_CV-equivalent
@@ -1777,7 +1777,7 @@ test.describe('Direct Edit column control in Finnish', () => {
   test('the column control is labelled in Finnish', async ({ page }) => {
     await page.getByRole('tab', { name: 'Suora muokkaus' }).click()
     await page.getByRole('button', { name: /^Valitse pohja:/ }).click()
-    await page.getByRole('dialog', { name: 'Pohjagalleria' }).getByText('Luova', { exact: true }).click()
+    await page.getByRole('dialog', { name: 'Pohjagalleria' }).locator('.template-gallery__name').getByText('Luova', { exact: true }).click()
 
     await openSectionPopup(page, 'skills')
     const group = page.getByRole('group', { name: 'Sarake' })

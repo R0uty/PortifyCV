@@ -123,8 +123,8 @@ const minimalVariant = getTemplateVariants('minimal')[1]
 async function pickTemplate(page, label) {
   await page.getByRole('button', { name: /^Select template:/ }).click()
   const dialog = page.getByRole('dialog', { name: 'Template gallery' })
-  // Use the specific .template-gallery__name selector to avoid matching the field filter label
-  await dialog.locator('.template-gallery__name', { hasText: label }).click()
+  // Scope to .template-gallery__name with exact match to avoid matching the field filter label
+  await dialog.locator('.template-gallery__name').getByText(label, { exact: true }).click()
   await expect(dialog).toBeHidden()
 }
 
