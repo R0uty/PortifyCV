@@ -2964,6 +2964,10 @@ select.floating-field__control {
   margin-bottom: var(--space-8);
 }
 
+.template-gallery__filter {
+  margin-bottom: var(--space-4);
+}
+
 .templates-page-card__thumb {
   display: block;
   cursor: pointer;

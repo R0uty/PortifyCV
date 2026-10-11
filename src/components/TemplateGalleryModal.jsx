@@ -3,11 +3,13 @@ import { useMemo, useState } from 'react'
 import Modal from './Modal'
 import StyleSwatchGroup from './StyleSwatchGroup'
 import TemplateThumbnail from './TemplateThumbnail'
+import TemplateFieldFilter from './TemplateFieldFilter'
 import { buildThumbnailCv } from '../utils/thumbnailCv'
 import { getCvFontStack } from '../utils/cvFonts'
 import { resolveTemplateAccent } from '../utils/cvTemplates'
 import { templatePath } from '../utils/routes'
 import { getVariantLook, resolveStyleVariantId, styleVariantSearch } from '../utils/templateVariants'
+import { filterTemplatesByField } from '../utils/templateFields'
 
 function TemplateGalleryModal({
   isOpen,
@@ -30,13 +32,18 @@ function TemplateGalleryModal({
   // every open, during render (React's "adjust state on a prop change"
   // pattern), so a reopened gallery never shows a stale preview.
   const [previewedLooks, setPreviewedLooks] = useState({})
+  // The field filter (1.6.12) is local and starts on All at every open:
+  // the gallery is for switching, not a page to link to.
+  const [field, setField] = useState(null)
   const [wasOpen, setWasOpen] = useState(isOpen)
   if (isOpen !== wasOpen) {
     setWasOpen(isOpen)
     if (isOpen) {
       setPreviewedLooks({})
+      setField(null)
     }
   }
+  const shownTemplates = filterTemplatesByField(templates, field)
 
   return (
     <Modal
@@ -59,8 +66,19 @@ function TemplateGalleryModal({
         </div>
       ) : null}
 
+      <div className="template-gallery__filter">
+        <TemplateFieldFilter
+          value={field}
+          onChange={setField}
+          locale={locale}
+          shownCount={shownTemplates.length}
+          totalCount={templates.length}
+          name="gallery-field"
+        />
+      </div>
+
       <div className="template-gallery__grid">
-        {templates.map((template) => {
+        {shownTemplates.map((template) => {
           const isActive = template.id === selectedTemplateId
           const storedLook = resolveStyleVariantId(formData, template.id)
           const look = previewedLooks[template.id] ?? storedLook

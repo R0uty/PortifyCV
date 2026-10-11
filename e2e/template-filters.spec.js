@@ -93,3 +93,28 @@ test.describe('Free CV Templates field filter', () => {
     await expect(gridNames(page)).toHaveText(labelsFor('graduate'))
   })
 })
+
+test.describe('Template gallery field filter', () => {
+  const openGallery = async (page) => {
+    await page.getByRole('button', { name: /^Select template:/ }).click()
+    return page.getByRole('dialog', { name: 'Template gallery' })
+  }
+  const galleryNames = (dialog) => dialog.locator('.template-gallery__name')
+
+  test('a chip filters the cards; reopening the gallery starts on All', async ({ page }) => {
+    await page.goto('/cv')
+    let dialog = await openGallery(page)
+    await expect(chip(dialog, 'All')).toBeChecked()
+    await expect(status(dialog)).toHaveText(`All ${cvTemplates.length} templates`)
+
+    await chip(dialog, 'Leadership').check()
+    await expect(galleryNames(dialog)).toHaveText(labelsFor('leadership'))
+    await expect(status(dialog)).toHaveText(`Showing ${labelsFor('leadership').length} of ${cvTemplates.length} templates`)
+
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+    dialog = await openGallery(page)
+    await expect(chip(dialog, 'All')).toBeChecked()
+    await expect(galleryNames(dialog)).toHaveCount(cvTemplates.length)
+  })
+})
