@@ -2287,7 +2287,10 @@ final review called the branch ready to merge; none of these block it.
   Browser Back keeps the filter (the grid re-reads `?field=` on mount),
   which is all the spec promised. Fixing it needs a choice: carry the field
   in `history.state` or in a query param on the template page.
-- **Link the per-field example pages to the filter.** e.g. Developer CV
+- ~~**Link the per-field example pages to the filter.**~~ — done 1.6.14:
+  the Developer, IT and Cybersecurity pages' "See also" link is now "Tech
+  CV templates" (`?field=tech`, replacing the unfiltered link; user's
+  choice), built with the new `fieldSearch()`. Original note: e.g. Developer CV
   examples (`DeveloperCvExamplesPage.jsx`) → `/free-cv-templates?field=tech`;
   also the IT and Cybersecurity pages. The spec left this out on purpose;
   add a small `fieldSearch()` helper in `templateFields.js` then (dropped

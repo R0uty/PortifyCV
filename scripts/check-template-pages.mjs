@@ -238,7 +238,7 @@ check(
 )
 
 // --- Field filters (1.6.12) -------------------------------------------------
-const { TEMPLATE_FIELDS, ALL_FIELDS_LABEL, parseFieldParam, filterTemplatesByField } =
+const { TEMPLATE_FIELDS, ALL_FIELDS_LABEL, parseFieldParam, filterTemplatesByField, fieldSearch } =
   await importSrc('utils/templateFields.js')
 
 const fieldIds = TEMPLATE_FIELDS.map((field) => field.id)
@@ -269,6 +269,8 @@ check('filterTemplatesByField keeps gallery order',
     && JSON.stringify(techIds) === JSON.stringify(cvTemplates.map((t) => t.id).filter((id) => techIds.includes(id))))
 check('filterTemplatesByField(null) returns every template',
   filterTemplatesByField(cvTemplates, null).length === cvTemplates.length)
+check('fieldSearch writes ?field= for a field and nothing for All',
+  fieldSearch('tech') === '?field=tech' && fieldSearch(null) === '')
 
 if (failures > 0) {
   console.log(`\n${failures} template-page check(s) failed.`)

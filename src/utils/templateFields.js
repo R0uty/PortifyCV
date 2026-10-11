@@ -25,6 +25,12 @@ export function parseFieldParam(raw) {
   return typeof raw === 'string' && FIELD_IDS.has(raw) ? raw : null
 }
 
+// The query string that opens the Free CV Templates grid on `fieldId`
+// (1.6.14, for links from other pages); nothing for null (All).
+export function fieldSearch(fieldId) {
+  return fieldId ? `?field=${fieldId}` : ''
+}
+
 // The templates tagged with `fieldId`, in their original order; every
 // template for null (All).
 export function filterTemplatesByField(templates, fieldId) {

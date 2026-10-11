@@ -118,3 +118,29 @@ test.describe('Template gallery field filter', () => {
     await expect(galleryNames(dialog)).toHaveCount(cvTemplates.length)
   })
 })
+
+// 1.6.14: the tech example pages' "See also" row links to the grid on the
+// Tech chip instead of the unfiltered grid.
+test.describe('Example pages link to the Tech filter', () => {
+  for (const path of ['/developer-cv-examples', '/it-cv-examples', '/cybersecurity-cv-examples']) {
+    test(`${path} opens the grid on Tech`, async ({ page }) => {
+      await page.goto(path)
+      const link = page.locator('.templates-page-links').getByRole('link', { name: 'Tech CV templates', exact: true })
+      await expect(link).toHaveAttribute('href', '/free-cv-templates?field=tech')
+      await expect(page.locator('.templates-page-links').getByRole('link', { name: 'Free CV Templates', exact: true }))
+        .toHaveCount(0)
+
+      await link.click()
+      await expect(page).toHaveURL(/\/free-cv-templates\?field=tech$/)
+      await expect(chip(page, 'Tech')).toBeChecked()
+      await expect(page.locator('a.templates-page-card__name')).toHaveText(labelsFor('tech'))
+    })
+  }
+
+  test('the link is translated', async ({ page }) => {
+    await page.goto('/developer-cv-examples')
+    await page.getByRole('button', { name: 'Switch language' }).click()
+    await expect(page.locator('.templates-page-links').getByRole('link', { name: 'Tekniikan ja IT-alan CV-pohjat', exact: true }))
+      .toHaveAttribute('href', '/free-cv-templates?field=tech')
+  })
+})

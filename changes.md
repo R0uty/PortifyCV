@@ -4,6 +4,15 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Tech example pages link to the Tech templates — 1.6.14, 2026-10-11
+
+The Developer, IT and Cybersecurity CV example pages' "See also" row now
+links to "Tech CV templates" ("Tekniikan ja IT-alan CV-pohjat"), which
+opens the Free CV Templates page on the Tech chip
+(`/free-cv-templates?field=tech`), instead of the unfiltered "Free CV
+Templates". The All chip is one click away there. A small `fieldSearch()`
+helper in `templateFields.js` builds the query.
+
 ## Dialog focus trap stops on real tab stops — 1.6.13, 2026-10-11
 
 No visible change today. The keyboard trap in dialogs (the shared `Modal`
