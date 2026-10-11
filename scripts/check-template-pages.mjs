@@ -248,6 +248,8 @@ const badFields = cvTemplates.filter((template) => !Array.isArray(template.field
   || new Set(template.fields).size !== template.fields.length
   || template.fields.some((field) => !fieldIds.includes(field)))
 check('every template has known, non-duplicate fields', badFields.length === 0, badFields.map((t) => t.id).join(', '))
+const mixedAny = cvTemplates.filter((template) => template.fields?.includes('any') && template.fields.length !== 1)
+check("an 'any' template has no other field", mixedAny.length === 0, mixedAny.map((t) => t.id).join(', '))
 for (const field of TEMPLATE_FIELDS) {
   const count = cvTemplates.filter((template) => template.fields?.includes(field.id)).length
   check(`field ${field.id} has at least two templates`, count >= 2, `has ${count}`)
