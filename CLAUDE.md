@@ -219,7 +219,10 @@ reaches a visitor. A template page also takes `?style=<variantId>` (one
 of that template's looks in `templateVariants.js`; an unknown id is
 Original, which is never written into a URL), set from its Style picker
 or a gallery/grid card, and passes it to the builder, which applies it to
-whatever CV it starts with, like `?example=`, and strips it.
+whatever CV it starts with, like `?example=`, and strips it. It also
+passes through `?field=` (the Free CV Templates filter it was opened
+from, 1.6.16) to its links back to the grid and to the previous/next
+template; the page never shows it and the builder never receives it.
 `src/utils/sectionContent.js`'s `hideEmptySections()`
 hides a section that has no real content instead of rendering its
 placeholder text, read by the per-template marketing page (its only

@@ -2281,7 +2281,10 @@ From the task and final reviews of the field filters (spec
 `docs/superpowers/specs/2026-10-11-template-field-filters-design.md`). The
 final review called the branch ready to merge; none of these block it.
 
-- **The template page's "All templates" link drops the filter.** It goes
+- ~~**The template page's "All templates" link drops the filter.**~~ —
+  fixed 1.6.16 (user chose the address): grid card links carry
+  `?field=`, and the template page passes it to its breadcrumb, "All
+  templates" and Previous/Next links. Original note: It goes
   to bare `/free-cv-templates` (`TemplateDetailPage.jsx:256`), so a visitor
   who came from `?field=tech` and returns by that link lands on All.
   Browser Back keeps the filter (the grid re-reads `?field=` on mount),

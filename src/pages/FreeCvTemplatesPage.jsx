@@ -60,6 +60,17 @@ function getCopy(locale) {
   }
 }
 
+// A template page link's query: the card's ?style= plus the grid's
+// ?field=, either of which may be absent.
+function cardSearch(styleSearch, field) {
+  const params = new URLSearchParams(styleSearch)
+  if (field) {
+    params.set('field', field)
+  }
+  const query = params.toString()
+  return query ? `?${query}` : ''
+}
+
 // The field filter lives in ?field= (1.6.12), so a reload, a shared link
 // and Back from a template page all keep it. Read once, on mount.
 function readFieldParam() {
@@ -116,7 +127,9 @@ function FreeCvTemplatesPage({ locale = 'en', onGetStarted = () => {}, onNavigat
         <div className="templates-page-grid">
           {shownTemplates.map((template) => {
             const look = looks[template.id] ?? DEFAULT_STYLE_VARIANT_ID
-            const search = styleVariantSearch(look)
+            // The card's look and the grid's filter (1.6.16), so the
+            // template page can link back to this same filtered grid.
+            const search = cardSearch(styleVariantSearch(look), field)
             const openTemplatePage = () => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${template.id}`, { search })
 
             return (

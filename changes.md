@@ -4,6 +4,18 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template pages keep the grid filter — 1.6.16, 2026-10-11
+
+A template page opened from a filtered Free CV Templates grid now keeps
+the filter: its address carries `?field=` (e.g.
+`/free-cv-templates/developer?field=tech`, alongside `?style=` when a
+look was picked), so its "Templates" breadcrumb and "All templates" link
+return to the same filtered grid, and Previous/Next keep it too. Before,
+those links went back to All; only the browser's Back kept the filter.
+The template page never shows the filter and never passes it to the
+builder. Search engines still see one page per template, because the
+canonical URL ignores the query.
+
 ## Field chip hover and one gallery test helper — 1.6.15, 2026-10-11
 
 The field chips on the Free CV Templates page and in the builder gallery

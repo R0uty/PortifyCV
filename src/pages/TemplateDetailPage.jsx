@@ -7,6 +7,7 @@ import { DEFAULT_STYLE_VARIANT_ID, getVariantLook, parseStyleVariantParam } from
 import { TEMPLATE_PAGE_COPY } from '../utils/templatePageCopy'
 import { getTemplateExamples, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
 import { ROUTES, templatePath } from '../utils/routes'
+import { fieldSearch, parseFieldParam } from '../utils/templateFields'
 import { TEMPLATE_VIEW_PREFIX } from '../utils/pageMeta'
 import { demoCvData } from '../utils/cvForm'
 import { withPlaceholderPhoto } from '../utils/thumbnailCv'
@@ -71,6 +72,14 @@ function readStyleParam(templateId) {
   return parseStyleVariantParam(templateId, new URLSearchParams(window.location.search).get('style'))
 }
 
+// ?field= (1.6.16): the Free CV Templates filter this page was opened
+// from. The page never shows it; it only passes it on, so the links back
+// to the grid and to the previous/next template keep that filter.
+function readFieldParam() {
+  if (typeof window === 'undefined') return null
+  return parseFieldParam(new URLSearchParams(window.location.search).get('field'))
+}
+
 function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}, onNavigateToView = () => {} }) {
   const resolvedLocale = locale === 'fi' ? 'fi' : 'en'
   const copy = getCopy(resolvedLocale)
@@ -85,6 +94,8 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
   const [loadedExample, setLoadedExample] = useState(null)
   const [atsView, setAtsView] = useState(false)
   const [styleId, setStyleId] = useState(() => readStyleParam(templateId))
+  const [field] = useState(readFieldParam)
+  const fieldQuery = fieldSearch(field)
 
   useEffect(() => {
     let cancelled = false
@@ -142,7 +153,8 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
   const neighbour = (offset) => cvTemplates[(index + offset + cvTemplates.length) % cvTemplates.length]
   const previous = getCvTemplate(neighbour(-1).id, resolvedLocale)
   const next = getCvTemplate(neighbour(1).id, resolvedLocale)
-  const goToTemplate = (target) => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${target.id}`)
+  const goToTemplate = (target) => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${target.id}`, { search: fieldQuery })
+  const goToGrid = () => onNavigateToView('freeTemplates', { search: fieldQuery })
 
   const selectedExampleRole = examples.find((example) => example.id === exampleId)?.role ?? ''
   const sectionCount = template.primarySections.length + (template.secondarySections?.length ?? 0)
@@ -154,7 +166,7 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
   return (
     <div className="landing-page template-page">
       <nav className="template-page__breadcrumb" aria-label={copy.breadcrumb}>
-        <InternalNavLink to={ROUTES.freeTemplates} onNavigate={() => onNavigateToView('freeTemplates')}>
+        <InternalNavLink to={`${ROUTES.freeTemplates}${fieldQuery}`} onNavigate={goToGrid}>
           {copy.breadcrumb}
         </InternalNavLink>
         <span aria-hidden="true"> › </span>
@@ -249,13 +261,13 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
       )}
 
       <nav className="template-page__pager" aria-label={copy.pagerNav}>
-        <InternalNavLink to={templatePath(previous.slug)} onNavigate={() => goToTemplate(previous)}>
+        <InternalNavLink to={`${templatePath(previous.slug)}${fieldQuery}`} onNavigate={() => goToTemplate(previous)}>
           ← {copy.previous}: {previous.label}
         </InternalNavLink>
-        <InternalNavLink to={ROUTES.freeTemplates} onNavigate={() => onNavigateToView('freeTemplates')}>
+        <InternalNavLink to={`${ROUTES.freeTemplates}${fieldQuery}`} onNavigate={goToGrid}>
           {copy.all}
         </InternalNavLink>
-        <InternalNavLink to={templatePath(next.slug)} onNavigate={() => goToTemplate(next)}>
+        <InternalNavLink to={`${templatePath(next.slug)}${fieldQuery}`} onNavigate={() => goToTemplate(next)}>
           {copy.next}: {next.label} →
         </InternalNavLink>
       </nav>

@@ -98,7 +98,8 @@ test.describe('Free CV Templates field filter', () => {
   test('Back from a template page returns to the same filter', async ({ page }) => {
     await page.goto('/free-cv-templates?field=graduate')
     await gridNames(page).first().click()
-    await expect(page).toHaveURL(/\/free-cv-templates\/[a-z-]+$/)
+    // The template page carries the filter on (1.6.16).
+    await expect(page).toHaveURL(/\/free-cv-templates\/[a-z-]+\?field=graduate$/)
 
     await page.goBack()
     await expect(page).toHaveURL(/\/free-cv-templates\?field=graduate$/)
@@ -155,5 +156,61 @@ test.describe('Example pages link to the Tech filter', () => {
     await page.getByRole('button', { name: 'Switch language' }).click()
     await expect(page.locator('.templates-page-links').getByRole('link', { name: 'Tekniikan ja IT-alan CV-pohjat', exact: true }))
       .toHaveAttribute('href', '/free-cv-templates?field=tech')
+  })
+})
+
+// 1.6.16: a template page opened from a filtered grid keeps ?field=, so its
+// links back to the grid (breadcrumb, "All templates") and its
+// Previous/Next links keep the filter.
+test.describe('Template pages keep the grid filter', () => {
+  const pager = (page) => page.locator('.template-page__pager')
+  const breadcrumb = (page) => page.locator('.template-page__breadcrumb')
+
+  test('a card opened from a filtered grid carries ?field=, and "All templates" returns to it', async ({ page }) => {
+    await page.goto('/free-cv-templates?field=tech')
+    await gridNames(page).filter({ hasText: /^Developer$/ }).click()
+    await expect(page).toHaveURL(/\/free-cv-templates\/developer\?field=tech$/)
+
+    await expect(breadcrumb(page).getByRole('link')).toHaveAttribute('href', '/free-cv-templates?field=tech')
+    await pager(page).getByRole('link', { name: 'All templates', exact: true }).click()
+    await expect(page).toHaveURL(/\/free-cv-templates\?field=tech$/)
+    await expect(chip(page, 'Tech')).toBeChecked()
+    await expect(gridNames(page)).toHaveText(labelsFor('tech'))
+  })
+
+  test('a card link carries both the picked look and the filter; the page keeps both', async ({ page }) => {
+    await page.goto('/free-cv-templates?field=tech')
+    await page.getByRole('radiogroup', { name: 'Style: Developer', exact: true })
+      .getByRole('radio', { name: developer[1].label.en, exact: true }).check()
+    const nameLink = gridNames(page).filter({ hasText: /^Developer$/ })
+    await expect(nameLink).toHaveAttribute('href', `/free-cv-templates/developer?style=${developer[1].id}&field=tech`)
+
+    await nameLink.click()
+    // Changing the look on the page keeps the filter in its address.
+    await page.getByRole('radiogroup', { name: 'Style', exact: true })
+      .getByRole('radio', { name: developer[2].label.en, exact: true }).check()
+    await expect(page).toHaveURL(new RegExp(`/free-cv-templates/developer\\?style=${developer[2].id}&field=tech$`))
+  })
+
+  test('Previous and Next keep the filter', async ({ page }) => {
+    await page.goto('/free-cv-templates/developer?field=tech')
+    const next = pager(page).getByRole('link', { name: /^Next template:/ })
+    await expect(next).toHaveAttribute('href', /\?field=tech$/)
+    await expect(pager(page).getByRole('link', { name: /Previous template:/ })).toHaveAttribute('href', /\?field=tech$/)
+
+    await next.click()
+    await expect(page).toHaveURL(/\/free-cv-templates\/[a-z-]+\?field=tech$/)
+    await expect(pager(page).getByRole('link', { name: 'All templates', exact: true }))
+      .toHaveAttribute('href', '/free-cv-templates?field=tech')
+  })
+
+  test('without a filter, or with an unknown one, the links stay plain', async ({ page }) => {
+    await page.goto('/free-cv-templates')
+    await expect(gridNames(page).filter({ hasText: /^Developer$/ })).toHaveAttribute('href', '/free-cv-templates/developer')
+
+    await page.goto('/free-cv-templates/developer?field=nope')
+    await expect(pager(page).getByRole('link', { name: 'All templates', exact: true })).toHaveAttribute('href', '/free-cv-templates')
+    await expect(breadcrumb(page).getByRole('link')).toHaveAttribute('href', '/free-cv-templates')
+    await expect(pager(page).getByRole('link', { name: /^Next template:/ })).not.toHaveAttribute('href', /\?/)
   })
 })
