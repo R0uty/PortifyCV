@@ -17,7 +17,7 @@ npm run check:feedback     # exercises evaluateCvFeedback (src/utils/cvFeedback.
 npm run check:docx-export  # exercises the Word export builders and archetypes (src/utils/docxExport.js)
 npm run check:section-schema   # validates the Direct Edit popup's section schema (src/utils/sectionSchema.js)
 npm run check:section-columns  # exercises the section column-move rules (src/utils/sectionColumns.js)
-npm run check:template-pages   # validates per-template page slugs, examples, and copy (src/utils/templatePageCopy.js, src/utils/templateMetaDescriptions.js, src/utils/exampleCvs.js)
+npm run check:template-pages   # validates per-template page slugs, examples, copy, and field tags (src/utils/templatePageCopy.js, src/utils/templateMetaDescriptions.js, src/utils/exampleCvs.js, src/utils/templateFields.js)
 npm run check:template-variants  # validates the style-variant registry against each template's CSS defaults, plus contrast (src/utils/templateVariants.js)
 
 npm run test:e2e           # full Playwright suite in e2e/, against a prod build+preview
@@ -37,7 +37,7 @@ rule-based feedback engine (`check:feedback`), the Word exporter
 (`check:docx-export`), the Direct Edit popup schema
 (`check:section-schema`), the section column-move
 rules and their import validation (`check:section-columns`), the
-per-template pages' slugs, examples, and copy (`check:template-pages`), or
+per-template pages' slugs, examples, copy, and field tags (`check:template-pages`), or
 a template's style variants or palette variables (`check:template-variants`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.
