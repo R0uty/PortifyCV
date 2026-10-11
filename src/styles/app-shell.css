@@ -2906,6 +2906,64 @@ select.floating-field__control {
   gap: var(--space-3);
 }
 
+/* Field chips (1.6.12) above the templates grid and the builder gallery.
+   Same structure as .style-swatches: the radio covers the whole chip. */
+.template-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.template-fields__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.template-fields__chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.8rem;
+  border: 1.5px solid var(--app-border);
+  border-radius: 999px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: var(--text-body-sm);
+  cursor: pointer;
+}
+
+.template-fields__chip input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.template-fields__chip:has(input:checked) {
+  border-color: var(--app-text);
+  background: var(--app-text);
+  color: var(--app-surface);
+}
+
+.template-fields__chip:has(input:focus-visible) {
+  outline: 2px solid var(--app-text);
+  outline-offset: 2px;
+}
+
+.template-fields__status {
+  color: var(--app-text-muted);
+  font-size: var(--text-body-sm);
+}
+
+.templates-page-filter {
+  margin-bottom: var(--space-8);
+}
+
 .templates-page-card__thumb {
   display: block;
   cursor: pointer;

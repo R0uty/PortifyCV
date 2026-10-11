@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 
 import StyleSwatchGroup from '../components/StyleSwatchGroup'
+import TemplateFieldFilter from '../components/TemplateFieldFilter'
 import TemplateThumbnail from '../components/TemplateThumbnail'
 import InternalNavLink from '../components/InternalNavLink'
 import { buildThumbnailCv } from '../utils/thumbnailCv'
@@ -8,6 +9,7 @@ import { cvTemplates, getCvTemplates } from '../utils/cvTemplates'
 import { ROUTES, templatePath } from '../utils/routes'
 import { TEMPLATE_VIEW_PREFIX } from '../utils/pageMeta'
 import { DEFAULT_STYLE_VARIANT_ID, getVariantLook, styleVariantSearch } from '../utils/templateVariants'
+import { filterTemplatesByField, parseFieldParam } from '../utils/templateFields'
 
 // Read off the template registry instead of a hardcoded number — this
 // count previously drifted out of sync with cvTemplates.js after a
@@ -58,6 +60,15 @@ function getCopy(locale) {
   }
 }
 
+// The field filter lives in ?field= (1.6.12), so a reload, a shared link
+// and Back from a template page all keep it. Read once, on mount.
+function readFieldParam() {
+  if (typeof window === 'undefined') {
+    return null
+  }
+  return parseFieldParam(new URLSearchParams(window.location.search).get('field'))
+}
+
 function FreeCvTemplatesPage({ locale = 'en', onGetStarted = () => {}, onNavigateToView = () => {} }) {
   const resolvedLocale = locale === 'fi' ? 'fi' : 'en'
   const copy = getCopy(resolvedLocale)
@@ -66,6 +77,22 @@ function FreeCvTemplatesPage({ locale = 'en', onGetStarted = () => {}, onNavigat
   // The look previewed on each card (Phase 4); every card starts on
   // Original. It carries into the card's links and "Use this template".
   const [looks, setLooks] = useState({})
+  const [field, setField] = useState(readFieldParam)
+  const shownTemplates = useMemo(() => filterTemplatesByField(templates, field), [templates, field])
+
+  // Like the template page's selectStyle: replace, don't push, so Back
+  // leaves the page instead of stepping through chips. All is the absence
+  // of ?field=.
+  const selectField = (nextField) => {
+    setField(nextField)
+    const url = new URL(window.location.href)
+    if (nextField) {
+      url.searchParams.set('field', nextField)
+    } else {
+      url.searchParams.delete('field')
+    }
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}`)
+  }
 
   return (
     <div className="landing-page">
@@ -76,8 +103,18 @@ function FreeCvTemplatesPage({ locale = 'en', onGetStarted = () => {}, onNavigat
       </div>
 
       <div className="landing-section">
+        <div className="templates-page-filter">
+          <TemplateFieldFilter
+            value={field}
+            onChange={selectField}
+            locale={resolvedLocale}
+            shownCount={shownTemplates.length}
+            totalCount={templates.length}
+            name="grid-field"
+          />
+        </div>
         <div className="templates-page-grid">
-          {templates.map((template) => {
+          {shownTemplates.map((template) => {
             const look = looks[template.id] ?? DEFAULT_STYLE_VARIANT_ID
             const search = styleVariantSearch(look)
             const openTemplatePage = () => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${template.id}`, { search })
