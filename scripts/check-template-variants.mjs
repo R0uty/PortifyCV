@@ -1,6 +1,7 @@
 // Regression checks for the template style-variant registry
 // (src/utils/templateVariants.js) against each template's stylesheet
-// (src/styles/templates/<name>.css). Framework-free, run directly:
+// (src/styles/templates/<name>.css), and the contrast of the text pairs in
+// scripts/templateContrastPairs.mjs. Framework-free, run directly:
 //
 //   node scripts/check-template-variants.mjs
 //
@@ -51,6 +52,7 @@ const {
 const { cvTemplates, getTemplateAccent, resolveTemplateAccent } = await importSrc('utils/cvTemplates.js')
 const { CV_FONT_OPTIONS, getCvFontStack } = await importSrc('utils/cvFonts.js')
 const { ACCENT_SWATCH_SETS } = await importSrc('utils/templateAccents.js')
+const { TEMPLATE_CONTRAST_PAIRS } = await import('./templateContrastPairs.mjs')
 
 // Where each template's palette defaults are declared: the root rule of
 // its stylesheet. `null` = no stylesheet yet, in which case variant
@@ -156,6 +158,13 @@ console.log('\nRegistry shape\n')
 check('every template has a registry entry, and nothing else does',
   JSON.stringify([...templateIds].sort()) === JSON.stringify(Object.keys(TEMPLATE_VARIANTS).sort()),
   `templates: ${templateIds.join(',')} | registry: ${Object.keys(TEMPLATE_VARIANTS).join(',')}`)
+check('every template has contrast pairs, and nothing else does',
+  JSON.stringify([...templateIds].sort()) === JSON.stringify(Object.keys(TEMPLATE_CONTRAST_PAIRS).sort()),
+  `templates: ${templateIds.join(',')} | pairs: ${Object.keys(TEMPLATE_CONTRAST_PAIRS).join(',')}`)
+// The pairs are read only by this script, so they stay out of the runtime
+// registry (and the app bundle).
+check('the runtime registry carries no check-only contrast data',
+  Object.values(TEMPLATE_VARIANTS).every((entry) => !('textPairs' in entry) && !('defaultContrastExceptions' in entry)))
 
 for (const templateId of templateIds) {
   const entry = TEMPLATE_VARIANTS[templateId]
@@ -233,10 +242,13 @@ console.log('\nContrast\n')
 
 for (const templateId of templateIds) {
   const entry = TEMPLATE_VARIANTS[templateId]
-  if (!entry) continue
+  const contrast = TEMPLATE_CONTRAST_PAIRS[templateId]
+  if (!entry || !contrast) continue
+  const exceptions = contrast.defaultContrastExceptions ?? []
+  check(`${templateId}: has at least one text pair`, contrast.textPairs.length > 0)
   const usedExceptions = new Set()
   for (const variant of entry.variants) {
-    for (const pair of entry.textPairs) {
+    for (const pair of contrast.textPairs) {
       const foreground = resolveColour(pair.foreground, variant)
       const background = resolveColour(pair.background, variant)
       const label = `${templateId}/${variant.id}: ${pair.foreground} on ${pair.background} (${pair.size})`
@@ -247,7 +259,7 @@ for (const templateId of templateIds) {
       const ratio = contrastRatio(foreground, background)
       const floor = pair.size === 'large' ? 3 : 4.5
       const exception = variant.id === DEFAULT_STYLE_VARIANT_ID
-        ? entry.defaultContrastExceptions.find((e) => e.foreground === pair.foreground && e.background === pair.background)
+        ? exceptions.find((e) => e.foreground === pair.foreground && e.background === pair.background)
         : null
       if (exception) {
         usedExceptions.add(exception)
@@ -258,7 +270,7 @@ for (const templateId of templateIds) {
       }
     }
   }
-  for (const exception of entry.defaultContrastExceptions) {
+  for (const exception of exceptions) {
     check(`${templateId}: exception ${exception.foreground} on ${exception.background} matches a declared pair`,
       usedExceptions.has(exception))
   }

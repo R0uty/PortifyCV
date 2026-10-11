@@ -4,6 +4,17 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Contrast data out of the app bundle — 1.6.10, 2026-10-11
+
+No visible change. The text/background pairs that `check:template-variants`
+tests for contrast (`textPairs`, and the now-empty
+`defaultContrastExceptions`) moved from `src/utils/templateVariants.js` to
+`scripts/templateContrastPairs.mjs`, which only the check reads. Visitors
+no longer download them: the chunk the template gallery and template pages
+load shrank from 31.8 kB to 20.4 kB (7.6 to 6.5 kB gzipped). The check runs
+the same 507 contrast checks as before, and now also fails if a template
+has no pairs or if the runtime registry gains the fields back.
+
 ## Contrast fixes for the first looks — 1.6.9, 2026-10-11
 
 The 13 text/background pairs listed under 1.6.0's "Known gaps" now meet

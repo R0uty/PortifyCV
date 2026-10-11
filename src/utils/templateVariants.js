@@ -19,8 +19,9 @@
 //
 // `scripts/check-template-variants.mjs` enforces: variant #1's palette
 // equals the stylesheet defaults character for character, every variant
-// sets exactly the same variables, contrast of every `textPairs` entry,
-// valid fonts, and accents drawn from the template's swatch set.
+// sets exactly the same variables, valid fonts, accents drawn from the
+// template's swatch set, and the contrast of every text pair listed in
+// scripts/templateContrastPairs.mjs (kept there, out of the app bundle).
 //
 // Relative imports here carry an explicit `.js` (unlike most of src/) so
 // Playwright specs can import this module under plain Node ESM.
@@ -49,19 +50,9 @@ function look({ id, label, fontId, palette, accent = null, headingColor = '' }) 
   return { id, label, palette, accent, fontId, headingColor }
 }
 
-const ACCENT = '--tpl-accent'
-
 export const TEMPLATE_VARIANTS = {
   minimal: {
     swatchVariables: ['--min-accent-ink', '--min-accent-line', '--min-ink'],
-    textPairs: [
-      { foreground: '--min-ink', background: '--min-bg', size: 'body' },
-      { foreground: '--min-muted', background: '--min-bg', size: 'body' },
-      { foreground: '--min-accent-ink', background: '--min-bg', size: 'body' },
-      { foreground: '--min-accent-ink', background: '--min-accent-soft', size: 'body' },
-      { foreground: '--min-accent-text', background: '--min-bg', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('minimal', {
         '--min-ink': '#111827',
@@ -113,29 +104,6 @@ export const TEMPLATE_VARIANTS = {
   },
   developer: {
     swatchVariables: ['--dev-sidebar', '--dev-teal', '--dev-purple'],
-    textPairs: [
-      { foreground: '--dev-text', background: '--dev-bg', size: 'body' },
-      { foreground: '--dev-text', background: '--dev-surface', size: 'body' },
-      { foreground: '--dev-primary', background: '--dev-bg', size: 'body' },
-      { foreground: '--dev-primary', background: '--dev-surface', size: 'body' },
-      { foreground: '--dev-accent', background: '--dev-bg', size: 'body' },
-      { foreground: '--dev-accent', background: '--dev-surface', size: 'body' },
-      { foreground: '--dev-muted', background: '--dev-bg', size: 'body' },
-      { foreground: '--dev-muted', background: '--dev-surface', size: 'body' },
-      { foreground: '--dev-body', background: '--dev-bg', size: 'body' },
-      { foreground: '--dev-body', background: '--dev-surface', size: 'body' },
-      { foreground: '--dev-sidebar-text', background: '--dev-sidebar', size: 'body' },
-      { foreground: '--dev-sidebar-text', background: '--dev-sidebar-end', size: 'body' },
-      { foreground: '--dev-sidebar-muted', background: '--dev-sidebar', size: 'body' },
-      { foreground: '--dev-sidebar-muted', background: '--dev-sidebar-end', size: 'body' },
-      { foreground: '--dev-sidebar-heading', background: '--dev-sidebar', size: 'body' },
-      { foreground: '--dev-sidebar-heading', background: '--dev-sidebar-end', size: 'body' },
-      { foreground: '--dev-sidebar-chip-text', background: '--dev-sidebar', size: 'body' },
-      { foreground: '--dev-sidebar-chip-text', background: '--dev-sidebar-end', size: 'body' },
-      { foreground: 'rgba(255, 255, 255, 0.85)', background: '--dev-sidebar', size: 'body' },
-      { foreground: 'rgba(255, 255, 255, 0.85)', background: '--dev-sidebar-end', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('developer', {
         '--dev-primary': '#0f172a',
@@ -223,21 +191,6 @@ export const TEMPLATE_VARIANTS = {
   },
   creative: {
     swatchVariables: ['--cr-page', '--cr-sidebar'],
-    textPairs: [
-      { foreground: '--cr-ink', background: '--cr-page', size: 'body' },
-      { foreground: '--cr-ink', background: '--cr-sidebar', size: 'body' },
-      { foreground: '--cr-ink', background: '--cr-card', size: 'body' },
-      { foreground: '--cr-ink-muted', background: '--cr-page', size: 'body' },
-      { foreground: '--cr-ink-muted', background: '--cr-sidebar', size: 'body' },
-      { foreground: '--cr-ink-muted', background: '--cr-card', size: 'body' },
-      { foreground: '--cr-ink-faint', background: '--cr-page', size: 'body' },
-      { foreground: '--cr-ink-faint', background: '--cr-sidebar', size: 'body' },
-      { foreground: '--cr-ink-faint', background: '--cr-card', size: 'body' },
-      { foreground: ACCENT, background: '--cr-page', size: 'body' },
-      { foreground: ACCENT, background: '--cr-sidebar', size: 'body' },
-      { foreground: ACCENT, background: '--cr-card', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('creative', {
         '--cr-ink': '#1a1a1a',
@@ -284,19 +237,6 @@ export const TEMPLATE_VARIANTS = {
   },
   modern: {
     swatchVariables: ['--ms-navy', '--ms-rose', '--ms-bg'],
-    textPairs: [
-      { foreground: '--ms-navy', background: '--ms-bg', size: 'body' },
-      { foreground: '--ms-navy', background: '--ms-bg-subtle', size: 'body' },
-      { foreground: '--ms-navy-muted', background: '--ms-bg', size: 'body' },
-      { foreground: '--ms-navy-muted', background: '--ms-bg-subtle', size: 'body' },
-      { foreground: '--ms-text', background: '--ms-bg', size: 'body' },
-      { foreground: '--ms-text', background: '--ms-bg-subtle', size: 'body' },
-      { foreground: '--ms-muted', background: '--ms-bg', size: 'body' },
-      { foreground: '--ms-muted', background: '--ms-bg-subtle', size: 'body' },
-      { foreground: '--ms-rose', background: '--ms-bg', size: 'body' },
-      { foreground: '--ms-rose', background: '--ms-bg-subtle', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('modern', {
         '--ms-navy': '#0f172a',
@@ -351,21 +291,6 @@ export const TEMPLATE_VARIANTS = {
   },
   executive: {
     swatchVariables: ['--ex-ink', '--ex-rail'],
-    textPairs: [
-      { foreground: '--ex-ink', background: '--ex-bg', size: 'body' },
-      { foreground: '--ex-ink', background: '--ex-rail', size: 'body' },
-      { foreground: '--ex-ink', background: '--ex-card', size: 'body' },
-      { foreground: '--ex-ink-muted', background: '--ex-bg', size: 'body' },
-      { foreground: '--ex-ink-muted', background: '--ex-rail', size: 'body' },
-      { foreground: '--ex-ink-muted', background: '--ex-card', size: 'body' },
-      { foreground: '--ex-ink-faint', background: '--ex-bg', size: 'body' },
-      { foreground: '--ex-ink-faint', background: '--ex-rail', size: 'body' },
-      { foreground: '--ex-ink-faint', background: '--ex-card', size: 'body' },
-      { foreground: ACCENT, background: '--ex-bg', size: 'body' },
-      { foreground: ACCENT, background: '--ex-rail', size: 'body' },
-      { foreground: ACCENT, background: '--ex-card', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('executive', {
         '--ex-ink': '#1c1917',
@@ -410,13 +335,6 @@ export const TEMPLATE_VARIANTS = {
   },
   timeline: {
     swatchVariables: ['--tl-text', '--tl-bg'],
-    textPairs: [
-      { foreground: '--tl-text', background: '--tl-bg', size: 'body' },
-      { foreground: '--tl-muted', background: '--tl-bg', size: 'body' },
-      { foreground: ACCENT, background: '--tl-bg', size: 'body' },
-      { foreground: '--tl-ink', background: '--tl-bg', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('timeline', {
         '--tl-text': '#1f2937',
@@ -455,12 +373,6 @@ export const TEMPLATE_VARIANTS = {
   },
   graduate: {
     swatchVariables: ['--gr-ink', '--gr-bg'],
-    textPairs: [
-      { foreground: '--gr-ink', background: '--gr-bg', size: 'body' },
-      { foreground: '--gr-ink-muted', background: '--gr-bg', size: 'body' },
-      { foreground: ACCENT, background: '--gr-bg', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('graduate', {
         '--gr-ink': '#1e293b',
@@ -496,12 +408,6 @@ export const TEMPLATE_VARIANTS = {
   },
   compact: {
     swatchVariables: ['--cp-ink', '--cp-bg'],
-    textPairs: [
-      { foreground: '--cp-ink', background: '--cp-bg', size: 'body' },
-      { foreground: '--cp-ink-muted', background: '--cp-bg', size: 'body' },
-      { foreground: ACCENT, background: '--cp-bg', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('compact', {
         '--cp-ink': '#0f172a',
@@ -540,21 +446,6 @@ export const TEMPLATE_VARIANTS = {
   },
   portfolio: {
     swatchVariables: ['--pf-slate', '--pf-sidebar-tint'],
-    textPairs: [
-      { foreground: '--pf-slate', background: '--pf-card', size: 'body' },
-      { foreground: '--pf-slate', background: '--pf-sidebar-tint', size: 'body' },
-      { foreground: '--pf-slate', background: '--pf-header-top', size: 'body' },
-      { foreground: '--pf-text', background: '--pf-card', size: 'body' },
-      { foreground: '--pf-text', background: '--pf-sidebar-tint', size: 'body' },
-      { foreground: '--pf-text', background: '--pf-header-top', size: 'body' },
-      { foreground: '--pf-gray', background: '--pf-card', size: 'body' },
-      { foreground: '--pf-gray', background: '--pf-sidebar-tint', size: 'body' },
-      { foreground: '--pf-gray', background: '--pf-header-top', size: 'body' },
-      { foreground: ACCENT, background: '--pf-card', size: 'body' },
-      { foreground: ACCENT, background: '--pf-sidebar-tint', size: 'body' },
-      { foreground: ACCENT, background: '--pf-header-top', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('portfolio', {
         '--pf-slate': '#0f172a',
@@ -608,18 +499,6 @@ export const TEMPLATE_VARIANTS = {
   },
   techExec: {
     swatchVariables: ['--te-navy', '--te-bg'],
-    textPairs: [
-      { foreground: '--te-ink', background: '--te-bg', size: 'body' },
-      { foreground: '--te-ink-muted', background: '--te-bg', size: 'body' },
-      { foreground: '--te-ink-faint', background: '--te-bg', size: 'body' },
-      { foreground: ACCENT, background: '--te-bg', size: 'body' },
-      { foreground: '#ffffff', background: '--te-navy', size: 'large' },
-      { foreground: '--te-masthead-kicker', background: '--te-navy', size: 'body' },
-      { foreground: '--te-masthead-role', background: '--te-navy', size: 'body' },
-      { foreground: '--te-masthead-contact', background: '--te-navy', size: 'body' },
-      { foreground: '--te-masthead-icon', background: '--te-navy', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('techExec', {
         '--te-navy': '#163d7a',
@@ -673,11 +552,6 @@ export const TEMPLATE_VARIANTS = {
   },
   classicProfessional: {
     swatchVariables: ['--cp-text', '--cp-border', '--cp-bg'],
-    textPairs: [
-      { foreground: '--cp-text', background: '--cp-bg', size: 'body' },
-      { foreground: '--cp-muted', background: '--cp-bg', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('classicProfessional', {
         '--cp-text': '#111111',
@@ -713,17 +587,6 @@ export const TEMPLATE_VARIANTS = {
   },
   navyProfessional: {
     swatchVariables: ['--np-navy', '--np-blue', '--np-bg'],
-    textPairs: [
-      { foreground: '#ffffff', background: '--np-navy', size: 'body' },
-      { foreground: 'rgba(255, 255, 255, 0.85)', background: '--np-navy', size: 'body' },
-      { foreground: 'rgba(255, 255, 255, 0.55)', background: '--np-navy', size: 'body' },
-      { foreground: 'rgba(255, 255, 255, 0.5)', background: '--np-navy', size: 'body' },
-      { foreground: '--np-blue-light', background: '--np-navy', size: 'body' },
-      { foreground: '--np-text', background: '--np-bg', size: 'body' },
-      { foreground: '--np-muted', background: '--np-bg', size: 'body' },
-      { foreground: '--np-blue', background: '--np-bg', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('navyProfessional', {
         '--np-navy': '#16233a',
@@ -769,16 +632,6 @@ export const TEMPLATE_VARIANTS = {
   },
   modernOrange: {
     swatchVariables: ['--mo-text', '--mo-sidebar-bg'],
-    textPairs: [
-      { foreground: '--mo-text', background: '--mo-bg', size: 'body' },
-      { foreground: '--mo-text', background: '--mo-sidebar-bg', size: 'body' },
-      { foreground: '--mo-muted', background: '--mo-bg', size: 'body' },
-      { foreground: '--mo-muted', background: '--mo-sidebar-bg', size: 'body' },
-      { foreground: ACCENT, background: '--mo-bg', size: 'body' },
-      { foreground: ACCENT, background: '--mo-sidebar-bg', size: 'body' },
-      { foreground: '#ffffff', background: ACCENT, size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('modernOrange', {
         '--mo-text': '#151a22',
@@ -820,52 +673,6 @@ export const TEMPLATE_VARIANTS = {
   },
   colorfulCompact: {
     swatchVariables: ['--cc-dark', '--cc-pink', '--cc-blue', '--cc-green'],
-    textPairs: [
-      { foreground: '--cc-ink', background: '--cc-page', size: 'body' },
-      { foreground: '--cc-ink', background: '--cc-card', size: 'body' },
-      { foreground: '--cc-ink', background: '--cc-sidebar', size: 'body' },
-      { foreground: '--cc-muted', background: '--cc-page', size: 'body' },
-      { foreground: '--cc-muted', background: '--cc-card', size: 'body' },
-      { foreground: '--cc-muted', background: '--cc-sidebar', size: 'body' },
-      { foreground: '--cc-body', background: '--cc-card', size: 'body' },
-      { foreground: '--cc-body', background: '--cc-sidebar', size: 'body' },
-      { foreground: '--cc-pink-text', background: '--cc-page', size: 'body' },
-      { foreground: '--cc-pink-text', background: '--cc-card', size: 'body' },
-      { foreground: '--cc-pink-text', background: '--cc-sidebar', size: 'body' },
-      { foreground: '--cc-orange-text', background: '--cc-page', size: 'body' },
-      { foreground: '--cc-orange-text', background: '--cc-card', size: 'body' },
-      { foreground: '--cc-orange-text', background: '--cc-sidebar', size: 'body' },
-      { foreground: '--cc-green-text', background: '--cc-page', size: 'body' },
-      { foreground: '--cc-green-text', background: '--cc-card', size: 'body' },
-      { foreground: '--cc-green-text', background: '--cc-sidebar', size: 'body' },
-      { foreground: '--cc-teal-text', background: '--cc-page', size: 'body' },
-      { foreground: '--cc-teal-text', background: '--cc-card', size: 'body' },
-      { foreground: '--cc-teal-text', background: '--cc-sidebar', size: 'body' },
-      { foreground: '--cc-blue-text', background: '--cc-page', size: 'body' },
-      { foreground: '--cc-blue-text', background: '--cc-card', size: 'body' },
-      { foreground: '--cc-blue-text', background: '--cc-sidebar', size: 'body' },
-      { foreground: '--cc-purple-text', background: '--cc-page', size: 'body' },
-      { foreground: '--cc-purple-text', background: '--cc-card', size: 'body' },
-      { foreground: '--cc-purple-text', background: '--cc-sidebar', size: 'body' },
-      { foreground: '--cc-pink-text', background: '--cc-pink-soft', size: 'body' },
-      { foreground: '--cc-orange-text', background: '--cc-orange-soft', size: 'body' },
-      { foreground: '--cc-green-text', background: '--cc-green-soft', size: 'body' },
-      { foreground: '--cc-teal-text', background: '--cc-teal-soft', size: 'body' },
-      { foreground: '--cc-blue-text', background: '--cc-blue-soft', size: 'body' },
-      { foreground: '--cc-purple-text', background: '--cc-purple-soft', size: 'body' },
-      { foreground: '#ffffff', background: '--cc-pink-text', size: 'body' },
-      { foreground: '#ffffff', background: '--cc-orange-text', size: 'body' },
-      { foreground: '#ffffff', background: '--cc-green-text', size: 'body' },
-      { foreground: '#ffffff', background: '--cc-teal-text', size: 'body' },
-      { foreground: '#ffffff', background: '--cc-blue-text', size: 'body' },
-      { foreground: '#ffffff', background: '--cc-purple-text', size: 'body' },
-      { foreground: '#ffffff', background: '--cc-dark', size: 'large' },
-      { foreground: '--cc-orange', background: '--cc-dark', size: 'large' },
-      { foreground: 'rgba(255, 255, 255, 0.5)', background: '--cc-dark', size: 'body' },
-      { foreground: 'rgba(255, 255, 255, 0.65)', background: '--cc-dark', size: 'body' },
-      { foreground: 'rgba(255, 255, 255, 0.8)', background: '--cc-dark', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('colorfulCompact', {
         '--cc-pink': '#ec4899',
@@ -969,15 +776,6 @@ export const TEMPLATE_VARIANTS = {
   },
   quadrant: {
     swatchVariables: ['--qd-text', '--qd-border'],
-    textPairs: [
-      { foreground: '--qd-text', background: '--qd-bg', size: 'body' },
-      { foreground: '--qd-text', background: '--qd-card', size: 'body' },
-      { foreground: '--qd-muted', background: '--qd-bg', size: 'body' },
-      { foreground: '--qd-muted', background: '--qd-card', size: 'body' },
-      { foreground: ACCENT, background: '--qd-bg', size: 'body' },
-      { foreground: ACCENT, background: '--qd-card', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('quadrant', {
         '--qd-text': '#0f172a',
@@ -1016,13 +814,6 @@ export const TEMPLATE_VARIANTS = {
   },
   editorial: {
     swatchVariables: ['--ed-ink', '--ed-bg'],
-    textPairs: [
-      { foreground: '--ed-ink', background: '--ed-bg', size: 'body' },
-      { foreground: '--ed-muted', background: '--ed-bg', size: 'body' },
-      { foreground: '--ed-faint', background: '--ed-bg', size: 'body' },
-      { foreground: ACCENT, background: '--ed-bg', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('editorial', {
         '--ed-ink': '#1a1a1a',
@@ -1061,14 +852,6 @@ export const TEMPLATE_VARIANTS = {
   },
   portrait: {
     swatchVariables: ['--pt-ink', '--pt-bg'],
-    textPairs: [
-      { foreground: '--pt-ink', background: '--pt-bg', size: 'body' },
-      { foreground: '--pt-muted', background: '--pt-bg', size: 'body' },
-      { foreground: '--pt-faint', background: '--pt-bg', size: 'body' },
-      { foreground: ACCENT, background: '--pt-bg', size: 'body' },
-      { foreground: 'rgba(255, 255, 255, 0.92)', background: ACCENT, size: 'large' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('portrait', {
         '--pt-ink': '#1a1a1a',
@@ -1107,13 +890,6 @@ export const TEMPLATE_VARIANTS = {
   },
   european: {
     swatchVariables: ['--eu-ink', '--eu-bg'],
-    textPairs: [
-      { foreground: '--eu-ink', background: '--eu-bg', size: 'body' },
-      { foreground: '--eu-muted', background: '--eu-bg', size: 'body' },
-      { foreground: '--eu-faint', background: '--eu-bg', size: 'body' },
-      { foreground: ACCENT, background: '--eu-bg', size: 'body' },
-    ],
-    defaultContrastExceptions: [],
     variants: [
       original('european', {
         '--eu-ink': '#1a1a1a',

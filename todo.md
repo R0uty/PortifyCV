@@ -2213,9 +2213,11 @@ Verification (1.6.0, after the fix wave): `npm run lint` clean, all eight
 `check:*` scripts pass, full `CI=1 npm run test:e2e` 827 passed (4.4m), `npm run
 build` ok.
 
-Possible follow-up: split the check-only `textPairs`/contrast exceptions out
+~~Possible follow-up: split the check-only `textPairs`/contrast exceptions out
 of the runtime registry (`templateVariants.js`), so the app bundle doesn't
-ship data only `check:template-variants` reads.
+ship data only `check:template-variants` reads.~~ — done 1.6.10: they live in
+`scripts/templateContrastPairs.mjs`; the check also requires pairs for every
+template and none on the runtime registry.
 
 ### Phase 4: template looks outside the builder — DONE (1.6.4, 2026-10-10)
 
@@ -2228,8 +2230,8 @@ handoff). Tests: `e2e/template-looks.spec.js`.
 
 Still open (not in this phase): gallery filters and a per-template photo
 flag (the original roadmap's Phase 4); ~~the 13 first-look contrast
-exceptions~~ (fixed 1.6.9); moving `textPairs`/`defaultContrastExceptions` out of the
-runtime registry; looks on the landing page's marquee and hero. The
+exceptions~~ (fixed 1.6.9); ~~moving `textPairs`/`defaultContrastExceptions` out of the
+runtime registry~~ (done 1.6.10); looks on the landing page's marquee and hero. The
 selected template in share links was done in 1.6.8.
 
 Follow-ups from the Phase 4 final review (not started):
