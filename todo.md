@@ -2301,11 +2301,11 @@ final review called the branch ready to merge; none of these block it.
 - **Chips have no hover state.** `.template-fields__chip` in
   `app-shell.css` has checked and focus styles but no `:hover`, unlike the
   other pills on the grid. Polish.
-- **Bug, pre-existing: the dialog Tab trap counts unchecked radios.**
-  `Modal.jsx:4`'s `FOCUSABLE_SELECTOR` includes every enabled `input`, but
-  only the checked radio of a group is in the tab order. If the last match
-  in a dialog is an unchecked radio, Tab from the real last control isn't
-  wrapped and focus can leave the dialog. Not caused by the filters (their
-  chips aren't last), but the gallery and other dialogs now hold more
-  radio groups. Fix: skip `input[type=radio]:not(:checked)` when a checked
-  radio with the same `name` exists, and add an e2e test that Tab wraps.
+- ~~**Bug, pre-existing: the dialog Tab trap counts unchecked radios.**~~
+  — fixed 1.6.13. It turned out latent: a probe showed every dialog starts
+  with its Close button and the gallery ends with "Get the badge", so no
+  current dialog let focus out. Hardened anyway (user's choice): both
+  traps (`Modal.jsx` and `SectionEditorPopup.jsx`, which had its own copy)
+  use `getTabStops()` in `src/utils/focusTrap.js`, which also skips hidden
+  inputs (Modal's old selector matched them). Tests:
+  `e2e/dialog-focus-trap.spec.js`.

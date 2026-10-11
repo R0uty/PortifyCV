@@ -4,6 +4,21 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Dialog focus trap stops on real tab stops — 1.6.13, 2026-10-11
+
+No visible change today. The keyboard trap in dialogs (the shared `Modal`
+and the Direct Edit section popup) wrapped Tab at the first and last
+focusable-looking elements, which could be an unchecked radio or a hidden
+input that Tab never stops on. A dialog starting or ending with one would
+have let keyboard focus walk out of it. No current dialog is built that
+way (every dialog starts with its Close button, and the template gallery
+ends with "Get the badge"), so nobody could hit it yet, but the gallery and
+more dialogs now hold radio groups. Both traps now use one helper,
+`getTabStops()` in `src/utils/focusTrap.js`, which keeps only the checked
+radio of each group (or the first, when none is checked) and skips hidden
+inputs. `e2e/dialog-focus-trap.spec.js` adds such a group or input to an
+open dialog and checks that Tab and Shift+Tab still wrap.
+
 ## Field filters for templates — 1.6.12, 2026-10-11
 
 The Free CV Templates page and the builder's template gallery have a row

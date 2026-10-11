@@ -5,6 +5,7 @@ import InlineTagEditor from './fields/InlineTagEditor'
 import { isPhotoVisibleForTemplate, normalizeSectionOrder } from '../utils/cvForm'
 import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/profilePhoto'
 import { canMoveSection, getSectionColumn, setSectionColumn } from '../utils/sectionColumns'
+import { getTabStops } from '../utils/focusTrap'
 
 // The popup editor for one section. Renders real <input>/<textarea>
 // elements and reads formData directly — never the DOM and never
@@ -12,17 +13,6 @@ import { canMoveSection, getSectionColumn, setSectionColumn } from '../utils/sec
 // sectionItemVisibility, so DOM order diverges from formData order and
 // any index derived from the DOM would target the wrong record.
 
-// Everything inside the popup that can take focus, in DOM order. The
-// profile-photo file input is sr-only rather than display:none precisely
-// so it stays in this list.
-const FOCUSABLE_SELECTOR = [
-  'a[href]',
-  'button:not([disabled])',
-  'input:not([disabled]):not([type="hidden"])',
-  'select:not([disabled])',
-  'textarea:not([disabled])',
-  '[tabindex]:not([tabindex="-1"])',
-].join(', ')
 
 function FieldInput({ field, value, isFinnish, onChange }) {
   const label = isFinnish ? field.labelFi : field.labelEn
@@ -636,7 +626,10 @@ export default function SectionEditorPopup({
       return
     }
 
-    const focusables = Array.from(dialog.querySelectorAll(FOCUSABLE_SELECTOR))
+    // Every tab stop inside the popup, in DOM order (utils/focusTrap.js).
+    // The profile-photo file input is sr-only rather than display:none
+    // precisely so it stays in this list.
+    const focusables = getTabStops(dialog)
 
     if (focusables.length === 0) {
       return
