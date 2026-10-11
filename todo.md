@@ -2240,7 +2240,9 @@ handoff). Tests: `e2e/template-looks.spec.js`.
 Still open (not in this phase): gallery filters and a per-template photo
 flag (the original roadmap's Phase 4); ~~the 13 first-look contrast
 exceptions~~ (fixed 1.6.9); ~~moving `textPairs`/`defaultContrastExceptions` out of the
-runtime registry~~ (done 1.6.10); looks on the landing page's marquee and hero. The
+runtime registry~~ (done 1.6.10); ~~looks on the landing page's marquee and hero~~
+(done 1.6.11: the strip's card n shows its template's look n mod 3, named
+under the card; the hero stays on original looks by the user's choice). The
 selected template in share links was done in 1.6.8.
 
 Follow-ups from the Phase 4 final review (not started):

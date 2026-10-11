@@ -1,4 +1,11 @@
 import { test, expect } from './fixtures/base.js'
+import { getTemplateVariants } from '../src/utils/templateVariants.js'
+import { getCvTemplates } from '../src/utils/cvTemplates.js'
+
+// Read on the name (every Showcase's <h1 data-cv-name>), which inherits
+// the look's palette from the Showcase root.
+const paletteVar = (scope, name) => scope.locator('[data-cv-name]').first()
+  .evaluate((el, variable) => getComputedStyle(el).getPropertyValue(variable).trim(), name)
 
 test.describe('Landing page', () => {
   test('shows the hero, a picture of the output, and the trust line', async ({ page }) => {
@@ -27,5 +34,55 @@ test.describe('Landing page', () => {
 
     await expect(page).toHaveURL(/\/free-cv-templates$/)
     await expect(page.getByRole('heading', { level: 1, name: 'Free CV Templates' })).toBeVisible()
+  })
+
+  test('the hero stack shows Minimalist in front, Creative and Developer behind', async ({ page }) => {
+    await page.goto('/')
+
+    const variantOf = (modifier) => page.locator(`.landing-preview__thumb--${modifier} [data-export-variant]`)
+      .first().getAttribute('data-export-variant')
+    expect(await variantOf('front')).toBe('minimal')
+    expect(await variantOf('back-left')).toBe('creative')
+    expect(await variantOf('back-right')).toBe('developer')
+  })
+})
+
+test.describe('Landing templates strip looks', () => {
+  // Card n (gallery order) shows its template's look n mod 3, named under
+  // the template name; the loop copy repeats the same looks.
+  const cards = (page) => page.locator('.landing-templates-card')
+
+  test('cards rotate through each template\'s looks and name the look', async ({ page }) => {
+    await page.goto('/')
+    const templates = getCvTemplates('en')
+    await expect(cards(page)).toHaveCount(templates.length * 2)
+
+    for (const [index, template] of templates.entries()) {
+      const variants = getTemplateVariants(template.id)
+      const look = variants[index % variants.length]
+      for (const copy of [0, 1]) {
+        const card = cards(page).nth(index + copy * templates.length)
+        await expect(card.locator('.landing-templates-card__name')).toHaveText(template.label)
+        await expect(card.locator('.landing-templates-card__look')).toHaveText(look.label.en)
+        // The first palette variable this look sets differently from the
+        // original proves the look is really rendered, not just named.
+        const name = Object.keys(look.palette)
+          .find((key) => look.palette[key].toLowerCase() !== variants[0].palette[key].toLowerCase())
+        if (name) {
+          await expect.poll(() => paletteVar(card, name)).toBe(look.palette[name])
+        }
+      }
+    }
+  })
+
+  test('look names follow the language', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Switch language' }).click()
+
+    const templates = getCvTemplates('fi')
+    await expect(cards(page).first().locator('.landing-templates-card__look'))
+      .toHaveText(getTemplateVariants(templates[0].id)[0].label.fi)
+    await expect(cards(page).nth(1).locator('.landing-templates-card__look'))
+      .toHaveText(getTemplateVariants(templates[1].id)[1].label.fi)
   })
 })

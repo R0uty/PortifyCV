@@ -4,6 +4,20 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template looks on the landing page — 1.6.11, 2026-10-11
+
+The landing page's scrolling template strip now shows that templates come
+in several looks. Card n, in gallery order, shows its template's look
+n mod 3, so six cards are on their original look and twelve on one of the
+other two (Developer on Graphite, Creative on Violet, and so on). Each look
+is named in a quieter second line under the template name, in Finnish too.
+It's a rule, not a hand-picked list, so a new template is covered
+automatically. The strip still renders the same 36 thumbnails and nothing
+in it is clickable. The hero's three fanned CVs stay on their original
+looks by choice. Its front CV asked for a template id that doesn't exist
+(`minimalist`, not `minimal`) and only showed Minimalist through the
+unknown-id fallback; it now asks for `minimal`.
+
 ## Contrast data out of the app bundle — 1.6.10, 2026-10-11
 
 No visible change. The text/background pairs that `check:template-variants`
