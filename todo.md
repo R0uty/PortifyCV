@@ -189,6 +189,15 @@ after.
       and dates. In the gallery, the five templates this item grouped as
       "pale blue" now read as rose, navy band, purple, bronze-on-cream and
       lavender band.
+      **Re-checked 2026-10-11 (1.6.10) with the 1.6.0 looks, no change
+      needed:** Modern's Ocean look (navy #0c4a6e, accent #0369a1) is the
+      only look near Tech Executive's blue (navy #163d7a, accent #2563eb).
+      Side by side on their template pages they still read as different
+      templates: Tech Executive's solid navy masthead with white text vs
+      Ocean's light header, dark name and thin gradient top line, plus
+      Modern's circular photo and timeline dots. Gallery and grid cards
+      show each template's original look, so the two only meet if someone
+      picks Ocean.
 - [x] **13. `creative` template's description promises "one accent colour you
       can change"** — checked 2026-08-14: false, no such control exists. The
       Settings modal (`ResumeBuilderPage.jsx`) has exactly two controls —
