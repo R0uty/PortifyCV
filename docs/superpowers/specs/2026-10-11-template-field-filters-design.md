@@ -72,8 +72,10 @@ The module exports:
   (All). Case-sensitive, like `parseStyleVariantParam`.
 - `filterTemplatesByField(templates, fieldId)`: `templates` unchanged for
   `null`, else those whose `fields` include `fieldId`, order kept.
-- `fieldSearch(fieldId)`: `''` for `null`, else `?field=<id>`, like
-  `styleVariantSearch`.
+
+(No `fieldSearch()` helper: the grid edits `URLSearchParams` directly, like
+`selectStyle` in `TemplateDetailPage.jsx`, and nothing else builds a
+`?field=` URL yet. Add one with the example-page links follow-up.)
 
 Relative imports carry an explicit `.js`, as in `templateVariants.js`, so
 Playwright specs can import the module under plain Node ESM.
@@ -127,8 +129,8 @@ Props: `value` (field id or `null`), `onChange(fieldId | null)`, `locale`,
   read once on mount (an unknown or missing value starts on All).
 - On change: set the state and update the address with
   `window.history.replaceState(window.history.state, '', url)`, where `url`
-  is the current path plus `fieldSearch(fieldId)`, keeping any other query
-  parameters. Same pattern as the template page's `?style=`
+  is the current URL with `field` set (or deleted for All), keeping any
+  other query parameters. Same pattern as the template page's `?style=`
   (`TemplateDetailPage.jsx`). No change to `App.jsx`'s `pushViewUrl`.
 - The grid renders `filterTemplatesByField(templates, field)`. The `looks`
   state stays keyed by template id, so a look picked on a card survives the
@@ -160,8 +162,7 @@ Props: `value` (field id or `null`), `onChange(fieldId | null)`, `locale`,
   unique per language.
 - `parseFieldParam`: known id → id; unknown, empty, missing, wrong case →
   `null`.
-- `filterTemplatesByField` keeps order; `null` returns everything;
-  `fieldSearch(null) === ''`.
+- `filterTemplatesByField` keeps order; `null` returns everything.
 - `CLAUDE.md`'s description of `check:template-pages` mentions fields.
 
 ### End-to-end (`e2e/template-filters.spec.js`, new)
