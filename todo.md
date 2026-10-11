@@ -2237,8 +2237,12 @@ and the template pages, and `?style=` carries a look into the builder
 (1.6.1 shared pieces, 1.6.2 gallery, 1.6.3 grid and pages, 1.6.4
 handoff). Tests: `e2e/template-looks.spec.js`.
 
-Still open (not in this phase): gallery filters and a per-template photo
-flag (the original roadmap's Phase 4); ~~the 13 first-look contrast
+Still open (not in this phase): ~~gallery filters and a per-template photo
+flag (the original roadmap's Phase 4)~~ — filters done 1.6.12 (field
+chips on the grid and in the gallery, spec
+`docs/superpowers/specs/2026-10-11-template-field-filters-design.md`); the
+photo flag was dropped (17 of 18 templates already show an uploaded photo,
+so it wouldn't filter anything); ~~the 13 first-look contrast
 exceptions~~ (fixed 1.6.9); ~~moving `textPairs`/`defaultContrastExceptions` out of the
 runtime registry~~ (done 1.6.10); ~~looks on the landing page's marquee and hero~~
 (done 1.6.11: the strip's card n shows its template's look n mod 3, named

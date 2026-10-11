@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-11
 **Branch:** `v1.6.0` (PR R0uty/PortifyCV#2), based on 1.6.11 (`50936f3`)
-**Status:** approved in conversation 2026-10-11; spec awaiting review
+**Status:** approved 2026-10-11; implemented in 1.6.12
 
 ## Goal
 

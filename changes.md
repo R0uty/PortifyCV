@@ -4,6 +4,23 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Field filters for templates — 1.6.12, 2026-10-11
+
+The Free CV Templates page and the builder's template gallery have a row
+of field chips: All, Tech, Creative, Business, Leadership, Graduate and
+Any field (in Finnish: Kaikki, Tekniikka ja IT, Luova ala, Liiketoiminta,
+Johto, Vastavalmistuneet, Kaikki alat). Picking one shows only the
+templates meant for that field, with a line saying how many are shown.
+Each template's fields are hand-picked for its main audience (in
+`cvTemplates.js`); "Any field" holds the three templates that suit
+anyone (Minimalist, Classic Professional, European) and they don't also
+appear under every other chip. On the Free CV Templates page the choice
+is kept in the address (`?field=tech`), so a reload, a shared link and
+Back from a template page keep it; changing it doesn't add history
+entries. The gallery opens on All every time. A per-template photo flag,
+planned alongside, was dropped: 17 of 18 templates already show a photo
+when you upload one.
+
 ## Template looks on the landing page — 1.6.11, 2026-10-11
 
 The landing page's scrolling template strip now shows that templates come
