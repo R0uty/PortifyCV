@@ -126,8 +126,12 @@ export default {
 
     // Not a real file and not a known route — a genuinely missing page.
     // Real 404 status + noindex, rather than the SPA fallback's 200 with
-    // homepage content for any junk URL a crawler happens to find.
-    const notFoundResponse = await env.ASSETS.fetch(new Request(new URL('/404.html', request.url), request))
+    // homepage content for any junk URL a crawler happens to find. Fetch
+    // "/404", not "/404.html": like "/index.html" above, the asset server
+    // answers "/404.html" with a 307 to "/404", and wrapping that empty
+    // redirect served a blank page with a stray Location header (1.6.17,
+    // docs/audit-1.6.16.md finding 1).
+    const notFoundResponse = await env.ASSETS.fetch(new Request(new URL('/404', request.url), request))
     const rewritten = new HTMLRewriter()
       .on('title', new SetText('Page Not Found - PortifyCV'))
       .on('meta[name="robots"]', new SetAttr('content', 'noindex, follow'))

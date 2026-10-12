@@ -4,6 +4,19 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Broken links show the "Page not found" page — 1.6.17, 2026-10-12
+
+A mistyped or stale link on portifycv.app showed a blank white page. The
+edge worker meant to serve the app's "Page not found" page with a real
+404, but it fetched `/404.html`, which Cloudflare's asset server answers
+with a redirect to `/404`; the worker served that empty redirect instead.
+It now fetches `/404`, the same way it already fetches `/` rather than
+`/index.html`. Unknown paths return 404 with the full page ("Page not
+found", the site's navigation, `noindex`, no canonical link). Found by the
+1.6.16 audit (`docs/audit-1.6.16.md`, finding 1). Verified on
+`wrangler dev`; the e2e suite runs against Vite's preview server, so it
+doesn't exercise the worker.
+
 ## Template pages keep the grid filter — 1.6.16, 2026-10-11
 
 A template page opened from a filtered Free CV Templates grid now keeps

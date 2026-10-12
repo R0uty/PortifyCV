@@ -43,6 +43,10 @@ Severity is about impact on real visitors, not effort to fix.
 
 ### 1. A broken link shows a blank page
 
+**Status:** fixed in 1.6.17 (`worker/index.js` fetches `/404`; verified
+on `wrangler dev`: unknown paths return 404 with the full page and no
+`Location` header, real routes unchanged).
+
 **Severity:** medium. Any visitor who follows a stale or mistyped link
 (old shares, search results for a removed page, typos) gets a white page
 with nothing on it: no message, no navigation, no way back except the
