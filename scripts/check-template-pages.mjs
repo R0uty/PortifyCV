@@ -272,6 +272,17 @@ check('filterTemplatesByField(null) returns every template',
 check('fieldSearch writes ?field= for a field and nothing for All',
   fieldSearch('tech') === '?field=tech' && fieldSearch(null) === '')
 
+// --- index.html's static template count -------------------------------------
+// index.html (the crawler-visible fallback copy and FAQ JSON-LD) can't read
+// cvTemplates, so its hard-coded count drifted before (13 vs 14+).
+{
+  const html = readFileSync(resolvePath(rootDir, 'index.html'), 'utf8')
+  const counts = [...html.matchAll(/(\d+) templates/g)].map((match) => Number(match[1]))
+  check(`index.html's template counts all equal ${cvTemplates.length}`,
+    counts.length > 0 && counts.every((count) => count === cvTemplates.length),
+    `found: ${counts.join(', ')}`)
+}
+
 if (failures > 0) {
   console.log(`\n${failures} template-page check(s) failed.`)
   process.exit(1)

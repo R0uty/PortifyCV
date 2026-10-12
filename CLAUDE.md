@@ -37,7 +37,7 @@ rule-based feedback engine (`check:feedback`), the Word exporter
 (`check:docx-export`), the Direct Edit popup schema
 (`check:section-schema`), the section column-move
 rules and their import validation (`check:section-columns`), the
-per-template pages' slugs, examples, copy, and field tags (`check:template-pages`), or
+per-template pages' slugs, examples, copy, and field tags, plus `index.html`'s static template count (`check:template-pages`), or
 a template's style variants or palette variables (`check:template-variants`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.

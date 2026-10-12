@@ -4,6 +4,32 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Site copy matches the app again — 1.6.21, 2026-10-12
+
+Fixes for stale or wrong claims found by the SEO and content audit
+(`docs/audit-seo-1.6.20.md`, S1, S2, S4, S5):
+
+- **The copy crawlers see is current.** `index.html` (the text every route
+  serves before JavaScript runs, plus the FAQ and app structured data) said
+  "all 13 templates" and listed exports as PDF, HTML and JSON. It now says
+  18 and includes Word. `check:template-pages` fails if a template count in
+  `index.html` stops matching the registry.
+- **"What we store" is accurate.** The privacy policy said three local
+  preferences and the landing FAQ said four, one of them an
+  advertising-cookie choice the app no longer stores. Both now list the
+  real five: language, onboarding seen, session restore on/off, builder
+  mode, and whether the section menu is collapsed. None holds CV content.
+  The privacy policy's date moves to 12 October 2026.
+- **The ATS guide's instructions work in the default mode.** ATS mode and
+  keyword scoring only apply in Classic mode (Direct Edit always shows and
+  exports the styled template), so the ATS guide and the Free CV Templates
+  page now say to switch to Classic first.
+- **The ATS guide covers Word export.** It said HTML was the only export
+  with real text; it now recommends Word (.docx, real text, the format
+  most ATS accept) from a one-column template, and names those templates.
+  `check:docx-export` checks the guide's numbers and names against
+  `DOCX_ARCHETYPES`.
+
 ## Imported CVs can't make the app fetch remote images — 1.6.20, 2026-10-12
 
 Importing a CV file now refuses a photo or project image that isn't

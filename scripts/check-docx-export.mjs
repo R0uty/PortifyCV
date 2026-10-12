@@ -705,5 +705,28 @@ console.log('\ndocxExport: gridTable never renders an empty bordered cell for a 
   )
 }
 
+// --- ATS guide copy matches the archetype map --------------------------------
+// The ATS-Friendly CV Guide tells readers how many templates export to Word
+// as a table and names the one-column ones. It can't import this map (that
+// would pull the docx library into the page's chunk), so check its source
+// text against the map here instead.
+{
+  const { readFileSync } = await import('node:fs')
+  const { getCvTemplates } = await importSrc('utils/cvTemplates.js')
+  const guide = readFileSync(resolvePath(srcDir, 'pages/AtsFriendlyCvGuidePage.jsx'), 'utf8')
+  const oneColumnIds = cvTemplates.map((t) => t.id).filter((id) => DOCX_ARCHETYPES[id]?.archetype === 'oneColumn')
+  const total = cvTemplates.length
+  const tables = total - oneColumnIds.length
+  check(
+    `ATS guide states "${tables} of the ${total}" / "${tables} pohjaa ${total}:sta" templates export to Word as a table`,
+    guide.includes(`${tables} of the ${total} templates`) && guide.includes(`${tables} pohjaa ${total}:sta`),
+  )
+  for (const locale of ['en', 'fi']) {
+    const labels = new Map(getCvTemplates(locale).map((t) => [t.id, t.label]))
+    const missing = oneColumnIds.map((id) => labels.get(id)).filter((label) => !guide.includes(label))
+    check(`ATS guide names every one-column Word template in ${locale}`, missing.length === 0, `missing: ${missing.join(', ')}`)
+  }
+}
+
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)
 process.exit(failures === 0 ? 0 : 1)

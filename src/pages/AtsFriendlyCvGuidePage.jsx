@@ -34,7 +34,7 @@ function getCopy(locale) {
         {
           heading: 'Miten PortifyCV:n ATS-tila auttaa tässä',
           paragraphs: [
-            `ATS-ystävällinen tila litistää minkä tahansa ${TEMPLATE_COUNT} pohjasta yksipalstaiseksi, tekstipainotteiseksi asetteluksi vakioiduilla osiotunnisteilla — sarakkeet, kuvakkeet ja koristeelliset elementit poistuvat kyseisestä renderöinnistä. Vie CV tässä tilassa, kun kohde on ATS eikä ihminen.`,
+            `ATS-ystävällinen tila litistää minkä tahansa ${TEMPLATE_COUNT} pohjasta yksipalstaiseksi, tekstipainotteiseksi asetteluksi vakioiduilla osiotunnisteilla — sarakkeet, kuvakkeet ja koristeelliset elementit poistuvat kyseisestä renderöinnistä. Vie CV tässä tilassa, kun kohde on ATS eikä ihminen. ATS-tila ja avainsanapisteytys ovat editorin Klassinen-tilassa: Suora muokkaus näyttää ja vie aina pohjan tyylitellyn version.`,
           ],
           linkParagraphs: [
             {
@@ -42,7 +42,7 @@ function getCopy(locale) {
               linkText: 'CV-rakentajassa',
               linkTo: ROUTES.builder,
               view: 'builder',
-              after: ' — vaihda tila päälle Asetuksista.',
+              after: ' — valitse yläpalkista Klassinen ja kytke ATS-ystävällinen tila päälle Asetuksista tai ATS-tulospaneelista.',
             },
           ],
         },
@@ -64,7 +64,8 @@ function getCopy(locale) {
         {
           heading: 'Rehellisyys vientimuodoista: mikä on oikeasti koneluettavaa',
           paragraphs: [
-            'PDF-vienti — myös ATS-tilassa — kuvakaappaa esikatselusivun ja upottaa sen kuvana PDF:ään korkean uskollisuuden säilyttämiseksi. Käytännössä tämä tarkoittaa, ettei edes ATS-tilan PDF ole itsestään selkeästi enemmän "koneluettava" tekstin poiminnan kannalta kuin tyylitelty versio — molemmat ovat kuva sivusta. Jos kohdejärjestelmäsi vaatii nimenomaan aidon tekstikerroksen, HTML-vienti säilyttää oikean, valittavissa olevan tekstin koko sisällöstä, ja se on turvallisempi valinta silloin. Voit myös tarkistaa oman PDF-vientisi avaamalla sen ja yrittämällä valita tekstiä hiirellä — jos teksti ei ole valittavissa, se on kuva.',
+            'PDF-vienti — myös ATS-tilassa — kuvakaappaa esikatselusivun ja upottaa sen kuvana PDF:ään korkean uskollisuuden säilyttämiseksi. Käytännössä tämä tarkoittaa, ettei edes ATS-tilan PDF ole itsestään selkeästi enemmän "koneluettava" tekstin poiminnan kannalta kuin tyylitelty versio — molemmat ovat kuva sivusta. Voit tarkistaa oman PDF-vientisi avaamalla sen ja yrittämällä valita tekstiä hiirellä — jos teksti ei ole valittavissa, se on kuva.',
+            'Word-vienti (.docx) rakennetaan suoraan CV:si tiedoista oikeana tekstinä, ja .docx on muoto, jonka useimmat hakijaseurantajärjestelmät ottavat vastaan. Yksi varaus: 12 pohjaa 18:sta viedään Wordiin kaksipalstaisena taulukkona, jotta asettelu säilyy, ja kuten yllä todettiin, osa jäsentimistä lukee taulukoita huonosti. Yksipalstaisen Word-tiedoston saat pohjista Minimalisti, Tiivis, Klassinen ammattilainen, Toimituksellinen, Moderni aikajana ja Muotokuva. Myös HTML-vienti säilyttää oikean, valittavissa olevan tekstin koko sisällöstä.',
           ],
         },
         {
@@ -88,7 +89,7 @@ function getCopy(locale) {
             'Vaihda ATS-ystävälliseen tilaan ja tarkista, ettei mitään puutu tai ole oudossa järjestyksessä',
             'Liitä tavoiterooli ja tarkista avainsanaosuma',
             'Varmista, että yhteystiedot ovat oikeaa tekstiä, ei kuvan sisällä',
-            'Jos järjestelmä vaatii aidosti jäsenneltävää tekstiä, harkitse HTML-vientiä PDF:n sijaan',
+            'Jos järjestelmä vaatii aidosti jäsenneltävää tekstiä, vie PDF:n sijaan Word-tiedosto yksipalstaisesta pohjasta (tai HTML)',
           ],
         },
       ],
@@ -123,7 +124,7 @@ function getCopy(locale) {
       {
         heading: 'How PortifyCV’s ATS mode helps',
         paragraphs: [
-          `ATS-friendly mode flattens any of the ${TEMPLATE_COUNT} templates into a single-column, text-forward layout with standard section headings — columns, icons, and decorative elements are removed from that render. Export in this mode when the destination is an ATS rather than a person.`,
+          `ATS-friendly mode flattens any of the ${TEMPLATE_COUNT} templates into a single-column, text-forward layout with standard section headings — columns, icons, and decorative elements are removed from that render. Export in this mode when the destination is an ATS rather than a person. ATS mode and keyword scoring live in the builder’s Classic mode: Direct Edit always shows and exports the template’s styled version.`,
         ],
         linkParagraphs: [
           {
@@ -131,7 +132,7 @@ function getCopy(locale) {
             linkText: 'CV builder',
             linkTo: ROUTES.builder,
             view: 'builder',
-            after: ' — toggle the mode on in Settings.',
+            after: ' — choose Classic in the top bar, then turn on ATS-friendly mode in Settings or in the ATS score panel.',
           },
         ],
       },
@@ -153,7 +154,8 @@ function getCopy(locale) {
       {
         heading: 'Being honest about export formats: what’s actually machine-readable',
         paragraphs: [
-          'PDF export — including in ATS mode — captures a screenshot of the preview page and embeds it as an image in the PDF, to preserve full visual fidelity. In practice, this means even the ATS-mode PDF isn’t inherently more "machine-readable" for text extraction than the styled version — both are a picture of the page. If your target system specifically requires a real text layer, HTML export preserves actual, selectable text for the full content and is the safer choice there. You can also check your own PDF export by opening it and trying to select text with your mouse — if the text isn’t selectable, it’s an image.',
+          'PDF export — including in ATS mode — captures a screenshot of the preview page and embeds it as an image in the PDF, to preserve full visual fidelity. In practice, this means even the ATS-mode PDF isn’t inherently more "machine-readable" for text extraction than the styled version — both are a picture of the page. You can check your own PDF export by opening it and trying to select text with your mouse — if the text isn’t selectable, it’s an image.',
+          'Word export (.docx) is built straight from your CV data as real text, and .docx is the format most applicant tracking systems accept. One caveat: 12 of the 18 templates export to Word as a two-column table to keep their layout, and as noted above, some parsers read tables poorly. Minimalist, Compact, Classic Professional, Editorial, Modern Timeline, and Portrait give you a one-column Word file. HTML export also preserves actual, selectable text for the full content.',
         ],
       },
       {
@@ -177,7 +179,7 @@ function getCopy(locale) {
           'Switch to ATS-friendly mode and check nothing is missing or reordered strangely',
           'Paste your target job description and check your keyword match',
           'Confirm contact info appears as real text, not inside an image',
-          'If the destination system needs genuinely parseable text, consider HTML export instead of PDF',
+          'If the destination system needs genuinely parseable text, export Word from a one-column template (or HTML) instead of PDF',
         ],
       },
     ],

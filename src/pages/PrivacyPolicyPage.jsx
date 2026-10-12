@@ -1,6 +1,6 @@
 const EFFECTIVE_DATE = {
-  en: '9 September 2026',
-  fi: '9. syyskuuta 2026',
+  en: '12 October 2026',
+  fi: '12. lokakuuta 2026',
 }
 
 function getPrivacyCopy(locale) {
@@ -43,16 +43,18 @@ function getPrivacyCopy(locale) {
           heading: 'Mitä PortifyCV tallentaa paikallisesti',
           paragraphs: [
             'PortifyCV tallentaa selaimesi paikalliseen tallennustilaan '
-            + '(local storage) kolme pientä asetusta, jotta ne säilyvät '
+            + '(local storage) viisi pientä asetusta, jotta ne säilyvät '
             + 'käyntikertojen välillä:',
           ],
           list: [
             'minkä käyttöliittymän kielen valitsit viimeksi (englanti vai suomi)',
             'oletko jo nähnyt kertaluonteisen opastusvinkin',
             'onko valinnainen "Palauta viimeisin istunto" -toiminto käytössä (katso alla)',
+            'kumpaa muokkaustilaa (Suora muokkaus vai Klassinen) käytit viimeksi',
+            'onko editorin osiovalikko pienennetty',
           ],
           paragraphsAfterList: [
-            'Mikään näistä ei sisällä mitään osaa CV:stäsi. Kaikki kolme voi '
+            'Mikään näistä ei sisällä mitään osaa CV:stäsi. Kaikki viisi voi '
             + 'tyhjentää milloin tahansa poistamalla selaimesi sivustokohtaiset '
             + 'tiedot tälle verkkotunnukselle. Mainosevästeiden suostumusvalinta '
             + 'tallennetaan erikseen Googlen suostumustyökalun toimesta (katso '
@@ -207,16 +209,18 @@ function getPrivacyCopy(locale) {
       {
         heading: 'What PortifyCV stores locally',
         paragraphs: [
-          "PortifyCV stores three small preferences in your browser's local "
+          "PortifyCV stores five small preferences in your browser's local "
           + 'storage, so they persist between visits:',
         ],
         list: [
           'which interface language you last selected (English or Finnish)',
           'whether you have already seen the one-time onboarding tip',
           'whether the optional "Restore last session" feature is turned on (see below)',
+          'which builder mode (Direct Edit or Classic) you last used',
+          "whether the builder's section menu is collapsed",
         ],
         paragraphsAfterList: [
-          "None of these contain any part of your CV. All three can be "
+          "None of these contain any part of your CV. All five can be "
           + "cleared at any time by clearing your browser's site data for "
           + 'this domain. Your advertising-cookie consent choice is stored '
           + "separately by Google's consent tool (see \"Cookies and "

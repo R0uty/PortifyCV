@@ -83,7 +83,7 @@ function getLandingCopy(locale) {
         },
         {
           q: 'Mitä tietoja PortifyCV tallentaa selaimeeni?',
-          a: 'Oletuksena vain neljä pientä asetusta (kielivalinta, oletko nähnyt opastuksen, mainosevästevalintasi ja onko istunnon palautus päällä) tallennetaan paikallisesti — mikään niistä ei sisällä osaa CV:stäsi. Jos otat käyttöön valinnaisen "Palauta viimeisin istunto" -toiminnon Asetuksista, CV:stäsi pidetään työkopiota vain kyseisessä selainvälilehdessä, jotta vahinkopäivitys ei tuhoa työtäsi — kopio poistuu automaattisesti heti kun suljet välilehden, eikä sitä koskaan lähetetä minnekään. Katso tietosuojaseloste.',
+          a: 'Oletuksena vain viisi pientä asetusta (kielivalinta, oletko nähnyt opastuksen, onko istunnon palautus päällä, viimeksi käyttämäsi muokkaustila ja onko osiovalikko pienennetty) tallennetaan paikallisesti — mikään niistä ei sisällä osaa CV:stäsi. Jos otat käyttöön valinnaisen "Palauta viimeisin istunto" -toiminnon Asetuksista, CV:stäsi pidetään työkopiota vain kyseisessä selainvälilehdessä, jotta vahinkopäivitys ei tuhoa työtäsi — kopio poistuu automaattisesti heti kun suljet välilehden, eikä sitä koskaan lähetetä minnekään. Katso tietosuojaseloste.',
         },
         {
           q: 'Voinko luoda myös saatekirjeen?',
@@ -150,7 +150,7 @@ function getLandingCopy(locale) {
       },
       {
         q: 'What data does PortifyCV store in my browser?',
-        a: "By default, only four small preferences (your language choice, whether you have seen the onboarding tip, your advertising-cookie choice, and whether session restore is on) are stored locally — none of them contain any part of your CV. If you turn on the optional \"Restore last session\" feature in Settings, a working copy of your CV is kept in that browser tab only, so an accidental refresh doesn't lose your work — it's cleared automatically the moment you close the tab and is never sent anywhere. See the privacy policy for details.",
+        a: "By default, only five small preferences (your language choice, whether you have seen the onboarding tip, whether session restore is on, which builder mode you last used, and whether the section menu is collapsed) are stored locally — none of them contain any part of your CV. If you turn on the optional \"Restore last session\" feature in Settings, a working copy of your CV is kept in that browser tab only, so an accidental refresh doesn't lose your work — it's cleared automatically the moment you close the tab and is never sent anywhere. See the privacy policy for details.",
       },
       {
         q: 'Can I also create a cover letter?',
