@@ -42,9 +42,34 @@ function Figure({ label, children }) {
 }
 
 const FIGURES = {
-  // 01 — Fill in your sections: editor frame, left rail with one item
+  // 01 — Edit right on the CV (Direct Edit): a CV page with one section
+  // outlined and its pencil, and the section's popup of fields beside it.
+  edit: (label, number) => (
+    <Figure label={label}>
+      <rect x="40" y="14" width="190" height="122" />
+      <line x1="58" y1="34" x2="150" y2="34" strokeWidth="2.5" />
+      <line x1="58" y1="46" x2="124" y2="46" strokeWidth="1" />
+      <rect x="50" y="58" width="170" height="44" strokeDasharray="4 3" />
+      <line x1="62" y1="72" x2="190" y2="72" strokeWidth="1" />
+      <line x1="62" y1="84" x2="176" y2="84" strokeWidth="1" />
+      <line x1="58" y1="116" x2="190" y2="116" strokeWidth="1" />
+      {/* the section's pencil */}
+      <circle cx="220" cy="58" r="12" fill="#ffffff" />
+      <path d="M212 66 l2 -6 l11 -11 l4 4 l-11 11 z M222 52 l4 4" strokeWidth="1.3" strokeLinejoin="round" />
+      {/* the popup beside it */}
+      <line x1="230" y1="72" x2="262" y2="72" strokeWidth="1" />
+      <rect x="262" y="30" width="170" height="96" />
+      <line x1="278" y1="48" x2="350" y2="48" strokeWidth="2" />
+      <rect x="278" y="60" width="138" height="14" />
+      <rect x="278" y="82" width="138" height="14" />
+      <line x1="278" y1="110" x2="316" y2="110" strokeWidth="1.5" />
+      <StepNumber cx={53} cy={24} value={number} />
+    </Figure>
+  ),
+
+  // 02 — Prefer a form? Classic mode: editor frame, left rail with one item
   // highlighted, form fields, live preview on the right.
-  sections: (label) => (
+  sections: (label, number) => (
     <Figure label={label}>
       <rect x="12" y="14" width="436" height="122" />
       <rect x="12" y="14" width="62" height="122" />
@@ -61,13 +86,13 @@ const FIGURES = {
       <line x1="282" y1="60" x2="396" y2="60" strokeWidth="1" />
       <line x1="282" y1="72" x2="418" y2="72" strokeWidth="1" />
       <line x1="282" y1="84" x2="360" y2="84" strokeWidth="1" />
-      <StepNumber cx={43} cy={65} value="1" />
+      <StepNumber cx={43} cy={65} value={number} />
     </Figure>
   ),
 
-  // 02 — Tighten your bullets: a form field with bullet lines and an inline
+  // 03 — Tighten your bullets: a form field with bullet lines and an inline
   // flag marker beside a weak one.
-  bullets: (label) => (
+  bullets: (label, number) => (
     <Figure label={label}>
       <rect x="40" y="20" width="300" height="110" />
       <circle cx="64" cy="44" r="2.5" fill={STROKE} />
@@ -81,12 +106,12 @@ const FIGURES = {
       <path d="M372 58 h26 l-6 10 l6 10 h-26 z" strokeWidth="1.5" />
       <line x1="384" y1="63" x2="384" y2="70" strokeWidth="1.5" />
       <circle cx="384" cy="75" r="1.4" fill={STROKE} stroke="none" />
-      <StepNumber cx={53} cy={24} value="2" />
+      <StepNumber cx={53} cy={24} value={number} />
     </Figure>
   ),
 
-  // 03 — Pick a template: three template cards, the middle one selected.
-  template: (label) => (
+  // 04 — Pick a template: three template cards, the middle one selected.
+  template: (label, number) => (
     <Figure label={label}>
       <rect x="28" y="24" width="122" height="102" />
       <line x1="42" y1="42" x2="118" y2="42" strokeWidth="1" />
@@ -100,14 +125,14 @@ const FIGURES = {
       <rect x="310" y="24" width="122" height="102" />
       <line x1="324" y1="42" x2="400" y2="42" strokeWidth="1" />
       <line x1="324" y1="54" x2="418" y2="54" strokeWidth="1" />
-      <StepNumber cx={230} cy={24} value="3" />
+      <StepNumber cx={230} cy={24} value={number} />
     </Figure>
   ),
 
-  // 04 — Check it against the job: the "ATS score & suggestions" panel —
+  // 05 — Check it against the job: the "ATS score & suggestions" panel —
   // an ATS-friendly-mode toggle, a pasted job description, and a
   // matched / missing keyword list.
-  ats: (label) => (
+  ats: (label, number) => (
     <Figure label={label}>
       <rect x="40" y="18" width="380" height="114" />
       {/* header row: label + toggle (on) */}
@@ -126,31 +151,32 @@ const FIGURES = {
       <line x1="256" y1="82" x2="336" y2="82" strokeWidth="1" />
       <path d="M234 100 h12 M240 94 v12" strokeWidth="2" />
       <line x1="256" y1="100" x2="352" y2="100" strokeWidth="1" />
-      <StepNumber cx={53} cy={24} value="4" />
+      <StepNumber cx={53} cy={24} value={number} />
     </Figure>
   ),
 
-  // 05 — Export or share: an open export menu (PDF / HTML / JSON) and a
+  // 06 — Export or share: an open export menu (PDF / Word / HTML / JSON) and a
   // share link URL line.
-  export: (label) => (
+  export: (label, number) => (
     <Figure label={label}>
       <rect x="60" y="18" width="120" height="22" />
       <path d="M150 26 l8 8 l8 -8" strokeWidth="2" />
       <rect x="60" y="46" width="120" height="86" />
-      <line x1="76" y1="66" x2="150" y2="66" strokeWidth="1.5" />
-      <line x1="76" y1="88" x2="150" y2="88" strokeWidth="1.5" />
-      <line x1="76" y1="110" x2="150" y2="110" strokeWidth="1.5" />
+      <line x1="76" y1="62" x2="150" y2="62" strokeWidth="1.5" />
+      <line x1="76" y1="80" x2="150" y2="80" strokeWidth="1.5" />
+      <line x1="76" y1="98" x2="150" y2="98" strokeWidth="1.5" />
+      <line x1="76" y1="116" x2="150" y2="116" strokeWidth="1.5" />
       {/* share link */}
       <rect x="238" y="60" width="162" height="30" rx="15" />
       <circle cx="258" cy="75" r="6" />
       <line x1="270" y1="75" x2="386" y2="75" strokeWidth="1" />
-      <StepNumber cx={73} cy={24} value="5" />
+      <StepNumber cx={73} cy={24} value={number} />
     </Figure>
   ),
 
-  // 06 — Keep your work safe: a settings panel with a "restore last
+  // 07 — Keep your work safe: a settings panel with a "restore last
   // session" toggle switched on.
-  restore: (label) => (
+  restore: (label, number) => (
     <Figure label={label}>
       <rect x="90" y="20" width="280" height="110" />
       <line x1="110" y1="44" x2="230" y2="44" strokeWidth="1.5" />
@@ -158,17 +184,17 @@ const FIGURES = {
       <rect x="300" y="60" width="42" height="20" rx="10" strokeWidth="2" />
       <circle cx="332" cy="70" r="6" fill={STROKE} stroke="none" />
       <line x1="110" y1="100" x2="240" y2="100" strokeWidth="1" />
-      <StepNumber cx={103} cy={24} value="6" />
+      <StepNumber cx={103} cy={24} value={number} />
     </Figure>
   ),
 }
 
-export default function BuilderWalkthroughFigure({ step, label }) {
+export default function BuilderWalkthroughFigure({ step, label, number }) {
   const render = FIGURES[step]
 
   if (!render) {
     return null
   }
 
-  return render(label)
+  return render(label, number)
 }

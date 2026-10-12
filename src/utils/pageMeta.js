@@ -67,7 +67,7 @@ const STATIC_VIEW_HEAD = {
     title: 'How to Use the CV Builder - PortifyCV',
     path: ROUTES.howToUse,
     description:
-      'An illustrated, step-by-step walkthrough of PortifyCV itself: filling in sections, tightening bullets, picking a template, checking ATS keywords, and exporting or sharing your CV.',
+      'A step-by-step walkthrough of PortifyCV: editing right on the CV, the Classic form, templates and looks, ATS keyword checks, and exporting or sharing your CV.',
     isArticle: true,
     datePublished: '2026-09-01',
   },

@@ -4,6 +4,21 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## The builder guide starts with Direct Edit — 1.6.22, 2026-10-12
+
+"How to Use the CV Builder" described only Classic mode (rail, form,
+preview), but the builder has opened in Direct Edit since 1.3. The guide
+now has seven steps: a new first step, "Edit right on the CV" (click text
+to type, a section's pencil opens its fields, column moves, the Sections
+menu, Load demo CV), then "Prefer a form? Switch to Classic". The bullet
+flags and the ATS panel steps say they live in Classic. The template step
+mentions the three looks in the Style menu, and the export step mentions
+the cover letter. The new step has its own line figure; the export
+figure's menu shows four formats instead of three, and figure numbers now
+come from the step's position. The page's meta description is shorter
+(158 characters) and mentions Direct Edit. From `docs/audit-seo-1.6.20.md`
+S3 and M3.
+
 ## Site copy matches the app again — 1.6.21, 2026-10-12
 
 Fixes for stale or wrong claims found by the SEO and content audit
