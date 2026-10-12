@@ -1,4 +1,6 @@
+import ExampleCvLinks from '../components/ExampleCvLinks'
 import InternalNavLink from '../components/InternalNavLink'
+import { CONTENT_PAGE_EXAMPLES } from '../utils/exampleCvs'
 import { ROUTES } from '../utils/routes'
 
 function getCopy(locale) {
@@ -13,7 +15,7 @@ function getCopy(locale) {
           view: 'developerCv',
           path: ROUTES.developerCv,
           title: 'Kehittäjän CV-esimerkkejä',
-          body: 'Projektikohtien rakenne, tekninen taitolista ja miksi Developer-pohja on rakennettu juuri tälle.',
+          body: 'Projektikohtien rakenne, tekninen taitolista ja miksi Kehittäjä-pohja on rakennettu juuri tälle.',
         },
         {
           view: 'itCv',
@@ -34,6 +36,8 @@ function getCopy(locale) {
           body: 'Mitä jätetään pois, kielitaidon merkitys, ja kaksikielinen esimerkki samasta sisällöstä.',
         },
       ],
+      fullExamplesTitle: 'Kokonaisia CV-esimerkkejä',
+      fullExamplesIntro: 'Valmiita esimerkki-CV:itä eri aloilta, kukin omassa pohjassaan. "Käytä tätä esimerkkiä" lataa esimerkin editoriin muokattavaksi, ja jokaisen pohjan sivulla on lisää esimerkkejä.',
       linksLabel: 'Katso myös:',
       howToWriteLink: 'Näin kirjoitat CV:n',
       templatesLink: 'Ilmaiset CV-pohjat',
@@ -73,6 +77,8 @@ function getCopy(locale) {
         body: 'What to leave out, why the languages section matters more, and a bilingual example of the same content.',
       },
     ],
+    fullExamplesTitle: 'Full example CVs',
+    fullExamplesIntro: 'Complete example CVs from different fields, each in its own template. "Use this example" loads one into the builder to edit, and every template page has more.',
     linksLabel: 'See also:',
     howToWriteLink: 'How to Write a CV',
     templatesLink: 'Free CV Templates',
@@ -106,6 +112,12 @@ function CvExamplesHubPage({ locale = 'en', onGetStarted = () => {}, onNavigateT
             </InternalNavLink>
           ))}
         </div>
+      </div>
+
+      <div className="landing-section">
+        <h2 className="landing-section__title">{copy.fullExamplesTitle}</h2>
+        <p className="landing-section__subtitle">{copy.fullExamplesIntro}</p>
+        <ExampleCvLinks examples={CONTENT_PAGE_EXAMPLES.cvExamples} locale={locale} onNavigateToView={onNavigateToView} />
 
         <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
           {copy.ctaLabel}

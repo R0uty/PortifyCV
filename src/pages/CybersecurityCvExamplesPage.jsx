@@ -1,4 +1,6 @@
+import ExampleCvLinks from '../components/ExampleCvLinks'
 import InternalNavLink from '../components/InternalNavLink'
+import { CONTENT_PAGE_EXAMPLES } from '../utils/exampleCvs'
 import { ROUTES } from '../utils/routes'
 import { fieldSearch } from '../utils/templateFields'
 
@@ -61,6 +63,10 @@ function getCopy(locale) {
         },
       ],
       ctaLabel: 'Aloita CV:si rakentaminen',
+      fullExamples: {
+        heading: 'Kokonainen tietoturva-analyytikon CV',
+        intro: 'Sama esimerkkihenkilö kahdessa pohjassa. Kumpikin avautuu valmiina CV:nä, ja "Käytä tätä esimerkkiä" lataa sen editoriin muokattavaksi.',
+      },
       ctaNote: 'Ei kirjautumista. Ei mitään tallennettua ennen kuin viet CV:n.',
       seeAlsoLabel: 'Katso myös:',
       seeAlso: [
@@ -126,6 +132,10 @@ function getCopy(locale) {
       },
     ],
     ctaLabel: 'Start building your CV',
+    fullExamples: {
+      heading: 'A full cybersecurity analyst CV',
+      intro: 'The same example person in two templates. Each opens as a complete CV, and "Use this example" loads it into the builder to edit.',
+    },
     ctaNote: 'No login. Nothing saved until you export.',
     seeAlsoLabel: 'See also:',
     seeAlso: [
@@ -181,6 +191,12 @@ function CybersecurityCvExamplesPage({ locale = 'en', onGetStarted = () => {}, o
             ))}
           </div>
         ))}
+
+        <div>
+          <h2>{copy.fullExamples.heading}</h2>
+          <p>{copy.fullExamples.intro}</p>
+          <ExampleCvLinks examples={CONTENT_PAGE_EXAMPLES.cybersecurityCv} locale={locale} onNavigateToView={onNavigateToView} />
+        </div>
 
         <div className="legal-page__cta">
           <button type="button" className="landing-cta" onClick={() => onGetStarted()}>

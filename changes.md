@@ -4,6 +4,29 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Example pages link the template pages and full example CVs — 1.6.23, 2026-10-12
+
+From `docs/audit-seo-1.6.20.md` L1-L3:
+
+- **Full example CVs from the example pages.** "CV Examples by Field" and
+  the Developer, Cybersecurity and Finnish CV example pages now list full
+  example CVs (e.g. "Frontend developer — Developer"), each opening that
+  template's page on that example (`?example=`), where "Use this example"
+  loads it into the builder. The IT page has no real fit and keeps its Tech
+  templates link. The pairs live in `CONTENT_PAGE_EXAMPLES`
+  (`exampleCvs.js`), and `check:template-pages` fails if one isn't an
+  example its template lists.
+- **Template names link their pages.** The Developer page's "Developer
+  template" and the Finnish page's three suggested templates link to their
+  `/free-cv-templates/<slug>` pages (new `templatePageLink()` in
+  `pageMeta.js`). The Finnish copy now uses the Finnish template names
+  (Kehittäjä, Klassinen ammattilainen, Laivastonsininen ammattilainen)
+  instead of the English ones.
+- **Direct Edit and looks in the evergreen copy.** The landing highlights,
+  About, the Free CV Templates intro and `index.html`'s fallback copy now
+  mention editing right on the CV and the three looks per template; About
+  and `index.html` also mention the cover letter.
+
 ## The builder guide starts with Direct Edit — 1.6.22, 2026-10-12
 
 "How to Use the CV Builder" described only Classic mode (rail, form,

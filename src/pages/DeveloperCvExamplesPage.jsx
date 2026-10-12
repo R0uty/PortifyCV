@@ -1,9 +1,13 @@
+import ExampleCvLinks from '../components/ExampleCvLinks'
 import InternalNavLink from '../components/InternalNavLink'
+import { CONTENT_PAGE_EXAMPLES } from '../utils/exampleCvs'
+import { templatePageLink } from '../utils/pageMeta'
 import { ROUTES } from '../utils/routes'
 import { fieldSearch } from '../utils/templateFields'
 
 // "See also" opens the templates grid on the Tech chip (1.6.14).
 const TECH_SEARCH = fieldSearch('tech')
+const DEVELOPER_TEMPLATE = templatePageLink('developer')
 
 function getCopy(locale) {
   if (locale === 'fi') {
@@ -40,7 +44,7 @@ function getCopy(locale) {
         {
           heading: 'Taidot: listaa, älä ryhmittele käsin',
           paragraphs: [
-            'PortifyCV tunnistaa taitosi avainsanoilla ja ryhmittelee ne automaattisesti (Kehykset, Tietokannat, Pilvi, DevOps, Turvallisuus) useissa pohjissa, mukaan lukien Developer-pohjassa — riittää, että listaat taidot oikeilla nimillä.',
+            'PortifyCV tunnistaa taitosi avainsanoilla ja ryhmittelee ne automaattisesti (Kehykset, Tietokannat, Pilvi, DevOps, Turvallisuus) useissa pohjissa, mukaan lukien Kehittäjä-pohjassa — riittää, että listaat taidot oikeilla nimillä.',
           ],
           linkParagraphs: [
             {
@@ -60,12 +64,22 @@ function getCopy(locale) {
         },
         {
           heading: 'Pohja, joka on rakennettu juuri tälle',
-          paragraphs: [
-            'Developer-pohjassa on tumma sivupalkki sekä projekti- ja saavutuskortit — rakennettu nimenomaan projektipohjaiselle uralle.',
+          linkParagraphs: [
+            {
+              before: '',
+              linkText: 'Kehittäjä-pohjassa',
+              linkTo: DEVELOPER_TEMPLATE.to,
+              view: DEVELOPER_TEMPLATE.view,
+              after: ' on tumma sivupalkki sekä projekti- ja saavutuskortit — rakennettu nimenomaan projektipohjaiselle uralle.',
+            },
           ],
         },
       ],
-      ctaLabel: 'Aloita Developer-pohjalla',
+      ctaLabel: 'Aloita Kehittäjä-pohjalla',
+      fullExamples: {
+        heading: 'Kokonaisia kehittäjän CV-esimerkkejä',
+        intro: 'Jokainen avautuu valmiina CV:nä omassa pohjassaan, ja "Käytä tätä esimerkkiä" lataa sen editoriin muokattavaksi.',
+      },
       ctaNote: 'Ei kirjautumista. Vaihda pohjaa milloin tahansa.',
       seeAlsoLabel: 'Katso myös:',
       seeAlso: [
@@ -130,12 +144,22 @@ function getCopy(locale) {
       },
       {
         heading: 'A template built for exactly this',
-        paragraphs: [
-          'The Developer template has a dark sidebar plus project and achievement cards — built specifically for a project-based career.',
+        linkParagraphs: [
+          {
+            before: 'The ',
+            linkText: 'Developer template',
+            linkTo: DEVELOPER_TEMPLATE.to,
+            view: DEVELOPER_TEMPLATE.view,
+            after: ' has a dark sidebar plus project and achievement cards — built specifically for a project-based career.',
+          },
         ],
       },
     ],
     ctaLabel: 'Start with the Developer template',
+    fullExamples: {
+      heading: 'Full developer CV examples',
+      intro: 'Each one opens as a complete CV in its template, and "Use this example" loads it into the builder to edit.',
+    },
     ctaNote: 'No login. Switch templates any time.',
     seeAlsoLabel: 'See also:',
     seeAlso: [
@@ -187,6 +211,12 @@ function DeveloperCvExamplesPage({ locale = 'en', onGetStarted = () => {}, onNav
             ))}
           </div>
         ))}
+
+        <div>
+          <h2>{copy.fullExamples.heading}</h2>
+          <p>{copy.fullExamples.intro}</p>
+          <ExampleCvLinks examples={CONTENT_PAGE_EXAMPLES.developerCv} locale={locale} onNavigateToView={onNavigateToView} />
+        </div>
 
         <div className="legal-page__cta">
           <button type="button" className="landing-cta" onClick={() => onGetStarted('developer')}>

@@ -119,7 +119,7 @@ const missingFromSitemap = cvTemplates.filter(
 check('every template page is in sitemap.xml', missingFromSitemap.length === 0, missingFromSitemap.map((t) => t.slug).join(', '))
 
 // --- Example CVs -------------------------------------------------------------
-const { EXAMPLES, TEMPLATE_EXAMPLES, loadExampleCv } = await importSrc('utils/exampleCvs.js')
+const { EXAMPLES, TEMPLATE_EXAMPLES, CONTENT_PAGE_EXAMPLES, isTemplateExample, loadExampleCv } = await importSrc('utils/exampleCvs.js')
 const { parseImportedCvData, createInitialCvData, CV_SECTION_ORDER_KEYS, demoCvData } = await importSrc('utils/cvForm.js')
 
 // Example and demo CVs must contain no real information: one placeholder
@@ -173,6 +173,14 @@ for (const template of cvTemplates) {
   const ids = TEMPLATE_EXAMPLES[template.id] ?? []
   check(`${template.id}: lists 2–3 examples`, ids.length >= 2 && ids.length <= 3, `${ids.length}`)
   check(`${template.id}: every listed example is registered`, ids.every((id) => EXAMPLES[id]), ids.filter((id) => !EXAMPLES[id]).join(', '))
+}
+
+// Content pages link [templateId, exampleId] pairs; each must be one the
+// template page actually lists, or the link silently opens its default.
+for (const [page, pairs] of Object.entries(CONTENT_PAGE_EXAMPLES)) {
+  const bad = pairs.filter(([templateId, exampleId]) => !isTemplateExample(templateId, exampleId))
+  check(`content page ${page}: every example link is listed by its template`, bad.length === 0,
+    bad.map((pair) => pair.join(':')).join(', '))
 }
 
 const usedIds = new Set(Object.values(TEMPLATE_EXAMPLES).flat())

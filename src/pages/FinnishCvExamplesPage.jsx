@@ -1,10 +1,16 @@
+import ExampleCvLinks from '../components/ExampleCvLinks'
 import InternalNavLink from '../components/InternalNavLink'
+import { CONTENT_PAGE_EXAMPLES } from '../utils/exampleCvs'
 import { cvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
 
 // Read off the template registry instead of a hardcoded number — see
 // LandingPage.jsx for why this drifted before.
 const TEMPLATE_COUNT = cvTemplates.length
+
+// The understated templates the "safe choice" section links, as
+// ExampleCvLinks pairs with no example (each links its template page).
+const SAFE_TEMPLATES = [['minimal', null], ['classicProfessional', null], ['navyProfessional', null]]
 
 function getCopy(locale) {
   if (locale === 'fi') {
@@ -53,8 +59,9 @@ function getCopy(locale) {
         {
           heading: 'Turvallinen, ammattimainen pohjavalinta',
           paragraphs: [
-            `Minimalisti, Classic Professional ja Navy Professional lukevat siistin ja asiallisen, mikä sopii suomalaisten työnantajien yleensä maltillisiin odotuksiin — mutta mikä tahansa ${TEMPLATE_COUNT} pohjasta toimii, ja vaihtaminen ei koske tekstiäsi.`,
+            `Nämä kolme lukevat siistin ja asiallisen, mikä sopii suomalaisten työnantajien yleensä maltillisiin odotuksiin — mutta mikä tahansa ${TEMPLATE_COUNT} pohjasta toimii, ja vaihtaminen ei koske tekstiäsi:`,
           ],
+          templateLinks: SAFE_TEMPLATES,
           linkParagraphs: [
             {
               before: 'Katso kaikki ',
@@ -67,6 +74,10 @@ function getCopy(locale) {
         },
       ],
       ctaLabel: 'Aloita CV:si rakentaminen',
+      fullExamples: {
+        heading: 'Kokonaisia CV-esimerkkejä Eurooppalainen-pohjassa',
+        intro: 'Eurooppalainen-pohja noudattaa EU:ssa yleistä Europass-tyylistä asettelua. Esimerkit avautuvat valmiina CV:inä sillä kielellä, jonka olet valinnut, ja "Käytä tätä esimerkkiä" lataa ne editoriin muokattavaksi.',
+      },
       ctaNote: 'Ei kirjautumista. Saatavilla suomeksi ja englanniksi.',
       seeAlsoLabel: 'Katso myös:',
       seeAlso: [
@@ -123,8 +134,9 @@ function getCopy(locale) {
       {
         heading: 'A safe, professional template choice',
         paragraphs: [
-          `Minimalist, Classic Professional, and Navy Professional read clean and understated, matching the generally restrained expectations of Finnish employers — but any of the ${TEMPLATE_COUNT} templates works, and switching never touches your text.`,
+          `These three read clean and understated, matching the generally restrained expectations of Finnish employers — but any of the ${TEMPLATE_COUNT} templates works, and switching never touches your text:`,
         ],
+        templateLinks: SAFE_TEMPLATES,
         linkParagraphs: [
           {
             before: 'See all ',
@@ -137,6 +149,10 @@ function getCopy(locale) {
       },
     ],
     ctaLabel: 'Start building your CV',
+    fullExamples: {
+      heading: 'Full CV examples in the European template',
+      intro: 'The European template follows the Europass-style layout common across the EU. Each example opens as a complete CV in the language you have selected (switch to FI for Finnish), and "Use this example" loads it into the builder to edit.',
+    },
     ctaNote: 'No login. Available in Finnish and English.',
     seeAlsoLabel: 'See also:',
     seeAlso: [
@@ -164,6 +180,9 @@ function FinnishCvExamplesPage({ locale = 'en', onGetStarted = () => {}, onNavig
             {section.paragraphs?.map((paragraph, index) => (
               <p key={index}>{paragraph}</p>
             ))}
+            {section.templateLinks ? (
+              <ExampleCvLinks examples={section.templateLinks} locale={locale} onNavigateToView={onNavigateToView} />
+            ) : null}
             {section.examplePair ? (
               <ul>
                 <li>
@@ -188,6 +207,12 @@ function FinnishCvExamplesPage({ locale = 'en', onGetStarted = () => {}, onNavig
             ))}
           </div>
         ))}
+
+        <div>
+          <h2>{copy.fullExamples.heading}</h2>
+          <p>{copy.fullExamples.intro}</p>
+          <ExampleCvLinks examples={CONTENT_PAGE_EXAMPLES.finnishCv} locale={locale} onNavigateToView={onNavigateToView} />
+        </div>
 
         <div className="legal-page__cta">
           <button type="button" className="landing-cta" onClick={() => onGetStarted()}>

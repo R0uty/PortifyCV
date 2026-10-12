@@ -1,4 +1,8 @@
+import { cvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
+
+// Read off the template registry, like the other pages' counts.
+const TEMPLATE_COUNT = cvTemplates.length
 
 function getAboutCopy(locale, onNavigateToView) {
   if (locale === 'fi') {
@@ -14,10 +18,12 @@ function getAboutCopy(locale, onNavigateToView) {
           heading: 'Mikä PortifyCV on',
           paragraphs: [
             'PortifyCV auttaa kokoamaan siistin, tulostuskelpoisen ansioluettelon '
-            + 'muutamassa minuutissa. Mukana on reaaliaikainen esikatselu, useita '
-            + 'valmiita pohjia, ATS-ystävällinen tila hakijaseurantajärjestelmiä '
-            + 'varten sekä vienti PDF-, Word-, HTML- ja JSON-muodossa. Koko käyttöliittymä '
-            + 'toimii sekä englanniksi että suomeksi.',
+            + 'muutamassa minuutissa. Muokkaat CV:tä suoraan sivulla (tai '
+            + `perinteisellä lomakkeella), valitset ${TEMPLATE_COUNT} pohjasta, joissa `
+            + 'kussakin on kolme tyyliä, ja mukana on ATS-ystävällinen tila '
+            + 'hakijaseurantajärjestelmiä varten, vienti PDF-, Word-, HTML- ja '
+            + 'JSON-muodossa sekä CV:si pohjalta luotava hakemuskirjeluonnos. Koko '
+            + 'käyttöliittymä toimii sekä englanniksi että suomeksi.',
             'Kaikki toiminnot ovat ilmaisia. Ei vesileimoja, ei maksumuurin takana '
             + 'olevia pohjia eikä pakollista rekisteröitymistä.',
           ],
@@ -102,10 +108,11 @@ function getAboutCopy(locale, onNavigateToView) {
         heading: 'What PortifyCV is',
         paragraphs: [
           'PortifyCV helps you put together a clean, print-ready CV in a few '
-          + 'minutes. It has a live preview, a set of ready-made templates, an '
-          + 'ATS-friendly mode for applicant tracking systems, and export to '
-          + 'PDF, Word, HTML, and JSON. The whole interface works in both English '
-          + 'and Finnish.',
+          + 'minutes. You edit the CV right on the page (or in a classic form), '
+          + `choose from ${TEMPLATE_COUNT} templates with three looks each, and get an `
+          + 'ATS-friendly mode for applicant tracking systems, export to PDF, '
+          + 'Word, HTML, and JSON, and a cover letter drafted from your CV. The '
+          + 'whole interface works in both English and Finnish.',
           'Every feature is free. There are no watermarks, no paywalled '
           + 'templates, and no required sign-up.',
         ],

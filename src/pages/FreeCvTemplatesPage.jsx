@@ -22,7 +22,7 @@ function getCopy(locale) {
       kicker: 'Pohjat',
       title: 'Ilmaiset CV-pohjat',
       intro:
-        `Kaikki ${TEMPLATE_COUNT} pohjaa ovat täysin ilmaisia, ilman vesileimaa ja ilman tiliä. Vaihda pohjaa milloin tahansa rakentaessasi — sisältösi säilyy, vain asettelu vaihtuu.`,
+        `Kaikki ${TEMPLATE_COUNT} pohjaa ovat täysin ilmaisia, ilman vesileimaa ja ilman tiliä. Jokaisessa on kolme tyyliä (värit, fontti ja otsikoiden väri), jotka voit kokeilla suoraan kortilla. Vaihda pohjaa milloin tahansa rakentaessasi — sisältösi säilyy, vain asettelu vaihtuu.`,
       useTemplate: 'Käytä tätä pohjaa',
       viewExamples: 'Katso esimerkit',
       style: 'Tyyli',
@@ -43,7 +43,7 @@ function getCopy(locale) {
     kicker: 'Templates',
     title: 'Free CV Templates',
     intro:
-      `All ${TEMPLATE_COUNT} templates are completely free, with no watermark and no account. Swap templates any time while you build — your content stays, only the layout changes.`,
+      `All ${TEMPLATE_COUNT} templates are completely free, with no watermark and no account. Each comes in three looks (a colour palette, a font, and a heading colour) you can try right on its card. Swap templates any time while you build — your content stays, only the layout changes.`,
     useTemplate: 'Use this template',
     viewExamples: 'View examples',
     style: 'Style',

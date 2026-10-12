@@ -3432,6 +3432,23 @@ select.floating-field__control {
   border-radius: 0.2em;
 }
 
+/* Full example CV links (ExampleCvLinks) — styled the same on the
+   landing-style hub page as inside a .legal-page. */
+.example-cv-links {
+  margin: var(--space-4) 0 0;
+  padding-left: 1.4rem;
+}
+
+.example-cv-links li {
+  margin-top: var(--space-2);
+}
+
+.example-cv-links a {
+  color: var(--app-text);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 /* "How to Use the CV Builder" — illustrated step walkthrough. */
 .builder-walkthrough {
   list-style: none;

@@ -5,7 +5,7 @@
 // places a page's HTML actually gets read, so importing one object into
 // both keeps them from drifting apart.
 import { ROUTES, templatePath } from './routes.js'
-import { cvTemplates } from './cvTemplates.js'
+import { cvTemplates, getTemplateSlug } from './cvTemplates.js'
 import { TEMPLATE_META_DESCRIPTIONS } from './templateMetaDescriptions.js'
 
 export const SITE_ORIGIN = 'https://portifycv.app'
@@ -130,6 +130,18 @@ const STATIC_VIEW_HEAD = {
 // View key prefix for the per-template pages: `template:developer` etc.
 // App.jsx maps every key with this prefix onto TemplateDetailPage.
 export const TEMPLATE_VIEW_PREFIX = 'template:'
+
+// A link to one template's page, for InternalNavLink + onNavigateToView:
+// `{ to, view, search }`. `example` opens it on that example CV (the page
+// reads ?example=; an id it doesn't list falls back to its default).
+export function templatePageLink(templateId, { example } = {}) {
+  const search = example ? `?example=${encodeURIComponent(example)}` : ''
+  return {
+    to: `${templatePath(getTemplateSlug(templateId))}${search}`,
+    view: `${TEMPLATE_VIEW_PREFIX}${templateId}`,
+    search,
+  }
+}
 
 // One entry per template, generated from the registry so a new template
 // gets its page, metadata, worker routing, and 404/redirect handling just

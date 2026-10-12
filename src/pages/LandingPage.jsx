@@ -35,9 +35,9 @@ function getLandingCopy(locale) {
       subtitle: 'Ei tiliä, ei kirjautumista, ei mitään tallennettua — kaikki tapahtuu tässä selaimessasi ja katoaa, kun suljet välilehden.',
       previewAlt: 'Esimerkki PortifyCV:llä rakennetusta CV:stä',
       highlights: [
-        'Ei tiliä, ei kirjautumista — aloita kirjoittaminen heti',
+        'Ei tiliä, ei kirjautumista — napsauta CV:tä ja ala kirjoittaa',
         'Mitään kirjoittamastasi ei koskaan lähetetä selaimestasi',
-        `${TEMPLATE_COUNT} pohjaa — vaihda milloin vain sisältöä menettämättä`,
+        `${TEMPLATE_COUNT} pohjaa, kolme tyyliä kussakin — vaihda milloin vain sisältöä menettämättä`,
         'ATS-pisteytys ja avainsanaehdotukset',
         'Vie PDF-, Word-, HTML- tai JSON-muodossa — sitten se on poissa',
       ],
@@ -102,9 +102,9 @@ function getLandingCopy(locale) {
     subtitle: 'No login, no account, nothing saved — everything happens right here in your browser, and disappears the moment you close the tab.',
     previewAlt: 'Example CV built with PortifyCV',
     highlights: [
-      'No account, no login — start typing immediately',
+      'No account, no login — click your CV and start typing',
       'Nothing you type ever leaves your browser',
-      `${TEMPLATE_COUNT} templates — swap anytime without losing your content`,
+      `${TEMPLATE_COUNT} templates, three looks each — swap anytime without losing your content`,
       'ATS scoring with keyword suggestions',
       'Export to PDF, Word, HTML, or JSON — then it’s gone',
     ],

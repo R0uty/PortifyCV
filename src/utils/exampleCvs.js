@@ -58,6 +58,34 @@ export const TEMPLATE_EXAMPLES = {
   european: ['nurse', 'teacher', 'chef'],
 }
 
+// Full example CVs linked from the content pages ("CV examples by field"
+// and its field pages), as [templateId, exampleId] pairs: each opens that
+// template's page on that example. Only real fits — check:template-pages
+// fails if a pair isn't in TEMPLATE_EXAMPLES.
+export const CONTENT_PAGE_EXAMPLES = {
+  cvExamples: [
+    ['developer', 'frontend-developer'],
+    ['minimal', 'cybersecurity-analyst'],
+    ['modern', 'marketing-manager'],
+    ['classicProfessional', 'accountant'],
+    ['timeline', 'project-manager'],
+    ['european', 'nurse'],
+  ],
+  developerCv: [
+    ['developer', 'frontend-developer'],
+    ['developer', 'data-engineer'],
+    ['graduate', 'junior-developer'],
+  ],
+  cybersecurityCv: [
+    ['minimal', 'cybersecurity-analyst'],
+    ['compact', 'cybersecurity-analyst'],
+  ],
+  finnishCv: [
+    ['european', 'nurse'],
+    ['european', 'teacher'],
+  ],
+}
+
 export function getTemplateExamples(templateId, locale = 'en') {
   const resolvedLocale = locale === 'fi' ? 'fi' : 'en'
   return (TEMPLATE_EXAMPLES[templateId] ?? [])
