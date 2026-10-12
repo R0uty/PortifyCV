@@ -140,6 +140,8 @@ snapshot.
 
 ### 6. Dependency advisories
 
+**Status:** fixed in 1.6.19 (`npm audit fix`; lockfile-only, 67 patch/minor bumps; `npm audit` reports 0).
+
 **Severity:** low. `npm audit` reports 7 advisories (1 low, 6 high), all
 with non-breaking fixes available through `npm audit fix`:
 

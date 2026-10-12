@@ -4,6 +4,18 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Dependency security updates — 1.6.19, 2026-10-12
+
+`npm audit fix` cleared all 7 advisories from the 1.6.16 audit
+(`docs/audit-1.6.16.md`, finding 6); `npm audit` now reports none. Only
+`package-lock.json` changed: 67 patch and minor version bumps, nothing
+added or removed. The one package that ships to visitors is `dompurify`
+(3.4.13 → 3.4.17, an optional jsPDF dependency the app never calls); the
+rest is build and deploy tooling (`brace-expansion`, `source-map-js`,
+`esbuild`, `sharp`, `undici`, and `wrangler` 4.125 → 4.149 with its
+`miniflare`/`workerd`). The worker was smoke-tested on the new
+`wrangler dev` and `wrangler deploy --dry-run` validates the config.
+
 ## Faster repeat visits, lighter landing page, cleaner strip for screen readers — 1.6.18, 2026-10-12
 
 Three fixes from the 1.6.16 audit (`docs/audit-1.6.16.md`, findings 3-5):
