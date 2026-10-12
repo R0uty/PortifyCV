@@ -104,6 +104,41 @@ const imagesBack = share.decodeCvStateFromUrl(imageEncoded)
 check('images decode to the schema default', imagesBack.photo === '' && imagesBack.projects[0].image === '')
 check('text is unaffected by dropping images', imagesBack.fullName === withImages.fullName)
 
+// Imported images must be embedded in the file (1.6.20,
+// docs/security-audit-1.6.19.md): a remote URL in photo or a project image
+// made the app fetch it on import, a tracking beacon for whoever crafted
+// the file. The app's own uploads only ever produce inline PNG/JPEG.
+const importThrows = (patch) => {
+  try {
+    parseImportedCvData({ ...structuredClone(demoCvData), ...patch })
+    return null
+  } catch (error) {
+    return error.message
+  }
+}
+const withProjectImage = (image) => ({
+  projects: structuredClone(demoCvData.projects).map((project, index) => (index === 0 ? { ...project, image } : project)),
+})
+for (const bad of [
+  'https://tracker.invalid/p.png?who=x',
+  '//tracker.invalid/p.png',
+  'http://tracker.invalid/p.png',
+  'javascript:alert(1)',
+  'data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=',
+  'data:text/html;base64,PGgxPg==',
+  'blob:https://portifycv.app/123',
+  ' data:image/png;base64,AAAA',
+]) {
+  const photoError = importThrows({ photo: bad })
+  check(`import rejects photo ${JSON.stringify(bad)}`, typeof photoError === 'string' && photoError.startsWith('photo '), photoError ?? 'accepted')
+  const imageError = importThrows(withProjectImage(bad))
+  check(`import rejects a project image ${JSON.stringify(bad)}`, typeof imageError === 'string' && imageError.startsWith('projects[0].image '), imageError ?? 'accepted')
+}
+for (const good of ['', 'data:image/jpeg;base64,/9j/AAAA', 'data:image/png;base64,iVBORw0KGgo=', 'data:image/jpg;base64,AAAA', 'DATA:IMAGE/PNG;BASE64,AAAA']) {
+  check(`import accepts photo ${JSON.stringify(good.slice(0, 24))}`, importThrows({ photo: good }) === null, importThrows({ photo: good }))
+  check(`import accepts a project image ${JSON.stringify(good.slice(0, 24))}`, importThrows(withProjectImage(good)) === null, importThrows(withProjectImage(good)))
+}
+
 // sectionColumnsByTemplate travels under its own short key ('sc').
 const withColumns = parseImportedCvData({
   ...structuredClone(demoCvData),

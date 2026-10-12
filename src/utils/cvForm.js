@@ -873,6 +873,24 @@ function validateAllowedKeys(value, allowedKeys, path) {
   }
 }
 
+// An image field from an imported file: empty, or an image embedded in the
+// file as an inline PNG/JPEG data URL, the only form the app's own uploads
+// produce (profilePhoto.js, DragDropUpload). Anything else — above all a
+// remote URL — would make the app fetch it as soon as the file is
+// imported, a tracking beacon for whoever crafted the file (1.6.20,
+// docs/security-audit-1.6.19.md).
+const EMBEDDED_IMAGE_RE = /^data:image\/(?:png|jpe?g);base64,/i
+
+function readOptionalImage(value, path) {
+  const image = readOptionalString(value, path)
+
+  if (image !== '' && !EMBEDDED_IMAGE_RE.test(image)) {
+    throw new Error(`${path} must be an image embedded in the file (a PNG or JPEG data URL), not a link.`)
+  }
+
+  return image
+}
+
 function readOptionalString(value, path) {
   if (value === undefined) {
     return ''
@@ -1425,7 +1443,7 @@ export function parseImportedCvData(value) {
     email: readOptionalString(value.email, 'email'),
     phone: readOptionalString(value.phone, 'phone'),
     location: readOptionalString(value.location, 'location'),
-    photo: readOptionalString(value.photo, 'photo'),
+    photo: readOptionalImage(value.photo, 'photo'),
     photoVisibilityByTemplate: {
       ...createTemplatePhotoVisibility(),
       ...photoVisibilityByTemplate,
@@ -1528,7 +1546,7 @@ export function parseImportedCvData(value) {
             date: readOptionalString(item.date, `projects[${index}].date`),
             teamSize: readOptionalString(item.teamSize, `projects[${index}].teamSize`),
             contribution: readOptionalString(item.contribution, `projects[${index}].contribution`),
-            image: readOptionalString(item.image, `projects[${index}].image`),
+            image: readOptionalImage(item.image, `projects[${index}].image`),
           }))
         : [createEmptyProject()],
     languages:

@@ -42,6 +42,11 @@ are cross-referenced below, not repeated.
 
 ### Medium: an imported CV file can make the app fetch remote images (tracking beacon)
 
+**Status:** fixed in 1.6.20. `parseImportedCvData` accepts only `''` or an
+inline PNG/JPEG data URL for `photo` and `projects[].image` and rejects
+the file otherwise; `check:share` and `e2e/json-import.spec.js` (which
+intercepts the bait host and asserts no request) cover it.
+
 **Location:** `src/utils/cvForm.js:1428` (`photo`) and `:1531`
 (`projects[].image`) accept any string through `readOptionalString`;
 `CVPreview.jsx:1382` and every Showcase render them as `<img src>`.

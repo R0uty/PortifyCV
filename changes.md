@@ -4,6 +4,21 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Imported CVs can't make the app fetch remote images — 1.6.20, 2026-10-12
+
+Importing a CV file now refuses a photo or project image that isn't
+embedded in the file. Before, a hand-crafted file could set either to a
+web address, and the app loaded it the moment the file was imported:
+whoever crafted the file learned the recipient's IP address, browser and
+when they opened it (a tracking beacon), contrary to "your data never
+leaves your device". Such a file is now rejected with "photo must be an
+image embedded in the file (a PNG or JPEG data URL), not a link." and
+nothing is fetched. Files the app itself exported are unaffected: its
+uploads only ever produce embedded PNG/JPEG images. Found by the 1.6.19
+security audit (`docs/security-audit-1.6.19.md`). Tests: `check:share`
+(remote, protocol-relative, `javascript:`, SVG and other non-image values
+rejected; embedded PNG/JPEG accepted) and `e2e/json-import.spec.js`.
+
 ## Dependency security updates — 1.6.19, 2026-10-12
 
 `npm audit fix` cleared all 7 advisories from the 1.6.16 audit
