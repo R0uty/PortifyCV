@@ -1,10 +1,17 @@
-# Netlify reads this file at deploy time and applies these as real HTTP
-# response headers. There is no meta-tag equivalent for X-Frame-Options or
+# Real HTTP response headers for the deployed site. Production is
+# Cloudflare Workers static assets (wrangler.jsonc), which reads this file
+# from dist/ at deploy time, including for the pages the edge worker serves
+# through env.ASSETS. There is no meta-tag equivalent for X-Frame-Options or
 # X-Content-Type-Options — both are ignored by browsers unless set here (see
-# docs/audit-1.0.2.md, finding on this). Vercel uses vercel.json instead;
-# GitHub Pages supports neither, since it serves static files with no custom
-# response-header mechanism.
+# docs/audit-1.0.2.md, finding on this).
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
+
+# Vite content-hashes every file under /assets/ (index-DAtX3vG6.js), so a
+# changed file always gets a new name: cache them for a year and never
+# revalidate. HTML keeps the default max-age=0, so a deploy shows at once
+# (1.6.18, docs/audit-1.6.16.md finding 3).
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -4,6 +4,23 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Faster repeat visits, lighter landing page, cleaner strip for screen readers — 1.6.18, 2026-10-12
+
+Three fixes from the 1.6.16 audit (`docs/audit-1.6.16.md`, findings 3-5):
+
+- **Repeat visits load faster.** Vite's content-hashed files under
+  `/assets/` are now cached for a year (`immutable`, in `public/_headers`)
+  instead of being re-checked on every visit; pages themselves still
+  aren't cached, so a deploy shows at once.
+- **The landing page no longer downloads a font for one thumbnail.** The
+  template strip's Quadrant card showed its Indigo look, whose Calibri font
+  pulled in about 92 KB of Carlito. A strip card whose look needs a font
+  download now shows the next look in its rotation instead (Quadrant shows
+  Original); only that card changed.
+- **Screen readers hear the strip once.** The strip's second copy, which
+  only exists so the scroll can loop, is now hidden from assistive
+  technology; before, every template and look name was read out twice.
+
 ## Broken links show the "Page not found" page — 1.6.17, 2026-10-12
 
 A mistyped or stale link on portifycv.app showed a blank white page. The

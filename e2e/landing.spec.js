@@ -1,6 +1,7 @@
 import { test, expect } from './fixtures/base.js'
 import { getTemplateVariants } from '../src/utils/templateVariants.js'
 import { getCvTemplates } from '../src/utils/cvTemplates.js'
+import { CV_FONT_OPTIONS } from '../src/utils/cvFonts.js'
 
 // Read on the name (every Showcase's <h1 data-cv-name>), which inherits
 // the look's palette from the Showcase root.
@@ -49,8 +50,19 @@ test.describe('Landing page', () => {
 
 test.describe('Landing templates strip looks', () => {
   // Card n (gallery order) shows its template's look n mod 3, named under
-  // the template name; the loop copy repeats the same looks.
+  // the template name; the loop copy repeats the same looks. A look whose
+  // font is a download (Calibri, Lato) is skipped for the next one in the
+  // rotation (1.6.18), so the landing page never fetches a font for a strip
+  // thumbnail.
   const cards = (page) => page.locator('.landing-templates-card')
+  const downloadsFont = (fontId) => Boolean(CV_FONT_OPTIONS.find((font) => font.id === fontId)?.load)
+  const stripLook = (variants, index) => {
+    for (let step = 0; step < variants.length; step += 1) {
+      const look = variants[(index + step) % variants.length]
+      if (!downloadsFont(look.fontId)) return look
+    }
+    return variants[0]
+  }
 
   test('cards rotate through each template\'s looks and name the look', async ({ page }) => {
     await page.goto('/')
@@ -59,7 +71,7 @@ test.describe('Landing templates strip looks', () => {
 
     for (const [index, template] of templates.entries()) {
       const variants = getTemplateVariants(template.id)
-      const look = variants[index % variants.length]
+      const look = stripLook(variants, index)
       for (const copy of [0, 1]) {
         const card = cards(page).nth(index + copy * templates.length)
         await expect(card.locator('.landing-templates-card__name')).toHaveText(template.label)
@@ -84,5 +96,29 @@ test.describe('Landing templates strip looks', () => {
       .toHaveText(getTemplateVariants(templates[0].id)[0].label.fi)
     await expect(cards(page).nth(1).locator('.landing-templates-card__look'))
       .toHaveText(getTemplateVariants(templates[1].id)[1].label.fi)
+  })
+
+  test('the landing page downloads no font for a strip thumbnail', async ({ page }) => {
+    const fontRequests = []
+    page.on('request', (request) => {
+      if (/carlito|lato/i.test(request.url())) fontRequests.push(request.url())
+    })
+    await page.goto('/')
+    await page.locator('.landing-templates-wrap').scrollIntoViewIfNeeded()
+    await page.waitForLoadState('networkidle')
+    expect(fontRequests).toEqual([])
+  })
+
+  test('screen readers get each strip card once, not the loop copy', async ({ page }) => {
+    await page.goto('/')
+    const templates = getCvTemplates('en')
+    await expect(cards(page)).toHaveCount(templates.length * 2)
+    // The loop copy is visual only.
+    await expect(page.locator('.landing-templates-card[aria-hidden="true"]')).toHaveCount(templates.length)
+    const snapshot = await page.locator('.landing-templates-wrap').ariaSnapshot()
+    for (const template of templates) {
+      const mentions = snapshot.split('\n').filter((line) => line.trim() === `- paragraph: ${template.label}`)
+      expect(mentions, template.label).toHaveLength(1)
+    }
   })
 })

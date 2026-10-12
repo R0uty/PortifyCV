@@ -74,6 +74,13 @@ export function isValidCvFontId(fontId) {
   return CV_FONT_BY_ID.has(fontId)
 }
 
+// True for a font whose files must be downloaded (Calibri's Carlito
+// fallback, Lato); false for system fonts, Inter (already loaded) and
+// unknown ids.
+export function cvFontNeedsDownload(fontId) {
+  return Boolean(CV_FONT_BY_ID.get(fontId)?.load)
+}
+
 export function getCvFontStack(fontId) {
   return (CV_FONT_BY_ID.get(fontId) ?? CV_FONT_BY_ID.get(DEFAULT_CV_FONT_ID)).stack
 }

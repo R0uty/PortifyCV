@@ -85,6 +85,8 @@ app itself.
 
 ### 3. Hashed assets are never cached
 
+**Status:** fixed in 1.6.18 (`public/_headers`; verified on `wrangler dev`: hashed assets `max-age=31536000, immutable`, pages and the 404 unchanged at `max-age=0`).
+
 **Severity:** low (performance). Every content-hashed file under
 `/assets/` (for example `index-DAtX3vG6.js`) is served with
 `cache-control: public, max-age=0, must-revalidate`. Their names change
@@ -104,6 +106,8 @@ Leave HTML on the current `max-age=0` so new releases appear at once.
 
 ### 4. The landing page downloads a font for one strip card
 
+**Status:** fixed in 1.6.18 (first option: a strip card whose look needs a font download takes the next look in its rotation; e2e checks the landing page requests no Carlito or Lato).
+
 **Severity:** low (performance). Since 1.6.11 the landing strip shows
 template looks, and card 15 (Quadrant) shows its Indigo look, whose font
 is Calibri. The thumbnail loads that font's self-hosted fallback, so every
@@ -119,6 +123,8 @@ without loading its font file. The first keeps the "card *n* shows look
 `TemplateThumbnail` for one caller.
 
 ### 5. Screen readers hear the landing strip twice
+
+**Status:** fixed in 1.6.18 (the loop copy is `aria-hidden`; e2e checks each template name appears once in the accessibility snapshot).
 
 **Severity:** low (accessibility). The strip duplicates its cards so the
 scroll can loop seamlessly, and the copy is exposed to assistive
