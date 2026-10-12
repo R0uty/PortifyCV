@@ -1,5 +1,9 @@
 # SEO / content audit — 1.6.20 (2026-10-12)
 
+**Status (2026-10-12):** S1 (text), S2, S4, S5 fixed in 1.6.21; S3 and M3
+in 1.6.22; L1-L3 in 1.6.23; S6 and S7 in 1.6.24. Open by the user's choice:
+M1, M2, M4, O4 (and S1's worker part, which is O4). Not deployed yet.
+
 Scope: every public route's copy and metadata against what the app actually
 does at 1.6.20 (main `e0898a0`). Report first; nothing here is fixed yet.
 Previous pass: `todo.md` item 31 (2026-08-20), which also recorded the

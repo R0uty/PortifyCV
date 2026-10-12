@@ -54,6 +54,7 @@ const STATIC_VIEW_HEAD = {
       'How applicant tracking systems actually read a CV, the formatting mistakes that break parsing, and how to check your own CV against real keyword scoring.',
     isArticle: true,
     datePublished: '2026-08-20',
+    dateModified: '2026-10-12',
   },
   howToWrite: {
     title: 'How to Write a CV - PortifyCV',
@@ -62,6 +63,7 @@ const STATIC_VIEW_HEAD = {
       'A practical, structural guide to writing a CV: what sections to include, how to write experience bullets that show impact, and mistakes to avoid.',
     isArticle: true,
     datePublished: '2026-08-20',
+    dateModified: '2026-08-29',
   },
   howToUse: {
     title: 'How to Use the CV Builder - PortifyCV',
@@ -70,6 +72,7 @@ const STATIC_VIEW_HEAD = {
       'A step-by-step walkthrough of PortifyCV: editing right on the CV, the Classic form, templates and looks, ATS keyword checks, and exporting or sharing your CV.',
     isArticle: true,
     datePublished: '2026-09-01',
+    dateModified: '2026-10-12',
   },
   coverLetterExamples: {
     title: 'Cover Letter Examples - PortifyCV',
@@ -78,6 +81,7 @@ const STATIC_VIEW_HEAD = {
       'Real weak-vs-strong cover letter examples for the opening, experience paragraph, and closing, plus how PortifyCV drafts the first version from your CV.',
     isArticle: true,
     datePublished: '2026-08-20',
+    dateModified: '2026-10-06',
   },
   cvSkills: {
     title: 'CV Skills Examples - PortifyCV',
@@ -86,6 +90,7 @@ const STATIC_VIEW_HEAD = {
       'How to choose, group, and phrase the skills section of your CV, with example groupings and how many skills is actually the right number.',
     isArticle: true,
     datePublished: '2026-08-20',
+    dateModified: '2026-08-21',
   },
   cvExamples: {
     title: 'CV Examples by Field - PortifyCV',
@@ -100,6 +105,7 @@ const STATIC_VIEW_HEAD = {
       'How to write a developer CV: project entries, experience bullets that show impact, and skills that read as technical rather than generic.',
     isArticle: true,
     datePublished: '2026-08-20',
+    dateModified: '2026-10-12',
   },
   itCv: {
     title: 'IT CV Examples - PortifyCV',
@@ -108,6 +114,7 @@ const STATIC_VIEW_HEAD = {
       'How to write an IT CV: certifications, systems and tools worth naming precisely, and why IT applications need ATS-friendly formatting.',
     isArticle: true,
     datePublished: '2026-08-20',
+    dateModified: '2026-10-11',
   },
   cybersecurityCv: {
     title: 'Cybersecurity CV Examples - PortifyCV',
@@ -116,6 +123,7 @@ const STATIC_VIEW_HEAD = {
       'How to write a cybersecurity CV: certifications, real tools like SIEM platforms, and where a Hack The Box or TryHackMe profile belongs.',
     isArticle: true,
     datePublished: '2026-08-20',
+    dateModified: '2026-10-12',
   },
   finnishCv: {
     title: 'Finnish CV Examples - PortifyCV',
@@ -124,6 +132,7 @@ const STATIC_VIEW_HEAD = {
       'How a Finnish CV differs from international norms: what to leave out, the languages section, and a bilingual example of the same content.',
     isArticle: true,
     datePublished: '2026-08-20',
+    dateModified: '2026-10-12',
   },
 }
 

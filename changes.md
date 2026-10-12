@@ -4,6 +4,16 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Accurate modified dates for search engines — 1.6.24, 2026-10-12
+
+Each guide page's Article structured data now carries a `dateModified`
+(it repeated `datePublished`, though most pages had changed since), and
+every `public/sitemap.xml` `lastmod` is the date of that page's last real
+content change, taken from git history: today for the pages this release
+series rewrote, 2026-10-11 for the template pages (looks and contrast
+fixes), 2026-10-10 for the builder. From `docs/audit-seo-1.6.20.md` S6
+and S7.
+
 ## Example pages link the template pages and full example CVs — 1.6.23, 2026-10-12
 
 From `docs/audit-seo-1.6.20.md` L1-L3:
