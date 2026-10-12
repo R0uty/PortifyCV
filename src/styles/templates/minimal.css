@@ -1,0 +1,40 @@
+/* ==========================================================================
+   Minimalist — palette variables for the flat renderer (CVPreview.jsx),
+   used ONLY when the template is Minimalist and ATS view is off
+   (minimal.js's class getters return these `min-*` classes; ATS view uses
+   its own monochrome classes and never sees them). Phase 3 style variants
+   override the `--min-*` values inline on the article (templateVariants.js).
+   Values are the exact colours the utility classes painted before
+   (utilities.css), so variant #1 is unchanged.
+   ========================================================================== */
+
+.min-doc {
+  --min-ink: #111827;
+  --min-muted: #6b7280;
+  --min-accent-ink: #b45309;
+  --min-accent-text: #b16105;
+  --min-accent-soft: #fffbeb;
+  --min-accent-line: #fde68a;
+  --min-header-line: #fef3c7;
+  --min-rule: #fcd34d;
+  --min-border: #e5e7eb;
+  --min-bg: #ffffff;
+
+  background-color: var(--min-bg);
+}
+
+.min-doc .min-ink { color: var(--min-ink); }
+.min-doc .min-muted { color: var(--min-muted); }
+.min-doc .min-accent-ink { color: var(--min-accent-ink); }
+.min-doc .min-accent-text { color: var(--min-accent-text); }
+.min-doc .min-header { color: var(--min-ink); border-bottom-color: var(--min-header-line); }
+.min-doc .min-border { border-color: var(--min-border); }
+.min-doc .min-rule { border-color: var(--min-rule); }
+
+.min-doc .min-tag,
+.min-doc .min-badge {
+  background-color: var(--min-accent-soft);
+  color: var(--min-accent-ink);
+}
+
+.min-doc .min-tag { border-color: var(--min-accent-line); }

@@ -1,5 +1,9 @@
 import InternalNavLink from '../components/InternalNavLink'
 import { ROUTES } from '../utils/routes'
+import { fieldSearch } from '../utils/templateFields'
+
+// "See also" opens the templates grid on the Tech chip (1.6.14).
+const TECH_SEARCH = fieldSearch('tech')
 
 function getCopy(locale) {
   if (locale === 'fi') {
@@ -62,7 +66,7 @@ function getCopy(locale) {
       seeAlso: [
         { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV:n taito-osion esimerkkejä' },
         { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-ystävällinen CV-opas' },
-        { to: ROUTES.freeTemplates, view: 'freeTemplates', text: 'Ilmaiset CV-pohjat' },
+        { to: `${ROUTES.freeTemplates}${TECH_SEARCH}`, view: 'freeTemplates', search: TECH_SEARCH, text: 'Tekniikan ja IT-alan CV-pohjat' },
         { to: ROUTES.cvExamples, view: 'cvExamples', text: 'CV-esimerkkejä aloittain' },
       ],
     }
@@ -127,7 +131,7 @@ function getCopy(locale) {
     seeAlso: [
       { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV Skills Examples' },
       { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-Friendly CV Guide' },
-      { to: ROUTES.freeTemplates, view: 'freeTemplates', text: 'Free CV Templates' },
+      { to: `${ROUTES.freeTemplates}${TECH_SEARCH}`, view: 'freeTemplates', search: TECH_SEARCH, text: 'Tech CV templates' },
       { to: ROUTES.cvExamples, view: 'cvExamples', text: 'CV Examples by Field' },
     ],
   }
@@ -187,7 +191,7 @@ function CybersecurityCvExamplesPage({ locale = 'en', onGetStarted = () => {}, o
         <div className="templates-page-links">
           <span>{copy.seeAlsoLabel}</span>
           {copy.seeAlso.map((link) => (
-            <InternalNavLink key={link.view} to={link.to} onNavigate={() => onNavigateToView(link.view)}>
+            <InternalNavLink key={link.view} to={link.to} onNavigate={() => onNavigateToView(link.view, { search: link.search })}>
               {link.text}
             </InternalNavLink>
           ))}

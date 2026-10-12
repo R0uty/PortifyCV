@@ -9,7 +9,7 @@
 
 // Registry default accent — must match `accent.default` for `compact` in
 // cvTemplates.js exactly (lowercase hex). See docs/template-design-system.md §6.
-export const COMPACT_DEFAULT_ACCENT_COLOR = '#0284c7'
+export const COMPACT_DEFAULT_ACCENT_COLOR = '#0277b4'
 
 export default {
   // Outer document border — adapts to dark/light mode

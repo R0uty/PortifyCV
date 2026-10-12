@@ -7,6 +7,9 @@ const SHARE_PAYLOAD_VERSION = 3
 
 // Short keys keep share URLs as small as possible. Never repurpose a key that is
 // already in use: links generated earlier decode against these exact tables.
+// Root keys written outside these tables are reserved too: s (skills), l (links),
+// so (section order), sv, siv, pv, sc, va, and tp (the sender's selected
+// template, 1.6.8). A new root key must not reuse any of them.
 const ROOT_STRING_KEYS = {
   fullName: 'f',
   title: 't',
@@ -256,6 +259,19 @@ function compressCvData(formData) {
     }
   }
 
+  // 'va' — permanent once shipped, like every other key here.
+  if (isPlainObject(formData.styleVariantByTemplate)) {
+    const chosen = Object.fromEntries(
+      Object.entries(formData.styleVariantByTemplate).filter(
+        ([, variantId]) => typeof variantId === 'string' && variantId && variantId !== 'default',
+      ),
+    )
+
+    if (Object.keys(chosen).length > 0) {
+      data.va = chosen
+    }
+  }
+
   return { v: SHARE_PAYLOAD_VERSION, d: data }
 }
 
@@ -302,6 +318,10 @@ function expandCurrentPayload(data) {
 
   if (data.sc !== undefined) {
     formData.sectionColumnsByTemplate = data.sc
+  }
+
+  if (data.va !== undefined) {
+    formData.styleVariantByTemplate = data.va
   }
 
   return formData
@@ -379,14 +399,25 @@ function decodeBase64Url(value) {
   return Uint8Array.from(binary, (character) => character.charCodeAt(0))
 }
 
-export function encodeCvStateForUrl(formData) {
-  const json = JSON.stringify(compressCvData(formData))
+// `templateId` is the sender's selected template ('tp', 1.6.8) — permanent
+// once shipped, like every other key here. It isn't CV data, so it's added
+// beside the compressed CV rather than in compressCvData.
+export function encodeCvStateForUrl(formData, templateId = null) {
+  const payload = compressCvData(formData)
+
+  if (typeof templateId === 'string' && templateId) {
+    payload.d.tp = templateId
+  }
+
+  const json = JSON.stringify(payload)
   const bytes = new TextEncoder().encode(json)
 
   return encodeBase64Url(bytes)
 }
 
-export function decodeCvStateFromUrl(encodedValue) {
+// base64url → the raw payload object. The one parse step behind both
+// decodeCvStateFromUrl and readCvStateFromLocation.
+function parseSharePayload(encodedValue) {
   if (typeof encodedValue !== 'string' || !encodedValue.trim()) {
     throw new Error('Shared CV data is missing.')
   }
@@ -396,13 +427,29 @@ export function decodeCvStateFromUrl(encodedValue) {
   }
 
   try {
-    const bytes = decodeBase64Url(encodedValue)
-    const json = new TextDecoder().decode(bytes)
-
-    return parseImportedCvData(expandCvData(JSON.parse(json)))
+    return JSON.parse(new TextDecoder().decode(decodeBase64Url(encodedValue)))
   } catch {
     throw new Error('Shared CV link is invalid or corrupted.')
   }
+}
+
+function cvFromPayload(payload) {
+  try {
+    return parseImportedCvData(expandCvData(payload))
+  } catch {
+    throw new Error('Shared CV link is invalid or corrupted.')
+  }
+}
+
+// The raw 'tp' value, or null for a link made before 1.6.8 (or a junk
+// value). The builder validates it (uiReducer's resolveTemplateId).
+function templateFromPayload(payload) {
+  const templateId = isPlainObject(payload) && isPlainObject(payload.d) ? payload.d.tp : null
+  return typeof templateId === 'string' && templateId ? templateId : null
+}
+
+export function decodeCvStateFromUrl(encodedValue) {
+  return cvFromPayload(parseSharePayload(encodedValue))
 }
 
 // True when the CV holds an image that a share link cannot carry, so the caller
@@ -423,8 +470,8 @@ export function shareLinkOmitsImages(formData) {
   })
 }
 
-export function buildShareUrl(formData, currentHref = window.location.href) {
-  const encodedValue = encodeCvStateForUrl(formData)
+export function buildShareUrl(formData, { templateId = null, currentHref = window.location.href } = {}) {
+  const encodedValue = encodeCvStateForUrl(formData, templateId)
   const nextUrl = new URL(currentHref)
 
   nextUrl.pathname = '/cv'
@@ -450,6 +497,9 @@ export function buildShareUrl(formData, currentHref = window.location.href) {
 // read — only cleaned out of the visible URL (see below) — so an old link
 // just opens an empty builder instead of silently leaking its payload again
 // on every subsequent open.
+//
+// Returns the CV and the sender's selected template ('tp'; null for links
+// made before 1.6.8).
 export function readCvStateFromLocation(currentHref = window.location.href) {
   const currentUrl = new URL(currentHref)
   const hashParams = new URLSearchParams(currentUrl.hash.replace(/^#/, ''))
@@ -459,7 +509,8 @@ export function readCvStateFromLocation(currentHref = window.location.href) {
     return null
   }
 
-  return decodeCvStateFromUrl(encodedValue)
+  const payload = parseSharePayload(encodedValue)
+  return { formData: cvFromPayload(payload), templateId: templateFromPayload(payload) }
 }
 
 export function removeShareDataParamFromCurrentUrl() {

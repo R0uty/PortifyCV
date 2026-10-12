@@ -74,9 +74,10 @@ import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
 import { hideEmptySections } from '../utils/sectionContent'
+import { DEFAULT_STYLE_VARIANT_ID, TEMPLATE_VARIANTS, getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, parseStyleVariantParam, resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
-import { uiReducer, createInitialUiState, UI_ACTION } from '../reducers/uiReducer'
+import { uiReducer, createInitialUiState, pickTemplateLook, readInitialTemplateId, UI_ACTION } from '../reducers/uiReducer'
 import {
   createExportFileName,
 } from '../utils/cvSnapshot'
@@ -148,6 +149,28 @@ const NAV_UTILITY_ITEMS = [
 ]
 
 const ALL_SCROLL_NAV_ITEMS = [...NAV_SECTIONS, ...NAV_UTILITY_ITEMS].filter((item) => item.kind === 'scroll')
+
+// An undo/redo history step: the CV, plus — only on a template-gallery
+// Use (1.6.6) — the template look it replaced (uiReducer's
+// pickTemplateLook), since the template and the tab-only accent, font and
+// headings colour aren't part of the CV. Ordinary edits carry no look, so
+// undoing them never touches font tweaks.
+function historyEntry(formData, look = null) {
+  return { formData, look }
+}
+
+// The undo past plus a change from the last HISTORY_COMMIT_DELAY_MS that
+// the debounced commit hasn't recorded yet, as its own step — so Undo (or
+// a gallery Use) right after a change treats that change separately.
+function pastWithPendingEdit(past, committed, formData) {
+  return formData === committed ? past : [...past, historyEntry(committed)]
+}
+
+// The templates whose stored (resolved) style variant differs between two CVs.
+function changedStyleVariantTemplates(a, b) {
+  return Object.keys(TEMPLATE_VARIANTS)
+    .filter((templateId) => resolveStyleVariantId(a, templateId) !== resolveStyleVariantId(b, templateId))
+}
 
 function createToast(message, type = 'success') {
   return {
@@ -246,6 +269,16 @@ async function waitForPreviewModeSync(previewElement, expectedMode, maxFrames = 
   return false
 }
 
+// Opens `formData` in look `variantId` for `templateId` (a template page's
+// ?style=, Phase 4) by storing it the way the Style picker does.
+// createInitialUiState / applyStoredStyleVariantLook then apply its
+// accent, font and headings colour like any other stored look.
+function withStyleVariant(formData, templateId, variantId) {
+  return variantId === DEFAULT_STYLE_VARIANT_ID
+    ? formData
+    : cvFormReducer(formData, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId, variantId })
+}
+
 function loadInitialCvSession() {
   if (typeof window === 'undefined') {
     return {
@@ -265,12 +298,15 @@ function loadInitialCvSession() {
   }
 
   try {
-    const sharedFormData = readCvStateFromLocation()
+    const shared = readCvStateFromLocation()
 
-    if (sharedFormData) {
+    if (shared) {
       markOnboardingSeen()
       return {
-        formData: sharedFormData,
+        formData: shared.formData,
+        // The sender's selected template (1.6.8); createInitialUiState
+        // opens on it when it resolves.
+        sharedTemplateId: shared.templateId,
         initialToast: createToast('Loaded CV from share link.', 'success'),
         clearShareParam: false,
         storageIssue: hasStorageIssue,
@@ -294,6 +330,13 @@ function loadInitialCvSession() {
 
   markOnboardingSeen()
 
+  const params = new URLSearchParams(window.location.search)
+  // ?style= (Phase 4): the look a template page or Free CV Templates card
+  // asked to open the template in. Like ?example=, a share link (returned
+  // above) or a restored session (below) ignores it.
+  const requestedTemplateId = readInitialTemplateId()
+  const requestedStyleId = parseStyleVariantParam(requestedTemplateId, params.get('style'))
+
   const sessionRestoreEnabled = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value === 'true'
 
   if (sessionRestoreEnabled) {
@@ -303,17 +346,17 @@ function loadInitialCvSession() {
       try {
         const restoredFormData = parseImportedCvData(JSON.parse(snapshotState.value))
 
-        // A valid ?example= for the selected template would otherwise be
+        // A valid ?example= or ?style= for the selected template would otherwise be
         // silently dropped with no explanation — the snapshot still wins
         // (see the comment below), but the toast should say so, pointing at
         // "Load demo CV" as the way to start over instead.
-        const restoreParams = new URLSearchParams(window.location.search)
-        const hasPendingExample = isTemplateExample(restoreParams.get('template'), restoreParams.get('example'))
+        const hasPendingExample = isTemplateExample(params.get('template'), params.get('example'))
+        const hasPendingStyle = requestedStyleId !== DEFAULT_STYLE_VARIANT_ID
 
         return {
           formData: restoredFormData,
           initialToast: createToast(
-            hasPendingExample
+            hasPendingExample || hasPendingStyle
               ? "Kept your restored CV. Use 'Load demo CV' to start over."
               : 'Restored your last session.',
             'success',
@@ -331,8 +374,6 @@ function loadInitialCvSession() {
     }
   }
 
-  const params = new URLSearchParams(window.location.search)
-
   // ?blank=1 from a template page's "Start blank with this template".
   // Reached only when there's no share link and no restored snapshot
   // (both returned above). Onboarding is already marked seen above, so
@@ -341,7 +382,7 @@ function loadInitialCvSession() {
   // explicitly asked for.
   if (params.get('blank') === '1') {
     return {
-      formData: initialCvData,
+      formData: withStyleVariant(initialCvData, requestedTemplateId, requestedStyleId),
       initialToast: null,
       clearShareParam: false,
       storageIssue: hasStorageIssue,
@@ -358,17 +399,18 @@ function loadInitialCvSession() {
   const requestedExampleId = params.get('example')
   if (isTemplateExample(params.get('template'), requestedExampleId)) {
     return {
-      formData: initialCvData,
+      formData: withStyleVariant(initialCvData, requestedTemplateId, requestedStyleId),
       initialToast: null,
       clearShareParam: false,
       storageIssue: hasStorageIssue,
       pendingExampleId: requestedExampleId,
+      pendingStyleVariantId: requestedStyleId,
     }
   }
 
   if (!hasSeenOnboarding) {
     return {
-      formData: structuredClone(demoCvData),
+      formData: withStyleVariant(structuredClone(demoCvData), requestedTemplateId, requestedStyleId),
       initialToast: createToast('Loaded a sample CV to help you get started.', 'success'),
       clearShareParam: false,
       storageIssue: hasStorageIssue,
@@ -377,7 +419,7 @@ function loadInitialCvSession() {
   }
 
   return {
-    formData: initialCvData,
+    formData: withStyleVariant(initialCvData, requestedTemplateId, requestedStyleId),
     initialToast: null,
     clearShareParam: false,
     storageIssue: hasStorageIssue,
@@ -428,6 +470,24 @@ function ResumeBuilderPage({
     toasts,
   } = uiState
   const ui = getUiTheme()
+  // The style variant in effect for the current template (variant #1
+  // unless the CV stores another). Passed to the visible preview AND the
+  // off-screen export source, so the PDF matches the screen.
+  const styleVariantId = resolveStyleVariantId(formData, selectedTemplate)
+  const styleVariants = useMemo(
+    () => getTemplateVariants(selectedTemplate).map((variant) => ({
+      ...variant,
+      swatches: getVariantSwatches(selectedTemplate, variant),
+    })),
+    [selectedTemplate],
+  )
+  const styleVariantModified = isStyleVariantModified({
+    templateId: selectedTemplate,
+    variantId: styleVariantId,
+    templateAccentColors,
+    cvFontId,
+    cvHeadingColor,
+  })
   const previewRef = useRef(null)
   // The CV the user sees in Classic mode's preview panel. previewRef is the
   // off-screen export source (see the .direct-edit-export-source copy
@@ -561,7 +621,7 @@ function ResumeBuilderPage({
         const committed = historyCommittedRef.current
 
         historyCommittedRef.current = formData
-        setHistoryPast((past) => [...past, committed])
+        setHistoryPast((past) => [...past, historyEntry(committed)])
         setHistoryFuture([])
       }
     }, HISTORY_COMMIT_DELAY_MS)
@@ -574,45 +634,75 @@ function ResumeBuilderPage({
   const canUndo = historyPast.length > 0
   const canRedo = historyFuture.length > 0
 
-  const handleUndo = useCallback(() => {
-    // A change from the last HISTORY_COMMIT_DELAY_MS isn't in historyPast
-    // yet. Record it as its own step first, so Undo straight after it
-    // (e.g. right after "Load demo CV") undoes that change and not also the
-    // step before it.
-    let past = historyPast
-    let current = historyCommittedRef.current
+  // Applies the looks `nextFormData` stores: every template's accent, plus
+  // the selected template's font and headings colour. Called wherever a
+  // whole CV arrives (JSON import, ?example=, Load demo CV, Clear CV) —
+  // share links and session restore get it from createInitialUiState.
+  // Undo/redo pass `templateIds`, the templates whose stored variant changed.
+  const applyStoredStyleVariantLook = useCallback((nextFormData, templateId, templateIds) => {
+    dispatchUi({ type: UI_ACTION.APPLY_STORED_STYLE_LOOKS, formData: nextFormData, templateId, templateIds })
+  }, [])
 
-    if (formData !== current) {
-      past = [...past, current]
-      current = formData
+  // Moves the CV to a history step's. A gallery Use's step may not have
+  // changed the CV at all, and the skip flag must only be set when a
+  // formData change will consume it, or it would swallow the next edit.
+  const restoreHistoryFormData = useCallback((nextFormData) => {
+    historyCommittedRef.current = nextFormData
+    if (nextFormData !== formData) {
+      historySkipNextCommitRef.current = true
+      dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: nextFormData })
     }
+  }, [dispatchFormData, formData])
+
+  // Restores the look that goes with a history step: a gallery Use's step
+  // puts back the exact template look it replaced; any other step
+  // restores the stored looks of the templates whose stored variant
+  // changed (a variant pick, Clear CV, Load demo CV), so the font/accent
+  // don't linger from the step being left.
+  const restoreHistoryLook = useCallback((step) => {
+    if (step.look) {
+      dispatchUi({ type: UI_ACTION.RESTORE_TEMPLATE_LOOK, look: step.look })
+      return
+    }
+    const changedTemplateIds = changedStyleVariantTemplates(step.formData, formData)
+    if (changedTemplateIds.length > 0) {
+      applyStoredStyleVariantLook(step.formData, selectedTemplate, changedTemplateIds)
+    }
+  }, [applyStoredStyleVariantLook, formData, selectedTemplate])
+
+  const handleUndo = useCallback(() => {
+    // Undo straight after a change (e.g. right after "Load demo CV") undoes
+    // that change and not also the step before it.
+    const past = pastWithPendingEdit(historyPast, historyCommittedRef.current, formData)
 
     if (past.length === 0) {
       return
     }
 
-    const previousFormData = past[past.length - 1]
+    const previous = past[past.length - 1]
 
     setHistoryPast(past.slice(0, -1))
-    setHistoryFuture([...historyFuture, current])
-    historyCommittedRef.current = previousFormData
-    historySkipNextCommitRef.current = true
-    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: previousFormData })
-  }, [dispatchFormData, formData, historyPast, historyFuture])
+    // Stepping back over a gallery Use: the redo step keeps the look being
+    // left, so Redo returns to it.
+    setHistoryFuture([...historyFuture, historyEntry(formData, previous.look ? pickTemplateLook(uiState) : null)])
+    restoreHistoryFormData(previous.formData)
+    restoreHistoryLook(previous)
+  }, [formData, historyFuture, historyPast, restoreHistoryFormData, restoreHistoryLook, uiState])
 
   const handleRedo = useCallback(() => {
     if (historyFuture.length === 0) {
       return
     }
 
-    const nextFormData = historyFuture[historyFuture.length - 1]
+    const next = historyFuture[historyFuture.length - 1]
 
     setHistoryFuture(historyFuture.slice(0, -1))
-    setHistoryPast([...historyPast, historyCommittedRef.current])
-    historyCommittedRef.current = nextFormData
-    historySkipNextCommitRef.current = true
-    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: nextFormData })
-  }, [dispatchFormData, historyFuture, historyPast])
+    // Stepping forward over a gallery Use: the undo step keeps the look
+    // being left, so Undo returns to it again.
+    setHistoryPast([...historyPast, historyEntry(historyCommittedRef.current, next.look ? pickTemplateLook(uiState) : null)])
+    restoreHistoryFormData(next.formData)
+    restoreHistoryLook(next)
+  }, [historyFuture, historyPast, restoreHistoryFormData, restoreHistoryLook, uiState])
 
   useEffect(() => {
     setStorageValue(UI_LOCALE_STORAGE_KEY, locale)
@@ -673,9 +763,9 @@ function ResumeBuilderPage({
     }
   }, [initialSession])
 
-  // Strip ?example=/?blank= so a reload doesn't re-apply them on top of
+  // Strip ?example=/?blank=/?style= so a reload doesn't re-apply them on top of
   // edits. Always strip, whether or not the example loaded: a restored
-  // session also ignores both.
+  // session also ignores all three.
   useEffect(() => {
     const url = new URL(window.location.href)
     let paramsChanged = false
@@ -685,6 +775,10 @@ function ResumeBuilderPage({
     }
     if (url.searchParams.has('blank')) {
       url.searchParams.delete('blank')
+      paramsChanged = true
+    }
+    if (url.searchParams.has('style')) {
+      url.searchParams.delete('style')
       paramsChanged = true
     }
     if (paramsChanged) {
@@ -708,7 +802,10 @@ function ResumeBuilderPage({
         showToast(locale === 'fi' ? 'Esimerkkiä ei voitu ladata.' : "Couldn't load that example.", 'error')
         return
       }
-      dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: exampleCv })
+      // ?style= wins over any look the example stores for this template.
+      const startCv = withStyleVariant(exampleCv, selectedTemplate, initialSession.pendingStyleVariantId ?? DEFAULT_STYLE_VARIANT_ID)
+      dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: startCv })
+      applyStoredStyleVariantLook(startCv, selectedTemplate)
       const roleLabel = EXAMPLES[exampleId].role[locale === 'fi' ? 'fi' : 'en']
       showToast(locale === 'fi' ? `Esimerkki ladattu: ${roleLabel}.` : `Loaded the ${roleLabel} example.`)
     })
@@ -962,6 +1059,7 @@ function ResumeBuilderPage({
       const importedData = parseImportedCvData(parsedValue)
 
       dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: importedData })
+      applyStoredStyleVariantLook(importedData, selectedTemplate)
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
       showToast(locale === 'fi' ? `CV-tiedot tuotu tiedostosta ${file.name}.` : `Imported CV data from ${file.name}.`)
     } catch (error) {
@@ -984,7 +1082,7 @@ function ResumeBuilderPage({
       dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: false })
       event.target.value = ''
     }
-  }, [dispatchFormData, locale, setStorageValue])
+  }, [applyStoredStyleVariantLook, dispatchFormData, locale, selectedTemplate, setStorageValue])
 
   const handleResetForm = useCallback(() => {
     window.clearTimeout(resetConfirmTimeoutRef.current)
@@ -999,6 +1097,9 @@ function ResumeBuilderPage({
 
     setResetConfirmArmed(false)
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
+    // A cleared CV stores no variants, so every template goes back to its
+    // original look (accent, plus the selected template's font/headings).
+    applyStoredStyleVariantLook(null, selectedTemplate)
     // Direct Edit has no form, so its "Clear CV" button gets its own wording.
     if (builderMode === 'direct') {
       showToast(
@@ -1013,15 +1114,17 @@ function ResumeBuilderPage({
           : 'Form reset. Restore it with the toolbar undo arrow.',
       )
     }
-  }, [builderMode, dispatchFormData, locale, resetConfirmArmed])
+  }, [applyStoredStyleVariantLook, builderMode, dispatchFormData, locale, resetConfirmArmed, selectedTemplate])
 
   useEffect(() => () => window.clearTimeout(resetConfirmTimeoutRef.current), [])
 
   const handleLoadDemo = useCallback(() => {
-    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: structuredClone(demoCvData) })
+    const demo = structuredClone(demoCvData)
+    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: demo })
+    applyStoredStyleVariantLook(demo, selectedTemplate)
     setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
     showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
-  }, [dispatchFormData, locale, setStorageValue])
+  }, [applyStoredStyleVariantLook, dispatchFormData, locale, selectedTemplate, setStorageValue])
 
   const handlePasteCvImport = useCallback(() => {
     try {
@@ -1045,7 +1148,7 @@ function ResumeBuilderPage({
     let shareUrl
 
     try {
-      shareUrl = buildShareUrl(formData)
+      shareUrl = buildShareUrl(formData, { templateId: selectedTemplate })
     } catch (error) {
       showToast(
         error instanceof Error
@@ -1094,7 +1197,7 @@ function ResumeBuilderPage({
     }
 
     showToast(locale === 'fi' ? 'Jakolinkki kopioitu leikepöydälle.' : 'Share link copied to clipboard.')
-  }, [formData, locale])
+  }, [formData, locale, selectedTemplate])
 
   const handleToggleAtsFriendlyMode = useCallback(() => {
     dispatchUi({ type: UI_ACTION.TOGGLE_ATS_MODE })
@@ -1140,9 +1243,57 @@ function ResumeBuilderPage({
     target?.scrollIntoView({ behavior: getScrollBehavior(), block: 'start' })
   }, [mobilePreviewVisible])
 
-  const handleSelectTemplate = useCallback((templateId) => {
+  // Stores `variantId` for `templateId` and resets the accent, font and
+  // headings colour to its values. The toolbar's Style picker and a
+  // gallery card's Use (Phase 4) share it.
+  const selectStyleVariant = useCallback((templateId, variantId) => {
+    dispatchFormData({ type: FORM_ACTION.SET_STYLE_VARIANT, templateId, variantId })
+    dispatchUi({
+      type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK,
+      templateId,
+      variant: getTemplateVariant(templateId, variantId),
+    })
+  }, [dispatchFormData])
+
+  // A gallery card's Use passes the look its thumbnail shows, and the
+  // builder ends up exactly as the card (Phase 4): the open template on
+  // its stored look changes nothing (tab-only tweaks survive); anything
+  // else switches template and applies the look. Without a variant it's a
+  // plain template switch, as before.
+  //
+  // A Use is one undo step (1.6.6), even when the CV itself doesn't change:
+  // the step carries the template look it replaces, so Undo puts back the
+  // previous template with its exact accent, font and headings colour.
+  const handleSelectTemplate = useCallback((templateId, variantId) => {
+    if (variantId === undefined) {
+      dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
+      return
+    }
+    if (templateId === selectedTemplate && variantId === resolveStyleVariantId(formData, templateId)) {
+      return
+    }
+
+    setHistoryPast([
+      ...pastWithPendingEdit(historyPast, historyCommittedRef.current, formData),
+      historyEntry(formData, pickTemplateLook(uiState)),
+    ])
+    setHistoryFuture([])
+    historyCommittedRef.current = formData
+    // When the Use also stores a different variant, that CV change belongs
+    // to this same step: skip its debounced commit. Only set the flag when
+    // the CV really changes, or it would swallow the next edit instead.
+    const storesNewVariant = cvFormReducer(formData, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId, variantId }) !== formData
+    historySkipNextCommitRef.current = storesNewVariant
+
     dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
-  }, [])
+    selectStyleVariant(templateId, variantId)
+  }, [formData, historyPast, selectedTemplate, selectStyleVariant, uiState])
+
+  // Picking a variant — even the active one again — stores it and resets
+  // the accent, font and headings colour to its values.
+  const handleSelectStyleVariant = useCallback((variantId) => {
+    selectStyleVariant(selectedTemplate, variantId)
+  }, [selectStyleVariant, selectedTemplate])
 
   const handleCvFontChange = useCallback((fontId) => {
     dispatchUi({ type: UI_ACTION.SET_CV_FONT, fontId })
@@ -1549,6 +1700,10 @@ function ResumeBuilderPage({
       templates,
       selectedTemplateId: selectedTemplate,
       onOpenTemplateGallery: handleOpenTemplateGallery,
+      styleVariants,
+      styleVariantId,
+      isStyleVariantModified: styleVariantModified,
+      onSelectStyleVariant: handleSelectStyleVariant,
       cvFontId,
       onCvFontChange: handleCvFontChange,
       cvHeadingColor,
@@ -1568,6 +1723,7 @@ function ResumeBuilderPage({
     handleExport, handleCopyShareLink, handleLocaleChange,
     canUndo, canRedo, handleUndo, handleRedo,
     templates, selectedTemplate, handleOpenTemplateGallery,
+    styleVariants, styleVariantId, styleVariantModified, handleSelectStyleVariant,
     cvFontId, handleCvFontChange,
     cvHeadingColor, handleCvHeadingColorChange,
     searchQuery,
@@ -2145,6 +2301,7 @@ function ResumeBuilderPage({
                 atsFriendlyMode={atsFriendlyMode}
                 accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
                 headingColor={cvHeadingColor}
+                styleVariantId={styleVariantId}
                 classicNameAlignment={classicNameAlignment}
               />
             </AppErrorBoundary>
@@ -2169,6 +2326,7 @@ function ResumeBuilderPage({
     isResponsivePreview,
     locale,
     selectedTemplate,
+    styleVariantId,
     templateAccentColors,
     zoomPercent,
     ui.button,
@@ -2307,6 +2465,7 @@ function ResumeBuilderPage({
                 locale={locale}
                 accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
                 headingColor={cvHeadingColor}
+                styleVariantId={styleVariantId}
                 classicNameAlignment={classicNameAlignment}
                 previewRef={previewRef}
                 cvFontId={cvFontId}
@@ -2351,6 +2510,7 @@ function ResumeBuilderPage({
               atsFriendlyMode={atsFriendlyMode}
               accentColor={resolveTemplateAccent(templateAccentColors, selectedTemplate)}
               headingColor={cvHeadingColor}
+              styleVariantId={styleVariantId}
               classicNameAlignment={classicNameAlignment}
             />
           </div>
@@ -2367,6 +2527,7 @@ function ResumeBuilderPage({
         onSelectTemplate={handleSelectTemplate}
         atsScore={atsScore}
         formData={formData}
+        templateAccentColors={templateAccentColors}
         cvFontId={cvFontId}
         cvHeadingColor={cvHeadingColor}
         locale={locale}

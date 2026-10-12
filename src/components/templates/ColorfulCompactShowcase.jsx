@@ -164,6 +164,7 @@ export default function ColorfulCompactShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   directEditDispatch = null,
 }) {
@@ -480,6 +481,7 @@ export default function ColorfulCompactShowcase({
       data-export-root="true"
       data-export-variant="colorfulCompact"
       className="colorful-compact-showcase preview-document--designer tpl-density-compact"
+      style={paletteStyle}
     >
       <div className="colorful-compact-showcase__rainbow colorful-compact-showcase__rainbow--top" aria-hidden="true" />
 

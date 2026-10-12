@@ -157,15 +157,23 @@ function useDocumentHead(view) {
 // leaving the URL frozen at whatever it was on first load — the canonical
 // tag would claim /cv while the address bar still read /, and the back
 // button had nothing to go back to.
-function pushViewUrl(nextView) {
+// `search` (Phase 4) carries a query string into the new view, e.g. a
+// template page's ?style=; without it the view opens at its bare path.
+// A navigation without `search` compares paths only, as before, so
+// clicking the current view's own link from e.g. `?utm_source=` doesn't
+// push a duplicate entry.
+function pushViewUrl(nextView, search = '') {
   if (typeof window === 'undefined') {
     return
   }
 
-  const path = VIEW_HEAD[nextView]?.path ?? '/'
+  const url = `${VIEW_HEAD[nextView]?.path ?? '/'}${search}`
+  const current = search
+    ? `${window.location.pathname}${window.location.search}`
+    : window.location.pathname
 
-  if (window.location.pathname !== path) {
-    window.history.pushState({ view: nextView }, '', path)
+  if (current !== url) {
+    window.history.pushState({ view: nextView }, '', url)
   }
 }
 
@@ -344,6 +352,9 @@ function App() {
   // template" button: it must NOT fall into the onboarding-demo branch of
   // loadInitialCvSession just because this is a first-time visitor — the
   // visitor explicitly asked for blank, not a demo.
+  // options.style is the look picked on a template page or Free CV Templates
+  // card; the builder applies it to whatever CV it starts with, exactly like
+  // ?example=.
   const goToBuilder = useCallback((templateId, exampleId, options = {}) => {
     setView('builder')
 
@@ -352,6 +363,13 @@ function App() {
       if (typeof templateId === 'string' && templateId) params.set('template', templateId)
       if (typeof exampleId === 'string' && exampleId) params.set('example', exampleId)
       if (options.blank) params.set('blank', '1')
+      // A template page's or grid card's look (Phase 4). 'default' is
+      // variant #1's id and never goes into a URL; App deliberately doesn't
+      // import the variant registry (it would join the entry chunk), so the
+      // builder validates the id.
+      if (typeof options.style === 'string' && options.style && options.style !== 'default') {
+        params.set('style', options.style)
+      }
       const query = params.toString() ? `?${params}` : ''
       const nextPath = `${VIEW_HEAD.builder.path}${query}`
 
@@ -372,9 +390,9 @@ function App() {
   // Generic version of goToLanding for any non-builder static page (footer
   // guide links, etc.) — builder goes through goToBuilder since it also
   // supports the optional ?template= id.
-  const goToView = useCallback((nextView) => {
+  const goToView = useCallback((nextView, { search = '' } = {}) => {
     setView(nextView)
-    pushViewUrl(nextView)
+    pushViewUrl(nextView, search)
     scrollToTop()
   }, [])
 
@@ -468,6 +486,10 @@ function App() {
           templates={headerProps.templates}
           selectedTemplateId={headerProps.selectedTemplateId}
           onOpenTemplateGallery={headerProps.onOpenTemplateGallery}
+          styleVariants={headerProps.styleVariants}
+          styleVariantId={headerProps.styleVariantId}
+          isStyleVariantModified={headerProps.isStyleVariantModified}
+          onSelectStyleVariant={headerProps.onSelectStyleVariant}
           cvFontId={headerProps.cvFontId}
           onCvFontChange={headerProps.onCvFontChange}
           cvHeadingColor={headerProps.cvHeadingColor}

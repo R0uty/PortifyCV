@@ -8,7 +8,7 @@ export const ACCENT_SWATCH_SETS = {
   // Warm set — orange first/default. Room to adapt without breaking a
   // warm, premium feel. (Originally the Modern Orange swatches.)
   warm: [
-    { color: '#f28c00', label: { en: 'Orange', fi: 'Oranssi' } },
+    { color: '#a56000', label: { en: 'Orange', fi: 'Oranssi' } },
     { color: '#d97706', label: { en: 'Amber', fi: 'Meripihka' } },
     { color: '#c2410c', label: { en: 'Rust', fi: 'Ruoste' } },
     { color: '#0d9488', label: { en: 'Teal', fi: 'Sinivihreä' } },
@@ -17,9 +17,9 @@ export const ACCENT_SWATCH_SETS = {
   ],
   // Warm-coral set — coral first/default. Editorial warm range for the
   // Creative template; distinct from `warm` (which leads with Modern
-  // Orange's #f28c00) by opening on a redder coral.
+  // Orange's #a56000) by opening on a redder coral.
   warmCoral: [
-    { color: '#e2572a', label: { en: 'Coral', fi: 'Koralli' } },
+    { color: '#b43e18', label: { en: 'Coral', fi: 'Koralli' } },
     { color: '#c2410c', label: { en: 'Rust', fi: 'Ruoste' } },
     { color: '#b45309', label: { en: 'Amber', fi: 'Meripihka' } },
     { color: '#be123c', label: { en: 'Rose', fi: 'Ruusu' } },
@@ -49,7 +49,7 @@ export const ACCENT_SWATCH_SETS = {
   // Cool-blue set — sky first/default. Compact's range: crisp blues plus a
   // near-mono slate for a purely typographic one-pager.
   coolBlue: [
-    { color: '#0284c7', label: { en: 'Sky', fi: 'Taivas' } },
+    { color: '#0277b4', label: { en: 'Sky', fi: 'Taivas' } },
     { color: '#2563eb', label: { en: 'Blue', fi: 'Sininen' } },
     { color: '#4f46e5', label: { en: 'Indigo', fi: 'Indigo' } },
     { color: '#0f766e', label: { en: 'Teal', fi: 'Sinivihreä' } },

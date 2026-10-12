@@ -15,6 +15,7 @@ import {
 import Logo from './Logo'
 import LocaleFlagIcon from './LocaleFlagIcon'
 import CvFontSwitcher from './CvFontSwitcher'
+import CvStyleSwitcher from './CvStyleSwitcher'
 import CvHeadingColorSwitcher from './CvHeadingColorSwitcher'
 
 function Toolbar({
@@ -30,6 +31,10 @@ function Toolbar({
   onOpenTemplateGallery = () => {},
   builderMode = 'classic',
   onSetBuilderMode = () => {},
+  styleVariants = [],
+  styleVariantId = 'default',
+  isStyleVariantModified = false,
+  onSelectStyleVariant = () => {},
   cvFontId = '',
   onCvFontChange = () => {},
   cvHeadingColor = '',
@@ -228,6 +233,17 @@ function Toolbar({
                 </span>
                 <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
               </button>
+            </div>
+
+            <div className="app-toolbar__labeled-control app-toolbar__labeled-control--style">
+              <span className="app-toolbar__control-label">{isFinnish ? 'Tyyli' : 'Style'}</span>
+              <CvStyleSwitcher
+                variants={styleVariants}
+                variantId={styleVariantId}
+                isModified={isStyleVariantModified}
+                onSelectVariant={onSelectStyleVariant}
+                locale={locale}
+              />
             </div>
 
             <div className="app-toolbar__labeled-control">

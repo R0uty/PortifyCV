@@ -237,6 +237,41 @@ check(
   hiddenFrontendDeveloper.sectionVisibility.languages === false,
 )
 
+// --- Field filters (1.6.12) -------------------------------------------------
+const { TEMPLATE_FIELDS, ALL_FIELDS_LABEL, parseFieldParam, filterTemplatesByField, fieldSearch } =
+  await importSrc('utils/templateFields.js')
+
+const fieldIds = TEMPLATE_FIELDS.map((field) => field.id)
+check('field ids are unique', new Set(fieldIds).size === fieldIds.length, fieldIds.join(', '))
+const badFields = cvTemplates.filter((template) => !Array.isArray(template.fields)
+  || template.fields.length === 0
+  || new Set(template.fields).size !== template.fields.length
+  || template.fields.some((field) => !fieldIds.includes(field)))
+check('every template has known, non-duplicate fields', badFields.length === 0, badFields.map((t) => t.id).join(', '))
+const mixedAny = cvTemplates.filter((template) => template.fields?.includes('any') && template.fields.length !== 1)
+check("an 'any' template has no other field", mixedAny.length === 0, mixedAny.map((t) => t.id).join(', '))
+for (const field of TEMPLATE_FIELDS) {
+  const count = cvTemplates.filter((template) => template.fields?.includes(field.id)).length
+  check(`field ${field.id} has at least two templates`, count >= 2, `has ${count}`)
+}
+for (const lang of ['en', 'fi']) {
+  const labels = [ALL_FIELDS_LABEL, ...TEMPLATE_FIELDS.map((field) => field.label)].map((label) => label?.[lang])
+  check(`field labels are non-empty and unique in ${lang}`,
+    labels.every((label) => typeof label === 'string' && label.trim()) && new Set(labels).size === labels.length,
+    labels.join(' | '))
+}
+check('parseFieldParam accepts a known id', parseFieldParam('tech') === 'tech')
+check('parseFieldParam: unknown, empty, missing or wrong-case → null',
+  ['nope', '', null, undefined, 'Tech'].every((raw) => parseFieldParam(raw) === null))
+const techIds = filterTemplatesByField(cvTemplates, 'tech').map((template) => template.id)
+check('filterTemplatesByField keeps gallery order',
+  techIds.length > 0
+    && JSON.stringify(techIds) === JSON.stringify(cvTemplates.map((t) => t.id).filter((id) => techIds.includes(id))))
+check('filterTemplatesByField(null) returns every template',
+  filterTemplatesByField(cvTemplates, null).length === cvTemplates.length)
+check('fieldSearch writes ?field= for a field and nothing for All',
+  fieldSearch('tech') === '?field=tech' && fieldSearch(null) === '')
+
 if (failures > 0) {
   console.log(`\n${failures} template-page check(s) failed.`)
   process.exit(1)

@@ -13,7 +13,7 @@ import { buildThumbnailCv } from '../utils/thumbnailCv'
 const STACK_TEMPLATES = [
   { id: 'creative', modifier: 'back-left' },
   { id: 'developer', modifier: 'back-right' },
-  { id: 'minimalist', modifier: 'front' },
+  { id: 'minimal', modifier: 'front' },
 ]
 
 function LandingHeroPreview({ locale = 'en', label = '' }) {

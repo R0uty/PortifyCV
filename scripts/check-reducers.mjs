@@ -32,7 +32,7 @@ const srcDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src')
 const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, relativePath)).href)
 
 const { cvFormReducer, FORM_ACTION } = await importSrc('reducers/cvFormReducer.js')
-const { uiReducer, UI_ACTION, createInitialUiState } = await importSrc('reducers/uiReducer.js')
+const { uiReducer, UI_ACTION, createInitialUiState, pickTemplateLook, resolveTemplateId } = await importSrc('reducers/uiReducer.js')
 const { createInitialCvData, createSectionVisibility, createSectionItemVisibility } =
   await importSrc('utils/cvForm.js')
 
@@ -117,6 +117,30 @@ console.log('\ncvFormReducer\n')
   check('TOGGLE_PHOTO_VISIBILITY hides the photo for the named template', next.photoVisibilityByTemplate.modern === false)
   const noTemplate = cvFormReducer(state, { type: FORM_ACTION.TOGGLE_PHOTO_VISIBILITY, template: undefined })
   check('TOGGLE_PHOTO_VISIBILITY without a template is a no-op', noTemplate === state)
+}
+
+{
+  const state = createInitialCvData()
+  check('a new CV stores no style variants', JSON.stringify(state.styleVariantByTemplate) === '{}')
+
+  const picked = cvFormReducer(state, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId: 'developer', variantId: 'graphite' })
+  check('SET_STYLE_VARIANT stores the variant for the named template', picked.styleVariantByTemplate.developer === 'graphite')
+  check('SET_STYLE_VARIANT does not mutate the previous state', JSON.stringify(state.styleVariantByTemplate) === '{}')
+
+  const both = cvFormReducer(picked, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId: 'creative', variantId: 'sage' })
+  check('SET_STYLE_VARIANT leaves other templates untouched',
+    both.styleVariantByTemplate.developer === 'graphite' && both.styleVariantByTemplate.creative === 'sage')
+
+  const backToDefault = cvFormReducer(both, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId: 'developer', variantId: 'default' })
+  check('choosing variant #1 deletes the entry',
+    !('developer' in backToDefault.styleVariantByTemplate) && backToDefault.styleVariantByTemplate.creative === 'sage')
+
+  check('re-picking the stored variant returns the same state',
+    cvFormReducer(both, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId: 'creative', variantId: 'sage' }) === both)
+  check('picking variant #1 with nothing stored returns the same state',
+    cvFormReducer(state, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId: 'developer', variantId: 'default' }) === state)
+  check('SET_STYLE_VARIANT ignores a missing template id',
+    cvFormReducer(state, { type: FORM_ACTION.SET_STYLE_VARIANT, variantId: 'sage' }) === state)
 }
 
 {
@@ -490,6 +514,109 @@ console.log('\nuiReducer\n')
   const state = createInitialUiState({})
   const next = uiReducer(state, { type: 'NOT_A_REAL_ACTION' })
   check('An unknown action type returns the same state reference', next === state)
+}
+
+{
+  const state = createInitialUiState({})
+  const look = { id: 'sage', accent: '#1f7a6c', fontId: 'lato', headingColor: '#166534', palette: {}, label: { en: 'Sage', fi: 'Salvia' } }
+  const next = uiReducer(state, { type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK, templateId: 'creative', variant: look })
+  check('APPLY_STYLE_VARIANT_LOOK sets the template accent', next.templateAccentColors.creative === '#1f7a6c')
+  check('APPLY_STYLE_VARIANT_LOOK leaves other accents alone', next.templateAccentColors.timeline === state.templateAccentColors.timeline)
+  check('APPLY_STYLE_VARIANT_LOOK sets the font and headings colour', next.cvFontId === 'lato' && next.cvHeadingColor === '#166534')
+
+  const accentless = uiReducer(state, {
+    type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK, templateId: 'developer', variant: { ...look, accent: null },
+  })
+  check('an accent-less variant adds no accent entry', !('developer' in accentless.templateAccentColors))
+  check('APPLY_STYLE_VARIANT_LOOK with no variant is a no-op',
+    uiReducer(state, { type: UI_ACTION.APPLY_STYLE_VARIANT_LOOK, templateId: 'creative', variant: null }) === state)
+
+  const fresh = createInitialUiState({ formData: createInitialCvData() })
+  check('a session without stored variants starts on Inter with no headings colour',
+    fresh.cvFontId === 'inter' && fresh.cvHeadingColor === '')
+  check('an unknown stored variant starts on variant #1',
+    createInitialUiState({ formData: { ...createInitialCvData(), styleVariantByTemplate: { minimal: 'fromTheFuture' } } }).cvFontId === 'inter')
+}
+
+{
+  // A gallery Use's undo step (1.6.6): snapshot the template look, change
+  // it, restore it.
+  const state = createInitialUiState({})
+  const snapshot = pickTemplateLook(state)
+  check('pickTemplateLook takes the template, accents, font and headings colour',
+    JSON.stringify(Object.keys(snapshot).sort()) === JSON.stringify(['cvFontId', 'cvHeadingColor', 'selectedTemplate', 'templateAccentColors']))
+  const changed = {
+    ...state,
+    selectedTemplate: 'creative',
+    templateAccentColors: { ...state.templateAccentColors, creative: '#1f7a6c' },
+    cvFontId: 'georgia',
+    cvHeadingColor: '#166534',
+  }
+  const restored = uiReducer(changed, { type: UI_ACTION.RESTORE_TEMPLATE_LOOK, look: snapshot })
+  check('RESTORE_TEMPLATE_LOOK restores the template, accents, font and headings colour',
+    JSON.stringify(pickTemplateLook(restored)) === JSON.stringify(snapshot))
+  check('RESTORE_TEMPLATE_LOOK leaves the rest of the UI state alone',
+    restored.locale === changed.locale && restored.builderMode === changed.builderMode)
+  check('RESTORE_TEMPLATE_LOOK with no look is a no-op',
+    uiReducer(changed, { type: UI_ACTION.RESTORE_TEMPLATE_LOOK, look: null }) === changed)
+}
+
+{
+  // A share link opens on the sender's template (1.6.8).
+  check('resolveTemplateId accepts a real template', resolveTemplateId('creative') === 'creative')
+  check('resolveTemplateId maps the retired classic id', resolveTemplateId('classic') === 'classicProfessional')
+  check('resolveTemplateId rejects an unknown id', resolveTemplateId('no-such-template') === null)
+  check('resolveTemplateId rejects null', resolveTemplateId(null) === null)
+  const fallback = createInitialUiState({}).selectedTemplate
+  check('a shared template is selected', createInitialUiState({ sharedTemplateId: 'creative' }).selectedTemplate === 'creative')
+  check('a shared retired id opens its successor',
+    createInitialUiState({ sharedTemplateId: 'classic' }).selectedTemplate === 'classicProfessional')
+  check('an unknown shared template falls back as before',
+    createInitialUiState({ sharedTemplateId: 'no-such-template' }).selectedTemplate === fallback)
+  check('no shared template falls back as before',
+    createInitialUiState({ sharedTemplateId: null }).selectedTemplate === fallback)
+}
+
+{
+  const { getTemplateVariants } = await importSrc('utils/templateVariants.js')
+  const stored = getTemplateVariants('minimal')[1]
+  const restored = createInitialUiState({ formData: { ...createInitialCvData(), styleVariantByTemplate: { minimal: stored.id } } })
+  check('a restored CV opens in its stored variant\'s font', restored.cvFontId === stored.fontId)
+}
+
+{
+  const { getTemplateVariant, getTemplateVariants } = await importSrc('utils/templateVariants.js')
+  const { applyStoredLooks } = await importSrc('reducers/uiReducer.js')
+  const { getAllTemplateAccents } = await importSrc('utils/cvTemplates.js')
+  const sage = getTemplateVariant('creative', 'sage')
+  const graphite = getTemplateVariant('developer', 'graphite')
+  const defaults = getAllTemplateAccents()
+  const formData = { ...createInitialCvData(), styleVariantByTemplate: { creative: 'sage', developer: 'graphite' } }
+  // A tweaked accent on a template with no stored variant must reset.
+  const tweaked = { ...createInitialUiState({}), templateAccentColors: { ...defaults, timeline: '#123456' } }
+  const loaded = applyStoredLooks(tweaked, formData, 'developer')
+  check('a loaded CV seeds a non-selected template\'s stored accent', loaded.templateAccentColors.creative === sage.accent)
+  check('a loaded CV resets a template without a stored variant to its registry default',
+    loaded.templateAccentColors.timeline === defaults.timeline
+      && loaded.templateAccentColors.timeline === getTemplateVariants('timeline')[0].accent)
+  check('a loaded CV takes the font and headings colour from the selected template\'s variant',
+    loaded.cvFontId === graphite.fontId && loaded.cvHeadingColor === graphite.headingColor)
+  check('a loaded CV with the selected template unstored takes variant #1\'s font',
+    applyStoredLooks(tweaked, formData, 'minimal').cvFontId === getTemplateVariants('minimal')[0].fontId)
+
+  const viaAction = uiReducer(tweaked, { type: UI_ACTION.APPLY_STORED_STYLE_LOOKS, formData, templateId: 'developer' })
+  check('APPLY_STORED_STYLE_LOOKS matches applyStoredLooks', JSON.stringify(viaAction) === JSON.stringify(loaded))
+
+  const partial = uiReducer({ ...tweaked, cvFontId: 'georgia' }, {
+    type: UI_ACTION.APPLY_STORED_STYLE_LOOKS, formData, templateId: 'minimal', templateIds: ['creative'],
+  })
+  check('APPLY_STORED_STYLE_LOOKS with templateIds touches only those accents',
+    partial.templateAccentColors.creative === sage.accent && partial.templateAccentColors.timeline === '#123456')
+  check('APPLY_STORED_STYLE_LOOKS leaves the font alone when the selected template is not listed', partial.cvFontId === 'georgia')
+
+  const initialised = createInitialUiState({ formData })
+  check('createInitialUiState seeds every stored accent, not only the selected template\'s',
+    initialised.templateAccentColors.creative === sage.accent)
 }
 
 console.log(`\n${failures === 0 ? 'All reducer checks passed.' : `${failures} check(s) failed.`}`)

@@ -313,6 +313,7 @@ export const createInitialCvData = () => ({
   photo: '',
   photoVisibilityByTemplate: createTemplatePhotoVisibility(),
   sectionColumnsByTemplate: {},
+  styleVariantByTemplate: {},
   sectionOrder: createSectionOrder(),
   skills: [],
   experience: [createEmptyExperience()],
@@ -351,6 +352,7 @@ export const demoCvData = {
   photo: '',
   photoVisibilityByTemplate: createTemplatePhotoVisibility(),
   sectionColumnsByTemplate: {},
+  styleVariantByTemplate: {},
   sectionOrder: createSectionOrder(),
   skills: [
     'Product Strategy',
@@ -974,6 +976,7 @@ export function parseImportedCvData(value) {
   const photoVisibilityByTemplate =
     value.photoVisibilityByTemplate ?? defaultState.photoVisibilityByTemplate
   const sectionColumnsByTemplate = value.sectionColumnsByTemplate ?? {}
+  const styleVariantByTemplate = value.styleVariantByTemplate ?? {}
   const sectionOrder = value.sectionOrder ?? defaultState.sectionOrder
 
   validateAllowedKeys(
@@ -989,6 +992,7 @@ export function parseImportedCvData(value) {
       'photo',
       'photoVisibilityByTemplate',
       'sectionColumnsByTemplate',
+      'styleVariantByTemplate',
       'skills',
       'experience',
       'education',
@@ -1400,6 +1404,19 @@ export function parseImportedCvData(value) {
     })
   })
 
+  // Shape only. An unknown template or variant id is kept as data and
+  // renders as variant #1 (templateVariants.js's getTemplateVariant), so a
+  // CV from a newer version still imports.
+  if (!isPlainObject(styleVariantByTemplate)) {
+    throw new Error('styleVariantByTemplate must be an object.')
+  }
+
+  Object.entries(styleVariantByTemplate).forEach(([templateId, variantId]) => {
+    if (typeof variantId !== 'string') {
+      throw new Error(`styleVariantByTemplate.${templateId} must be a string.`)
+    }
+  })
+
   return {
     fullName: readOptionalString(value.fullName, 'fullName'),
     title: readOptionalString(value.title, 'title'),
@@ -1416,6 +1433,7 @@ export function parseImportedCvData(value) {
     sectionColumnsByTemplate: Object.fromEntries(
       Object.entries(sectionColumnsByTemplate).map(([templateId, columns]) => [templateId, { ...columns }]),
     ),
+    styleVariantByTemplate: { ...styleVariantByTemplate },
     skills: skills.map((skill, index) => readOptionalString(skill, `skills[${index}]`)),
     experience:
       experience.length > 0

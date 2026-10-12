@@ -50,6 +50,9 @@ jobs:
       - name: Template page checks
         run: npm run check:template-pages
 
+      - name: Template variant checks
+        run: npm run check:template-variants
+
   e2e:
     name: End-to-end smoke tests
     runs-on: ubuntu-latest

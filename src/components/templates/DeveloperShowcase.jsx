@@ -143,7 +143,7 @@ function SectionHeading({ icon, label, placement }) {
     <div>
       <h2
         className="dev-showcase__section-title"
-        style={{ color: placement === 'side' ? '#f1f5f9' : 'var(--dev-primary)' }}
+        style={{ color: placement === 'side' ? 'var(--dev-sidebar-heading)' : 'var(--dev-primary)' }}
       >
         <span
           className="dev-showcase__section-icon"
@@ -177,6 +177,7 @@ export default function DeveloperShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   showcaseConfig = {},
   directEditDispatch = null,
@@ -637,6 +638,7 @@ export default function DeveloperShowcase({
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
       className={`dev-showcase preview-document--designer tpl-density-standard ${animationEnabled ? '' : 'dev-showcase--no-animation'}`}
+      style={paletteStyle}
     >
       {showDecorations ? (
         <div className="dev-showcase__bg" data-export-ignore="true" data-decorative aria-hidden="true">

@@ -30,6 +30,10 @@
   --te-border: #e2e8f0;
   /* Deliberately NOT pure #ffffff — the blank-canvas PDF export guard. */
   --te-bg: #f8fafc;
+  --te-masthead-kicker: #a8b5c8;
+  --te-masthead-role: #bfdbfe;
+  --te-masthead-contact: #cbd5e1;
+  --te-masthead-icon: #93c5fd;
 
   position: relative;
   overflow: hidden;
@@ -71,7 +75,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: #a8b5c8;
+  color: var(--te-masthead-kicker);
 }
 
 .tech-exec-showcase__name {
@@ -90,7 +94,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: #bfdbfe;
+  color: var(--te-masthead-role);
 }
 
 /* The role is styled uppercase. EditableField saves innerText, which
@@ -107,7 +111,7 @@
   align-items: center;
   gap: 0.3rem 0.8rem;
   font-size: var(--tpl-meta-size);
-  color: #cbd5e1;
+  color: var(--te-masthead-contact);
 }
 
 .tech-exec-showcase__contact-item {
@@ -121,7 +125,7 @@
 .tech-exec-showcase__contact-icon {
   display: inline-flex;
   flex-shrink: 0;
-  color: #93c5fd;
+  color: var(--te-masthead-icon);
 }
 
 .tech-exec-showcase__photo-wrap {
@@ -495,7 +499,7 @@
   font-size: var(--tpl-title-size);
   font-style: italic;
   line-height: 1.3;
-  color: #cbd5e1;
+  color: var(--te-masthead-contact);
 }
 
 /* ── Responsive ── */

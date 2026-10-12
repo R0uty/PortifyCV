@@ -1,20 +1,11 @@
 import { test, expect } from './fixtures/base.js'
+import { pickTemplate } from './helpers/templateGallery.js'
 
 // Regression guard for audit-1.0.1.md finding 5: sections used to stay
 // editable (and listed in the nav rail) even when the selected template
 // couldn't render them at all. Minimalist supports 5 section types;
 // Developer supports 11, including Certificates.
 //
-// The template picker is the toolbar's "Template" trigger, which opens
-// TemplateGalleryModal (the same modal the nav rail's Templates item and
-// the mobile "Templates" tab use) — selecting a template means opening
-// that dialog and clicking the card with the matching name.
-async function selectTemplate(page, label) {
-  await page.getByRole('button', { name: /^Select template:/ }).click()
-  const dialog = page.getByRole('dialog', { name: 'Template gallery' })
-  await dialog.getByText(label, { exact: true }).click()
-}
-
 test.describe('Template-gated sections', () => {
   test('switching templates shows and hides matching nav rail sections', async ({ page }) => {
     await page.goto('/cv')
@@ -25,11 +16,11 @@ test.describe('Template-gated sections', () => {
     await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Minimalist')
     await expect(nav.getByRole('button', { name: 'Certificates' })).toBeHidden()
 
-    await selectTemplate(page, 'Developer')
+    await pickTemplate(page, 'Developer')
     await expect(page.locator('.app-toolbar__template-trigger-label')).toHaveText('Developer')
     await expect(nav.getByRole('button', { name: 'Certificates' })).toBeVisible()
 
-    await selectTemplate(page, 'Minimalist')
+    await pickTemplate(page, 'Minimalist')
     await expect(nav.getByRole('button', { name: 'Certificates' })).toBeHidden()
   })
 
@@ -44,7 +35,7 @@ test.describe('Template-gated sections', () => {
 
     await expect(formPanel.getByRole('heading', { name: 'Certificates', exact: true })).toBeHidden()
 
-    await selectTemplate(page, 'Developer')
+    await pickTemplate(page, 'Developer')
 
     await expect(formPanel.getByRole('heading', { name: 'Certificates', exact: true })).toBeVisible()
   })
@@ -54,7 +45,7 @@ test.describe('Template accent color', () => {
   test('choosing a swatch recolors the Modern Timeline preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Modern Timeline')
+    await pickTemplate(page, 'Modern Timeline')
 
     await page.getByRole('button', { name: 'Settings' }).first().click()
     // 'Blue' is the 2nd swatch in the 'cool' set (#2563eb)
@@ -73,7 +64,7 @@ test.describe('Template accent color', () => {
   test('choosing a swatch recolors the Creative preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Creative')
+    await pickTemplate(page, 'Creative')
 
     await page.getByRole('button', { name: 'Settings' }).first().click()
     // 'Teal' is the 6th swatch in the 'warmCoral' set (#1f7a6c)
@@ -93,7 +84,7 @@ test.describe('Template accent color', () => {
   test('choosing a swatch recolors the Graduate preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Graduate')
+    await pickTemplate(page, 'Graduate')
 
     await page.getByRole('button', { name: 'Settings' }).first().click()
     // 'Emerald' is the 5th swatch in the 'coolIndigo' set (#059669)
@@ -112,7 +103,7 @@ test.describe('Template accent color', () => {
   test('choosing a swatch recolors the Executive preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Executive')
+    await pickTemplate(page, 'Executive')
 
     await page.getByRole('button', { name: 'Settings' }).first().click()
     // 'Teal' is the 4th swatch in the 'warmGold' set (#0f766e)
@@ -131,7 +122,7 @@ test.describe('Template accent color', () => {
   test('choosing a swatch recolors the Compact preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Compact')
+    await pickTemplate(page, 'Compact')
 
     await page.getByRole('button', { name: 'Settings' }).first().click()
     // 'Rose' is the 6th swatch in the 'coolBlue' set (#be123c)
@@ -150,7 +141,7 @@ test.describe('Template accent color', () => {
   test('choosing a swatch recolors the Quadrant preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Quadrant')
+    await pickTemplate(page, 'Quadrant')
 
     await page.getByRole('button', { name: 'Settings' }).first().click()
     // 'Emerald' is the 4th swatch in the 'coolCyan' set (#059669)
@@ -169,7 +160,7 @@ test.describe('Template accent color', () => {
   test('choosing a swatch recolors the Portfolio Hybrid preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Portfolio Hybrid')
+    await pickTemplate(page, 'Portfolio Hybrid')
 
     await page.getByRole('button', { name: 'Settings' }).first().click()
     // 'Teal' is the 3rd swatch in the 'forestGreen' set (#0f766e)
@@ -188,7 +179,7 @@ test.describe('Template accent color', () => {
   test('choosing a swatch recolors the Tech Executive preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Tech Executive')
+    await pickTemplate(page, 'Tech Executive')
 
     await page.getByRole('button', { name: 'Settings' }).first().click()
     // 'Teal' is the 4th swatch in the 'royalBlue' set (#0f766e)
@@ -207,7 +198,7 @@ test.describe('Template accent color', () => {
   test('choosing a swatch recolors the Editorial preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Editorial')
+    await pickTemplate(page, 'Editorial')
 
     await page.getByRole('button', { name: 'Settings' }).first().click()
     // 'Teal' is the 5th swatch in the 'inkCrimson' set (#0f766e)
@@ -226,7 +217,7 @@ test.describe('Template accent color', () => {
   test('choosing a swatch recolors the Portrait preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Portrait')
+    await pickTemplate(page, 'Portrait')
 
     await page.getByRole('button', { name: 'Settings' }).first().click()
     // 'Slate' is the 3rd swatch in the 'quietTeal' set (#334155)
@@ -245,7 +236,7 @@ test.describe('Template accent color', () => {
   test('choosing a swatch recolors the European preview', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'European')
+    await pickTemplate(page, 'European')
 
     await page.getByRole('button', { name: 'Settings' }).first().click()
     // 'Forest' is the 4th swatch in the 'civicBlue' set (#15803d)
@@ -267,14 +258,14 @@ test.describe('Classic Professional name alignment', () => {
     await page.goto('/cv')
     await page.getByRole('button', { name: /^Select template:/ }).click()
     const dialog = page.getByRole('dialog', { name: 'Template gallery' })
-    await expect(dialog.getByText('Classic Professional', { exact: true })).toBeVisible()
-    await expect(dialog.getByText('Classic', { exact: true })).toHaveCount(0)
+    await expect(dialog.locator('.template-gallery__name').getByText('Classic Professional', { exact: true })).toBeVisible()
+    await expect(dialog.locator('.template-gallery__name').getByText('Classic', { exact: true })).toHaveCount(0)
   })
 
   test('the Settings option toggles the header alignment', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Classic Professional')
+    await pickTemplate(page, 'Classic Professional')
 
     const root = page.locator('.classic-professional-showcase').first()
     await expect(root).toHaveAttribute('data-name-align', 'center')
@@ -301,7 +292,7 @@ test.describe('Link URL formatting', () => {
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
 
     for (const label of ['Compact', 'Navy Professional', 'Modern Timeline']) {
-      await selectTemplate(page, label)
+      await pickTemplate(page, label)
       const preview = page.locator('[data-export-root]')
       // Positive: the Links section shows the scheme-stripped value.
       await expect(preview.getByText('linkedin.example.com/in/john-doe', { exact: false }).first()).toBeVisible()
@@ -327,7 +318,7 @@ test.describe('Colorful Compact skill pills', () => {
   test('every colour variant reads at 4.5:1 or better', async ({ page }) => {
     await page.goto('/cv')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    await selectTemplate(page, 'Colorful Compact')
+    await pickTemplate(page, 'Colorful Compact')
     await expect(page.locator('.colorful-compact-showcase').first()).toBeVisible()
 
     const ratios = await page.evaluate(() => {

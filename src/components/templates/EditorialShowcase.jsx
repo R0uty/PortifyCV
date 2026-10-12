@@ -54,6 +54,7 @@ export default function EditorialShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   headingColor = null,
   accentColor = EDITORIAL_DEFAULT_ACCENT_COLOR,
@@ -330,6 +331,7 @@ export default function EditorialShowcase({
       data-export-variant="editorial"
       className="editorial-showcase preview-document--designer tpl-density-roomy"
       style={{
+        ...paletteStyle,
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, EDITORIAL_DEFAULT_ACCENT_COLOR),
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),

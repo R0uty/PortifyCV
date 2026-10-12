@@ -317,6 +317,10 @@
   color: var(--pt-ink);
 }
 
+/* Each "Language – Level" stays on one line, but the separator (rendered
+   inside the item) resets white-space so its spaces are break
+   opportunities — otherwise the whole row is one unbreakable line that
+   runs past the page edge for a long language list. */
 .portrait-showcase__language-item {
   white-space: nowrap;
 }
@@ -324,6 +328,7 @@
 .portrait-showcase__language-sep {
   margin: 0 0.4rem;
   color: var(--pt-border);
+  white-space: normal;
 }
 
 /* ── Certificates: plain stacked lines ── */

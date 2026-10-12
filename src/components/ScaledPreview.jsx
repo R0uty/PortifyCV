@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import CVPreview from './CVPreview'
+import { loadCvFont } from '../utils/cvFonts'
 
 // Same native width TemplateThumbnail renders at (see its comment): the CV
 // lays out at real size, then scales down to the frame. Unlike the
@@ -8,7 +9,17 @@ import CVPreview from './CVPreview'
 // scaled content instead of a fixed A4 crop.
 const NATIVE_WIDTH = 780
 
-function ScaledPreview({ formData, template, locale, atsFriendlyMode = false, accentColor }) {
+function ScaledPreview({
+  formData,
+  template,
+  locale,
+  atsFriendlyMode = false,
+  accentColor,
+  styleVariantId = 'default',
+  fontId,
+  fontStack,
+  headingColor,
+}) {
   const frameRef = useRef(null)
   const pageRef = useRef(null)
   const [scale, setScale] = useState(null)
@@ -33,13 +44,24 @@ function ScaledPreview({ formData, template, locale, atsFriendlyMode = false, ac
     return () => observer.disconnect()
   }, [])
 
+  // Same reason as TemplateThumbnail: a look's lazily loaded font.
+  useEffect(() => {
+    if (fontId) {
+      loadCvFont(fontId).catch(() => {})
+    }
+  }, [fontId])
+
   return (
     <div className="scaled-preview" ref={frameRef} style={height ? { height } : undefined}>
       <div
         className="scaled-preview__page"
         ref={pageRef}
         aria-hidden="true"
-        style={scale ? { transform: `scale(${scale})` } : undefined}
+        style={{
+          ...(scale ? { transform: `scale(${scale})` } : null),
+          // The look's font, as TemplateThumbnail's --font-sans override.
+          ...(fontStack ? { '--font-sans': fontStack } : null),
+        }}
       >
         <CVPreview
           formData={formData}
@@ -47,6 +69,8 @@ function ScaledPreview({ formData, template, locale, atsFriendlyMode = false, ac
           locale={locale}
           atsFriendlyMode={atsFriendlyMode}
           accentColor={accentColor}
+          headingColor={headingColor}
+          styleVariantId={styleVariantId}
         />
       </div>
     </div>

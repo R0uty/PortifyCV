@@ -140,6 +140,7 @@ export default function CompactShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   showcaseConfig = {},
   headingColor = null,
@@ -489,6 +490,7 @@ export default function CompactShowcase({
       // forever waiting for a class that can never appear, hanging the export.
       className={`compact-showcase preview-document--designer tpl-density-compact compact-showcase--${density}${showTwoColumn ? ' compact-showcase--two-column' : ''}`}
       style={{
+        ...paletteStyle,
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.1, COMPACT_DEFAULT_ACCENT_COLOR),
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),

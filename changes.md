@@ -4,6 +4,237 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template pages keep the grid filter — 1.6.16, 2026-10-11
+
+A template page opened from a filtered Free CV Templates grid now keeps
+the filter: its address carries `?field=` (e.g.
+`/free-cv-templates/developer?field=tech`, alongside `?style=` when a
+look was picked), so its "Templates" breadcrumb and "All templates" link
+return to the same filtered grid, and Previous/Next keep it too. Before,
+those links went back to All; only the browser's Back kept the filter.
+The template page never shows the filter and never passes it to the
+builder. Search engines still see one page per template, because the
+canonical URL ignores the query.
+
+## Field chip hover and one gallery test helper — 1.6.15, 2026-10-11
+
+The field chips on the Free CV Templates page and in the builder gallery
+now darken their border on hover, like the page's other outlined pills.
+Behind the scenes, the e2e tests that switch templates through the
+gallery share one helper (`e2e/helpers/templateGallery.js`, English and
+Finnish) instead of three copies plus an inline Finnish one; it picks a
+card by its exact name, so labels the field chips share with cards can't
+trip it.
+
+## Tech example pages link to the Tech templates — 1.6.14, 2026-10-11
+
+The Developer, IT and Cybersecurity CV example pages' "See also" row now
+links to "Tech CV templates" ("Tekniikan ja IT-alan CV-pohjat"), which
+opens the Free CV Templates page on the Tech chip
+(`/free-cv-templates?field=tech`), instead of the unfiltered "Free CV
+Templates". The All chip is one click away there. A small `fieldSearch()`
+helper in `templateFields.js` builds the query.
+
+## Dialog focus trap stops on real tab stops — 1.6.13, 2026-10-11
+
+No visible change today. The keyboard trap in dialogs (the shared `Modal`
+and the Direct Edit section popup) wrapped Tab at the first and last
+focusable-looking elements, which could be an unchecked radio or a hidden
+input that Tab never stops on. A dialog starting or ending with one would
+have let keyboard focus walk out of it. No current dialog is built that
+way (every dialog starts with its Close button, and the template gallery
+ends with "Get the badge"), so nobody could hit it yet, but the gallery and
+more dialogs now hold radio groups. Both traps now use one helper,
+`getTabStops()` in `src/utils/focusTrap.js`, which keeps only the checked
+radio of each group (or the first, when none is checked) and skips hidden
+inputs. `e2e/dialog-focus-trap.spec.js` adds such a group or input to an
+open dialog and checks that Tab and Shift+Tab still wrap.
+
+## Field filters for templates — 1.6.12, 2026-10-11
+
+The Free CV Templates page and the builder's template gallery have a row
+of field chips: All, Tech, Creative, Business, Leadership, Graduate and
+Any field (in Finnish: Kaikki, Tekniikka ja IT, Luova ala, Liiketoiminta,
+Johto, Vastavalmistuneet, Kaikki alat). Picking one shows only the
+templates meant for that field, with a line saying how many are shown.
+Each template's fields are hand-picked for its main audience (in
+`cvTemplates.js`); "Any field" holds the three templates that suit
+anyone (Minimalist, Classic Professional, European) and they don't also
+appear under every other chip. On the Free CV Templates page the choice
+is kept in the address (`?field=tech`), so a reload, a shared link and
+Back from a template page keep it; changing it doesn't add history
+entries. The gallery opens on All every time. A per-template photo flag,
+planned alongside, was dropped: 17 of 18 templates already show a photo
+when you upload one.
+
+## Template looks on the landing page — 1.6.11, 2026-10-11
+
+The landing page's scrolling template strip now shows that templates come
+in several looks. Card n, in gallery order, shows its template's look
+n mod 3, so six cards are on their original look and twelve on one of the
+other two (Developer on Graphite, Creative on Violet, and so on). Each look
+is named in a quieter second line under the template name, in Finnish too.
+It's a rule, not a hand-picked list, so a new template is covered
+automatically. The strip still renders the same 36 thumbnails and nothing
+in it is clickable. The hero's three fanned CVs stay on their original
+looks by choice. Its front CV asked for a template id that doesn't exist
+(`minimalist`, not `minimal`) and only showed Minimalist through the
+unknown-id fallback; it now asks for `minimal`.
+
+## Contrast data out of the app bundle — 1.6.10, 2026-10-11
+
+No visible change. The text/background pairs that `check:template-variants`
+tests for contrast (`textPairs`, and the now-empty
+`defaultContrastExceptions`) moved from `src/utils/templateVariants.js` to
+`scripts/templateContrastPairs.mjs`, which only the check reads. Visitors
+no longer download them: the chunk the template gallery and template pages
+load shrank from 31.8 kB to 20.4 kB (7.6 to 6.5 kB gzipped). The check runs
+the same 507 contrast checks as before, and now also fails if a template
+has no pairs or if the runtime registry gains the fields back.
+
+## Contrast fixes for the first looks — 1.6.9, 2026-10-11
+
+The 13 text/background pairs listed under 1.6.0's "Known gaps" now meet
+WCAG AA's 4.5:1, so `templateVariants.js` has no `defaultContrastExceptions`
+left. What you'll see:
+
+- Creative, Compact and Modern Orange open on a darker default accent:
+  Creative's coral #e2572a → #b43e18, Compact's sky #0284c7 → #0277b4,
+  Modern Orange's orange #f28c00 → #a56000 (the first swatch of each
+  template's colour picker changes with it, keeping its name). Modern
+  Orange's white title badge now reads on the accent too (2.46 → 4.91).
+- Developer: a certificate link on a sidebar section moved onto the white
+  main column uses the template's text teal (#0f766e) instead of the bright
+  gradient teal (2.49 → 5.47). No palette colour changed.
+- Small greys and one amber, too slight to notice: Minimalist's project
+  names #d97706 → #b16105 (3.19 → 4.58), Creative's faint sidebar meta
+  #6b6b6b → #666666, Modern Professional's muted slate and Portfolio
+  Hybrid's grey #64748b → #627289, Colorful Compact's muted grey
+  #6b7280 → #686f7d.
+
+Only each template's first look changed; the other two already passed.
+Accent tweaks live only in the open tab, so every CV on Creative, Compact
+or Modern Orange shows the new default accent the next time it's opened;
+share links and exported JSON don't carry a hand-picked accent, so nothing
+saved keeps the old one.
+
+Known limit: the accent pickers still offer light swatches (for example
+Amber #d97706 in Modern Orange's set). A user who picks one by hand can
+still get accent text below 4.5:1; only the defaults and the looks are
+checked.
+
+## Share links open on the sender's template — 1.6.8, 2026-10-10
+
+A share link now remembers which template the sender had open and opens
+on it, so the template's chosen look arrives complete: its colours,
+accent, font and headings colour. Before, every share link opened on
+Minimalist, and a look's font and headings colour couldn't travel. The
+template travels inside the link's `#data=` part, which browsers never
+send to a server, under a new key `tp`. Links made before 1.6.8 have no
+template and still open on Minimalist, exactly as before. Hand-picked
+accent, font or headings-colour tweaks still don't travel; looks do.
+
+## Look names on template cards — 1.6.7, 2026-10-10
+
+The look swatches on the builder's template gallery cards and the Free CV
+Templates grid now name the checked look in a small caption after them
+("Slate", "Alkuperäinen"), updated as soon as you pick another. Before,
+the names were only in tooltips and for screen readers, so on a phone you
+couldn't tell which look you had. The template pages' Style picker already
+showed every name and is unchanged.
+
+## Undo for a template-gallery Use — 1.6.6, 2026-10-10
+
+Using a template from the builder's gallery is now one Undo step, even
+when the CV itself doesn't change. Undo goes back to the previous template
+with its exact accent, font and headings colour, including tweaks (a font
+you'd picked by hand comes back), and Redo returns to the template you
+used. Before, a Use that changed no stored look reset the font and
+headings colour with nothing to undo. An edit made after the Use is undone
+first, then the Use. Every other way of switching templates, and every
+other undo step, works as before; undoing a text edit never touches your
+font.
+
+## Template looks outside the builder — 1.6.1-1.6.4, 2026-10-10
+
+The three looks of every template can now be seen and picked outside the
+builder's Style picker:
+
+- **Builder's template gallery.** Each card has three look swatches. A
+  card opens on the look your CV has stored for that template, and the
+  open template's card shows exactly what the preview shows, tweaks
+  included. A swatch only previews the look on that card. "Use template"
+  then opens the template in that look (its accent, font and headings
+  colour), and an open template previewed in another look offers "Use
+  this style" ("Käytä tyyliä").
+- **Free CV Templates grid.** Each card has the same swatches.
+- **Template pages.** A "Style" ("Tyyli") picker sits beside the
+  examples, and the choice is kept in the URL as `?style=`.
+
+A look picked on a template page or grid card travels into the builder:
+"Use this example", "Start blank" and "Use this template" all open it in
+that look. As with `?example=`, a restored session or a share link wins
+and ignores it. Original is never written into a URL.
+
+Switching templates from the gallery now always matches the card. The
+font and headings colour come from the new template's stored look
+instead of carrying over from the previous template (1.6.0 carried
+them). Using a template from the gallery is one Undo step since 1.6.6
+(see above).
+
+Bundle (gzip, before to after): entry index 37.29 to 36.86 KB (-0.43),
+CVPreview 40.73 to 34.72 KB (thumbnailCv, 8.22 KB, now splits out as its
+own chunk), FreeCvTemplatesPage 1.68 to 1.87 KB, TemplateDetailPage 10.97
+to 11.14 KB, ResumeBuilderPage 49.89 to 50.27 KB; new shared chunks
+StyleSwatchGroup (0.46 KB) and preload-helper (0.67 KB).
+
+## Template style variants — 1.6.0, 2026-10-08
+
+Every one of the 18 templates now comes in three looks, so a CV no longer
+has to wear a template's one default colour scheme. Pick a look from the new
+"Style" ("Tyyli") button in the toolbar, right after Template, in both
+Classic and Direct Edit. Under 1600px wide the button shows only the look's
+colour strip (a dot appears when the look is modified) with the name in its
+tooltip and label; wider, it shows the name and a "Modified" ("Muokattu")
+pill.
+
+A look changes the template's own palette, its font and its headings
+colour. It never changes the type ramp, density, layout or page count
+(a new variant layout and PDF-budget suite guards that). Picking a look,
+even the one already active, resets accent, font and headings colour to that
+look's values, and the same applies when a CV is loaded or an undo/redo
+crosses a look change. A loaded CV (share link, session restore, JSON
+import, a template-page example) restores every template's stored look
+accent, not just the open template's, and resets templates without a stored
+look to their original accent; the font and headings colour come from the
+open template's look. Load demo CV and Clear CV replace the whole CV, so
+they also reset to the new CV's look (undo brings the old look back).
+Tweaking the accent, font or headings colour after
+that stays tab-only and marks the look as Modified; it is not saved
+anywhere. The first look of every template is the template's existing
+design, so old CVs, share links and exported JSON look exactly as before.
+The chosen look is stored per template in the CV (`styleVariantByTemplate`)
+and travels in share links under the new `va` key.
+
+Under the hood each template's colours became CSS variables (Minimalist
+gets its own stylesheet, and Developer, Colorful Compact, Tech Executive,
+Timeline and Portfolio were tokenised) and the looks live in
+`src/utils/templateVariants.js`. The new `check:template-variants` makes
+sure the first look matches the stylesheet defaults, every variable is
+declared once, and text pairs meet WCAG contrast, traced from real CSS
+usage. While testing, Portrait's language row was found overflowing the page
+in the builder; it now wraps between languages (1.5.16).
+
+Known gaps (all fixed in 1.6.9), kept as first-look-only `defaultContrastExceptions` because they
+predate this work and changing them would change the original designs:
+Minimalist amber project names on white (3.19), Developer teal cert link on
+white (2.49), Creative faint meta on the sidebar (4.25) and coral accent on
+page, sidebar and cards (3.35, 2.97, 3.64), Modern Professional slate
+contact text (4.45), Compact sky accent text (3.83), Portfolio Hybrid grey on
+the sidebar tint (4.48), Modern Orange accent on page and sidebar (2.42,
+2.30) and white title text on orange (2.46), and Colorful Compact grey on
+the sidebar (4.39). The other two looks of each template pass.
+
 ## Clear CV in Direct Edit — 1.5.4, 2026-10-07
 
 Direct Edit gets a "Clear CV" button under "Load demo CV". It works like

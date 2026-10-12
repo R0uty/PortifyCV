@@ -146,6 +146,7 @@ export default function EuropeanShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   headingColor = null,
   accentColor = EUROPEAN_DEFAULT_ACCENT_COLOR,
@@ -521,6 +522,7 @@ export default function EuropeanShowcase({
       // hanging the export.
       className={`european-showcase preview-document--designer tpl-density-${density}`}
       style={{
+        ...paletteStyle,
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, EUROPEAN_DEFAULT_ACCENT_COLOR),
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),

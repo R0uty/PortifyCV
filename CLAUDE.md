@@ -17,7 +17,8 @@ npm run check:feedback     # exercises evaluateCvFeedback (src/utils/cvFeedback.
 npm run check:docx-export  # exercises the Word export builders and archetypes (src/utils/docxExport.js)
 npm run check:section-schema   # validates the Direct Edit popup's section schema (src/utils/sectionSchema.js)
 npm run check:section-columns  # exercises the section column-move rules (src/utils/sectionColumns.js)
-npm run check:template-pages   # validates per-template page slugs, examples, and copy (src/utils/templatePageCopy.js, src/utils/templateMetaDescriptions.js, src/utils/exampleCvs.js)
+npm run check:template-pages   # validates per-template page slugs, examples, copy, and field tags (src/utils/templatePageCopy.js, src/utils/templateMetaDescriptions.js, src/utils/exampleCvs.js, src/utils/templateFields.js)
+npm run check:template-variants  # validates the style-variant registry against each template's CSS defaults, plus contrast (src/utils/templateVariants.js)
 
 npm run test:e2e           # full Playwright suite in e2e/, against a prod build+preview
 npm run test:e2e:fast      # same suite minus the @slow tier (--grep-invert @slow) — what CI's main e2e job runs
@@ -35,11 +36,12 @@ codec (`check:share`), the CV schema/reducers (`check:reducers`), the
 rule-based feedback engine (`check:feedback`), the Word exporter
 (`check:docx-export`), the Direct Edit popup schema
 (`check:section-schema`), the section column-move
-rules and their import validation (`check:section-columns`), or the
-per-template pages' slugs, examples, and copy (`check:template-pages`). A
+rules and their import validation (`check:section-columns`), the
+per-template pages' slugs, examples, copy, and field tags (`check:template-pages`), or
+a template's style variants or palette variables (`check:template-variants`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.
-CI (`.github/workflows/ci.yml`) runs all seven on every push to `main` and
+CI (`.github/workflows/ci.yml`) runs all eight on every push to `main` and
 `v1.6.0` (the current long-lived branch) and on every pull request.
 
 `test:e2e` (and its `:fast`/`:slow` variants) build and serve the app first
@@ -85,7 +87,7 @@ variants to the canonical path. If you change a route or its metadata,
 `routes.js`/`pageMeta.js` is the one place to edit — both the client
 (`App.jsx`'s `useDocumentHead`) and the worker read from it.
 
-**Template system — three files per bespoke template.** A template variant
+**Template system — four pieces per bespoke template.** A template variant
 (e.g. `portfolio`, `modern`, `developer`) is assembled from:
 
 1. `src/utils/cvTemplates.js` — the template's identity: label, description,
@@ -105,13 +107,22 @@ variants to the canonical path. If you change a route or its metadata,
    itself in ATS mode or renders a simplified version of the same Showcase
    (Timeline, Navy Professional, Modern Orange do the latter — see the
    comments beside each `if (variant === ...)` block for why).
+4. The template's entry in `src/utils/templateVariants.js` — three looks (a
+   palette of the template's own CSS variables, a font, a headings colour).
+   Variant #1 must equal the stylesheet's root defaults, so declare every
+   colour on the template's root rule as a variable. `check:template-variants`
+   checks those root custom properties — variant #1 equals them exactly, each
+   is declared once, any non-colour one is on an allowlist — plus contrast;
+   it does not scan the rest of a stylesheet for hard-coded colour literals,
+   so keep those out by review. The chosen look is stored per
+   template as `styleVariantByTemplate` (below).
 
 `src/components/templates/index.js` is the variant→config registry and also
 owns `prefetchTemplateShowcases()` (idle-prefetch of every Showcase chunk, so
 switching templates or opening the gallery — which thumbnails all templates
 at once — doesn't pay for a dynamic import at that moment). Every
 `*Showcase.jsx` is `React.lazy()`-loaded from `CVPreview.jsx`; a new bespoke
-template should follow the same three-file pattern and get added to both the
+template should follow the same four-piece pattern and get added to both the
 lazy-import list in `CVPreview.jsx` and the prefetch list in
 `templates/index.js`.
 
@@ -137,7 +148,7 @@ with zero new entries in `e2e/fixtures/layoutAllowlist.js` — that file is
 `[]` as of this release, and a stale entry fails its own test, so treat any
 addition as a real, temporary finding, not a way to ship around a failure.
 If a template's PDF pagination changes (a density/content change, not a
-regression), update `EXPECTED_PDF_PAGES` in `e2e/template-pdf.spec.js`
+regression), update `EXPECTED_PDF_PAGES` in `e2e/fixtures/pdfPages.js`
 deliberately, in the same commit, and say why the count changed.
 
 **Styling is hand-written utility CSS, not Tailwind.** `src/index.css`
@@ -168,10 +179,13 @@ keys (`ROOT_STRING_KEYS`, etc.) to keep links short — never repurpose an
 existing key, since older generated links decode against the same table.
 Uploaded images are stripped from the payload (too large for a URL) with the
 recipient told they're missing; export JSON instead when images need to
-travel too.
+travel too. The per-template style-variant choice travels under the `va`
+key, and the sender's selected template under `tp` (1.6.8; the link opens
+on it — older links without it open on the default template).
 
 **CV data shape and mutations** are centralized in `src/utils/cvForm.js`
-(the `CvData` shape, empty-entry factories, section-visibility helpers) and
+(the `CvData` shape, including `styleVariantByTemplate`, the chosen look per
+template; empty-entry factories, section-visibility helpers) and
 `src/types/cv.d.ts` (JSDoc typedefs referenced via `@typedef` comments, no
 TypeScript build). All form/UI state changes go through
 `src/reducers/cvFormReducer.js` and `src/reducers/uiReducer.js` — add a new
@@ -201,7 +215,15 @@ shipped — never rename one. Example people live one file per person in
 fit is real rather than duplicated. Every example must fill every
 `primarySections` entry of each template it's listed under, in both
 locales — `check:template-pages` enforces this, so an empty section never
-reaches a visitor. `src/utils/sectionContent.js`'s `hideEmptySections()`
+reaches a visitor. A template page also takes `?style=<variantId>` (one
+of that template's looks in `templateVariants.js`; an unknown id is
+Original, which is never written into a URL), set from its Style picker
+or a gallery/grid card, and passes it to the builder, which applies it to
+whatever CV it starts with, like `?example=`, and strips it. It also
+passes through `?field=` (the Free CV Templates filter it was opened
+from, 1.6.16) to its links back to the grid and to the previous/next
+template; the page never shows it and the builder never receives it.
+`src/utils/sectionContent.js`'s `hideEmptySections()`
 hides a section that has no real content instead of rendering its
 placeholder text, read by the per-template marketing page (its only
 preview) and by the builder's dedicated off-screen, read-only, inert

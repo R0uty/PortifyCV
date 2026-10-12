@@ -183,6 +183,7 @@ export default function ModernShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   showcaseConfig = {},
   headingColor = null,
@@ -566,7 +567,7 @@ export default function ModernShowcase({
       // "designer", never "ats". Without this class the export handler polls
       // forever waiting for a class that can never appear, hanging the export.
       className="modern-showcase preview-document--designer tpl-density-standard"
-      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
+      style={{ ...paletteStyle, ...(headingColor ? { '--cv-heading-color': headingColor } : null) }}
     >
       <header data-export-header="true" className="modern-showcase__header">
         <div className="min-w-0">

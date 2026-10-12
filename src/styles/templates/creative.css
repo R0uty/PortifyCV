@@ -24,12 +24,12 @@
 .creative-showcase {
   /* Accent — overridden inline per render from the chosen swatch. Kept in
      sync with CREATIVE_DEFAULT_ACCENT_COLOR in components/templates/creative.js. */
-  --tpl-accent: #e2572a;
+  --tpl-accent: #b43e18;
   --tpl-accent-soft: rgba(226, 87, 42, 0.12);
 
   --cr-ink: #1a1a1a;
   --cr-ink-muted: #4b4b4b;
-  --cr-ink-faint: #6b6b6b;
+  --cr-ink-faint: #666666;
   --cr-border: #ecdfc9;
   --cr-page: #fdf1e2;
   --cr-sidebar: #f7e3c4;

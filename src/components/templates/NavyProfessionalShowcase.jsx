@@ -161,6 +161,7 @@ export default function NavyProfessionalShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   showcaseConfig = {},
   atsFriendlyMode = false,
@@ -418,7 +419,7 @@ export default function NavyProfessionalShowcase({
       // claims ("no columns") promise to remove. Section order and
       // everything else about the layout stays the same.
       className={`navy-professional-showcase preview-document--${atsFriendlyMode ? 'ats' : 'designer'} tpl-density-standard${atsFriendlyMode ? ' navy-professional-showcase--ats' : ''}`}
-      style={headingColor ? { '--cv-heading-color': headingColor } : undefined}
+      style={{ ...paletteStyle, ...(headingColor ? { '--cv-heading-color': headingColor } : null) }}
     >
       <aside className="navy-professional-showcase__sidebar" data-export-secondary="true">
         <div data-export-header="true" className="navy-professional-showcase__identity">

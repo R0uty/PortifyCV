@@ -13,6 +13,7 @@
 @import './styles/direct-edit.css';
 @import './styles/direct-edit-popup.css';
 @import './styles/templates/_system.css';
+@import './styles/templates/minimal.css';
 @import './styles/templates/developer.css';
 @import './styles/templates/creative.css';
 @import './styles/templates/modern.css';

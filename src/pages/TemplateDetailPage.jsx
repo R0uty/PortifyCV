@@ -1,10 +1,13 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 
 import InternalNavLink from '../components/InternalNavLink'
-import { cvTemplates, getCvTemplate, resolveTemplateAccent } from '../utils/cvTemplates'
+import StyleSwatchGroup from '../components/StyleSwatchGroup'
+import { cvTemplates, getCvTemplate } from '../utils/cvTemplates'
+import { DEFAULT_STYLE_VARIANT_ID, getVariantLook, parseStyleVariantParam } from '../utils/templateVariants'
 import { TEMPLATE_PAGE_COPY } from '../utils/templatePageCopy'
 import { getTemplateExamples, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
 import { ROUTES, templatePath } from '../utils/routes'
+import { fieldSearch, parseFieldParam } from '../utils/templateFields'
 import { TEMPLATE_VIEW_PREFIX } from '../utils/pageMeta'
 import { demoCvData } from '../utils/cvForm'
 import { withPlaceholderPhoto } from '../utils/thumbnailCv'
@@ -22,6 +25,7 @@ function getCopy(locale) {
       heading: (label) => `${label} – CV-pohja`,
       bestFor: 'Sopii:',
       examples: 'Esimerkit',
+      style: 'Tyyli',
       atsView: 'ATS-näkymä',
       useExample: 'Käytä tätä esimerkkiä',
       useTemplate: 'Aloita tyhjästä tällä pohjalla',
@@ -40,6 +44,7 @@ function getCopy(locale) {
     heading: (label) => `${label} CV template`,
     bestFor: 'Best for:',
     examples: 'Examples',
+    style: 'Style',
     atsView: 'ATS view',
     useExample: 'Use this example',
     useTemplate: 'Start blank with this template',
@@ -58,6 +63,23 @@ function readExampleParam() {
   return new URLSearchParams(window.location.search).get('example')
 }
 
+// ?style= (Phase 4): the look to open the page on, from a Free CV
+// Templates card or a builder gallery card's "View examples". An unknown
+// id is Original. The page remounts per template (App's key={view}), so
+// moving to another template reads its own URL afresh.
+function readStyleParam(templateId) {
+  if (typeof window === 'undefined') return DEFAULT_STYLE_VARIANT_ID
+  return parseStyleVariantParam(templateId, new URLSearchParams(window.location.search).get('style'))
+}
+
+// ?field= (1.6.16): the Free CV Templates filter this page was opened
+// from. The page never shows it; it only passes it on, so the links back
+// to the grid and to the previous/next template keep that filter.
+function readFieldParam() {
+  if (typeof window === 'undefined') return null
+  return parseFieldParam(new URLSearchParams(window.location.search).get('field'))
+}
+
 function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}, onNavigateToView = () => {} }) {
   const resolvedLocale = locale === 'fi' ? 'fi' : 'en'
   const copy = getCopy(resolvedLocale)
@@ -71,6 +93,9 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
   })
   const [loadedExample, setLoadedExample] = useState(null)
   const [atsView, setAtsView] = useState(false)
+  const [styleId, setStyleId] = useState(() => readStyleParam(templateId))
+  const [field] = useState(readFieldParam)
+  const fieldQuery = fieldSearch(field)
 
   useEffect(() => {
     let cancelled = false
@@ -101,6 +126,19 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
     window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}`)
   }
 
+  // Like selectExample: the look lives in the URL, so a reload or a shared
+  // link keeps it. Original is the absence of ?style=.
+  const selectStyle = (nextId) => {
+    setStyleId(nextId)
+    const url = new URL(window.location.href)
+    if (nextId === DEFAULT_STYLE_VARIANT_ID) {
+      url.searchParams.delete('style')
+    } else {
+      url.searchParams.set('style', nextId)
+    }
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}`)
+  }
+
   // A not-yet-written or failed example falls back to the demo CV rather
   // than an empty frame. Empty sections are hidden here, page-preview only
   // (hideEmptySections), so an unfilled section's placeholder text never
@@ -115,7 +153,8 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
   const neighbour = (offset) => cvTemplates[(index + offset + cvTemplates.length) % cvTemplates.length]
   const previous = getCvTemplate(neighbour(-1).id, resolvedLocale)
   const next = getCvTemplate(neighbour(1).id, resolvedLocale)
-  const goToTemplate = (target) => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${target.id}`)
+  const goToTemplate = (target) => onNavigateToView(`${TEMPLATE_VIEW_PREFIX}${target.id}`, { search: fieldQuery })
+  const goToGrid = () => onNavigateToView('freeTemplates', { search: fieldQuery })
 
   const selectedExampleRole = examples.find((example) => example.id === exampleId)?.role ?? ''
   const sectionCount = template.primarySections.length + (template.secondarySections?.length ?? 0)
@@ -127,7 +166,7 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
   return (
     <div className="landing-page template-page">
       <nav className="template-page__breadcrumb" aria-label={copy.breadcrumb}>
-        <InternalNavLink to={ROUTES.freeTemplates} onNavigate={() => onNavigateToView('freeTemplates')}>
+        <InternalNavLink to={`${ROUTES.freeTemplates}${fieldQuery}`} onNavigate={goToGrid}>
           {copy.breadcrumb}
         </InternalNavLink>
         <span aria-hidden="true"> › </span>
@@ -163,6 +202,15 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
               ))}
             </div>
           )}
+          <StyleSwatchGroup
+            templateId={templateId}
+            value={styleId}
+            onChange={selectStyle}
+            locale={resolvedLocale}
+            name="template-style"
+            label={copy.style}
+            size="page"
+          />
 
           <label className="template-page__ats-toggle">
             <input type="checkbox" checked={atsView} onChange={(event) => setAtsView(event.target.checked)} />
@@ -170,13 +218,13 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
           </label>
 
           <div className="template-page__actions">
-            <button type="button" className="landing-cta" onClick={() => onGetStarted(templateId, exampleId)}>
+            <button type="button" className="landing-cta" onClick={() => onGetStarted(templateId, exampleId, { style: styleId })}>
               {copy.useExample}
             </button>
             <button
               type="button"
               className="templates-page-card__cta"
-              onClick={() => onGetStarted(templateId, undefined, { blank: true })}
+              onClick={() => onGetStarted(templateId, undefined, { blank: true, style: styleId })}
             >
               {copy.useTemplate}
             </button>
@@ -196,7 +244,7 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
                 template={templateId}
                 locale={resolvedLocale}
                 atsFriendlyMode={atsView}
-                accentColor={resolveTemplateAccent(null, templateId)}
+                {...getVariantLook(templateId, styleId)}
               />
             </Suspense>
           )}
@@ -213,13 +261,13 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
       )}
 
       <nav className="template-page__pager" aria-label={copy.pagerNav}>
-        <InternalNavLink to={templatePath(previous.slug)} onNavigate={() => goToTemplate(previous)}>
+        <InternalNavLink to={`${templatePath(previous.slug)}${fieldQuery}`} onNavigate={() => goToTemplate(previous)}>
           ← {copy.previous}: {previous.label}
         </InternalNavLink>
-        <InternalNavLink to={ROUTES.freeTemplates} onNavigate={() => onNavigateToView('freeTemplates')}>
+        <InternalNavLink to={`${ROUTES.freeTemplates}${fieldQuery}`} onNavigate={goToGrid}>
           {copy.all}
         </InternalNavLink>
-        <InternalNavLink to={templatePath(next.slug)} onNavigate={() => goToTemplate(next)}>
+        <InternalNavLink to={`${templatePath(next.slug)}${fieldQuery}`} onNavigate={() => goToTemplate(next)}>
           {copy.next}: {next.label} →
         </InternalNavLink>
       </nav>

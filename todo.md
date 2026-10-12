@@ -189,6 +189,15 @@ after.
       and dates. In the gallery, the five templates this item grouped as
       "pale blue" now read as rose, navy band, purple, bronze-on-cream and
       lavender band.
+      **Re-checked 2026-10-11 (1.6.10) with the 1.6.0 looks, no change
+      needed:** Modern's Ocean look (navy #0c4a6e, accent #0369a1) is the
+      only look near Tech Executive's blue (navy #163d7a, accent #2563eb).
+      Side by side on their template pages they still read as different
+      templates: Tech Executive's solid navy masthead with white text vs
+      Ocean's light header, dark name and thin gradient top line, plus
+      Modern's circular photo and timeline dots. Gallery and grid cards
+      show each template's original look, so the two only meet if someone
+      picks Ocean.
 - [x] **13. `creative` template's description promises "one accent colour you
       can change"** — checked 2026-08-14: false, no such control exists. The
       Settings modal (`ResumeBuilderPage.jsx`) has exactly two controls —
@@ -2175,3 +2184,138 @@ Observed by the controller's visual audits of the template pages (desktop, dev s
 - Navy Professional's short names render visibly smaller than every other template's name row (the 180px identity-rail floor, narrower than the standard 210px floor) — this is deliberate (see `docs/template-design-system.md` §2 "Adoption state" and `docs/template-audit-phase2.md`'s F7), not a bug to fix reflexively.
 - ~~Several templates' "technologies" line in the experience entry reuses the company-name CSS class instead of its own role~~ — fixed 2026-10-04, and wider than first noted: all 17 bespoke Showcases shared the technologies line's class with another meta line (company, or the `__entry-meta`/`__exp-meta`/`__edu-meta` company/location line), including the shared `renderExperienceEntry` in `directEditExperienceEntry.jsx` (Classic Professional, Editorial, Portrait). Each now renders it with its own `…technologies` class (e.g. `creative-showcase__exp-technologies`, `${classPrefix}__entry-technologies`), and every CSS rule that targeted the old class lists the new one alongside it, so the look is unchanged (screenshots byte-identical) while a future company-only rule no longer reaches the technologies line.
 - ~~Compact's density axis (D=1, `docs/template-audit-phase2.md`'s rubric) is still ad hoc~~ — settled 2026-10-04 (user's decision): kept as is and documented as the one sanctioned exception to the three-class ramp, `docs/template-design-system.md` §2 "Auto-fit tiers below `compact` (Compact only)". The snug/tight tiers in `compact.css` are template-local, engaged only by measured one-page overflow, and always sit on top of `tpl-density-compact`. The alternatives were stepping `standard`→`compact` like European (bigger default look) or dropping the tiers; both would have pushed heavy CVs onto a second page.
+
+## Phase 3: template style variants — DONE (1.6.0, 2026-10-08)
+
+Spec: `docs/superpowers/specs/2026-10-06-template-style-variants-design.md`.
+All 18 templates have three looks in `src/utils/templateVariants.js`; the
+`TEMPLATES_WITH_DESIGNED_VARIANTS` gate in `scripts/check-template-variants.mjs`
+is gone and the script requires 3 everywhere. Shipped across 1.5.5-1.5.17:
+registry and check, `styleVariantByTemplate` + share key `va` +
+`SET_STYLE_VARIANT`, applying a look's accent/font/headings colour on pick
+and load (undo/redo included), the Style/Tyyli toolbar picker, tokenising
+Minimalist, Developer, Colorful Compact, Tech Executive, Timeline and
+Portfolio, the variant layout and PDF-budget harness
+(`e2e/template-variants.spec.js`; `EXPECTED_PDF_PAGES` moved to
+`e2e/fixtures/pdfPages.js`), and the 36 looks in three approved batches.
+1.5.16 also fixed Portrait's language row overflowing the page.
+
+Final-review fix wave (1.6.0, 2026-10-09): a loaded CV now seeds every
+template's stored look accent (not only the open template's) and resets
+templates without one to their original accent (`applyStoredLooks` in
+`uiReducer.js`); Load demo CV and Clear CV apply the new CV's look; undo/redo
+restore the looks of the templates whose stored variant changed;
+`check:template-variants` reports a missing `CSS_SOURCES` entry as a FAIL
+line; `style-variants.spec.js` also checks the off-screen export source.
+
+Known gaps: ~~the `defaultContrastExceptions` in `templateVariants.js` (13
+pairs across 8 templates, listed in `changes.md`), first look only~~ — fixed
+1.6.9: the colours changed instead (Creative, Compact and Modern Orange
+default accents darker, Developer's moved cert link uses `--dev-accent`,
+small greys), so the list is empty. A hand-picked light swatch can still
+fall below 4.5:1 (see `changes.md`). Share
+links ~~don't carry the selected template~~ — fixed 1.6.8: the link carries
+it as `tp` and opens on it (spec
+`docs/superpowers/specs/2026-10-10-template-in-share-links-design.md`).
+
+Verification (1.6.0, after the fix wave): `npm run lint` clean, all eight
+`check:*` scripts pass, full `CI=1 npm run test:e2e` 827 passed (4.4m), `npm run
+build` ok.
+
+~~Possible follow-up: split the check-only `textPairs`/contrast exceptions out
+of the runtime registry (`templateVariants.js`), so the app bundle doesn't
+ship data only `check:template-variants` reads.~~ — done 1.6.10: they live in
+`scripts/templateContrastPairs.mjs`; the check also requires pairs for every
+template and none on the runtime registry.
+
+### Phase 4: template looks outside the builder — DONE (1.6.4, 2026-10-10)
+
+Spec: `docs/superpowers/specs/2026-10-10-template-looks-outside-builder-design.md`;
+plan: `docs/superpowers/plans/2026-10-10-template-looks-outside-builder.md`.
+The looks show on the builder gallery cards, the Free CV Templates grid
+and the template pages, and `?style=` carries a look into the builder
+(1.6.1 shared pieces, 1.6.2 gallery, 1.6.3 grid and pages, 1.6.4
+handoff). Tests: `e2e/template-looks.spec.js`.
+
+Still open (not in this phase): ~~gallery filters and a per-template photo
+flag (the original roadmap's Phase 4)~~ — filters done 1.6.12 (field
+chips on the grid and in the gallery, spec
+`docs/superpowers/specs/2026-10-11-template-field-filters-design.md`); the
+photo flag was dropped (17 of 18 templates already show an uploaded photo,
+so it wouldn't filter anything); ~~the 13 first-look contrast
+exceptions~~ (fixed 1.6.9); ~~moving `textPairs`/`defaultContrastExceptions` out of the
+runtime registry~~ (done 1.6.10); ~~looks on the landing page's marquee and hero~~
+(done 1.6.11: the strip's card n shows its template's look n mod 3, named
+under the card; the hero stays on original looks by the user's choice). The
+selected template in share links was done in 1.6.8.
+
+Follow-ups from the Phase 4 final review (not started):
+
+- ~~A gallery "Use" on another template whose stored look doesn't change
+  resets the font and headings colour with no undo step~~ — fixed 1.6.6
+  (user chose "make Use undoable"): history steps are `{ formData, look }`
+  in `ResumeBuilderPage.jsx`, and only a gallery Use's step carries a
+  `look` (uiReducer's `pickTemplateLook`), restored by
+  `RESTORE_TEMPLATE_LOOK`. Tests: `e2e/template-looks.spec.js` (Use undo,
+  redo, font tweak back, edit-after-Use order), `check:reducers`.
+- ~~On gallery and grid cards a look's name is only in the radio's
+  `aria-label` and the option's `title` tooltip~~ — fixed 1.6.7 (user chose
+  a caption of the checked look): `StyleSwatchGroup`'s `card` size renders
+  an aria-hidden `.style-swatches__caption` after the swatches. Tests:
+  `e2e/template-looks.spec.js` (gallery card, grid card, Finnish).
+
+1.6.5 cleanup: removed a stray blank line in `TemplateGalleryModal.jsx`,
+rewrapped the `?style=` note in `CLAUDE.md`, marked the spec implemented,
+and `pushViewUrl` compares paths only for a navigation without `search`
+again (a same-view click from a URL with a query no longer pushes a
+duplicate history entry).
+
+Verification (1.6.4): `npm run lint` clean; all 8 check:* ok (share,
+reducers, feedback, docx-export, section-schema, section-columns,
+template-pages, template-variants); `CI=1 npm run test:e2e` 843 passed
+(4.9m), 0 failed; `npm run build` ok.
+
+### Field filters (1.6.12) — follow-ups (not started)
+
+From the task and final reviews of the field filters (spec
+`docs/superpowers/specs/2026-10-11-template-field-filters-design.md`). The
+final review called the branch ready to merge; none of these block it.
+
+- ~~**The template page's "All templates" link drops the filter.**~~ —
+  fixed 1.6.16 (user chose the address): grid card links carry
+  `?field=`, and the template page passes it to its breadcrumb, "All
+  templates" and Previous/Next links. Original note: It goes
+  to bare `/free-cv-templates` (`TemplateDetailPage.jsx:256`), so a visitor
+  who came from `?field=tech` and returns by that link lands on All.
+  Browser Back keeps the filter (the grid re-reads `?field=` on mount),
+  which is all the spec promised. Fixing it needs a choice: carry the field
+  in `history.state` or in a query param on the template page.
+- ~~**Link the per-field example pages to the filter.**~~ — done 1.6.14:
+  the Developer, IT and Cybersecurity pages' "See also" link is now "Tech
+  CV templates" (`?field=tech`, replacing the unfiltered link; user's
+  choice), built with the new `fieldSearch()`. Original note: e.g. Developer CV
+  examples (`DeveloperCvExamplesPage.jsx`) → `/free-cv-templates?field=tech`;
+  also the IT and Cybersecurity pages. The spec left this out on purpose;
+  add a small `fieldSearch()` helper in `templateFields.js` then (dropped
+  in 1.6.12 because nothing called it).
+- ~~**One shared gallery-pick e2e helper.**~~ — done 1.6.15:
+  `pickTemplate(page, label, { locale })` in `e2e/helpers/templateGallery.js`,
+  used by the three specs and the Finnish inline case in direct-edit.
+  Original note: "Pick a card in the template
+  gallery by name" is copied in `e2e/templates.spec.js`,
+  `e2e/direct-edit.spec.js` and `e2e/style-variants.spec.js`. In 1.6.12 the
+  new "Creative"/"Graduate" chips clashed with card names and all three
+  copies had to be fixed (now scoped to `.template-gallery__name`, exact);
+  one helper in `e2e/helpers/` would stop the next clash.
+- ~~**Chips have no hover state.**~~ — done 1.6.15 (border darkens to the
+  checked chip's, test in `template-filters.spec.js`). Original note: `.template-fields__chip` in
+  `app-shell.css` has checked and focus styles but no `:hover`, unlike the
+  other pills on the grid. Polish.
+- ~~**Bug, pre-existing: the dialog Tab trap counts unchecked radios.**~~
+  — fixed 1.6.13. It turned out latent: a probe showed every dialog starts
+  with its Close button and the gallery ends with "Get the badge", so no
+  current dialog let focus out. Hardened anyway (user's choice): both
+  traps (`Modal.jsx` and `SectionEditorPopup.jsx`, which had its own copy)
+  use `getTabStops()` in `src/utils/focusTrap.js`, which also skips hidden
+  inputs (Modal's old selector matched them). Tests:
+  `e2e/dialog-focus-trap.spec.js`.

@@ -54,6 +54,7 @@ export default function PortraitShowcase({
   formData,
   locale = 'en',
   previewRef,
+  paletteStyle = {},
   templateConfig,
   headingColor = null,
   accentColor = PORTRAIT_DEFAULT_ACCENT_COLOR,
@@ -338,6 +339,7 @@ export default function PortraitShowcase({
       // hanging the export.
       className="portrait-showcase preview-document--designer tpl-density-standard"
       style={{
+        ...paletteStyle,
         '--tpl-accent': accentColor,
         '--tpl-accent-soft': accentSoftFill(accentColor, 0.12, PORTRAIT_DEFAULT_ACCENT_COLOR),
         ...(headingColor ? { '--cv-heading-color': headingColor } : null),

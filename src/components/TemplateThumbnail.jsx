@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react'
 
 import CVPreview from './CVPreview'
+import { loadCvFont } from '../utils/cvFonts'
 
 // Matches .template-gallery__thumb-page's fixed width in app-shell.css —
 // the live CVPreview renders at this width, then gets scaled down to fit
@@ -11,7 +12,16 @@ const THUMBNAIL_NATIVE_WIDTH = 780
 // memo keeps sibling previews from re-rendering while the user hovers around
 // the grid — the trimmed CV (see utils/thumbnailCv.js) is a stable reference
 // for the caller's lifetime.
-const TemplateThumbnail = memo(function TemplateThumbnail({ templateId, formData, locale, fontStack, headingColor }) {
+const TemplateThumbnail = memo(function TemplateThumbnail({
+  templateId,
+  formData,
+  locale,
+  fontId,
+  fontStack,
+  headingColor,
+  accentColor,
+  styleVariantId = 'default',
+}) {
   const frameRef = useRef(null)
   // Falls back to the CSS default (0.29, tuned for the gallery modal's own
   // card size — see .template-gallery__thumb-page) until the very first
@@ -38,6 +48,15 @@ const TemplateThumbnail = memo(function TemplateThumbnail({ templateId, formData
     return () => observer.disconnect()
   }, [])
 
+  // A look's font may be a lazily loaded one (Calibri/Carlito, Lato);
+  // outside the builder nothing else loads it (Phase 4). A failed chunk
+  // just leaves the fallback face.
+  useEffect(() => {
+    if (fontId) {
+      loadCvFont(fontId).catch(() => {})
+    }
+  }, [fontId])
+
   return (
     <div className="template-gallery__thumb-frame" ref={frameRef}>
       <div
@@ -54,7 +73,14 @@ const TemplateThumbnail = memo(function TemplateThumbnail({ templateId, formData
           ...(fontStack ? { '--font-sans': fontStack } : null),
         }}
       >
-        <CVPreview formData={formData} template={templateId} locale={locale} headingColor={headingColor} />
+        <CVPreview
+          formData={formData}
+          template={templateId}
+          locale={locale}
+          headingColor={headingColor}
+          accentColor={accentColor}
+          styleVariantId={styleVariantId}
+        />
       </div>
     </div>
   )

@@ -13,6 +13,7 @@ export default function DirectEditPreview({
   theme,
   accentColor,
   headingColor,
+  styleVariantId,
   classicNameAlignment,
   previewRef,
   cvFontId,
@@ -38,6 +39,7 @@ export default function DirectEditPreview({
     atsFriendlyMode: false,
     accentColor,
     headingColor,
+    styleVariantId,
     classicNameAlignment,
   }
   // The export-source copy below renders from the empty-section-hidden

@@ -52,6 +52,9 @@ Section-heading tracking, since these are always uppercase and small:
 `roomy` `0.14em`, `standard` `0.16em`, `compact` `0.18em`. Tracking goes
 **up** as size goes down — small caps set solid are unreadable.
 
+A style variant (§3) may change a template's font but never its type ramp
+or density class.
+
 ### Token names
 
 These are the shared CSS custom properties the ramp is implemented as, set
@@ -300,6 +303,25 @@ The dark header's contact dots use one fixed swatch (orange, matching the
 two-tone name's accent half).
 
 ---
+
+### Style variants (v1.6)
+
+Every template ships three looks (`src/utils/templateVariants.js`). A look is
+the template's own palette variables, plus a font from `CV_FONT_OPTIONS` and
+a headings colour.
+
+- Variant #1 equals the stylesheet defaults, so a CV that never picks a look
+  renders exactly as before.
+- This section's colour rule applies per variant: one accent, one tint, ink
+  and muted text. Each look is checked on its own.
+- Dark bands (sidebars, header bands) stay dark in every look.
+- A new colour literal on a template stylesheet's root must be a palette
+  variable. The keep list, which may stay literal: shadows, print guards,
+  builder-only UI, ATS-only rules, white glyphs on accent fills, photo
+  rings, and translucent white on dark bands.
+- `check:template-variants` enforces that variant #1 matches the CSS
+  defaults, each variable is declared once, text pairs meet contrast
+  (traced from real CSS usage), and no `color-mix()` is used.
 
 ## 4. Section-heading treatments
 
