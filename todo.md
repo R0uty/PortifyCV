@@ -2249,7 +2249,7 @@ runtime registry~~ (done 1.6.10); ~~looks on the landing page's marquee and hero
 under the card; the hero stays on original looks by the user's choice). The
 selected template in share links was done in 1.6.8.
 
-Follow-ups from the Phase 4 final review (not started):
+Follow-ups from the Phase 4 final review (all done, 1.6.6-1.6.7):
 
 - ~~A gallery "Use" on another template whose stored look doesn't change
   resets the font and headings colour with no undo step~~ — fixed 1.6.6
@@ -2275,7 +2275,7 @@ reducers, feedback, docx-export, section-schema, section-columns,
 template-pages, template-variants); `CI=1 npm run test:e2e` 843 passed
 (4.9m), 0 failed; `npm run build` ok.
 
-### Field filters (1.6.12) — follow-ups (not started)
+### Field filters (1.6.12) — follow-ups (all done, 1.6.13-1.6.16)
 
 From the task and final reviews of the field filters (spec
 `docs/superpowers/specs/2026-10-11-template-field-filters-design.md`). The
