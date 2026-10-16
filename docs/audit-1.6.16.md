@@ -70,6 +70,8 @@ worker check would keep it fixed; today no test exercises the worker.
 
 ### 2. Plain HTTP isn't upgraded to HTTPS
 
+**Status:** fixed 2026-10-17 in the Cloudflare dashboard ("Always Use HTTPS" and HSTS; verified with `curl`: `http://` answers `301` to the same `https://` URL, path and query kept, and HTTPS sends `strict-transport-security: max-age=15552000; includeSubDomains` plus `x-content-type-options: nosniff`). HSTS preload left off on purpose.
+
 **Severity:** medium (transport security). `http://portifycv.app/`
 answers `200 OK` with the full page over unencrypted HTTP, and HTTPS
 responses send no `Strict-Transport-Security` header. A visitor who types

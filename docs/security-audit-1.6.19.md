@@ -102,7 +102,10 @@ view instead of from `index.html`, or exclude `/cv` in the AdSense
 dashboard's Auto ads page exclusions (which stops ad placement but not the
 script). A CSP is the stronger follow-up (see "Not tested").
 
-### Cross-reference (Medium, open): plain HTTP and HSTS
+### Cross-reference (Medium, fixed 2026-10-17): plain HTTP and HSTS
+
+**Status:** fixed in the Cloudflare dashboard; see `audit-1.6.16.md`
+finding 2 for the verification. As found:
 
 `audit-1.6.16.md` finding 2 is still open on the live site:
 `http://portifycv.app/` answers `200` over unencrypted HTTP and HTTPS sends
