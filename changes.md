@@ -4,6 +4,31 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## ATS view in Direct Edit — 1.6.25, 2026-10-17
+
+Direct Edit now has an **ATS view** button (top right of the CV, next to
+Sections). It turns on the app-wide ATS-friendly mode, the same setting as
+in Settings and Classic's ATS panel, which Direct Edit used to ignore: the
+editable CV switches to the ATS layout, text stays editable in place,
+section pencils and popups still work, and a PDF exported from Direct Edit
+now uses the ATS layout when it's on. In ATS view the section popup hides
+its Main/Sidebar column control (the ATS layout is one column); moves
+already made are kept for the styled layout. Keyword scoring stays in
+Classic's ATS panel.
+
+Also fixed on the way: the shared flat layout's columns clip their
+overflow, which hid each list entry's drag handle (hung just left of the
+entry) on Minimalist and Tech Executive in Direct Edit, and would have on
+every template's ATS view. The editable copy no longer clips; the export
+copy is unchanged.
+
+The ATS guide, Free CV Templates page and builder guide now point to the
+ATS view button instead of saying ATS mode is Classic-only (1.6.21-1.6.22
+wording). Tests: new "ATS view in Direct Edit" tests in
+`e2e/direct-edit.spec.js` (toggle, inline edit, popups, PDF export on four
+templates) and a Direct Edit ATS stress pass in
+`e2e/template-layout.spec.js` (three templates × four stress CVs, `@slow`).
+
 ## Accurate modified dates for search engines — 1.6.24, 2026-10-12
 
 Each guide page's Article structured data now carries a `dateModified`

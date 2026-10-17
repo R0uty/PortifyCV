@@ -83,7 +83,8 @@ toolbar, then turn on ATS-friendly mode". The same wording is on the Free
 CV Templates page ("switch on ATS-friendly mode from any template") and in
 the checklist. *Product note, not SEO:* the Settings toggle stays visible
 in Direct Edit with no effect, which may be worth its own small fix (it
-could say "applies in Classic mode").
+could say "applies in Classic mode"). **Superseded in 1.6.25:** Direct Edit now honours ATS
+mode (its own "ATS view" button), and the copy points there.
 
 **S5. The ATS guide's export section ignores Word export.** It says HTML is
 the only export with real, selectable text. Word (.docx, shipped

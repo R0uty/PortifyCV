@@ -61,7 +61,7 @@ function getCopy(locale) {
           heading: 'Tarkista CV työpaikkailmoitusta vasten',
           figureLabel: '"ATS-pisteet ja ehdotukset" -paneeli: ATS-ystävällinen tila -kytkin, ilmoitustekstin kenttä ja lista osuneista ja puuttuvista avainsanoista.',
           caption:
-            'Avaa Klassinen-tilassa lomakekenttien yläpuolelta "ATS-pisteet ja ehdotukset" -paneeli. Sen "ATS-ystävällinen tila" -kytkin vaihtaa esikatselun tasaiseksi, yhden sarakkeen asetteluksi, jonka hakijaseurantajärjestelmät osaavat lukea, ja työpaikkailmoituksen liittäminen listaa avainsanat, jotka CV:stäsi vielä puuttuvat.',
+            'Avaa Klassinen-tilassa lomakekenttien yläpuolelta "ATS-pisteet ja ehdotukset" -paneeli. Sen "ATS-ystävällinen tila" -kytkin vaihtaa esikatselun tasaiseksi, yhden sarakkeen asetteluksi, jonka hakijaseurantajärjestelmät osaavat lukea (Suora muokkaus -tilassa saman tekee CV:n oikean yläkulman ATS-näkymä-painike), ja työpaikkailmoituksen liittäminen listaa avainsanat, jotka CV:stäsi vielä puuttuvat.',
         },
         {
           step: 'export',
@@ -135,7 +135,7 @@ function getCopy(locale) {
         heading: 'Check it against the job posting',
         figureLabel: 'The "ATS score and suggestions" panel: an ATS-friendly-mode toggle, a job-description box, and a matched-and-missing keyword list.',
         caption:
-          'In Classic mode, open the "ATS score & suggestions" panel above the form fields. Its ATS-friendly-mode toggle flattens the preview to the single-column layout applicant tracking systems can parse, and pasting a job description lists the keywords your CV is still missing.',
+          'In Classic mode, open the "ATS score & suggestions" panel above the form fields. Its ATS-friendly-mode toggle flattens the preview to the single-column layout applicant tracking systems can parse (in Direct Edit, the ATS view button at the top right of your CV does the same), and pasting a job description lists the keywords your CV is still missing.',
       },
       {
         step: 'export',

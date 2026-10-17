@@ -24,6 +24,11 @@ export default function DirectEditPreview({
   // window clears the CV.
   onClear = null,
   clearArmed = false,
+  // The app-wide ATS-friendly mode (also in Settings and Classic's ATS
+  // panel). When on, both copies below render the ATS layout, so the CV
+  // you edit is the one that exports.
+  atsFriendlyMode = false,
+  onToggleAtsFriendlyMode = null,
 }) {
   // Shadows the --font-sans token (tokens.css) for this subtree only —
   // matches Classic mode's .preview-zoom-wrapper inline style in
@@ -36,7 +41,7 @@ export default function DirectEditPreview({
     theme,
     template: selectedTemplate,
     locale,
-    atsFriendlyMode: false,
+    atsFriendlyMode,
     accentColor,
     headingColor,
     styleVariantId,
@@ -60,6 +65,16 @@ export default function DirectEditPreview({
             templateConfig={templateConfig}
             locale={locale}
           />
+          {onToggleAtsFriendlyMode ? (
+            <button
+              type="button"
+              className={`direct-edit-sections__trigger direct-edit-ats-toggle${atsFriendlyMode ? ' direct-edit-ats-toggle--on' : ''}`}
+              aria-pressed={atsFriendlyMode}
+              onClick={onToggleAtsFriendlyMode}
+            >
+              {locale === 'fi' ? 'ATS-näkymä' : 'ATS view'}
+            </button>
+          ) : null}
           {onLoadDemo ? (
             <button type="button" className="direct-edit-sections__trigger" onClick={onLoadDemo}>
               {locale === 'fi' ? 'Lataa demo-CV' : 'Load demo CV'}
@@ -85,6 +100,7 @@ export default function DirectEditPreview({
           templateConfig={templateConfig}
           locale={locale}
           apiRef={overlayApiRef}
+          atsFriendlyMode={atsFriendlyMode}
         />
       </div>
       {/* What PDF export captures. The PDF exporter clones previewRef's

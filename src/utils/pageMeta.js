@@ -54,7 +54,7 @@ const STATIC_VIEW_HEAD = {
       'How applicant tracking systems actually read a CV, the formatting mistakes that break parsing, and how to check your own CV against real keyword scoring.',
     isArticle: true,
     datePublished: '2026-08-20',
-    dateModified: '2026-10-12',
+    dateModified: '2026-10-17',
   },
   howToWrite: {
     title: 'How to Write a CV - PortifyCV',
@@ -72,7 +72,7 @@ const STATIC_VIEW_HEAD = {
       'A step-by-step walkthrough of PortifyCV: editing right on the CV, the Classic form, templates and looks, ATS keyword checks, and exporting or sharing your CV.',
     isArticle: true,
     datePublished: '2026-09-01',
-    dateModified: '2026-10-12',
+    dateModified: '2026-10-17',
   },
   coverLetterExamples: {
     title: 'Cover Letter Examples - PortifyCV',

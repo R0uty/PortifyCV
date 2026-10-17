@@ -28,7 +28,7 @@ function getCopy(locale) {
       style: 'Tyyli',
       notSureTitle: 'Et ole varma mistä aloittaa?',
       notSureBody:
-        'Valitse mikä tahansa pohja — voit vaihtaa toiseen milloin tahansa menettämättä yhtään kirjoittamaasi tekstiä. Jos hait rooliin, jossa hakemus kulkee hakijaseurantajärjestelmän läpi, kytke ATS-ystävällinen tila päälle mistä tahansa pohjasta ennen vientiä (editorin Klassinen-tilassa).',
+        'Valitse mikä tahansa pohja — voit vaihtaa toiseen milloin tahansa menettämättä yhtään kirjoittamaasi tekstiä. Jos hait rooliin, jossa hakemus kulkee hakijaseurantajärjestelmän läpi, kytke ATS-ystävällinen tila päälle mistä tahansa pohjasta ennen vientiä (editorin ATS-näkymä-painikkeella).',
       ctaLabel: 'Aloita ilman pohjan valintaa',
       linksLabel: 'Katso myös:',
       howToWriteLink: 'Näin kirjoitat CV:n',
@@ -49,7 +49,7 @@ function getCopy(locale) {
     style: 'Style',
     notSureTitle: 'Not sure where to start?',
     notSureBody:
-      'Pick any template — you can switch to another one at any point without losing a single word you’ve written. If you’re applying somewhere your application goes through an applicant tracking system, switch on ATS-friendly mode from any template before exporting (in the builder’s Classic mode).',
+      'Pick any template — you can switch to another one at any point without losing a single word you’ve written. If you’re applying somewhere your application goes through an applicant tracking system, switch on ATS-friendly mode from any template before exporting (the builder’s ATS view button).',
     ctaLabel: 'Start without picking a template',
     linksLabel: 'See also:',
     howToWriteLink: 'How to Write a CV',

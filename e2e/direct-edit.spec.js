@@ -933,10 +933,9 @@ test.describe('Direct Edit builder', () => {
   // Navy Professional and Modern Orange render the SAME Showcase in ATS
   // mode, recoloured to monochrome with a transparent sidebar. Their
   // moved-section CSS recolours main-column markup for a dark rail, which
-  // must not follow it into ATS mode, where that rail is white. Direct Edit
-  // itself always renders the designer layout (DirectEditPreview passes
-  // atsFriendlyMode={false}), so ATS mode is checked in Classic's preview,
-  // which a move made in Direct Edit carries into.
+  // must not follow it into ATS mode, where that rail is white. Checked in
+  // Classic's preview, which a move made in Direct Edit carries into (Direct
+  // Edit's own ATS view renders the same Showcase, 1.6.25).
   for (const [label, sectionKey] of [['Navy Professional', 'education'], ['Modern Orange', 'certificates']]) {
     test(`${label}: a section moved to the sidebar stays readable in ATS mode`, async ({ page }) => {
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
@@ -1134,15 +1133,11 @@ test.describe('Direct Edit builder', () => {
     expect(clones[0]).toEqual({ editingChrome: 0, hasHiddenEntry: false, hasVisibleEntry: true, commaSkillLines: 1 })
   })
 
-  // Regression guard for Fix 2 (final whole-branch review): DirectEditPreview
-  // hardcodes atsFriendlyMode={false} on its CVPreview call, but
-  // handleExport used to compute exportPdfMode from the app's real
-  // atsFriendlyMode toggle regardless of builderMode — so with ATS mode ON
-  // while in Direct Edit, waitForPreviewModeSync polled for a
-  // `preview-document--ats` class the DOM would never produce, timed out,
-  // and PDF export failed every time with no way to recover (see Fix 5:
-  // Settings, where the ATS toggle lives, was itself unreachable on desktop
-  // in Direct Edit mode until this same fix wave). Both ATS states must now
+  // Regression guard for Fix 2 (final whole-branch review): the export's
+  // mode and the preview's must agree, or waitForPreviewModeSync polls for
+  // a class the DOM never produces and PDF export fails every time. Direct
+  // Edit used to force ATS off on screen while the export read the real
+  // toggle; since 1.6.25 both follow the toggle. Both ATS states must
   // succeed.
   test('PDF export succeeds in Direct Edit mode with ATS mode off and on', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
@@ -2098,4 +2093,90 @@ test.describe('Direct Edit pencils and Load demo CV', () => {
     await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
     await expect(nameField).toHaveText('Someone Else')
   })
+})
+
+// ATS view in Direct Edit (1.6.25): the app-wide ATS-friendly mode now
+// applies here too, so the CV you edit is the ATS layout you export.
+test.describe('ATS view in Direct Edit', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+  })
+
+  const atsToggle = (page) => page.locator('.direct-edit-actions').getByRole('button', { name: 'ATS view' })
+
+  test('the toggle switches the editable CV and its export copy to the ATS layout, and back', async ({ page }) => {
+    await pickTemplate(page, 'Developer')
+    await expect(atsToggle(page)).toHaveAttribute('aria-pressed', 'false')
+    await expect(page.locator('.direct-edit-preview .preview-document--ats')).toHaveCount(0)
+
+    await atsToggle(page).click()
+    await expect(atsToggle(page)).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.locator('.direct-edit-preview .preview-document--ats')).toBeVisible()
+    await expect(page.locator('.direct-edit-export-source .preview-document--ats')).toHaveCount(1)
+
+    // One setting app-wide: Settings and Classic follow it.
+    await page.getByRole('button', { name: 'Settings' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Settings' })
+    await expect(dialog.locator('.settings-row', { hasText: 'ATS-friendly mode' }).getByRole('checkbox')).toBeChecked()
+    await page.getByRole('button', { name: 'Close' }).click()
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await expect(page.locator('.app-shell__preview .preview-document--ats')).toBeVisible()
+
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await atsToggle(page).click()
+    await expect(atsToggle(page)).toHaveAttribute('aria-pressed', 'false')
+    await expect(page.locator('.direct-edit-preview .preview-document--ats')).toHaveCount(0)
+    await expect(page.locator('.direct-edit-export-source .preview-document--ats')).toHaveCount(0)
+  })
+
+  test('text stays editable in place in the ATS layout', async ({ page }) => {
+    await pickTemplate(page, 'Developer')
+    await atsToggle(page).click()
+
+    const nameField = page.locator('.direct-edit-preview [data-cv-name] .direct-edit-field')
+    await expect(nameField).toHaveAttribute('contenteditable', 'true')
+    await nameField.click()
+    await page.keyboard.press('Control+A')
+    await page.keyboard.type('Jordan Rivera')
+    await nameField.blur()
+
+    await expect(page.locator('.direct-edit-export-source [data-cv-name]')).toHaveText('Jordan Rivera')
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Jordan Rivera')
+  })
+
+  // The ATS layout is one column, so the popup drops its Main/Sidebar
+  // control there; everything else in it still works.
+  test('section pencils open their popups, without the column control', async ({ page }) => {
+    await pickTemplate(page, 'Developer')
+
+    await openSectionPopup(page, 'education')
+    await expect(page.getByRole('group', { name: 'Column' })).toBeVisible()
+    await page.keyboard.press('Escape')
+
+    await atsToggle(page).click()
+    await page.locator('[data-direct-edit-pencil="education"]').click()
+    const popup = page.locator('.direct-edit-popup')
+    await expect(popup).toBeVisible()
+    await expect(popup).toContainText('Education')
+    await expect(page.getByRole('group', { name: 'Column' })).toHaveCount(0)
+  })
+
+  for (const label of ['Minimalist', 'Navy Professional', 'Modern Orange', 'Creative']) {
+    test(`${label}: a PDF exported with ATS view on uses the ATS layout`, async ({ page }) => {
+      await pickTemplate(page, label)
+      await atsToggle(page).click()
+      await expect(page.locator('.direct-edit-export-source [data-export-variant]').first()).toBeAttached()
+      // Navy Professional and Modern Orange render their own Showcase
+      // simplified (a `showcase--ats` class); the rest use the flat ATS
+      // document. Either way the export copy is in ATS mode.
+      const isAts = await page.locator('.direct-edit-export-source').evaluate(
+        (root) => Boolean(root.querySelector('.preview-document--ats, [class*="showcase--ats"]')),
+      )
+      expect(isAts).toBe(true)
+      await exportPdfAndExpectSuccess(page)
+    })
+  }
 })

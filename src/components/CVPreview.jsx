@@ -342,7 +342,8 @@ function CVPreview({
   // order and everything else about the layout intact.
   //
   // Wrapped in DirectEditProvider unconditionally, as Timeline is: Direct
-  // Edit always renders with atsFriendlyMode={false}, and in Classic/ATS
+  // Edit renders this in either mode (its "ATS view" follows
+  // atsFriendlyMode, 1.6.25) and edits both, while in Classic
   // directEditDispatch is null, so the provider stays inert there.
   if (variant === 'navyProfessional') {
     return (

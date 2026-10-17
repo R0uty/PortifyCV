@@ -128,6 +128,7 @@ export default function SectionEditorPopup({
   templateConfig,
   locale,
   focusEntryIndex = null,
+  atsFriendlyMode = false,
   onClose,
 }) {
   const isFinnish = locale === 'fi'
@@ -217,7 +218,10 @@ export default function SectionEditorPopup({
   // config (see sectionColumns.js); templateConfig here is the effective
   // one, which carries it as baseConfig.
   const baseTemplateConfig = templateConfig.baseConfig ?? templateConfig
-  const showColumnControl = isOrderableSection && canMoveSection(baseTemplateConfig, sectionKey)
+  // ATS mode lays every section out in one column, so a Main/Sidebar
+  // choice would only reorder the page there. Moves already made are kept
+  // and apply again once ATS mode is off.
+  const showColumnControl = !atsFriendlyMode && isOrderableSection && canMoveSection(baseTemplateConfig, sectionKey)
   const currentColumn = getSectionColumn(templateConfig, sectionKey)
 
   const moveToColumn = (column) => {

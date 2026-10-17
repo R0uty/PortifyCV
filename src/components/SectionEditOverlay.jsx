@@ -46,6 +46,9 @@ export default function SectionEditOverlay({
   // Filled with { openSectionFromNav(sectionKey) } for the builder's nav
   // rail, which lives outside this component.
   apiRef = null,
+  // Passed through to the popup, which hides its column control in ATS
+  // mode (the ATS layout is a single column).
+  atsFriendlyMode = false,
 }) {
   const containerRef = useRef(null)
   const popupAnchorRef = useRef(null)
@@ -558,6 +561,7 @@ export default function SectionEditOverlay({
             templateConfig={templateConfig}
             locale={locale}
             focusEntryIndex={focusEntry ? focusEntry.index : null}
+            atsFriendlyMode={atsFriendlyMode}
             onClose={handleClose}
           />
         </div>

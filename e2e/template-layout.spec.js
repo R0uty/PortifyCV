@@ -80,8 +80,8 @@ for (const template of cvTemplates) {
 // exercises ATS-friendly mode, which recolours/restructures several
 // templates (Navy Professional, Modern Orange — see direct-edit.spec.js)
 // enough that a stress-fixture-specific layout break there would otherwise
-// go uncaught. Classic mode only — ATS mode is a Classic-only concern
-// (DirectEditPreview.jsx hardcodes atsFriendlyMode={false}).
+// go uncaught. Checked in Classic's preview; the Direct Edit pass below
+// covers its ATS view (1.6.25) on a few templates.
 for (const template of cvTemplates) {
   for (const [fixtureId, cv] of Object.entries(STRESS_CVS)) {
     test(`${template.id} / stress:${fixtureId} / ats @slow`, async ({ page }) => {
@@ -102,6 +102,34 @@ for (const template of cvTemplates) {
       const violations = await auditLayout(page, BUILDER_ROOT, { skipRules: ['placeholder'] })
       const { remaining, staleEntries } = filterAllowlisted(violations, LAYOUT_ALLOWLIST, {
         template: template.id, subject: `stress:${fixtureId}`, mode: 'ats-stress',
+      })
+      expect(remaining, 'layout violations').toEqual([])
+      expect(staleEntries, 'allowlist entries that no longer fail — remove them').toEqual([])
+    })
+  }
+}
+
+// Stress tier, Direct Edit's ATS view (1.6.25): the editable copy, with its
+// editing chrome, on one flat-renderer template and the two whose Showcase
+// renders its own ATS pass. Not the full matrix — the Classic ATS loop
+// above already covers every template's ATS layout.
+const DIRECT_EDIT_ROOT = '.direct-edit-preview [data-export-variant]'
+for (const templateId of ['developer', 'navyProfessional', 'modernOrange']) {
+  for (const [fixtureId, cv] of Object.entries(STRESS_CVS)) {
+    test(`${templateId} / stress:${fixtureId} / direct-edit ats @slow`, async ({ page }) => {
+      await page.addInitScript((snapshot) => {
+        window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+        window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
+      }, JSON.stringify(cv))
+      await page.goto(`/cv?template=${templateId}`)
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
+      await page.locator('.direct-edit-actions').getByRole('button', { name: 'ATS view' }).click()
+      await expect(page.locator(DIRECT_EDIT_ROOT)).toContainText(cv.fullName.split(' ')[0])
+      await waitForStableLayout(page)
+
+      const violations = await auditLayout(page, DIRECT_EDIT_ROOT, { skipRules: ['placeholder'] })
+      const { remaining, staleEntries } = filterAllowlisted(violations, LAYOUT_ALLOWLIST, {
+        template: templateId, subject: `stress:${fixtureId}`, mode: 'direct-edit-ats-stress',
       })
       expect(remaining, 'layout violations').toEqual([])
       expect(staleEntries, 'allowlist entries that no longer fail — remove them').toEqual([])

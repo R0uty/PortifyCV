@@ -32,6 +32,15 @@
   border-radius: 8px;
 }
 
+/* The flat renderer's columns clip their overflow (app-shell.css), which
+   also hid EditableList's drag handle, hung 22px left of each entry in the
+   gutter above — on Minimalist and Tech Executive, and on every template's
+   ATS view. The editable copy only; the export copy keeps the clip. */
+.direct-edit-preview .preview-document [data-export-primary],
+.direct-edit-preview .preview-document [data-export-secondary] {
+  overflow: visible;
+}
+
 .direct-edit-entry:hover {
   background: var(--ds-surface-muted, #fafaf9);
 }
@@ -292,6 +301,13 @@
   border-radius: 999px;
   padding: 6px 11px;
   cursor: pointer;
+}
+
+/* "ATS view": pressed while the CV shows the ATS layout. */
+.direct-edit-ats-toggle--on {
+  background: var(--app-text, #16161a);
+  border-color: var(--app-text, #16161a);
+  color: #ffffff;
 }
 
 /* "Clear CV": armed by its first click, like Classic's "Reset form", and

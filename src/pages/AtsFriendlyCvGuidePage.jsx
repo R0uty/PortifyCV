@@ -34,7 +34,7 @@ function getCopy(locale) {
         {
           heading: 'Miten PortifyCV:n ATS-tila auttaa tässä',
           paragraphs: [
-            `ATS-ystävällinen tila litistää minkä tahansa ${TEMPLATE_COUNT} pohjasta yksipalstaiseksi, tekstipainotteiseksi asetteluksi vakioiduilla osiotunnisteilla — sarakkeet, kuvakkeet ja koristeelliset elementit poistuvat kyseisestä renderöinnistä. Vie CV tässä tilassa, kun kohde on ATS eikä ihminen. ATS-tila ja avainsanapisteytys ovat editorin Klassinen-tilassa: Suora muokkaus näyttää ja vie aina pohjan tyylitellyn version.`,
+            `ATS-ystävällinen tila litistää minkä tahansa ${TEMPLATE_COUNT} pohjasta yksipalstaiseksi, tekstipainotteiseksi asetteluksi vakioiduilla osiotunnisteilla — sarakkeet, kuvakkeet ja koristeelliset elementit poistuvat kyseisestä renderöinnistä. Vie CV tässä tilassa, kun kohde on ATS eikä ihminen. Kun tila on päällä, muokkaat suoraan sitä versiota, joka viedään. Avainsanapisteytys on editorin Klassinen-tilassa.`,
           ],
           linkParagraphs: [
             {
@@ -42,7 +42,7 @@ function getCopy(locale) {
               linkText: 'CV-rakentajassa',
               linkTo: ROUTES.builder,
               view: 'builder',
-              after: ' — valitse yläpalkista Klassinen ja kytke ATS-ystävällinen tila päälle Asetuksista tai ATS-tulospaneelista.',
+              after: ' — napsauta CV:n oikeasta yläkulmasta ATS-näkymä (tai kytke ATS-ystävällinen tila päälle Asetuksista).',
             },
           ],
         },
@@ -124,7 +124,7 @@ function getCopy(locale) {
       {
         heading: 'How PortifyCV’s ATS mode helps',
         paragraphs: [
-          `ATS-friendly mode flattens any of the ${TEMPLATE_COUNT} templates into a single-column, text-forward layout with standard section headings — columns, icons, and decorative elements are removed from that render. Export in this mode when the destination is an ATS rather than a person. ATS mode and keyword scoring live in the builder’s Classic mode: Direct Edit always shows and exports the template’s styled version.`,
+          `ATS-friendly mode flattens any of the ${TEMPLATE_COUNT} templates into a single-column, text-forward layout with standard section headings — columns, icons, and decorative elements are removed from that render. Export in this mode when the destination is an ATS rather than a person. While it’s on, the CV you edit is the version you export. Keyword scoring lives in the builder’s Classic mode.`,
         ],
         linkParagraphs: [
           {
@@ -132,7 +132,7 @@ function getCopy(locale) {
             linkText: 'CV builder',
             linkTo: ROUTES.builder,
             view: 'builder',
-            after: ' — choose Classic in the top bar, then turn on ATS-friendly mode in Settings or in the ATS score panel.',
+            after: ' — click ATS view at the top right of your CV (or turn on ATS-friendly mode in Settings).',
           },
         ],
       },
