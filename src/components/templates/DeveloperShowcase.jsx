@@ -17,6 +17,7 @@
 // ramp via `tpl-density-standard`.
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
@@ -141,7 +142,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, showTime
 function SectionHeading({ icon, label, placement }) {
   return (
     <div>
-      <h2
+      <CvHeading as="h2"
         className="dev-showcase__section-title"
         style={{ color: placement === 'side' ? 'var(--dev-sidebar-heading)' : 'var(--dev-primary)' }}
       >
@@ -153,7 +154,7 @@ function SectionHeading({ icon, label, placement }) {
           {sectionIcons[icon]}
         </span>
         {label}
-      </h2>
+      </CvHeading>
     </div>
   )
 }
@@ -654,7 +655,7 @@ export default function DeveloperShowcase({
           <p className="dev-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`} data-cv-name>
+          <CvHeading as="h1" className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`} data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
@@ -663,7 +664,7 @@ export default function DeveloperShowcase({
                 placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
               />
             ) : fullName}
-          </h1>
+          </CvHeading>
           <p className="dev-showcase__role">
             {directEditDispatch ? (
               <EditableField

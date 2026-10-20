@@ -130,7 +130,11 @@ lazy-import list in `CVPreview.jsx` and the prefetch list in
 (`docs/template-audit-phase2.md`, `e2e/template-layout.spec.js`,
 `e2e/template-content.spec.js`, `e2e/helpers/layoutAudit.js`): put
 `data-cv-name` on the name element (every existing `*Showcase.jsx`'s `<h1>`
-has it — the harness's name-line-count rule keys off it) and `data-decorative`
+has it — the harness's name-line-count rule keys off it), and render the
+name and section titles through `CvHeading` (`<CvHeading as="h1">`), never
+a bare `<h1>`/`<h2>`: inside a thumbnail or template-page preview it drops
+the heading tag so the marketing pages keep one real `<h1>` each
+(`e2e/seo-headings.spec.js`, 1.6.26) and `data-decorative`
 on any purely-visual background/decoration node (the harness ignores
 clipped/overflow violations inside one, since those never carry real
 content). Render each experience entry's `achievements` and `technologies`

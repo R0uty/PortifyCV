@@ -24,6 +24,7 @@
 // bordered entry cards and the section order are unchanged.
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
@@ -127,7 +128,7 @@ function SectionHead({ number, title }) {
       <span className="creative-showcase__section-num" aria-hidden="true">
         {String(number).padStart(2, '0')}
       </span>
-      <h2 className="creative-showcase__section-title">{title}</h2>
+      <CvHeading as="h2" className="creative-showcase__section-title">{title}</CvHeading>
     </div>
   )
 }
@@ -503,7 +504,7 @@ export default function CreativeShowcase({
           <p className="creative-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="creative-showcase__name" data-cv-name>
+          <CvHeading as="h1" className="creative-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
@@ -512,7 +513,7 @@ export default function CreativeShowcase({
                 placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
               />
             ) : fullName}
-          </h1>
+          </CvHeading>
           <p className="creative-showcase__role">
             {directEditDispatch ? (
               <EditableField

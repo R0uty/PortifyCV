@@ -35,6 +35,7 @@
 // fix switches into.
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 import '@fontsource/instrument-serif/400.css'
 import '@fontsource/instrument-serif/400-italic.css'
 
@@ -175,7 +176,7 @@ function SectionHead({ icon, title, subtitle }) {
         {sectionIcons[icon]}
       </span>
       <div>
-        <h2 className="portfolio-showcase__section-title">{title}</h2>
+        <CvHeading as="h2" className="portfolio-showcase__section-title">{title}</CvHeading>
         {subtitle ? <p className="portfolio-showcase__section-subtitle">{subtitle}</p> : null}
       </div>
     </div>
@@ -712,7 +713,7 @@ export default function PortfolioShowcase({
           <p className="portfolio-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="portfolio-showcase__name" data-cv-name>
+          <CvHeading as="h1" className="portfolio-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
@@ -721,7 +722,7 @@ export default function PortfolioShowcase({
                 placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
               />
             ) : fullName}
-          </h1>
+          </CvHeading>
           <p className="portfolio-showcase__role">
             {directEditDispatch ? (
               <EditableField

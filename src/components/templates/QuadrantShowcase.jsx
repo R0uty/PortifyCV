@@ -24,6 +24,7 @@
 // dividers, soft-cyan skill tags), and the About rebalance above.
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
@@ -135,7 +136,7 @@ function SectionHead({ icon, title }) {
       <span className="quadrant-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
-      <h2 className="quadrant-showcase__section-title">{title}</h2>
+      <CvHeading as="h2" className="quadrant-showcase__section-title">{title}</CvHeading>
     </div>
   )
 }
@@ -465,7 +466,7 @@ export default function QuadrantShowcase({
         <p className="quadrant-showcase__kicker" data-export-ignore="true">
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
-        <h1 className="quadrant-showcase__name" data-cv-name>
+        <CvHeading as="h1" className="quadrant-showcase__name" data-cv-name>
           {directEditDispatch ? (
             <EditableField
               as="span"
@@ -474,7 +475,7 @@ export default function QuadrantShowcase({
               placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
             />
           ) : fullName}
-        </h1>
+        </CvHeading>
         <p className="quadrant-showcase__role">
           {directEditDispatch ? (
             <EditableField

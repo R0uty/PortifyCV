@@ -15,6 +15,7 @@
 // renderer, which made it read as a near-twin of Modern Professional.
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
@@ -125,7 +126,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst,
 function SectionHead({ title }) {
   return (
     <div className="tech-exec-showcase__section-head">
-      <h2 className="tech-exec-showcase__section-title">{title}</h2>
+      <CvHeading as="h2" className="tech-exec-showcase__section-title">{title}</CvHeading>
     </div>
   )
 }
@@ -528,7 +529,7 @@ export default function TechExecShowcase({
           <p className="tech-exec-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="tech-exec-showcase__name" data-cv-name>
+          <CvHeading as="h1" className="tech-exec-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
@@ -537,7 +538,7 @@ export default function TechExecShowcase({
                 placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
               />
             ) : fullName}
-          </h1>
+          </CvHeading>
           <p className="tech-exec-showcase__role">
             {directEditDispatch ? (
               <EditableField

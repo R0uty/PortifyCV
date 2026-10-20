@@ -19,6 +19,7 @@
 // CreativeShowcase for the more colorful counterexamples).
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
@@ -164,7 +165,7 @@ function SectionHead({ icon, title }) {
       <span className="modern-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
-      <h2 className="modern-showcase__section-title">{title}</h2>
+      <CvHeading as="h2" className="modern-showcase__section-title">{title}</CvHeading>
     </div>
   )
 }
@@ -574,7 +575,7 @@ export default function ModernShowcase({
           <p className="modern-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="modern-showcase__name" data-cv-name>
+          <CvHeading as="h1" className="modern-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
@@ -583,7 +584,7 @@ export default function ModernShowcase({
                 placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
               />
             ) : fullName}
-          </h1>
+          </CvHeading>
           <p className="modern-showcase__role">
             {directEditDispatch ? (
               <EditableField

@@ -25,6 +25,7 @@
 // adopted.)
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
@@ -144,9 +145,9 @@ function SectionHead({ title, color }) {
         className={`colorful-compact-showcase__section-dot colorful-compact-showcase__section-dot--${color}`}
         aria-hidden="true"
       />
-      <h2 className={`colorful-compact-showcase__section-title colorful-compact-showcase__section-title--${color}`}>
+      <CvHeading as="h2" className={`colorful-compact-showcase__section-title colorful-compact-showcase__section-title--${color}`}>
         {title}
-      </h2>
+      </CvHeading>
     </div>
   )
 }
@@ -493,7 +494,7 @@ export default function ColorfulCompactShowcase({
           {/* The two-tone split can't live inside one contentEditable field,
               so Direct Edit shows the whole name as one field (in the lead
               colour — see colorfulCompact.css), like Modern Timeline. */}
-          <h1 className="colorful-compact-showcase__name" data-cv-name>
+          <CvHeading as="h1" className="colorful-compact-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
@@ -507,7 +508,7 @@ export default function ColorfulCompactShowcase({
                 {nameRest ? <> <span className="colorful-compact-showcase__name-accent">{nameRest}</span></> : null}
               </>
             )}
-          </h1>
+          </CvHeading>
           <p className="colorful-compact-showcase__role">
             {directEditDispatch ? (
               <EditableField

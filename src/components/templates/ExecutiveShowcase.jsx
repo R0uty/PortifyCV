@@ -21,6 +21,7 @@
 // Professional / Modern Orange.
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import EditableField from '../EditableField'
@@ -175,7 +176,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, showMetr
 function SectionHead({ title }) {
   return (
     <div className="executive-showcase__section-head">
-      <h2 className="executive-showcase__section-title">{title}</h2>
+      <CvHeading as="h2" className="executive-showcase__section-title">{title}</CvHeading>
     </div>
   )
 }
@@ -657,7 +658,7 @@ export default function ExecutiveShowcase({
           <p className="executive-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="executive-showcase__name" data-cv-name>
+          <CvHeading as="h1" className="executive-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
@@ -666,7 +667,7 @@ export default function ExecutiveShowcase({
                 placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
               />
             ) : fullName}
-          </h1>
+          </CvHeading>
           <p className="executive-showcase__role">
             {directEditDispatch ? (
               <EditableField

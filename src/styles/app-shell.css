@@ -3533,6 +3533,8 @@ select.floating-field__control {
    blanket rule to lower its min-content size. */
 .preview-document h3,
 .preview-document h4,
+.preview-document [data-cv-heading='h3'],
+.preview-document [data-cv-heading='h4'],
 .preview-document p,
 .preview-document span {
   overflow-wrap: break-word;

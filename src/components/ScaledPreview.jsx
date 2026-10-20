@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import CVPreview from './CVPreview'
+import { DecorativeHeadingsContext } from './cvHeadingContext'
 import { loadCvFont } from '../utils/cvFonts'
 
 // Same native width TemplateThumbnail renders at (see its comment): the CV
@@ -57,21 +58,24 @@ function ScaledPreview({
         className="scaled-preview__page"
         ref={pageRef}
         aria-hidden="true"
+        data-nosnippet
         style={{
           ...(scale ? { transform: `scale(${scale})` } : null),
           // The look's font, as TemplateThumbnail's --font-sans override.
           ...(fontStack ? { '--font-sans': fontStack } : null),
         }}
       >
-        <CVPreview
-          formData={formData}
-          template={template}
-          locale={locale}
-          atsFriendlyMode={atsFriendlyMode}
-          accentColor={accentColor}
-          headingColor={headingColor}
-          styleVariantId={styleVariantId}
-        />
+        <DecorativeHeadingsContext.Provider value>
+          <CVPreview
+            formData={formData}
+            template={template}
+            locale={locale}
+            atsFriendlyMode={atsFriendlyMode}
+            accentColor={accentColor}
+            headingColor={headingColor}
+            styleVariantId={styleVariantId}
+          />
+        </DecorativeHeadingsContext.Provider>
       </div>
     </div>
   )

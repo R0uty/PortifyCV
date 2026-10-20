@@ -23,6 +23,7 @@
 // monogram instead, so it never reads as an empty hole.
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
@@ -36,7 +37,7 @@ import { renderExperienceEntry } from './directEditExperienceEntry'
 function SectionHead({ title }) {
   return (
     <div className="portrait-showcase__section-head">
-      <h2 className="portrait-showcase__section-title">{title}</h2>
+      <CvHeading as="h2" className="portrait-showcase__section-title">{title}</CvHeading>
     </div>
   )
 }
@@ -363,14 +364,14 @@ export default function PortraitShowcase({
           <p className="portrait-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="portrait-showcase__name" data-cv-name>
+          <CvHeading as="h1" className="portrait-showcase__name" data-cv-name>
             <EditableField
               as="span"
               path={{ kind: 'root', field: 'fullName' }}
               value={formData.fullName}
               placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
             />
-          </h1>
+          </CvHeading>
           <p className="portrait-showcase__role">
             <EditableField
               as="span"

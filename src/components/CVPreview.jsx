@@ -4,6 +4,7 @@
 // Each template config (from ./templates/) provides CSS class getters and layout flags.
 
 import { lazy, memo, Suspense, useMemo } from 'react'
+import CvHeading from './CvHeading'
 
 import { createCvSnapshot } from '../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../utils/cvForm'
@@ -739,7 +740,7 @@ function CVPreview({
           {sectionIcons[key]}
         </span>
       ) : null}
-      <h4 className={sectionTitleClasses} style={headingColor ? { color: headingColor } : undefined}>{label}</h4>
+      <CvHeading as="h4" className={sectionTitleClasses} style={headingColor ? { color: headingColor } : undefined}>{label}</CvHeading>
     </div>
   )
 
@@ -1945,7 +1946,7 @@ function CVPreview({
             </p>
 
             {/* Full name heading — uses template-specific font size and weight */}
-            <h3
+            <CvHeading as="h3"
               data-cv-name
               className={`leading-none ${
                 atsFriendlyMode ? 'mt-2 text-4xl font-semibold tracking-tight text-gray-900' : t.headerTitle()
@@ -1958,7 +1959,7 @@ function CVPreview({
                 value={formData.fullName}
                 placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
               />
-            </h3>
+            </CvHeading>
 
             {/* Professional title / subtitle */}
             <p className={resolvedHeaderSubtitleClasses}>

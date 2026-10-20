@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from 'react'
 
 import CVPreview from './CVPreview'
+import { DecorativeHeadingsContext } from './cvHeadingContext'
 import { loadCvFont } from '../utils/cvFonts'
 
 // Matches .template-gallery__thumb-page's fixed width in app-shell.css —
@@ -62,6 +63,7 @@ const TemplateThumbnail = memo(function TemplateThumbnail({
       <div
         className="template-gallery__thumb-page"
         aria-hidden="true"
+        data-nosnippet
         style={{
           ...(scale ? { transform: `scale(${scale})` } : null),
           // Shadows --font-sans for this thumbnail only — see the identical
@@ -73,14 +75,16 @@ const TemplateThumbnail = memo(function TemplateThumbnail({
           ...(fontStack ? { '--font-sans': fontStack } : null),
         }}
       >
-        <CVPreview
-          formData={formData}
-          template={templateId}
-          locale={locale}
-          headingColor={headingColor}
-          accentColor={accentColor}
-          styleVariantId={styleVariantId}
-        />
+        <DecorativeHeadingsContext.Provider value>
+          <CVPreview
+            formData={formData}
+            template={templateId}
+            locale={locale}
+            headingColor={headingColor}
+            accentColor={accentColor}
+            styleVariantId={styleVariantId}
+          />
+        </DecorativeHeadingsContext.Provider>
       </div>
     </div>
   )

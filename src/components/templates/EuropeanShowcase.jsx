@@ -32,6 +32,7 @@
 // re-checking once the layout actually stabilizes.
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
@@ -48,7 +49,7 @@ function SectionHead({ title }) {
   return (
     <div className="european-showcase__section-head">
       <span className="european-showcase__section-tick" aria-hidden="true" />
-      <h2 className="european-showcase__section-title">{title}</h2>
+      <CvHeading as="h2" className="european-showcase__section-title">{title}</CvHeading>
     </div>
   )
 }
@@ -533,7 +534,7 @@ export default function EuropeanShowcase({
           <p className="european-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="european-showcase__name" data-cv-name>
+          <CvHeading as="h1" className="european-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
@@ -542,7 +543,7 @@ export default function EuropeanShowcase({
                 placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
               />
             ) : fullName}
-          </h1>
+          </CvHeading>
           <p className="european-showcase__role">
             {directEditDispatch ? (
               <EditableField

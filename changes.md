@@ -4,6 +4,22 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template previews no longer add headings to the page — 1.6.26, 2026-10-20
+
+Phase 1 of the search plan (SEO and design review, 2026-10-20). Template
+thumbnails and template-page previews render a whole CV, and its name and
+section titles were real headings: search engines read the front page as
+37 `<h1>`s (36 of them "John Doe") and 321 `<h2>`s, the Free CV Templates
+page as 18 and 150, and every template page had a second `<h1>`. Inside
+those previews the CV's headings are now styled `div`s (new `CvHeading`,
+switched by `DecorativeHeadingsContext` in `TemplateThumbnail` and
+`ScaledPreview`), and the previews carry `data-nosnippet`. Each of those
+pages now has exactly one `<h1>`; the front page has 3 `<h2>`s. Nothing
+looks different: every template's thumbnail headings were measured
+against 1.6.25 (computed styles and box sizes) and are identical. The
+builder's own preview and every export keep real headings.
+`e2e/seo-headings.spec.js` guards both.
+
 ## ATS view in Direct Edit — 1.6.25, 2026-10-17
 
 Direct Edit now has an **ATS view** button (top right of the CV, next to

@@ -135,6 +135,24 @@ h6 {
   letter-spacing: -0.02em;
 }
 
+/* A CV heading rendered without its tag inside a marketing preview
+   (CvHeading.jsx): the reset above plus the browser's own heading
+   defaults, so it looks exactly like the <hN> it replaces. Any template
+   class sets its own size/weight later in the cascade, as it does for
+   the real tag. */
+[data-cv-heading] {
+  display: block;
+  margin: 0;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: bold;
+}
+
+[data-cv-heading='h1'] { font-size: 2em; }
+[data-cv-heading='h2'] { font-size: 1.5em; }
+[data-cv-heading='h3'] { font-size: 1.17em; }
+[data-cv-heading='h4'] { font-size: 1em; }
+
 p {
   margin: 0;
 }

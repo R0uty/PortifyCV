@@ -20,6 +20,7 @@
 // the user has added a photo and left it visible for this template.
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
@@ -36,7 +37,7 @@ function SectionHead({ number, title }) {
       <span className="editorial-showcase__section-num" aria-hidden="true">
         {String(number).padStart(2, '0')}
       </span>
-      <h2 className="editorial-showcase__section-title">{title}</h2>
+      <CvHeading as="h2" className="editorial-showcase__section-title">{title}</CvHeading>
     </div>
   )
 }
@@ -342,14 +343,14 @@ export default function EditorialShowcase({
           <p className="editorial-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="editorial-showcase__name" data-cv-name>
+          <CvHeading as="h1" className="editorial-showcase__name" data-cv-name>
             <EditableField
               as="span"
               path={{ kind: 'root', field: 'fullName' }}
               value={formData.fullName}
               placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
             />
-          </h1>
+          </CvHeading>
           <p className="editorial-showcase__role">
             <EditableField
               as="span"

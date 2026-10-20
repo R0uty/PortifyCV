@@ -23,6 +23,7 @@
 // the one that fits the exported page — not necessarily the on-screen one.
 
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
@@ -265,7 +266,7 @@ export default function CompactShowcase({
     if (key === 'skills') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="skills" data-export-placement="main">
-          <h2 className="compact-showcase__section-title">{copy.skills}</h2>
+          <CvHeading as="h2" className="compact-showcase__section-title">{copy.skills}</CvHeading>
           {directEditDispatch ? null : skillCategories.length > 0 ? (
             <div className="compact-showcase__skill-groups">
               {skillCategories.map((cat) => (
@@ -295,7 +296,7 @@ export default function CompactShowcase({
     if (key === 'experience') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="experience" data-export-placement="main">
-          <h2 className="compact-showcase__section-title">{copy.experience}</h2>
+          <CvHeading as="h2" className="compact-showcase__section-title">{copy.experience}</CvHeading>
           <div className="compact-showcase__entry-list">
             {directEditDispatch ? (
               <EditableList
@@ -326,7 +327,7 @@ export default function CompactShowcase({
     if (key === 'projects') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="projects" data-export-placement="main">
-          <h2 className="compact-showcase__section-title">{copy.projects}</h2>
+          <CvHeading as="h2" className="compact-showcase__section-title">{copy.projects}</CvHeading>
           <div className="compact-showcase__entry-list">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -357,7 +358,7 @@ export default function CompactShowcase({
     if (key === 'education') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="education" data-export-placement="main">
-          <h2 className="compact-showcase__section-title">{copy.education}</h2>
+          <CvHeading as="h2" className="compact-showcase__section-title">{copy.education}</CvHeading>
           <div className="compact-showcase__entry-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => {
@@ -386,7 +387,7 @@ export default function CompactShowcase({
     if (key === 'certificates') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="certificates" data-export-placement="main">
-          <h2 className="compact-showcase__section-title">{copy.certificates}</h2>
+          <CvHeading as="h2" className="compact-showcase__section-title">{copy.certificates}</CvHeading>
           <div className="compact-showcase__entry-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -410,7 +411,7 @@ export default function CompactShowcase({
     if (key === 'languages') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="languages" data-export-placement="main">
-          <h2 className="compact-showcase__section-title">{copy.languages}</h2>
+          <CvHeading as="h2" className="compact-showcase__section-title">{copy.languages}</CvHeading>
           {snapshot.languages.length > 0 ? (
             <p className="compact-showcase__inline-list">
               {snapshot.languages.map((item, index) => (
@@ -432,7 +433,7 @@ export default function CompactShowcase({
     if (key === 'links') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="links" data-export-placement="main">
-          <h2 className="compact-showcase__section-title">{copy.links}</h2>
+          <CvHeading as="h2" className="compact-showcase__section-title">{copy.links}</CvHeading>
           {linkEntries.length > 0 ? (
             <div className="compact-showcase__link-row">
               {linkEntries.map(([linkKey, value]) => (
@@ -455,7 +456,7 @@ export default function CompactShowcase({
     if (key === 'interests') {
       return (
         <section key={key} className="compact-showcase__section" data-export-section="interests" data-export-placement="main">
-          <h2 className="compact-showcase__section-title">{copy.interests}</h2>
+          <CvHeading as="h2" className="compact-showcase__section-title">{copy.interests}</CvHeading>
           {snapshot.interests.length > 0 ? (
             <p className="compact-showcase__inline-list">
               {snapshot.interests.map((item, index) => (
@@ -501,7 +502,7 @@ export default function CompactShowcase({
           <p className="compact-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="compact-showcase__name" data-cv-name>
+          <CvHeading as="h1" className="compact-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
@@ -510,7 +511,7 @@ export default function CompactShowcase({
                 placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
               />
             ) : fullName}
-          </h1>
+          </CvHeading>
           <p className="compact-showcase__role">
             {directEditDispatch ? (
               <EditableField
@@ -555,7 +556,7 @@ export default function CompactShowcase({
 
       {directEditDispatch || about ? (
         <section className="compact-showcase__section compact-showcase__section--summary" data-export-section="about" data-export-placement="main">
-          <h2 className="compact-showcase__section-title">{copy.summary}</h2>
+          <CvHeading as="h2" className="compact-showcase__section-title">{copy.summary}</CvHeading>
           <p className="compact-showcase__summary">
             {directEditDispatch ? (
               <EditableField

@@ -18,6 +18,7 @@
 // data-name-align, handled in classicProfessional.css.
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder } from '../../utils/cvForm'
@@ -93,7 +94,7 @@ export default function ClassicProfessionalShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about">
-          <h2 className="classic-professional-showcase__heading">{copy.summary}</h2>
+          <CvHeading as="h2" className="classic-professional-showcase__heading">{copy.summary}</CvHeading>
           <p className="classic-professional-showcase__summary">
             <EditableField
               as="span"
@@ -114,7 +115,7 @@ export default function ClassicProfessionalShowcase({
     if (key === 'experience') {
       return (
         <Section key={key} id="experience">
-          <h2 className="classic-professional-showcase__heading">{copy.experience}</h2>
+          <CvHeading as="h2" className="classic-professional-showcase__heading">{copy.experience}</CvHeading>
           <div className="classic-professional-showcase__entry-list">
             {directEditDispatch ? (
               <EditableList
@@ -150,7 +151,7 @@ export default function ClassicProfessionalShowcase({
     if (key === 'education') {
       return (
         <Section key={key} id="education">
-          <h2 className="classic-professional-showcase__heading">{copy.education}</h2>
+          <CvHeading as="h2" className="classic-professional-showcase__heading">{copy.education}</CvHeading>
           <div className="classic-professional-showcase__entry-list">
             {snapshot.education.length > 0 ? (
               snapshot.education.map((item, index) => {
@@ -179,7 +180,7 @@ export default function ClassicProfessionalShowcase({
     if (key === 'skills') {
       return (
         <Section key={key} id="skills">
-          <h2 className="classic-professional-showcase__heading">{copy.skills}</h2>
+          <CvHeading as="h2" className="classic-professional-showcase__heading">{copy.skills}</CvHeading>
           <div className="classic-professional-showcase__tag-row">
             {directEditDispatch ? null : snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill) => (
@@ -201,7 +202,7 @@ export default function ClassicProfessionalShowcase({
     if (key === 'languages') {
       return (
         <Section key={key} id="languages">
-          <h2 className="classic-professional-showcase__heading">{copy.languages}</h2>
+          <CvHeading as="h2" className="classic-professional-showcase__heading">{copy.languages}</CvHeading>
           {snapshot.languages.length > 0 ? (
             <p className="classic-professional-showcase__language-row">
               {snapshot.languages.map((item, index) => (
@@ -224,7 +225,7 @@ export default function ClassicProfessionalShowcase({
     if (key === 'certificates') {
       return (
         <Section key={key} id="certificates">
-          <h2 className="classic-professional-showcase__heading">{copy.certificates}</h2>
+          <CvHeading as="h2" className="classic-professional-showcase__heading">{copy.certificates}</CvHeading>
           <div className="classic-professional-showcase__cert-list">
             {snapshot.certificates.length > 0 ? (
               snapshot.certificates.map((item, index) => (
@@ -265,14 +266,14 @@ export default function ClassicProfessionalShowcase({
         <p className="classic-professional-showcase__kicker" data-export-ignore="true">
           {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
         </p>
-        <h1 className="classic-professional-showcase__name" data-cv-name>
+        <CvHeading as="h1" className="classic-professional-showcase__name" data-cv-name>
           <EditableField
             as="span"
             path={{ kind: 'root', field: 'fullName' }}
             value={formData.fullName}
             placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
           />
-        </h1>
+        </CvHeading>
         <p className="classic-professional-showcase__role">
           <EditableField
             as="span"

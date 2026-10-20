@@ -18,6 +18,7 @@
 // never needs to know the actual color.
 
 import { useMemo } from 'react'
+import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
@@ -64,7 +65,7 @@ function SectionHead({ icon, title }) {
       <span className="timeline-showcase__section-icon" aria-hidden="true">
         {sectionIcons[icon]}
       </span>
-      <h2 className="timeline-showcase__section-title">{title}</h2>
+      <CvHeading as="h2" className="timeline-showcase__section-title">{title}</CvHeading>
     </div>
   )
 }
@@ -501,7 +502,7 @@ export default function TimelineShowcase({
           <p className="timeline-showcase__kicker" data-export-ignore="true">
             {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
           </p>
-          <h1 className="timeline-showcase__name" data-cv-name>
+          <CvHeading as="h1" className="timeline-showcase__name" data-cv-name>
             {directEditDispatch ? (
               <EditableField
                 as="span"
@@ -512,7 +513,7 @@ export default function TimelineShowcase({
             ) : (
               <>{nameFirst}<span className="timeline-showcase__name-accent">{nameRest}</span></>
             )}
-          </h1>
+          </CvHeading>
           <p className="timeline-showcase__role">
             <EditableField
               as="span"
