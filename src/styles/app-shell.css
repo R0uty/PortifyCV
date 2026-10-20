@@ -2462,7 +2462,7 @@ select.floating-field__control {
   align-items: center;
   width: 100%;
   margin: 0;
-  padding: clamp(4rem, 12vh, 8rem) var(--space-5) var(--space-10);
+  padding: clamp(2.5rem, 7vh, 5rem) var(--space-5) var(--space-10);
   background-color: var(--app-bg);
   background-image:
     linear-gradient(to right, var(--grid-paper-line) 1px, transparent 1px),
@@ -2755,6 +2755,62 @@ select.floating-field__control {
 @media (max-width: 1023px) {
   .landing-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* The slim "Start building" bar for phones (LandingPage.jsx shows it once
+   the hero's own buttons have scrolled away). Same white bar and border
+   as the site footer it replaces there. */
+.landing-sticky-cta {
+  display: none;
+}
+
+/* Phones: the hero's buttons inside the first screen. Less top padding,
+   a smaller headline, and the footer no longer stuck over the bottom of
+   the screen. */
+@media (max-width: 639px) {
+  .landing-page {
+    padding-top: var(--space-6);
+  }
+
+  .landing-hero {
+    padding-top: 0;
+  }
+
+  .landing-title {
+    font-size: 2.4rem;
+  }
+
+  .landing-hero__actions {
+    margin-top: var(--space-6);
+  }
+
+  .landing-hero__actions .landing-cta,
+  .landing-hero__templates {
+    padding: 0.85rem 1.4rem;
+  }
+
+  .site-footer {
+    position: static;
+  }
+
+  .landing-sticky-cta:not([hidden]) {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    padding: var(--space-3) max(var(--space-5), env(safe-area-inset-right, 0px)) calc(var(--space-3) + env(safe-area-inset-bottom, 0px)) max(var(--space-5), env(safe-area-inset-left, 0px));
+    background: var(--app-bg);
+    border-top: 1px solid var(--app-border);
+  }
+
+  .landing-sticky-cta .landing-cta {
+    display: block;
+    width: 100%;
+    margin-top: 0;
+    padding: 0.85rem 1rem;
   }
 }
 

@@ -4,6 +4,29 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## "Start building" on the first screen — 1.6.28, 2026-10-20
+
+Phase 1 of the search plan. On a phone the front page's "Start building"
+sat at 732px of an 812px screen, under the footer bar that sticks to the
+bottom of every page, after about 100px of empty space; on a 1366 × 768 or
+1280 × 720 laptop it was below the fold too.
+
+- The hero's buttons now come right after the subtitle, before the bullet
+  list, at every width.
+- Less empty space above the eyebrow line (the shared `landing-page`
+  padding, so the template pages, the templates grid and the examples hub
+  sit a little higher too).
+- On phones (under 640px): a slightly smaller headline, and the footer bar
+  no longer sticks over the screen; it sits at the end of the page.
+  Instead, once the hero's buttons have scrolled away, a slim white bar
+  with "Start building" sticks to the bottom.
+
+The button now sits at 372px on a 375 × 812 phone and is fully visible on
+the first screen at 1366 × 768, 1440 × 900, 1920 × 1080, 768 × 1024 and
+360 × 640 (at 1280 × 720 its bottom 3px touches the footer bar; the
+Phase 2 hero rework addresses the headline's size). Tests: two new phone
+tests in `landing.spec.js`.
+
 ## Titles and the front page headline say what people search for — 1.6.27, 2026-10-20
 
 Phase 1 of the search plan. The front page's title was "PortifyCV - CV

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import InternalNavLink from '../components/InternalNavLink'
 import { cvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
@@ -166,6 +166,22 @@ function LandingPage({
   onNavigateToView = () => {},
 }) {
   const copy = getLandingCopy(locale)
+  const actionsRef = useRef(null)
+  // Phones only (CSS): once the hero's buttons have scrolled up out of
+  // view, a slim bar at the bottom offers "Start building" again.
+  const [showStickyCta, setShowStickyCta] = useState(false)
+
+  useEffect(() => {
+    const actions = actionsRef.current
+    if (!actions || typeof IntersectionObserver === 'undefined') {
+      return undefined
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      setShowStickyCta(!entry.isIntersecting && entry.boundingClientRect.top < 0)
+    })
+    observer.observe(actions)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <section className="landing-page">
@@ -174,12 +190,7 @@ function LandingPage({
           <p className="landing-kicker">{copy.kicker}</p>
           <h1 className="landing-title">{copy.title}</h1>
           <p className="landing-subtitle">{copy.subtitle}</p>
-          <ul className="landing-highlights">
-            {copy.highlights.map((highlight) => (
-              <li key={highlight}>{highlight}</li>
-            ))}
-          </ul>
-          <div className="landing-hero__actions">
+          <div className="landing-hero__actions" ref={actionsRef}>
             <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
               {copy.startButton}
             </button>
@@ -198,6 +209,11 @@ function LandingPage({
               {copy.howItWorksLink}
             </InternalNavLink>
           </div>
+          <ul className="landing-highlights">
+            {copy.highlights.map((highlight) => (
+              <li key={highlight}>{highlight}</li>
+            ))}
+          </ul>
         </div>
 
         <div className="landing-preview">
@@ -244,6 +260,12 @@ function LandingPage({
             </div>
           ))}
         </dl>
+      </div>
+
+      <div className="landing-sticky-cta print:hidden" hidden={!showStickyCta}>
+        <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
+          {copy.startButton}
+        </button>
       </div>
     </section>
   )

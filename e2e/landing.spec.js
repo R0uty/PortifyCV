@@ -122,3 +122,33 @@ test.describe('Landing templates strip looks', () => {
     }
   })
 })
+
+// 1.6.28: on a phone the hero's "Start building" sat at 732px of an 812px
+// screen, under the sticky footer bar. It must be on the first screen and
+// actually clickable there; once it scrolls away, a sticky bar offers it.
+test.describe('Landing page on a phone', () => {
+  test.use({ viewport: { width: 375, height: 812 } })
+
+  test('"Start building" is on the first screen and not covered', async ({ page }) => {
+    await page.goto('/')
+    const cta = page.locator('.landing-hero__actions .landing-cta')
+    await expect(cta).toBeVisible()
+    const box = await cta.boundingBox()
+    expect(box.y + box.height).toBeLessThanOrEqual(812)
+    const topElementIsCta = await cta.evaluate((el) => {
+      const r = el.getBoundingClientRect()
+      return el.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2))
+    })
+    expect(topElementIsCta).toBe(true)
+    await expect(page.locator('.landing-sticky-cta')).toBeHidden()
+  })
+
+  test('a sticky "Start building" bar appears once the hero buttons scroll away', async ({ page }) => {
+    await page.goto('/')
+    await page.evaluate(() => window.scrollTo(0, 1500))
+    const bar = page.locator('.landing-sticky-cta')
+    await expect(bar).toBeVisible()
+    await bar.getByRole('button', { name: 'Start building' }).click()
+    await expect(page).toHaveURL(/\/cv/)
+  })
+})
