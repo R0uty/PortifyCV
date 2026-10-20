@@ -4,6 +4,25 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## The front page shows the editor — 1.6.32, 2026-10-21
+
+Phase 2 of the search plan. The hero's picture was a fanned stack of three
+template thumbnails cut off at the edge; it now shows the builder itself:
+Direct Edit with the demo CV and the About section's popup open, in a
+window frame on the grid paper, in English or Finnish to match the page.
+It's a screenshot taken by `npm run thumbnails` (new:
+`public/thumbnails/product/direct-edit-<en|fi>.webp`, 1280 × 800, about
+52 KB), checked for presence by `check:thumbnails` but not for staleness,
+since it shows the whole builder: rerun `npm run thumbnails` after a
+visible builder change.
+
+The five bullets, which repeated "no login / nothing saved" from the line
+above the headline, are now four chips: 18 templates × 3 looks, ATS view,
+English & Finnish, cover letter included. The subtitle says what you do
+("Click your CV and type. Pick a template, then take it with you as a
+PDF, a Word file or a share link."). Same in Finnish. `LandingHeroPreview`
+and the card-stack styles are gone.
+
 ## A simpler header with a Build my CV button — 1.6.31, 2026-10-21
 
 Phase 2 of the search plan (front page restructure, same look). The

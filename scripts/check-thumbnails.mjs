@@ -57,6 +57,13 @@ for (const template of cvTemplates) {
   }
 }
 
+// The front page's product shot of the builder (1.6.32). Not covered by
+// the inputs hash (it shows the whole builder); regenerate it with the
+// thumbnails when the builder's look changes.
+for (const locale of ['en', 'fi']) {
+  expected.add(`product/direct-edit-${locale}.webp`)
+}
+
 const missing = [...expected].filter((file) => !existsSync(join(outDir, file)))
 check(`all ${expected.size} thumbnails (template × look × locale) exist`, missing.length === 0, missing.join(', '))
 

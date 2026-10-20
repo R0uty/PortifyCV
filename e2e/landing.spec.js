@@ -7,7 +7,7 @@ test.describe('Landing page', () => {
     await page.goto('/')
 
     await expect(page.getByRole('heading', { name: 'Free CV builder. Build it, take it, done.' })).toBeVisible()
-    await expect(page.getByRole('img', { name: 'Example CV built with PortifyCV' })).toBeVisible()
+    await expect(page.getByRole('img', { name: 'The PortifyCV editor: a CV with its About section open for editing beside it.' })).toBeVisible()
     await expect(page.getByText('No login. No data saved.').first()).toBeVisible()
   })
 
@@ -31,17 +31,18 @@ test.describe('Landing page', () => {
     await expect(page.getByRole('heading', { level: 1, name: 'Free CV Templates' })).toBeVisible()
   })
 
-  test('the hero stack shows Minimalist in front, Creative and Developer behind', async ({ page }) => {
+  // 1.6.32: the hero shows the builder itself (Direct Edit, a popup open),
+  // pre-rendered by `npm run thumbnails`, in the visitor's language; and
+  // its facts as chips.
+  test('the hero shows the editor screenshot and the facts as chips', async ({ page }) => {
     await page.goto('/')
+    const shot = page.locator('.landing-product-shot img')
+    await expect(shot).toHaveAttribute('src', '/thumbnails/product/direct-edit-en.webp')
+    await expect.poll(() => shot.evaluate((img) => img.complete && img.naturalWidth)).toBe(1280)
+    await expect(page.getByRole('list', { name: 'Included' }).getByRole('listitem')).toHaveCount(4)
 
-    const imageOf = (modifier) => page.locator(`.landing-preview__thumb--${modifier} img`)
-    await expect(imageOf('front')).toHaveAttribute('src', '/thumbnails/minimal/default-en.webp')
-    await expect(imageOf('back-left')).toHaveAttribute('src', '/thumbnails/creative/default-en.webp')
-    await expect(imageOf('back-right')).toHaveAttribute('src', '/thumbnails/developer/default-en.webp')
-    // Pre-rendered images, not live CVs (1.6.30): every one actually loads.
-    for (const modifier of ['front', 'back-left', 'back-right']) {
-      await expect.poll(() => imageOf(modifier).evaluate((img) => img.complete && img.naturalWidth)).toBeGreaterThan(0)
-    }
+    await page.getByRole('button', { name: 'Switch language' }).click()
+    await expect(shot).toHaveAttribute('src', '/thumbnails/product/direct-edit-fi.webp')
   })
 })
 

@@ -2743,31 +2743,25 @@ select.floating-field__control {
   max-width: 44ch;
 }
 
-.landing-highlights {
+/* The hero's facts as chips (1.6.32), outlined like the templates page's
+   field chips. */
+.landing-chips {
   display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
+  flex-wrap: wrap;
+  gap: var(--space-2);
   margin-top: var(--space-6);
   padding: 0;
   list-style: none;
 }
 
-.landing-highlights li {
-  position: relative;
-  padding-left: 1.2rem;
-  font-size: 0.85rem;
-  line-height: 1.5;
+.landing-chips li {
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-pill);
+  background: var(--app-surface);
+  font-size: 0.8rem;
+  font-weight: 600;
   color: var(--app-text-muted);
-}
-
-.landing-highlights li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.5em;
-  width: 0.5rem;
-  height: 0.5rem;
-  background: #111111;
 }
 
 .landing-cta {
@@ -2865,80 +2859,31 @@ select.floating-field__control {
   color: #ffffff;
 }
 
-/* A real picture of the result is the strongest conversion element for a
-   visual product — LandingHeroPreview renders an actual live CVPreview
-   (Minimalist, demo data) via the same TemplateThumbnail the gallery and
-   the marquee below use, scaled to fit .landing-preview__thumb's width. */
+/* A real picture of the product is the strongest conversion element for a
+   visual product: the hero shows the builder itself (.landing-product-shot
+   below). */
 .landing-preview {
   display: flex;
   justify-content: center;
-  /* The back thumbs are rotated ~11-14deg, so their corners poke past the
-     stack box; on a narrow phone that widened the whole page. Clip only the
-     x-axis — the downward drop shadow still needs to spill vertically. */
-  overflow-x: clip;
+  min-width: 0;
 }
 
-.landing-preview__stack {
-  position: relative;
+/* The hero's picture (1.6.32): a screenshot of the builder, framed like a
+   window on the grid paper. */
+.landing-product-shot {
   width: 100%;
-  max-width: 26rem;
-  aspect-ratio: 6 / 5;
-}
-
-.landing-preview__thumb {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 63%;
-  box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.3);
-}
-
-.landing-preview__thumb--front {
-  z-index: 3;
-  transform: translate(-50%, -50%) rotate(-4deg);
-  box-shadow: 0 32px 64px -28px rgba(0, 0, 0, 0.35);
-}
-
-.landing-preview__thumb--back-left {
-  z-index: 1;
-  left: 24%;
-  transform: translate(-50%, -50%) rotate(-14deg);
-  opacity: 0.92;
-}
-
-.landing-preview__thumb--back-right {
-  z-index: 2;
-  left: 76%;
-  top: 56%;
-  transform: translate(-50%, -50%) rotate(11deg);
-  opacity: 0.96;
-}
-
-/* Pull the fan in on phone-width screens so the clip above has almost
-   nothing to trim and the side thumbs read as whole cards. */
-@media (max-width: 479px) {
-  .landing-preview__stack {
-    max-width: 22rem;
-  }
-
-  .landing-preview__thumb--back-left {
-    left: 30%;
-  }
-
-  .landing-preview__thumb--back-right {
-    left: 70%;
-  }
-}
-
-.landing-preview__placeholder {
-  width: 100%;
-  max-width: 22rem;
-  aspect-ratio: 1 / 1.16;
-  border-radius: var(--radius-sm);
-  background: var(--app-surface-strong);
+  margin: 0;
+  overflow: hidden;
   border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: #ffffff;
   box-shadow: 0 32px 64px -32px rgba(0, 0, 0, 0.3);
-  transform: rotate(-3deg);
+}
+
+.landing-product-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 @media (max-width: 1023px) {

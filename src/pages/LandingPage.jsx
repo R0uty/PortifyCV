@@ -3,6 +3,12 @@ import InternalNavLink from '../components/InternalNavLink'
 import { cvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
 
+// The hero's picture (1.6.32): the builder itself, in Direct Edit with a
+// section's popup open, captured by `npm run thumbnails`. Its intrinsic
+// size reserves the space, so nothing shifts while it loads.
+const PRODUCT_SHOT_WIDTH = 1280
+const PRODUCT_SHOT_HEIGHT = 800
+
 // Lazy-loaded so the landing page's critical-path bundle doesn't carry
 // CVPreview + the template registry just for this one below-the-fold
 // section — same reasoning as ResumeBuilderPage's own lazy-loading (see
@@ -12,11 +18,6 @@ import { ROUTES } from '../utils/routes'
 // to "Start building" isn't re-downloading it from scratch.
 const LandingTemplatesPreview = lazy(() => import('../components/LandingTemplatesPreview'))
 
-// Same lazy-loading reasoning as LandingTemplatesPreview above, but this one
-// is above the fold — the Suspense fallback below is a same-shaped
-// placeholder (not null) so there's no layout shift while the shared
-// CVPreview chunk downloads.
-const LandingHeroPreview = lazy(() => import('../components/LandingHeroPreview'))
 
 // Read off the template registry instead of a hardcoded number — this
 // count previously drifted out of sync with cvTemplates.js (copy said 13,
@@ -32,14 +33,14 @@ function getLandingCopy(locale) {
       viewTemplatesButton: 'Katso pohjat',
       howItWorksLink: 'Katso miten se toimii',
       title: 'Ilmainen CV-työkalu. Tee CV, ota se mukaan, valmis.',
-      subtitle: 'Ei tiliä, ei kirjautumista, ei mitään tallennettua — kaikki tapahtuu tässä selaimessasi ja katoaa, kun suljet välilehden.',
-      previewAlt: 'Esimerkki PortifyCV:llä rakennetusta CV:stä',
-      highlights: [
-        'Ei tiliä, ei kirjautumista — napsauta CV:tä ja ala kirjoittaa',
-        'Mitään kirjoittamastasi ei koskaan lähetetä selaimestasi',
-        `${TEMPLATE_COUNT} pohjaa, kolme tyyliä kussakin — vaihda milloin vain sisältöä menettämättä`,
-        'ATS-pisteytys ja avainsanaehdotukset',
-        'Vie PDF-, Word-, HTML- tai JSON-muodossa — sitten se on poissa',
+      subtitle: 'Napsauta CV:tä ja kirjoita. Valitse pohja ja ota CV mukaan PDF- tai Word-tiedostona tai jakolinkkinä.',
+      previewAlt: 'PortifyCV-editori: CV, jonka Esittely-osio on auki muokattavaksi sen vieressä.',
+      chipsLabel: 'Mukana',
+      chips: [
+        `${TEMPLATE_COUNT} pohjaa × 3 tyyliä`,
+        'ATS-näkymä',
+        'Suomi ja englanti',
+        'Hakemuskirje mukana',
       ],
       whyTitle: 'Miksi PortifyCV',
       why: [
@@ -99,14 +100,14 @@ function getLandingCopy(locale) {
     viewTemplatesButton: 'View templates',
     howItWorksLink: 'See how it works',
     title: 'Free CV builder. Build it, take it, done.',
-    subtitle: 'No login, no account, nothing saved — everything happens right here in your browser, and disappears the moment you close the tab.',
-    previewAlt: 'Example CV built with PortifyCV',
-    highlights: [
-      'No account, no login — click your CV and start typing',
-      'Nothing you type ever leaves your browser',
-      `${TEMPLATE_COUNT} templates, three looks each — swap anytime without losing your content`,
-      'ATS scoring with keyword suggestions',
-      'Export to PDF, Word, HTML, or JSON — then it’s gone',
+    subtitle: 'Click your CV and type. Pick a template, then take it with you as a PDF, a Word file or a share link.',
+    previewAlt: 'The PortifyCV editor: a CV with its About section open for editing beside it.',
+    chipsLabel: 'Included',
+    chips: [
+      `${TEMPLATE_COUNT} templates × 3 looks`,
+      'ATS view',
+      'English & Finnish',
+      'Cover letter included',
     ],
     whyTitle: 'Why use PortifyCV',
     why: [
@@ -236,17 +237,24 @@ function LandingPage({
               {copy.howItWorksLink}
             </InternalNavLink>
           </div>
-          <ul className="landing-highlights">
-            {copy.highlights.map((highlight) => (
-              <li key={highlight}>{highlight}</li>
+          <ul className="landing-chips" aria-label={copy.chipsLabel}>
+            {copy.chips.map((chip) => (
+              <li key={chip}>{chip}</li>
             ))}
           </ul>
         </div>
 
         <div className="landing-preview">
-          <Suspense fallback={<div className="landing-preview__placeholder" aria-hidden="true" />}>
-            <LandingHeroPreview locale={locale} label={copy.previewAlt} />
-          </Suspense>
+          <figure className="landing-product-shot">
+            <img
+              src={`/thumbnails/product/direct-edit-${locale === 'fi' ? 'fi' : 'en'}.webp`}
+              width={PRODUCT_SHOT_WIDTH}
+              height={PRODUCT_SHOT_HEIGHT}
+              alt={copy.previewAlt}
+              fetchPriority="high"
+              decoding="async"
+            />
+          </figure>
         </div>
       </div>
 
