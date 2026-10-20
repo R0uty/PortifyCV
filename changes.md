@@ -4,6 +4,18 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## A site map at the end of every page — 1.6.29, 2026-10-20
+
+Phase 1 of the search plan. The footer bar only linked About and Privacy,
+and on phones the guides were reachable only through the menu. Every
+static page now ends with a site map in the footer's own style: Build
+(start building, how to use the builder, free templates), all 18 CV
+templates by name, Guides, Examples (all five example pages) and
+PortifyCV (About, Privacy), in English or Finnish. So every guide,
+example page and template page is one link from every other page. The
+builder doesn't get it. On phones, the footer leaves room at the end
+for the sticky "Start building" bar. Test: `e2e/site-map.spec.js`.
+
 ## "Start building" on the first screen — 1.6.28, 2026-10-20
 
 Phase 1 of the search plan. On a phone the front page's "Start building"

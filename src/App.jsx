@@ -9,7 +9,8 @@ import Modal from './components/Modal'
 import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
 import { safeStorageGet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
-import { ROUTES } from './utils/routes'
+import { ROUTES, templatePath } from './utils/routes'
+import { getCvTemplates } from './utils/cvTemplates'
 import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema, TEMPLATE_VIEW_PREFIX } from './utils/pageMeta'
 import { APP_VERSION } from './utils/appVersion'
 
@@ -279,6 +280,89 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {} }) {
   )
 }
 
+// Every content page in one place, below each static page (not the
+// builder): the footer bar itself only links About and Privacy, and on
+// phones the guides were otherwise reachable only through the menu.
+const SITE_MAP_COLUMNS = [
+  {
+    title: { en: 'Build', fi: 'Rakenna' },
+    links: [
+      { view: 'builder', en: 'Start building', fi: 'Aloita rakentaminen' },
+      { view: 'howToUse', en: 'How to use the builder', fi: 'Näin käytät CV-editoria' },
+      { view: 'freeTemplates', en: 'Free CV templates', fi: 'Ilmaiset CV-pohjat' },
+    ],
+  },
+  { title: { en: 'CV templates', fi: 'CV-pohjat' }, templates: true },
+  {
+    title: { en: 'Guides', fi: 'Oppaat' },
+    links: [
+      { view: 'howToWrite', en: 'How to write a CV', fi: 'Näin kirjoitat CV:n' },
+      { view: 'atsGuide', en: 'ATS-friendly CV guide', fi: 'ATS-ystävällinen CV-opas' },
+      { view: 'cvSkills', en: 'CV skills examples', fi: 'Taito-osion esimerkkejä' },
+      { view: 'coverLetterExamples', en: 'Cover letter examples', fi: 'Saatekirje-esimerkkejä' },
+    ],
+  },
+  {
+    title: { en: 'Examples', fi: 'Esimerkit' },
+    links: [
+      { view: 'cvExamples', en: 'CV examples by field', fi: 'CV-esimerkkejä aloittain' },
+      { view: 'developerCv', en: 'Developer CV examples', fi: 'Kehittäjän CV-esimerkkejä' },
+      { view: 'itCv', en: 'IT CV examples', fi: 'IT-alan CV-esimerkkejä' },
+      { view: 'cybersecurityCv', en: 'Cybersecurity CV examples', fi: 'Tietoturva-alan CV-esimerkkejä' },
+      { view: 'finnishCv', en: 'Finnish CV examples', fi: 'Suomalaisen CV:n esimerkkejä' },
+    ],
+  },
+  {
+    title: { en: 'PortifyCV', fi: 'PortifyCV' },
+    links: [
+      { view: 'about', en: 'About', fi: 'Tietoa' },
+      { view: 'privacy', en: 'Privacy policy', fi: 'Tietosuojaseloste' },
+    ],
+  },
+]
+
+function SiteMap({ locale = 'en', onNavigate = () => {}, onGetStarted = () => {} }) {
+  const lang = locale === 'fi' ? 'fi' : 'en'
+  const templates = getCvTemplates(lang)
+
+  return (
+    <nav className="site-map print:hidden" aria-label={lang === 'fi' ? 'Sivukartta' : 'Site map'}>
+      <div className="site-map__inner">
+        {SITE_MAP_COLUMNS.map((column) => (
+          <div key={column.title.en} className={`site-map__column${column.templates ? ' site-map__column--templates' : ''}`}>
+            <p className="site-map__title">{column.title[lang]}</p>
+            <ul className="site-map__list">
+              {column.templates
+                ? templates.map((template) => (
+                  <li key={template.id}>
+                    <a
+                      href={templatePath(template.slug)}
+                      onClick={(event) => handleInAppLinkClick(event, `${TEMPLATE_VIEW_PREFIX}${template.id}`, onNavigate)}
+                    >
+                      {template.label}
+                    </a>
+                  </li>
+                ))
+                : column.links.map((link) => (
+                  <li key={link.view}>
+                    <a
+                      href={VIEW_HEAD[link.view].path}
+                      onClick={(event) => (link.view === 'builder'
+                        ? handleInAppLinkClick(event, link.view, () => onGetStarted())
+                        : handleInAppLinkClick(event, link.view, onNavigate))}
+                    >
+                      {link[lang]}
+                    </a>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </nav>
+  )
+}
+
 function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
   const isFinnish = locale === 'fi'
 
@@ -463,6 +547,7 @@ function App() {
           />
         </Suspense>
 
+        <SiteMap locale={locale} onNavigate={goToView} onGetStarted={goToBuilder} />
         <SiteFooter locale={locale} onNavigate={goToView} />
       </div>
     )
