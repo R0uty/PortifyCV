@@ -1,6 +1,7 @@
 import { test, expect } from './fixtures/base.js'
 import { getTemplateVariants } from '../src/utils/templateVariants.js'
 import { getCvTemplates } from '../src/utils/cvTemplates.js'
+import { filterTemplatesByField } from '../src/utils/templateFields.js'
 
 test.describe('Landing page', () => {
   test('shows the hero, a picture of the output, and the trust line', async ({ page }) => {
@@ -46,67 +47,69 @@ test.describe('Landing page', () => {
   })
 })
 
-test.describe('Landing templates strip looks', () => {
-  // Card n (gallery order) shows its template's look n mod 3, named under
-  // the template name; the loop copy repeats the same looks. Each card is
-  // that look's pre-rendered image (1.6.30).
-  const cards = (page) => page.locator('.landing-templates-card')
-  const stripLook = (variants, index) => variants[index % variants.length]
+// 1.6.33: the front page's templates section is the templates page's field
+// chips over up to six pre-rendered thumbnails (card n shows look n mod 3),
+// each a link to its template page; "Browse all" keeps the field.
+test.describe('Landing templates by field', () => {
+  const cards = (page) => page.locator('.landing-templates__card')
 
-  test('cards rotate through each template\'s looks and name the look', async ({ page }) => {
+  test('shows six templates, each in a look, linking to its template page', async ({ page }) => {
     await page.goto('/')
     const templates = getCvTemplates('en')
-    await expect(cards(page)).toHaveCount(templates.length * 2)
-
-    for (const [index, template] of templates.entries()) {
+    await expect(cards(page)).toHaveCount(6)
+    for (const [index, template] of templates.slice(0, 6).entries()) {
       const variants = getTemplateVariants(template.id)
-      const look = stripLook(variants, index)
-      for (const copy of [0, 1]) {
-        const card = cards(page).nth(index + copy * templates.length)
-        await expect(card.locator('.landing-templates-card__name')).toHaveText(template.label)
-        await expect(card.locator('.landing-templates-card__look')).toHaveText(look.label.en)
-        await expect(card.locator('img')).toHaveAttribute('src', `/thumbnails/${template.id}/${look.id}-en.webp`)
-      }
+      const look = variants[index % variants.length]
+      const card = cards(page).nth(index)
+      await expect(card.locator('.landing-templates__name')).toHaveText(template.label)
+      await expect(card.locator('.landing-templates__look')).toHaveText(look.label.en)
+      await expect(card.locator('img')).toHaveAttribute('src', `/thumbnails/${template.id}/${look.id}-en.webp`)
+      await expect(card).toHaveAttribute('href', `/free-cv-templates/${template.slug}${look.id === 'default' ? '' : `?style=${look.id}`}`)
     }
   })
 
-  test('look names follow the language', async ({ page }) => {
+  test('a field chip filters the cards and Browse all keeps the field', async ({ page }) => {
     await page.goto('/')
-    await page.getByRole('button', { name: 'Switch language' }).click()
+    const section = page.locator('.landing-templates')
+    await section.getByRole('radiogroup', { name: 'Field', exact: true }).getByRole('radio', { name: 'Creative', exact: true }).check()
+    const creative = filterTemplatesByField(getCvTemplates('en'), 'creative')
+    await expect(cards(page)).toHaveCount(Math.min(6, creative.length))
+    await expect(cards(page).first().locator('.landing-templates__name')).toHaveText(creative[0].label)
 
-    const templates = getCvTemplates('fi')
-    await expect(cards(page).first().locator('.landing-templates-card__look'))
-      .toHaveText(getTemplateVariants(templates[0].id)[0].label.fi)
-    await expect(cards(page).nth(1).locator('.landing-templates-card__look'))
-      .toHaveText(getTemplateVariants(templates[1].id)[1].label.fi)
-    // Finnish section titles in the image too.
-    await expect(cards(page).nth(1).locator('img'))
-      .toHaveAttribute('src', `/thumbnails/${templates[1].id}/${getTemplateVariants(templates[1].id)[1].id}-fi.webp`)
+    const browse = section.getByRole('link', { name: `Browse all ${getCvTemplates('en').length} templates` })
+    await expect(browse).toHaveAttribute('href', '/free-cv-templates?field=creative')
+    await browse.click()
+    await expect(page).toHaveURL(/\/free-cv-templates\?field=creative$/)
   })
 
-  test('the landing page downloads no font for a strip thumbnail', async ({ page }) => {
+  test('looks and images follow the language', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Switch language' }).click()
+    const templates = getCvTemplates('fi')
+    const look = getTemplateVariants(templates[1].id)[1]
+    await expect(cards(page).nth(1).locator('.landing-templates__look')).toHaveText(look.label.fi)
+    await expect(cards(page).nth(1).locator('img')).toHaveAttribute('src', `/thumbnails/${templates[1].id}/${look.id}-fi.webp`)
+  })
+
+  test('the landing page downloads no CV font', async ({ page }) => {
     const fontRequests = []
     page.on('request', (request) => {
       if (/carlito|lato/i.test(request.url())) fontRequests.push(request.url())
     })
     await page.goto('/')
-    await page.locator('.landing-templates-wrap').scrollIntoViewIfNeeded()
+    await page.locator('.landing-templates').scrollIntoViewIfNeeded()
     await page.waitForLoadState('networkidle')
     expect(fontRequests).toEqual([])
   })
+})
 
-  test('screen readers get each strip card once, not the loop copy', async ({ page }) => {
-    await page.goto('/')
-    const templates = getCvTemplates('en')
-    await expect(cards(page)).toHaveCount(templates.length * 2)
-    // The loop copy is visual only.
-    await expect(page.locator('.landing-templates-card[aria-hidden="true"]')).toHaveCount(templates.length)
-    const snapshot = await page.locator('.landing-templates-wrap').ariaSnapshot()
-    for (const template of templates) {
-      const mentions = snapshot.split('\n').filter((line) => line.trim() === `- paragraph: ${template.label}`)
-      expect(mentions, template.label).toHaveLength(1)
-    }
-  })
+test('How it works shows three steps and links the full walkthrough', async ({ page }) => {
+  await page.goto('/')
+  const steps = page.locator('.landing-step')
+  await expect(steps).toHaveCount(3)
+  await expect(steps.locator('h3')).toHaveText(['Pick a template', 'Edit right on the CV', 'Export or share'])
+  await page.getByRole('link', { name: 'Read the full walkthrough' }).click()
+  await expect(page).toHaveURL(/\/how-to-use-the-cv-builder$/)
 })
 
 // 1.6.28: on a phone the hero's "Start building" sat at 732px of an 812px

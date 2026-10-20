@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import BuilderWalkthroughFigure from '../components/BuilderWalkthroughFigure'
 import InternalNavLink from '../components/InternalNavLink'
 import { cvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
@@ -9,14 +10,9 @@ import { ROUTES } from '../utils/routes'
 const PRODUCT_SHOT_WIDTH = 1280
 const PRODUCT_SHOT_HEIGHT = 800
 
-// Lazy-loaded so the landing page's critical-path bundle doesn't carry
-// CVPreview + the template registry just for this one below-the-fold
-// section — same reasoning as ResumeBuilderPage's own lazy-loading (see
-// App.jsx and CVPreview.jsx). It imports the same TemplateThumbnail the
-// builder's template gallery uses, so the bundler hoists that shared code
-// (and CVPreview beneath it) into a common chunk — a visitor who goes on
-// to "Start building" isn't re-downloading it from scratch.
-const LandingTemplatesPreview = lazy(() => import('../components/LandingTemplatesPreview'))
+// Lazy-loaded: the templates section sits below the fold and brings the
+// look registry and field filter with it, which the hero doesn't need.
+const LandingTemplatesByField = lazy(() => import('../components/LandingTemplatesByField'))
 
 
 // Read off the template registry instead of a hardcoded number — this
@@ -57,9 +53,23 @@ function getLandingCopy(locale) {
           body: 'ATS-tila muotoilee CV:n järjestelmien luettavaksi ilman sarakkeita tai grafiikkaa, ja avainsanapisteytys näyttää mitä puuttuu.',
         },
       ],
+      howTitle: 'Näin se toimii',
+      steps: [
+        { step: 'template', title: 'Valitse pohja', body: `${TEMPLATE_COUNT} asettelua, kolme tyyliä kussakin. Vaihda milloin vain, tekstisi säilyy.`, figureLabel: 'Kolme pohjakorttia rinnakkain, keskimmäinen valittuna.' },
+        { step: 'edit', title: 'Muokkaa suoraan CV:ssä', body: 'Napsauta mitä tahansa tekstiä ja kirjoita, tai avaa osion kynä nähdäksesi kaikki sen kentät.', figureLabel: 'CV-sivu, jossa yksi osio on rajattu kynäkuvakkeineen, ja sen vieressä osion kentät.' },
+        { step: 'export', title: 'Vie tai jaa', body: 'Lataa PDF- tai Word-tiedosto tai kopioi jakolinkki. Mitään ei ladata palvelimelle.', figureLabel: 'Avattu Vie-valikko ja jakolinkki.' },
+      ],
+      howLink: 'Lue koko käyttöopas',
       templatesTitle: 'Katso pohjat',
-      templatesSubtitle: `Kaikki ${TEMPLATE_COUNT} asettelua yhdellä silmäyksellä — vaihda milloin tahansa rakentaessasi, ilman että sisältösi katoaa.`,
-      templatesCta: 'Selaa kaikkia pohjia',
+      templatesSubtitle: 'Valitse alasi nähdäksesi siihen sopivat pohjat, kukin yhdessä kolmesta tyylistään.',
+      templatesCta: `Selaa kaikkia ${TEMPLATE_COUNT} pohjaa`,
+      guidesTitle: 'Oppaat ja esimerkit',
+      guides: [
+        { view: 'howToWrite', path: ROUTES.howToWrite, title: 'Näin kirjoitat CV:n', body: 'Osiot, yhteenveto joka sanoo jotain, ja kohdat jotka näyttävät tuloksia.' },
+        { view: 'atsGuide', path: ROUTES.atsGuide, title: 'ATS-ystävällinen CV-opas', body: 'Mitä hakijaseurantajärjestelmät lukevat, mikä ne rikkoo ja mikä vientimuoto valita.' },
+        { view: 'cvExamples', path: ROUTES.cvExamples, title: 'CV-esimerkkejä aloittain', body: 'Kehittäjän, IT-alan, tietoturva-alan ja suomalaisen CV:n esimerkit sekä kokonaiset CV:t.' },
+        { view: 'coverLetterExamples', path: ROUTES.coverLetterExamples, title: 'Saatekirje-esimerkkejä', body: 'Heikot ja vahvat aloitukset, keskiosat ja lopetukset sekä luonnos CV:si pohjalta.' },
+      ],
       faqTitle: 'Usein kysytyt kysymykset',
       faq: [
         {
@@ -124,9 +134,23 @@ function getLandingCopy(locale) {
         body: 'Toggle ATS mode for a layout that parsers can actually read — no columns, icons, or tables to trip them up — plus keyword scoring that shows what your CV is missing.',
       },
     ],
+    howTitle: 'How it works',
+    steps: [
+      { step: 'template', title: 'Pick a template', body: `${TEMPLATE_COUNT} layouts, three looks each. Switch any time; your text stays.`, figureLabel: 'Three template cards side by side with the middle one selected.' },
+      { step: 'edit', title: 'Edit right on the CV', body: 'Click any text and type, or open a section’s pencil for all its fields.', figureLabel: 'A CV page with one section outlined and its pencil, and that section’s fields beside it.' },
+      { step: 'export', title: 'Export or share', body: 'Download a PDF or Word file, or copy a share link. Nothing is uploaded.', figureLabel: 'An open export menu next to a share link.' },
+    ],
+    howLink: 'Read the full walkthrough',
     templatesTitle: 'See the templates',
-    templatesSubtitle: `All ${TEMPLATE_COUNT} layouts at a glance — swap between them any time while you build, without losing your content.`,
-    templatesCta: 'Browse all templates',
+    templatesSubtitle: 'Pick your field to see the templates that suit it, each in one of its three looks.',
+    templatesCta: `Browse all ${TEMPLATE_COUNT} templates`,
+    guidesTitle: 'Guides and examples',
+    guides: [
+      { view: 'howToWrite', path: ROUTES.howToWrite, title: 'How to write a CV', body: 'Sections, a summary that says something, and bullets that show impact.' },
+      { view: 'atsGuide', path: ROUTES.atsGuide, title: 'ATS-friendly CV guide', body: 'What applicant tracking systems read, what breaks them, and which export to use.' },
+      { view: 'cvExamples', path: ROUTES.cvExamples, title: 'CV examples by field', body: 'Developer, IT, cybersecurity and Finnish CVs, with full example CVs.' },
+      { view: 'coverLetterExamples', path: ROUTES.coverLetterExamples, title: 'Cover letter examples', body: 'Weak and strong openings, middles and closings, and a draft from your CV.' },
+    ],
     faqTitle: 'Frequently asked questions',
     faq: [
       {
@@ -259,6 +283,32 @@ function LandingPage({
       </div>
 
       <div className="landing-section">
+        <h2 className="landing-section__title">{copy.howTitle}</h2>
+        <ol className="landing-steps">
+          {copy.steps.map((item, index) => (
+            <li className="landing-step" key={item.step}>
+              <div className="landing-step__figure">
+                <BuilderWalkthroughFigure step={item.step} label={item.figureLabel} number={String(index + 1)} />
+              </div>
+              <h3 className="landing-step__title">{item.title}</h3>
+              <p className="landing-step__body">{item.body}</p>
+            </li>
+          ))}
+        </ol>
+        <InternalNavLink to={ROUTES.howToUse} onNavigate={() => onNavigateToView('howToUse')} className="landing-hero__link">
+          {copy.howLink}
+        </InternalNavLink>
+      </div>
+
+      <div className="landing-section">
+        <h2 className="landing-section__title">{copy.templatesTitle}</h2>
+        <p className="landing-section__subtitle">{copy.templatesSubtitle}</p>
+        <Suspense fallback={null}>
+          <LandingTemplatesByField locale={locale} browseLabel={copy.templatesCta} onNavigateToView={onNavigateToView} />
+        </Suspense>
+      </div>
+
+      <div className="landing-section">
         <h2 className="landing-section__title">{copy.whyTitle}</h2>
         <div className="landing-why-grid">
           {copy.why.map((item) => (
@@ -271,18 +321,20 @@ function LandingPage({
       </div>
 
       <div className="landing-section">
-        <h2 className="landing-section__title">{copy.templatesTitle}</h2>
-        <p className="landing-section__subtitle">{copy.templatesSubtitle}</p>
-        <Suspense fallback={null}>
-          <LandingTemplatesPreview locale={locale} />
-        </Suspense>
-        <button
-          type="button"
-          className="landing-secondary-cta"
-          onClick={() => onNavigateToView('freeTemplates')}
-        >
-          {copy.templatesCta}
-        </button>
+        <h2 className="landing-section__title">{copy.guidesTitle}</h2>
+        <div className="landing-guides">
+          {copy.guides.map((guide) => (
+            <InternalNavLink
+              key={guide.view}
+              to={guide.path}
+              onNavigate={() => onNavigateToView(guide.view)}
+              className="examples-hub-card"
+            >
+              <span className="examples-hub-card__title">{guide.title}</span>
+              <span className="examples-hub-card__body">{guide.body}</span>
+            </InternalNavLink>
+          ))}
+        </div>
       </div>
 
       <div className="landing-section landing-faq-section" id="faq">

@@ -4,6 +4,27 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## How it works, templates by field, and guides on the front page — 1.6.33, 2026-10-21
+
+Phase 2 of the search plan. The front page now reads: hero, **How it
+works**, **See the templates**, Why use PortifyCV (unchanged), **Guides
+and examples**, FAQ.
+
+- **How it works:** three steps (pick a template, edit right on the CV,
+  export or share), each with the builder guide's own line figure, and a
+  link to the full walkthrough.
+- **See the templates:** the auto-scrolling strip of all 18 is replaced by
+  the templates page's field chips over up to six pre-rendered thumbnails
+  (card n in its look n mod 3, named under it), each linking to its
+  template page with that look; "Browse all 18 templates" keeps the chosen
+  field. No motion, so the strip's pause button is gone too.
+- **Guides and examples:** four cards (how to write a CV, the ATS guide,
+  examples by field, cover letters) in the examples hub's card style.
+
+The front page is now 384 DOM nodes (7,231 at 1.6.25). Same in Finnish.
+`LandingTemplatesPreview` and the strip styles are removed; the strip's
+tests in `landing.spec.js` are replaced by tests for the new sections.
+
 ## The front page shows the editor — 1.6.32, 2026-10-21
 
 Phase 2 of the search plan. The hero's picture was a fanned stack of three

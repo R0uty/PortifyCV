@@ -2986,107 +2986,122 @@ select.floating-field__control {
   color: var(--app-text-muted);
 }
 
-.landing-templates-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: var(--space-3);
+/* "How it works" (1.6.33): three steps, each with the builder guide's own
+   line figure. */
+.landing-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-8);
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  list-style: none;
 }
 
-.landing-templates-marquee__toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border: 1px solid var(--app-border);
-  border-radius: var(--radius-sm);
-  background: var(--app-surface);
+.landing-step {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.landing-step__figure {
+  padding: var(--space-3);
+  border: 1px solid var(--app-border-strong);
+  background: #ffffff;
+}
+
+.landing-step__title {
+  font-size: var(--text-section);
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.landing-step__body {
+  font-size: var(--text-body-sm);
+  line-height: 1.6;
   color: var(--app-text-muted);
-  cursor: pointer;
-  transition: background 140ms ease, color 140ms ease;
 }
 
-.landing-templates-marquee__toggle:hover {
-  background: #111111;
-  color: #ffffff;
+/* Templates by field (1.6.33): the templates page's field chips over up to
+   six pre-rendered thumbnails. */
+.landing-templates__grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
 }
 
-/* Stays within the same column as the section title/subtitle above it —
-   only the track inside scrolls, clipped at these same left/right edges. */
-.landing-templates-marquee {
-  width: 100%;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    black var(--space-8),
-    black calc(100% - var(--space-8)),
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent 0,
-    black var(--space-8),
-    black calc(100% - var(--space-8)),
-    transparent 100%
-  );
+.landing-templates__card {
+  display: grid;
+  gap: var(--space-1);
+  color: inherit;
+  text-decoration: none;
 }
 
-.landing-templates-track {
-  display: flex;
-  width: max-content;
-  gap: var(--space-4);
-  animation: landing-templates-scroll 40s linear infinite;
-}
-
-.landing-templates-marquee:hover .landing-templates-track,
-.landing-templates-track--paused {
-  animation-play-state: paused;
-}
-
-@keyframes landing-templates-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    /* Track holds two identical copies of the template list back to
-       back, so scrolling exactly half its width loops seamlessly. */
-    transform: translateX(-50%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .landing-templates-track {
-    animation: none;
-  }
-}
-
-.landing-templates-card {
-  flex: 0 0 12rem;
-  width: 12rem;
-}
-
-/* Wraps TemplateThumbnail's own `.template-gallery__thumb-frame` (border,
-   radius, and background already come from that) — this just adds the
-   drop shadow, with a matching radius so the shadow's corners line up. */
-.landing-templates-card__thumb {
-  border-radius: var(--radius-sm);
+.landing-templates__card .template-gallery__thumb-frame {
   box-shadow: var(--shadow-sm);
+  transition: border-color 140ms ease;
 }
 
-.landing-templates-card__name {
+.landing-templates__card:hover .template-gallery__thumb-frame,
+.landing-templates__card:focus-visible .template-gallery__thumb-frame {
+  border-color: #111111;
+}
+
+.landing-templates__name {
   margin-top: var(--space-2);
   text-align: center;
   font-size: var(--text-caption);
   font-weight: 600;
-  color: var(--app-text-muted);
+  color: var(--app-text);
 }
 
-/* The card's look ("Graphite"), a quieter second line under the name. */
-.landing-templates-card__look {
+.landing-templates__look {
   text-align: center;
   font-size: var(--text-caption);
   color: var(--app-text-muted);
+}
+
+.landing-templates .landing-secondary-cta {
+  width: fit-content;
+  text-decoration: none;
+}
+
+/* Guides and examples (1.6.33): the examples hub's cards, four across. */
+.landing-guides {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.landing-guides .examples-hub-card__title,
+.landing-guides .examples-hub-card__body {
+  display: block;
+}
+
+@media (max-width: 1023px) {
+  .landing-templates__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .landing-guides {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
+  .landing-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-templates__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .landing-guides {
+    grid-template-columns: 1fr;
+  }
 }
 
 .landing-why-grid {
