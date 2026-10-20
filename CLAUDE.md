@@ -19,6 +19,8 @@ npm run check:section-schema   # validates the Direct Edit popup's section schem
 npm run check:section-columns  # exercises the section column-move rules (src/utils/sectionColumns.js)
 npm run check:template-pages   # validates per-template page slugs, examples, copy, and field tags (src/utils/templatePageCopy.js, src/utils/templateMetaDescriptions.js, src/utils/exampleCvs.js, src/utils/templateFields.js)
 npm run check:template-variants  # validates the style-variant registry against each template's CSS defaults, plus contrast (src/utils/templateVariants.js)
+npm run check:thumbnails   # the pre-rendered thumbnails in public/thumbnails/ exist, match their manifest, and are up to date with the template code
+npm run thumbnails         # regenerate public/thumbnails/ (Vite dev server + Playwright Chromium, ~20s); commit the result
 
 npm run test:e2e           # full Playwright suite in e2e/, against a prod build+preview
 npm run test:e2e:fast      # same suite minus the @slow tier (--grep-invert @slow) — what CI's main e2e job runs
@@ -38,10 +40,11 @@ rule-based feedback engine (`check:feedback`), the Word exporter
 (`check:section-schema`), the section column-move
 rules and their import validation (`check:section-columns`), the
 per-template pages' slugs, examples, copy, and field tags, plus `index.html`'s static template count (`check:template-pages`), or
-a template's style variants or palette variables (`check:template-variants`). A
+a template's style variants or palette variables (`check:template-variants`),
+or anything a template thumbnail is rendered from (`check:thumbnails`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.
-CI (`.github/workflows/ci.yml`) runs all eight on every push to `main` and
+CI (`.github/workflows/ci.yml`) runs all nine on every push to `main` and
 `v1.6.0` (the current long-lived branch) and on every pull request.
 
 `test:e2e` (and its `:fast`/`:slow` variants) build and serve the app first
@@ -116,6 +119,19 @@ variants to the canonical path. If you change a route or its metadata,
    it does not scan the rest of a stylesheet for hard-coded colour literals,
    so keep those out by review. The chosen look is stored per
    template as `styleVariantByTemplate` (below).
+
+**Template thumbnails on the marketing pages are images (1.6.30).** The
+front page's hero stack and template strip and the Free CV Templates grid
+show `public/thumbnails/<template>/<look>-<en|fi>.webp` (via
+`TemplateThumbnailImage`), not live CVs, which made those pages 7,000+ DOM
+nodes of placeholder text. `npm run thumbnails` renders them from the live
+`TemplateThumbnail` in a dev-only harness (`scripts/thumbnails/`, never
+built) and records an input hash in `public/thumbnails/manifest.json`;
+`check:thumbnails` fails when a file the harness imports (template JSX and
+CSS, `CVPreview`, the demo CV, the look registry, the preview rules in
+`app-shell.css`) changes without a regeneration. So after changing a
+template's design or looks, run `npm run thumbnails` and commit the images.
+The builder's gallery and the template pages' own preview stay live.
 
 `src/components/templates/index.js` is the variant→config registry and also
 owns `prefetchTemplateShowcases()` (idle-prefetch of every Showcase chunk, so

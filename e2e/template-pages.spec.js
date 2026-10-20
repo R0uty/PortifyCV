@@ -184,16 +184,22 @@ test.describe('Template pages', () => {
     await expect(page.getByRole('radiogroup', { name: 'Examples' })).toBeVisible()
   })
 
-  // The thumbnails render real CVs, and several templates put <a> links in
-  // them (project and credential links), so a thumbnail must never sit
-  // inside a link or button.
-  test('the templates page nests no link inside a link and its thumbnails still open the template page', async ({ page }) => {
+  // Since 1.6.30 each thumbnail is its look's pre-rendered image, with alt
+  // text; the page still nests no link inside a link, and clicking a
+  // thumbnail still opens the template page.
+  test('the templates page shows thumbnail images, nests no link inside a link, and its thumbnails open the template page', async ({ page }) => {
     const errors = []
     page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()) })
 
     await page.goto('/free-cv-templates')
-    await expect(page.locator('.templates-page-card [data-export-variant]')).toHaveCount(18)
-    await expect(page.locator('.templates-page-card', { hasText: 'Developer' }).locator('.templates-page-card__thumb a').first()).toBeAttached()
+    const images = page.locator('.templates-page-card__thumb img')
+    await expect(images).toHaveCount(18)
+    await expect(page.locator('.templates-page-card [data-export-variant]')).toHaveCount(0)
+    const developerImage = page.locator('.templates-page-card', { hasText: 'Developer' }).locator('.templates-page-card__thumb img').first()
+    await expect(developerImage).toHaveAttribute('src', '/thumbnails/developer/default-en.webp')
+    await expect(developerImage).toHaveAttribute('alt', 'Developer CV template, Original')
+    await developerImage.scrollIntoViewIfNeeded()
+    await expect.poll(() => developerImage.evaluate((img) => img.complete && img.naturalWidth)).toBeGreaterThan(0)
     expect(await page.locator('a a, button a, a button').count()).toBe(0)
     expect(errors.filter((text) => /cannot contain a nested|cannot be a descendant of/.test(text))).toEqual([])
 

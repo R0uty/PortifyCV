@@ -20,7 +20,9 @@
     "test:e2e:fast": "playwright test --grep-invert @slow",
     "test:e2e:slow": "playwright test --grep @slow",
     "worker:dev": "wrangler dev",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "thumbnails": "node scripts/generate-thumbnails.mjs",
+    "check:thumbnails": "node scripts/check-thumbnails.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

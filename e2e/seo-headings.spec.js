@@ -2,15 +2,28 @@ import { test, expect } from './fixtures/base.js'
 
 // Template thumbnails and template-page previews render a whole CV. Its
 // name and section titles used to be real <h1>/<h2>s, so a crawler read
-// the front page as 36 CVs for "John Doe" (1.6.26). Inside those previews
-// CvHeading renders them as styled divs; each page keeps one real <h1>.
+// the front page as 36 CVs for "John Doe" (1.6.26). The front page and the
+// templates grid now show pre-rendered images (1.6.30); a template page's
+// live preview renders them as styled divs (CvHeading). Each page keeps
+// exactly one real <h1>.
 for (const [path, h1] of [
-  ['/', /Build your CV|Free CV builder/],
+  ['/', 'Free CV builder. Build it, take it, done.'],
   ['/free-cv-templates', 'Free CV Templates'],
+]) {
+  test(`${path} has one <h1> and shows thumbnails as images`, async ({ page }) => {
+    await page.goto(path)
+    await expect(page.locator('img.template-gallery__thumb-image').first()).toBeAttached()
+    await expect(page.locator('[data-export-variant]')).toHaveCount(0)
+    await expect(page.locator('h1')).toHaveCount(1)
+    await expect(page.locator('h1')).toHaveText(h1)
+  })
+}
+
+for (const [path, h1] of [
   ['/free-cv-templates/developer', 'Developer CV template'],
   ['/free-cv-templates/european', 'European CV template'],
 ]) {
-  test(`${path} has one <h1> and no headings inside CV previews`, async ({ page }) => {
+  test(`${path} has one <h1> and no headings inside its CV preview`, async ({ page }) => {
     await page.goto(path)
     await expect(page.locator('[data-cv-heading]').first()).toBeAttached()
     await expect(page.locator('h1')).toHaveCount(1)

@@ -4,6 +4,44 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template thumbnails are images on the front page and the templates grid — 1.6.30, 2026-10-20
+
+Phase 1 of the search plan. The front page's hero stack and template
+strip and the Free CV Templates grid rendered 36 and 18 live CVs, which
+made the front page 7,231 DOM nodes and ~9,600 words of placeholder CV
+text, and pulled three fonts. They now show pre-rendered images of the
+same thumbnails: 18 templates × 3 looks × English and Finnish (the
+section titles are translated), 108 WebP files, about 36 KB each, in
+`public/thumbnails/`, with alt text naming the template and look.
+
+| | DOM nodes | words | `<h1>` | font files |
+| --- | --- | --- | --- | --- |
+| front page, before → after | 7,231 → 462 | 9,641 → 742 | 37 → 1 | 3 → 1 |
+| templates grid, before → after | 3,861 → 758 | 4,894 → 814 | 18 → 1 | 3 → 1 |
+
+None of the CV renderer's code loads on the front page any more; the
+app's own scripts there are about 330 KB, and the largest remaining item
+is the AdSense script (about 800 KB).
+
+- `npm run thumbnails` regenerates the images (~20 s): a dev-only harness
+  page (`scripts/thumbnails/`, served by Vite, never built) renders the
+  live `TemplateThumbnail`, Playwright's Chromium screenshots and encodes
+  each one. The output is identical byte for byte when rerun.
+- `npm run check:thumbnails` (new, in CI) fails if an image is missing or
+  differs from `public/thumbnails/manifest.json`, or if anything the
+  thumbnails are rendered from (template JSX and CSS, `CVPreview`, the
+  demo CV, the look registry, the preview rules in `app-shell.css`) has
+  changed since: run `npm run thumbnails` and commit the result.
+- The landing strip now rotates through every look (n mod 3); it no
+  longer skips looks with a downloadable font, since an image needs no
+  font.
+- The builder's template gallery (it shows your own CV) and each template
+  page's preview stay live.
+
+Tests: `landing.spec.js`, `template-pages.spec.js`, `template-looks.spec.js`
+and `seo-headings.spec.js` now check the images (path, alt text, loaded)
+where they read the live thumbnails' DOM.
+
 ## A site map at the end of every page — 1.6.29, 2026-10-20
 
 Phase 1 of the search plan. The footer bar only linked About and Privacy,

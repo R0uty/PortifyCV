@@ -1,11 +1,8 @@
-import { useMemo } from 'react'
+import TemplateThumbnailImage from './TemplateThumbnailImage'
 
-import TemplateThumbnail from './TemplateThumbnail'
-import { buildThumbnailCv } from '../utils/thumbnailCv'
-
-// A fanned stack of 3 real, live-rendered templates (same TemplateThumbnail
-// the gallery and the marquee below use) — the hero's "picture of the
-// result," not a pre-built marketing mockup. Minimalist sits on top and
+// A fanned stack of 3 real templates (their pre-rendered thumbnails, made
+// from the live renderer by `npm run thumbnails`) — the hero's "picture
+// of the result," not a hand-made marketing mockup. Minimalist sits on top and
 // dead-center (black-on-white, so it doesn't fight the hero's own
 // monochrome type); Developer and Creative peek out behind it specifically
 // to show the range — dark/technical and warm/colorful — a single template
@@ -17,13 +14,16 @@ const STACK_TEMPLATES = [
 ]
 
 function LandingHeroPreview({ locale = 'en', label = '' }) {
-  const thumbnailCv = useMemo(() => buildThumbnailCv(), [])
-
   return (
     <div className="landing-preview__stack" role="img" aria-label={label}>
       {STACK_TEMPLATES.map(({ id, modifier }) => (
         <div key={id} className={`landing-preview__thumb landing-preview__thumb--${modifier}`}>
-          <TemplateThumbnail templateId={id} formData={thumbnailCv} locale={locale} />
+          <TemplateThumbnailImage
+            templateId={id}
+            locale={locale}
+            loading="eager"
+            fetchPriority={modifier === 'front' ? 'high' : undefined}
+          />
         </div>
       ))}
     </div>

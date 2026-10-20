@@ -2,13 +2,12 @@ import { useMemo, useState } from 'react'
 
 import StyleSwatchGroup from '../components/StyleSwatchGroup'
 import TemplateFieldFilter from '../components/TemplateFieldFilter'
-import TemplateThumbnail from '../components/TemplateThumbnail'
+import TemplateThumbnailImage from '../components/TemplateThumbnailImage'
 import InternalNavLink from '../components/InternalNavLink'
-import { buildThumbnailCv } from '../utils/thumbnailCv'
 import { cvTemplates, getCvTemplates } from '../utils/cvTemplates'
 import { ROUTES, templatePath } from '../utils/routes'
 import { TEMPLATE_VIEW_PREFIX } from '../utils/pageMeta'
-import { DEFAULT_STYLE_VARIANT_ID, getVariantLook, styleVariantSearch } from '../utils/templateVariants'
+import { DEFAULT_STYLE_VARIANT_ID, getTemplateVariant, styleVariantSearch } from '../utils/templateVariants'
 import { filterTemplatesByField, parseFieldParam } from '../utils/templateFields'
 
 // Read off the template registry instead of a hardcoded number — this
@@ -84,7 +83,6 @@ function FreeCvTemplatesPage({ locale = 'en', onGetStarted = () => {}, onNavigat
   const resolvedLocale = locale === 'fi' ? 'fi' : 'en'
   const copy = getCopy(resolvedLocale)
   const templates = useMemo(() => getCvTemplates(resolvedLocale), [resolvedLocale])
-  const thumbnailCv = useMemo(() => buildThumbnailCv(), [])
   // The look previewed on each card (Phase 4); every card starts on
   // Original. It carries into the card's links and "Use this template".
   const [looks, setLooks] = useState({})
@@ -134,22 +132,21 @@ function FreeCvTemplatesPage({ locale = 'en', onGetStarted = () => {}, onNavigat
 
             return (
               <div className="templates-page-card" key={template.id}>
-                {/* Not a link: the thumbnail is a real CV, and several
-                    templates render <a> links inside it, which can't be
-                    nested in another <a>. Clicking it still opens the
-                    template page; keyboard and screen-reader users get the
-                    name link and "View examples" below, so it stays
-                    aria-hidden and out of the tab order. */}
+                {/* The look's pre-rendered image (1.6.30). Clicking it opens
+                    the template page; keyboard and screen-reader users get
+                    the name link and "View examples" below, so it stays
+                    aria-hidden and out of the tab order. Its alt text is
+                    still read by search engines and image search. */}
                 <div
                   className="templates-page-card__thumb"
                   aria-hidden="true"
                   onClick={openTemplatePage}
                 >
-                  <TemplateThumbnail
+                  <TemplateThumbnailImage
                     templateId={template.id}
-                    formData={thumbnailCv}
+                    styleVariantId={look}
                     locale={resolvedLocale}
-                    {...getVariantLook(template.id, look)}
+                    alt={`${template.label} CV template, ${getTemplateVariant(template.id, look).label[resolvedLocale]}`}
                   />
                 </div>
                 <div className="templates-page-card__looks">

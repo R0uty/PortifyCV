@@ -199,15 +199,16 @@ test.describe('Free CV Templates grid looks', () => {
 
   test('a swatch previews only its own card and carries into its links', async ({ page }) => {
     await page.goto('/free-cv-templates')
-    await expect(page.locator('.templates-page-card [data-export-variant]')).toHaveCount(cvTemplates.length)
+    await expect(page.locator('.templates-page-card__thumb img')).toHaveCount(cvTemplates.length)
     const developerCard = gridCard(page, 'developer')
     const nameLink = developerCard.locator('a.templates-page-card__name')
     const examplesLink = developerCard.getByRole('link', { name: `View examples: ${label('developer')}` })
     await expect(nameLink).toHaveAttribute('href', `/free-cv-templates/${developerSlug}`)
 
     await lookRadio(page, `Style: ${label('developer')}`, developer[1]).check()
-    await expect.poll(() => paletteVar(developerCard, developerVar)).toBe(developer[1].palette[developerVar])
-    expect(await paletteVar(gridCard(page, 'creative'), creativeVar)).toBe(creative[0].palette[creativeVar])
+    // Each card shows its look's pre-rendered image (1.6.30).
+    await expect(developerCard.locator('.templates-page-card__thumb img')).toHaveAttribute('src', `/thumbnails/developer/${developer[1].id}-en.webp`)
+    await expect(gridCard(page, 'creative').locator('.templates-page-card__thumb img')).toHaveAttribute('src', `/thumbnails/creative/${creative[0].id}-en.webp`)
     await expect(nameLink).toHaveAttribute('href', `/free-cv-templates/${developerSlug}?style=${developer[1].id}`)
     await expect(examplesLink).toHaveAttribute('href', `/free-cv-templates/${developerSlug}?style=${developer[1].id}`)
 

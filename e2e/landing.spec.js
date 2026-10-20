@@ -1,12 +1,6 @@
 import { test, expect } from './fixtures/base.js'
 import { getTemplateVariants } from '../src/utils/templateVariants.js'
 import { getCvTemplates } from '../src/utils/cvTemplates.js'
-import { CV_FONT_OPTIONS } from '../src/utils/cvFonts.js'
-
-// Read on the name (every Showcase's <h1 data-cv-name>), which inherits
-// the look's palette from the Showcase root.
-const paletteVar = (scope, name) => scope.locator('[data-cv-name]').first()
-  .evaluate((el, variable) => getComputedStyle(el).getPropertyValue(variable).trim(), name)
 
 test.describe('Landing page', () => {
   test('shows the hero, a picture of the output, and the trust line', async ({ page }) => {
@@ -40,29 +34,23 @@ test.describe('Landing page', () => {
   test('the hero stack shows Minimalist in front, Creative and Developer behind', async ({ page }) => {
     await page.goto('/')
 
-    const variantOf = (modifier) => page.locator(`.landing-preview__thumb--${modifier} [data-export-variant]`)
-      .first().getAttribute('data-export-variant')
-    expect(await variantOf('front')).toBe('minimal')
-    expect(await variantOf('back-left')).toBe('creative')
-    expect(await variantOf('back-right')).toBe('developer')
+    const imageOf = (modifier) => page.locator(`.landing-preview__thumb--${modifier} img`)
+    await expect(imageOf('front')).toHaveAttribute('src', '/thumbnails/minimal/default-en.webp')
+    await expect(imageOf('back-left')).toHaveAttribute('src', '/thumbnails/creative/default-en.webp')
+    await expect(imageOf('back-right')).toHaveAttribute('src', '/thumbnails/developer/default-en.webp')
+    // Pre-rendered images, not live CVs (1.6.30): every one actually loads.
+    for (const modifier of ['front', 'back-left', 'back-right']) {
+      await expect.poll(() => imageOf(modifier).evaluate((img) => img.complete && img.naturalWidth)).toBeGreaterThan(0)
+    }
   })
 })
 
 test.describe('Landing templates strip looks', () => {
   // Card n (gallery order) shows its template's look n mod 3, named under
-  // the template name; the loop copy repeats the same looks. A look whose
-  // font is a download (Calibri, Lato) is skipped for the next one in the
-  // rotation (1.6.18), so the landing page never fetches a font for a strip
-  // thumbnail.
+  // the template name; the loop copy repeats the same looks. Each card is
+  // that look's pre-rendered image (1.6.30).
   const cards = (page) => page.locator('.landing-templates-card')
-  const downloadsFont = (fontId) => Boolean(CV_FONT_OPTIONS.find((font) => font.id === fontId)?.load)
-  const stripLook = (variants, index) => {
-    for (let step = 0; step < variants.length; step += 1) {
-      const look = variants[(index + step) % variants.length]
-      if (!downloadsFont(look.fontId)) return look
-    }
-    return variants[0]
-  }
+  const stripLook = (variants, index) => variants[index % variants.length]
 
   test('cards rotate through each template\'s looks and name the look', async ({ page }) => {
     await page.goto('/')
@@ -76,13 +64,7 @@ test.describe('Landing templates strip looks', () => {
         const card = cards(page).nth(index + copy * templates.length)
         await expect(card.locator('.landing-templates-card__name')).toHaveText(template.label)
         await expect(card.locator('.landing-templates-card__look')).toHaveText(look.label.en)
-        // The first palette variable this look sets differently from the
-        // original proves the look is really rendered, not just named.
-        const name = Object.keys(look.palette)
-          .find((key) => look.palette[key].toLowerCase() !== variants[0].palette[key].toLowerCase())
-        if (name) {
-          await expect.poll(() => paletteVar(card, name)).toBe(look.palette[name])
-        }
+        await expect(card.locator('img')).toHaveAttribute('src', `/thumbnails/${template.id}/${look.id}-en.webp`)
       }
     }
   })
@@ -96,6 +78,9 @@ test.describe('Landing templates strip looks', () => {
       .toHaveText(getTemplateVariants(templates[0].id)[0].label.fi)
     await expect(cards(page).nth(1).locator('.landing-templates-card__look'))
       .toHaveText(getTemplateVariants(templates[1].id)[1].label.fi)
+    // Finnish section titles in the image too.
+    await expect(cards(page).nth(1).locator('img'))
+      .toHaveAttribute('src', `/thumbnails/${templates[1].id}/${getTemplateVariants(templates[1].id)[1].id}-fi.webp`)
   })
 
   test('the landing page downloads no font for a strip thumbnail', async ({ page }) => {
