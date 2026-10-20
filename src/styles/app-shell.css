@@ -3489,24 +3489,49 @@ select.floating-field__control {
   max-width: 42ch;
 }
 
+/* The FAQ as an accordion (1.6.34): native <details>, so it needs no
+   script and every answer stays in the page for search engines. */
 .landing-faq {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: var(--space-10);
-  row-gap: var(--space-7);
-  margin: 0;
+  max-width: 52rem;
+  border-bottom: 1px solid var(--app-border);
 }
 
 .landing-faq__item {
   border-top: 1px solid var(--app-border);
-  padding-top: var(--space-5);
 }
 
 .landing-faq__question {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
   font-size: var(--text-section);
   font-weight: 700;
   color: var(--app-text);
-  margin: 0 0 var(--space-2);
+  cursor: pointer;
+  list-style: none;
+}
+
+.landing-faq__question::-webkit-details-marker {
+  display: none;
+}
+
+.landing-faq__question::after {
+  content: '+';
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  color: var(--app-text-muted);
+}
+
+.landing-faq__item[open] > .landing-faq__question::after {
+  content: '\2212';
+}
+
+.landing-faq__question:focus-visible {
+  outline: 2px solid #111111;
+  outline-offset: 2px;
 }
 
 .landing-faq__answer {
@@ -3514,7 +3539,14 @@ select.floating-field__control {
   line-height: 1.6;
   color: var(--app-text-muted);
   margin: 0;
+  padding-bottom: var(--space-5);
   max-width: 60ch;
+}
+
+.landing-faq__answer a {
+  color: var(--app-text);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 @media (max-width: 1023px) {
@@ -3523,10 +3555,6 @@ select.floating-field__control {
     gap: var(--space-6);
   }
 
-  .landing-faq {
-    grid-template-columns: 1fr;
-    row-gap: var(--space-6);
-  }
 }
 
 .site-footer__link {

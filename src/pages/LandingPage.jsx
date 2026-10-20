@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import BuilderWalkthroughFigure from '../components/BuilderWalkthroughFigure'
 import InternalNavLink from '../components/InternalNavLink'
 import { cvTemplates } from '../utils/cvTemplates'
+import { LANDING_FAQ } from '../utils/landingFaq'
+import { VIEW_HEAD } from '../utils/pageMeta'
 import { ROUTES } from '../utils/routes'
 
 // The hero's picture (1.6.32): the builder itself, in Direct Edit with a
@@ -71,36 +73,6 @@ function getLandingCopy(locale) {
         { view: 'coverLetterExamples', path: ROUTES.coverLetterExamples, title: 'Saatekirje-esimerkkejä', body: 'Heikot ja vahvat aloitukset, keskiosat ja lopetukset sekä luonnos CV:si pohjalta.' },
       ],
       faqTitle: 'Usein kysytyt kysymykset',
-      faq: [
-        {
-          q: 'Onko PortifyCV oikeasti ilmainen?',
-          a: `Kyllä. Ei tilausmaksua, ei vesileimaa, ei piilotettuja rajoituksia — kaikki ${TEMPLATE_COUNT} pohjaa ja kaikki vientimuodot ovat käytössä ilmaiseksi.`,
-        },
-        {
-          q: 'Tarvitsenko tilin?',
-          a: 'Ei. Avaa sivu ja aloita kirjoittaminen — kirjautumista tai sähköpostia ei kysytä.',
-        },
-        {
-          q: 'Läpäiseekö CV:ni hakijaseurantajärjestelmät (ATS)?',
-          a: 'ATS-tila poistaa asettelut, joita jäsentäjät eivät osaa lukea (sarakkeet, kuvakkeet, taulukot) ja avainsanapisteytys ehdottaa työpaikkailmoituksesta puuttuvia termejä.',
-        },
-        {
-          q: 'Mihin muotoihin voin viedä CV:ni?',
-          a: 'PDF, Word, HTML tai JSON — PDF tulostukseen ja hakemuksiin, Word muokattavaksi toisessa ohjelmassa, HTML jaettavaksi verkossa, JSON varmuuskopioksi tai myöhempää muokkausta varten.',
-        },
-        {
-          q: 'Voinko jakaa CV:ni ilman tiedoston lähettämistä?',
-          a: 'Kyllä — jakolinkki koodaa koko CV:n URL-osoitteen fragmenttiin, jota ei koskaan lähetetä palvelimelle. Kuvat eivät mahdu linkkiin, joten vie JSON, jos kuvien pitää säilyä.',
-        },
-        {
-          q: 'Mitä tietoja PortifyCV tallentaa selaimeeni?',
-          a: 'Oletuksena vain viisi pientä asetusta (kielivalinta, oletko nähnyt opastuksen, onko istunnon palautus päällä, viimeksi käyttämäsi muokkaustila ja onko osiovalikko pienennetty) tallennetaan paikallisesti — mikään niistä ei sisällä osaa CV:stäsi. Jos otat käyttöön valinnaisen "Palauta viimeisin istunto" -toiminnon Asetuksista, CV:stäsi pidetään työkopiota vain kyseisessä selainvälilehdessä, jotta vahinkopäivitys ei tuhoa työtäsi — kopio poistuu automaattisesti heti kun suljet välilehden, eikä sitä koskaan lähetetä minnekään. Katso tietosuojaseloste.',
-        },
-        {
-          q: 'Voinko luoda myös saatekirjeen?',
-          a: 'Kyllä — sisäänrakennettu generaattori luo saatekirjeluonnoksen CV:si yhteenvedon, viimeisimmän roolin ja tärkeimpien taitojen perusteella. Se pysyy selaimessasi kuten kaikki muukin, ja voit kopioida sen, ladata sen tekstinä tai viedä sen PDF-muodossa.',
-        },
-      ],
     }
   }
 
@@ -152,36 +124,6 @@ function getLandingCopy(locale) {
       { view: 'coverLetterExamples', path: ROUTES.coverLetterExamples, title: 'Cover letter examples', body: 'Weak and strong openings, middles and closings, and a draft from your CV.' },
     ],
     faqTitle: 'Frequently asked questions',
-    faq: [
-      {
-        q: 'Is PortifyCV really free?',
-        a: `Yes. No subscription, no watermark, no hidden limits — all ${TEMPLATE_COUNT} templates and every export format are free to use.`,
-      },
-      {
-        q: 'Do I need to create an account?',
-        a: 'No. Open the page and start typing — there is no login and no email required.',
-      },
-      {
-        q: 'Will my CV pass applicant tracking systems (ATS)?',
-        a: 'ATS mode strips out layouts that parsers struggle with (columns, icons, tables), and keyword scoring suggests terms missing from the job description.',
-      },
-      {
-        q: 'What formats can I export to?',
-        a: 'PDF, Word, HTML, or JSON — PDF for printing and applications, Word for editing in another program, HTML for sharing online, JSON as a backup or to keep editing later.',
-      },
-      {
-        q: 'Can I share my CV without sending a file?',
-        a: 'Yes — a share link encodes the whole CV in the URL fragment, which is never sent to a server. Images do not fit in the link, so export JSON if images need to travel too.',
-      },
-      {
-        q: 'What data does PortifyCV store in my browser?',
-        a: "By default, only five small preferences (your language choice, whether you have seen the onboarding tip, whether session restore is on, which builder mode you last used, and whether the section menu is collapsed) are stored locally — none of them contain any part of your CV. If you turn on the optional \"Restore last session\" feature in Settings, a working copy of your CV is kept in that browser tab only, so an accidental refresh doesn't lose your work — it's cleared automatically the moment you close the tab and is never sent anywhere. See the privacy policy for details.",
-      },
-      {
-        q: 'Can I also create a cover letter?',
-        a: 'Yes — a built-in generator drafts a cover letter from your CV’s summary, most recent role, and top skills. It stays in your browser like everything else, and you can copy it, download it as text, or export it as a PDF.',
-      },
-    ],
   }
 }
 
@@ -339,14 +281,22 @@ function LandingPage({
 
       <div className="landing-section landing-faq-section" id="faq">
         <h2 className="landing-section__title">{copy.faqTitle}</h2>
-        <dl className="landing-faq">
-          {copy.faq.map((item) => (
-            <div className="landing-faq__item" key={item.q}>
-              <dt className="landing-faq__question">{item.q}</dt>
-              <dd className="landing-faq__answer">{item.a}</dd>
-            </div>
+        <div className="landing-faq">
+          {LANDING_FAQ[locale === 'fi' ? 'fi' : 'en'].map((item) => (
+            <details className="landing-faq__item" key={item.q}>
+              <summary className="landing-faq__question">{item.q}</summary>
+              <p className="landing-faq__answer">
+                {item.before}
+                {item.link ? (
+                  <InternalNavLink to={VIEW_HEAD[item.link.view].path} onNavigate={() => onNavigateToView(item.link.view)}>
+                    {item.link.text}
+                  </InternalNavLink>
+                ) : null}
+                {item.after}
+              </p>
+            </details>
           ))}
-        </dl>
+        </div>
       </div>
 
       <div className="landing-sticky-cta print:hidden" hidden={!showStickyCta}>

@@ -4,6 +4,26 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## A shorter FAQ as an accordion — 1.6.34, 2026-10-21
+
+Phase 2 of the search plan, last part. The front page FAQ showed all seven
+answers open in two columns, the privacy one about 90 words long. It's
+now one column of native `<details>` (no script; search engines still
+read every answer), each answer one to three sentences, with a link to
+the page that covers the rest where there is one (the ATS guide, the
+privacy policy, the cover letter examples). Same in Finnish.
+
+The FAQ text lives in one place, `src/utils/landingFaq.js`. `index.html`'s
+FAQPage JSON-LD and its no-JavaScript fallback were regenerated from it,
+and `check:template-pages` now fails if the JSON-LD stops matching the
+English FAQ (search engines expect FAQ markup to match the page), if the
+two languages have different numbers of entries, or if an answer links
+to a page that doesn't exist.
+
+Also fixed: the phone sticky-bar test from 1.6.28 could scroll before
+React had rendered the page and failed about 1 run in 20 under parallel
+load; it now waits for the page first.
+
 ## How it works, templates by field, and guides on the front page — 1.6.33, 2026-10-21
 
 Phase 2 of the search plan. The front page now reads: hero, **How it

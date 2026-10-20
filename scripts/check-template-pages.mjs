@@ -291,6 +291,24 @@ check('fieldSearch writes ?field= for a field and nothing for All',
     `found: ${counts.join(', ')}`)
 }
 
+// --- The front page FAQ vs index.html's FAQPage JSON-LD ----------------------
+// Search engines expect FAQ markup to match the visible FAQ (1.6.34).
+{
+  const { LANDING_FAQ, faqAnswerText } = await importSrc('utils/landingFaq.js')
+  const { VIEW_HEAD } = await importSrc('utils/pageMeta.js')
+  const html = readFileSync(resolvePath(rootDir, 'index.html'), 'utf8')
+  const ldMatch = html.match(/<script type="application\/ld\+json" id="ld-faq">([\s\S]*?)<\/script>/)
+  const ld = ldMatch ? JSON.parse(ldMatch[1]) : { mainEntity: [] }
+  const expected = LANDING_FAQ.en.map((item) => [item.q, faqAnswerText(item)])
+  const actual = ld.mainEntity.map((entry) => [entry.name, entry.acceptedAnswer?.text])
+  check('index.html FAQPage JSON-LD matches the landing FAQ (en)',
+    JSON.stringify(actual) === JSON.stringify(expected),
+    'regenerate the #ld-faq block from src/utils/landingFaq.js')
+  check('the landing FAQ has as many Finnish as English entries', LANDING_FAQ.fi.length === LANDING_FAQ.en.length)
+  const badLinks = [...LANDING_FAQ.en, ...LANDING_FAQ.fi].filter((item) => item.link && !VIEW_HEAD[item.link.view])
+  check('every landing FAQ link points to a real page', badLinks.length === 0, badLinks.map((item) => item.q).join(', '))
+}
+
 if (failures > 0) {
   console.log(`\n${failures} template-page check(s) failed.`)
   process.exit(1)
