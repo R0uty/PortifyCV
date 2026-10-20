@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
-import { Menu } from 'lucide-react'
+import { ChevronDown, Menu } from 'lucide-react'
 
 import LandingPage from './pages/LandingPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
@@ -187,20 +187,38 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-// Shown in the header nav on every static page (landing included) — the
-// builder's Toolbar is a different, task-focused header and deliberately
-// doesn't get these marketing/guide links. `short*` is the pill's visible
-// text (kept tight so six links fit one capsule without dominating the
-// header); the full `en`/`fi` label still carries the link's accessible name.
-const GUIDE_LINKS = [
-  { view: 'howToUse', en: 'How to Use the Builder', fi: 'Käyttöopas', shortEn: 'How to Use', shortFi: 'Käyttöopas' },
-  { view: 'freeTemplates', en: 'Free CV Templates', fi: 'CV-pohjat', shortEn: 'Templates', shortFi: 'CV-pohjat' },
-  { view: 'howToWrite', en: 'How to Write a CV', fi: 'Näin kirjoitat CV:n', shortEn: 'How to Write', shortFi: 'Kirjoitusopas' },
-  { view: 'cvSkills', en: 'CV Skills Examples', fi: 'Taito-osion esimerkkejä', shortEn: 'Skills Examples', shortFi: 'Taitoesimerkit' },
-  { view: 'atsGuide', en: 'ATS-Friendly CV Guide', fi: 'ATS-opas', shortEn: 'ATS Guide', shortFi: 'ATS-opas' },
-  { view: 'coverLetterExamples', en: 'Cover Letter Examples', fi: 'Saatekirje-esimerkkejä', shortEn: 'Cover Letters', shortFi: 'Saatekirjeet' },
-  { view: 'cvExamples', en: 'CV Examples by Field', fi: 'CV-esimerkkejä aloittain', shortEn: 'Examples by Field', shortFi: 'CV-esimerkit' },
+// The header nav on every static page (landing included); the builder's
+// Toolbar is a different, task-focused header. Two top-level links, the
+// guides in one menu, and FAQ (the landing page's #faq section), 1.6.31.
+// Template pages count as Templates, the field example pages as Examples.
+const PRIMARY_LINKS = [
+  { view: 'freeTemplates', en: 'Templates', fi: 'CV-pohjat', activeFor: (view) => view === 'freeTemplates' || view.startsWith(TEMPLATE_VIEW_PREFIX) },
+  { view: 'cvExamples', en: 'Examples', fi: 'Esimerkit', activeFor: (view) => ['cvExamples', 'developerCv', 'itCv', 'cybersecurityCv', 'finnishCv'].includes(view) },
 ]
+
+const GUIDE_LINKS = [
+  { view: 'howToUse', en: 'How to use the builder', fi: 'Näin käytät CV-editoria' },
+  { view: 'howToWrite', en: 'How to write a CV', fi: 'Näin kirjoitat CV:n' },
+  { view: 'atsGuide', en: 'ATS-friendly CV guide', fi: 'ATS-ystävällinen CV-opas' },
+  { view: 'cvSkills', en: 'CV skills examples', fi: 'Taito-osion esimerkkejä' },
+  { view: 'coverLetterExamples', en: 'Cover letter examples', fi: 'Saatekirje-esimerkkejä' },
+]
+
+// The landing page's FAQ: scroll there, from the landing page or after
+// navigating to it (LandingPage scrolls to #faq on mount).
+function goToFaq(event, activeView, onNavigate) {
+  if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+    return
+  }
+  event.preventDefault()
+  if (activeView === 'landing') {
+    window.history.replaceState(window.history.state, '', '/#faq')
+    document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    return
+  }
+  onNavigate('landing')
+  window.history.replaceState(window.history.state, '', '/#faq')
+}
 
 function handleInAppLinkClick(event, view, onNavigate) {
   if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
@@ -210,16 +228,77 @@ function handleInAppLinkClick(event, view, onNavigate) {
   onNavigate(view)
 }
 
-// Below 640px (the same breakpoint .project-header__content already switches
-// padding at) the pill wraps its 7 links across several rows inside its own
-// rounded background, which reads as clutter rather than navigation. Under
-// that width the pill is hidden by CSS and this hamburger button takes its
-// place, opening the same links as a plain vertical list in the shared Modal
-// component instead of building a bespoke drawer.
-function HeaderNav({ locale = 'en', activeView, onNavigate = () => {} }) {
+// The Guides menu: a disclosure button and a short list of links. Closes
+// on a link, Escape (focus back to the button), or a click outside.
+function GuidesMenu({ locale, activeView, onNavigate }) {
+  const isFinnish = locale === 'fi'
+  const [isOpen, setIsOpen] = useState(false)
+  const rootRef = useRef(null)
+  const buttonRef = useRef(null)
+  const isActive = GUIDE_LINKS.some((link) => link.view === activeView)
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined
+    }
+    function handlePointerDown(event) {
+      if (!rootRef.current?.contains(event.target)) setIsOpen(false)
+    }
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setIsOpen(false)
+        buttonRef.current?.focus()
+      }
+    }
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen])
+
+  return (
+    <div className="project-header__menu" ref={rootRef}>
+      <button
+        type="button"
+        ref={buttonRef}
+        className={`project-header__link project-header__menu-button${isActive ? ' project-header__link--active' : ''}`}
+        aria-expanded={isOpen}
+        aria-controls="header-guides-menu"
+        onClick={() => setIsOpen((open) => !open)}
+      >
+        {isFinnish ? 'Oppaat' : 'Guides'}
+        <ChevronDown size={12} strokeWidth={2.5} aria-hidden="true" />
+      </button>
+      <div id="header-guides-menu" className="project-header__menu-panel" hidden={!isOpen}>
+        {GUIDE_LINKS.map((link) => (
+          <a
+            key={link.view}
+            href={VIEW_HEAD[link.view].path}
+            className="project-header__menu-link"
+            aria-current={link.view === activeView ? 'page' : undefined}
+            onClick={(event) => {
+              setIsOpen(false)
+              handleInAppLinkClick(event, link.view, onNavigate)
+            }}
+          >
+            {isFinnish ? link.fi : link.en}
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// Below 640px the pill is hidden by CSS and this hamburger button takes its
+// place, opening the same links as a plain vertical list in the shared
+// Modal component instead of building a bespoke drawer.
+function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStarted = () => {} }) {
   const isFinnish = locale === 'fi'
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
-  const navLabel = isFinnish ? 'Oppaat' : 'Guides'
+  const navLabel = isFinnish ? 'Sivuston valikko' : 'Site menu'
+  const faqLabel = isFinnish ? 'UKK' : 'FAQ'
 
   function handleMobileNavigate(event, view) {
     handleInAppLinkClick(event, view, onNavigate)
@@ -229,22 +308,21 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {} }) {
   return (
     <>
       <nav className="project-header__nav" aria-label={navLabel}>
-        {GUIDE_LINKS.map((link) => {
-          const isActive = link.view === activeView
-
-          return (
-            <a
-              key={link.view}
-              href={VIEW_HEAD[link.view].path}
-              className="project-header__link"
-              aria-current={isActive ? 'page' : undefined}
-              title={isFinnish ? link.fi : link.en}
-              onClick={(event) => handleInAppLinkClick(event, link.view, onNavigate)}
-            >
-              {isFinnish ? link.shortFi : link.shortEn}
-            </a>
-          )
-        })}
+        {PRIMARY_LINKS.map((link) => (
+          <a
+            key={link.view}
+            href={VIEW_HEAD[link.view].path}
+            className={`project-header__link${link.activeFor(activeView) ? ' project-header__link--active' : ''}`}
+            aria-current={link.view === activeView ? 'page' : undefined}
+            onClick={(event) => handleInAppLinkClick(event, link.view, onNavigate)}
+          >
+            {isFinnish ? link.fi : link.en}
+          </a>
+        ))}
+        <GuidesMenu locale={locale} activeView={activeView} onNavigate={onNavigate} />
+        <a href="/#faq" className="project-header__link" onClick={(event) => goToFaq(event, activeView, onNavigate)}>
+          {faqLabel}
+        </a>
       </nav>
 
       <button
@@ -259,21 +337,49 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {} }) {
 
       <Modal isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} title={navLabel}>
         <nav className="project-header__mobile-nav" aria-label={navLabel}>
-          {GUIDE_LINKS.map((link) => {
-            const isActive = link.view === activeView
-
-            return (
-              <a
-                key={link.view}
-                href={VIEW_HEAD[link.view].path}
-                className="project-header__mobile-nav-link"
-                aria-current={isActive ? 'page' : undefined}
-                onClick={(event) => handleMobileNavigate(event, link.view)}
-              >
-                {isFinnish ? link.fi : link.en}
-              </a>
-            )
-          })}
+          <button
+            type="button"
+            className="landing-cta project-header__mobile-cta"
+            onClick={() => {
+              setIsMobileNavOpen(false)
+              onGetStarted()
+            }}
+          >
+            {isFinnish ? 'Tee CV' : 'Build my CV'}
+          </button>
+          {PRIMARY_LINKS.map((link) => (
+            <a
+              key={link.view}
+              href={VIEW_HEAD[link.view].path}
+              className="project-header__mobile-nav-link"
+              aria-current={link.view === activeView ? 'page' : undefined}
+              onClick={(event) => handleMobileNavigate(event, link.view)}
+            >
+              {isFinnish ? link.fi : link.en}
+            </a>
+          ))}
+          <a
+            href="/#faq"
+            className="project-header__mobile-nav-link"
+            onClick={(event) => {
+              setIsMobileNavOpen(false)
+              goToFaq(event, activeView, onNavigate)
+            }}
+          >
+            {faqLabel}
+          </a>
+          <p className="project-header__mobile-nav-group">{isFinnish ? 'Oppaat' : 'Guides'}</p>
+          {GUIDE_LINKS.map((link) => (
+            <a
+              key={link.view}
+              href={VIEW_HEAD[link.view].path}
+              className="project-header__mobile-nav-link"
+              aria-current={link.view === activeView ? 'page' : undefined}
+              onClick={(event) => handleMobileNavigate(event, link.view)}
+            >
+              {isFinnish ? link.fi : link.en}
+            </a>
+          ))}
         </nav>
       </Modal>
     </>
@@ -522,17 +628,22 @@ function App() {
                   />
                 </a>
               )}
-              <HeaderNav locale={locale} activeView={view} onNavigate={goToView} />
-              <button
-                type="button"
-                className="action-button action-button--secondary flex items-center gap-1.5 border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
-                onClick={handleToggleLocale}
-                aria-label={locale === 'fi' ? 'Vaihda kieli' : 'Switch language'}
-                title={locale === 'fi' ? 'Vaihda kieli' : 'Switch language'}
-              >
-                <LocaleFlagIcon locale={locale} />
-                {locale === 'fi' ? 'FI' : 'EN'}
-              </button>
+              <HeaderNav locale={locale} activeView={view} onNavigate={goToView} onGetStarted={goToBuilder} />
+              <div className="project-header__actions">
+                <button
+                  type="button"
+                  className="action-button action-button--secondary flex items-center gap-1.5 border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
+                  onClick={handleToggleLocale}
+                  aria-label={locale === 'fi' ? 'Vaihda kieli' : 'Switch language'}
+                  title={locale === 'fi' ? 'Vaihda kieli' : 'Switch language'}
+                >
+                  <LocaleFlagIcon locale={locale} />
+                  {locale === 'fi' ? 'FI' : 'EN'}
+                </button>
+                <button type="button" className="project-header__cta" onClick={() => goToBuilder()}>
+                  {locale === 'fi' ? 'Tee CV' : 'Build my CV'}
+                </button>
+              </div>
             </div>
           </div>
         </header>

@@ -171,6 +171,33 @@ function LandingPage({
   // view, a slim bar at the bottom offers "Start building" again.
   const [showStickyCta, setShowStickyCta] = useState(false)
 
+  // The header's FAQ link lands here as /#faq. The lazy sections above the
+  // FAQ grow after the first paint, so keep it in place while the page
+  // settles (up to 1.5s), unless the visitor starts scrolling first.
+  useEffect(() => {
+    if (window.location.hash !== '#faq' || typeof ResizeObserver === 'undefined') {
+      return undefined
+    }
+    const snap = () => document.getElementById('faq')?.scrollIntoView({ block: 'start' })
+    const observer = new ResizeObserver(snap)
+    const stop = () => {
+      observer.disconnect()
+      window.removeEventListener('wheel', stop)
+      window.removeEventListener('touchstart', stop)
+      window.removeEventListener('keydown', stop)
+    }
+    snap()
+    observer.observe(document.body)
+    window.addEventListener('wheel', stop, { passive: true })
+    window.addEventListener('touchstart', stop, { passive: true })
+    window.addEventListener('keydown', stop)
+    const timer = window.setTimeout(stop, 1500)
+    return () => {
+      window.clearTimeout(timer)
+      stop()
+    }
+  }, [])
+
   useEffect(() => {
     const actions = actionsRef.current
     if (!actions || typeof IntersectionObserver === 'undefined') {
@@ -250,7 +277,7 @@ function LandingPage({
         </button>
       </div>
 
-      <div className="landing-section">
+      <div className="landing-section landing-faq-section" id="faq">
         <h2 className="landing-section__title">{copy.faqTitle}</h2>
         <dl className="landing-faq">
           {copy.faq.map((item) => (

@@ -4,6 +4,21 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## A simpler header with a Build my CV button — 1.6.31, 2026-10-21
+
+Phase 2 of the search plan (front page restructure, same look). The
+header had seven equal guide links and no button. Now: **Templates**,
+**Examples**, a **Guides** menu (how to use the builder, how to write a
+CV, the ATS guide, skills examples, cover letter examples) and **FAQ**,
+which scrolls to the front page's FAQ, then the language switch and a
+black **Build my CV** button (hidden under 480px, where the phone menu
+starts with it instead). Template pages light up Templates, the field
+example pages Examples, a guide the Guides menu. The menu closes on a
+link, Escape (focus back to its button) or a click outside. On phones the
+menu lists Build my CV, the three main links, then every guide.
+Opening `/#faq` directly also lands on the FAQ, held in place while the
+page's lazy sections load. Test: `e2e/header-nav.spec.js`.
+
 ## Template thumbnails are images on the front page and the templates grid — 1.6.30, 2026-10-20
 
 Phase 1 of the search plan. The front page's hero stack and template

@@ -1364,6 +1364,20 @@ select.floating-field__control {
   padding: 3px;
 }
 
+/* The Guides menu's button, before the link rules so their hover and
+   active backgrounds apply to it too. */
+.project-header__menu-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  background: transparent;
+}
+
 .project-header__link {
   color: var(--app-text-muted);
   text-decoration: none;
@@ -1378,13 +1392,94 @@ select.floating-field__control {
   background: rgba(15, 15, 25, 0.06);
 }
 
-.project-header__link[aria-current='page'] {
+.project-header__link[aria-current='page'],
+.project-header__link--active {
   color: var(--accent-contrast);
   background: var(--accent-solid);
 }
 
-.project-header__link[aria-current='page']:hover {
+.project-header__link[aria-current='page']:hover,
+.project-header__link--active:hover {
   background: var(--accent-solid-hover);
+}
+
+/* The Guides menu (1.6.31): a pill button like its neighbours, opening a
+   plain white list under it. */
+.project-header__menu {
+  position: relative;
+}
+
+.project-header__menu-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  min-width: 15rem;
+  padding: var(--space-2);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.project-header__menu-panel[hidden] {
+  display: none;
+}
+
+.project-header__menu-link {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--app-text);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.project-header__menu-link:hover,
+.project-header__menu-link:focus-visible {
+  background: rgba(15, 15, 25, 0.06);
+}
+
+.project-header__menu-link[aria-current='page'] {
+  font-weight: 700;
+}
+
+.project-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* "Build my CV": the site's black button, sized for the header. */
+.project-header__cta {
+  border: 2px solid #111111;
+  background: #111111;
+  color: #ffffff;
+  padding: 0.55rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 140ms ease, color 140ms ease;
+}
+
+.project-header__cta:hover {
+  background: transparent;
+  color: #111111;
+}
+
+@media (max-width: 479px) {
+  .project-header__cta {
+    display: none;
+  }
 }
 
 /* Full PortifyCV.jpg lockup (icon + wordmark), shown at a size where the
@@ -1447,6 +1542,20 @@ select.floating-field__control {
 
 .project-header__mobile-nav-link[aria-current='page'] {
   color: var(--accent-solid);
+}
+
+.project-header__mobile-cta {
+  margin: 0 0 var(--space-2);
+  text-align: center;
+}
+
+.project-header__mobile-nav-group {
+  margin-top: var(--space-5);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
 }
 
 /* ── App toolbar (builder top bar) ── */
@@ -2904,6 +3013,11 @@ select.floating-field__control {
   width: min(100%, 88rem);
   margin: 0 auto;
   padding-top: clamp(3.5rem, 8vw, 6rem);
+}
+
+/* Clear of the sticky header when the FAQ link scrolls here. */
+.landing-faq-section {
+  scroll-margin-top: 6rem;
 }
 
 .landing-section__title {
