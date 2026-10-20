@@ -7,7 +7,7 @@ test.describe('Template pages', () => {
   test('a template page loads directly at its own URL', async ({ page }) => {
     await page.goto('/free-cv-templates/developer')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Developer CV template')
-    await expect(page).toHaveTitle('Developer CV Template - Free, No Login - PortifyCV')
+    await expect(page).toHaveTitle('Developer CV Template (Free) - PortifyCV')
     await expect(page.locator('.template-page__preview [data-export-header]').first()).toBeVisible()
 
     const breadcrumbBox = await page.locator('.template-page__breadcrumb').boundingBox()

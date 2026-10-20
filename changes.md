@@ -4,6 +4,27 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Titles and the front page headline say what people search for — 1.6.27, 2026-10-20
+
+Phase 1 of the search plan. The front page's title was "PortifyCV - CV
+Builder" and its headline "Build your CV. Take it. That's it." carried no
+search term at all. Now:
+
+- **Title** (and the share-card title): "Free CV Builder, No Sign-Up -
+  PortifyCV".
+- **Headline:** "Free CV builder. Build it, take it, done." (Finnish:
+  "Ilmainen CV-työkalu. Tee CV, ota se mukaan, valmis."), keeping the
+  slogan's rhythm. `index.html`'s no-JavaScript fallback uses it too.
+- **Template pages:** "Developer CV Template (Free) - PortifyCV" instead of
+  "… - Free, No Login - PortifyCV"; the longest is now 51 characters, so
+  search results no longer cut two of them off. Their breadcrumb data
+  takes the template's name directly instead of parsing the title.
+- **Navy Professional's description** no longer calls its two-column
+  layout "ATS-friendly", which the ATS guide says columns are not.
+
+Template page URLs are unchanged. `landing.spec.js` and
+`template-pages.spec.js` now expect the new wording.
+
 ## Template previews no longer add headings to the page — 1.6.26, 2026-10-20
 
 Phase 1 of the search plan (SEO and design review, 2026-10-20). Template

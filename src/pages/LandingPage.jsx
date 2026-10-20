@@ -31,7 +31,7 @@ function getLandingCopy(locale) {
       startButton: 'Aloita rakentaminen',
       viewTemplatesButton: 'Katso pohjat',
       howItWorksLink: 'Katso miten se toimii',
-      title: 'Rakenna CV:si. Ota se mukaan. Siinä kaikki.',
+      title: 'Ilmainen CV-työkalu. Tee CV, ota se mukaan, valmis.',
       subtitle: 'Ei tiliä, ei kirjautumista, ei mitään tallennettua — kaikki tapahtuu tässä selaimessasi ja katoaa, kun suljet välilehden.',
       previewAlt: 'Esimerkki PortifyCV:llä rakennetusta CV:stä',
       highlights: [
@@ -98,7 +98,7 @@ function getLandingCopy(locale) {
     startButton: 'Start building',
     viewTemplatesButton: 'View templates',
     howItWorksLink: 'See how it works',
-    title: 'Build your CV. Take it. That’s it.',
+    title: 'Free CV builder. Build it, take it, done.',
     subtitle: 'No login, no account, nothing saved — everything happens right here in your browser, and disappears the moment you close the tab.',
     previewAlt: 'Example CV built with PortifyCV',
     highlights: [

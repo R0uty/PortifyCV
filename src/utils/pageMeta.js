@@ -18,7 +18,7 @@ const TEMPLATE_COUNT = cvTemplates.length
 
 const STATIC_VIEW_HEAD = {
   landing: {
-    title: 'PortifyCV - CV Builder',
+    title: 'Free CV Builder, No Sign-Up - PortifyCV',
     path: ROUTES.landing,
     description:
       'Build a free CV in minutes. No login, no data saved. Live preview, ATS-friendly mode, and PDF/Word/HTML/JSON export.',
@@ -161,7 +161,10 @@ const TEMPLATE_VIEW_HEAD = Object.fromEntries(
   cvTemplates.map((template) => [
     `${TEMPLATE_VIEW_PREFIX}${template.id}`,
     {
-      title: `${template.label} CV Template - Free, No Login - PortifyCV`,
+      // Under 60 characters for every label (search results cut longer
+      // titles); "Classic Professional" is the longest at 51.
+      title: `${template.label} CV Template (Free) - PortifyCV`,
+      templateLabel: template.label,
       path: templatePath(template.slug),
       description: TEMPLATE_META_DESCRIPTIONS[template.id] ?? template.description,
       templateId: template.id,
@@ -199,7 +202,7 @@ export function buildTemplatePageSchema(head) {
   const crumbs = [
     { name: 'PortifyCV', path: ROUTES.landing },
     { name: 'Free CV templates', path: ROUTES.freeTemplates },
-    { name: head.title.replace(/ CV Template - .*$/, ''), path: head.path },
+    { name: head.templateLabel, path: head.path },
   ]
 
   return {

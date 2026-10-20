@@ -32,7 +32,7 @@ export const TEMPLATE_META_DESCRIPTIONS = {
   classicProfessional:
     'Free Classic Professional CV template: traditional single column, thin dividers, a serif name you can center, no login.',
   navyProfessional:
-    'Free Navy Professional CV template: dark navy sidebar, blue accents, ATS-friendly two-column layout, no login.',
+    'Free Navy Professional CV template: dark navy sidebar, blue accents, a clear two-column layout, no login.',
   modernOrange:
     'Free Modern Orange CV template: cream sidebar, orange accent, dot-rated skills and dual timelines, no login.',
   colorfulCompact:
