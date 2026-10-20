@@ -134,10 +134,28 @@ test.describe('Landing page on a phone', () => {
 
   test('a sticky "Start building" bar appears once the hero buttons scroll away', async ({ page }) => {
     await page.goto('/')
+    // Scroll only once the page has rendered: React can commit after the
+    // load event, and a scroll before that has nothing to scroll.
+    await expect(page.locator('.landing-hero__actions')).toBeVisible()
+    await expect(page.locator('.landing-templates__card').first()).toBeAttached()
     await page.evaluate(() => window.scrollTo(0, 1500))
     const bar = page.locator('.landing-sticky-cta')
     await expect(bar).toBeVisible()
     await bar.getByRole('button', { name: 'Start building' }).click()
     await expect(page).toHaveURL(/\/cv/)
   })
+})
+
+// 1.6.34: the FAQ is an accordion of short answers, the same text as
+// index.html's FAQPage JSON-LD (check:template-pages compares them).
+test('the FAQ opens one answer at a time and links to the guide behind it', async ({ page }) => {
+  await page.goto('/')
+  const items = page.locator('#faq details')
+  await expect(items).toHaveCount(7)
+  const ats = items.filter({ hasText: 'Will my CV pass applicant tracking systems (ATS)?' })
+  await expect(ats.locator('.landing-faq__answer')).toBeHidden()
+  await ats.locator('summary').click()
+  await expect(ats).toHaveAttribute('open', '')
+  await ats.getByRole('link', { name: 'ATS-friendly CV guide' }).click()
+  await expect(page).toHaveURL(/\/ats-friendly-cv-guide$/)
 })
