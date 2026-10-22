@@ -4,6 +4,16 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Deeper Finnish CV examples — 1.6.44, 2026-10-22
+
+Phase 4 of the search plan. The Finnish CV page (English about 430 → 820
+words, Finnish about 600) adds what's specific to applying in Finland:
+photo and personal details today, Finnish date format and how to name
+job titles and degrees (AMK, official translations), language
+certificates (YKI levels, civil-service Swedish), references
+(suosittelijat), conscription, civil service and positions of trust, and
+how applications usually work (a CV plus a hakemus, often through a form).
+
 ## Deeper CV skills examples — 1.6.43, 2026-10-22
 
 Phase 4 of the search plan. The skills page (English about 430 → 920

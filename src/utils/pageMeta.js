@@ -196,7 +196,7 @@ const STATIC_VIEW_HEAD = {
       'How a Finnish CV differs from international norms: what to leave out, the languages section, and a bilingual example of the same content.',
     isArticle: true,
     datePublished: '2026-08-20',
-    dateModified: '2026-10-12',
+    dateModified: '2026-10-22',
   },
 }
 

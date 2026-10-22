@@ -33,9 +33,29 @@ function getCopy(locale) {
           ],
         },
         {
+          heading: "Kuva ja henkilötiedot",
+          paragraphs: [
+            "Kuva on suomalaisessa CV:ssä yleinen mutta ei pakollinen. Jos lisäät sen, käytä selkeää ja tuoretta kasvokuvaa; kuvan puuttumista ei pidetä miinuksena. Vanhemmissa suomalaisissa CV:issä lueteltiin usein syntymäaika, perhe ja harrastukset tarkasti; nykyään riittää nimi, tehtävänimike, puhelin, sähköposti, kotikaupunki ja LinkedIn-linkki.",
+          ],
+        },
+        {
+          heading: "Päivämäärät, nimikkeet ja tutkinnot",
+          list: [
+            "Suomalaiset päivämäärät ovat yleensä muotoa \"1/2022–3/2024\". Valitse yksi muoto ja pidä siitä kiinni.",
+            "Pidä tehtävänimikkeet CV:n kielellä, ja lisää englanninkieliseen CV:hen alkuperäinen nimike sulkuihin, jos sille ei ole selvää vastinetta.",
+            "Käytä tutkinnoista virallisia nimiä ja käännöksiä, kuten \"insinööri (AMK)\" tai englanniksi \"Bachelor of Engineering\", jotta lukija tietää tason.",
+          ],
+        },
+        {
           heading: 'Kielitaito-osio on tavallista tärkeämpi',
           paragraphs: [
             'Suomalaisilla työpaikoilla kysytään usein sekä suomen että ruotsin taitoa englannin lisäksi. PortifyCV:n Kielet-osiossa jokaiselle kielelle merkitään oma taso — tämä kannattaa täyttää huolella, se on yksi ensimmäisistä asioista, joita moni rekrytoija Suomessa katsoo.',
+          ],
+        },
+        {
+          heading: "Kielitodistukset: YKI ja virkamiesruotsi",
+          paragraphs: [
+            "Jos olet suorittanut yleisen kielitutkinnon (YKI), kerro kieli ja taso, esimerkiksi \"suomi, YKI taso 4\". Se kertoo työnantajalle enemmän kuin \"hyvä\". Julkisen sektorin tehtävissä vaaditaan usein todistus virkamiesruotsista tai -suomesta, joten mainitse se, jos sinulla on sellainen.",
           ],
         },
         {
@@ -54,6 +74,24 @@ function getCopy(locale) {
           },
           paragraphsAfter: [
             'Rakenne ja luvut pysyvät samoina — vain kieli vaihtuu. Vältä suoraa sanasta sanaan -käännöstä, joka usein kuulostaa kömpelöltä; kirjoita lause uudelleen kohdekielellä.',
+          ],
+        },
+        {
+          heading: "Suosittelijat",
+          paragraphs: [
+            "Suomalaiset työnantajat ottavat yhteyttä suosittelijoihin, usein prosessin loppuvaiheessa. Yhden tai kahden nimen listaaminen tehtävänimikkeen ja puhelinnumeron kanssa on tavallista; myös \"suosittelijat pyydettäessä\" käy. Kysy jokaiselta lupa ennen kuin listaat hänet.",
+          ],
+        },
+        {
+          heading: "Varusmies- tai siviilipalvelus ja vapaaehtoistyö",
+          paragraphs: [
+            "Suoritetun varusmies- tai siviilipalveluksen voi mainita lyhyesti, ja siitä kannattaa kertoa rivi, kun se liittyy haettavaan työhön: johtajakoulutus, erikoistehtävä tai työssä tarvittavat taidot. Vapaaehtoistyötä ja järjestöjen luottamustehtäviä arvostetaan Suomessa; kerro niistä lyhyesti, mitä teit.",
+          ],
+        },
+        {
+          heading: "Hakeminen: CV ja hakemus, usein lomakkeella",
+          paragraphs: [
+            "Useimmat suomalaiset työnantajat odottavat CV:n lisäksi erillisen hakemuksen. Monet käyttävät verkkolomaketta, jolle ladataan CV ja liitetään hakemus tai vastataan muutamaan kysymykseen. Kirjoita molemmat ilmoituksen kielellä.",
           ],
         },
         {
@@ -107,9 +145,29 @@ function getCopy(locale) {
         ],
       },
       {
+        heading: "Photo and personal details",
+        paragraphs: [
+          "A photo is common on Finnish CVs but not required. If you add one, use a plain, recent headshot; leaving it out is never held against you. Older Finnish CVs often listed a date of birth, family and hobbies in detail; today the convention is name, title, phone, email, city and a LinkedIn link.",
+        ],
+      },
+      {
+        heading: "Dates, job titles and degrees",
+        list: [
+          "Finnish dates usually look like \"1/2022–3/2024\". Pick one format and keep it.",
+          "Keep job titles in the language of the CV, and add the original in brackets when a Finnish title has no clear English equivalent.",
+          "Name degrees the way they’re officially translated, such as \"Bachelor of Engineering (AMK)\" or \"Master of Science (Technology)\", so a reader abroad knows the level.",
+        ],
+      },
+      {
         heading: 'The languages section matters more than usual',
         paragraphs: [
           'Finnish employers often ask about both Finnish and Swedish proficiency in addition to English. PortifyCV’s Languages section lets you mark a proficiency level for each — worth filling in carefully, since it’s one of the first things many recruiters in Finland check.',
+        ],
+      },
+      {
+        heading: "Language certificates: YKI and civil-service Swedish",
+        paragraphs: [
+          "If you’ve taken the National Certificate of Language Proficiency (YKI), name the language and level, such as \"Finnish, YKI level 4\". It tells an employer more than \"good\". For public-sector jobs, proof of civil-service Swedish (virkamiesruotsi) or Finnish is often a requirement, so list it if you have it.",
         ],
       },
       {
@@ -128,6 +186,24 @@ function getCopy(locale) {
         },
         paragraphsAfter: [
           'The structure and numbers stay the same — only the language changes. Avoid a direct word-for-word translation, which often reads awkwardly; rewrite the sentence naturally in the target language instead.',
+        ],
+      },
+      {
+        heading: "References",
+        paragraphs: [
+          "Finnish employers do contact references, often near the end of the process. Listing one or two names with their role and phone number is common; \"references on request\" works too. Ask each person before you list them.",
+        ],
+      },
+      {
+        heading: "Conscription, civil service and voluntary work",
+        paragraphs: [
+          "Completed military or civilian service can be listed briefly, and it’s worth a line when it’s relevant: leader training, a specialist role, or skills the job needs. Voluntary work and positions of trust (luottamustehtävät) in associations are valued in Finland; give them a short entry with what you did.",
+        ],
+      },
+      {
+        heading: "Applying: a CV plus a hakemus, often through a form",
+        paragraphs: [
+          "Most Finnish employers expect a CV and a separate application letter, the hakemus. Many use an online form where you upload the CV and paste the letter or answer a few questions. Write both in the language of the job posting.",
         ],
       },
       {
