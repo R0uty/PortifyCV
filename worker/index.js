@@ -32,6 +32,10 @@ const FAQ_SCHEMA_FI = JSON.stringify({
   })),
 })
 
+// index.html's AdSense tag (1.6.48 removes it from the builder and from
+// 404 pages).
+export const ADSENSE_SCRIPT = 'script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'
+
 const escapeHtml = (text) => String(text)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
@@ -145,6 +149,12 @@ function rewriteForRoute(response, view, locale) {
     rewriter.on('#seo-landing', new SetInnerHtml(fallbackBody(view, head)))
   }
 
+  // No ads in the builder (1.6.48): it's an app screen, where AdSense
+  // doesn't allow them and where Auto ads would sit among its buttons.
+  if (view === 'builder') {
+    rewriter.on(ADSENSE_SCRIPT, new RemoveElement())
+  }
+
   if (head.alternates) {
     const { en, fi } = head.alternates
     rewriter.on('head', new AppendToHead([
@@ -210,6 +220,8 @@ export default {
       .on('meta[name="robots"]', new SetAttr('content', 'noindex, follow'))
       .on('link[rel="canonical"]', new RemoveElement())
       .on('#ld-faq', new RemoveElement())
+      // No ads on an error page: AdSense doesn't allow them there (1.6.48).
+      .on(ADSENSE_SCRIPT, new RemoveElement())
       .transform(notFoundResponse)
 
     return new Response(rewritten.body, {
