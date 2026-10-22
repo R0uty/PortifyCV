@@ -1,11 +1,11 @@
 {
   "name": "portifycv",
   "private": true,
-  "version": "1.6.48",
+  "version": "1.6.49",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && cp dist/index.html dist/404.html",
+    "build": "vite build && vite build --ssr src/prerender.jsx --outDir dist-ssr && NODE_ENV=production node scripts/prerender.mjs && cp dist/index.html dist/404.html",
     "lint": "eslint .",
     "check:share": "node scripts/check-share-links.mjs",
     "check:reducers": "node scripts/check-reducers.mjs",

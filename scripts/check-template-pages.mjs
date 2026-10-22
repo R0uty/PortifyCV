@@ -357,7 +357,7 @@ check('fieldSearch writes ?field= for a field and nothing for All',
 
   // 1.6.48: the worker strips index.html's AdSense tag from the builder and
   // 404s by a selector; if the tag changes, the selector must still match.
-  const { ADSENSE_SCRIPT } = await import(pathToFileURL(resolvePath(rootDir, 'worker/index.js')).href)
+  const { ADSENSE_SCRIPT } = await import(pathToFileURL(resolvePath(rootDir, 'worker/adsense.js')).href)
   const adsenseSrcPart = ADSENSE_SCRIPT.match(/\*="([^"]+)"/)?.[1]
   const indexHtml = readFileSync(resolvePath(rootDir, 'index.html'), 'utf8')
   check("the worker's AdSense selector matches index.html's AdSense tag",

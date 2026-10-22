@@ -280,6 +280,11 @@ export const PATH_TO_VIEW = new Map(Object.entries(VIEW_HEAD).flatMap(([view, he
   ...(head.pathFi ? [[head.pathFi, { view, locale: 'fi' }]] : []),
 ]))
 
+// Where scripts/prerender.mjs writes a page's pre-rendered markup and the
+// worker fetches it from (1.6.49), without the ".html" the asset server
+// redirects away. Template views' "template:" colon becomes a dash.
+export const prerenderedPath = (view, locale) => `/prerendered/${view.replace(/[^a-zA-Z0-9-]/g, '-')}-${locale}`
+
 // Article schema for guide-type pages (VIEW_HEAD entries with isArticle:
 // true) — index.html's own two JSON-LD blocks (SoftwareApplication, FAQPage)
 // describe the app itself and stay static across every route; this is the

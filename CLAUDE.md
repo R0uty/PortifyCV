@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm install              # install dependencies
 npm run dev               # dev server with HMR
-npm run build              # production build to dist/ (also copies dist/index.html -> dist/404.html)
+npm run build              # production build to dist/, pre-renders every content page into dist/prerendered/ (1.6.49), copies dist/index.html -> dist/404.html
 npm run preview            # serve the production build locally
 npm run lint               # ESLint over the whole repo
 
@@ -87,7 +87,17 @@ this is a client-rendered SPA and a crawler that doesn't execute JS would
 otherwise see the landing page's metadata for every route. Since 1.6.46 it
 also replaces `index.html`'s no-JS `#seo-landing` body (the English front
 page's copy) with each route's own heading, description and same-language
-links (`fallbackBody`, checked by `check:template-pages`). It also returns a
+links (`fallbackBody`, checked by `check:template-pages`); since 1.6.49 it
+puts each page's full pre-rendered markup there instead
+(`src/prerender.jsx` + `scripts/prerender.mjs`, run by `npm run build`,
+which renders `App` with a `route` prop in Node), keeping `fallbackBody`
+as the fallback. A page component must therefore render without
+`window`/`document` (touch them in effects only). `wrangler.jsonc`'s
+`run_worker_first` sends `/` and `/prerendered/*` through the worker,
+since Cloudflare serves any other path matching a `dist/` file directly,
+and the worker may only export functions (the runtime reads each export
+as an entry point; shared constants live in their own module, e.g.
+`worker/adsense.js`). It also returns a
 real 404 (with `noindex`) for unknown paths and redirects case/trailing-slash
 variants to the canonical path. If you change a route or its metadata,
 `routes.js`/`pageMeta.js` is the one place to edit — both the client
