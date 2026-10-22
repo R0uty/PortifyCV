@@ -4,6 +4,16 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## A deeper ATS guide — 1.6.41, 2026-10-22
+
+Phase 4 of the search plan. The ATS-friendly CV guide (both languages)
+adds: the section headings a parser recognises, dates/titles/contact
+details it can read, matching a posting's words without keyword stuffing
+(and why hidden white-text keywords backfire), how to test your own CV
+the way a parser reads it (paste the exported text into a plain-text
+editor), three common ATS myths, and two more checklist items. The
+export-format section and its checked sentence are unchanged.
+
 ## A real IT example CV and a deeper IT page — 1.6.40, 2026-10-22
 
 Phase 4 of the search plan. The IT CV examples page was the thinnest page

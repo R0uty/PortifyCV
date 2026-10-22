@@ -78,7 +78,7 @@ const STATIC_VIEW_HEAD = {
       'How applicant tracking systems actually read a CV, the formatting mistakes that break parsing, and how to check your own CV against real keyword scoring.',
     isArticle: true,
     datePublished: '2026-08-20',
-    dateModified: '2026-10-17',
+    dateModified: '2026-10-22',
   },
   howToWrite: {
     title: 'How to Write a CV - PortifyCV',
