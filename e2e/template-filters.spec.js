@@ -154,8 +154,10 @@ test.describe('Example pages link to the Tech filter', () => {
   test('the link is translated', async ({ page }) => {
     await page.goto('/developer-cv-examples')
     await page.getByRole('button', { name: 'Switch language' }).click()
+    // The switch moves to the Finnish page, whose links stay Finnish (1.6.35).
+    await expect(page).toHaveURL(/\/fi\/kehittajan-cv-esimerkit$/)
     await expect(page.locator('.templates-page-links').getByRole('link', { name: 'Tekniikan ja IT-alan CV-pohjat', exact: true }))
-      .toHaveAttribute('href', '/free-cv-templates?field=tech')
+      .toHaveAttribute('href', '/fi/ilmaiset-cv-pohjat?field=tech')
   })
 })
 

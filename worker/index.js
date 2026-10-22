@@ -17,9 +17,30 @@
 //   4. returns a real 404 (with noindex) for paths that aren't a known
 //      route, instead of the soft-404 the SPA fallback produced (200,
 //      indexable, homepage content, for literally any typo'd URL).
-import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema } from '../src/utils/pageMeta.js'
+import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema, localizedHead, PATH_TO_VIEW } from '../src/utils/pageMeta.js'
+import { LANDING_FAQ, faqAnswerText } from '../src/utils/landingFaq.js'
 
-const PATH_TO_HEAD = new Map(Object.values(VIEW_HEAD).map((head) => [head.path, head]))
+// The Finnish front page's FAQPage JSON-LD (1.6.35): index.html carries
+// the English one, which must match the visible FAQ, so /fi gets its own.
+const FAQ_SCHEMA_FI = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: LANDING_FAQ.fi.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: faqAnswerText(item) },
+  })),
+})
+
+class SetInnerHtml {
+  constructor(html) {
+    this.html = html
+  }
+
+  element(el) {
+    el.setInnerContent(this.html, { html: true })
+  }
+}
 
 // Hashed JS/CSS bundles, images, fonts, robots.txt, sitemap.xml, etc. — any
 // request that isn't asking for an HTML page. These never need rewriting or
@@ -66,8 +87,14 @@ class AppendToHead {
 // FAQPage schema only matches visible content on the landing route (see
 // src/pages/LandingPage.jsx's FAQ section) — every other route had it too,
 // which is structured data that doesn't describe the page it's on.
-function rewriteForRoute(response, head, canonicalUrl) {
+// `locale` is the address's language (1.6.35): /fi/… pages get Finnish
+// metadata, <html lang="fi">, and hreflang links to their English twin.
+function rewriteForRoute(response, view, locale) {
+  const head = localizedHead(VIEW_HEAD[view], locale)
+  const canonicalUrl = `${SITE_ORIGIN}${head.path}`
   const rewriter = new HTMLRewriter()
+    .on('html', new SetAttr('lang', head.locale))
+    .on('meta[property="og:locale"]', new SetAttr('content', head.locale === 'fi' ? 'fi_FI' : 'en_US'))
     .on('title', new SetText(head.title))
     .on('link[rel="canonical"]', new SetAttr('href', canonicalUrl))
     .on('meta[name="description"]', new SetAttr('content', head.description))
@@ -77,8 +104,19 @@ function rewriteForRoute(response, head, canonicalUrl) {
     .on('meta[name="twitter:title"]', new SetAttr('content', head.title))
     .on('meta[name="twitter:description"]', new SetAttr('content', head.description))
 
-  if (head !== VIEW_HEAD.landing) {
+  if (view !== 'landing') {
     rewriter.on('#ld-faq', new RemoveElement())
+  } else if (head.locale === 'fi') {
+    rewriter.on('#ld-faq', new SetInnerHtml(FAQ_SCHEMA_FI))
+  }
+
+  if (head.alternates) {
+    const { en, fi } = head.alternates
+    rewriter.on('head', new AppendToHead([
+      `<link rel="alternate" hreflang="en" href="${SITE_ORIGIN}${en}">`,
+      `<link rel="alternate" hreflang="fi" href="${SITE_ORIGIN}${fi}">`,
+      `<link rel="alternate" hreflang="x-default" href="${SITE_ORIGIN}${en}">`,
+    ].join('')))
   }
 
   const schema = buildViewSchema(head)
@@ -107,21 +145,21 @@ export default {
     }
 
     const normalized = normalizePath(pathname)
-    const head = PATH_TO_HEAD.get(normalized)
+    const route = PATH_TO_VIEW.get(normalized)
 
-    if (head && normalized !== pathname) {
+    if (route && normalized !== pathname) {
       const redirectUrl = new URL(request.url)
       redirectUrl.pathname = normalized
       return Response.redirect(redirectUrl.toString(), 301)
     }
 
-    if (head) {
+    if (route) {
       // Cloudflare's asset server redirects an explicit "/index.html"
       // request to "/" (treats it as the implicit directory file), so
       // fetch "/" itself to get the shell's raw bytes rather than following
       // a redirect for every route.
       const assetResponse = await env.ASSETS.fetch(new Request(new URL('/', request.url), request))
-      return rewriteForRoute(assetResponse, head, `${SITE_ORIGIN}${head.path}`)
+      return rewriteForRoute(assetResponse, route.view, route.locale ?? 'en')
     }
 
     // Not a real file and not a known route — a genuinely missing page.

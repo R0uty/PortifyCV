@@ -216,6 +216,25 @@ component.
 `App.jsx` down; most user-facing strings are inline `isFinnish ? '...' :
 '...'` pairs rather than a translation-file/i18n library.
 
+**Finnish pages have their own addresses (1.6.35).** Every content page and
+template page also lives under `/fi/…` (`ROUTES_FI` in `routes.js`;
+template pages at `/fi/ilmaiset-cv-pohjat/<same slug>`), and the address
+decides the language: `/fi/…` is Finnish, every other content address
+English, whatever the visitor saved. Only the builder's `/cv` has no
+language of its own (it uses the saved one). Each `VIEW_HEAD` entry carries
+`pathFi`/`titleFi`/`descriptionFi` beside the English fields (template
+pages read `templateMetaDescriptionsFi.js`); `localizedHead(head, locale)`
+picks one language, and `PATH_TO_VIEW` maps every path in both languages to
+its view. Link with English paths as before: `InternalNavLink` rewrites
+them into the page's language (`LocaleContext`, `localizePath`), so a
+Finnish page never links to an English one; a raw `<a href>` must call
+`localizePath` itself. The header's language switch moves to the twin page.
+App and the worker both emit `<html lang>`, `og:locale` and the
+`hreflang` en/fi/x-default links, and `public/sitemap.xml` lists both
+languages with their alternates. `check:template-pages` fails if a page
+lacks its Finnish fields, a path collides, or the sitemap misses a path or
+its alternates. Finnish slugs are permanent like the English ones.
+
 **Per-template pages (`/free-cv-templates/<slug>`).** Each of the 18
 templates gets its own public page, generated from `cvTemplates.js` (the
 template's slug, section support, layout) plus `VIEW_HEAD`

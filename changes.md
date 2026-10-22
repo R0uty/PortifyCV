@@ -4,6 +4,44 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Finnish pages at their own addresses — 1.6.35, 2026-10-22
+
+Phase 3 of the search plan. The Finnish site was a language toggle on the
+English URLs, so search engines only ever saw English. Every content page
+and all 18 template pages now also live under `/fi/`, in Finnish:
+`/fi`, `/fi/ilmaiset-cv-pohjat` (template pages at
+`/fi/ilmaiset-cv-pohjat/<slug>`, same slugs), `/fi/nain-kirjoitat-cvn`,
+`/fi/cv-editorin-kayttoopas`, `/fi/ats-ystavallinen-cv`,
+`/fi/cv-taidot-esimerkit`, `/fi/hakemuskirje-esimerkit`, `/fi/cv-esimerkit`,
+`/fi/kehittajan-cv-esimerkit`, `/fi/it-alan-cv-esimerkit`,
+`/fi/tietoturva-alan-cv-esimerkit`, `/fi/suomalainen-cv`, `/fi/tietoa`,
+`/fi/tietosuoja`. English addresses are unchanged; the builder stays `/cv`.
+
+- **The address decides the language.** `/fi/…` is always Finnish and every
+  other content page English, for visitors and crawlers alike; a saved
+  language never redirects anyone.
+- **The language switch** opens the same page in the other language (query
+  kept, Back returns) and remembers the choice for the builder, which
+  opens in the language of the page you came from.
+- **Links stay in their language:** every in-app link on a Finnish page
+  points at a Finnish page (`InternalNavLink` and `localizePath`), header,
+  site map and footer included.
+- **Search metadata:** Finnish titles and descriptions for every page (18
+  new Finnish template descriptions in `templateMetaDescriptionsFi.js`),
+  `<html lang>`, `og:locale` and `hreflang` en/fi/x-default links from both
+  the app and the edge worker, Finnish breadcrumbs on template pages, and a
+  Finnish FAQPage JSON-LD on `/fi`.
+- **Sitemap:** 33 → 65 URLs, each with its language alternates.
+
+`check:template-pages` now fails if a page lacks a Finnish path, title or
+description, a Finnish title passes 60 characters, two paths collide, or
+the sitemap misses a page or its alternates. Tests: `e2e/finnish-urls.spec.js`
+(every Finnish page, links, the switch, metadata, the builder); four tests
+that set Finnish through a saved language on English URLs now use the
+Finnish URLs (one of them would otherwise have passed without checking
+anything Finnish). Verified on `wrangler dev` too: Finnish metadata,
+hreflang, `/FI/Tietoa/` → 301 `/fi/tietoa`, 404 for unknown `/fi/` paths.
+
 ## A shorter FAQ as an accordion — 1.6.34, 2026-10-21
 
 Phase 2 of the search plan, last part. The front page FAQ showed all seven

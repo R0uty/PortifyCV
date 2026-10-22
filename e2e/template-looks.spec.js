@@ -261,8 +261,7 @@ test.describe('Template page looks', () => {
   })
 
   test('Finnish label', async ({ page }) => {
-    await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'fi'))
-    await page.goto(`/free-cv-templates/${developerSlug}`)
+    await page.goto(`/fi/ilmaiset-cv-pohjat/${developerSlug}`)
     await expect(page.getByRole('radiogroup', { name: 'Tyyli', exact: true })).toBeVisible()
   })
 })
