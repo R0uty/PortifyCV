@@ -154,7 +154,7 @@ const STATIC_VIEW_HEAD = {
       'How to write a developer CV: project entries, experience bullets that show impact, and skills that read as technical rather than generic.',
     isArticle: true,
     datePublished: '2026-08-20',
-    dateModified: '2026-10-12',
+    dateModified: '2026-10-22',
   },
   itCv: {
     title: 'IT CV Examples - PortifyCV',
@@ -182,7 +182,7 @@ const STATIC_VIEW_HEAD = {
       'How to write a cybersecurity CV: certifications, real tools like SIEM platforms, and where a Hack The Box or TryHackMe profile belongs.',
     isArticle: true,
     datePublished: '2026-08-20',
-    dateModified: '2026-10-12',
+    dateModified: '2026-10-22',
   },
   finnishCv: {
     title: 'Finnish CV Examples - PortifyCV',

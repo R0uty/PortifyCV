@@ -4,6 +4,18 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Deeper developer and cybersecurity CV examples — 1.6.45, 2026-10-22
+
+Phase 4 of the search plan, last guides. The developer page (English
+about 335 → 790 words, Finnish about 610) adds before/after bullets for
+frontend, backend, data, DevOps and mobile work, putting the stack next
+to the result, projects as the core of a junior or self-taught CV, a
+GitHub profile worth linking, and signals of seniority. The cybersecurity
+page (about 640 words, Finnish about 490) adds scope and severity in
+numbers, certifications that need renewing, writing about incidents
+without revealing confidential details, moving into security from IT or
+development, and security clearances (turvallisuusselvitys in Finland).
+
 ## Deeper Finnish CV examples — 1.6.44, 2026-10-22
 
 Phase 4 of the search plan. The Finnish CV page (English about 430 → 820

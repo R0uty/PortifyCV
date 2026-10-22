@@ -31,6 +31,12 @@ function getCopy(locale) {
           ],
         },
         {
+          heading: "Kerro laajuus ja vakavuus luvuin",
+          paragraphs: [
+            "Tietoturvatyötä on helpompi arvioida lukujen avulla: valvotut päätelaitteet tai käyttäjät, päivittäin luokitellut hälytykset, vuodessa hoidetut häiriöt ja kuinka nopeasti ne havaitaan ja rajataan (usein MTTD ja MTTR). \"Luokittelin noin 200 hälytystä viikossa 15 asiakasverkolle\" kertoo heti, missä mittakaavassa toimit.",
+          ],
+        },
+        {
           heading: 'Taidot, jotka näyttävät konkreettisia työkaluja',
           list: [
             'SIEM: Splunk, QRadar, Microsoft Sentinel',
@@ -41,9 +47,33 @@ function getCopy(locale) {
           ],
         },
         {
+          heading: "Sertifikaatit, jotka pitää uusia",
+          paragraphs: [
+            "Moni tietoturvasertifikaatti vanhenee tai vaatii täydennyskoulutuspisteitä pysyäkseen voimassa. Kerro jokaisesta myöntäjä, vuosi ja vanhenemispäivä (PortifyCV:n Sertifikaatit-osiossa on sille kenttä), jotta rekrytoijan ei tarvitse tarkistaa. Laita ilmoituksessa mainitut sertifikaatit ensimmäisiksi.",
+          ],
+        },
+        {
+          heading: "Kerro häiriöistä paljastamatta mitään luottamuksellista",
+          paragraphs: [
+            "Kuvaa häiriön tyyppi, oma osuutesi ja lopputulos, mutta älä koskaan asiakkaiden nimiä, IP-osoitteita tai yksityiskohtia, joista järjestelmän voisi tunnistaa: \"Rajasin kiristyshaittaohjelmatartunnan 400 hengen asiakasyrityksessä 3 tunnissa; dataa ei menetetty\" on riittävän konkreettinen. Jos kuvaus vaatisi luottamuksellisia tietoja ollakseen ymmärrettävä, pidä se yleisellä tasolla.",
+          ],
+        },
+        {
           heading: 'Käytännön näyttö: Hack The Box, TryHackMe, CTF-tulokset',
           paragraphs: [
             'PortifyCV:n Linkit-osiossa on omat kentät suoraan Hack The Boxille ja TryHackMelle — jos sinulla on profiili jommassakummassa, se kuuluu tähän omana rivinään, ei upotettuna tekstiin.',
+          ],
+        },
+        {
+          heading: "Siirtyminen tietoturvaan IT:stä tai ohjelmistokehityksestä",
+          paragraphs: [
+            "Moni asia, jota SOC- tai tietoturvatiimi tarvitsee, voi jo olla työtäsi: lokien lukeminen, verkot, skriptaus, päivitysten hallinta ja käyttöoikeuksien hallinta. Nimeä ne tietoturvan termein (\"lokianalyysi\", \"koventaminen\", \"identiteetin- ja pääsynhallinta\"), lisää kotilabra tai CTF-tulokset näyttämään harjoittelusi ja valitse puoli, joka sopii taustaasi: IT:stä siirrytään usein puolustavaan (blue team) työhön, ohjelmistokehityksestä sovellustietoturvaan.",
+          ],
+        },
+        {
+          heading: "Turvallisuusselvitys",
+          paragraphs: [
+            "Jos sinulla on turvallisuusselvitys, kerro se ja sen taso, kun saat. Suomessa monet julkisen sektorin ja huoltovarmuuskriittisten alojen tehtävät edellyttävät turvallisuusselvitystä, ja valmis selvitys voi lyhentää rekrytointia.",
           ],
         },
         {
@@ -99,6 +129,12 @@ function getCopy(locale) {
         ],
       },
       {
+        heading: "Show scope and severity in numbers",
+        paragraphs: [
+          "Security work is easier to judge with numbers: endpoints or users monitored, alerts triaged a day, incidents handled a year, and how fast you detect and contain them (often called MTTD and MTTR). \"Triaged about 200 alerts a week across 15 client networks\" places you at once.",
+        ],
+      },
+      {
         heading: 'Skills that show real tools',
         list: [
           'SIEM: Splunk, QRadar, Microsoft Sentinel',
@@ -109,9 +145,33 @@ function getCopy(locale) {
         ],
       },
       {
+        heading: "Certifications that need renewing",
+        paragraphs: [
+          "Many security certifications expire or need continuing education credits to stay valid. List each with its issuer, the year and the expiry date (PortifyCV’s Certificates section has a field for it), so a recruiter doesn’t have to check. Put the certifications the posting names first.",
+        ],
+      },
+      {
+        heading: "Write about incidents without revealing anything confidential",
+        paragraphs: [
+          "Describe the kind of incident, your part and the outcome, never client names, IP addresses or details that could identify a system: \"Contained a ransomware outbreak at a 400-person client within 3 hours; no data was lost\" is specific enough. If a description would need confidential detail to make sense, keep it general.",
+        ],
+      },
+      {
         heading: 'Hands-on proof: Hack The Box, TryHackMe, CTF results',
         paragraphs: [
           'PortifyCV’s Links section has dedicated fields for Hack The Box and TryHackMe specifically — if you have a profile on either, it belongs there as its own line, not buried in prose.',
+        ],
+      },
+      {
+        heading: "Moving into security from IT or development",
+        paragraphs: [
+          "Much of what a SOC or security team needs you may already do: reading logs, networking, scripting, patching, access management. Name those skills in security terms (\"log analysis\", \"hardening\", \"identity and access management\"), add a home lab or CTF results to show you practise, and choose the side that fits your background: IT moves often lead into defensive (blue team) work, development into application security.",
+        ],
+      },
+      {
+        heading: "Security clearance",
+        paragraphs: [
+          "If you hold a security clearance, say so and give its level when you’re allowed to. In Finland, many public-sector and critical-infrastructure roles require a security clearance (turvallisuusselvitys), and having one can shorten the hiring process.",
         ],
       },
       {
