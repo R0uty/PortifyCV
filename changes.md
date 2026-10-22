@@ -4,6 +4,20 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## The builder walkthrough shows the real builder — 1.6.50, 2026-10-23
+
+The front page's "How it works" and the seven steps of "How to use the
+builder" showed hand-drawn black-and-white line figures. They now show
+screenshots of the real builder with the demo CV, in the page's language:
+Direct Edit with a section's popup open, Classic mode, a weak bullet and
+its tip, the template gallery, the job-posting keyword match, the Export
+menu, and Settings with "Restore last session" on. `npm run thumbnails`
+captures them (`captureWalkthrough`, cropped to the part each step is
+about, 960 × 600 WebP, 14 files, about 460 KB in all, lazy-loaded) into
+`public/thumbnails/walkthrough/`; `check:thumbnails` expects every one.
+Their alt texts describe the screenshots now. The front page keeps a step
+number on each. Test in `landing.spec.js`.
+
 ## Crawlers that don't run JavaScript read each page in full — 1.6.49, 2026-10-23
 
 After AdSense turned the site down for "low-value content". A crawler

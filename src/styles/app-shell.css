@@ -2997,7 +2997,7 @@ html:lang(fi) .landing-title {
 }
 
 /* "How it works" (1.6.33): three steps, each with the builder guide's own
-   line figure. */
+   screenshot (line figures until 1.6.50). */
 .landing-steps {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3014,7 +3014,6 @@ html:lang(fi) .landing-title {
 }
 
 .landing-step__figure {
-  padding: var(--space-3);
   border: 1px solid var(--app-border-strong);
   background: #ffffff;
 }
@@ -3987,15 +3986,36 @@ html:lang(fi) .landing-title {
 
 .builder-walkthrough__figure {
   margin-top: var(--space-4);
-  padding: var(--space-3);
   border: 1px solid var(--app-border-strong);
   background: #ffffff;
 }
 
-.builder-walkthrough__svg {
+/* A screenshot of the builder (1.6.50), 16:10. */
+.builder-walkthrough__shot {
+  position: relative;
+}
+
+.builder-walkthrough__image {
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: 16 / 10;
+}
+
+.builder-walkthrough__badge {
+  position: absolute;
+  top: var(--space-2);
+  left: var(--space-2);
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1.5px solid var(--app-text);
+  border-radius: 999px;
+  background: #ffffff;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.95rem;
+  color: var(--app-text);
 }
 
 .builder-walkthrough__caption {

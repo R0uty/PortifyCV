@@ -31,7 +31,7 @@ const outDir = resolve(rootDir, 'public/thumbnails')
 const importSrc = (p) => import(pathToFileURL(resolve(rootDir, 'src', p)).href)
 const { cvTemplates } = await importSrc('utils/cvTemplates.js')
 const { getTemplateVariants } = await importSrc('utils/templateVariants.js')
-const { thumbnailImagePath } = await importSrc('utils/thumbnailImages.js')
+const { thumbnailImagePath, walkthroughImagePath, WALKTHROUGH_STEPS } = await importSrc('utils/thumbnailImages.js')
 
 let failures = 0
 function check(label, passed, detail = '') {
@@ -62,6 +62,13 @@ for (const template of cvTemplates) {
 // thumbnails when the builder's look changes.
 for (const locale of ['en', 'fi']) {
   expected.add(`product/direct-edit-${locale}.webp`)
+}
+// The builder walkthrough's screenshots (1.6.50). Like the product shot,
+// not covered by the inputs hash.
+for (const step of WALKTHROUGH_STEPS) {
+  for (const locale of ['en', 'fi']) {
+    expected.add(walkthroughImagePath(step, locale).replace(/^thumbnails\//, ''))
+  }
 }
 // Each template page's share image (1.6.47).
 for (const template of cvTemplates) {
