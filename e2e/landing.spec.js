@@ -112,6 +112,35 @@ test('How it works shows three steps and links the full walkthrough', async ({ p
   await expect(page).toHaveURL(/\/how-to-use-the-cv-builder$/)
 })
 
+// 1.6.50: the walkthrough shows screenshots of the real builder (until then
+// line drawings), in the page's language.
+
+// Each image's path, once all `count` of them have loaded (they're lazy,
+// so they are scrolled into view first).
+async function loadedImages(locator, count) {
+  await expect(locator).toHaveCount(count)
+  for (const image of await locator.all()) {
+    await image.scrollIntoViewIfNeeded()
+  }
+  await expect.poll(() => locator.evaluateAll((images) => images.every((image) => image.naturalWidth === 960 && image.naturalHeight === 600))).toBe(true)
+  return locator.evaluateAll((images) => images.map((image) => new URL(image.currentSrc).pathname))
+}
+
+test('How it works and the builder guide show screenshots of the builder, in the page language', async ({ page }) => {
+  await page.goto('/')
+  const landingShots = await loadedImages(page.locator('.landing-step img'), 3)
+  expect(landingShots).toEqual(
+    ['template', 'edit', 'export'].map((step) => `/thumbnails/walkthrough/${step}-en.webp`),
+  )
+  await expect(page.getByRole('img', { name: /^The template gallery:/ })).toBeAttached()
+
+  await page.goto('/fi/cv-editorin-kayttoopas')
+  const guideShots = await loadedImages(page.locator('.builder-walkthrough__figure img'), 7)
+  expect(guideShots).toEqual(
+    ['edit', 'sections', 'bullets', 'template', 'ats', 'export', 'restore'].map((step) => `/thumbnails/walkthrough/${step}-fi.webp`),
+  )
+})
+
 // 1.6.28: on a phone the hero's "Start building" sat at 732px of an 812px
 // screen, under the sticky footer bar. It must be on the first screen and
 // actually clickable there; once it scrolls away, a sticky bar offers it.

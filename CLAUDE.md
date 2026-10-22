@@ -149,7 +149,11 @@ same command also captures the front page's builder screenshot
 (`product/direct-edit-<en|fi>.webp`, 1.6.32; checked for presence only)
 and each template page's 1200 × 630 share image (`og/<template>-<en|fi>.jpg`
 from `scripts/thumbnails/og.js`, 1.6.47), which `VIEW_HEAD` points
-`og:image`/`twitter:image` at.
+`og:image`/`twitter:image` at, and the builder walkthrough's screenshots
+(`walkthrough/<step>-<en|fi>.webp`, 1.6.50, shown by
+`BuilderWalkthroughFigure` on the front page and the builder guide). Like
+the product shot, those builder screenshots aren't in the inputs hash:
+regenerate them when the builder's look changes.
 
 `src/components/templates/index.js` is the variant→config registry and also
 owns `prefetchTemplateShowcases()` (idle-prefetch of every Showcase chunk, so

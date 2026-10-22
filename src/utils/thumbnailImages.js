@@ -20,3 +20,12 @@ export function thumbnailImagePath(templateId, variantId = 'default', locale = '
 export function thumbnailImageSrc(templateId, variantId = 'default', locale = 'en') {
   return `/${thumbnailImagePath(templateId, variantId, locale)}`
 }
+
+// The builder walkthrough's screenshots (1.6.50), one per step of "How to
+// use the builder", in the order the guide shows them; also made by
+// `npm run thumbnails`.
+export const WALKTHROUGH_STEPS = ['edit', 'sections', 'bullets', 'template', 'ats', 'export', 'restore']
+
+export function walkthroughImagePath(step, locale = 'en') {
+  return `thumbnails/walkthrough/${step}-${locale === 'fi' ? 'fi' : 'en'}.webp`
+}
