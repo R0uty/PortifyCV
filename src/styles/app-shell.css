@@ -2735,6 +2735,13 @@ select.floating-field__control {
   color: var(--app-text);
 }
 
+/* Finnish words are long ("CV-työkalu", "mukaan"), so the same headline
+   wrapped to 4-7 lines and pushed the buttons below the fold. About three
+   quarters of the English size keeps it to about three lines (1.6.36). */
+html:lang(fi) .landing-title {
+  font-size: clamp(2.2rem, 1.2rem + 3.6vw, 4.75rem);
+}
+
 .landing-subtitle {
   margin-top: var(--space-5);
   font-size: clamp(0.9rem, 0.85rem + 0.25vw, 1.05rem);

@@ -4,6 +4,15 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## A smaller Finnish headline — 1.6.36, 2026-10-22
+
+The Finnish front page headline ("Ilmainen CV-työkalu. Tee CV, ota se
+mukaan, valmis.") used the English headline's size, and its longer words
+wrapped to four to seven lines; at 1024px wide the buttons fell below the
+first screen (927px). On Finnish pages (`html:lang(fi)`) it's now about
+three quarters of the English size: three lines at 1366px and 1920px, five
+at 1024px with the buttons at 695px, 35px on phones. English is unchanged.
+
 ## Finnish pages at their own addresses — 1.6.35, 2026-10-22
 
 Phase 3 of the search plan. The Finnish site was a language toggle on the
