@@ -1,5 +1,5 @@
+import GuideLayout from '../components/GuideLayout'
 import ExampleCvLinks from '../components/ExampleCvLinks'
-import InternalNavLink from '../components/InternalNavLink'
 import { CONTENT_PAGE_EXAMPLES } from '../utils/exampleCvs'
 import { templatePageLink } from '../utils/pageMeta'
 import { ROUTES } from '../utils/routes'
@@ -30,6 +30,22 @@ function getCopy(locale) {
           ],
         },
         {
+          heading: "Lisää kehittäjän kokemuskohtia työn lajin mukaan",
+          list: [
+            "Frontend. Heikko: \"Rakensin käyttöliittymäkomponentteja.\" Vahva: \"Rakensin kassan uudelleen Reactilla ja pienensin sen JavaScriptiä 40 %; mobiilikonversio nousi 9 %.\"",
+            "Backend. Heikko: \"Työskentelin rajapinnan parissa.\" Vahva: \"Jaoin tilausrajapinnan kolmeen palveluun ja laskin p95-vasteajan 800 ms:sta 120 ms:iin.\"",
+            "Data. Heikko: \"Ylläpidin dataputkia.\" Vahva: \"Siirsin 30 yöajoa orkestroituun putkeen; epäonnistuneet ajot vähenivät noin kuudesta kuukaudessa yhteen.\"",
+            "DevOps. Heikko: \"Hoidin CI/CD:tä.\" Vahva: \"Lyhensin käännöksen ja julkaisun 25 minuutista 7 minuuttiin ja siirsin julkaisut viikoittaisista päivittäisiksi.\"",
+            "Mobiili. Heikko: \"Kehitin sovelluksen ominaisuuksia.\" Vahva: \"Toin offline-tilan 200 000 käyttäjän sovellukseen; kaatumattomien istuntojen osuus nousi 97,1 %:sta 99,4 %:iin.\"",
+          ],
+        },
+        {
+          heading: "Pidä teknologiat tuloksen vieressä",
+          paragraphs: [
+            "Rekrytoijat hakevat teknologioita, mutta pelkkä lista ei kerro, mitä teit niillä. Anna jokaiselle työpaikalle oma teknologiarivinsä (PortifyCV:n kokemuskohdissa on sille kenttä), ja anna kohtien kertoa, mitä saavutit. Käytä ilmoituksen nimiä: \"React\" eikä \"ReactJS\", jos ilmoituksessa lukee niin.",
+          ],
+        },
+        {
           heading: 'Projektikohta, joka kannattaa muotoilla samalla tavalla joka kerta',
           paragraphs: [
             'Nimi, yhden lauseen kuvaus, teknologiapino ja linkit — PortifyCV:n Projektit-osiossa on omat kentät kaikille näille (myös GitHub- ja demolinkille), joten tätä rakennetta ei tarvitse väkisin sovittaa muuhun tekstiin.',
@@ -57,9 +73,30 @@ function getCopy(locale) {
           ],
         },
         {
+          heading: "Juniori tai itseoppinut? Projektit kantavat CV:n",
+          paragraphs: [
+            "Kun työhistoriaa on vähän, kaksi tai kolme hyvää projektia on kokemuksesi. Valitse sellaiset, jotka näyttävät oikealta työltä: ne ratkaisevat ongelman, niillä on README, joka selittää ne, ja ne näyttävät taidon, jota työ vaatii. Kuvaa jokainen kuin työpaikka: mitä se tekee, mitä rakensit, teknologiat sekä linkki koodiin ja, jos se on käynnissä, demoon. Yksi valmis projekti voittaa viisi tutoriaalia.",
+          ],
+        },
+        {
           heading: 'Linkit-osio on osa tarinaa, ei jälkiajatus',
           paragraphs: [
             'GitHub, portfolio ja henkilökohtainen sivu kuuluvat omaan Linkit-osioonsa — ei upotettuina yhteenvetoon. Rekrytoija, joka haluaa nähdä koodisi, löytää sen suoraan.',
+          ],
+        },
+        {
+          heading: "GitHub-profiili, joka kannattaa linkittää",
+          list: [
+            "Kiinnitä kolmesta kuuteen repositoriota, jotka näyttävät parhaan työsi.",
+            "Anna jokaiselle README: mitä se tekee, miten sen ajaa ja kuvakaappaus.",
+            "Jos suurin osa työstäsi on yksityistä, kerro se profiilissa ja anna CV:n projektien puhua.",
+            "Tyhjä tai hylätty profiili haittaa enemmän kuin profiilin puuttuminen; linkitä se vain, kun siitä on hyötyä.",
+          ],
+        },
+        {
+          heading: "Senioriteetin merkit",
+          paragraphs: [
+            "Kokemuksen kasvaessa rekrytoijat katsovat yksittäisten ominaisuuksien ohi vastuun laajuuteen: järjestelmät, joista vastasit, päätökset, jotka teit, ja ihmiset, joiden kasvua tuit. \"Suunnittelin tapahtumaputken, jonka neljä tiimiä otti myöhemmin käyttöön\", \"mentoroin kolme junioria itsenäisiksi omistajiksi\", \"johdin siirtymäsuunnitelman ja sen palautusstrategian\". Seniori- ja liidirooleissa jokaisessa työpaikassa pitäisi olla ainakin yksi kohta, joka näyttää vaikutuksen oman koodin ulkopuolella.",
           ],
         },
         {
@@ -81,7 +118,6 @@ function getCopy(locale) {
         intro: 'Jokainen avautuu valmiina CV:nä omassa pohjassaan, ja "Käytä tätä esimerkkiä" lataa sen editoriin muokattavaksi.',
       },
       ctaNote: 'Ei kirjautumista. Vaihda pohjaa milloin tahansa.',
-      seeAlsoLabel: 'Katso myös:',
       seeAlso: [
         { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV:n taito-osion esimerkkejä' },
         { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-ystävällinen CV-opas' },
@@ -107,6 +143,22 @@ function getCopy(locale) {
         },
         paragraphsAfter: [
           'Name the system, the metric, and the number. "Fixed bugs" doesn’t tell anyone anything measurable — "reduced on-call incidents by 60%" does.',
+        ],
+      },
+      {
+        heading: "More developer bullets, by kind of work",
+        list: [
+          "Frontend. Weak: \"Built UI components.\" Strong: \"Rebuilt the checkout in React and cut its JavaScript by 40%; mobile conversion rose 9%.\"",
+          "Backend. Weak: \"Worked on the API.\" Strong: \"Split the order API into three services and brought p95 latency from 800 ms to 120 ms.\"",
+          "Data. Weak: \"Maintained data pipelines.\" Strong: \"Moved 30 nightly jobs to an orchestrated pipeline; failed runs fell from about 6 a month to 1.\"",
+          "DevOps. Weak: \"Managed CI/CD.\" Strong: \"Cut build-and-deploy time from 25 to 7 minutes and moved releases from weekly to daily.\"",
+          "Mobile. Weak: \"Developed app features.\" Strong: \"Shipped offline mode for an app with 200,000 users; crash-free sessions rose from 97.1% to 99.4%.\"",
+        ],
+      },
+      {
+        heading: "Put your stack next to the result",
+        paragraphs: [
+          "Recruiters search for technologies, but a bare list doesn’t show what you did with them. Give each job its technologies on their own line (PortifyCV’s experience entries have a field for it), and let the bullets say what you achieved. Use the names the posting uses: \"React\" rather than \"ReactJS\" if that’s what it says.",
         ],
       },
       {
@@ -137,9 +189,30 @@ function getCopy(locale) {
         ],
       },
       {
+        heading: "Junior or self-taught? Projects carry the CV",
+        paragraphs: [
+          "Without much work history, two or three good projects are your experience. Pick ones that look like real work: they solve a problem, have a README that explains them, and show a skill the job asks for. Describe each like a job: what it does, what you built, the stack, and a link to the code and, if it’s running, a demo. One finished project beats five tutorials.",
+        ],
+      },
+      {
         heading: 'The Links section is part of the story, not an afterthought',
         paragraphs: [
           'GitHub, portfolio, and personal site belong in their own Links section — not buried in your summary. A recruiter who wants to see your code should be able to find it directly.',
+        ],
+      },
+      {
+        heading: "A GitHub profile worth linking",
+        list: [
+          "Pin the three to six repositories that show your best work.",
+          "Give each a README: what it does, how to run it, a screenshot.",
+          "If most of your work is private, say so in the profile and let the CV’s projects do the talking.",
+          "An empty or abandoned profile hurts more than none; link it only when it helps.",
+        ],
+      },
+      {
+        heading: "Signals of seniority",
+        paragraphs: [
+          "As you grow, recruiters look past individual features to scope: systems you owned, decisions you made, people you helped grow. \"Designed the event pipeline later adopted by four teams\", \"mentored three juniors to independent ownership\", \"led the migration plan and its rollback strategy\". For senior and lead roles, at least one bullet per job should show impact beyond your own code.",
         ],
       },
       {
@@ -161,7 +234,6 @@ function getCopy(locale) {
       intro: 'Each one opens as a complete CV in its template, and "Use this example" loads it into the builder to edit.',
     },
     ctaNote: 'No login. Switch templates any time.',
-    seeAlsoLabel: 'See also:',
     seeAlso: [
       { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV Skills Examples' },
       { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-Friendly CV Guide' },
@@ -175,65 +247,24 @@ function DeveloperCvExamplesPage({ locale = 'en', onGetStarted = () => {}, onNav
   const copy = getCopy(locale === 'fi' ? 'fi' : 'en')
 
   return (
-    <section className="legal-page">
-      <div className="legal-page__inner">
-        <p className="legal-page__kicker">{copy.kicker}</p>
-        <h1 className="legal-page__title">{copy.title}</h1>
-        <p>{copy.intro}</p>
-
-        {copy.sections.map((section) => (
-          <div key={section.heading}>
-            <h2>{section.heading}</h2>
-            {section.paragraphs?.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-            {section.examplePair ? (
-              <ul>
-                <li>
-                  <strong>{section.examplePair.weakLabel}:</strong> {section.examplePair.weak}
-                </li>
-                <li>
-                  <strong>{section.examplePair.strongLabel}:</strong> {section.examplePair.strong}
-                </li>
-              </ul>
-            ) : null}
-            {section.paragraphsAfter?.map((paragraph, index) => (
-              <p key={`after-${index}`}>{paragraph}</p>
-            ))}
-            {section.linkParagraphs?.map((linkParagraph, index) => (
-              <p key={`link-${index}`}>
-                {linkParagraph.before}
-                <InternalNavLink to={linkParagraph.linkTo} onNavigate={() => onNavigateToView(linkParagraph.view)}>
-                  {linkParagraph.linkText}
-                </InternalNavLink>
-                {linkParagraph.after}
-              </p>
-            ))}
-          </div>
-        ))}
-
-        <div>
-          <h2>{copy.fullExamples.heading}</h2>
-          <p>{copy.fullExamples.intro}</p>
-          <ExampleCvLinks examples={CONTENT_PAGE_EXAMPLES.developerCv} locale={locale} onNavigateToView={onNavigateToView} />
-        </div>
-
-        <div className="legal-page__cta">
-          <button type="button" className="landing-cta" onClick={() => onGetStarted('developer')}>
-            {copy.ctaLabel}
-          </button>
-          <span className="legal-page__cta-note">{copy.ctaNote}</span>
-        </div>
-        <div className="templates-page-links">
-          <span>{copy.seeAlsoLabel}</span>
-          {copy.seeAlso.map((link) => (
-            <InternalNavLink key={link.view} to={link.to} onNavigate={() => onNavigateToView(link.view, { search: link.search })}>
-              {link.text}
-            </InternalNavLink>
-          ))}
-        </div>
+    <GuideLayout
+      view="developerCv"
+      locale={locale}
+      kicker={copy.kicker}
+      title={copy.title}
+      intro={copy.intro}
+      sections={copy.sections}
+      cta={{ label: copy.ctaLabel, note: copy.ctaNote, onClick: () => onGetStarted('developer') }}
+      related={copy.seeAlso.map((link) => ({ view: link.view, search: link.search, title: link.text }))}
+      onGetStarted={onGetStarted}
+      onNavigateToView={onNavigateToView}
+    >
+      <div className="guide__section">
+        <h2>{copy.fullExamples.heading}</h2>
+        <p>{copy.fullExamples.intro}</p>
+        <ExampleCvLinks examples={CONTENT_PAGE_EXAMPLES.developerCv} locale={locale} onNavigateToView={onNavigateToView} />
       </div>
-    </section>
+    </GuideLayout>
   )
 }
 

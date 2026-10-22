@@ -84,7 +84,10 @@ serving `dist/` as static assets). `worker/index.js` re-matches the same
 route table at the edge and rewrites each response's
 title/canonical/description/OG/JSON-LD before it reaches the client, because
 this is a client-rendered SPA and a crawler that doesn't execute JS would
-otherwise see the landing page's metadata for every route. It also returns a
+otherwise see the landing page's metadata for every route. Since 1.6.46 it
+also replaces `index.html`'s no-JS `#seo-landing` body (the English front
+page's copy) with each route's own heading, description and same-language
+links (`fallbackBody`, checked by `check:template-pages`). It also returns a
 real 404 (with `noindex`) for unknown paths and redirects case/trailing-slash
 variants to the canonical path. If you change a route or its metadata,
 `routes.js`/`pageMeta.js` is the one place to edit — both the client
@@ -131,7 +134,12 @@ built) and records an input hash in `public/thumbnails/manifest.json`;
 CSS, `CVPreview`, the demo CV, the look registry, the preview rules in
 `app-shell.css`) changes without a regeneration. So after changing a
 template's design or looks, run `npm run thumbnails` and commit the images.
-The builder's gallery and the template pages' own preview stay live.
+The builder's gallery and the template pages' own preview stay live. The
+same command also captures the front page's builder screenshot
+(`product/direct-edit-<en|fi>.webp`, 1.6.32; checked for presence only)
+and each template page's 1200 × 630 share image (`og/<template>-<en|fi>.jpg`
+from `scripts/thumbnails/og.js`, 1.6.47), which `VIEW_HEAD` points
+`og:image`/`twitter:image` at.
 
 `src/components/templates/index.js` is the variant→config registry and also
 owns `prefetchTemplateShowcases()` (idle-prefetch of every Showcase chunk, so
@@ -215,6 +223,25 @@ component.
 **Bilingual throughout (`en`/`fi`).** Locale is threaded as a prop from
 `App.jsx` down; most user-facing strings are inline `isFinnish ? '...' :
 '...'` pairs rather than a translation-file/i18n library.
+
+**Finnish pages have their own addresses (1.6.35).** Every content page and
+template page also lives under `/fi/…` (`ROUTES_FI` in `routes.js`;
+template pages at `/fi/ilmaiset-cv-pohjat/<same slug>`), and the address
+decides the language: `/fi/…` is Finnish, every other content address
+English, whatever the visitor saved. Only the builder's `/cv` has no
+language of its own (it uses the saved one). Each `VIEW_HEAD` entry carries
+`pathFi`/`titleFi`/`descriptionFi` beside the English fields (template
+pages read `templateMetaDescriptionsFi.js`); `localizedHead(head, locale)`
+picks one language, and `PATH_TO_VIEW` maps every path in both languages to
+its view. Link with English paths as before: `InternalNavLink` rewrites
+them into the page's language (`LocaleContext`, `localizePath`), so a
+Finnish page never links to an English one; a raw `<a href>` must call
+`localizePath` itself. The header's language switch moves to the twin page.
+App and the worker both emit `<html lang>`, `og:locale` and the
+`hreflang` en/fi/x-default links, and `public/sitemap.xml` lists both
+languages with their alternates. `check:template-pages` fails if a page
+lacks its Finnish fields, a path collides, or the sitemap misses a path or
+its alternates. Finnish slugs are permanent like the English ones.
 
 **Per-template pages (`/free-cv-templates/<slug>`).** Each of the 18
 templates gets its own public page, generated from `cvTemplates.js` (the

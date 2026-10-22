@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://portifycv.app/</loc>
-    <lastmod>2026-10-12</lastmod>
+    <lastmod>2026-10-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/" />
   </url>
   <url>
     <loc>https://portifycv.app/cv</loc>
@@ -17,185 +29,557 @@
     <lastmod>2026-10-12</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/about" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/tietoa" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/about" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/tietoa</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/about" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/tietoa" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/about" />
   </url>
   <url>
     <loc>https://portifycv.app/privacy</loc>
     <lastmod>2026-10-12</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/privacy" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/tietosuoja" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/privacy" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/tietosuoja</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/privacy" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/tietosuoja" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/privacy" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates</loc>
     <lastmod>2026-10-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/minimalist</loc>
-    <lastmod>2026-10-11</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/minimalist" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/minimalist" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/minimalist" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/minimalist</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/minimalist" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/minimalist" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/minimalist" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/developer</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/developer" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/developer" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/developer" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/developer</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/developer" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/developer" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/developer" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/creative</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/creative" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/creative" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/creative" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/creative</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/creative" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/creative" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/creative" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/modern-professional</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/modern-professional" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/modern-professional" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/modern-professional" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/modern-professional</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/modern-professional" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/modern-professional" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/modern-professional" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/executive</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/executive" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/executive" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/executive" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/executive</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/executive" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/executive" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/executive" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/modern-timeline</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/modern-timeline" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/modern-timeline" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/modern-timeline" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/modern-timeline</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/modern-timeline" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/modern-timeline" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/modern-timeline" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/graduate</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/graduate" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/graduate" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/graduate" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/graduate</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/graduate" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/graduate" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/graduate" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/compact</loc>
-    <lastmod>2026-10-11</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/compact" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/compact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/compact" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/compact</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/compact" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/compact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/compact" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/portfolio-hybrid</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/portfolio-hybrid" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/portfolio-hybrid" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/portfolio-hybrid" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/portfolio-hybrid</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/portfolio-hybrid" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/portfolio-hybrid" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/portfolio-hybrid" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/tech-executive</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/tech-executive" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/tech-executive" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/tech-executive" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/tech-executive</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/tech-executive" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/tech-executive" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/tech-executive" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/classic-professional</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/classic-professional" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/classic-professional" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/classic-professional" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/classic-professional</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/classic-professional" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/classic-professional" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/classic-professional" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/navy-professional</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/navy-professional" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/navy-professional" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/navy-professional" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/navy-professional</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/navy-professional" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/navy-professional" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/navy-professional" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/modern-orange</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/modern-orange" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/modern-orange" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/modern-orange" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/modern-orange</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/modern-orange" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/modern-orange" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/modern-orange" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/colorful-compact</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/colorful-compact" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/colorful-compact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/colorful-compact" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/colorful-compact</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/colorful-compact" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/colorful-compact" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/colorful-compact" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/quadrant</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/quadrant" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/quadrant" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/quadrant" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/quadrant</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/quadrant" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/quadrant" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/quadrant" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/editorial</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/editorial" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/editorial" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/editorial" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/editorial</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/editorial" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/editorial" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/editorial" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/portrait</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/portrait" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/portrait" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/portrait" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/portrait</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/portrait" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/portrait" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/portrait" />
   </url>
   <url>
     <loc>https://portifycv.app/free-cv-templates/european</loc>
     <lastmod>2026-10-11</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/european" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/european" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/european" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ilmaiset-cv-pohjat/european</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/free-cv-templates/european" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ilmaiset-cv-pohjat/european" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/free-cv-templates/european" />
   </url>
   <url>
     <loc>https://portifycv.app/how-to-write-a-cv</loc>
-    <lastmod>2026-08-29</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/how-to-write-a-cv" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/nain-kirjoitat-cvn" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/how-to-write-a-cv" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/nain-kirjoitat-cvn</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/how-to-write-a-cv" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/nain-kirjoitat-cvn" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/how-to-write-a-cv" />
   </url>
   <url>
     <loc>https://portifycv.app/how-to-use-the-cv-builder</loc>
     <lastmod>2026-10-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/how-to-use-the-cv-builder" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/cv-editorin-kayttoopas" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/how-to-use-the-cv-builder" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/cv-editorin-kayttoopas</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/how-to-use-the-cv-builder" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/cv-editorin-kayttoopas" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/how-to-use-the-cv-builder" />
   </url>
   <url>
     <loc>https://portifycv.app/ats-friendly-cv-guide</loc>
-    <lastmod>2026-10-17</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/ats-friendly-cv-guide" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ats-ystavallinen-cv" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/ats-friendly-cv-guide" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/ats-ystavallinen-cv</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/ats-friendly-cv-guide" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/ats-ystavallinen-cv" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/ats-friendly-cv-guide" />
   </url>
   <url>
     <loc>https://portifycv.app/cover-letter-examples</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/cover-letter-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/hakemuskirje-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/cover-letter-examples" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/hakemuskirje-esimerkit</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/cover-letter-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/hakemuskirje-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/cover-letter-examples" />
   </url>
   <url>
     <loc>https://portifycv.app/cv-skills-examples</loc>
-    <lastmod>2026-08-21</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/cv-skills-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/cv-taidot-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/cv-skills-examples" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/cv-taidot-esimerkit</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/cv-skills-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/cv-taidot-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/cv-skills-examples" />
   </url>
   <url>
     <loc>https://portifycv.app/cv-examples</loc>
     <lastmod>2026-10-12</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/cv-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/cv-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/cv-examples" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/cv-esimerkit</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/cv-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/cv-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/cv-examples" />
   </url>
   <url>
     <loc>https://portifycv.app/developer-cv-examples</loc>
-    <lastmod>2026-10-12</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/developer-cv-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/kehittajan-cv-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/developer-cv-examples" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/kehittajan-cv-esimerkit</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/developer-cv-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/kehittajan-cv-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/developer-cv-examples" />
   </url>
   <url>
     <loc>https://portifycv.app/it-cv-examples</loc>
-    <lastmod>2026-10-11</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/it-cv-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/it-alan-cv-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/it-cv-examples" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/it-alan-cv-esimerkit</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/it-cv-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/it-alan-cv-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/it-cv-examples" />
   </url>
   <url>
     <loc>https://portifycv.app/cybersecurity-cv-examples</loc>
-    <lastmod>2026-10-12</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/cybersecurity-cv-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/tietoturva-alan-cv-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/cybersecurity-cv-examples" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/tietoturva-alan-cv-esimerkit</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/cybersecurity-cv-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/tietoturva-alan-cv-esimerkit" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/cybersecurity-cv-examples" />
   </url>
   <url>
     <loc>https://portifycv.app/finnish-cv-examples</loc>
-    <lastmod>2026-10-12</lastmod>
+    <lastmod>2026-10-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/finnish-cv-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/suomalainen-cv" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/finnish-cv-examples" />
+  </url>
+  <url>
+    <loc>https://portifycv.app/fi/suomalainen-cv</loc>
+    <lastmod>2026-10-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://portifycv.app/finnish-cv-examples" />
+    <xhtml:link rel="alternate" hreflang="fi" href="https://portifycv.app/fi/suomalainen-cv" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://portifycv.app/finnish-cv-examples" />
   </url>
 </urlset>

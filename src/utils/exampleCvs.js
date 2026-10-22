@@ -26,6 +26,7 @@ export const EXAMPLES = {
   nurse: { role: role('Registered nurse', 'Sairaanhoitaja'), load: () => import('./examples/nurse.js') },
   accountant: { role: role('Accountant', 'Kirjanpitäjä'), load: () => import('./examples/accountant.js') },
   'cybersecurity-analyst': { role: role('Cybersecurity analyst', 'Kyberturvallisuusanalyytikko'), load: () => import('./examples/cybersecurity-analyst.js') },
+  'it-support': { role: role('IT support specialist', 'IT-tukihenkilö'), load: () => import('./examples/it-support.js') },
   teacher: { role: role('Teacher', 'Opettaja'), load: () => import('./examples/teacher.js') },
   'business-graduate': { role: role('Business graduate', 'Kauppatieteiden vastavalmistunut'), load: () => import('./examples/business-graduate.js') },
   'research-scientist': { role: role('Research scientist', 'Tutkija'), load: () => import('./examples/research-scientist.js') },
@@ -38,14 +39,14 @@ export const EXAMPLES = {
 }
 
 export const TEMPLATE_EXAMPLES = {
-  minimal: ['nurse', 'accountant', 'cybersecurity-analyst'],
+  minimal: ['nurse', 'cybersecurity-analyst', 'it-support'],
   developer: ['frontend-developer', 'data-engineer', 'junior-developer'],
   creative: ['ux-designer', 'graphic-designer'],
   modern: ['marketing-manager', 'project-manager', 'product-manager'],
   executive: ['finance-director', 'operations-manager', 'engineering-director'],
   timeline: ['project-manager', 'teacher', 'operations-manager'],
   graduate: ['junior-developer', 'business-graduate'],
-  compact: ['data-engineer', 'cybersecurity-analyst', 'business-graduate'],
+  compact: ['data-engineer', 'cybersecurity-analyst', 'it-support'],
   portfolio: ['frontend-developer', 'ux-designer', 'product-manager'],
   techExec: ['engineering-director', 'cto'],
   classicProfessional: ['accountant', 'finance-director', 'research-scientist'],
@@ -75,6 +76,10 @@ export const CONTENT_PAGE_EXAMPLES = {
     ['developer', 'frontend-developer'],
     ['developer', 'data-engineer'],
     ['graduate', 'junior-developer'],
+  ],
+  itCv: [
+    ['minimal', 'it-support'],
+    ['compact', 'it-support'],
   ],
   cybersecurityCv: [
     ['minimal', 'cybersecurity-analyst'],

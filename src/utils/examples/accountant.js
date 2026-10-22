@@ -1,6 +1,6 @@
 import { buildExampleCv } from './buildExampleCv.js'
 
-// Fictional person. Listed under: minimal, classicProfessional.
+// Fictional person. Listed under: classicProfessional (minimal until 1.6.40).
 const shared = {
   fullName: 'John Doe',
   email: 'john.doe@example.com',

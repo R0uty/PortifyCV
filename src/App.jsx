@@ -7,11 +7,12 @@ import Toolbar from './components/Toolbar'
 import LocaleFlagIcon from './components/LocaleFlagIcon'
 import Modal from './components/Modal'
 import { UI_LOCALE_STORAGE_KEY } from './utils/designSystem'
-import { safeStorageGet } from './utils/cvForm'
+import { safeStorageGet, safeStorageSet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
-import { ROUTES, templatePath } from './utils/routes'
+import { ROUTES, localizePath, pathLocale, templatePath } from './utils/routes'
 import { getCvTemplates } from './utils/cvTemplates'
-import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema, TEMPLATE_VIEW_PREFIX } from './utils/pageMeta'
+import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX } from './utils/pageMeta'
+import { LocaleContext } from './components/localeContext'
 import { APP_VERSION } from './utils/appVersion'
 
 const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
@@ -43,7 +44,7 @@ function NotFoundView({ locale, onNavigateToView }) {
           : "The page you're looking for doesn't exist or has moved."}
       </p>
       <a
-        href={ROUTES.landing}
+        href={isFinnish ? localizePath(ROUTES.landing, 'fi') : ROUTES.landing}
         onClick={(event) => {
           event.preventDefault()
           onNavigateToView('landing')
@@ -77,19 +78,27 @@ const STATIC_PAGES = {
   notFound: NotFoundView,
 }
 
-function getInitialView() {
+// The view and language the address asks for (1.6.35: /fi/… is Finnish,
+// other content addresses English; the builder's /cv has no language of
+// its own, `locale: null`).
+function readRoute() {
   if (typeof window === 'undefined') {
-    return 'landing'
+    return { view: 'landing', locale: 'en' }
   }
   const currentUrl = new URL(window.location.href)
   if (currentUrl.searchParams.has(SHARE_QUERY_PARAM)) {
-    return 'builder'
+    return { view: 'builder', locale: null }
   }
-  const matchedView = Object.entries(VIEW_HEAD).find(([, head]) => head.path === currentUrl.pathname)
-  if (matchedView) {
-    return matchedView[0]
+  const matched = PATH_TO_VIEW.get(currentUrl.pathname)
+  if (matched) {
+    return matched
   }
-  return currentUrl.pathname === '/' ? 'landing' : 'notFound'
+  return { view: 'notFound', locale: pathLocale(currentUrl.pathname) }
+}
+
+// A view's address in `locale`, e.g. '/fi/tietoa' for about in Finnish.
+function viewPath(view, locale) {
+  return localizedHead(VIEW_HEAD[view], locale)?.path ?? (locale === 'fi' ? '/fi' : '/')
 }
 
 function setMetaContent(selector, content) {
@@ -111,12 +120,34 @@ const NOT_FOUND_HEAD = {
 
 const VIEW_STRUCTURED_DATA_SCRIPT_ID = 'view-structured-data'
 
-function useDocumentHead(view) {
+// The <link rel="alternate" hreflang> trio for a page that exists in both
+// languages (1.6.35); removed on a page that doesn't.
+function setLanguageAlternates(alternates) {
+  for (const hreflang of ['en', 'fi', 'x-default']) {
+    const selector = `link[rel="alternate"][hreflang="${hreflang}"]`
+    const existing = document.head.querySelector(selector)
+    if (!alternates) {
+      existing?.remove()
+      continue
+    }
+    const link = existing ?? document.createElement('link')
+    link.rel = 'alternate'
+    link.hreflang = hreflang
+    link.href = `${SITE_ORIGIN}${hreflang === 'fi' ? alternates.fi : alternates.en}`
+    if (!existing) {
+      document.head.appendChild(link)
+    }
+  }
+}
+
+function useDocumentHead(view, locale) {
   useEffect(() => {
-    const head = view === 'notFound' ? NOT_FOUND_HEAD : (VIEW_HEAD[view] ?? VIEW_HEAD.landing)
+    const head = view === 'notFound' ? NOT_FOUND_HEAD : localizedHead(VIEW_HEAD[view] ?? VIEW_HEAD.landing, locale)
     const url = head.path ? `${SITE_ORIGIN}${head.path}` : window.location.href
 
     document.title = head.title
+    setLanguageAlternates(head.alternates ?? null)
+    setMetaContent('meta[property="og:locale"]', locale === 'fi' ? 'fi_FI' : 'en_US')
 
     const canonicalLink = document.querySelector('link[rel="canonical"]')
     if (canonicalLink) {
@@ -135,6 +166,9 @@ function useDocumentHead(view) {
     setMetaContent('meta[property="og:description"]', head.description)
     setMetaContent('meta[name="twitter:title"]', head.title)
     setMetaContent('meta[name="twitter:description"]', head.description)
+    const image = `${SITE_ORIGIN}${head.ogImage ?? DEFAULT_OG_IMAGE}`
+    setMetaContent('meta[property="og:image"]', image)
+    setMetaContent('meta[name="twitter:image"]', image)
 
     const existingScript = document.getElementById(VIEW_STRUCTURED_DATA_SCRIPT_ID)
     const schema = buildViewSchema(head)
@@ -149,7 +183,7 @@ function useDocumentHead(view) {
     } else if (existingScript) {
       existingScript.remove()
     }
-  }, [view])
+  }, [view, locale])
 }
 
 // Pushes a new history entry for the given view so the address bar, the
@@ -163,12 +197,12 @@ function useDocumentHead(view) {
 // A navigation without `search` compares paths only, as before, so
 // clicking the current view's own link from e.g. `?utm_source=` doesn't
 // push a duplicate entry.
-function pushViewUrl(nextView, search = '') {
+function pushViewUrl(nextView, search = '', locale = 'en') {
   if (typeof window === 'undefined') {
     return
   }
 
-  const url = `${VIEW_HEAD[nextView]?.path ?? '/'}${search}`
+  const url = `${viewPath(nextView, locale)}${search}`
   const current = search
     ? `${window.location.pathname}${window.location.search}`
     : window.location.pathname
@@ -206,18 +240,19 @@ const GUIDE_LINKS = [
 
 // The landing page's FAQ: scroll there, from the landing page or after
 // navigating to it (LandingPage scrolls to #faq on mount).
-function goToFaq(event, activeView, onNavigate) {
+function goToFaq(event, activeView, onNavigate, locale) {
   if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
     return
   }
   event.preventDefault()
+  const faqUrl = localizePath('/#faq', locale)
   if (activeView === 'landing') {
-    window.history.replaceState(window.history.state, '', '/#faq')
+    window.history.replaceState(window.history.state, '', faqUrl)
     document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     return
   }
   onNavigate('landing')
-  window.history.replaceState(window.history.state, '', '/#faq')
+  window.history.replaceState(window.history.state, '', faqUrl)
 }
 
 function handleInAppLinkClick(event, view, onNavigate) {
@@ -275,7 +310,7 @@ function GuidesMenu({ locale, activeView, onNavigate }) {
         {GUIDE_LINKS.map((link) => (
           <a
             key={link.view}
-            href={VIEW_HEAD[link.view].path}
+            href={localizePath(VIEW_HEAD[link.view].path, locale)}
             className="project-header__menu-link"
             aria-current={link.view === activeView ? 'page' : undefined}
             onClick={(event) => {
@@ -311,7 +346,7 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
         {PRIMARY_LINKS.map((link) => (
           <a
             key={link.view}
-            href={VIEW_HEAD[link.view].path}
+            href={localizePath(VIEW_HEAD[link.view].path, locale)}
             className={`project-header__link${link.activeFor(activeView) ? ' project-header__link--active' : ''}`}
             aria-current={link.view === activeView ? 'page' : undefined}
             onClick={(event) => handleInAppLinkClick(event, link.view, onNavigate)}
@@ -320,7 +355,7 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
           </a>
         ))}
         <GuidesMenu locale={locale} activeView={activeView} onNavigate={onNavigate} />
-        <a href="/#faq" className="project-header__link" onClick={(event) => goToFaq(event, activeView, onNavigate)}>
+        <a href={localizePath('/#faq', locale)} className="project-header__link" onClick={(event) => goToFaq(event, activeView, onNavigate, locale)}>
           {faqLabel}
         </a>
       </nav>
@@ -350,7 +385,7 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
           {PRIMARY_LINKS.map((link) => (
             <a
               key={link.view}
-              href={VIEW_HEAD[link.view].path}
+              href={localizePath(VIEW_HEAD[link.view].path, locale)}
               className="project-header__mobile-nav-link"
               aria-current={link.view === activeView ? 'page' : undefined}
               onClick={(event) => handleMobileNavigate(event, link.view)}
@@ -359,11 +394,11 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
             </a>
           ))}
           <a
-            href="/#faq"
+            href={localizePath('/#faq', locale)}
             className="project-header__mobile-nav-link"
             onClick={(event) => {
               setIsMobileNavOpen(false)
-              goToFaq(event, activeView, onNavigate)
+              goToFaq(event, activeView, onNavigate, locale)
             }}
           >
             {faqLabel}
@@ -372,7 +407,7 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
           {GUIDE_LINKS.map((link) => (
             <a
               key={link.view}
-              href={VIEW_HEAD[link.view].path}
+              href={localizePath(VIEW_HEAD[link.view].path, locale)}
               className="project-header__mobile-nav-link"
               aria-current={link.view === activeView ? 'page' : undefined}
               onClick={(event) => handleMobileNavigate(event, link.view)}
@@ -442,7 +477,7 @@ function SiteMap({ locale = 'en', onNavigate = () => {}, onGetStarted = () => {}
                 ? templates.map((template) => (
                   <li key={template.id}>
                     <a
-                      href={templatePath(template.slug)}
+                      href={templatePath(template.slug, lang)}
                       onClick={(event) => handleInAppLinkClick(event, `${TEMPLATE_VIEW_PREFIX}${template.id}`, onNavigate)}
                     >
                       {template.label}
@@ -452,7 +487,7 @@ function SiteMap({ locale = 'en', onNavigate = () => {}, onGetStarted = () => {}
                 : column.links.map((link) => (
                   <li key={link.view}>
                     <a
-                      href={VIEW_HEAD[link.view].path}
+                      href={localizePath(VIEW_HEAD[link.view].path, locale)}
                       onClick={(event) => (link.view === 'builder'
                         ? handleInAppLinkClick(event, link.view, () => onGetStarted())
                         : handleInAppLinkClick(event, link.view, onNavigate))}
@@ -482,14 +517,14 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
         </span>
         <nav className="site-footer__links" aria-label={isFinnish ? 'Oikeudellinen' : 'Legal'}>
           <a
-            href={VIEW_HEAD.about.path}
+            href={localizePath(VIEW_HEAD.about.path, locale)}
             className="site-footer__link"
             onClick={(event) => handleInAppLinkClick(event, 'about', onNavigate)}
           >
             {isFinnish ? 'Tietoa' : 'About'}
           </a>
           <a
-            href={VIEW_HEAD.privacy.path}
+            href={localizePath(VIEW_HEAD.privacy.path, locale)}
             className="site-footer__link"
             onClick={(event) => handleInAppLinkClick(event, 'privacy', onNavigate)}
           >
@@ -502,12 +537,20 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
 }
 
 function App() {
-  const [locale, setLocale] = useState(() => readStoredLocale())
-  const [view, setView] = useState(() => getInitialView())
+  const [initialRoute] = useState(() => readRoute())
+  // The address decides the language (1.6.35); only the builder's /cv,
+  // which has none, falls back to the visitor's last choice.
+  const [locale, setLocale] = useState(() => initialRoute.locale ?? readStoredLocale())
+  const [view, setView] = useState(initialRoute.view)
+  // Read by the navigation callbacks at click time.
+  const localeRef = useRef(locale)
+  useEffect(() => {
+    localeRef.current = locale
+  }, [locale])
   const [headerProps, setHeaderProps] = useState(null)
   const headerPropsRef = useRef(null)
 
-  useDocumentHead(view)
+  useDocumentHead(view, locale)
 
   // Previously only ResumeBuilderPage synced this, so toggling to Finnish
   // anywhere else (landing, the 10 content pages) left `lang="en"` on
@@ -518,9 +561,16 @@ function App() {
     document.documentElement.lang = locale
   }, [locale])
 
+  // The header's language switch: the same page at the other language's
+  // address (query kept), remembered for the builder.
   const handleToggleLocale = useCallback(() => {
-    setLocale((prev) => (prev === 'fi' ? 'en' : 'fi'))
-  }, [])
+    const next = localeRef.current === 'fi' ? 'en' : 'fi'
+    safeStorageSet(UI_LOCALE_STORAGE_KEY, next)
+    if (view !== 'builder' && view !== 'notFound') {
+      pushViewUrl(view, window.location.search, next)
+    }
+    setLocale(next)
+  }, [view])
 
   const handleEditorLocaleChange = useCallback((nextLocale) => {
     setLocale((prev) => (prev === nextLocale ? prev : nextLocale))
@@ -573,7 +623,7 @@ function App() {
 
   const goToLanding = useCallback(() => {
     setView('landing')
-    pushViewUrl('landing')
+    pushViewUrl('landing', '', localeRef.current)
     scrollToTop()
   }, [])
 
@@ -582,7 +632,7 @@ function App() {
   // supports the optional ?template= id.
   const goToView = useCallback((nextView, { search = '' } = {}) => {
     setView(nextView)
-    pushViewUrl(nextView, search)
+    pushViewUrl(nextView, search, localeRef.current)
     scrollToTop()
   }, [])
 
@@ -591,7 +641,11 @@ function App() {
   // without going through goToBuilder/goToLanding.
   useEffect(() => {
     function handlePopState() {
-      setView(getInitialView())
+      const route = readRoute()
+      setView(route.view)
+      if (route.locale) {
+        setLocale(route.locale)
+      }
     }
 
     window.addEventListener('popstate', handlePopState)
@@ -603,6 +657,7 @@ function App() {
     const PageComponent = templatePageId ? TemplateDetailPage : (STATIC_PAGES[view] ?? LandingPage)
 
     return (
+      <LocaleContext.Provider value={locale}>
       <div className="one-pager">
         <header className="project-header print:hidden">
           <div className="project-header__container">
@@ -615,7 +670,7 @@ function App() {
                 />
               ) : (
                 <a
-                  href="/"
+                  href={viewPath('landing', locale)}
                   onClick={(event) => {
                     event.preventDefault()
                     goToLanding()
@@ -661,10 +716,12 @@ function App() {
         <SiteMap locale={locale} onNavigate={goToView} onGetStarted={goToBuilder} />
         <SiteFooter locale={locale} onNavigate={goToView} />
       </div>
+      </LocaleContext.Provider>
     )
   }
 
   return (
+    <LocaleContext.Provider value={locale}>
     <div
       className={`one-pager one-pager--builder${
         headerProps?.builderMode === 'direct' ? ' one-pager--direct-edit' : ''
@@ -718,6 +775,7 @@ function App() {
 
       <SiteFooter locale={locale} onNavigate={goToView} />
     </div>
+    </LocaleContext.Provider>
   )
 }
 

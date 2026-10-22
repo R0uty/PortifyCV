@@ -153,14 +153,13 @@ test.describe('Template pages', () => {
     // same "<Section> näky(vät|y) tässä[,.]" pattern (e.g. "Kielet näkyvät
     // tässä.", "Koulutus näkyy tässä."); one case-insensitive regex on the
     // shared "näky... tässä" fragment covers all of them.
-    await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'fi'))
-
-    await page.goto('/free-cv-templates/developer')
+    // The address decides the language (1.6.35).
+    await page.goto('/fi/ilmaiset-cv-pohjat/developer')
     const preview = page.locator('.template-page__preview')
     await expect(preview).toBeVisible()
     await expect(preview).not.toContainText(/näky\S* tässä/i)
 
-    await page.goto('/free-cv-templates/graduate')
+    await page.goto('/fi/ilmaiset-cv-pohjat/graduate')
     const graduatePreview = page.locator('.template-page__preview')
     await expect(graduatePreview).toBeVisible()
     await expect(graduatePreview).not.toContainText(/näky\S* tässä/i)
@@ -232,8 +231,7 @@ test.describe('Template pages', () => {
   })
 
   test('the Finnish page shows Finnish copy and a Finnish example', async ({ page }) => {
-    await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'fi'))
-    await page.goto('/free-cv-templates/developer')
+    await page.goto('/fi/ilmaiset-cv-pohjat/developer')
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Kehittäjä – CV-pohja')
     await expect(page.getByRole('radiogroup', { name: 'Esimerkit' })).toBeVisible()
     await expect(page.locator('.template-page__preview')).toContainText('Frontend-kehittäjä')

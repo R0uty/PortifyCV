@@ -1,6 +1,6 @@
 import { buildExampleCv } from './buildExampleCv.js'
 
-// Fictional person. Listed under: graduate, compact. Stress case: thin
+// Fictional person. Listed under: graduate (compact until 1.6.40). Stress case: thin
 // experience — a part-time retail job plus one internship, no full-time role.
 const shared = {
   fullName: 'John Doe',
