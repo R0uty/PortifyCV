@@ -4,6 +4,32 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Crawlers that don't run JavaScript read each page in full — 1.6.49, 2026-10-23
+
+After AdSense turned the site down for "low-value content". A crawler
+that doesn't run JavaScript read about 165 words on every guide, example
+and template page: the short summary from 1.6.46, not the page. `npm run
+build` now also renders every content page in both languages with React
+in Node (`src/prerender.jsx`, a server build in `dist-ssr/`, written to
+`dist/prerendered/` by `scripts/prerender.mjs`), and the worker puts that
+markup in index.html's no-JavaScript block, which React still removes on
+load. `/how-to-write-a-cv` now reads about 1,900 words without
+JavaScript, `/it-cv-examples` about 1,200; the 1.6.46 summary stays as the
+fallback for a build without them.
+
+Found on the way: Cloudflare serves a request that matches a file in
+`dist/` without running the worker, so the English front page `/` had
+gone out as raw `index.html` without its hreflang links since 1.6.35, and
+the new fragments would have been public pages. `wrangler.jsonc` now runs
+the worker first for `/` and `/prerendered/*` only (other assets still
+skip it); the fragments are 404s from outside. 1.6.48's string export
+from `worker/index.js` stopped `wrangler dev` from starting (the runtime
+reads every export as an entry point; production accepted it), so the
+AdSense selector moved to `worker/adsense.js`. And `GuideLayout`'s
+reading-time count looped through a JSX intro's owner in React's
+development build, crashing the builder guide under `npm run dev`. Test in
+`prerender.spec.js`; verified on `wrangler dev`.
+
 ## No ads in the builder or on error pages — 1.6.48, 2026-10-22
 
 From the AdSense readiness review. `index.html` loads the AdSense tag on

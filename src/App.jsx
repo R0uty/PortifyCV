@@ -536,8 +536,10 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
   )
 }
 
-function App() {
-  const [initialRoute] = useState(() => readRoute())
+// `route` is only passed by the build-time pre-render (src/prerender.jsx,
+// 1.6.49), which has no address to read.
+function App({ route = null }) {
+  const [initialRoute] = useState(() => route ?? readRoute())
   // The address decides the language (1.6.35); only the builder's /cv,
   // which has none, falls back to the visitor's last choice.
   const [locale, setLocale] = useState(() => initialRoute.locale ?? readStoredLocale())

@@ -1,3 +1,4 @@
+import { isValidElement } from 'react'
 import InternalNavLink from './InternalNavLink'
 import { localizedHead, PATH_TO_VIEW, VIEW_HEAD } from '../utils/pageMeta'
 import { localizePath, ROUTES } from '../utils/routes'
@@ -40,10 +41,13 @@ const STRONG_LABEL = /^(strong|vahva)/i
 
 const sectionId = (index) => `section-${index + 1}`
 
-// Every string in the page's copy, for the reading time.
+// Every string in the page's copy, for the reading time. A JSX intro
+// counts by its children only: in development an element also points at
+// its owner component, which loops back to it.
 function collectText(value) {
   if (typeof value === 'string') return [value]
   if (Array.isArray(value)) return value.flatMap(collectText)
+  if (isValidElement(value)) return collectText(value.props.children)
   if (value && typeof value === 'object') return Object.values(value).flatMap(collectText)
   return []
 }

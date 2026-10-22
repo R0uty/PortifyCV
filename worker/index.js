@@ -17,8 +17,9 @@
 //   4. returns a real 404 (with noindex) for paths that aren't a known
 //      route, instead of the soft-404 the SPA fallback produced (200,
 //      indexable, homepage content, for literally any typo'd URL).
-import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema, localizedHead, PATH_TO_VIEW } from '../src/utils/pageMeta.js'
+import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema, localizedHead, PATH_TO_VIEW, prerenderedPath } from '../src/utils/pageMeta.js'
 import { LANDING_FAQ, faqAnswerText } from '../src/utils/landingFaq.js'
+import { ADSENSE_SCRIPT } from './adsense.js'
 
 // The Finnish front page's FAQPage JSON-LD (1.6.35): index.html carries
 // the English one, which must match the visible FAQ, so /fi gets its own.
@@ -32,9 +33,6 @@ const FAQ_SCHEMA_FI = JSON.stringify({
   })),
 })
 
-// index.html's AdSense tag (1.6.48 removes it from the builder and from
-// 404 pages).
-export const ADSENSE_SCRIPT = 'script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'
 
 const escapeHtml = (text) => String(text)
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
@@ -45,7 +43,9 @@ const escapeHtml = (text) => String(text)
 // JS read landing copy on /how-to-write-a-cv or /fi/tietoa. Every route but
 // the English front page now gets its own heading and description, links to
 // the main pages in its language, and on /fi the Finnish FAQ. React removes
-// the block on load (src/main.jsx), so visitors never see it.
+// the block on load (src/main.jsx), so visitors never see it. Since 1.6.49
+// the block holds the page's full pre-rendered markup instead; this is the
+// fallback when a build has none.
 const FALLBACK_LINKS = ['landing', 'freeTemplates', 'howToWrite', 'atsGuide', 'cvExamples', 'coverLetterExamples']
 
 export function fallbackBody(view, head) {
@@ -122,7 +122,9 @@ class AppendToHead {
 // which is structured data that doesn't describe the page it's on.
 // `locale` is the address's language (1.6.35): /fi/… pages get Finnish
 // metadata, <html lang="fi">, and hreflang links to their English twin.
-function rewriteForRoute(response, view, locale) {
+// `body` is the page's pre-rendered markup (1.6.49, scripts/prerender.mjs),
+// or null when there's none, as in `wrangler dev` before a full build.
+function rewriteForRoute(response, view, locale, body) {
   const head = localizedHead(VIEW_HEAD[view], locale)
   const canonicalUrl = `${SITE_ORIGIN}${head.path}`
   const rewriter = new HTMLRewriter()
@@ -145,7 +147,9 @@ function rewriteForRoute(response, view, locale) {
     rewriter.on('#ld-faq', new SetInnerHtml(FAQ_SCHEMA_FI))
   }
 
-  if (!(view === 'landing' && head.locale === 'en')) {
+  if (body) {
+    rewriter.on('#seo-landing', new SetInnerHtml(body))
+  } else if (!(view === 'landing' && head.locale === 'en')) {
     rewriter.on('#seo-landing', new SetInnerHtml(fallbackBody(view, head)))
   }
 
@@ -173,6 +177,13 @@ function rewriteForRoute(response, view, locale) {
   }
 
   return rewriter.transform(response)
+}
+
+// The builder has no pre-render: it's an app, with nothing to read.
+async function prerenderedBody(env, request, route) {
+  if (route.view === 'builder') return null
+  const response = await env.ASSETS.fetch(new Request(new URL(prerenderedPath(route.view, route.locale), request.url)))
+  return response.ok ? response.text() : null
 }
 
 function normalizePath(pathname) {
@@ -204,7 +215,7 @@ export default {
       // fetch "/" itself to get the shell's raw bytes rather than following
       // a redirect for every route.
       const assetResponse = await env.ASSETS.fetch(new Request(new URL('/', request.url), request))
-      return rewriteForRoute(assetResponse, route.view, route.locale ?? 'en')
+      return rewriteForRoute(assetResponse, route.view, route.locale ?? 'en', await prerenderedBody(env, request, route))
     }
 
     // Not a real file and not a known route — a genuinely missing page.
