@@ -544,9 +544,11 @@ function App() {
   const [view, setView] = useState(initialRoute.view)
   // Read by the navigation callbacks at click time.
   const localeRef = useRef(locale)
+  const viewRef = useRef(view)
   useEffect(() => {
     localeRef.current = locale
-  }, [locale])
+    viewRef.current = view
+  }, [locale, view])
   const [headerProps, setHeaderProps] = useState(null)
   const headerPropsRef = useRef(null)
 
@@ -596,8 +598,6 @@ function App() {
   // card; the builder applies it to whatever CV it starts with, exactly like
   // ?example=.
   const goToBuilder = useCallback((templateId, exampleId, options = {}) => {
-    setView('builder')
-
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams()
       if (typeof templateId === 'string' && templateId) params.set('template', templateId)
@@ -613,28 +613,53 @@ function App() {
       const query = params.toString() ? `?${params}` : ''
       const nextPath = `${VIEW_HEAD.builder.path}${query}`
 
+      // Into the builder is a full page load (1.6.48): the worker serves
+      // /cv without the AdSense script, which a page the visitor came from
+      // would otherwise have loaded already (ads aren't allowed on an app
+      // screen like the builder). The language goes with it.
+      if (viewRef.current !== 'builder') {
+        safeStorageSet(UI_LOCALE_STORAGE_KEY, localeRef.current)
+        window.location.assign(nextPath)
+        return
+      }
+
       if (`${window.location.pathname}${window.location.search}` !== nextPath) {
         window.history.pushState({ view: 'builder' }, '', nextPath)
       }
     }
 
+    setView('builder')
     scrollToTop()
   }, [])
 
+  // Out of the builder is a full page load too (1.6.48), so the page the
+  // visitor goes to loads its ads again.
+  const leaveBuilder = useCallback((nextView, search = '') => {
+    window.location.assign(`${viewPath(nextView, localeRef.current)}${search}`)
+  }, [])
+
   const goToLanding = useCallback(() => {
+    if (viewRef.current === 'builder') {
+      leaveBuilder('landing')
+      return
+    }
     setView('landing')
     pushViewUrl('landing', '', localeRef.current)
     scrollToTop()
-  }, [])
+  }, [leaveBuilder])
 
   // Generic version of goToLanding for any non-builder static page (footer
   // guide links, etc.) — builder goes through goToBuilder since it also
   // supports the optional ?template= id.
   const goToView = useCallback((nextView, { search = '' } = {}) => {
+    if (viewRef.current === 'builder' && nextView !== 'builder') {
+      leaveBuilder(nextView, search)
+      return
+    }
     setView(nextView)
     pushViewUrl(nextView, search, localeRef.current)
     scrollToTop()
-  }, [])
+  }, [leaveBuilder])
 
   // Keep view state in sync when the user navigates with the browser's
   // back/forward buttons rather than an in-app link — those change the URL
@@ -642,6 +667,12 @@ function App() {
   useEffect(() => {
     function handlePopState() {
       const route = readRoute()
+      // Back/forward across the builder's edge reloads, for the same
+      // reason the links into and out of it do (1.6.48).
+      if ((route.view === 'builder') !== (viewRef.current === 'builder')) {
+        window.location.reload()
+        return
+      }
       setView(route.view)
       if (route.locale) {
         setLocale(route.locale)

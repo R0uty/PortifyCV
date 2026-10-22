@@ -4,6 +4,22 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## No ads in the builder or on error pages — 1.6.48, 2026-10-22
+
+From the AdSense readiness review. `index.html` loads the AdSense tag on
+every page, so Auto ads could place ads in the CV builder (an app screen
+full of buttons, with the phone bottom bar next to where anchor ads sit)
+and on 404 pages, neither of which AdSense allows. The edge worker now
+removes the tag from `/cv` (both languages) and from every 404. Because a
+script a content page has loaded can't be unloaded, moving into or out of
+the builder is now a full page load (Start building, template and example
+buttons, header and footer links from the builder, and Back/Forward across
+the builder's edge); the UI language is saved first so the builder opens
+in the page's language. Moves between content pages stay in-app.
+`check:template-pages` checks the worker's selector still matches the tag
+in `index.html`; test in `builder-ad-boundary.spec.js`; verified on
+`wrangler dev`.
+
 ## Template pages share their own image — 1.6.47, 2026-10-22
 
 Phase 5 of the search plan. Every page shared the same `PortifyCV.jpg`
