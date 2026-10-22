@@ -4,6 +4,19 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## A deeper "How to Write a CV" — 1.6.39, 2026-10-22
+
+Phase 4 of the search plan, part 2: the first guide rewritten to the
+depth its search intent calls for, in both languages (English about 700 →
+1,460 words, Finnish about 1,120). New sections: contact details (what to
+include and leave out), more before-and-after bullets for sales, nursing,
+customer service and teaching, education/certificates/projects, tailoring
+to each job (with the ATS score panel), length and format, and a final
+pre-send checklist; the summary section adds a career-changer example and
+the mistakes list two more. The file-format advice matches the ATS guide
+(a Word file from a one-column template when software reads it). Updated
+date 22 October 2026, in the page meta and the sitemap.
+
 ## One clearer layout for every guide — 1.6.38, 2026-10-22
 
 Phase 4 of the search plan, part 1. The nine guide and example pages were

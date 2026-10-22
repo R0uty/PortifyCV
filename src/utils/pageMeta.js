@@ -91,7 +91,7 @@ const STATIC_VIEW_HEAD = {
       'A practical, structural guide to writing a CV: what sections to include, how to write experience bullets that show impact, and mistakes to avoid.',
     isArticle: true,
     datePublished: '2026-08-20',
-    dateModified: '2026-08-29',
+    dateModified: '2026-10-22',
   },
   howToUse: {
     title: 'How to Use the CV Builder - PortifyCV',
