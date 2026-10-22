@@ -37,9 +37,9 @@ function previewRulesOnly(css) {
 }
 
 export function collectThumbnailInputs(rootDir) {
-  const entry = resolve(rootDir, 'scripts/thumbnails/harness.jsx')
   const seen = new Set()
-  const queue = [entry]
+  // The thumbnails' harness and the share images' (1.6.47).
+  const queue = ['scripts/thumbnails/harness.jsx', 'scripts/thumbnails/og.js'].map((entry) => resolve(rootDir, entry))
   while (queue.length) {
     const file = queue.pop()
     if (seen.has(file)) continue

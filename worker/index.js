@@ -132,6 +132,8 @@ function rewriteForRoute(response, view, locale) {
     .on('meta[property="og:description"]', new SetAttr('content', head.description))
     .on('meta[name="twitter:title"]', new SetAttr('content', head.title))
     .on('meta[name="twitter:description"]', new SetAttr('content', head.description))
+    .on('meta[property="og:image"]', new SetAttr('content', `${SITE_ORIGIN}${head.ogImage}`))
+    .on('meta[name="twitter:image"]', new SetAttr('content', `${SITE_ORIGIN}${head.ogImage}`))
 
   if (view !== 'landing') {
     rewriter.on('#ld-faq', new RemoveElement())

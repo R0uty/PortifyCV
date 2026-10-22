@@ -63,6 +63,12 @@ for (const template of cvTemplates) {
 for (const locale of ['en', 'fi']) {
   expected.add(`product/direct-edit-${locale}.webp`)
 }
+// Each template page's share image (1.6.47).
+for (const template of cvTemplates) {
+  for (const locale of ['en', 'fi']) {
+    expected.add(`og/${template.id}-${locale}.jpg`)
+  }
+}
 
 const missing = [...expected].filter((file) => !existsSync(join(outDir, file)))
 check(`all ${expected.size} thumbnails (template × look × locale) exist`, missing.length === 0, missing.join(', '))

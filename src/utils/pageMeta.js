@@ -11,6 +11,9 @@ import { TEMPLATE_META_DESCRIPTIONS_FI } from './templateMetaDescriptionsFi.js'
 
 export const SITE_ORIGIN = 'https://portifycv.app'
 
+// The share image of every page without one of its own.
+export const DEFAULT_OG_IMAGE = '/PortifyCV.jpg'
+
 // Read off the template registry instead of a hardcoded number in the
 // freeTemplates description below — this previously drifted out of sync
 // with cvTemplates.js after a template was added without this file being
@@ -237,6 +240,9 @@ const TEMPLATE_VIEW_HEAD = Object.fromEntries(
       titleFi: `${getCvTemplate(template.id, 'fi').label} – CV-pohja - PortifyCV`,
       templateLabelFi: getCvTemplate(template.id, 'fi').label,
       descriptionFi: TEMPLATE_META_DESCRIPTIONS_FI[template.id] ?? getCvTemplate(template.id, 'fi').description,
+      // The page's own share image (1.6.47, made by `npm run thumbnails`).
+      ogImage: `/thumbnails/og/${template.id}-en.jpg`,
+      ogImageFi: `/thumbnails/og/${template.id}-fi.jpg`,
       templateId: template.id,
       schema: 'template',
     },
@@ -261,6 +267,7 @@ export function localizedHead(head, locale) {
     description: fi ? head.descriptionFi ?? head.description : head.description,
     path: fi && head.pathFi ? head.pathFi : head.path,
     templateLabel: fi ? head.templateLabelFi ?? head.templateLabel : head.templateLabel,
+    ogImage: (fi ? head.ogImageFi : head.ogImage) ?? DEFAULT_OG_IMAGE,
     alternates: head.pathFi ? { en: head.path, fi: head.pathFi } : null,
   }
 }

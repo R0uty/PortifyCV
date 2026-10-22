@@ -64,3 +64,21 @@ test('the FAQ link on a Finnish page goes to the Finnish FAQ', async ({ page }) 
   await expect(page).toHaveURL(/\/fi#faq$/)
   await expect(page.locator('#faq h2')).toHaveText('Usein kysytyt kysymykset')
 })
+
+// 1.6.47: each template page shares its own image, in its language; other
+// pages share the default, including after an in-app navigation away.
+test('template pages set their own share image, and it loads', async ({ page, request }) => {
+  for (const [path, image] of [
+    ['/free-cv-templates/developer', '/thumbnails/og/developer-en.jpg'],
+    ['/fi/ilmaiset-cv-pohjat/developer', '/thumbnails/og/developer-fi.jpg'],
+  ]) {
+    await page.goto(path)
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', `https://portifycv.app${image}`)
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveAttribute('content', `https://portifycv.app${image}`)
+    const response = await request.get(image)
+    expect(response.status()).toBe(200)
+    expect(response.headers()['content-type']).toContain('image/jpeg')
+  }
+  await page.locator('.template-page__breadcrumb a').first().click()
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://portifycv.app/PortifyCV.jpg')
+})

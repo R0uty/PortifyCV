@@ -134,7 +134,12 @@ built) and records an input hash in `public/thumbnails/manifest.json`;
 CSS, `CVPreview`, the demo CV, the look registry, the preview rules in
 `app-shell.css`) changes without a regeneration. So after changing a
 template's design or looks, run `npm run thumbnails` and commit the images.
-The builder's gallery and the template pages' own preview stay live.
+The builder's gallery and the template pages' own preview stay live. The
+same command also captures the front page's builder screenshot
+(`product/direct-edit-<en|fi>.webp`, 1.6.32; checked for presence only)
+and each template page's 1200 × 630 share image (`og/<template>-<en|fi>.jpg`
+from `scripts/thumbnails/og.js`, 1.6.47), which `VIEW_HEAD` points
+`og:image`/`twitter:image` at.
 
 `src/components/templates/index.js` is the variant→config registry and also
 owns `prefetchTemplateShowcases()` (idle-prefetch of every Showcase chunk, so

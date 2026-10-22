@@ -11,7 +11,7 @@ import { safeStorageGet, safeStorageSet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
 import { ROUTES, localizePath, pathLocale, templatePath } from './utils/routes'
 import { getCvTemplates } from './utils/cvTemplates'
-import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX } from './utils/pageMeta'
+import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX } from './utils/pageMeta'
 import { LocaleContext } from './components/localeContext'
 import { APP_VERSION } from './utils/appVersion'
 
@@ -166,6 +166,9 @@ function useDocumentHead(view, locale) {
     setMetaContent('meta[property="og:description"]', head.description)
     setMetaContent('meta[name="twitter:title"]', head.title)
     setMetaContent('meta[name="twitter:description"]', head.description)
+    const image = `${SITE_ORIGIN}${head.ogImage ?? DEFAULT_OG_IMAGE}`
+    setMetaContent('meta[property="og:image"]', image)
+    setMetaContent('meta[name="twitter:image"]', image)
 
     const existingScript = document.getElementById(VIEW_STRUCTURED_DATA_SCRIPT_ID)
     const schema = buildViewSchema(head)
