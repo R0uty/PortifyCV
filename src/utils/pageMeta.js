@@ -144,6 +144,7 @@ const STATIC_VIEW_HEAD = {
   },
   developerCv: {
     title: 'Developer CV Examples - PortifyCV',
+    parent: 'cvExamples',
     path: ROUTES.developerCv,
     pathFi: ROUTES_FI.developerCv,
     titleFi: 'Kehittäjän CV-esimerkit - PortifyCV',
@@ -157,6 +158,7 @@ const STATIC_VIEW_HEAD = {
   },
   itCv: {
     title: 'IT CV Examples - PortifyCV',
+    parent: 'cvExamples',
     path: ROUTES.itCv,
     pathFi: ROUTES_FI.itCv,
     titleFi: 'IT-alan CV-esimerkit - PortifyCV',
@@ -170,6 +172,7 @@ const STATIC_VIEW_HEAD = {
   },
   cybersecurityCv: {
     title: 'Cybersecurity CV Examples - PortifyCV',
+    parent: 'cvExamples',
     path: ROUTES.cybersecurityCv,
     pathFi: ROUTES_FI.cybersecurityCv,
     titleFi: 'Tietoturva-alan CV-esimerkit - PortifyCV',
@@ -183,6 +186,7 @@ const STATIC_VIEW_HEAD = {
   },
   finnishCv: {
     title: 'Finnish CV Examples - PortifyCV',
+    parent: 'cvExamples',
     path: ROUTES.finnishCv,
     pathFi: ROUTES_FI.finnishCv,
     titleFi: 'Suomalaisen CV:n esimerkit - PortifyCV',
@@ -275,11 +279,10 @@ export const PATH_TO_VIEW = new Map(Object.entries(VIEW_HEAD).flatMap(([view, he
 // per-page equivalent for the guide pages.
 export function buildArticleSchema(head) {
   const url = `${SITE_ORIGIN}${head.path}`
-
-  return {
-    '@context': 'https://schema.org',
+  const fi = head.locale === 'fi'
+  const article = {
     '@type': 'Article',
-    inLanguage: head.locale === 'fi' ? 'fi' : 'en',
+    inLanguage: fi ? 'fi' : 'en',
     headline: head.title.replace(/ - PortifyCV$/, ''),
     description: head.description,
     url,
@@ -289,6 +292,26 @@ export function buildArticleSchema(head) {
     datePublished: head.datePublished,
     dateModified: head.dateModified ?? head.datePublished,
   }
+
+  // Its breadcrumb trail, as the page shows it (1.6.38): home, the
+  // examples hub for the field example pages, then the page itself.
+  const parent = head.parent ? localizedHead(VIEW_HEAD[head.parent], head.locale) : null
+  const crumbs = [
+    { name: 'PortifyCV', path: fi ? ROUTES_FI.landing : ROUTES.landing },
+    ...(parent ? [{ name: parent.title.replace(/ - PortifyCV$/, ''), path: parent.path }] : []),
+    { name: article.headline, path: head.path },
+  ]
+  const breadcrumb = {
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((crumb, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: crumb.name,
+      item: `${SITE_ORIGIN}${crumb.path}`,
+    })),
+  }
+
+  return { '@context': 'https://schema.org', '@graph': [article, breadcrumb] }
 }
 
 // BreadcrumbList for a per-template page: Home › Free CV templates › <Label>.

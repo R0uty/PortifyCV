@@ -1,5 +1,5 @@
+import GuideLayout from '../components/GuideLayout'
 import ExampleCvLinks from '../components/ExampleCvLinks'
-import InternalNavLink from '../components/InternalNavLink'
 import { CONTENT_PAGE_EXAMPLES } from '../utils/exampleCvs'
 import { cvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
@@ -79,7 +79,6 @@ function getCopy(locale) {
         intro: 'Eurooppalainen-pohja noudattaa EU:ssa yleistä Europass-tyylistä asettelua. Esimerkit avautuvat valmiina CV:inä sillä kielellä, jonka olet valinnut, ja "Käytä tätä esimerkkiä" lataa ne editoriin muokattavaksi.',
       },
       ctaNote: 'Ei kirjautumista. Saatavilla suomeksi ja englanniksi.',
-      seeAlsoLabel: 'Katso myös:',
       seeAlso: [
         { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV:n taito-osion esimerkkejä' },
         { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-ystävällinen CV-opas' },
@@ -154,7 +153,6 @@ function getCopy(locale) {
       intro: 'The European template follows the Europass-style layout common across the EU. Each example opens as a complete CV in the language you have selected (switch to FI for Finnish), and "Use this example" loads it into the builder to edit.',
     },
     ctaNote: 'No login. Available in Finnish and English.',
-    seeAlsoLabel: 'See also:',
     seeAlso: [
       { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV Skills Examples' },
       { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-Friendly CV Guide' },
@@ -168,68 +166,27 @@ function FinnishCvExamplesPage({ locale = 'en', onGetStarted = () => {}, onNavig
   const copy = getCopy(locale === 'fi' ? 'fi' : 'en')
 
   return (
-    <section className="legal-page">
-      <div className="legal-page__inner">
-        <p className="legal-page__kicker">{copy.kicker}</p>
-        <h1 className="legal-page__title">{copy.title}</h1>
-        <p>{copy.intro}</p>
-
-        {copy.sections.map((section) => (
-          <div key={section.heading}>
-            <h2>{section.heading}</h2>
-            {section.paragraphs?.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-            {section.templateLinks ? (
-              <ExampleCvLinks examples={section.templateLinks} locale={locale} onNavigateToView={onNavigateToView} />
-            ) : null}
-            {section.examplePair ? (
-              <ul>
-                <li>
-                  <strong>{section.examplePair.weakLabel}:</strong> {section.examplePair.weak}
-                </li>
-                <li>
-                  <strong>{section.examplePair.strongLabel}:</strong> {section.examplePair.strong}
-                </li>
-              </ul>
-            ) : null}
-            {section.paragraphsAfter?.map((paragraph, index) => (
-              <p key={`after-${index}`}>{paragraph}</p>
-            ))}
-            {section.linkParagraphs?.map((linkParagraph, index) => (
-              <p key={`link-${index}`}>
-                {linkParagraph.before}
-                <InternalNavLink to={linkParagraph.linkTo} onNavigate={() => onNavigateToView(linkParagraph.view)}>
-                  {linkParagraph.linkText}
-                </InternalNavLink>
-                {linkParagraph.after}
-              </p>
-            ))}
-          </div>
-        ))}
-
-        <div>
-          <h2>{copy.fullExamples.heading}</h2>
-          <p>{copy.fullExamples.intro}</p>
-          <ExampleCvLinks examples={CONTENT_PAGE_EXAMPLES.finnishCv} locale={locale} onNavigateToView={onNavigateToView} />
-        </div>
-
-        <div className="legal-page__cta">
-          <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
-            {copy.ctaLabel}
-          </button>
-          <span className="legal-page__cta-note">{copy.ctaNote}</span>
-        </div>
-        <div className="templates-page-links">
-          <span>{copy.seeAlsoLabel}</span>
-          {copy.seeAlso.map((link) => (
-            <InternalNavLink key={link.view} to={link.to} onNavigate={() => onNavigateToView(link.view)}>
-              {link.text}
-            </InternalNavLink>
-          ))}
-        </div>
+    <GuideLayout
+      view="finnishCv"
+      locale={locale}
+      kicker={copy.kicker}
+      title={copy.title}
+      intro={copy.intro}
+      sections={copy.sections}
+      renderSectionExtra={(section) => (section.templateLinks
+        ? <ExampleCvLinks examples={section.templateLinks} locale={locale} onNavigateToView={onNavigateToView} />
+        : null)}
+      cta={{ label: copy.ctaLabel, note: copy.ctaNote }}
+      related={copy.seeAlso.map((link) => ({ view: link.view, search: link.search, title: link.text }))}
+      onGetStarted={onGetStarted}
+      onNavigateToView={onNavigateToView}
+    >
+      <div className="guide__section">
+        <h2>{copy.fullExamples.heading}</h2>
+        <p>{copy.fullExamples.intro}</p>
+        <ExampleCvLinks examples={CONTENT_PAGE_EXAMPLES.finnishCv} locale={locale} onNavigateToView={onNavigateToView} />
       </div>
-    </section>
+    </GuideLayout>
   )
 }
 

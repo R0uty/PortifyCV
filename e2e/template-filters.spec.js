@@ -134,15 +134,20 @@ test.describe('Template gallery field filter', () => {
 })
 
 // 1.6.14: the tech example pages' "See also" row links to the grid on the
-// Tech chip instead of the unfiltered grid.
+// Tech chip instead of the unfiltered grid (since 1.6.38 the row is the
+// guide layout's related cards; a card's link text includes its summary,
+// so cards are found by their title).
+const relatedCard = (page, title) => page.locator('.guide__related a', {
+  has: page.locator('.examples-hub-card__title', { hasText: new RegExp(`^${title}$`) }),
+})
+
 test.describe('Example pages link to the Tech filter', () => {
   for (const path of ['/developer-cv-examples', '/it-cv-examples', '/cybersecurity-cv-examples']) {
     test(`${path} opens the grid on Tech`, async ({ page }) => {
       await page.goto(path)
-      const link = page.locator('.templates-page-links').getByRole('link', { name: 'Tech CV templates', exact: true })
+      const link = relatedCard(page, 'Tech CV templates')
       await expect(link).toHaveAttribute('href', '/free-cv-templates?field=tech')
-      await expect(page.locator('.templates-page-links').getByRole('link', { name: 'Free CV Templates', exact: true }))
-        .toHaveCount(0)
+      await expect(relatedCard(page, 'Free CV Templates')).toHaveCount(0)
 
       await link.click()
       await expect(page).toHaveURL(/\/free-cv-templates\?field=tech$/)
@@ -156,7 +161,7 @@ test.describe('Example pages link to the Tech filter', () => {
     await page.getByRole('button', { name: 'Switch language' }).click()
     // The switch moves to the Finnish page, whose links stay Finnish (1.6.35).
     await expect(page).toHaveURL(/\/fi\/kehittajan-cv-esimerkit$/)
-    await expect(page.locator('.templates-page-links').getByRole('link', { name: 'Tekniikan ja IT-alan CV-pohjat', exact: true }))
+    await expect(relatedCard(page, 'Tekniikan ja IT-alan CV-pohjat'))
       .toHaveAttribute('href', '/fi/ilmaiset-cv-pohjat?field=tech')
   })
 })

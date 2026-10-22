@@ -1,4 +1,4 @@
-import InternalNavLink from '../components/InternalNavLink'
+import GuideLayout from '../components/GuideLayout'
 import { ROUTES } from '../utils/routes'
 
 function getCopy(locale) {
@@ -65,7 +65,6 @@ function getCopy(locale) {
       ],
       ctaLabel: 'Lisää taitosi nyt',
       ctaNote: 'Ei kirjautumista. Automaattinen ryhmittely useissa pohjissa.',
-      seeAlsoLabel: 'Katso myös:',
       seeAlso: [
         { to: ROUTES.howToWrite, view: 'howToWrite', text: 'Näin kirjoitat CV:n' },
         { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-ystävällinen CV-opas' },
@@ -137,7 +136,6 @@ function getCopy(locale) {
     ],
     ctaLabel: 'Add your skills now',
     ctaNote: 'No login. Auto-grouped in several templates.',
-    seeAlsoLabel: 'See also:',
     seeAlso: [
       { to: ROUTES.howToWrite, view: 'howToWrite', text: 'How to Write a CV' },
       { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-Friendly CV Guide' },
@@ -151,56 +149,18 @@ function CvSkillsExamplesPage({ locale = 'en', onGetStarted = () => {}, onNaviga
   const copy = getCopy(locale === 'fi' ? 'fi' : 'en')
 
   return (
-    <section className="legal-page">
-      <div className="legal-page__inner">
-        <p className="legal-page__kicker">{copy.kicker}</p>
-        <h1 className="legal-page__title">{copy.title}</h1>
-        <p>{copy.intro}</p>
-
-        {copy.sections.map((section) => (
-          <div key={section.heading}>
-            <h2>{section.heading}</h2>
-            {section.paragraphs?.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-            {section.list ? (
-              <ul>
-                {section.list.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            ) : null}
-            {section.paragraphsAfter?.map((paragraph, index) => (
-              <p key={`after-${index}`}>{paragraph}</p>
-            ))}
-            {section.linkParagraph ? (
-              <p>
-                {section.linkParagraph.before}
-                <InternalNavLink to={section.linkParagraph.linkTo} onNavigate={() => onNavigateToView('atsGuide')}>
-                  {section.linkParagraph.linkText}
-                </InternalNavLink>
-                {section.linkParagraph.after}
-              </p>
-            ) : null}
-          </div>
-        ))}
-
-        <div className="legal-page__cta">
-          <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
-            {copy.ctaLabel}
-          </button>
-          <span className="legal-page__cta-note">{copy.ctaNote}</span>
-        </div>
-        <div className="templates-page-links">
-          <span>{copy.seeAlsoLabel}</span>
-          {copy.seeAlso.map((link) => (
-            <InternalNavLink key={link.view} to={link.to} onNavigate={() => onNavigateToView(link.view)}>
-              {link.text}
-            </InternalNavLink>
-          ))}
-        </div>
-      </div>
-    </section>
+    <GuideLayout
+      view="cvSkills"
+      locale={locale}
+      kicker={copy.kicker}
+      title={copy.title}
+      intro={copy.intro}
+      sections={copy.sections}
+      cta={{ label: copy.ctaLabel, note: copy.ctaNote }}
+      related={copy.seeAlso.map((link) => ({ view: link.view, search: link.search, title: link.text }))}
+      onGetStarted={onGetStarted}
+      onNavigateToView={onNavigateToView}
+    ></GuideLayout>
   )
 }
 

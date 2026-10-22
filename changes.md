@@ -4,6 +4,30 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## One clearer layout for every guide — 1.6.38, 2026-10-22
+
+Phase 4 of the search plan, part 1. The nine guide and example pages were
+each a single text column with their own copy of the same render code,
+weak/strong examples as plain bullets and a call to action only at the
+end. They now share `GuideLayout` (same light look and type):
+
+- a breadcrumb (field example pages sit under CV examples by field), the
+  updated date, the reading time, and a link to the page in the other
+  language;
+- "On this page", sticky beside the text on wide screens and a disclosure
+  above it on phones, linking every section;
+- weak/strong examples as two side-by-side cards with a thin red or green
+  edge (other pairs, like Finnish/English, stay neutral);
+- a "Try it on your own CV" box half-way down, as well as the page's own
+  button at the end;
+- related pages as cards (the old "See also" row), with their summaries.
+
+Their structured data is now an Article plus a BreadcrumbList that matches
+the visible breadcrumb, with the page's language. The copy itself is
+unchanged; deeper content is the next part. Tests: `e2e/guide-layout.spec.js`
+(every guide, both languages); the Tech-filter tests in
+`template-filters.spec.js` find the link among the related cards.
+
 ## The English headline fits at tablet and small-laptop widths — 1.6.37, 2026-10-22
 
 Between about 1024px and 1180px the front page's picture column kept a

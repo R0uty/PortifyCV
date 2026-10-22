@@ -1,5 +1,5 @@
+import GuideLayout from '../components/GuideLayout'
 import ExampleCvLinks from '../components/ExampleCvLinks'
-import InternalNavLink from '../components/InternalNavLink'
 import { CONTENT_PAGE_EXAMPLES } from '../utils/exampleCvs'
 import { templatePageLink } from '../utils/pageMeta'
 import { ROUTES } from '../utils/routes'
@@ -81,7 +81,6 @@ function getCopy(locale) {
         intro: 'Jokainen avautuu valmiina CV:nä omassa pohjassaan, ja "Käytä tätä esimerkkiä" lataa sen editoriin muokattavaksi.',
       },
       ctaNote: 'Ei kirjautumista. Vaihda pohjaa milloin tahansa.',
-      seeAlsoLabel: 'Katso myös:',
       seeAlso: [
         { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV:n taito-osion esimerkkejä' },
         { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-ystävällinen CV-opas' },
@@ -161,7 +160,6 @@ function getCopy(locale) {
       intro: 'Each one opens as a complete CV in its template, and "Use this example" loads it into the builder to edit.',
     },
     ctaNote: 'No login. Switch templates any time.',
-    seeAlsoLabel: 'See also:',
     seeAlso: [
       { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV Skills Examples' },
       { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-Friendly CV Guide' },
@@ -175,65 +173,24 @@ function DeveloperCvExamplesPage({ locale = 'en', onGetStarted = () => {}, onNav
   const copy = getCopy(locale === 'fi' ? 'fi' : 'en')
 
   return (
-    <section className="legal-page">
-      <div className="legal-page__inner">
-        <p className="legal-page__kicker">{copy.kicker}</p>
-        <h1 className="legal-page__title">{copy.title}</h1>
-        <p>{copy.intro}</p>
-
-        {copy.sections.map((section) => (
-          <div key={section.heading}>
-            <h2>{section.heading}</h2>
-            {section.paragraphs?.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-            {section.examplePair ? (
-              <ul>
-                <li>
-                  <strong>{section.examplePair.weakLabel}:</strong> {section.examplePair.weak}
-                </li>
-                <li>
-                  <strong>{section.examplePair.strongLabel}:</strong> {section.examplePair.strong}
-                </li>
-              </ul>
-            ) : null}
-            {section.paragraphsAfter?.map((paragraph, index) => (
-              <p key={`after-${index}`}>{paragraph}</p>
-            ))}
-            {section.linkParagraphs?.map((linkParagraph, index) => (
-              <p key={`link-${index}`}>
-                {linkParagraph.before}
-                <InternalNavLink to={linkParagraph.linkTo} onNavigate={() => onNavigateToView(linkParagraph.view)}>
-                  {linkParagraph.linkText}
-                </InternalNavLink>
-                {linkParagraph.after}
-              </p>
-            ))}
-          </div>
-        ))}
-
-        <div>
-          <h2>{copy.fullExamples.heading}</h2>
-          <p>{copy.fullExamples.intro}</p>
-          <ExampleCvLinks examples={CONTENT_PAGE_EXAMPLES.developerCv} locale={locale} onNavigateToView={onNavigateToView} />
-        </div>
-
-        <div className="legal-page__cta">
-          <button type="button" className="landing-cta" onClick={() => onGetStarted('developer')}>
-            {copy.ctaLabel}
-          </button>
-          <span className="legal-page__cta-note">{copy.ctaNote}</span>
-        </div>
-        <div className="templates-page-links">
-          <span>{copy.seeAlsoLabel}</span>
-          {copy.seeAlso.map((link) => (
-            <InternalNavLink key={link.view} to={link.to} onNavigate={() => onNavigateToView(link.view, { search: link.search })}>
-              {link.text}
-            </InternalNavLink>
-          ))}
-        </div>
+    <GuideLayout
+      view="developerCv"
+      locale={locale}
+      kicker={copy.kicker}
+      title={copy.title}
+      intro={copy.intro}
+      sections={copy.sections}
+      cta={{ label: copy.ctaLabel, note: copy.ctaNote, onClick: () => onGetStarted('developer') }}
+      related={copy.seeAlso.map((link) => ({ view: link.view, search: link.search, title: link.text }))}
+      onGetStarted={onGetStarted}
+      onNavigateToView={onNavigateToView}
+    >
+      <div className="guide__section">
+        <h2>{copy.fullExamples.heading}</h2>
+        <p>{copy.fullExamples.intro}</p>
+        <ExampleCvLinks examples={CONTENT_PAGE_EXAMPLES.developerCv} locale={locale} onNavigateToView={onNavigateToView} />
       </div>
-    </section>
+    </GuideLayout>
   )
 }
 

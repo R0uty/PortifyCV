@@ -3601,6 +3601,229 @@ html:lang(fi) .landing-title {
   width: min(100%, 42rem);
 }
 
+/* The guide and example pages (GuideLayout, 1.6.38): the same light page
+   and type as the legal pages, wider to fit "On this page" beside the
+   text, which keeps its 42rem reading width. */
+.guide__inner {
+  width: min(100%, 58rem);
+}
+
+.guide__breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  font-size: var(--text-caption);
+  color: var(--app-text-muted);
+}
+
+.guide__breadcrumb a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.guide__breadcrumb [aria-current='page'] {
+  color: var(--app-text);
+}
+
+.guide__header {
+  max-width: 42rem;
+}
+
+.legal-page .guide__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.guide__meta a {
+  color: var(--app-text);
+}
+
+.guide__body {
+  display: grid;
+  grid-template-columns: 13rem minmax(0, 42rem);
+  gap: var(--space-8);
+  margin-top: var(--space-4);
+}
+
+.guide__toc {
+  position: sticky;
+  top: 6.5rem;
+  align-self: start;
+  margin-top: var(--space-8);
+  padding-left: var(--space-4);
+  border-left: 2px solid #111111;
+}
+
+.legal-page .guide__toc-title {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text);
+}
+
+.guide__toc-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-caption);
+  line-height: 1.4;
+}
+
+.legal-page .guide__toc-list {
+  margin: 0;
+}
+
+.legal-page .guide__toc-list a {
+  color: var(--app-text-muted);
+  text-decoration: none;
+}
+
+.legal-page .guide__toc-list a:hover,
+.legal-page .guide__toc-list a:focus-visible {
+  color: var(--app-text);
+  text-decoration: underline;
+}
+
+.guide__toc-mobile {
+  display: none;
+  margin-top: var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+}
+
+.guide__toc-mobile summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.guide__toc-mobile .guide__toc-list {
+  margin-top: var(--space-3);
+}
+
+.guide__section {
+  scroll-margin-top: 6rem;
+}
+
+/* Weak/strong examples side by side; a thin red or green edge is the only
+   colour. Other pairs (e.g. "Suomeksi / Englanniksi") stay neutral. */
+.guide-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.guide-pair__card {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+}
+
+.guide-pair--compare .guide-pair__card--first {
+  border-left: 3px solid #b4232a;
+}
+
+.guide-pair--compare .guide-pair__card--second {
+  border-left: 3px solid #1d6b44;
+}
+
+.guide-pair__label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-text);
+}
+
+.legal-page .guide-pair__card p {
+  margin-top: var(--space-2);
+}
+
+/* "Try it on your own CV", half-way down. */
+.guide__try {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+  padding: var(--space-5);
+  border: 1.5px dashed #111111;
+  background: var(--app-surface);
+}
+
+.legal-page .guide__try-title {
+  margin: 0;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.legal-page .guide__try-body {
+  margin-top: var(--space-1);
+}
+
+.guide__try .landing-cta {
+  margin-top: 0;
+  padding: 0.85rem 1.4rem;
+}
+
+.guide__related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.legal-page .guide__related-grid .examples-hub-card {
+  padding: var(--space-4);
+  text-decoration: none;
+}
+
+.guide__related-grid .examples-hub-card__title,
+.guide__related-grid .examples-hub-card__body {
+  display: block;
+}
+
+.guide__related-grid .examples-hub-card__title {
+  font-size: var(--text-body);
+}
+
+@media (max-width: 899px) {
+  .guide__body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .guide__toc {
+    display: none;
+  }
+
+  .guide__toc-mobile {
+    display: block;
+  }
+}
+
+@media (max-width: 559px) {
+  .guide-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .legal-page__kicker {
   font-size: var(--text-caption);
   font-weight: 600;

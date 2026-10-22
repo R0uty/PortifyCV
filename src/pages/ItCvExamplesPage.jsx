@@ -1,4 +1,4 @@
-import InternalNavLink from '../components/InternalNavLink'
+import GuideLayout from '../components/GuideLayout'
 import { ROUTES } from '../utils/routes'
 import { fieldSearch } from '../utils/templateFields'
 
@@ -58,7 +58,6 @@ function getCopy(locale) {
       ],
       ctaLabel: 'Aloita CV:si rakentaminen',
       ctaNote: 'Ei kirjautumista. Ei mitään tallennettua ennen kuin viet CV:n.',
-      seeAlsoLabel: 'Katso myös:',
       seeAlso: [
         { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV:n taito-osion esimerkkejä' },
         { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-ystävällinen CV-opas' },
@@ -119,7 +118,6 @@ function getCopy(locale) {
     ],
     ctaLabel: 'Start building your CV',
     ctaNote: 'No login. Nothing saved until you export.',
-    seeAlsoLabel: 'See also:',
     seeAlso: [
       { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV Skills Examples' },
       { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-Friendly CV Guide' },
@@ -133,66 +131,18 @@ function ItCvExamplesPage({ locale = 'en', onGetStarted = () => {}, onNavigateTo
   const copy = getCopy(locale === 'fi' ? 'fi' : 'en')
 
   return (
-    <section className="legal-page">
-      <div className="legal-page__inner">
-        <p className="legal-page__kicker">{copy.kicker}</p>
-        <h1 className="legal-page__title">{copy.title}</h1>
-        <p>{copy.intro}</p>
-
-        {copy.sections.map((section) => (
-          <div key={section.heading}>
-            <h2>{section.heading}</h2>
-            {section.paragraphs?.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-            {section.examplePair ? (
-              <ul>
-                <li>
-                  <strong>{section.examplePair.weakLabel}:</strong> {section.examplePair.weak}
-                </li>
-                <li>
-                  <strong>{section.examplePair.strongLabel}:</strong> {section.examplePair.strong}
-                </li>
-              </ul>
-            ) : null}
-            {section.list ? (
-              <ul>
-                {section.list.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            ) : null}
-            {section.paragraphsAfter?.map((paragraph, index) => (
-              <p key={`after-${index}`}>{paragraph}</p>
-            ))}
-            {section.linkParagraphs?.map((linkParagraph, index) => (
-              <p key={`link-${index}`}>
-                {linkParagraph.before}
-                <InternalNavLink to={linkParagraph.linkTo} onNavigate={() => onNavigateToView(linkParagraph.view)}>
-                  {linkParagraph.linkText}
-                </InternalNavLink>
-                {linkParagraph.after}
-              </p>
-            ))}
-          </div>
-        ))}
-
-        <div className="legal-page__cta">
-          <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
-            {copy.ctaLabel}
-          </button>
-          <span className="legal-page__cta-note">{copy.ctaNote}</span>
-        </div>
-        <div className="templates-page-links">
-          <span>{copy.seeAlsoLabel}</span>
-          {copy.seeAlso.map((link) => (
-            <InternalNavLink key={link.view} to={link.to} onNavigate={() => onNavigateToView(link.view, { search: link.search })}>
-              {link.text}
-            </InternalNavLink>
-          ))}
-        </div>
-      </div>
-    </section>
+    <GuideLayout
+      view="itCv"
+      locale={locale}
+      kicker={copy.kicker}
+      title={copy.title}
+      intro={copy.intro}
+      sections={copy.sections}
+      cta={{ label: copy.ctaLabel, note: copy.ctaNote }}
+      related={copy.seeAlso.map((link) => ({ view: link.view, search: link.search, title: link.text }))}
+      onGetStarted={onGetStarted}
+      onNavigateToView={onNavigateToView}
+    ></GuideLayout>
   )
 }
 

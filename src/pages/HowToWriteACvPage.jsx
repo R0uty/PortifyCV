@@ -1,4 +1,4 @@
-import InternalNavLink from '../components/InternalNavLink'
+import GuideLayout from '../components/GuideLayout'
 import { cvTemplates } from '../utils/cvTemplates'
 import { ROUTES } from '../utils/routes'
 
@@ -246,61 +246,18 @@ function HowToWriteACvPage({ locale = 'en', onGetStarted = () => {}, onNavigateT
   const copy = getCopy(locale === 'fi' ? 'fi' : 'en')
 
   return (
-    <section className="legal-page">
-      <div className="legal-page__inner">
-        <p className="legal-page__kicker">{copy.kicker}</p>
-        <h1 className="legal-page__title">{copy.title}</h1>
-        <p>{copy.intro}</p>
-
-        {copy.sections.map((section) => (
-          <div key={section.heading}>
-            <h2>{section.heading}</h2>
-            {section.paragraphs?.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-            {section.examplePair ? (
-              <ul>
-                <li>
-                  <strong>{section.examplePair.weakLabel}:</strong> {section.examplePair.weak}
-                </li>
-                <li>
-                  <strong>{section.examplePair.strongLabel}:</strong> {section.examplePair.strong}
-                </li>
-              </ul>
-            ) : null}
-            {section.list ? (
-              <ul>
-                {section.list.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            ) : null}
-            {section.paragraphsAfter?.map((paragraph, index) => (
-              <p key={`after-${index}`}>{paragraph}</p>
-            ))}
-            {section.linkParagraphs?.map((linkParagraph, index) => (
-              <p key={`link-${index}`}>
-                {linkParagraph.before}
-                <InternalNavLink
-                  to={linkParagraph.linkTo}
-                  onNavigate={() => onNavigateToView(linkParagraph.view)}
-                >
-                  {linkParagraph.linkText}
-                </InternalNavLink>
-                {linkParagraph.after}
-              </p>
-            ))}
-          </div>
-        ))}
-
-        <div className="legal-page__cta">
-          <button type="button" className="landing-cta" onClick={() => onGetStarted()}>
-            {copy.ctaLabel}
-          </button>
-          <span className="legal-page__cta-note">{copy.ctaNote}</span>
-        </div>
-      </div>
-    </section>
+    <GuideLayout
+      view="howToWrite"
+      locale={locale}
+      kicker={copy.kicker}
+      title={copy.title}
+      intro={copy.intro}
+      sections={copy.sections}
+      cta={{ label: copy.ctaLabel, note: copy.ctaNote }}
+      related={[{ view: 'atsGuide' }, { view: 'cvSkills' }, { view: 'coverLetterExamples' }]}
+      onGetStarted={onGetStarted}
+      onNavigateToView={onNavigateToView}
+    ></GuideLayout>
   )
 }
 
