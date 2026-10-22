@@ -4,6 +4,16 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Deeper CV skills examples — 1.6.43, 2026-10-22
+
+Phase 4 of the search plan. The skills page (English about 430 → 920
+words, Finnish about 670) adds skill groupings for healthcare, finance,
+sales and marketing, customer service, education and hospitality, a
+weak/strong pair for showing soft skills in bullets, honest skill levels
+(and the A1-C2 scale for languages), where else skills belong (summary,
+bullets, Core Strengths), keeping the list current, and transferable
+skills for career changers.
+
 ## Deeper cover letter examples — 1.6.42, 2026-10-22
 
 Phase 4 of the search plan. The cover letter page (English about 490 →

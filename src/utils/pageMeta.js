@@ -130,7 +130,7 @@ const STATIC_VIEW_HEAD = {
       'How to choose, group, and phrase the skills section of your CV, with example groupings and how many skills is actually the right number.',
     isArticle: true,
     datePublished: '2026-08-20',
-    dateModified: '2026-08-21',
+    dateModified: '2026-10-22',
   },
   cvExamples: {
     title: 'CV Examples by Field - PortifyCV',
