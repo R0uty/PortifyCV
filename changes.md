@@ -4,6 +4,17 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## The English headline fits at tablet and small-laptop widths — 1.6.37, 2026-10-22
+
+Between about 1024px and 1180px the front page's picture column kept a
+fixed 576px, leaving the headline a 360-500px column: five lines, and the
+buttons below the fold on a 1024 × 768 screen (785px). The picture column
+now gives up width there (at most 42% of the row), so the headline stays
+on three lines in both languages at every two-column width, and the
+button is on the first screen at 1024 × 768 (607px), 1100 × 800,
+1180 × 820, 1280 × 720 (no longer touching the footer bar) and up.
+Wider screens are unchanged.
+
 ## A smaller Finnish headline — 1.6.36, 2026-10-22
 
 The Finnish front page headline ("Ilmainen CV-työkalu. Tee CV, ota se
