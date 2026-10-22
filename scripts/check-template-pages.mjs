@@ -332,6 +332,30 @@ check('fieldSearch writes ?field= for a field and nothing for All',
   check('the sitemap gives every bilingual page its hreflang alternates', missingAlternates.length === 0, missingAlternates.join(', '))
 }
 
+// --- The worker's no-JavaScript body (1.6.46, audit item O4) ------------------
+// Every route but the English front page gets its own heading, description
+// and same-language links instead of the front page's copy.
+{
+  globalThis.HTMLRewriter ??= class {}
+  const { fallbackBody } = await import(pathToFileURL(resolvePath(rootDir, 'worker/index.js')).href)
+  const { VIEW_HEAD, localizedHead } = await importSrc('utils/pageMeta.js')
+  const problems = []
+  for (const [view, rawHead] of Object.entries(VIEW_HEAD)) {
+    for (const locale of rawHead.pathFi ? ['en', 'fi'] : ['en']) {
+      if (view === 'landing' && locale === 'en') continue
+      const head = localizedHead(rawHead, locale)
+      const body = fallbackBody(view, head)
+      const h1 = body.match(/<h1>([^<]*)<\/h1>/)?.[1] ?? ''
+      const hrefs = [...body.matchAll(/href="([^"]+)"/g)].map((m) => m[1])
+      if (!h1 || !head.title.includes(h1.replace(/&amp;/g, '&'))) problems.push(`${view}/${locale}: heading "${h1}"`)
+      if (body.includes('Build it, take it, done')) problems.push(`${view}/${locale}: front page copy`)
+      if (hrefs.length < 4) problems.push(`${view}/${locale}: ${hrefs.length} links`)
+      if (locale === 'fi' && hrefs.some((href) => !href.startsWith('/fi'))) problems.push(`${view}/fi: English link`)
+    }
+  }
+  check('the worker gives every route its own no-JavaScript body', problems.length === 0, problems.slice(0, 5).join('; '))
+}
+
 if (failures > 0) {
   console.log(`\n${failures} template-page check(s) failed.`)
   process.exit(1)

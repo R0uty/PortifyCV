@@ -4,6 +4,19 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Crawlers that don't run JavaScript see each page's own text — 1.6.46, 2026-10-22
+
+Phase 5 of the search plan (audit item O4). `index.html` carries a short
+no-JavaScript version of the English front page (`#seo-landing`), which
+React removes on load. The edge worker served it on every route, so Bing,
+link-preview bots and AI crawlers that don't run JavaScript read the
+front page's copy on `/how-to-write-a-cv` or `/fi/tietoa`. Every route but
+the English front page now gets its own heading and description, links to
+the main pages in its language, and on `/fi` the Finnish FAQ (worker
+`fallbackBody`). Verified on `wrangler dev`; `check:template-pages` checks
+every route in both languages (own heading, no front-page copy, at least
+four links, Finnish routes linking only to Finnish pages).
+
 ## Deeper developer and cybersecurity CV examples — 1.6.45, 2026-10-22
 
 Phase 4 of the search plan, last guides. The developer page (English

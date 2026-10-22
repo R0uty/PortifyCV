@@ -84,7 +84,10 @@ serving `dist/` as static assets). `worker/index.js` re-matches the same
 route table at the edge and rewrites each response's
 title/canonical/description/OG/JSON-LD before it reaches the client, because
 this is a client-rendered SPA and a crawler that doesn't execute JS would
-otherwise see the landing page's metadata for every route. It also returns a
+otherwise see the landing page's metadata for every route. Since 1.6.46 it
+also replaces `index.html`'s no-JS `#seo-landing` body (the English front
+page's copy) with each route's own heading, description and same-language
+links (`fallbackBody`, checked by `check:template-pages`). It also returns a
 real 404 (with `noindex`) for unknown paths and redirects case/trailing-slash
 variants to the canonical path. If you change a route or its metadata,
 `routes.js`/`pageMeta.js` is the one place to edit — both the client

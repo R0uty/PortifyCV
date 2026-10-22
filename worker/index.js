@@ -32,6 +32,35 @@ const FAQ_SCHEMA_FI = JSON.stringify({
   })),
 })
 
+const escapeHtml = (text) => String(text)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+
+// The no-JavaScript body for one route (1.6.46, audit item O4). index.html's
+// #seo-landing block is the English front page's copy, which every other
+// route used to serve too, so a crawler or link-preview bot that doesn't run
+// JS read landing copy on /how-to-write-a-cv or /fi/tietoa. Every route but
+// the English front page now gets its own heading and description, links to
+// the main pages in its language, and on /fi the Finnish FAQ. React removes
+// the block on load (src/main.jsx), so visitors never see it.
+const FALLBACK_LINKS = ['landing', 'freeTemplates', 'howToWrite', 'atsGuide', 'cvExamples', 'coverLetterExamples']
+
+export function fallbackBody(view, head) {
+  const heading = head.title.replace(/^PortifyCV - /, '').replace(/ - PortifyCV$/, '')
+  const links = FALLBACK_LINKS
+    .filter((linkView) => linkView !== view)
+    .map((linkView) => {
+      const linkHead = localizedHead(VIEW_HEAD[linkView], head.locale)
+      return `<li><a href="${linkHead.path}">${escapeHtml(linkHead.title.replace(/ - PortifyCV$/, ''))}</a></li>`
+    })
+    .join('')
+  const faq = view === 'landing' && head.locale === 'fi'
+    ? `<section><h2>Usein kysytyt kysymykset</h2>${LANDING_FAQ.fi
+      .map((item) => `<p><strong>${escapeHtml(item.q)}</strong> ${escapeHtml(faqAnswerText(item))}</p>`)
+      .join('')}</section>`
+    : ''
+  return `<h1>${escapeHtml(heading)}</h1><p>${escapeHtml(head.description)}</p>${faq}<nav><ul>${links}</ul></nav>`
+}
+
 class SetInnerHtml {
   constructor(html) {
     this.html = html
@@ -108,6 +137,10 @@ function rewriteForRoute(response, view, locale) {
     rewriter.on('#ld-faq', new RemoveElement())
   } else if (head.locale === 'fi') {
     rewriter.on('#ld-faq', new SetInnerHtml(FAQ_SCHEMA_FI))
+  }
+
+  if (!(view === 'landing' && head.locale === 'en')) {
+    rewriter.on('#seo-landing', new SetInnerHtml(fallbackBody(view, head)))
   }
 
   if (head.alternates) {
