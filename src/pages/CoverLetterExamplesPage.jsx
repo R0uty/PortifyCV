@@ -40,6 +40,33 @@ function getCopy(locale) {
           ],
         },
         {
+          heading: "Miksi juuri tämä yritys, yhdellä konkreettisella lauseella",
+          paragraphs: [
+            "Kerro, miksi haluat juuri tämän työn tässä yrityksessä, et mitä tahansa työtä. Yksi konkreettinen syy riittää, ja se on kohta, jonka useimmat kirjeet ohittavat.",
+          ],
+          examplePair: {
+            weakLabel: "Heikko",
+            weak: "\"Example Oy on alansa johtava yritys, jolla on hieno kulttuuri, ja haluaisin olla osa sitä.\"",
+            strongLabel: "Vahva",
+            strong: "\"Siirtymänne itsepalveluperehdytykseen on juuri se ongelma, jonka ratkaisin edellisessä työssäni, jossa se vähensi tukipyyntöjä kolmanneksella.\"",
+          },
+          paragraphsAfter: [
+            "Vahvan version olisi voinut kirjoittaa vain tälle yritykselle. Etsi tuore tuotejulkaisu, ilmoituksessa mainittu tavoite tai ongelma, jota varten tehtävä on olemassa.",
+          ],
+        },
+        {
+          heading: "Taitokappale, joka todistaa eikä vain luettele",
+          examplePair: {
+            weakLabel: "Heikko",
+            weak: "\"Hallitsen Figman, käyttäjätutkimuksen, prototypoinnin, saavutettavuuden ja suunnittelujärjestelmät.\"",
+            strongLabel: "Vahva",
+            strong: "\"Ilmoituksessa haetaan saavutettavuuskokemusta: johdin siirtymämme WCAG 2.1 AA -tasolle 40 näkymässä ja koulutin tiimin pitämään tason yllä.\"",
+          },
+          paragraphsAfter: [
+            "CV:ssäsi taidot on jo lueteltu. Kirje poimii niistä yhden tai kaksi, joita ilmoitus painottaa eniten, ja näyttää ne käytännössä.",
+          ],
+        },
+        {
           heading: 'Lopetus, joka kutsuu seuraavaan askeleeseen',
           examplePair: {
             weakLabel: 'Heikko',
@@ -47,6 +74,24 @@ function getCopy(locale) {
             strongLabel: 'Vahva',
             strong: '"Keskustelen mielelläni siitä, miten kokemukseni voisi hyödyttää tiimiänne. Kiitos ajastanne ja harkinnastanne."',
           },
+        },
+        {
+          heading: "Pituus, muoto ja sävy",
+          list: [
+            "Noin 250–400 sanaa kolmessa tai neljässä lyhyessä kappaleessa. Enintään yksi sivu.",
+            "Ylhäällä sama nimi ja samat yhteystiedot kuin CV:ssä, jotta ne selvästi kuuluvat yhteen.",
+            "Minämuoto ja selkeä kieli. Itsevarmuus on hyvä asia; itsestä käytetyt superlatiivit (\"poikkeuksellinen\", \"intohimoinen\") eivät ole näyttöä.",
+            "Lähetä tiedostomuoto, jota ilmoitus pyytää, ja anna sille hyödyllinen nimi, kuten \"Etunimi-Sukunimi-hakemus.pdf\".",
+          ],
+        },
+        {
+          heading: "Fraasit, jotka kannattaa korvata, ja mitä kirjoittaa tilalle",
+          list: [
+            "\"Olen hyvä tiimipelaaja\" → yksi lause jostain, minkä tiimi saavutti, ja omasta osuudestasi siinä.",
+            "\"Olen intohimoinen…\" → mitä olet tehnyt asian eteen: projekti, kurssi, tulos.",
+            "\"Uskon sopivani tehtävään erinomaisesti\" → ilmoituksen ja kokemuksesi konkreettinen yhtymäkohta.",
+            "\"Liitteenä CV:ni\" → jätä pois; lukija näkee liitteen.",
+          ],
         },
         {
           heading: 'Anna PortifyCV:n kirjoittaa ensimmäinen versio',
@@ -59,6 +104,34 @@ function getCopy(locale) {
             linkTo: ROUTES.builder,
             after: ', ja muokkaa luonnosta sieltä — kopioi, lataa tekstinä tai vie PDF-muodossa.',
           },
+        },
+        {
+          heading: "Kokonainen lyhyt esimerkki",
+          letter: true,
+          paragraphs: [
+            "Hyvä Maria Virtanen,",
+            "Haen Example Oy:n asiakkuuspäällikön tehtävää. Olen neljän vuoden ajan vastannut 60 keskikokoisesta asiakkaasta ohjelmistoyrityksessä, ja haluaisin tuoda tämän kokemuksen tiimiin, jonka asiakaskunta kasvaa yhtä nopeasti kuin teidän.",
+            "Ilmoituksessanne haetaan henkilöä, joka vähentää asiakaspoistumaa. Nykyisessä työssäni otin käyttöön neljännesvuosittaiset tapaamiset jokaisen asiakkaan kanssa sekä varoituslistan asiakkaista, jotka lakkasivat käyttämästä keskeisiä toimintoja; kahdessa vuodessa vuotuinen poistuma laski 14 %:sta 8 %:iin.",
+            "Huomasin myös, että siirrätte perehdytyksen verkkoon. Rakensin ohjekeskukseemme perehdytyskurssin, joka hoitaa nyt noin puolet uusien asiakkaiden ensimmäisistä kysymyksistä.",
+            "Keskustelen mielelläni siitä, miten voisin auttaa tiimiänne pitämään voittamansa asiakkaat. Kiitos, että luit hakemukseni.",
+            "Ystävällisin terveisin",
+        "John Doe",
+          ],
+          paragraphsAfter: [
+            "Noin 140 sanaa: ensin tehtävä ja yritys, jokaisessa kappaleessa yksi ilmoitukseen sidottu näyttö ja selkeä lopetus.",
+          ],
+        },
+        {
+          heading: "Hakeminen lomakkeella tai sähköpostilla",
+          paragraphs: [
+            "Monessa haussa ei ole paikkaa kirjetiedostolle: lomake kysyy \"Miksi olet kiinnostunut tehtävästä?\" tai hakemus lähetetään sähköpostilla. Käytä samaa rakennetta lyhyempänä: kaksi tai kolme lausetta siitä, miksi juuri tämä tehtävä, yksi näyttö ja lopetus. Sähköpostissa itse viesti on hakemus ja CV on liitteenä.",
+          ],
+        },
+        {
+          heading: "Hakeminen Suomessa",
+          paragraphs: [
+            "Suomessa saatekirjettä kutsutaan hakemukseksi tai työhakemukseksi, ja sitä odotetaan useimpiin työpaikkoihin. Rakenne on sama: yksi sivu, ensin tehtävä ja yritys, konkreettista näyttöä ja syy hakea juuri tälle työnantajalle. Kirjoita hakemus ilmoituksen kielellä. Suomenkielinen ilmoitus odottaa suomenkielistä hakemusta, vaikka työpaikalla puhuttaisiin englantia.",
+          ],
         },
         {
           heading: 'Virheet, jotka kannattaa välttää',
@@ -118,6 +191,33 @@ function getCopy(locale) {
         ],
       },
       {
+        heading: "Why this company, in one specific sentence",
+        paragraphs: [
+          "Say why you want this job at this company, not just any job. One specific reason is enough, and it’s the part most letters skip.",
+        ],
+        examplePair: {
+          weakLabel: "Weak",
+          weak: "\"Example Oy is a leading company with a great culture, and I would love to be part of it.\"",
+          strongLabel: "Strong",
+          strong: "\"Your move to self-service onboarding is exactly the problem I solved at my last job, where it cut support tickets by a third.\"",
+        },
+        paragraphsAfter: [
+          "The strong version could only have been written to this company. Look for a recent product launch, a stated goal in the job posting, or a problem the role exists to solve.",
+        ],
+      },
+      {
+        heading: "A skills paragraph that proves, not lists",
+        examplePair: {
+          weakLabel: "Weak",
+          weak: "\"I am skilled in Figma, user research, prototyping, accessibility and design systems.\"",
+          strongLabel: "Strong",
+          strong: "\"The posting asks for accessibility experience: I led our move to WCAG 2.1 AA across 40 screens and trained the team to keep it there.\"",
+        },
+        paragraphsAfter: [
+          "Your CV already lists the skills. The letter picks the one or two the posting cares about most and shows them in action.",
+        ],
+      },
+      {
         heading: 'A closing that invites the next step',
         examplePair: {
           weakLabel: 'Weak',
@@ -125,6 +225,24 @@ function getCopy(locale) {
           strongLabel: 'Strong',
           strong: '"I’d welcome the opportunity to discuss how my experience could contribute to your team. Thank you for your time and consideration."',
         },
+      },
+      {
+        heading: "Length, format and tone",
+        list: [
+          "About 250 to 400 words, in three or four short paragraphs. One page at most.",
+          "The same name and contact details at the top as on your CV, so the two clearly belong together.",
+          "First person and plain words. Confident is fine; superlatives about yourself (\"exceptional\", \"passionate\") aren’t evidence.",
+          "Send it as the file type the posting asks for, with a useful name like \"Firstname-Lastname-cover-letter.pdf\".",
+        ],
+      },
+      {
+        heading: "Phrases to replace, and what to write instead",
+        list: [
+          "\"I am a team player\" → one sentence about something the team achieved and your part in it.",
+          "\"I am passionate about…\" → what you’ve done about it: a project, a course, a result.",
+          "\"I believe I would be a great fit\" → the specific overlap between the posting and your experience.",
+          "\"Please find attached my CV\" → leave it out; the reader can see the attachment.",
+        ],
       },
       {
         heading: 'Let PortifyCV draft the first version',
@@ -137,6 +255,34 @@ function getCopy(locale) {
           linkTo: ROUTES.builder,
           after: ', then edit from there — copy it, download it as text, or export it as a PDF.',
         },
+      },
+      {
+        heading: "A complete short example",
+        letter: true,
+        paragraphs: [
+          "Dear Ms Virtanen,",
+          "I’m applying for the Customer Success Manager role at Example Oy. For the past four years I’ve looked after 60 mid-size customers at a software company, and I’d like to bring that to a team that is growing its customer base as fast as yours.",
+          "Your posting asks for someone who can reduce churn. In my current role I set up quarterly check-ins with every customer and a warning list for accounts that stopped using key features; over two years our yearly churn fell from 14% to 8%.",
+          "I also see that you’re moving onboarding online. I built our onboarding course in our help centre, which now handles about half of new customers’ first questions.",
+          "I’d be glad to talk about how I could help your team keep the customers it wins. Thank you for reading.",
+          "Best regards,",
+      "John Doe",
+        ],
+        paragraphsAfter: [
+          "About 170 words: role and company first, one proof per paragraph tied to the posting, a clear close.",
+        ],
+      },
+      {
+        heading: "Applying through a form or by email",
+        paragraphs: [
+          "Many applications have no place for a letter file: a form asks \"Why are you interested in this role?\" or you send an email. Use the same structure, shorter: two or three sentences on why this role, one piece of evidence, and the close. In an email, the letter is the message itself and your CV is the attachment.",
+        ],
+      },
+      {
+        heading: "Applying in Finland",
+        paragraphs: [
+          "In Finland the cover letter is called a hakemus (or työhakemus) and is expected for most jobs. It follows the same shape: one page, the role and company first, concrete evidence and a reason for this employer. Write it in the language of the posting. A Finnish-language posting expects a Finnish letter even if the workplace uses English.",
+        ],
       },
       {
         heading: 'Mistakes to avoid',

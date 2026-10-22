@@ -117,7 +117,7 @@ const STATIC_VIEW_HEAD = {
       'Real weak-vs-strong cover letter examples for the opening, experience paragraph, and closing, plus how PortifyCV drafts the first version from your CV.',
     isArticle: true,
     datePublished: '2026-08-20',
-    dateModified: '2026-10-06',
+    dateModified: '2026-10-22',
   },
   cvSkills: {
     title: 'CV Skills Examples - PortifyCV',

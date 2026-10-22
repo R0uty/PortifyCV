@@ -91,7 +91,11 @@ export function GuideSection({ section, index, onNavigateToView, extra = null })
   return (
     <div className="guide__section" id={sectionId(index)}>
       <h2>{section.heading}</h2>
-      {section.paragraphs?.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
+      {section.letter ? (
+        <div className="guide-letter">
+          {section.paragraphs?.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
+        </div>
+      ) : section.paragraphs?.map((paragraph, i) => <p key={i}>{paragraph}</p>)}
       {section.examplePair ? <ExamplePair pair={section.examplePair} /> : null}
       {section.list ? (
         <ul>

@@ -4,6 +4,16 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Deeper cover letter examples — 1.6.42, 2026-10-22
+
+Phase 4 of the search plan. The cover letter page (English about 490 →
+1,170 words, Finnish about 830) adds a "why this company" pair, a skills
+paragraph that proves rather than lists, length/format/tone, clichés to
+replace and what to write instead, a complete ~170-word example letter
+(shown on its own sheet, a new `letter` section style in `GuideLayout`),
+applying through a form or by email, and what a Finnish hakemus is
+expected to be.
+
 ## A deeper ATS guide — 1.6.41, 2026-10-22
 
 Phase 4 of the search plan. The ATS-friendly CV guide (both languages)
