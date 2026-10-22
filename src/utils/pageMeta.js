@@ -168,7 +168,7 @@ const STATIC_VIEW_HEAD = {
       'How to write an IT CV: certifications, systems and tools worth naming precisely, and why IT applications need ATS-friendly formatting.',
     isArticle: true,
     datePublished: '2026-08-20',
-    dateModified: '2026-10-11',
+    dateModified: '2026-10-22',
   },
   cybersecurityCv: {
     title: 'Cybersecurity CV Examples - PortifyCV',

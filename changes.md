@@ -4,6 +4,26 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## A real IT example CV and a deeper IT page — 1.6.40, 2026-10-22
+
+Phase 4 of the search plan. The IT CV examples page was the thinnest page
+on the site (221 words) and had no full example CV of its own. Now:
+
+- **A new example person:** an IT support specialist (fictional, in
+  English and Finnish): six years on service desks for 300-900 users,
+  the environment in numbers, PowerShell automation, a knowledge base,
+  and certificates with expiry dates. Listed under Minimalist and Compact;
+  to stay within each template's 2-3 examples, Minimalist no longer lists
+  the accountant (still on Classic Professional) and Compact no longer the
+  business graduate (still on Graduate). Compact keeps the data engineer
+  first, which `template-pdf.spec.js` uses as its many-skills case.
+- **The IT page** (about 900 words, both languages) adds what an IT hiring
+  manager scans for first, more before/after bullets for systems,
+  networking and service desk roles, describing your environment in
+  numbers, naming your support level when titles vary, automation and
+  documentation, and a home lab for people starting out, and ends with
+  the new example CV in both templates.
+
 ## A deeper "How to Write a CV" — 1.6.39, 2026-10-22
 
 Phase 4 of the search plan, part 2: the first guide rewritten to the
