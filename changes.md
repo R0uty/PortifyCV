@@ -4,6 +4,21 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Finnish bullets get real feedback — 1.6.51, 2026-10-23
+
+The builder's bullet checks (`cvFeedback.js`) only knew English. Every
+Finnish example CV got a false "Aloita toimintaverbillä" tip on almost
+every role, since no Finnish verb counted as strong, and a Finnish
+duty-list phrase was never flagged, although the Finnish builder guide
+says "vastuualueena" is. The weak-phrase list now has Finnish entries
+("vastuussa", "vastuualue…", "tehtäviin kuului", "olin mukana",
+"osallistuin"; not "vastasin", the usual active opener of a Finnish role)
+and the action verbs have Finnish first-person forms, past and present.
+Eight English verbs our own examples use ("triaged", "handled", "wrote" …)
+joined too, and one Finnish example line was reworded. `check:feedback`
+now checks the Finnish cases and that no example CV, in either language,
+gets a weak-phrase or action-verb tip.
+
 ## The builder walkthrough shows the real builder — 1.6.50, 2026-10-23
 
 The front page's "How it works" and the seven steps of "How to use the
