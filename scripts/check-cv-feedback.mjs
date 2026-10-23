@@ -31,6 +31,7 @@ const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, rel
 
 const { evaluateCvFeedback } = await importSrc('utils/cvFeedback.js')
 const { createInitialCvData, createEmptyExperience } = await importSrc('utils/cvForm.js')
+const { EXAMPLES, loadExampleCv } = await importSrc('utils/exampleCvs.js')
 
 let failures = 0
 function check(label, passed, detail = '') {
@@ -143,6 +144,48 @@ console.log('\nevaluateCvFeedback — action-verb detection (new)\n')
 {
   const feedback = evaluateCvFeedback(withExperience({ description: '' }))
   check('an entry with no description gets neither phrasing tip (description-missing already covers it)', tipIdsForFirstExperience(feedback).every((id) => !id.startsWith('experience-weak-phrase') && !id.startsWith('experience-action-verb')))
+}
+
+console.log('\nevaluateCvFeedback — Finnish phrasing (1.6.51)\n')
+
+{
+  const feedback = evaluateCvFeedback(withExperience({ description: 'Vastuualueena asiakastuki ja laskutus.' }))
+  check('a Finnish duty-list description ("vastuualueena") is flagged as a weak phrase', tipIdsForFirstExperience(feedback).includes('experience-weak-phrase-0'))
+}
+
+{
+  const feedback = evaluateCvFeedback(withExperience({ description: 'Olin vastuussa uusien työntekijöiden perehdytyksestä.' }))
+  check('"olin vastuussa" is flagged as a weak phrase', tipIdsForFirstExperience(feedback).includes('experience-weak-phrase-0'))
+}
+
+{
+  const feedback = evaluateCvFeedback(withExperience({ description: 'Perehdytin 40 uutta työntekijää ja lyhensin perehdytyksen viiteen päivään.' }))
+  check('a Finnish bullet opening with a strong verb ("Perehdytin") gets no action-verb tip', !tipIdsForFirstExperience(feedback).includes('experience-action-verb-0'))
+}
+
+{
+  const feedback = evaluateCvFeedback(withExperience({ description: 'Johdan 12 hengen tiimiä ja vastaan budjetista.' }))
+  check('a current Finnish role in the present tense ("Johdan") gets no action-verb tip', !tipIdsForFirstExperience(feedback).includes('experience-action-verb-0'))
+}
+
+{
+  const feedback = evaluateCvFeedback(withExperience({ description: 'Vastasin palvelupisteestä 300 käyttäjälle.' }))
+  check('"Vastasin", the usual active opener of a Finnish role, is not a weak phrase', !tipIdsForFirstExperience(feedback).includes('experience-weak-phrase-0'))
+}
+
+console.log('\nevaluateCvFeedback — the example CVs model good phrasing (1.6.51)\n')
+
+{
+  const flagged = []
+  for (const exampleId of Object.keys(EXAMPLES)) {
+    for (const locale of ['en', 'fi']) {
+      const feedback = evaluateCvFeedback(await loadExampleCv(exampleId, locale), { locale })
+      const ids = feedback.inlineTips.experienceItems.flat().map((item) => item.id)
+        .filter((id) => id.startsWith('experience-weak-phrase') || id.startsWith('experience-action-verb'))
+      if (ids.length) flagged.push(`${exampleId} (${locale}): ${ids.join(', ')}`)
+    }
+  }
+  check('no example CV gets a weak-phrase or action-verb tip, in either language', flagged.length === 0, flagged.join('; '))
 }
 
 console.log()

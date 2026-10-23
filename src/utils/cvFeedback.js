@@ -23,6 +23,15 @@ const WEAK_PHRASES = [
   'helped to',
   'assisted with',
   'assisted in',
+  // Finnish (1.6.51): the same passive, duty-list phrasing. "Vastasin" ("I
+  // was in charge of") is not on it: it's the usual active way to open a
+  // Finnish role description.
+  'vastuussa',
+  'vastuualue',
+  'tehtäviin kuului',
+  'tehtäviini kuului',
+  'olin mukana',
+  'osallistuin',
 ]
 
 // Common strong resume action verbs, past tense. Used to check the opening
@@ -42,6 +51,23 @@ const STRONG_ACTION_VERBS = new Set([
   'deployed', 'enhanced', 'facilitated', 'owned', 'partnered', 'presented',
   'trained', 'unified', 'migrated', 'centralized', 'modernized', 'devised',
   'championed', 'orchestrated', 'formulated', 'cultivated', 'defined', 'planned',
+  'monitored', 'triaged', 'patched', 'handled', 'wrote', 'broke', 'produced',
+  'coauthored',
+  // Finnish (1.6.51), first person: past tense, plus the present for a
+  // current role ("Johdan", "Vastaan").
+  'johdin', 'rakensin', 'lyhensin', 'vastasin', 'kasvatin', 'vähensin', 'uudistin',
+  'otin', 'laskin', 'vedin', 'suunnittelin', 'pidin', 'koulutin', 'nostin',
+  'toteutin', 'ohjasin', 'siirsin', 'lanseerasin', 'toimitin', 'julkaisin', 'kehitin',
+  'tuotin', 'korjasin', 'mentoroin', 'neuvottelin', 'löysin', 'tuin', 'hoidin',
+  'valvoin', 'luokittelin', 'automatisoin', 'käsittelin', 'kirjoitin', 'opetin',
+  'tutkin', 'ylitin', 'solmin', 'paljastin', 'paransin', 'loin', 'perustin',
+  'koordinoin', 'nopeutin', 'puolitin', 'kaksinkertaistin', 'laajensin', 'käynnistin',
+  'ratkaisin', 'skaalasin', 'yksinkertaistin', 'standardoin', 'vahvistin', 'päivitin',
+  'voitin', 'analysoin', 'yhdistin', 'keskitin', 'modernisoin', 'määrittelin',
+  'pienensin', 'tehostin', 'perehdytin', 'esittelin', 'optimoin', 'integroin',
+  'organisoin', 'myin', 'hankin', 'säästin', 'hallinnoin', 'sijoituin', 'avustin',
+  'johdan', 'vastaan', 'rakennan', 'kehitän', 'suunnittelen', 'ohjaan', 'opetan',
+  'koulutan', 'valvon', 'hoidan', 'seuraan', 'annan',
 ])
 
 function trimValue(value) {

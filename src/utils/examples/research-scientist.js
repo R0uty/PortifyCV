@@ -146,7 +146,7 @@ const fi = buildExampleCv({
       description: 'Tutkin elektrodipinnoitusprosesseja akkujen kestoiän parantamiseksi.',
       achievements: [
         'Kehitin uuden elektrodipinnoitusprosessin, joka kasvatti akun kestoikää 40 % 500 latauskerran yli.',
-        'Olin mukana kirjoittamassa 9 julkaisua, joihin on viitattu yhteensä yli 300 kertaa.',
+        'Kirjoitin yhdessä kollegoiden kanssa 9 julkaisua, joihin on viitattu yhteensä yli 300 kertaa.',
       ],
       technologies: [],
     },
