@@ -38,6 +38,45 @@ function sectionSelectorFor(sectionKey) {
     : `[data-export-section="${sectionKey}"]`
 }
 
+// Where each section's pencil goes (1.6.53). Inside the section's
+// top-right corner it covered whatever the template puts there (the About
+// heading's "Profile" pill, a date), so it now hangs just outside that
+// corner when the spot is free: inside the preview, and clear of every
+// other section (a main-column section's outside spot can be the
+// sidebar). Otherwise it stays inside the corner. The gap and size match
+// .direct-edit-pencil--outside in direct-edit-popup.css.
+const PENCIL_GAP = 6
+const PENCIL_SIZE = 28
+
+function placePencils(container, sectionKeys) {
+  const parent = container?.parentElement
+
+  if (!parent) {
+    return []
+  }
+
+  const base = container.getBoundingClientRect()
+  const found = sectionKeys
+    .map((sectionKey) => [sectionKey, parent.querySelector(sectionSelectorFor(sectionKey))?.getBoundingClientRect()])
+    .filter(([, rect]) => rect)
+
+  return found.map(([sectionKey, rect]) => {
+    const spot = {
+      left: rect.right + PENCIL_GAP,
+      right: rect.right + PENCIL_GAP + PENCIL_SIZE,
+      top: rect.top,
+      bottom: rect.top + PENCIL_SIZE,
+    }
+    const outside = spot.right <= base.right && !found.some(([otherKey, other]) => (
+      otherKey !== sectionKey
+      && other.left < spot.right && other.right > spot.left
+      && other.top < spot.bottom && other.bottom > spot.top
+    ))
+
+    return { sectionKey, top: rect.top - base.top, right: rect.right - base.left, outside }
+  })
+}
+
 export default function SectionEditOverlay({
   formData,
   dispatchFormData,
@@ -292,12 +331,7 @@ export default function SectionEditOverlay({
   // Re-measured after every content change and whenever the preview
   // resizes (a template's Showcase chunk loading, an edit reflowing the
   // page, a window resize), so the pencils follow their sections.
-  const measurePencils = useCallback(() => (
-    sections
-      .map((sectionKey) => measure(findSectionElement(sectionKey), sectionKey))
-      .filter(Boolean)
-  ), [sections, measure, findSectionElement])
-
+  //
   // Keeps the same array when nothing moved, so a re-measure that changes
   // nothing doesn't re-render every pencil.
   const keepIfUnchanged = (next) => (prev) => (
@@ -306,48 +340,28 @@ export default function SectionEditOverlay({
         pencil.sectionKey === next[index].sectionKey
         && pencil.top === next[index].top
         && pencil.right === next[index].right
+        && pencil.outside === next[index].outside
       ))
       ? prev
       : next
   )
 
-  // Measured inline from the container ref (like the section enumeration
-  // above) rather than through measurePencils, which the hooks lint rule
-  // can't see into.
   useLayoutEffect(() => {
-    const container = containerRef.current
-    const parent = container?.parentElement
-
-    if (!container || !parent) {
-      return
-    }
-
-    const base = container.getBoundingClientRect()
-    const next = []
-
-    for (const sectionKey of sections) {
-      const element = parent.querySelector(sectionSelectorFor(sectionKey))
-
-      if (element) {
-        const rect = element.getBoundingClientRect()
-        next.push({ sectionKey, top: rect.top - base.top, right: rect.right - base.left })
-      }
-    }
-
-    setPencils(keepIfUnchanged(next))
+    setPencils(keepIfUnchanged(placePencils(containerRef.current, sections)))
   }, [sections, formData])
 
   useEffect(() => {
-    const parent = containerRef.current?.parentElement
+    const container = containerRef.current
+    const parent = container?.parentElement
 
     if (!parent) {
       return undefined
     }
 
-    const observer = new ResizeObserver(() => setPencils(keepIfUnchanged(measurePencils())))
+    const observer = new ResizeObserver(() => setPencils(keepIfUnchanged(placePencils(container, sections))))
     observer.observe(parent)
     return () => observer.disconnect()
-  }, [measurePencils])
+  }, [sections])
 
   const openSection = useCallback(
     (sectionKey) => {
@@ -510,7 +524,7 @@ export default function SectionEditOverlay({
             key={pencil.sectionKey}
             type="button"
             tabIndex={-1}
-            className={`direct-edit-pencil${hovered?.sectionKey === pencil.sectionKey ? ' direct-edit-pencil--active' : ''}`}
+            className={`direct-edit-pencil${pencil.outside ? ' direct-edit-pencil--outside' : ''}${hovered?.sectionKey === pencil.sectionKey ? ' direct-edit-pencil--active' : ''}`}
             data-direct-edit-pencil={pencil.sectionKey}
             style={{ top: `${pencil.top}px`, left: `${pencil.right}px` }}
             onPointerDown={(event) => event.stopPropagation()}

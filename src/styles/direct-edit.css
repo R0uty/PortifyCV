@@ -313,24 +313,18 @@
   position: relative;
 }
 
-/* "Sections" with "Load demo CV" stacked below it, in the preview's
-   top-right corner. Stacked, not side by side, so the pair stays out of
-   the CV's own top-right corner, where the header's always-visible edit
-   pencil sits. */
+/* The preview's own buttons (Sections, ATS view, Load demo CV, Clear CV),
+   in a row above the CV (1.6.53). They used to float stacked over the
+   CV's top-right corner, on top of the header's pencil and, on a phone,
+   over the name. Above the CV they cover nothing at any width. */
 .direct-edit-actions {
-  position: absolute;
-  top: 14px;
-  right: 14px;
+  position: relative;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 6px;
-  /* z-index:auto (the brief's original omission) is not enough here: the
-     CV header content it overlaps is deep inside a plain, non-positioned
-     ARTICLE/HEADER subtree, yet real-browser paint/hit-testing still put
-     that subtree above this popover without an explicit z-index — verified
-     via elementsFromPoint before/after adding this. An explicit value is
-     required for the trigger to actually be clickable. */
+  margin-bottom: 12px;
+  /* Keeps the open Sections panel above the CV below it. */
   z-index: 5;
 }
 

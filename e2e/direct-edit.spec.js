@@ -2005,14 +2005,23 @@ test.describe('Direct Edit pencils and Load demo CV', () => {
       await expect(page.locator(`[data-direct-edit-pencil="${key}"]`)).toBeVisible()
     }
 
-    // Each pencil sits at its own section's top-right corner.
+    // Each pencil sits at its own section's top-right corner: just outside
+    // it where there's room (1.6.53), otherwise just inside it.
     const geometry = await page.evaluate(() => {
-      const pencil = document.querySelector('[data-direct-edit-pencil="experience"]').getBoundingClientRect()
+      const pencil = document.querySelector('[data-direct-edit-pencil="experience"]')
+      const box = pencil.getBoundingClientRect()
       const section = document.querySelector('.direct-edit-preview [data-export-section="experience"]').getBoundingClientRect()
-      return { pencilTop: pencil.top, pencilRight: pencil.right, sectionTop: section.top, sectionRight: section.right }
+      return {
+        outside: pencil.classList.contains('direct-edit-pencil--outside'),
+        pencilTop: box.top, pencilLeft: box.left, pencilRight: box.right, sectionTop: section.top, sectionRight: section.right,
+      }
     })
     expect(Math.abs(geometry.pencilTop - geometry.sectionTop)).toBeLessThan(6)
-    expect(Math.abs(geometry.pencilRight - geometry.sectionRight)).toBeLessThan(6)
+    if (geometry.outside) {
+      expect(Math.abs(geometry.pencilLeft - geometry.sectionRight - 6)).toBeLessThan(6)
+    } else {
+      expect(Math.abs(geometry.pencilRight - geometry.sectionRight)).toBeLessThan(6)
+    }
 
     await page.locator('[data-direct-edit-pencil="experience"]').click()
     const popup = page.locator('.direct-edit-popup')
@@ -2267,5 +2276,45 @@ test.describe('Direct Edit audit fixes', () => {
       return document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2) === button
     })
     expect(onTop).toBe(true)
+  })
+})
+
+// 1.6.53: the preview's own buttons sit above the CV and the section
+// pencils beside it, so neither covers the CV at any width.
+test.describe('Direct Edit chrome stays off the CV', () => {
+  const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+
+  for (const size of [{ width: 1280, height: 800 }, { width: 1024, height: 768 }, { width: 375, height: 812 }]) {
+    test(`at ${size.width}px the buttons cover no section and no pencil`, async ({ page }) => {
+      await page.setViewportSize(size)
+      await page.goto('/cv')
+      await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
+      await expect(page.locator('[data-direct-edit-pencil="about"]')).toBeVisible()
+
+      const found = await page.evaluate(() => {
+        const box = (el) => el.getBoundingClientRect()
+        const buttons = [...document.querySelectorAll('.direct-edit-actions button')].map(box)
+        const sections = [...document.querySelectorAll('.direct-edit-preview [data-export-section], .direct-edit-preview [data-export-header]')].map(box)
+        const pencils = [...document.querySelectorAll('.direct-edit-pencil')].map(box)
+        return { buttons, sections, pencils }
+      })
+      const clash = found.buttons.filter((button) => [...found.sections, ...found.pencils].some((other) => overlaps(button, other)))
+      expect(clash).toEqual([])
+    })
+  }
+
+  test("on a wide screen a section's pencil sits outside the section", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    const pencil = page.locator('[data-direct-edit-pencil="about"]')
+    await expect(pencil).toHaveClass(/direct-edit-pencil--outside/)
+    const [pencilBox, sectionBox] = await Promise.all([
+      pencil.boundingBox(),
+      page.locator('.direct-edit-preview [data-export-section="about"]').first().boundingBox(),
+    ])
+    expect(pencilBox.x).toBeGreaterThanOrEqual(sectionBox.x + sectionBox.width)
   })
 })

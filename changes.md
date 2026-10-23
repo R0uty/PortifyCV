@@ -4,6 +4,22 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit's buttons and pencils stay off the CV — 1.6.53, 2026-10-24
+
+The rest of the Direct Edit audit, layout. The preview's own buttons
+(Sections, ATS view, Load demo CV, Clear CV) floated stacked over the
+CV's top-right corner: on top of the header's pencil at 1024px and below,
+and over the name on a phone. They are now a row above the CV
+(`.direct-edit-actions`). Each section's pencil sat inside the section's
+top-right corner, over whatever the template puts there (the About
+heading's "Profile" pill on Minimalist); it now hangs just outside the
+corner when that spot is inside the preview and clear of every other
+section (`placePencils` in `SectionEditOverlay`), and stays inside
+otherwise. The front page's builder screenshot and two walkthrough
+screenshots were regenerated. Tests in `direct-edit.spec.js` ("Direct Edit
+chrome stays off the CV"); the existing pencil-position test accepts
+either spot.
+
 ## Direct Edit audit: six editing bugs — 1.6.52, 2026-10-24
 
 From an audit of the Direct Edit builder, each reproduced in the browser:
