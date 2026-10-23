@@ -236,9 +236,8 @@ test.describe('Direct Edit builder', () => {
     // Deliberately NOT asserted here: that the entry vanishes from the
     // preview. On inline-wired templates EditableList renders raw
     // formData (unfiltered by sectionItemVisibility) by design, so in
-    // Direct Edit the entry stays visible — a documented, accepted
-    // trade-off since Phase 1 that this task does not change. Asserting
-    // otherwise would encode a false expectation and fail.
+    // Direct Edit the entry stays, marked hidden since 1.6.52 (see "a
+    // hidden entry is marked in the editable CV" below).
     const firstEntry = entries.first()
     await firstEntry.locator('.direct-edit-popup__entry-visibility').click()
     await expect(firstEntry).toHaveClass(/direct-edit-popup__entry--hidden/)
@@ -2179,4 +2178,94 @@ test.describe('ATS view in Direct Edit', () => {
       await exportPdfAndExpectSuccess(page)
     })
   }
+})
+
+// 1.6.52: the Direct Edit audit's fixes.
+test.describe('Direct Edit audit fixes', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+  })
+
+  const nameField = (page) => page.locator('.direct-edit-preview [data-export-header] [contenteditable]').first()
+  const experienceEntries = (page) => page.locator('.direct-edit-preview [data-export-section="experience"] .direct-edit-entry')
+
+  test('a hidden entry is marked in the editable CV, left out of the export, and shown again from its mark', async ({ page }) => {
+    await openSectionPopup(page, 'experience')
+    await page.locator('.direct-edit-popup__entry').first().locator('.direct-edit-popup__entry-visibility').click()
+    await page.keyboard.press('Escape')
+
+    const first = experienceEntries(page).first()
+    await expect(first).toHaveClass(/direct-edit-entry--hidden/)
+    await expect(page.locator('.direct-edit-export-source [data-export-section="experience"]')).not.toContainText('Senior Product Designer')
+
+    await first.getByRole('button', { name: 'Hidden from export · Show' }).click()
+    await expect(first).not.toHaveClass(/direct-edit-entry--hidden/)
+    await expect(page.locator('.direct-edit-export-source [data-export-section="experience"]')).toContainText('Senior Product Designer')
+  })
+
+  test('text pasted with line breaks into a one-line field is stored on one line', async ({ page }) => {
+    const field = nameField(page)
+    await field.click()
+    await page.keyboard.press('Control+A')
+    await field.evaluate((el) => {
+      const data = new DataTransfer()
+      data.setData('text/plain', 'Jane\nSmith\n')
+      el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }))
+    })
+    await field.blur()
+    await expect(field).toHaveText('Jane Smith')
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('Jane Smith')
+  })
+
+  test('a field that had focus during Undo shows the undone text once it loses focus', async ({ page }) => {
+    const field = nameField(page)
+    await field.click()
+    await page.keyboard.press('End')
+    await page.keyboard.type(' Jr')
+    await expect(page.getByRole('button', { name: 'Undo' })).toBeEnabled()
+    // Safari and Firefox on a Mac leave focus in the field when a button is
+    // clicked; a click from script does the same in Chromium.
+    await page.getByRole('button', { name: 'Undo' }).evaluate((button) => button.click())
+    await expect(field).toBeFocused()
+    await field.blur()
+    await expect(field).toHaveText('John Doe')
+    await expect(page.locator('.direct-edit-export-source [data-export-header]')).toContainText('John Doe')
+  })
+
+  test('switching template closes an open section popup', async ({ page }) => {
+    await openSectionPopup(page, 'experience')
+    await pickTemplate(page, 'Developer')
+    await expect(page.locator('.direct-edit-popup')).toHaveCount(0)
+    await expect(page.locator('[data-direct-edit-pencil="experience"]')).toBeVisible()
+  })
+
+  test('Tab out of a renamed skill in the popup keeps focus in the popup', async ({ page }) => {
+    await openSectionPopup(page, 'skills')
+    const skill = page.getByRole('textbox', { name: 'Skill 2' })
+    await skill.fill('Design Ops')
+    await page.keyboard.press('Tab')
+    expect(await page.evaluate(() => Boolean(document.activeElement?.closest('.direct-edit-popup')))).toBe(true)
+    await expect(page.getByRole('textbox', { name: 'Skill 2' })).toHaveValue('Design Ops')
+    await expect(page.locator('.direct-edit-preview [data-export-section="skills"]')).toContainText('Design Ops')
+  })
+
+  test("an entry's drag handle and remove button show on keyboard focus and sit clear of its content", async ({ page }) => {
+    const entry = experienceEntries(page).first()
+    const remove = entry.locator('.direct-edit-entry__remove')
+    await remove.focus()
+    await expect(remove).toHaveCSS('opacity', '1')
+    await expect(entry.locator('.direct-edit-entry__handle')).toHaveCSS('opacity', '1')
+
+    // Nothing of the entry's own content covers it (on Minimalist it used
+    // to sit under the dates, top-right).
+    const onTop = await remove.evaluate((button) => {
+      const rect = button.getBoundingClientRect()
+      return document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2) === button
+    })
+    expect(onTop).toBe(true)
+  })
 })

@@ -4,6 +4,35 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Direct Edit audit: six editing bugs — 1.6.52, 2026-10-24
+
+From an audit of the Direct Edit builder, each reproduced in the browser:
+
+- **Hiding an entry changed nothing on screen.** The editable CV shows
+  every entry, so a hidden job looked exactly like a visible one while the
+  PDF left it out. It now shows faded, with a "Hidden from export · Show"
+  button (`EditableList`, which reads `sectionItemVisibility` through
+  `DirectEditContext`).
+- **Line breaks in one-line fields.** Pasting "Jane↵Smith" into the name
+  stored the line break; Classic's input then showed "JaneSmith". One-line
+  fields now paste and store on one line (`EditableField`).
+- **Stale text after Undo in Safari and Firefox on a Mac.** There, clicking
+  Undo leaves focus in the field, which skipped the update; the field kept
+  the undone text even after losing focus, and the next keystroke saved it
+  again. A field now shows the stored text when it loses focus.
+- **The section popup survived a template switch,** left over the new
+  template's content. The overlay is keyed by template, so it starts closed.
+- **Tab out of a renamed skill in the Skills popup lost focus** to the
+  page: renaming changed the row's key. Rows are keyed by position, and
+  `InlineTagEditor` follows its value when the list changes.
+- **An entry's drag handle and × were only shown on mouse hover,** so Tab
+  landed on invisible buttons, touch screens never showed them, and on
+  Minimalist the × sat under the dates where it couldn't be clicked. They
+  now show on focus and on touch screens, and the × sits under the handle
+  in the entry's left gutter.
+
+Tests in `direct-edit.spec.js` ("Direct Edit audit fixes").
+
 ## Finnish bullets get real feedback — 1.6.51, 2026-10-23
 
 The builder's bullet checks (`cvFeedback.js`) only knew English. Every

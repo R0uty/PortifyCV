@@ -18,7 +18,7 @@ import { useDirectEdit } from './DirectEditContext'
 import InlineTagEditor from './fields/InlineTagEditor'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 
-function EditableListEntry({ id, onRemove, dragLabel, removeLabel, children }) {
+function EditableListEntry({ id, onRemove, dragLabel, removeLabel, hidden, hiddenLabel, onShow, children }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
   const style = { transform: CSS.Transform.toString(transform), transition }
 
@@ -26,8 +26,13 @@ function EditableListEntry({ id, onRemove, dragLabel, removeLabel, children }) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`direct-edit-entry${isDragging ? ' direct-edit-entry--dragging' : ''}`}
+      className={`direct-edit-entry${isDragging ? ' direct-edit-entry--dragging' : ''}${hidden ? ' direct-edit-entry--hidden' : ''}`}
     >
+      {hidden ? (
+        <button type="button" className="direct-edit-entry__hidden-badge" onClick={onShow}>
+          {hiddenLabel}
+        </button>
+      ) : null}
       <button
         type="button"
         className="direct-edit-entry__handle"
@@ -46,9 +51,11 @@ function EditableListEntry({ id, onRemove, dragLabel, removeLabel, children }) {
 }
 
 export default function EditableList({ section, items, addLabel, removeLabel, children }) {
-  const { isEditing, dispatchFormData, locale } = useDirectEdit()
+  const { isEditing, dispatchFormData, locale, itemVisibility } = useDirectEdit()
   const isFinnish = locale === 'fi'
   const dragLabel = isFinnish ? 'Järjestä vetämällä' : 'Drag to reorder'
+  const hiddenLabel = isFinnish ? 'Piilotettu viennistä · Näytä' : 'Hidden from export · Show'
+  const sectionVisibility = itemVisibility?.[section] ?? {}
   const resolvedRemoveLabel = removeLabel ?? (isFinnish ? 'Poista kohta' : 'Remove entry')
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -94,6 +101,9 @@ export default function EditableList({ section, items, addLabel, removeLabel, ch
             onRemove={() => handleRemove(index)}
             dragLabel={dragLabel}
             removeLabel={resolvedRemoveLabel}
+            hidden={sectionVisibility[String(index)] === false}
+            hiddenLabel={hiddenLabel}
+            onShow={() => dispatchFormData({ type: FORM_ACTION.TOGGLE_SECTION_ITEM_VISIBILITY, section, itemKey: index })}
           >
             {children(item, index)}
           </EditableListEntry>

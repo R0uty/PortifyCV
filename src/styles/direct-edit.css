@@ -75,13 +75,55 @@
   cursor: grab;
 }
 
+/* Below the handle in the entry's left gutter (1.6.52). At the entry's
+   top-right it sat under the dates most templates put there, so it could
+   not be clicked, and over them once shown. */
 .direct-edit-entry__remove {
-  right: 0;
+  left: 0;
+  top: 24px;
 }
 
+/* Shown on hover, while the entry is being edited, and when one of them
+   has keyboard focus (1.6.52: Tab used to land on them invisible). */
 .direct-edit-entry:hover .direct-edit-entry__handle,
-.direct-edit-entry:hover .direct-edit-entry__remove {
+.direct-edit-entry:hover .direct-edit-entry__remove,
+.direct-edit-entry:focus-within .direct-edit-entry__handle,
+.direct-edit-entry:focus-within .direct-edit-entry__remove {
   opacity: 1;
+}
+
+/* A touch screen has no hover to reveal them. */
+@media (hover: none) {
+  .direct-edit-entry__handle,
+  .direct-edit-entry__remove {
+    opacity: 1;
+  }
+}
+
+/* An entry the user hid (1.6.52): still editable here, faded, with a
+   button that shows it again. The export copy leaves it out. */
+.direct-edit-entry--hidden > :not(.direct-edit-entry__hidden-badge, .direct-edit-entry__handle, .direct-edit-entry__remove) {
+  opacity: 0.45;
+}
+
+.direct-edit-entry__hidden-badge {
+  display: inline-block;
+  margin: 2px 0 4px;
+  padding: 2px 8px;
+  border: 1px dashed var(--ds-border-strong, #d4d4d8);
+  border-radius: 999px;
+  background: var(--ds-surface, #ffffff);
+  color: var(--ds-text-secondary, #52525b);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.direct-edit-entry__hidden-badge:hover,
+.direct-edit-entry__hidden-badge:focus-visible {
+  border-color: var(--ds-accent, #0f766e);
+  color: var(--ds-accent, #0f766e);
 }
 
 .direct-edit-entry__remove:hover {

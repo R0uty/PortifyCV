@@ -21,6 +21,19 @@ function buildAction(path, value) {
   }
 }
 
+// The field's text as it should be stored. A lone "\n" is what deleting
+// the last character can leave behind (a stray <br>), so it counts as
+// empty. A one-line field never stores a line break (1.6.52): a pasted or
+// typed one became part of the name, which Classic's <input> then showed
+// with the words run together.
+function normalizeFieldText(text, multiline) {
+  if (text === '\n') {
+    return ''
+  }
+
+  return multiline ? text : text.replace(/\n+$/, '').replace(/\s*\n+\s*/g, ' ')
+}
+
 // as="h1"|"p"|"span"|... — the exact tag the read-only render already
 // used at each call site, so swapping in EditableField never changes
 // the surrounding CSS's element-selector assumptions.
@@ -34,6 +47,12 @@ export default function EditableField({
 }) {
   const { isEditing, dispatchFormData } = useDirectEdit()
   const elementRef = useRef(null)
+  // The latest value, for the blur handler below.
+  const valueRef = useRef(value)
+
+  useEffect(() => {
+    valueRef.current = value
+  }, [value])
 
   // Seed/update the DOM's text imperatively instead of via React
   // children. A contentEditable element must own its own text node
@@ -60,24 +79,39 @@ export default function EditableField({
 
   const handleInput = useCallback(
     (event) => {
-      const text = event.currentTarget.innerText ?? ''
-      // Deleting a field's last character can leave a lone <br> behind,
-      // which innerText reports as "\n". Treat that as empty, or the field
-      // would never get its placeholder back.
-      dispatchFormData(buildAction(path, text === '\n' ? '' : text))
+      dispatchFormData(buildAction(path, normalizeFieldText(event.currentTarget.innerText ?? '', multiline)))
     },
-    [dispatchFormData, path],
+    [dispatchFormData, path, multiline],
+  )
+
+  // The effect above leaves a focused field alone, and nothing re-runs it
+  // once focus leaves. So a change that lands while the field has focus
+  // (Undo clicked in Safari or Firefox on a Mac, where clicking a button
+  // doesn't take focus from the field) used to stay invisible: the field
+  // kept its old text, and the next keystroke saved it again (1.6.52).
+  // Leaving the field shows what is stored.
+  const handleBlur = useCallback(
+    (event) => {
+      const el = event.currentTarget
+      const stored = valueRef.current || ''
+
+      if (normalizeFieldText(el.innerText ?? '', multiline) !== stored) {
+        el.textContent = stored
+      }
+    },
+    [multiline],
   )
 
   // Paste as plain text only — a contentEditable field left to its
   // default paste behavior can pull in the source's own markup
   // (font, color, links), which would silently break the template's
-  // own styling for that one field.
+  // own styling for that one field. A one-line field gets the text on
+  // one line.
   const handlePaste = useCallback((event) => {
     event.preventDefault()
     const text = event.clipboardData.getData('text/plain')
-    document.execCommand('insertText', false, text)
-  }, [])
+    document.execCommand('insertText', false, multiline ? text : text.replace(/\s*\r?\n+\s*/g, ' ').trim())
+  }, [multiline])
 
   const handleKeyDown = useCallback(
     (event) => {
@@ -107,6 +141,7 @@ export default function EditableField({
       spellCheck={false}
       data-placeholder={placeholder}
       onInput={handleInput}
+      onBlur={handleBlur}
       onPaste={handlePaste}
       onKeyDown={handleKeyDown}
     />

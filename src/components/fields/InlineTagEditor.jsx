@@ -24,6 +24,16 @@ export default function InlineTagEditor({
 }) {
   const [draft, setDraft] = useState(value)
   const [isDuplicate, setIsDuplicate] = useState(false)
+  // A new value from outside (a reorder, a removal above it, an undo)
+  // replaces the draft, so an editor keyed by position shows its own tag.
+  const [shownValue, setShownValue] = useState(value)
+
+  if (value !== shownValue) {
+    setShownValue(value)
+    setDraft(value)
+    setIsDuplicate(false)
+  }
+
   const inputRef = useRef(null)
   // Enter and Escape blur a non-persistent editor as they close it; this
   // stops that blur from committing a second time.
