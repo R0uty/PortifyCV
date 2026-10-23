@@ -43,6 +43,18 @@
   transform: translate(-100%, 0) scale(1.12);
 }
 
+/* Hung just outside the section's top-right corner (1.6.53), where
+   SectionEditOverlay found room, so it covers none of the section. */
+.direct-edit-pencil--outside {
+  transform: translate(6px, 0);
+}
+
+.direct-edit-pencil--outside.direct-edit-pencil--active,
+.direct-edit-pencil--outside:hover,
+.direct-edit-pencil--outside:focus-visible {
+  transform: translate(6px, 0) scale(1.12);
+}
+
 /* One entry's pencil: smaller than the section pencil and hung just
    OUTSIDE the entry's right edge, in the page gutter. Inside the entry it
    would sit on top of the right-aligned dates nearly every template puts

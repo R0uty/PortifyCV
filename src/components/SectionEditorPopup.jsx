@@ -541,7 +541,11 @@ export default function SectionEditorPopup({
     return (
       <>
         {items.map((skill, index) => (
-          <div key={`${skill}-${index}`} className="direct-edit-popup__skill">
+          // Keyed by position, not text (1.6.52): renaming a skill changed
+          // its key, so the row was rebuilt and a Tab out of the renamed
+          // skill lost focus to the page. InlineTagEditor follows its value
+          // when the list changes under it.
+          <div key={index} className="direct-edit-popup__skill">
             {/* Editable in place: Enter or clicking away saves, Escape
                 reverts. Same rules as adding (no duplicates); emptying it
                 removes the skill (UPDATE_SKILL). */}

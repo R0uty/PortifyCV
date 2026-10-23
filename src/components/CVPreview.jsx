@@ -121,7 +121,7 @@ function CVPreview({
   // never move it earlier without checking no hook follows it.
   if (variant === 'developer' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <DeveloperShowcase
             paletteStyle={paletteStyle}
@@ -142,7 +142,7 @@ function CVPreview({
   // system that ATS mode bypasses entirely.
   if (variant === 'creative' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <CreativeShowcase
             paletteStyle={paletteStyle}
@@ -164,7 +164,7 @@ function CVPreview({
   // "premium executive" visual system that ATS mode bypasses entirely.
   if (variant === 'modern' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <ModernShowcase
             paletteStyle={paletteStyle}
@@ -186,7 +186,7 @@ function CVPreview({
   // bespoke "boardroom" visual system that ATS mode bypasses entirely.
   if (variant === 'executive' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <ExecutiveShowcase
             paletteStyle={paletteStyle}
@@ -214,7 +214,7 @@ function CVPreview({
   // a different template."
   if (variant === 'timeline') {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <TimelineShowcase
             paletteStyle={paletteStyle}
@@ -239,7 +239,7 @@ function CVPreview({
   // bypasses entirely.
   if (variant === 'graduate' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <GraduateShowcase
             paletteStyle={paletteStyle}
@@ -263,7 +263,7 @@ function CVPreview({
   // system that ATS mode bypasses entirely.
   if (variant === 'compact' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <CompactShowcase
             paletteStyle={paletteStyle}
@@ -287,7 +287,7 @@ function CVPreview({
   // condensed into a résumé" visual system that ATS mode bypasses entirely.
   if (variant === 'portfolio' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <PortfolioShowcase
             paletteStyle={paletteStyle}
@@ -314,7 +314,7 @@ function CVPreview({
   // template's left-aligned letterhead as a Settings option (v1.2.10).
   if (variant === 'classicProfessional' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <ClassicProfessionalShowcase
             paletteStyle={paletteStyle}
@@ -348,7 +348,7 @@ function CVPreview({
   // directEditDispatch is null, so the provider stays inert there.
   if (variant === 'navyProfessional') {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <NavyProfessionalShowcase
             paletteStyle={paletteStyle}
@@ -374,7 +374,7 @@ function CVPreview({
   // Professional. Its accent color is user-customizable, same as Timeline.
   if (variant === 'modernOrange') {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <ModernOrangeShowcase
             paletteStyle={paletteStyle}
@@ -401,7 +401,7 @@ function CVPreview({
   // color to fall back to).
   if (variant === 'colorfulCompact' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <ColorfulCompactShowcase
             paletteStyle={paletteStyle}
@@ -422,7 +422,7 @@ function CVPreview({
   // every other bespoke Showcase above.
   if (variant === 'quadrant' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <QuadrantShowcase
             paletteStyle={paletteStyle}
@@ -447,7 +447,7 @@ function CVPreview({
   // bespoke Showcase above.
   if (variant === 'techExec' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <TechExecShowcase
             paletteStyle={paletteStyle}
@@ -471,7 +471,7 @@ function CVPreview({
   // same reasoning as every other bespoke Showcase above.
   if (variant === 'editorial' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <EditorialShowcase
             paletteStyle={paletteStyle}
@@ -494,7 +494,7 @@ function CVPreview({
   // as every other bespoke Showcase above.
   if (variant === 'portrait' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <PortraitShowcase
             paletteStyle={paletteStyle}
@@ -517,7 +517,7 @@ function CVPreview({
   // entirely, same reasoning as every other bespoke Showcase above.
   if (variant === 'european' && !atsFriendlyMode) {
     return (
-      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+      <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
         <Suspense fallback={null}>
           <EuropeanShowcase
             paletteStyle={paletteStyle}
@@ -1909,7 +1909,7 @@ function CVPreview({
   // ── Document shell ─────────────────────────────────────────────────
   // The outer <article> wraps the entire CV. Style varies by template and ATS mode.
   return (
-    <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale}>
+    <DirectEditProvider isEditing={Boolean(directEditDispatch)} dispatchFormData={directEditDispatch} locale={locale} itemVisibility={formData.sectionItemVisibility}>
     <article
       ref={previewRef}
       data-export-root="true"

@@ -94,7 +94,12 @@ export default function DirectEditPreview({
           ) : null}
         </div>
         <CVPreview {...previewProps} directEditDispatch={dispatchFormData} />
+        {/* Keyed by template (1.6.52): a template switch from the toolbar
+            used to leave an open section popup where it was, over the new
+            template's content, editing a section that may no longer be
+            there. A new template starts with the overlay closed. */}
         <SectionEditOverlay
+          key={templateConfig.id}
           formData={formData}
           dispatchFormData={dispatchFormData}
           templateConfig={templateConfig}
