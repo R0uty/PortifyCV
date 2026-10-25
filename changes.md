@@ -4,6 +4,18 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## The CV examples hub says what changes by field — 1.6.55, 2026-10-25
+
+From the second AdSense content review: `/cv-examples` had 182 words of
+its own, four link cards and a list of example CVs. It now also covers
+what every strong CV has in common, what counts as evidence in nine fields
+(software, IT, security, healthcare, education, sales and marketing,
+creative work, finance and management, graduates), each linking the
+templates that suit it, and how to use the examples without copying
+them, in English and Finnish (791 and 578 words). The sitemap's
+`lastmod` moves to today for the hub and the 36 template pages, whose
+content changed in 1.6.54. Test in `guide-layout.spec.js`.
+
 ## Template pages are pre-rendered with their example CV — 1.6.54, 2026-10-25
 
 From the second AdSense content review. A template page shows a full

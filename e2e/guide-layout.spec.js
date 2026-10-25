@@ -60,3 +60,23 @@ test.describe('on a phone', () => {
     await expect(page).toHaveURL(/#section-1$/)
   })
 })
+
+// 1.6.55: the CV examples hub explains what changes by field, with the
+// templates that suit each, in the page's language.
+test('the CV examples hub covers nine fields, each linking the templates that suit it', async ({ page }) => {
+  await page.goto('/cv-examples')
+  const fields = page.locator('.examples-hub-field')
+  await expect(fields).toHaveCount(9)
+  await expect(page.getByRole('heading', { name: 'What every strong CV has in common' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'How to use these examples' })).toBeVisible()
+
+  await fields.filter({ hasText: 'Healthcare' }).getByRole('link', { name: 'European' }).click()
+  await expect(page).toHaveURL(/\/free-cv-templates\/european$/)
+  await expect(page.locator('h1')).toHaveText('European CV template')
+
+  await page.goto('/fi/cv-esimerkit')
+  const fieldsFi = page.locator('.examples-hub-field')
+  await expect(fieldsFi).toHaveCount(9)
+  await expect(fieldsFi.filter({ hasText: 'Terveydenhuolto' }).getByRole('link', { name: 'Eurooppalainen' }))
+    .toHaveAttribute('href', '/fi/ilmaiset-cv-pohjat/european')
+})
