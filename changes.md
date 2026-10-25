@@ -4,6 +4,13 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Contact in the footer — 1.6.56, 2026-10-25
+
+The contact address (portifycv@gmail.com) was only at the bottom of About
+and the privacy policy. The footer bar, on every page including the
+builder, and the site map's PortifyCV column now link it as "Contact" /
+"Yhteystiedot". Test in `site-map.spec.js`.
+
 ## The CV examples hub says what changes by field — 1.6.55, 2026-10-25
 
 From the second AdSense content review: `/cv-examples` had 182 words of

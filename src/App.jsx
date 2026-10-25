@@ -15,6 +15,8 @@ import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHea
 import { LocaleContext } from './components/localeContext'
 import { APP_VERSION } from './utils/appVersion'
 
+const CONTACT_MAILTO = 'mailto:portifycv@gmail.com'
+
 const ResumeBuilderPage = lazy(() => import('./pages/ResumeBuilderPage'))
 const AboutPage = lazy(() => import('./pages/AboutPage'))
 const FreeCvTemplatesPage = lazy(() => import('./pages/FreeCvTemplatesPage'))
@@ -458,6 +460,7 @@ const SITE_MAP_COLUMNS = [
     links: [
       { view: 'about', en: 'About', fi: 'Tietoa' },
       { view: 'privacy', en: 'Privacy policy', fi: 'Tietosuojaseloste' },
+      { href: CONTACT_MAILTO, en: 'Contact', fi: 'Yhteystiedot' },
     ],
   },
 ]
@@ -485,15 +488,19 @@ function SiteMap({ locale = 'en', onNavigate = () => {}, onGetStarted = () => {}
                   </li>
                 ))
                 : column.links.map((link) => (
-                  <li key={link.view}>
-                    <a
-                      href={localizePath(VIEW_HEAD[link.view].path, locale)}
-                      onClick={(event) => (link.view === 'builder'
-                        ? handleInAppLinkClick(event, link.view, () => onGetStarted())
-                        : handleInAppLinkClick(event, link.view, onNavigate))}
-                    >
-                      {link[lang]}
-                    </a>
+                  <li key={link.view ?? link.href}>
+                    {link.href ? (
+                      <a href={link.href}>{link[lang]}</a>
+                    ) : (
+                      <a
+                        href={localizePath(VIEW_HEAD[link.view].path, locale)}
+                        onClick={(event) => (link.view === 'builder'
+                          ? handleInAppLinkClick(event, link.view, () => onGetStarted())
+                          : handleInAppLinkClick(event, link.view, onNavigate))}
+                      >
+                        {link[lang]}
+                      </a>
+                    )}
                   </li>
                 ))}
             </ul>
@@ -515,7 +522,7 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
           {' '}
           <span className="site-footer__version">{APP_VERSION}</span>
         </span>
-        <nav className="site-footer__links" aria-label={isFinnish ? 'Oikeudellinen' : 'Legal'}>
+        <nav className="site-footer__links" aria-label={isFinnish ? 'Tietoa ja yhteystiedot' : 'About and contact'}>
           <a
             href={localizePath(VIEW_HEAD.about.path, locale)}
             className="site-footer__link"
@@ -529,6 +536,11 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
             onClick={(event) => handleInAppLinkClick(event, 'privacy', onNavigate)}
           >
             {isFinnish ? 'Tietosuojaseloste' : 'Privacy policy'}
+          </a>
+          {/* 1.6.56: the contact address, on every page, rather than only
+              at the bottom of About and the privacy policy. */}
+          <a href={CONTACT_MAILTO} className="site-footer__link">
+            {isFinnish ? 'Yhteystiedot' : 'Contact'}
           </a>
         </nav>
       </div>
