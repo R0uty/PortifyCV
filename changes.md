@@ -4,6 +4,50 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template pages say only what the templates do — 1.6.58, 2026-10-25
+
+A proofread of 1.6.55–1.6.57 and of the older template-page tips, every
+claim checked against the templates' code. Corrected:
+
+- **ATS view**: the plain ATS view keeps a visible profile photo (in the
+  header), so it no longer says the photo is dropped (Modern
+  Professional, Portrait). Modern Timeline's ATS view only turns its
+  accent grey; Navy Professional's and Modern Orange's stack the sidebar
+  above the main column and turn monochrome, keeping icons, tags, dots and
+  timelines.
+- **Design details**: Minimalist has no amber header band (a thin line
+  under the header, amber labels and tags); Creative's accent is on the
+  section numbers, job title, header rule and experience-card edges, not
+  "every heading and divider"; Executive does have icons, its section is
+  "Leadership experience", and its identity sits in the left rail;
+  Modern Timeline's line runs through experience and education only;
+  Compact has two tighter settings after its default and warns when
+  content still doesn't fit; Tech Executive's footer band needs a
+  tagline; Navy Professional's sidebar also holds photo, name and
+  contact details; Quadrant's quarters were misassigned.
+- **Modern Orange's skill dots follow list order** (five tapering to three),
+  not a rating: the text and an older tip told people to rate their
+  skills. Only Experience is on its main-column timeline.
+- **European steps down one density setting and warns**; it does not
+  always fit one page. Its tip, gallery description and meta
+  descriptions said it auto-fits.
+- **Unverifiable claims removed**: page-count promises ("fits on one page
+  with a typical history"), and on the CV examples hub "skims a CV in
+  under a minute", "the same stock phrases many times a week" and "the
+  most number-driven CV there is". The hub now names the panel that lists
+  missing keywords (ATS score & suggestions, Classic mode), not the ATS
+  view.
+- **Best for**: Minimalist and Compact named accountants and business
+  graduates, no longer among their examples; now IT support specialists.
+- **Finnish**: section names as the app shows them (Sertifikaatit, not
+  Todistukset; Johtamiskokemus and Vahvuudet, not Johtavuus and
+  Ydinvahvuudet; Esittely, not Yhteenveto); "Sinivalkoinen" for a navy
+  sidebar; "ambran-sävyisessä", "aikajananssa", "perinteiseen tittelin",
+  "royal-blue-viiva" and other errors; colloquial "niin" for "joten".
+
+The Classic-mode walkthrough screenshots were regenerated: they show the
+whole window, whose footer gained the Contact link in 1.6.56.
+
 ## Every template page says what the template is for — 1.6.57, 2026-10-25
 
 The last part of the second AdSense content review. A template page had a

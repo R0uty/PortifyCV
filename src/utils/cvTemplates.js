@@ -405,7 +405,7 @@ const templateMap = {
     slug: 'european',
     accent: { default: '#1d4ed8', swatchSet: 'civicBlue' },
     label: 'European',
-    description: 'A Europass-adjacent, genuinely minimal one-page format — every section reads as a label/value table (dates, categories, link types) instead of flowing prose, with one customizable accent. Auto-fits one page.',
+    description: 'A Europass-adjacent, genuinely minimal one-page format — every section reads as a label/value table (dates, categories, link types) instead of flowing prose, with one customizable accent. Tightens its spacing to fit one page where it can.',
     variant: 'european',
     layout: 'stacked',
     fields: ['any'],
@@ -530,7 +530,7 @@ const templateLocalization = {
     },
     european: {
       label: 'Eurooppalainen',
-      description: 'Europass-henkinen, todella minimalistinen yksisivuinen muoto — jokainen osio esitetään otsikko/arvo-taulukkona (päivämäärät, luokat, linkkityypit) juoksevan tekstin sijaan, yhdellä muokattavalla aksenttivärillä. Sovittuu automaattisesti yhdelle sivulle.',
+      description: 'Europass-henkinen, todella minimalistinen yksisivuinen muoto — jokainen osio esitetään otsikko/arvo-taulukkona (päivämäärät, luokat, linkkityypit) juoksevan tekstin sijaan, yhdellä muokattavalla aksenttivärillä. Tiivistää välejään mahtuakseen yhdelle sivulle, kun se on mahdollista.',
       summaryBadgeLabel: 'Profiili',
       chips: ['Taulukko', 'Yksi sivu'],
     },

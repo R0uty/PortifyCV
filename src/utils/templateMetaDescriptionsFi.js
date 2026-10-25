@@ -37,5 +37,5 @@ export const TEMPLATE_META_DESCRIPTIONS_FI = {
   portrait:
     'Ilmainen Muotokuva-CV-pohja: täyskorkea kuva vasemmassa palstassa ja kaikki osiot oikealla, ei kirjautumista.',
   european:
-    'Ilmainen Eurooppalainen CV-pohja: Europass-tyylinen otsikko–arvo-taulukko, joka sovittuu yhdelle sivulle, ei kirjautumista.',
+    'Ilmainen Eurooppalainen CV-pohja: Europass-tyylinen otsikko–arvo-taulukko, joka tiivistyy mahtuakseen yhdelle sivulle, ei kirjautumista.',
 }
