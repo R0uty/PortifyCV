@@ -3484,6 +3484,27 @@ html:lang(fi) .landing-title {
   }
 }
 
+/* A template page's own writing (1.6.57): two paragraphs about the
+   template and three questions with answers. */
+.template-page__about p,
+.template-page__faq-item p {
+  max-width: 68ch;
+  margin-top: var(--space-3);
+  font-size: var(--text-body-sm);
+  line-height: 1.7;
+  color: var(--app-text-muted);
+}
+
+.template-page__faq-item {
+  margin-top: var(--space-6);
+}
+
+.template-page__faq-item h3 {
+  font-size: var(--text-body);
+  font-weight: 700;
+  color: var(--app-text);
+}
+
 /* The CV examples hub's written sections (1.6.55): plain reading prose,
    and one card per field with the templates that suit it. */
 .examples-hub-prose p,

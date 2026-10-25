@@ -92,6 +92,14 @@ for (const template of cvTemplates) {
         && localized.tips.length === 3
         && localized.tips.every((tip) => tip.trim().length > 0),
     )
+    // 1.6.57: two paragraphs about the template and three questions with
+    // answers, written for it, so its page isn't thin.
+    check(
+      `${template.id}/${locale}: 2 intro paragraphs and 3 questions with answers`,
+      Array.isArray(localized?.intro) && localized.intro.length === 2 && localized.intro.every((p) => p.trim().length > 80)
+        && Array.isArray(localized?.faq) && localized.faq.length === 3
+        && localized.faq.every((qa) => Array.isArray(qa) && qa.length === 2 && qa[0].trim().endsWith('?') && qa[1].trim().length > 60),
+    )
   }
 
   const metaDescription = TEMPLATE_META_DESCRIPTIONS[template.id]
@@ -110,6 +118,10 @@ for (const template of cvTemplates) {
 }
 const allTips = Object.values(TEMPLATE_PAGE_COPY).flatMap((copy) => copy.en.tips)
 check('no English tip is copy-pasted between templates', new Set(allTips).size === allTips.length)
+for (const locale of ['en', 'fi']) {
+  const written = Object.values(TEMPLATE_PAGE_COPY).flatMap((copy) => [...(copy[locale].intro ?? []), ...(copy[locale].faq ?? []).map((qa) => qa[1])])
+  check(`no ${locale} intro paragraph or answer is copy-pasted between templates`, new Set(written).size === written.length)
+}
 
 // --- Sitemap ------------------------------------------------------------------
 const sitemap = readFileSync(resolvePath(rootDir, 'public/sitemap.xml'), 'utf8')

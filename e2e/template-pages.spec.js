@@ -277,3 +277,21 @@ test.describe('Template pages', () => {
     await expect(page.getByRole('textbox', { name: /Full name/ })).toHaveValue('')
   })
 })
+
+// 1.6.57: every template page has its own two paragraphs and three
+// questions with answers, in its language, and they reach the pre-render.
+test('a template page shows its own writing and questions, in its language', async ({ page, request }) => {
+  await page.goto('/free-cv-templates/quadrant')
+  await expect(page.getByRole('heading', { name: 'About this template', exact: true })).toBeVisible()
+  await expect(page.locator('.template-page__about p')).toHaveCount(2)
+  await expect(page.locator('.template-page__faq-item')).toHaveCount(3)
+  await expect(page.getByRole('heading', { name: 'Can I move sections between quarters?' })).toBeVisible()
+
+  await page.goto('/fi/ilmaiset-cv-pohjat/european')
+  await expect(page.getByRole('heading', { name: 'Tietoa pohjasta', exact: true })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Onko tämä virallinen Europass-CV?' })).toBeVisible()
+
+  const prerendered = await (await request.get('/prerendered/template-european-fi.html')).text()
+  expect(prerendered).toContain('Kysymyksiä pohjasta')
+  expect(prerendered).toContain('Onko tämä virallinen Europass-CV?')
+})

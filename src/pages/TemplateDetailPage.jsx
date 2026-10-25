@@ -30,6 +30,8 @@ function getCopy(locale) {
       useExample: 'Käytä tätä esimerkkiä',
       useTemplate: 'Aloita tyhjästä tällä pohjalla',
       tipsTitle: 'Vinkkejä tähän pohjaan',
+      aboutTitle: 'Tietoa pohjasta',
+      faqTitle: 'Kysymyksiä pohjasta',
       previous: 'Edellinen pohja',
       next: 'Seuraava pohja',
       all: 'Kaikki pohjat',
@@ -49,6 +51,8 @@ function getCopy(locale) {
     useExample: 'Use this example',
     useTemplate: 'Start blank with this template',
     tipsTitle: 'Tips for this template',
+    aboutTitle: 'About this template',
+    faqTitle: 'Questions about this template',
     previous: 'Previous template',
     next: 'Next template',
     all: 'All templates',
@@ -256,12 +260,31 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
         </div>
       </div>
 
+      {pageCopy?.intro && (
+        <div className="landing-section template-page__about">
+          <h2 className="landing-section__title" style={{ fontSize: 'var(--text-title)' }}>{copy.aboutTitle}</h2>
+          {pageCopy.intro.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+        </div>
+      )}
+
       {pageCopy && (
         <div className="landing-section">
           <h2 className="landing-section__title" style={{ fontSize: 'var(--text-title)' }}>{copy.tipsTitle}</h2>
           <ul className="template-page__tips">
             {pageCopy.tips.map((tip) => <li key={tip}>{tip}</li>)}
           </ul>
+        </div>
+      )}
+
+      {pageCopy?.faq && (
+        <div className="landing-section template-page__faq">
+          <h2 className="landing-section__title" style={{ fontSize: 'var(--text-title)' }}>{copy.faqTitle}</h2>
+          {pageCopy.faq.map(([question, answer]) => (
+            <div key={question} className="template-page__faq-item">
+              <h3>{question}</h3>
+              <p>{answer}</p>
+            </div>
+          ))}
         </div>
       )}
 

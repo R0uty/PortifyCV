@@ -4,6 +4,22 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Every template page says what the template is for — 1.6.57, 2026-10-25
+
+The last part of the second AdSense content review. A template page had a
+one-line description, a "best for" line and three tips of its own. Each
+of the 18 now also has two paragraphs on how the template is built and
+who it suits, and three questions with answers specific to it (is the
+dark sidebar a problem for ATS, what goes in Leadership, is European the
+official Europass CV, what photo works in Portrait…), in English and
+Finnish: about 3,500 and 2,600 new words (`intro` and `faq` in
+`templatePageCopy.js`, shown as "About this template" / "Tietoa
+pohjasta" and "Questions about this template" / "Kysymyksiä pohjasta").
+With the example CV from 1.6.54, a template page's own text is now about
+585–885 words, up from about 170. `check:template-pages` requires the two
+paragraphs and three answers for every template and language, and that
+none is copied between templates. Test in `template-pages.spec.js`.
+
 ## Contact in the footer — 1.6.56, 2026-10-25
 
 The contact address (portifycv@gmail.com) was only at the bottom of About
