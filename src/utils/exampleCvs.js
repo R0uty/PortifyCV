@@ -38,6 +38,10 @@ export const EXAMPLES = {
   architect: { role: role('Architect', 'Arkkitehti'), load: () => import('./examples/architect.js') },
 }
 
+// Each template's first example is the one its page opens on, and no two
+// templates open on the same person (1.6.54; check:template-pages): the
+// page is pre-rendered with that CV, so a shared one would put the same
+// CV text on several template pages.
 export const TEMPLATE_EXAMPLES = {
   minimal: ['nurse', 'cybersecurity-analyst', 'it-support'],
   developer: ['frontend-developer', 'data-engineer', 'junior-developer'],
@@ -47,16 +51,16 @@ export const TEMPLATE_EXAMPLES = {
   timeline: ['project-manager', 'teacher', 'operations-manager'],
   graduate: ['junior-developer', 'business-graduate'],
   compact: ['data-engineer', 'cybersecurity-analyst', 'it-support'],
-  portfolio: ['frontend-developer', 'ux-designer', 'product-manager'],
+  portfolio: ['product-manager', 'frontend-developer', 'ux-designer'],
   techExec: ['engineering-director', 'cto'],
   classicProfessional: ['accountant', 'finance-director', 'research-scientist'],
   navyProfessional: ['cto', 'sales-manager', 'research-scientist'],
-  modernOrange: ['marketing-manager', 'ux-designer', 'customer-success'],
+  modernOrange: ['customer-success', 'marketing-manager', 'ux-designer'],
   colorfulCompact: ['graphic-designer', 'customer-success'],
-  quadrant: ['marketing-manager', 'sales-manager', 'journalist'],
+  quadrant: ['sales-manager', 'marketing-manager', 'journalist'],
   editorial: ['journalist', 'research-scientist'],
   portrait: ['brand-specialist', 'chef', 'architect'],
-  european: ['nurse', 'teacher', 'chef'],
+  european: ['teacher', 'nurse', 'chef'],
 }
 
 // Full example CVs linked from the content pages ("CV examples by field"
@@ -102,6 +106,12 @@ export function isTemplateExample(templateId, exampleId) {
   return typeof exampleId === 'string' && (TEMPLATE_EXAMPLES[templateId] ?? []).includes(exampleId)
 }
 
+// Examples already loaded, by `${exampleId}:${locale}`. Lets a template
+// page start with its example on the first render when it has been loaded
+// before: the build-time pre-render (src/prerender.jsx) loads it first, so
+// the pre-rendered page carries the example CV's text, not an empty frame.
+const loadedExamples = new Map()
+
 // Resolves to null (never throws) for an unknown id, or an example whose
 // file isn't written yet, so a stale ?example= link degrades to the
 // default instead of breaking the page or the builder.
@@ -111,10 +121,18 @@ export async function loadExampleCv(exampleId, locale = 'en') {
     return null
   }
 
+  const lang = locale === 'fi' ? 'fi' : 'en'
   try {
     const module = await entry.load()
-    return structuredClone(module.default[locale === 'fi' ? 'fi' : 'en'])
+    loadedExamples.set(`${exampleId}:${lang}`, module.default[lang])
+    return structuredClone(module.default[lang])
   } catch {
     return null
   }
+}
+
+// The example if it has already been loaded, else undefined.
+export function peekExampleCv(exampleId, locale = 'en') {
+  const cv = loadedExamples.get(`${exampleId}:${locale === 'fi' ? 'fi' : 'en'}`)
+  return cv === undefined ? undefined : structuredClone(cv)
 }

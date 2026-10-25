@@ -5,7 +5,7 @@ import StyleSwatchGroup from '../components/StyleSwatchGroup'
 import { cvTemplates, getCvTemplate } from '../utils/cvTemplates'
 import { DEFAULT_STYLE_VARIANT_ID, getVariantLook, parseStyleVariantParam } from '../utils/templateVariants'
 import { TEMPLATE_PAGE_COPY } from '../utils/templatePageCopy'
-import { getTemplateExamples, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
+import { getTemplateExamples, isTemplateExample, loadExampleCv, peekExampleCv } from '../utils/exampleCvs'
 import { ROUTES, templatePath } from '../utils/routes'
 import { fieldSearch, parseFieldParam } from '../utils/templateFields'
 import { TEMPLATE_VIEW_PREFIX } from '../utils/pageMeta'
@@ -91,7 +91,12 @@ function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}
     const requested = readExampleParam()
     return isTemplateExample(templateId, requested) ? requested : examples[0]?.id ?? null
   })
-  const [loadedExample, setLoadedExample] = useState(null)
+  // Already loaded (always in the build-time pre-render), so the first
+  // render shows the example rather than a placeholder.
+  const [loadedExample, setLoadedExample] = useState(() => {
+    const cv = exampleId ? peekExampleCv(exampleId, resolvedLocale) : undefined
+    return cv === undefined ? null : { id: exampleId, locale: resolvedLocale, cv }
+  })
   const [atsView, setAtsView] = useState(false)
   const [styleId, setStyleId] = useState(() => readStyleParam(templateId))
   const [field] = useState(readFieldParam)

@@ -183,6 +183,12 @@ for (const [page, pairs] of Object.entries(CONTENT_PAGE_EXAMPLES)) {
     bad.map((pair) => pair.join(':')).join(', '))
 }
 
+// 1.6.54: a template page opens on its first example and is pre-rendered
+// with it, so no two templates may open on the same person.
+const firstExamples = cvTemplates.map((template) => TEMPLATE_EXAMPLES[template.id]?.[0]).filter(Boolean)
+const repeatedFirsts = firstExamples.filter((id, index) => firstExamples.indexOf(id) !== index)
+check('every template page opens on a different example', repeatedFirsts.length === 0, repeatedFirsts.join(', '))
+
 const usedIds = new Set(Object.values(TEMPLATE_EXAMPLES).flat())
 const unused = Object.keys(EXAMPLES).filter((id) => !usedIds.has(id))
 check('every registered example is used by a template', unused.length === 0, unused.join(', '))

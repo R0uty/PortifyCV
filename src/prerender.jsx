@@ -1,6 +1,8 @@
 import { prerenderToNodeStream } from 'react-dom/static'
 import { Buffer } from 'node:buffer'
 import App from './App.jsx'
+import { VIEW_HEAD } from './utils/pageMeta'
+import { TEMPLATE_EXAMPLES, loadExampleCv } from './utils/exampleCvs'
 
 // Build-time pre-render (1.6.49): each content page's full markup, for
 // crawlers that don't run JavaScript. scripts/prerender.mjs writes it to
@@ -11,6 +13,12 @@ import App from './App.jsx'
 // page is React.lazy()) in place: React otherwise moves a large one after
 // the footer behind a swap script, which this block never runs.
 export async function renderRoute(view, locale) {
+  // A template page opens on its first example, loaded in an effect; load
+  // it now so the page renders with it (TemplateDetailPage peeks at it).
+  const templateId = VIEW_HEAD[view]?.templateId
+  if (templateId && TEMPLATE_EXAMPLES[templateId]?.length) {
+    await loadExampleCv(TEMPLATE_EXAMPLES[templateId][0], locale)
+  }
   const { prelude } = await prerenderToNodeStream(<App route={{ view, locale }} />, {
     progressiveChunkSize: Number.POSITIVE_INFINITY,
   })

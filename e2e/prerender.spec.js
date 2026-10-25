@@ -33,3 +33,15 @@ test('a guide is pre-rendered in full, in its own language with its own links', 
   expect(fi).toContain('href="/fi/ats-ystavallinen-cv"')
   expect(fi).not.toContain('href="/ats-friendly-cv-guide"')
 })
+
+// 1.6.54: a template page is pre-rendered with its example CV, not an
+// empty preview frame, so its text reaches crawlers that don't run JS.
+test('a template page is pre-rendered with its own example CV', async ({ request }) => {
+  const developer = await fragment(request, 'template:developer', 'en')
+  expect(developer).toContain('Frontend Developer')
+  expect(developer).not.toContain('template-page__preview-placeholder')
+
+  const european = await fragment(request, 'template:european', 'fi')
+  expect(european).toContain('scaled-preview')
+  expect(european).not.toContain('template-page__preview-placeholder')
+})

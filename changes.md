@@ -4,6 +4,23 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template pages are pre-rendered with their example CV — 1.6.54, 2026-10-25
+
+From the second AdSense content review. A template page shows a full
+example CV, but loaded it in an effect, so the pre-rendered page (1.6.49)
+had only an empty preview frame: about 120–180 words of the page's own
+text. `loadExampleCv` now keeps what it loaded, `peekExampleCv` hands it to
+`TemplateDetailPage`'s first render, and `src/prerender.jsx` loads each
+template's first example before rendering it. Template pages now carry
+about 360–680 words of their own. Four templates opened on an example
+another template also opened on (Portfolio Hybrid on the frontend
+developer, Modern Orange and Quadrant on the marketing manager, European
+on the nurse), which would have put the same CV on several pages; each
+now opens on another of its own examples (product manager, customer
+success manager, sales manager, teacher), and `check:template-pages`
+requires every template's first example to differ. Their PDF page counts
+are unchanged. Test in `prerender.spec.js`.
+
 ## Direct Edit's buttons and pencils stay off the CV — 1.6.53, 2026-10-24
 
 The rest of the Direct Edit audit, layout. The preview's own buttons
