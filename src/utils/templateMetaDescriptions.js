@@ -44,5 +44,5 @@ export const TEMPLATE_META_DESCRIPTIONS = {
   portrait:
     'Free Portrait CV template: a full-height photo fills the left column, every section flows on the right, no login.',
   european:
-    'Free European CV template: a Europass-style label/value table layout that auto-fits one page, no login.',
+    'Free European CV template: a Europass-style label/value table layout that tightens to fit one page, no login.',
 }

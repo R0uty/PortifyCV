@@ -4,6 +4,102 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Template pages say only what the templates do — 1.6.58, 2026-10-25
+
+A proofread of 1.6.55–1.6.57 and of the older template-page tips, every
+claim checked against the templates' code. Corrected:
+
+- **ATS view**: the plain ATS view keeps a visible profile photo (in the
+  header), so it no longer says the photo is dropped (Modern
+  Professional, Portrait). Modern Timeline's ATS view only turns its
+  accent grey; Navy Professional's and Modern Orange's stack the sidebar
+  above the main column and turn monochrome, keeping icons, tags, dots and
+  timelines.
+- **Design details**: Minimalist has no amber header band (a thin line
+  under the header, amber labels and tags); Creative's accent is on the
+  section numbers, job title, header rule and experience-card edges, not
+  "every heading and divider"; Executive does have icons, its section is
+  "Leadership experience", and its identity sits in the left rail;
+  Modern Timeline's line runs through experience and education only;
+  Compact has two tighter settings after its default and warns when
+  content still doesn't fit; Tech Executive's footer band needs a
+  tagline; Navy Professional's sidebar also holds photo, name and
+  contact details; Quadrant's quarters were misassigned.
+- **Modern Orange's skill dots follow list order** (five tapering to three),
+  not a rating: the text and an older tip told people to rate their
+  skills. Only Experience is on its main-column timeline.
+- **European steps down one density setting and warns**; it does not
+  always fit one page. Its tip, gallery description and meta
+  descriptions said it auto-fits.
+- **Unverifiable claims removed**: page-count promises ("fits on one page
+  with a typical history"), and on the CV examples hub "skims a CV in
+  under a minute", "the same stock phrases many times a week" and "the
+  most number-driven CV there is". The hub now names the panel that lists
+  missing keywords (ATS score & suggestions, Classic mode), not the ATS
+  view.
+- **Best for**: Minimalist and Compact named accountants and business
+  graduates, no longer among their examples; now IT support specialists.
+- **Finnish**: section names as the app shows them (Sertifikaatit, not
+  Todistukset; Johtamiskokemus and Vahvuudet, not Johtavuus and
+  Ydinvahvuudet; Esittely, not Yhteenveto); "Sinivalkoinen" for a navy
+  sidebar; "ambran-sävyisessä", "aikajananssa", "perinteiseen tittelin",
+  "royal-blue-viiva" and other errors; colloquial "niin" for "joten".
+
+The Classic-mode walkthrough screenshots were regenerated: they show the
+whole window, whose footer gained the Contact link in 1.6.56.
+
+## Every template page says what the template is for — 1.6.57, 2026-10-25
+
+The last part of the second AdSense content review. A template page had a
+one-line description, a "best for" line and three tips of its own. Each
+of the 18 now also has two paragraphs on how the template is built and
+who it suits, and three questions with answers specific to it (is the
+dark sidebar a problem for ATS, what goes in Leadership, is European the
+official Europass CV, what photo works in Portrait…), in English and
+Finnish: about 3,500 and 2,600 new words (`intro` and `faq` in
+`templatePageCopy.js`, shown as "About this template" / "Tietoa
+pohjasta" and "Questions about this template" / "Kysymyksiä pohjasta").
+With the example CV from 1.6.54, a template page's own text is now about
+585–885 words, up from about 170. `check:template-pages` requires the two
+paragraphs and three answers for every template and language, and that
+none is copied between templates. Test in `template-pages.spec.js`.
+
+## Contact in the footer — 1.6.56, 2026-10-25
+
+The contact address (portifycv@gmail.com) was only at the bottom of About
+and the privacy policy. The footer bar, on every page including the
+builder, and the site map's PortifyCV column now link it as "Contact" /
+"Yhteystiedot". Test in `site-map.spec.js`.
+
+## The CV examples hub says what changes by field — 1.6.55, 2026-10-25
+
+From the second AdSense content review: `/cv-examples` had 182 words of
+its own, four link cards and a list of example CVs. It now also covers
+what every strong CV has in common, what counts as evidence in nine fields
+(software, IT, security, healthcare, education, sales and marketing,
+creative work, finance and management, graduates), each linking the
+templates that suit it, and how to use the examples without copying
+them, in English and Finnish (791 and 578 words). The sitemap's
+`lastmod` moves to today for the hub and the 36 template pages, whose
+content changed in 1.6.54. Test in `guide-layout.spec.js`.
+
+## Template pages are pre-rendered with their example CV — 1.6.54, 2026-10-25
+
+From the second AdSense content review. A template page shows a full
+example CV, but loaded it in an effect, so the pre-rendered page (1.6.49)
+had only an empty preview frame: about 120–180 words of the page's own
+text. `loadExampleCv` now keeps what it loaded, `peekExampleCv` hands it to
+`TemplateDetailPage`'s first render, and `src/prerender.jsx` loads each
+template's first example before rendering it. Template pages now carry
+about 360–680 words of their own. Four templates opened on an example
+another template also opened on (Portfolio Hybrid on the frontend
+developer, Modern Orange and Quadrant on the marketing manager, European
+on the nurse), which would have put the same CV on several pages; each
+now opens on another of its own examples (product manager, customer
+success manager, sales manager, teacher), and `check:template-pages`
+requires every template's first example to differ. Their PDF page counts
+are unchanged. Test in `prerender.spec.js`.
+
 ## Direct Edit's buttons and pencils stay off the CV — 1.6.53, 2026-10-24
 
 The rest of the Direct Edit audit, layout. The preview's own buttons
