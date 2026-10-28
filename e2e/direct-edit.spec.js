@@ -1,5 +1,7 @@
 import { test, expect } from './fixtures/base.js'
 import { pickTemplate } from './helpers/templateGallery.js'
+import { cvTemplates } from '../src/utils/cvTemplates.js'
+import { TEMPLATE_EXAMPLES } from '../src/utils/exampleCvs.js'
 
 // The demo CV's fixed skill list (src/utils/cvForm.js's DEMO_CV-equivalent
 // seed data) — used by the Skills/EditableChip test below so it doesn't
@@ -1909,6 +1911,39 @@ test.describe('Direct Edit nav rail, entry highlight and placeholders', () => {
 // Skills used to be add-or-remove only: clicking anywhere on a chip deleted
 // it, "+ Add" inserted "New skill N" that nothing could rename, and the
 // popup and Classic's tags had no way to edit a skill's text.
+// 1.6.64: each section's pencil is level with the section's heading. It
+// was pinned to the section box's top, so it sat 5-13px below the heading
+// in most templates and 28px above it in Graduate (whose heading sits
+// under an icon), and the templates that slide their sections in
+// (Developer, Creative, Colorful Compact) were measured mid-slide.
+test.describe('Direct Edit section pencils', () => {
+  for (const template of cvTemplates) {
+    test(`${template.id}: every section pencil is level with its heading`, async ({ page }) => {
+      await page.goto(`/cv?template=${template.id}&example=${TEMPLATE_EXAMPLES[template.id][0]}`)
+      await page.getByRole('tab', { name: 'Direct Edit' }).click()
+      const pencils = page.locator('.direct-edit-preview [data-direct-edit-pencil]:not([data-direct-edit-pencil="identity"])')
+      await expect(pencils.first()).toBeVisible()
+
+      const offsets = () => pencils.evaluateAll((elements) => elements.map((pencil) => {
+        const key = pencil.getAttribute('data-direct-edit-pencil')
+        const section = document.querySelector(`.direct-edit-preview [data-export-section="${key}"]`)
+        const walker = document.createTreeWalker(section, NodeFilter.SHOW_TEXT)
+        const range = document.createRange()
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          if (!node.textContent.trim() || node.parentElement.closest('button')) continue
+          range.selectNodeContents(node)
+          const line = range.getClientRects()[0]
+          const box = pencil.getBoundingClientRect()
+          return `${key}: ${Math.round(box.top + box.height / 2 - (line.top + line.height / 2))}`
+        }
+        return `${key}: no text`
+      }))
+
+      await expect.poll(async () => (await offsets()).filter((entry) => !/: -?[01]$/.test(entry))).toEqual([])
+    })
+  }
+})
+
 test.describe('Editing a skill', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/cv')

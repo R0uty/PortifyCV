@@ -4,6 +4,19 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Section pencils line up with their headings — 1.6.64, 2026-10-28
+
+In Direct Edit each section's pencil was pinned to the top of the
+section's box, and every template puts its heading at a different depth
+in that box: the pencil sat 5-13px below the heading in most templates,
+on its underline, and 28px above it in Graduate, whose heading sits
+under an icon. It is now centred on the section's first line of text,
+whatever element holds the heading. Developer, Creative and Colorful
+Compact slide their sections in as they appear, which moved them
+without resizing anything, so their pencils were measured mid-slide;
+they are re-measured when that animation ends. Test in
+`direct-edit.spec.js`, every template.
+
 ## Section pencils stay under the Sections panel — 1.6.63, 2026-10-28
 
 In Direct Edit, opening the Sections menu drew the section pencils on
