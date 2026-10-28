@@ -1825,6 +1825,42 @@ test.describe('Direct Edit nav rail, entry highlight and placeholders', () => {
     await expect(rail.getByRole('button', { name: 'Summary' })).toHaveCount(0)
   })
 
+  // The section pencils sit on an overlay above the CV (z-index 20), and
+  // were drawn over the open Sections panel (1.6.63).
+  test('no section pencil covers the open Sections panel', async ({ page }) => {
+    await page.goto('/cv?template=modern&example=project-manager')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await expect(page.locator('.direct-edit-pencil').first()).toBeVisible()
+    await page.getByRole('button', { name: 'Sections', exact: true }).click()
+    const panel = page.locator('.direct-edit-sections__panel')
+
+    // The panel hangs over the CV's right edge, where the pencils hang
+    // outside each section's top-right corner: at least one is under it.
+    const pencilsUnderPanel = await panel.evaluate((el) => {
+      const box = el.getBoundingClientRect()
+      return [...document.querySelectorAll('.direct-edit-pencil')].filter((pencil) => {
+        const p = pencil.getBoundingClientRect()
+        return p.left < box.right && p.right > box.left && p.top < box.bottom && p.bottom > box.top
+      }).length
+    })
+    expect(pencilsUnderPanel).toBeGreaterThan(0)
+
+    const covered = await panel.evaluate((panel) => {
+      const box = panel.getBoundingClientRect()
+      // Inside the panel's rounded corners (border-radius 10px).
+      const inset = 10
+      const covers = []
+      for (let x = box.left + inset; x <= box.right - inset; x += 4) {
+        for (let y = box.top + inset; y <= Math.min(box.bottom, innerHeight) - inset; y += 4) {
+          const top = document.elementFromPoint(x, y)
+          if (top && !panel.contains(top)) covers.push(String(top.className))
+        }
+      }
+      return [...new Set(covers)]
+    })
+    expect(covered).toEqual([])
+  })
+
   test('the entry being edited is highlighted while one of its fields has focus', async ({ page }) => {
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
     await page.getByRole('tab', { name: 'Direct Edit' }).click()

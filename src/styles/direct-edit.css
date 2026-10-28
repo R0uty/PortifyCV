@@ -328,6 +328,13 @@
   z-index: 5;
 }
 
+/* While the Sections panel is open, also above the pencils' overlay
+   (.direct-edit-overlay-host, z-index 20 in direct-edit-popup.css), which
+   otherwise draws the section pencils over the panel. */
+.direct-edit-actions:has(.direct-edit-sections__panel) {
+  z-index: 21;
+}
+
 .direct-edit-sections__trigger {
   font-size: 0.75rem;
   font-weight: 500;
