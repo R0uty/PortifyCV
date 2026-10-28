@@ -4,6 +4,17 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Contact details stay inside the sidebar — 1.6.60, 2026-10-28
+
+A scan of every template's on-screen preview (Classic at 1440px, Direct
+Edit at 1440 and 1024px, every example) for text running past its own
+column found Modern Orange's and Navy Professional's contact details
+(email, website, LinkedIn) running up to 39px past the sidebar into the
+main column in the narrower live preview. Their values now use the
+shared `.tpl-value-breakable` wrap, as the template guidelines ask for
+URLs and emails. The PDF, laid out wider, was not affected. Thumbnails
+regenerated (Modern Orange's contact lines wrap differently).
+
 ## PDF page breaks never cut a line of text — 1.6.59, 2026-10-28
 
 A PDF export cuts one tall image of the CV into A4 pages, and the break

@@ -467,7 +467,10 @@ export default function NavyProfessionalShowcase({
               {directEditContactFields.map(([key, value, placeholderLabel, pathKind, icon]) => (
                 <div key={key} className="navy-professional-showcase__contact-item">
                   <span className="navy-professional-showcase__contact-icon" aria-hidden="true">{icon}</span>
-                  <span>
+                  {/* Emails and addresses wrap anywhere (1.6.59): in a narrow
+                      preview the LinkedIn address ran up to 30px past the
+                      sidebar. */}
+                  <span className="tpl-value-breakable">
                     <EditableField
                       as="span"
                       path={{ kind: pathKind, field: key }}
@@ -485,13 +488,13 @@ export default function NavyProfessionalShowcase({
               {contactItems.map(([key, value]) => (
                 <div key={key} className="navy-professional-showcase__contact-item">
                   <span className="navy-professional-showcase__contact-icon" aria-hidden="true">{contactIcons[key]}</span>
-                  <span>{value}</span>
+                  <span className="tpl-value-breakable">{value}</span>
                 </div>
               ))}
               {linkedinUrl ? (
                 <div className="navy-professional-showcase__contact-item">
                   <span className="navy-professional-showcase__contact-icon" aria-hidden="true">{devIcons.linkedin}</span>
-                  <span>{formatLinkDisplayValue(linkedinUrl)}</span>
+                  <span className="tpl-value-breakable">{formatLinkDisplayValue(linkedinUrl)}</span>
                 </div>
               ) : null}
             </div>
