@@ -42,8 +42,11 @@ function PanelSection({
           {eyebrow ? (
             <p className="ds-kicker accent-text uppercase tracking-[0.14em]">{eyebrow}</p>
           ) : null}
-          <div className={`flex items-start justify-between gap-3${eyebrow ? ' mt-3' : ''}`}>
-            <h2 className={`ds-section-title font-bold uppercase tracking-[-0.02em] sm:text-2xl ${ui.textPrimary}`}>{title}</h2>
+          {/* Wraps (1.6.61): in a narrow form column the title and badge
+              didn't fit one row, and the badge ran under the toggle
+              button beside it ("6/6 VISI" at a 1024px window). */}
+          <div className={`flex flex-wrap items-start justify-between gap-x-3 gap-y-2${eyebrow ? ' mt-3' : ''}`}>
+            <h2 className={`ds-section-title min-w-0 font-bold uppercase tracking-[-0.02em] sm:text-2xl ${ui.textPrimary}`}>{title}</h2>
             {badge ? (
               <span className={`shrink-0 px-3 py-1 text-xs font-bold uppercase tracking-[0.08em] ${badgeClasses}`}>
                 {badge.label}

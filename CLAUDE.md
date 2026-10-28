@@ -214,6 +214,10 @@ above `collectCanvasPageBreakpoints`/`collectCanvasContentBlocks`/
 logic, since main-column and sidebar breakpoints are deliberately handled
 asymmetrically (main column drives the page-break decision; sidebar content
 is filtered out of that calculation and just falls wherever it lands).
+Since 1.6.59 a final pass, `keepPageBreaksOutOfText`, moves any break that
+would cut a text line or small icon in *either* column up above it and
+re-flows the pages after it, so the sidebar can no longer be sliced
+mid-line; `e2e/pdf-page-breaks.spec.js` (@slow) fails on any cut line.
 
 **Share links carry the whole CV in the URL, never a server.**
 `src/utils/shareLinks.js` encodes CV state with short single/double-letter

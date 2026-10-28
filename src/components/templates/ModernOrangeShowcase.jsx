@@ -623,25 +623,29 @@ export default function ModernOrangeShowcase({
                   {directEditDispatch ? (
                     <EditableField
                       as="span"
+                      className="tpl-value-breakable"
                       path={{ kind: 'root', field: key }}
                       value={value}
                       placeholder={placeholderLabel}
                     />
                   ) : (
-                    <span>{value}</span>
+                    // Emails and addresses wrap anywhere (1.6.59): in a
+                    // narrow preview a long LinkedIn address ran 39px past
+                    // the sidebar into the main column.
+                    <span className="tpl-value-breakable">{value}</span>
                   )}
                 </div>
               ))}
               {websiteUrl ? (
                 <div className="modern-orange-showcase__contact-item">
                   <span className="modern-orange-showcase__contact-icon" aria-hidden="true">{devIcons.website}</span>
-                  <span>{formatLinkDisplayValue(websiteUrl)}</span>
+                  <span className="tpl-value-breakable">{formatLinkDisplayValue(websiteUrl)}</span>
                 </div>
               ) : null}
               {linkedinUrl ? (
                 <div className="modern-orange-showcase__contact-item">
                   <span className="modern-orange-showcase__contact-icon" aria-hidden="true">{devIcons.linkedin}</span>
-                  <span>{formatLinkDisplayValue(linkedinUrl)}</span>
+                  <span className="tpl-value-breakable">{formatLinkDisplayValue(linkedinUrl)}</span>
                 </div>
               ) : null}
             </div>

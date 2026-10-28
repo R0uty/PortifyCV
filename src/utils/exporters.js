@@ -1127,6 +1127,147 @@ function collectCanvasSectionHeadingBottoms(captureRoot, canvas) {
   return headingBottoms
 }
 
+// Every line of text, and every small icon or image, in canvas px, from
+// BOTH columns. The page-break choice above is driven by the main column
+// only, so a break could still land in the middle of a sidebar line —
+// a heading sliced in half across two pages (1.6.59: Graduate's
+// "Interests" did exactly that). `keepPageBreaksOutOfText` below moves any
+// break that would cut one of these up to just above it.
+// Just enough to keep anti-aliased glyph edges with their line; a break in
+// the leading between two lines of a paragraph is fine.
+const UNBREAKABLE_PAD_PX = 1
+const UNBREAKABLE_MAX_ATOM_HEIGHT_PX = 60
+
+function collectCanvasUnbreakableRanges(captureRoot, canvas) {
+  if (!captureRoot || !canvas) {
+    return []
+  }
+
+  const sourceHeight = Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1)
+  const sourceRect = captureRoot.getBoundingClientRect()
+  const scaleY = canvas.height / sourceHeight
+  const ranges = []
+  const isIgnored = (element) => Boolean(
+    element?.closest('[data-export-ignore="true"], [data-export-summary-chip="true"]'),
+  )
+  const addRect = (rect) => {
+    if (rect.width < 1 || rect.height < 1) {
+      return
+    }
+
+    const top = Math.max(0, Math.floor((rect.top - sourceRect.top - UNBREAKABLE_PAD_PX) * scaleY))
+    const bottom = Math.min(canvas.height, Math.ceil((rect.bottom - sourceRect.top + UNBREAKABLE_PAD_PX) * scaleY))
+
+    if (bottom > top) {
+      ranges.push({ top, bottom })
+    }
+  }
+
+  const walker = document.createTreeWalker(captureRoot, NodeFilter.SHOW_TEXT)
+  const range = document.createRange()
+  let node = walker.nextNode()
+
+  while (node) {
+    if (node.textContent.trim() && !isIgnored(node.parentElement)) {
+      range.selectNodeContents(node)
+      Array.from(range.getClientRects()).forEach(addRect)
+    }
+
+    node = walker.nextNode()
+  }
+
+  captureRoot.querySelectorAll('svg, img').forEach((element) => {
+    if (isIgnored(element)) {
+      return
+    }
+
+    const rect = element.getBoundingClientRect()
+
+    if (rect.height <= UNBREAKABLE_MAX_ATOM_HEIGHT_PX) {
+      addRect(rect)
+    }
+  })
+
+  return ranges.sort((a, b) => a.top - b.top)
+}
+
+// Moves `y` up until it sits outside every unbreakable range, so the line
+// it would have cut starts the next page instead. Gives up (keeping `y`)
+// rather than leave the page less than a third full — a pathological
+// stack of overlapping lines must not produce a near-empty page.
+function findSafeBreakY(y, pageTop, pageHeightPx, unbreakableRanges) {
+  const floor = pageTop + Math.floor(pageHeightPx / 3)
+  let safeY = y
+
+  for (let guard = 0; guard < 200; guard += 1) {
+    const blocking = unbreakableRanges.find((range) => range.top < safeY && range.bottom > safeY)
+
+    if (!blocking) {
+      return safeY
+    }
+
+    safeY = blocking.top
+
+    if (safeY <= floor) {
+      return y
+    }
+  }
+
+  return y
+}
+
+// Final pass over the page slices: keep every boundary out of text (see
+// `collectCanvasUnbreakableRanges`). The pages are re-flowed from the top:
+// each ends at the furthest original boundary that still fits on it, or
+// else at the best main-column breakpoint in its lower half, and that end
+// is moved up out of any line it would cut. A boundary nudged up a few px
+// so shifts the pages after it slightly, instead of pushing the next page
+// over the limit and splitting it into a full page and a near-empty stub.
+// No page is ever taller than one page.
+function keepPageBreaksOutOfText(slices, pageHeightPx, breakpoints = [], unbreakableRanges = []) {
+  if (!slices.length || !unbreakableRanges.length) {
+    return slices
+  }
+
+  const end = slices[slices.length - 1].bottom
+  const originalBoundaries = slices.slice(0, -1).map((slice) => slice.bottom)
+  const result = []
+  let top = slices[0].top
+
+  const minPage = Math.floor(pageHeightPx / 4)
+
+  while (end - top > pageHeightPx) {
+    const limit = top + pageHeightPx
+    // The original layout's own boundary when one still fits and, kept out
+    // of text, leaves the page at least a quarter full. A boundary just
+    // past one that moved up would otherwise make a sliver of a page.
+    const original = [...originalBoundaries].reverse().find((y) => y > top + minPage && y <= limit)
+    const originalCut = original === undefined
+      ? undefined
+      : findSafeBreakY(original, top, pageHeightPx, unbreakableRanges)
+    // An original boundary that had to climb far (through lines in both
+    // columns) can leave a short page; then the best main-column breakpoint
+    // in the page's lower half, also kept out of text, may fill it better.
+    const keptOriginal = originalCut !== undefined && originalCut > top + minPage
+      && original - originalCut <= pageHeightPx / 10
+    let cutY = originalCut
+
+    if (!keptOriginal) {
+      const fallback = [...breakpoints].reverse().find((y) => y > top + pageHeightPx / 2 && y <= limit)
+      const fallbackCut = findSafeBreakY(fallback ?? limit, top, pageHeightPx, unbreakableRanges)
+      cutY = originalCut !== undefined && originalCut > top + minPage
+        ? Math.max(originalCut, fallbackCut)
+        : fallbackCut
+    }
+
+    result.push({ top, bottom: cutY })
+    top = cutY
+  }
+
+  result.push({ top, bottom: end })
+  return result
+}
+
 function resolvePageSliceHeight(offsetY, pageHeightPx, totalHeight, breakpoints) {
   const remainingHeight = totalHeight - offsetY
 
@@ -1362,6 +1503,7 @@ function addCanvasPagesToPdf(
   contentBlocks = [],
   sectionRanges = [],
   headingBottoms = new Map(),
+  unbreakableRanges = [],
 ) {
   const renderedWidth = A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right
   const printableHeight = A4_HEIGHT_MM - pdfMode.marginMm.top - pdfMode.marginMm.bottom
@@ -1374,11 +1516,16 @@ function addCanvasPagesToPdf(
     throw new Error('Unable to prepare page canvas for PDF export.')
   }
 
-  const pageSlices = buildPageSlicesFromBlocks(
+  const pageSlices = keepPageBreaksOutOfText(
+    buildPageSlicesFromBlocks(
+      pageHeightPx,
+      contentBlocks.length > 0 ? contentBlocks : [{ top: 0, bottom: canvas.height }],
+      breakpoints,
+      headingBottoms,
+    ),
     pageHeightPx,
-    contentBlocks.length > 0 ? contentBlocks : [{ top: 0, bottom: canvas.height }],
     breakpoints,
-    headingBottoms,
+    unbreakableRanges,
   )
   const effectiveContentBlocks = contentBlocks.length > 0
     ? contentBlocks
@@ -1456,7 +1603,7 @@ function addCanvasPagesToPdf(
   })
 }
 
-function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks = [], sectionRanges = [], headingBottoms = new Map()) {
+function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks = [], sectionRanges = [], headingBottoms = new Map(), unbreakableRanges = []) {
   const renderedWidth = A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right
   const printableHeight = A4_HEIGHT_MM - pdfMode.marginMm.top - pdfMode.marginMm.bottom
   const pageBottomY = A4_HEIGHT_MM - pdfMode.marginMm.bottom
@@ -1468,11 +1615,16 @@ function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks
     throw new Error('Unable to prepare page canvas for PDF export.')
   }
 
-  const pageSlices = buildPageSlicesFromBlocks(
+  const pageSlices = keepPageBreaksOutOfText(
+    buildPageSlicesFromBlocks(
+      pageHeightPx,
+      contentBlocks.length > 0 ? contentBlocks : [{ top: 0, bottom: canvas.height }],
+      breakpoints,
+      headingBottoms,
+    ),
     pageHeightPx,
-    contentBlocks.length > 0 ? contentBlocks : [{ top: 0, bottom: canvas.height }],
     breakpoints,
-    headingBottoms,
+    unbreakableRanges,
   )
   const effectiveContentBlocks = contentBlocks.length > 0
     ? contentBlocks
@@ -2383,6 +2535,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     const contentBlocks = collectCanvasContentBlocks(captureRoot, canvas)
     const sectionRanges = collectCanvasSectionRanges(captureRoot, canvas)
     const headingBottoms = collectCanvasSectionHeadingBottoms(captureRoot, canvas)
+    const unbreakableRanges = collectCanvasUnbreakableRanges(captureRoot, canvas)
     const exportName =
       mode === 'designer' ? fileName : `${fileName}-${createPdfMode(mode).fileSuffix}`
     const workerPages = createWorkerPageSlices(
@@ -2392,6 +2545,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
       contentBlocks,
       sectionRanges,
       headingBottoms,
+      unbreakableRanges,
     )
 
     try {
@@ -2406,7 +2560,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
         format: 'a4',
       })
 
-      addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints, contentBlocks, sectionRanges, headingBottoms)
+      addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints, contentBlocks, sectionRanges, headingBottoms, unbreakableRanges)
       const blob = pdf.output('blob')
       saveAs(blob, `${exportName}.pdf`)
     }

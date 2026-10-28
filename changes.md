@@ -4,6 +4,81 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## The Classic preview is a scaled page — 1.6.62, 2026-10-28
+
+The Classic preview reflowed the CV to the width of its pane, so at a
+1024px window the page was about 375px wide and two-column templates
+squeezed their main column to almost nothing (Executive about 110px,
+Tech Executive 75px, Navy Professional 135px): nothing like the PDF.
+The preview now lays the CV out at its 220mm paper width, the width
+PDF export uses, and scales it to the pane with `zoom`. Fit Width is
+the default, re-fits as the window or pane resizes, and stops at 100%
+on a wide screen. Zooming past the pane scrolls the page sideways
+inside the preview, under a zoom bar that stays in view. Narrow preview
+and phones (under 1024px) still reflow the CV to their column. The PDF
+export no longer resets the zoom while it runs, since it renders from
+the off-screen copy. Test in `editor.spec.js`. The builder walkthrough
+screenshots are regenerated.
+
+The layout harness's builder tiers (`waitForStableLayout`) and the
+European card-spacing test now measure the Classic preview at 100%:
+Chrome lays zoomed text out at the zoomed font size, so its lines wrap
+a little differently from the page at actual size, which is what the
+PDF prints. At paper width the harness also caught a flaw in its own
+"word too wide to fit" exemption: it ignored the padding of the boxes
+between the word and its row, so Portfolio's pill badge, which cannot
+hold the stress tier's 44-letter word, read as a defect. That padding
+is now subtracted.
+
+## The Classic form fits a narrow column — 1.6.61, 2026-10-28
+
+From a scan of the builder for overlapping, overflowing and clipped text
+at 1440, 1024, 768 and 375px. At a 1024px window the Classic form column
+is about 220px wide, but its field rows switched to two or three columns
+on the window's width (`sm:grid-cols-2/3`): Email / Phone / Location got
+about 63px each, the "Location" label overflowed the Profile panel, and
+focusing that field scrolled the panel sideways and left its left edge
+cut off ("ROFILE IMAGE", "PG or PNG"). The form column is now a CSS
+container and its rows go to one column when it can't give each field
+room. The Visible sections badge ("6/6 VISI") ran under the panel's
+toggle button; title and badge now wrap. Test in `editor.spec.js`.
+
+## Contact details stay inside the sidebar — 1.6.60, 2026-10-28
+
+A scan of every template's on-screen preview (Classic at 1440px, Direct
+Edit at 1440 and 1024px, every example) for text running past its own
+column found Modern Orange's and Navy Professional's contact details
+(email, website, LinkedIn) running up to 39px past the sidebar into the
+main column in the narrower live preview. Their values now use the
+shared `.tpl-value-breakable` wrap, as the template guidelines ask for
+URLs and emails. The PDF, laid out wider, was not affected. Thumbnails
+regenerated (Modern Orange's contact lines wrap differently).
+
+## PDF page breaks never cut a line of text — 1.6.59, 2026-10-28
+
+A PDF export cuts one tall image of the CV into A4 pages, and the break
+positions were chosen from the main column only; sidebar content "fell
+wherever it landed". A sidebar line could therefore be sliced in half
+across two pages. Found by exporting every template with every example,
+in Finnish, in ATS view, in each look, and with a long CV (157 PDFs),
+and checking every text line against the page boundaries: Graduate's
+"Interests" heading (business-graduate example), and with a long CV a
+Graduate achievement and a Modern Orange skill. All pages were A4 and
+nothing ran off the side.
+
+`exporters.js` now collects every text line and every small icon or image
+in both columns (`collectCanvasUnbreakableRanges`) and re-flows the
+pages after the existing break choice (`keepPageBreaksOutOfText`): each
+page ends at the original break when it still fits, moved up just above
+any line it would cut, or, if that would leave the page short, at the
+best main-column break in the page's lower half. No page is taller than
+the printable area, and no example CV's page count changed (one ATS
+export got a page shorter). The same 157 exports afterwards: no cut
+lines. `e2e/pdf-page-breaks.spec.js` (@slow) exports every template's
+first example and a long CV, plus the Graduate case, and fails on any
+cut line or non-A4 page (`e2e/helpers/pdfTextCuts.js`); with the fix
+switched off it fails on exactly the three lines above.
+
 ## Template pages say only what the templates do — 1.6.58, 2026-10-25
 
 A proofread of 1.6.55–1.6.57 and of the older template-page tips, every

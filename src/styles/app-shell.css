@@ -138,6 +138,29 @@
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
+/* The form's field rows follow the form column's own width (1.6.61), not
+   the window's: sm:grid-cols-2/3 switch on at 640px of window, but beside
+   the preview the column is far narrower, so a three-field row (Email,
+   Phone, Location) got ~63px per field. A label wider than its field then
+   overflowed the panel, and focusing that field scrolled the panel
+   sideways, cutting off its left edge. Rows go to one column when the
+   column can't give each field room. */
+.editor-panel {
+  container: editor-panel / inline-size;
+}
+
+@container editor-panel (max-width: 32.5rem) {
+  .editor-panel [class~='sm:grid-cols-3'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container editor-panel (max-width: 26rem) {
+  .editor-panel [class~='sm:grid-cols-2'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .editor-panel::-webkit-scrollbar {
   width: 12px;
 }
@@ -2481,7 +2504,11 @@ select.floating-field__control {
   gap: var(--space-4);
   width: min(100%, var(--preview-stage-width));
   margin: 0 auto;
-  padding: var(--space-2) 0 0;
+  /* Scrolls the paper-width CV sideways when zoomed past the pane (see
+     .preview-zoom-wrapper); the side padding keeps the page's shadow
+     inside that scroll box. */
+  padding: var(--space-2) var(--space-2) 0;
+  overflow-x: auto;
 }
 
 .preview-mobile-toggle {
@@ -2492,8 +2519,23 @@ select.floating-field__control {
   min-width: 0;
 }
 
+/* The CV is laid out at its real paper width (220mm, the width PDF export
+   renders it at) and scaled to the pane with `zoom`, so a narrow pane shows
+   a smaller page rather than a squeezed one with its columns reflowed. Fit
+   Width (ResumeBuilderPage.jsx) picks the zoom; above it the page scrolls
+   sideways inside .preview-stage, under a zoom bar that stays put.
+   Narrow preview and phones (utilities.css) reflow it to their column
+   instead. */
+
 .preview-zoom-wrapper {
   zoom: var(--preview-zoom, 1);
+  width: 220mm;
+  max-width: none;
+  margin-inline: auto;
+}
+
+.preview-panel--responsive .preview-zoom-wrapper {
+  width: auto;
 }
 
 .preview-zoom-bar {

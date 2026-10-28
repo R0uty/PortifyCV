@@ -1576,6 +1576,8 @@ test.describe('Direct Edit builder', () => {
       return cards[1].getBoundingClientRect().top - cards[0].getBoundingClientRect().bottom
     }, scope)
 
+    // At actual size: the Classic preview is scaled to fit its pane.
+    await page.locator('.preview-zoom-bar').getByRole('button', { name: '100%' }).click()
     expect(await gapBetweenCards('.european-showcase')).toBeGreaterThanOrEqual(14)
 
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
