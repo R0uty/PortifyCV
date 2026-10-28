@@ -4,6 +4,43 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Word, HTML and JSON exports carry the whole CV — 1.6.65, 2026-10-28
+
+An audit of the non-PDF exports found them losing content every
+template shows:
+- A job's bullet points and technologies were missing from Word and
+  HTML, as was the location of jobs, education and internships.
+- A current job had no "Present" / "Nykyinen".
+- Projects lost their date in Word and their organisation, impact and
+  date in HTML.
+- Certificates lost their credential link, and Word dropped
+  publication and open-source URLs.
+
+Other fixes:
+- Word printed the editor's placeholder text for empty sections ("No
+  links added yet."). Word and HTML printed "Your Name" /
+  "Professional Title" for a blank name or title.
+- Finnish files had English left in them: "at" between role and
+  company (now "@", as in the templates) and "(expires …)" (now
+  "Vanhenee").
+- Link labels read "Devto" and "BoardProfile". They now use the
+  editor's names, in the CV's language.
+- Nothing was clickable. Links, email and phone are now real links in
+  HTML, and links and email are links in Word.
+- The HTML file now shows the photo when the template does, and the
+  name is its `<h1>`.
+- The PDF text fallback had the same gaps and gets the same fixes.
+
+Importing a JSON file whose section order was empty (the template's
+own order) turned it into the full default order, which moved
+sections around. It now stays empty.
+
+Tests: `check:docx-export` now checks what reaches the file for one
+template of each Word layout in both languages. Its placeholder
+assertions are changed on purpose, since placeholders are no longer
+written. `export.spec.js` checks the HTML and Word contents and the
+JSON round trip.
+
 ## Section pencils line up with their headings — 1.6.64, 2026-10-28
 
 In Direct Edit each section's pencil was pinned to the top of the

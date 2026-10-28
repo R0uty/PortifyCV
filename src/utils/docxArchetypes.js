@@ -8,8 +8,9 @@
 // See docs/superpowers/specs/2026-09-13-word-export-c2-c3-design.md.
 
 import { Table, TableRow, TableCell, WidthType, ShadingType, Paragraph, BorderStyle } from 'docx'
-import { sectionHeading, boldLine, plainLine, emptyNotice, descriptionLines, NO_CELL_BORDERS, META_SIZE } from './docxExport'
-import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
+import { sectionHeading, boldLine, plainLine, bulletLines, linkLine, descriptionLines, NO_CELL_BORDERS, META_SIZE, BODY_SIZE } from './docxExport'
+import { formatDateRange } from './shared'
+import { formatExportDates, getExportLinkLabel } from './exporters'
 
 const RAIL_WIDTH_PERCENT = 32
 const MAIN_WIDTH_PERCENT = 68
@@ -117,25 +118,30 @@ function buildLabelGridRow(labelText, valueChildren) {
   })
 }
 
+// An empty section adds nothing, as in docxExport.js (1.6.65).
 function buildLabelGridAbout(snapshot, copy) {
   if (!snapshot.about) {
-    return [sectionHeading(copy.about), emptyNotice(copy.addSummary)]
+    return []
   }
   return [sectionHeading(copy.about), buildLabelGridRow('', [plainLine(snapshot.about)])]
 }
 
 function buildLabelGridExperience(snapshot, copy) {
   if (snapshot.experience.length === 0) {
-    return [sectionHeading(copy.experience), emptyNotice(copy.noExperience)]
+    return []
   }
   const rows = snapshot.experience.map((item) => {
     const heading = item.role || copy.untitledRole
     const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
-    const dateRange = formatDateRange(item.startDate, item.endDate)
+    const dateRange = formatExportDates(item, copy)
     const value = [
       boldLine(heading),
       metaLine ? plainLine(metaLine, { subtle: true, size: META_SIZE }) : null,
       ...descriptionLines(item.description),
+      ...bulletLines(item.achievements),
+      item.technologies.length > 0
+        ? plainLine(item.technologies.join(', '), { subtle: true, size: META_SIZE })
+        : null,
     ]
     return buildLabelGridRow(dateRange, value)
   })
@@ -144,7 +150,7 @@ function buildLabelGridExperience(snapshot, copy) {
 
 function buildLabelGridEducation(snapshot, copy) {
   if (snapshot.education.length === 0) {
-    return [sectionHeading(copy.education), emptyNotice(copy.noEducation)]
+    return []
   }
   const rows = snapshot.education.map((item) => {
     const heading = item.degree || copy.educationEntry
@@ -161,7 +167,7 @@ function buildLabelGridEducation(snapshot, copy) {
 
 function buildLabelGridSkills(snapshot, copy) {
   if (snapshot.skills.length === 0) {
-    return [sectionHeading(copy.skills), emptyNotice(copy.addSkills)]
+    return []
   }
   // Flat, not category-grouped — parseSkillCategories lives in
   // src/components/templates/shared.jsx (JSX, not importable from this
@@ -188,9 +194,9 @@ function buildLabelGridProjects(snapshot, copy) {
 function buildLabelGridLinks(snapshot, copy) {
   const links = Object.entries(snapshot.links)
   if (links.length === 0) {
-    return [sectionHeading(copy.links), emptyNotice(copy.noLinks)]
+    return []
   }
-  const rows = links.map(([key, value]) => buildLabelGridRow(formatLinkLabel(key), [plainLine(formatLinkDisplayValue(value))]))
+  const rows = links.map(([key, value]) => buildLabelGridRow(getExportLinkLabel(key, copy.lang), [linkLine('', value, { size: BODY_SIZE })]))
   return [sectionHeading(copy.links), ...rows]
 }
 

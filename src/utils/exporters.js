@@ -5,9 +5,9 @@ import fileSaverPkg from 'file-saver'
 const { saveAs } = fileSaverPkg
 import { defaultTemplateId } from './cvTemplates'
 import { getEffectiveCvTemplate } from './sectionColumns'
-import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from './cvForm'
+import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate, getLinkFields } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
-import { formatDateRange, formatLinkLabel } from './shared'
+import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
 
 const PDF_MODES = {
   designer: {
@@ -179,8 +179,6 @@ export function createExportCopy(locale = 'en') {
 
   return {
     lang: isFinnish ? 'fi' : 'en',
-    yourName: isFinnish ? 'Nimesi' : 'Your Name',
-    professionalTitle: isFinnish ? 'Ammattinimike' : 'Professional Title',
     untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
     educationEntry: isFinnish ? 'Koulutusmerkintä' : 'Education entry',
     about: isFinnish ? 'Esittely' : 'About',
@@ -208,13 +206,59 @@ export function createExportCopy(locale = 'en') {
     technologies: isFinnish ? 'Teknologiat' : 'Technologies',
     outcome: isFinnish ? 'Tulos' : 'Outcome',
     lessonsLearned: isFinnish ? 'Opitut asiat' : 'Lessons Learned',
-    addSummary: isFinnish ? 'Lisää ammatillinen yhteenveto.' : 'Add a professional summary.',
-    addSkills: isFinnish ? 'Lisää taitoja' : 'Add skills',
-    noExperience: isFinnish ? 'Työkokemusta ei ole vielä lisätty.' : 'No experience added yet.',
-    noEducation: isFinnish ? 'Koulutusta ei ole vielä lisätty.' : 'No education added yet.',
-    noLinks: isFinnish ? 'Linkkejä ei ole vielä lisätty.' : 'No links added yet.',
+    // As the templates word them (CVPreview.jsx, GraduateShowcase.jsx).
+    present: isFinnish ? 'Nykyinen' : 'Present',
+    expires: isFinnish ? 'Vanhenee' : 'Expires',
     cv: isFinnish ? 'CV' : 'CV',
   }
+}
+
+// Helpers the HTML, Word and text-PDF exports share (1.6.65), so a field
+// reads the same in every file.
+
+// A link's name as the form shows it ("Verkkosivu", "Hack The Box"), not
+// its storage key.
+export function getExportLinkLabel(key, locale = 'en') {
+  return getLinkFields(locale).find((field) => field.key === key)?.label ?? formatLinkLabel(key)
+}
+
+// "Mar 2019 - Present" for a current job, which has no end date.
+export function formatExportDates(item, copy) {
+  return formatDateRange(item.startDate ?? '', item.endDate ?? '', Boolean(item.isCurrent), copy.present)
+}
+
+export function formatExportCertificate(item, copy) {
+  const meta = [item.issuer, item.year].filter(Boolean).join(', ')
+  const expiry = item.expiry ? ` (${copy.expires} ${item.expiry})` : ''
+  return (meta ? `${item.name} — ${meta}` : item.name) + expiry
+}
+
+// An http(s) address to link to, for a value typed with or without its
+// scheme ("linkedin.com/in/x"); undefined for anything else, so a
+// `javascript:` value never becomes a link. Unlike getSafeHref (shared.js)
+// this needs no window, since the Word export also runs in Node.
+export function getExportHref(value) {
+  const trimmed = typeof value === 'string' ? value.trim() : ''
+
+  if (/^https?:\/\/[^\s]+$/i.test(trimmed)) {
+    return trimmed
+  }
+
+  return /^[a-z0-9-]+(\.[a-z0-9-]+)+(\/[^\s]*)?$/i.test(trimmed) ? `https://${trimmed}` : undefined
+}
+
+// Whether a section has anything to show. An empty one is left out of an
+// exported file rather than filled with a note to the person writing it.
+export function isExportSectionPopulated(snapshot, section) {
+  if (section === 'about') {
+    return Boolean(snapshot.about)
+  }
+
+  if (section === 'links') {
+    return Object.keys(snapshot.links).length > 0
+  }
+
+  return Array.isArray(snapshot[section]) && snapshot[section].length > 0
 }
 
 export function getPhotoDataUrl(value) {
@@ -350,6 +394,11 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
   const locale = options.locale === 'fi' ? 'fi' : 'en'
   const copy = createExportCopy(locale)
   const snapshot = createCvSnapshot(formData)
+  // The photo shows when the chosen template shows it, as in the Word file.
+  const includePhoto = isPhotoVisibleForTemplate(
+    formData.photoVisibilityByTemplate,
+    getEffectiveCvTemplate(options.template ?? defaultTemplateId, 'en', formData).id,
+  )
   const sectionVisibility = {
     ...createSectionVisibility(),
     ...(formData.sectionVisibility ?? {}),
@@ -364,14 +413,29 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
       .replace(/"/g, '&quot;')
   }
 
+  // A link when the value is a real address, its text otherwise.
+  function anchor(value, href = getExportHref(value), text = formatLinkDisplayValue(value)) {
+    return href ? `<a href="${esc(href)}">${esc(text)}</a>` : esc(text)
+  }
+
+  const metaLine = (item) => [formatExportDates(item, copy), item.location].filter(Boolean).join(' · ')
+
   const experienceItems = snapshot.experience
     .map((item) => {
-      const heading = [item.role, item.company].filter(Boolean).join(' at ') || copy.untitledRole
-      const dateRange = formatDateRange(item.startDate, item.endDate)
+      const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
+      const meta = metaLine(item)
+      // The job's bullet points and technologies, as every template shows
+      // them (getExperienceBullets etc. in directEditExperienceEntry.jsx).
+      const bullets = item.achievements.length > 0
+        ? `<ul class="xp-bullets">${item.achievements.map((line) => `<li>${esc(line)}</li>`).join('')}</ul>`
+        : ''
+      const technologies = item.technologies.length > 0
+        ? `<p class="project-stack">${esc(item.technologies.join(', '))}</p>`
+        : ''
 
       return `  <div class="xp-item">
-    <div class="xp-head"><p class="xp-role">${esc(heading)}</p>${dateRange ? `<p class="xp-date">${esc(dateRange)}</p>` : ''}</div>
-    ${item.description ? `<p class="xp-desc">${esc(item.description)}</p>` : ''}
+    <div class="xp-head"><p class="xp-role">${esc(heading)}</p>${meta ? `<p class="xp-date">${esc(meta)}</p>` : ''}</div>
+    ${item.description ? `<p class="xp-desc">${esc(item.description)}</p>` : ''}${bullets}${technologies}
   </div>`
     })
     .join('\n')
@@ -380,12 +444,12 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
     .map((item) => {
       const heading =
         [item.degree, item.school].filter(Boolean).join(', ') || copy.educationEntry
-      const dateRange = formatDateRange(item.startDate, item.endDate)
+      const meta = metaLine(item)
 
       const gradeLine = [item.grade, item.coursework].filter(Boolean).join(' · ')
 
       return `  <div class="edu-item">
-    <p class="edu-degree">${esc(heading)}</p>${dateRange ? `<p class="edu-date">${esc(dateRange)}</p>` : ''}${item.honors ? `<p class="edu-honors">${esc(item.honors)}</p>` : ''}${gradeLine ? `<p class="edu-honors">${esc(gradeLine)}</p>` : ''}
+    <p class="edu-degree">${esc(heading)}</p>${meta ? `<p class="edu-date">${esc(meta)}</p>` : ''}${item.honors ? `<p class="edu-honors">${esc(item.honors)}</p>` : ''}${gradeLine ? `<p class="edu-honors">${esc(gradeLine)}</p>` : ''}
   </div>`
     })
     .join('\n')
@@ -397,7 +461,7 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
   const linkItems = Object.entries(snapshot.links)
     .map(
       ([key, value]) =>
-        `  <div class="link-item"><p class="link-label">${esc(formatLinkLabel(key))}</p><p class="link-url">${esc(value)}</p></div>`,
+        `  <div class="link-item"><p class="link-label">${esc(getExportLinkLabel(key, locale))}</p><p class="link-url">${anchor(value)}</p></div>`,
     )
     .join('\n')
 
@@ -409,18 +473,15 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
     .join('\n')
 
   const certificateItems = snapshot.certificates
-    .map((item) => {
-      const meta = [item.issuer, item.year].filter(Boolean).join(', ')
-      const expiry = item.expiry ? ` (expires ${item.expiry})` : ''
-      return `<li>${esc(item.name)}${meta ? ` — ${esc(meta)}` : ''}${esc(expiry)}</li>`
-    })
+    .map((item) => `<li>${esc(formatExportCertificate(item, copy))}${item.credentialUrl ? ` · ${anchor(item.credentialUrl)}` : ''}</li>`)
     .join('\n    ')
 
   const projectItems = snapshot.projects
     .map((item) => {
-      const linkLine = [item.githubUrl, item.demoUrl].filter(Boolean).join('  ·  ')
+      const linkLine = [item.githubUrl, item.demoUrl].filter(Boolean).map((url) => anchor(url)).join('  ·  ')
       const contributionLine = [item.teamSize, item.contribution].filter(Boolean).join(' · ')
-      return `  <div class="project-item">${item.name ? `<p class="project-name">${esc(item.name)}</p>` : ''}${item.description ? `<p class="project-desc">${esc(item.description)}</p>` : ''}${item.stack ? `<p class="project-stack">${esc(item.stack)}</p>` : ''}${contributionLine ? `<p class="project-stack">${esc(contributionLine)}</p>` : ''}${linkLine ? `<p class="project-links">${esc(linkLine)}</p>` : ''}</div>`
+      const organizationLine = [item.organization, item.date].filter(Boolean).join(' · ')
+      return `  <div class="project-item">${item.name ? `<p class="project-name">${esc(item.name)}</p>` : ''}${organizationLine ? `<p class="publication-meta">${esc(organizationLine)}</p>` : ''}${item.description ? `<p class="project-desc">${esc(item.description)}</p>` : ''}${item.impact ? `<p class="project-impact">${esc(item.impact)}</p>` : ''}${item.stack ? `<p class="project-stack">${esc(item.stack)}</p>` : ''}${contributionLine ? `<p class="project-stack">${esc(contributionLine)}</p>` : ''}${linkLine ? `<p class="project-links">${linkLine}</p>` : ''}</div>`
     })
     .join('\n')
 
@@ -447,14 +508,14 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
       const meta = [item.language, item.stars ? `★ ${item.stars}` : '', item.forks ? `⑂ ${item.forks}` : '']
         .filter(Boolean)
         .join('   ')
-      return `  <div class="opensource-item">${item.name ? `<p class="opensource-name">${esc(item.name)}</p>` : ''}${meta ? `<p class="opensource-meta">${esc(meta)}</p>` : ''}${item.description ? `<p class="opensource-desc">${esc(item.description)}</p>` : ''}${item.url ? `<p class="opensource-url">${esc(item.url)}</p>` : ''}</div>`
+      return `  <div class="opensource-item">${item.name ? `<p class="opensource-name">${esc(item.name)}</p>` : ''}${meta ? `<p class="opensource-meta">${esc(meta)}</p>` : ''}${item.description ? `<p class="opensource-desc">${esc(item.description)}</p>` : ''}${item.url ? `<p class="opensource-url">${anchor(item.url)}</p>` : ''}</div>`
     })
     .join('\n')
 
   const publicationItems = snapshot.publications
     .map((item) => {
       const meta = [item.publisher, item.year].filter(Boolean).join(' · ')
-      return `  <div class="publication-item">${item.title ? `<p class="publication-title">${esc(item.title)}</p>` : ''}${meta ? `<p class="publication-meta">${esc(meta)}</p>` : ''}${item.url ? `<p class="publication-url">${esc(item.url)}</p>` : ''}</div>`
+      return `  <div class="publication-item">${item.title ? `<p class="publication-title">${esc(item.title)}</p>` : ''}${meta ? `<p class="publication-meta">${esc(meta)}</p>` : ''}${item.url ? `<p class="publication-url">${anchor(item.url)}</p>` : ''}</div>`
     })
     .join('\n')
 
@@ -489,11 +550,11 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
 
   const internshipItems = snapshot.internships
     .map((item) => {
-      const heading = [item.role, item.company].filter(Boolean).join(' at ') || copy.untitledRole
-      const dateRange = formatDateRange(item.startDate, item.endDate)
+      const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
+      const meta = metaLine(item)
 
       return `  <div class="xp-item">
-    <div class="xp-head"><p class="xp-role">${esc(heading)}</p>${dateRange ? `<p class="xp-date">${esc(dateRange)}</p>` : ''}</div>
+    <div class="xp-head"><p class="xp-role">${esc(heading)}</p>${meta ? `<p class="xp-date">${esc(meta)}</p>` : ''}</div>
     ${item.description ? `<p class="xp-desc">${esc(item.description)}</p>` : ''}${item.technologies ? `<p class="project-stack">${esc(item.technologies)}</p>` : ''}
   </div>`
     })
@@ -520,10 +581,17 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
     })
     .join('\n')
 
-  const contactLine = [snapshot.email, snapshot.phone, snapshot.location]
+  const contactLine = [
+    snapshot.email && `<a href="mailto:${esc(snapshot.email)}">${esc(snapshot.email)}</a>`,
+    snapshot.phone && `<a href="tel:${esc(snapshot.phone.replace(/[^\d+]/g, ''))}">${esc(snapshot.phone)}</a>`,
+    snapshot.location && esc(snapshot.location),
+  ]
     .filter(Boolean)
-    .map((value) => `<span>${esc(value)}</span>`)
+    .map((value) => `<span>${value}</span>`)
     .join('')
+  const photo = includePhoto && snapshot.photo
+    ? `<img class="cv-photo" src="${esc(snapshot.photo)}" alt="">`
+    : ''
 
   const isVisible = (section) => sectionVisibility[section] !== false
   const sectionMarkupByKey = {
@@ -644,6 +712,13 @@ section { margin-bottom: 2.5rem; }
 .link-item { margin-bottom: 0.875rem; }
 .link-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: #94a3b8; margin-bottom: 0.25rem; }
 .link-url { font-size: 0.9rem; color: #0284c7; word-break: break-all; }
+a { color: inherit; }
+.link-url a { color: #0284c7; }
+header { display: flex; gap: 1.5rem; align-items: flex-start; justify-content: space-between; }
+.cv-photo { width: 6rem; height: 6rem; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.xp-bullets { margin-top: 0.5rem; padding-left: 1.125rem; font-size: 0.9rem; color: #334155; line-height: 1.65; }
+.xp-bullets li { margin-bottom: 0.25rem; }
+.project-impact { margin-top: 0.25rem; font-size: 0.85rem; font-weight: 600; color: #334155; }
 .strength-item { margin-bottom: 1.125rem; }
 .strength-title { font-weight: 600; font-size: 0.95rem; }
 .strength-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; white-space: pre-line; }
@@ -690,8 +765,9 @@ section { margin-bottom: 2.5rem; }
 </head>
 <body>
 <header>
-  <p class="cv-name">${esc(snapshot.fullName || copy.yourName)}</p>
-  <p class="cv-job-title">${esc(snapshot.title || copy.professionalTitle)}</p>${snapshot.tagline ? `\n  <p class="cv-tagline">${esc(snapshot.tagline)}</p>` : ''}${contactLine ? `\n  <div class="cv-contact">${contactLine}</div>` : ''}
+  <div>
+  ${snapshot.fullName ? `<h1 class="cv-name">${esc(snapshot.fullName)}</h1>` : ''}${snapshot.title ? `\n  <p class="cv-job-title">${esc(snapshot.title)}</p>` : ''}${snapshot.tagline ? `\n  <p class="cv-tagline">${esc(snapshot.tagline)}</p>` : ''}${contactLine ? `\n  <div class="cv-contact">${contactLine}</div>` : ''}
+  </div>${photo ? `\n  ${photo}` : ''}
 </header>
 
 ${sections}
@@ -1753,12 +1829,14 @@ function ensurePdfCursorSpace(pdf, cursor, heightNeeded, marginMm) {
   cursor.y = marginMm.top
 }
 
-async function drawFallbackHeader(pdf, snapshot, marginMm, palette, includePhoto = true, copy = createExportCopy()) {
+async function drawFallbackHeader(pdf, snapshot, marginMm, palette, includePhoto = true) {
   const fullWidth = A4_WIDTH_MM - marginMm.left - marginMm.right
   const headerX = marginMm.left
   const headerY = marginMm.top
-  const title = snapshot.fullName || copy.yourName
-  const subtitle = snapshot.title || copy.professionalTitle
+  // A blank name or title stays blank: the editor's placeholder text is not
+  // the person's name.
+  const title = snapshot.fullName
+  const subtitle = snapshot.title
   const rawPhotoDataUrl = getPhotoDataUrl(snapshot.photo)
   const photoDataUrl = rawPhotoDataUrl ? await cropPhotoDataUrlToSquare(rawPhotoDataUrl) : ''
   const photoSize = 21
@@ -1773,16 +1851,20 @@ async function drawFallbackHeader(pdf, snapshot, marginMm, palette, includePhoto
   pdf.setTextColor(...palette.headerText)
   pdf.setFont('helvetica', 'bold')
   pdf.setFontSize(16)
-  const titleLines = pdf.splitTextToSize(title, availableTextWidth)
-  pdf.text(titleLines, headerX, headerY + 4.2)
-  const titleLineCount = Array.isArray(titleLines) ? titleLines.length : 1
+  const titleLines = title ? pdf.splitTextToSize(title, availableTextWidth) : []
+  if (titleLines.length > 0) {
+    pdf.text(titleLines, headerX, headerY + 4.2)
+  }
+  const titleLineCount = titleLines.length
 
   pdf.setFont('helvetica', 'normal')
   pdf.setFontSize(10.5)
   const subtitleY = headerY + 4.2 + titleLineCount * 5.2
-  const subtitleLines = pdf.splitTextToSize(subtitle, availableTextWidth)
-  pdf.text(subtitleLines, headerX, subtitleY)
-  const subtitleLineCount = Array.isArray(subtitleLines) ? subtitleLines.length : 1
+  const subtitleLines = subtitle ? pdf.splitTextToSize(subtitle, availableTextWidth) : []
+  if (subtitleLines.length > 0) {
+    pdf.text(subtitleLines, headerX, subtitleY)
+  }
+  const subtitleLineCount = subtitleLines.length
   const textBottomY = subtitleY + subtitleLineCount * 4.6
 
   if (hasPhoto) {
@@ -1911,7 +1993,7 @@ async function exportCvAsPdfTextFallback(
     templateConfig.id,
   )
   const cursor = {
-    y: await drawFallbackHeader(pdf, snapshot, pdfMode.marginMm, palette, includePhoto, copy),
+    y: await drawFallbackHeader(pdf, snapshot, pdfMode.marginMm, palette, includePhoto),
   }
 
   const isVisible = (section) => sectionVisibility[section] !== false
@@ -1920,7 +2002,7 @@ async function exportCvAsPdfTextFallback(
     drawFallbackSectionHeading(pdf, copy.about, cursor, pdfMode.marginMm, palette)
     drawFallbackParagraph(
       pdf,
-      snapshot.about || copy.addSummary,
+      snapshot.about,
       cursor,
       pdfMode.marginMm,
       palette,
@@ -1930,11 +2012,7 @@ async function exportCvAsPdfTextFallback(
 
   const renderSkills = () => {
     drawFallbackSectionHeading(pdf, copy.skills, cursor, pdfMode.marginMm, palette)
-    if (snapshot.skills.length > 0) {
-      drawFallbackBullets(pdf, snapshot.skills, cursor, pdfMode.marginMm, palette)
-    } else {
-      drawFallbackParagraph(pdf, copy.addSkills, cursor, pdfMode.marginMm, palette, { subtle: true })
-    }
+    drawFallbackBullets(pdf, snapshot.skills, cursor, pdfMode.marginMm, palette)
   }
 
   const renderExperience = () => {
@@ -1948,9 +2026,9 @@ async function exportCvAsPdfTextFallback(
           after: 0.6,
         })
 
-        const dateRange = formatDateRange(item.startDate, item.endDate)
-        if (dateRange) {
-          drawFallbackParagraph(pdf, dateRange, cursor, pdfMode.marginMm, palette, {
+        const meta = [formatExportDates(item, copy), item.location].filter(Boolean).join(' · ')
+        if (meta) {
+          drawFallbackParagraph(pdf, meta, cursor, pdfMode.marginMm, palette, {
             subtle: true,
             size: 9.8,
             after: 0.8,
@@ -1963,12 +2041,21 @@ async function exportCvAsPdfTextFallback(
             lineHeight: 4.85,
             after: 1.5,
           })
-        } else {
+        }
+        if (item.achievements.length > 0) {
+          drawFallbackBullets(pdf, item.achievements, cursor, pdfMode.marginMm, palette)
+        }
+        if (item.technologies.length > 0) {
+          drawFallbackParagraph(pdf, item.technologies.join(', '), cursor, pdfMode.marginMm, palette, {
+            subtle: true,
+            size: 9.2,
+            after: 1.3,
+          })
+        }
+        if (!item.description && item.achievements.length === 0 && item.technologies.length === 0) {
           cursor.y += 1.2
         }
       })
-    } else {
-      drawFallbackParagraph(pdf, copy.noExperience, cursor, pdfMode.marginMm, palette, { subtle: true })
     }
   }
 
@@ -1977,7 +2064,7 @@ async function exportCvAsPdfTextFallback(
     if (snapshot.education.length > 0) {
       snapshot.education.forEach((item) => {
         const heading = [item.degree, item.school].filter(Boolean).join(', ') || copy.educationEntry
-        const dateRange = formatDateRange(item.startDate, item.endDate)
+        const dateRange = [formatExportDates(item, copy), item.location].filter(Boolean).join(' · ')
 
         drawFallbackParagraph(pdf, heading, cursor, pdfMode.marginMm, palette, {
           bold: true,
@@ -2011,8 +2098,6 @@ async function exportCvAsPdfTextFallback(
           })
         }
       })
-    } else {
-      drawFallbackParagraph(pdf, copy.noEducation, cursor, pdfMode.marginMm, palette, { subtle: true })
     }
   }
 
@@ -2023,15 +2108,13 @@ async function exportCvAsPdfTextFallback(
       links.forEach(([key, value]) => {
         drawFallbackParagraph(
           pdf,
-          `${formatLinkLabel(key)}: ${value}`,
+          `${getExportLinkLabel(key, locale)}: ${value}`,
           cursor,
           pdfMode.marginMm,
           palette,
           { size: 10.2, after: 1.1 },
         )
       })
-    } else {
-      drawFallbackParagraph(pdf, copy.noLinks, cursor, pdfMode.marginMm, palette, { subtle: true })
     }
   }
 
@@ -2062,11 +2145,7 @@ async function exportCvAsPdfTextFallback(
     if (snapshot.certificates.length > 0) {
       drawFallbackBullets(
         pdf,
-        snapshot.certificates.map((item) => {
-          const meta = [item.issuer, item.year].filter(Boolean).join(', ')
-          const expiry = item.expiry ? ` (expires ${item.expiry})` : ''
-          return (meta ? `${item.name} — ${meta}` : item.name) + expiry
-        }),
+        snapshot.certificates.map((item) => [formatExportCertificate(item, copy), item.credentialUrl].filter(Boolean).join(' · ')),
         cursor,
         pdfMode.marginMm,
         palette,
@@ -2084,8 +2163,9 @@ async function exportCvAsPdfTextFallback(
           after: 0.5,
         })
       }
-      if (item.organization) {
-        drawFallbackParagraph(pdf, item.organization, cursor, pdfMode.marginMm, palette, {
+      const organizationLine = [item.organization, item.date].filter(Boolean).join(' · ')
+      if (organizationLine) {
+        drawFallbackParagraph(pdf, organizationLine, cursor, pdfMode.marginMm, palette, {
           subtle: true,
           size: 9.8,
           after: 0.5,
@@ -2198,6 +2278,13 @@ async function exportCvAsPdfTextFallback(
         drawFallbackParagraph(pdf, item.description, cursor, pdfMode.marginMm, palette, {
           size: 10,
           lineHeight: 4.7,
+          after: item.url ? 0.5 : 1.3,
+        })
+      }
+      if (item.url) {
+        drawFallbackParagraph(pdf, item.url, cursor, pdfMode.marginMm, palette, {
+          subtle: true,
+          size: 9.2,
           after: 1.3,
         })
       }
@@ -2214,7 +2301,7 @@ async function exportCvAsPdfTextFallback(
           after: 0.5,
         })
       }
-      const meta = [item.publisher, item.year].filter(Boolean).join(' · ')
+      const meta = [item.publisher, item.year, item.url].filter(Boolean).join(' · ')
       if (meta) {
         drawFallbackParagraph(pdf, meta, cursor, pdfMode.marginMm, palette, {
           subtle: true,
@@ -2329,7 +2416,7 @@ async function exportCvAsPdfTextFallback(
         after: 0.6,
       })
 
-      const dateRange = formatDateRange(item.startDate, item.endDate)
+      const dateRange = [formatExportDates(item, copy), item.location].filter(Boolean).join(' · ')
       if (dateRange) {
         drawFallbackParagraph(pdf, dateRange, cursor, pdfMode.marginMm, palette, {
           subtle: true,
@@ -2430,17 +2517,21 @@ async function exportCvAsPdfTextFallback(
 
   const renderedSections = new Set()
 
+  // A section with nothing in it gets no heading, as in the Word and HTML
+  // files.
+  const shouldRender = (section) => isVisible(section) && isExportSectionPopulated(snapshot, section)
+
   sectionOrder.forEach((section) => {
     const render = sectionRenderers[section]
 
-    if (render && !renderedSections.has(section) && isVisible(section)) {
+    if (render && !renderedSections.has(section) && shouldRender(section)) {
       render()
       renderedSections.add(section)
     }
   })
 
   Object.keys(sectionRenderers).forEach((section) => {
-    if (!renderedSections.has(section) && isVisible(section)) {
+    if (!renderedSections.has(section) && shouldRender(section)) {
       sectionRenderers[section]()
       renderedSections.add(section)
     }
