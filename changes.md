@@ -4,6 +4,31 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## PDF page breaks never cut a line of text — 1.6.59, 2026-10-28
+
+A PDF export cuts one tall image of the CV into A4 pages, and the break
+positions were chosen from the main column only; sidebar content "fell
+wherever it landed". A sidebar line could therefore be sliced in half
+across two pages. Found by exporting every template with every example,
+in Finnish, in ATS view, in each look, and with a long CV (157 PDFs),
+and checking every text line against the page boundaries: Graduate's
+"Interests" heading (business-graduate example), and with a long CV a
+Graduate achievement and a Modern Orange skill. All pages were A4 and
+nothing ran off the side.
+
+`exporters.js` now collects every text line and every small icon or image
+in both columns (`collectCanvasUnbreakableRanges`) and re-flows the
+pages after the existing break choice (`keepPageBreaksOutOfText`): each
+page ends at the original break when it still fits, moved up just above
+any line it would cut, or, if that would leave the page short, at the
+best main-column break in the page's lower half. No page is taller than
+the printable area, and no example CV's page count changed (one ATS
+export got a page shorter). The same 157 exports afterwards: no cut
+lines. `e2e/pdf-page-breaks.spec.js` (@slow) exports every template's
+first example and a long CV, plus the Graduate case, and fails on any
+cut line or non-A4 page (`e2e/helpers/pdfTextCuts.js`); with the fix
+switched off it fails on exactly the three lines above.
+
 ## Template pages say only what the templates do — 1.6.58, 2026-10-25
 
 A proofread of 1.6.55–1.6.57 and of the older template-page tips, every
