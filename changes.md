@@ -4,6 +4,13 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Section pencils stay under the Sections panel — 1.6.63, 2026-10-28
+
+In Direct Edit, opening the Sections menu drew the section pencils on
+top of it, since they live on an overlay above the CV (z-index 20) and
+the menu's row sat at 5. While the menu is open its row now sits above
+that overlay. Test in `direct-edit.spec.js`.
+
 ## The Classic preview is a scaled page — 1.6.62, 2026-10-28
 
 The Classic preview reflowed the CV to the width of its pane, so at a
