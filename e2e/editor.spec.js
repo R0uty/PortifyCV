@@ -104,3 +104,34 @@ test.describe('CV editor', () => {
     })
   }
 })
+
+// 1.6.61: at a 1024px window the Classic form column is ~220px wide. Field
+// rows switched to 2–3 columns on window width, so Email / Phone / Location
+// got ~63px each, the Location label overflowed the panel, and focusing it
+// scrolled the panel sideways, cutting off its left edge. Rows now follow
+// the form column's width, and the Visible sections badge wraps instead of
+// running under its toggle.
+test.describe('Classic form in a narrow column', () => {
+  test.use({ viewport: { width: 1024, height: 900 } })
+
+  test('no form panel is wider than its box, and focusing a field never shifts it', async ({ page }) => {
+    await page.goto('/cv?template=executive&example=finance-director')
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    const location = page.getByRole('textbox', { name: /^Location/ }).first()
+    await location.focus()
+    const panels = await page.locator('.editor-panel .panel-section__body-inner').evaluateAll((els) => els
+      .filter((el) => el.clientWidth > 0)
+      .map((el) => ({ extra: el.scrollWidth - el.clientWidth, shifted: el.scrollLeft })))
+    expect(panels.length).toBeGreaterThan(0)
+    for (const panel of panels) {
+      expect(panel.extra).toBeLessThanOrEqual(0)
+      expect(panel.shifted).toBe(0)
+    }
+
+    const badge = page.getByText(/^\d+\/\d+ visible$/i).first()
+    const toggle = page.locator('.editor-panel .panel-section__toggle').first()
+    const [b, t] = await Promise.all([badge.boundingBox(), toggle.boundingBox()])
+    const overlaps = b.x < t.x + t.width && b.x + b.width > t.x && b.y < t.y + t.height && b.y + b.height > t.y
+    expect(overlaps).toBe(false)
+  })
+})

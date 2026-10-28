@@ -138,6 +138,29 @@
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
+/* The form's field rows follow the form column's own width (1.6.61), not
+   the window's: sm:grid-cols-2/3 switch on at 640px of window, but beside
+   the preview the column is far narrower, so a three-field row (Email,
+   Phone, Location) got ~63px per field. A label wider than its field then
+   overflowed the panel, and focusing that field scrolled the panel
+   sideways, cutting off its left edge. Rows go to one column when the
+   column can't give each field room. */
+.editor-panel {
+  container: editor-panel / inline-size;
+}
+
+@container editor-panel (max-width: 32.5rem) {
+  .editor-panel [class~='sm:grid-cols-3'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@container editor-panel (max-width: 26rem) {
+  .editor-panel [class~='sm:grid-cols-2'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .editor-panel::-webkit-scrollbar {
   width: 12px;
 }

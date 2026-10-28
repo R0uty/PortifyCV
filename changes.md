@@ -4,6 +4,19 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## The Classic form fits a narrow column — 1.6.61, 2026-10-28
+
+From a scan of the builder for overlapping, overflowing and clipped text
+at 1440, 1024, 768 and 375px. At a 1024px window the Classic form column
+is about 220px wide, but its field rows switched to two or three columns
+on the window's width (`sm:grid-cols-2/3`): Email / Phone / Location got
+about 63px each, the "Location" label overflowed the Profile panel, and
+focusing that field scrolled the panel sideways and left its left edge
+cut off ("ROFILE IMAGE", "PG or PNG"). The form column is now a CSS
+container and its rows go to one column when it can't give each field
+room. The Visible sections badge ("6/6 VISI") ran under the panel's
+toggle button; title and badge now wrap. Test in `editor.spec.js`.
+
 ## Contact details stay inside the sidebar — 1.6.60, 2026-10-28
 
 A scan of every template's on-screen preview (Classic at 1440px, Direct
