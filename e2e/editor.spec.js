@@ -134,4 +134,38 @@ test.describe('Classic form in a narrow column', () => {
     const overlaps = b.x < t.x + t.width && b.x + b.width > t.x && b.y < t.y + t.height && b.y + b.height > t.y
     expect(overlaps).toBe(false)
   })
+
+  // 1.6.62: the Classic preview lays the CV out at its 220mm paper width and
+  // scales it to the pane, instead of reflowing it to the pane's width —
+  // which squeezed Executive's main column to about 110px at this size.
+  test('the preview is a scaled paper-width page, and zooming past the pane scrolls only the page', async ({ page }) => {
+    await page.goto('/cv?template=executive&example=finance-director')
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    const wrapper = page.locator('.preview-zoom-wrapper')
+    const layout = () => wrapper.evaluate((el) => {
+      const zoom = Number(el.style.getPropertyValue('--preview-zoom'))
+      const stage = el.closest('.preview-stage')
+      const panel = el.closest('.preview-panel')
+      return {
+        zoom,
+        main: el.querySelector('[data-export-primary]').getBoundingClientRect().width / zoom,
+        stageExtra: stage.scrollWidth - stage.clientWidth,
+        panelExtra: panel.scrollWidth - panel.clientWidth,
+      }
+    })
+
+    await expect.poll(async () => (await layout()).zoom).toBeLessThan(1)
+    const fitted = await layout()
+    expect(fitted.main).toBeGreaterThan(500)
+    expect(fitted.stageExtra).toBeLessThanOrEqual(0)
+
+    await page.getByRole('button', { name: '150%' }).click()
+    await expect.poll(async () => (await layout()).zoom).toBe(1.5)
+    const zoomed = await layout()
+    expect(zoomed.stageExtra).toBeGreaterThan(0)
+    expect(zoomed.panelExtra).toBeLessThanOrEqual(0)
+
+    await page.getByRole('button', { name: 'Fit width' }).click()
+    await expect.poll(async () => (await layout()).zoom).toBe(fitted.zoom)
+  })
 })

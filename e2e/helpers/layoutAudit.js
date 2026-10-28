@@ -1,3 +1,4 @@
+import { expect } from '../fixtures/base.js'
 // Layout audit for rendered CVs (Phase 2 template polish). auditLayout runs
 // in the browser against one rendered CV root and returns rule violations;
 // the template harness (template-layout.spec.js) treats any violation that
@@ -14,6 +15,15 @@ export const LAYOUT_THRESHOLDS = {
 export async function waitForStableLayout(page) {
   await page.waitForLoadState('networkidle')
   await page.evaluate(() => document.fonts.ready)
+  // Since 1.6.62 the Classic preview is the paper-width page scaled to fit
+  // its pane. Chrome lays zoomed text out at the zoomed font size, so its
+  // lines wrap a little differently from the page at actual size, which is
+  // the layout PDF export uses. Audit that one.
+  const actualSize = page.locator('.preview-zoom-bar').getByRole('button', { name: '100%' })
+  if (await actualSize.isVisible()) {
+    await actualSize.click()
+    await expect(page.locator('.preview-zoom-wrapper')).toHaveCSS('--preview-zoom', '1')
+  }
 }
 
 export async function auditLayout(page, rootSelector, opts = {}) {
@@ -85,14 +95,19 @@ export async function auditLayout(page, rootSelector, opts = {}) {
       // currently happen to be laid out. Falls back to the word's nearest
       // block container (this file's existing `getBlockContainer`,
       // computed by the caller) when the word isn't inside a flex/grid row
-      // at all.
+      // at all. The padding and borders of the boxes between the word and
+      // that row (a pill-shaped chip's own padding, say) still take room
+      // from it, so they are subtracted (1.6.62).
       const widestAvailableWidth = (fontEl, fallbackContainer) => {
         let ancestor = fontEl
+        let insets = 0
         while (ancestor && ancestor !== root.parentElement) {
-          const display = getComputedStyle(ancestor).display
-          if (['flex', 'grid', 'inline-flex', 'inline-grid'].includes(display)) {
-            return elementContentWidth(ancestor)
+          const cs = getComputedStyle(ancestor)
+          if (['flex', 'grid', 'inline-flex', 'inline-grid'].includes(cs.display)) {
+            return elementContentWidth(ancestor) - insets
           }
+          insets += (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0)
+            + (parseFloat(cs.borderLeftWidth) || 0) + (parseFloat(cs.borderRightWidth) || 0)
           ancestor = ancestor.parentElement
         }
         return elementContentWidth(fallbackContainer)

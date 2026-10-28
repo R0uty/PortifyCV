@@ -98,6 +98,9 @@ import { EXAMPLES, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
 const RESET_CONFIRM_WINDOW_MS = 4000
+// The Classic preview's paper width, 220mm in CSS px — .preview-zoom-wrapper's
+// width in app-shell.css, and the width PDF export renders the CV at.
+const PREVIEW_PAPER_WIDTH_PX = (220 / 25.4) * 96
 
 // Order must match the section cards' actual JSX order in CVForm.jsx (personal,
 // summary, skills, experience, education, coreStrengths, certificates,
@@ -519,6 +522,12 @@ function ResumeBuilderPage({
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false)
   const [isResponsivePreview, setIsResponsivePreview] = useState(false)
   const [zoomPercent, setZoomPercent] = useState(100)
+  // Fit Width is the default: the Classic preview lays the CV out at its
+  // paper width and scales it to the pane (see .preview-zoom-wrapper in
+  // app-shell.css), re-fitting as the pane resizes. Any other zoom control
+  // leaves it at the zoom picked.
+  const [isFitWidthZoom, setIsFitWidthZoom] = useState(true)
+  const previewStageRef = useRef(null)
   const [isTemplateGalleryOpen, setIsTemplateGalleryOpen] = useState(false)
   // SectionEditOverlay's handle, for Direct Edit's nav rail; see
   // handleDirectEditNavigate.
@@ -912,13 +921,6 @@ function ResumeBuilderPage({
 
     showToast(toastLabel, 'info')
 
-    const zoomPercentBeforeExport = type === 'pdf-designer' ? zoomPercent : null
-
-    if (zoomPercentBeforeExport !== null && zoomPercentBeforeExport !== 100) {
-      setZoomPercent(100)
-      await waitForPreviewRefresh()
-    }
-
     try {
       const {
         exportCvAsJson,
@@ -1012,12 +1014,9 @@ function ResumeBuilderPage({
         'error',
       )
     } finally {
-      if (zoomPercentBeforeExport !== null && zoomPercentBeforeExport !== 100) {
-        setZoomPercent(zoomPercentBeforeExport)
-      }
       dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
     }
-  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate, templateAccentColors, zoomPercent])
+  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate, templateAccentColors])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()
@@ -1395,16 +1394,55 @@ function ResumeBuilderPage({
   const clampZoomPercent = useCallback((value) => Math.round(Math.min(200, Math.max(40, value))), [])
 
   const handleSetZoomPercent = useCallback((value) => {
+    setIsFitWidthZoom(false)
     setZoomPercent(clampZoomPercent(value))
   }, [clampZoomPercent])
 
   const handleZoomBy = useCallback((delta) => {
+    setIsFitWidthZoom(false)
     setZoomPercent((value) => clampZoomPercent(value + delta))
   }, [clampZoomPercent])
 
   const handleFitWidth = useCallback(() => {
-    setZoomPercent(100)
+    setIsFitWidthZoom(true)
   }, [])
+
+  // The zoom at which the paper-width CV fills the preview stage, capped at
+  // actual size so a wide pane shows the page at 100% rather than blowing it
+  // up. Narrow preview reflows the CV to its 26rem column instead of
+  // scaling it, so it fits at 100%.
+  useEffect(() => {
+    const stage = previewStageRef.current
+
+    if (!isFitWidthZoom || !stage) {
+      return undefined
+    }
+
+    // A ResizeObserver reports the stage's size as soon as it starts
+    // observing, so this also makes the first fit. The fit waits a frame:
+    // a new zoom resizes the stage (its height, a scrollbar), and resizing
+    // an observed box inside the observer's own callback is a loop error.
+    let frame = 0
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        if (isResponsivePreview) {
+          setZoomPercent(100)
+        } else if (stage.clientWidth > 0) {
+          const { paddingLeft, paddingRight } = getComputedStyle(stage)
+          const width = stage.clientWidth - parseFloat(paddingLeft) - parseFloat(paddingRight)
+          setZoomPercent(Math.max(25, Math.min(100, Math.floor((width / PREVIEW_PAPER_WIDTH_PX) * 100))))
+        }
+      })
+    })
+
+    observer.observe(stage)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      observer.disconnect()
+    }
+  }, [isFitWidthZoom, isResponsivePreview])
 
   const handleFitPage = useCallback(() => {
     const viewport = previewViewportRef.current
@@ -1412,14 +1450,16 @@ function ResumeBuilderPage({
     const zoomWrapper = content?.closest('.preview-zoom-wrapper')
     const availableHeight = viewport ? viewport.clientHeight - 48 : 0
 
+    setIsFitWidthZoom(false)
+
     if (!zoomWrapper || availableHeight <= 0 || content.getBoundingClientRect().height <= 0) {
       setZoomPercent(100)
       return
     }
 
-    // The CV reflows to its zoomed width — zooming in narrows its layout box
-    // and makes it taller — so its height at the current zoom doesn't
-    // predict its height at any other. Binary-search the largest zoom whose
+    // In Narrow preview the CV reflows to its zoomed width — zooming in
+    // narrows its layout box and makes it taller — so its height at the
+    // current zoom doesn't predict its height at any other. Binary-search the largest zoom whose
     // rendered height fits instead, writing each candidate straight onto the
     // wrapper so getBoundingClientRect forces a synchronous layout at it,
     // then restore React's value before committing the result. Falls back to
@@ -1459,6 +1499,7 @@ function ResumeBuilderPage({
       }
 
       event.preventDefault()
+      setIsFitWidthZoom(false)
       setZoomPercent((value) => clampZoomPercent(value - Math.sign(event.deltaY) * 5))
     }
 
@@ -2257,7 +2298,7 @@ function ResumeBuilderPage({
           </button>
         ) : null}
 
-        <div className="preview-stage">
+        <div ref={previewStageRef} className="preview-stage">
           <button
             type="button"
             className={`preview-mobile-toggle border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition lg:hidden ${

@@ -774,10 +774,11 @@
      screen, outside the zoomed box) scroll the page normally — exactly the
      "only scrolls near the top/bottom" symptom this fixes. There's no
      visual change from disabling it here: the zoom bar above is hidden on
-     mobile, so zoomPercent (ResumeBuilderPage.jsx) never leaves its 100%
-     default and --preview-zoom is always 1 on this breakpoint anyway. */
+     mobile, and the preview reflows to the screen width here rather than
+     being laid out at paper width and scaled down. */
   .preview-zoom-wrapper {
     zoom: normal;
+    width: auto;
   }
 
   .editor-panel,

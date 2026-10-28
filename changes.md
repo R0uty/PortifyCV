@@ -4,6 +4,32 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## The Classic preview is a scaled page — 1.6.62, 2026-10-28
+
+The Classic preview reflowed the CV to the width of its pane, so at a
+1024px window the page was about 375px wide and two-column templates
+squeezed their main column to almost nothing (Executive about 110px,
+Tech Executive 75px, Navy Professional 135px): nothing like the PDF.
+The preview now lays the CV out at its 220mm paper width, the width
+PDF export uses, and scales it to the pane with `zoom`. Fit Width is
+the default, re-fits as the window or pane resizes, and stops at 100%
+on a wide screen. Zooming past the pane scrolls the page sideways
+inside the preview, under a zoom bar that stays in view. Narrow preview
+and phones (under 1024px) still reflow the CV to their column. The PDF
+export no longer resets the zoom while it runs, since it renders from
+the off-screen copy. Test in `editor.spec.js`. The builder walkthrough
+screenshots are regenerated.
+
+The layout harness's builder tiers (`waitForStableLayout`) and the
+European card-spacing test now measure the Classic preview at 100%:
+Chrome lays zoomed text out at the zoomed font size, so its lines wrap
+a little differently from the page at actual size, which is what the
+PDF prints. At paper width the harness also caught a flaw in its own
+"word too wide to fit" exemption: it ignored the padding of the boxes
+between the word and its row, so Portfolio's pill badge, which cannot
+hold the stress tier's 44-letter word, read as a defect. That padding
+is now subtracted.
+
 ## The Classic form fits a narrow column — 1.6.61, 2026-10-28
 
 From a scan of the builder for overlapping, overflowing and clipped text
