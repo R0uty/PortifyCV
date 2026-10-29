@@ -4,6 +4,35 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Builder usability: leave warning, tap targets, toasts, hero chips — 1.6.66, 2026-10-29
+
+From a usability review of the live site:
+- **Leaving with unsaved edits asks first.** Nothing is saved, so one
+  back-swipe, closed tab or footer link lost the whole CV. The browser's
+  own "Leave site?" prompt now appears when the CV differs from the last
+  copy the visitor can get back: the one they opened, imported or
+  loaded, or last exported as JSON. With session restore on, it doesn't
+  ask, since a copy is kept (`utils/leaveGuard.js`).
+- **Bigger tap targets.** A skill chip's × was 9 × 21px; its hit area
+  now fills the chip's height and right padding, without reaching the
+  skill's name. On a touch screen an entry's drag handle and × grow
+  from 22px to 32px buttons, in a wider gutter that nudges the entry's
+  text 10px right in the editable preview only.
+- **Toasts no longer cover the CV on a phone.** They sat 12rem up to
+  clear Classic mode's bottom bar, including in Direct Edit, which has
+  no bar. They now sit at the bottom and rise above the bar only while
+  it shows. They're in sentence case instead of capitals, and the
+  builder's opening toasts are in Finnish on a Finnish builder.
+- **The front page's chips are links.** "18 templates × 3 looks", "ATS
+  view", "English & Finnish" and "Cover letter included" looked like
+  buttons and did nothing; each now opens its page, in the page's
+  language.
+
+Tests: new `usability.spec.js`; `landing.spec.js` checks the chip links.
+`export.spec.js`'s JSON round trip (1.6.65) was flaky: it could read the
+section list before the builder's off-screen export copy had rendered,
+so it now reads the visible preview only, once the example has loaded.
+
 ## Word, HTML and JSON exports carry the whole CV — 1.6.65, 2026-10-28
 
 An audit of the non-PDF exports found them losing content every

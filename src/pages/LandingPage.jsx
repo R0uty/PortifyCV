@@ -35,10 +35,10 @@ function getLandingCopy(locale) {
       previewAlt: 'PortifyCV-editori: CV, jonka Esittely-osio on auki muokattavaksi sen vieressä.',
       chipsLabel: 'Mukana',
       chips: [
-        `${TEMPLATE_COUNT} pohjaa × 3 tyyliä`,
-        'ATS-näkymä',
-        'Suomi ja englanti',
-        'Hakemuskirje mukana',
+        { label: `${TEMPLATE_COUNT} pohjaa × 3 tyyliä`, view: 'freeTemplates' },
+        { label: 'ATS-näkymä', view: 'atsGuide' },
+        { label: 'Suomi ja englanti', view: 'finnishCv' },
+        { label: 'Hakemuskirje mukana', view: 'coverLetterExamples' },
       ],
       whyTitle: 'Miksi PortifyCV',
       why: [
@@ -86,10 +86,10 @@ function getLandingCopy(locale) {
     previewAlt: 'The PortifyCV editor: a CV with its About section open for editing beside it.',
     chipsLabel: 'Included',
     chips: [
-      `${TEMPLATE_COUNT} templates × 3 looks`,
-      'ATS view',
-      'English & Finnish',
-      'Cover letter included',
+      { label: `${TEMPLATE_COUNT} templates × 3 looks`, view: 'freeTemplates' },
+      { label: 'ATS view', view: 'atsGuide' },
+      { label: 'English & Finnish', view: 'finnishCv' },
+      { label: 'Cover letter included', view: 'coverLetterExamples' },
     ],
     whyTitle: 'Why use PortifyCV',
     why: [
@@ -203,9 +203,15 @@ function LandingPage({
               {copy.howItWorksLink}
             </InternalNavLink>
           </div>
+          {/* Each chip links to the page about it (1.6.66): they looked
+              like buttons and did nothing. */}
           <ul className="landing-chips" aria-label={copy.chipsLabel}>
             {copy.chips.map((chip) => (
-              <li key={chip}>{chip}</li>
+              <li key={chip.view}>
+                <InternalNavLink to={ROUTES[chip.view]} onNavigate={() => onNavigateToView(chip.view)}>
+                  {chip.label}
+                </InternalNavLink>
+              </li>
             ))}
           </ul>
         </div>
