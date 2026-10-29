@@ -14,6 +14,7 @@ import { getCvTemplates } from './utils/cvTemplates'
 import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX } from './utils/pageMeta'
 import { LocaleContext } from './components/localeContext'
 import { APP_VERSION } from './utils/appVersion'
+import { hasUnsavedChanges } from './utils/leaveGuard'
 
 const CONTACT_MAILTO = 'mailto:portifycv@gmail.com'
 
@@ -684,6 +685,16 @@ function App({ route = null }) {
       // Back/forward across the builder's edge reloads, for the same
       // reason the links into and out of it do (1.6.48).
       if ((route.view === 'builder') !== (viewRef.current === 'builder')) {
+        // Leaving a CV with unsaved edits (1.6.66): put the builder's
+        // address back before loading the page the visitor went back to,
+        // so if they cancel the browser's "Leave site?" prompt the address
+        // still matches the builder they stayed on.
+        if (viewRef.current === 'builder' && hasUnsavedChanges()) {
+          const target = window.location.href
+          window.history.pushState(null, '', viewPath('builder', localeRef.current))
+          window.location.assign(target)
+          return
+        }
         window.location.reload()
         return
       }

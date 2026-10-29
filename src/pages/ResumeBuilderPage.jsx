@@ -94,6 +94,7 @@ import {
 import { evaluateCvFeedback } from '../utils/cvFeedback'
 import { generateCoverLetterDraft } from '../utils/coverLetter'
 import { EXAMPLES, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
+import { registerUnsavedChangesCheck } from '../utils/leaveGuard'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
@@ -282,7 +283,11 @@ function withStyleVariant(formData, templateId, variantId) {
     : cvFormReducer(formData, { type: FORM_ACTION.SET_STYLE_VARIANT, templateId, variantId })
 }
 
-function loadInitialCvSession() {
+// `locale` is only for the opening toast's wording, which used to be
+// English on a Finnish page.
+function loadInitialCvSession(locale = 'en') {
+  const isFinnish = locale === 'fi'
+
   if (typeof window === 'undefined') {
     return {
       formData: initialCvData,
@@ -310,7 +315,7 @@ function loadInitialCvSession() {
         // The sender's selected template (1.6.8); createInitialUiState
         // opens on it when it resolves.
         sharedTemplateId: shared.templateId,
-        initialToast: createToast('Loaded CV from share link.', 'success'),
+        initialToast: createToast(isFinnish ? 'CV ladattu jakolinkistä.' : 'Loaded CV from share link.', 'success'),
         clearShareParam: false,
         storageIssue: hasStorageIssue,
         pendingExampleId: null,
@@ -360,8 +365,10 @@ function loadInitialCvSession() {
           formData: restoredFormData,
           initialToast: createToast(
             hasPendingExample || hasPendingStyle
-              ? "Kept your restored CV. Use 'Load demo CV' to start over."
-              : 'Restored your last session.',
+              ? isFinnish
+                ? 'Palautettu CV säilytettiin. Aloita alusta valitsemalla Lataa demo-CV.'
+                : "Kept your restored CV. Use 'Load demo CV' to start over."
+              : isFinnish ? 'Edellinen istunto palautettu.' : 'Restored your last session.',
             'success',
           ),
           clearShareParam: false,
@@ -414,7 +421,7 @@ function loadInitialCvSession() {
   if (!hasSeenOnboarding) {
     return {
       formData: withStyleVariant(structuredClone(demoCvData), requestedTemplateId, requestedStyleId),
-      initialToast: createToast('Loaded a sample CV to help you get started.', 'success'),
+      initialToast: createToast(isFinnish ? 'Esimerkki-CV ladattu avuksi alkuun.' : 'Loaded a sample CV to help you get started.', 'success'),
       clearShareParam: false,
       storageIssue: hasStorageIssue,
       pendingExampleId: null,
@@ -435,7 +442,9 @@ function ResumeBuilderPage({
   onLocaleChange = () => {},
   onHeaderChange,
 }) {
-  const initialSession = useMemo(() => loadInitialCvSession(), [])
+  // Decided once, on mount; a later language switch doesn't reload the CV.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const initialSession = useMemo(() => loadInitialCvSession(initialLocale), [])
   const [formData, dispatchFormData] = useReducer(cvFormReducer, initialSession.formData)
   const [uiState, dispatchUi] = useReducer(
     uiReducer,
@@ -760,6 +769,32 @@ function ResumeBuilderPage({
     }
   }, [formData, locale, sessionRestoreEnabled])
 
+  // The CV as it was when the visitor last had a copy they can get back:
+  // opened, imported, loaded, or exported as JSON. Leaving the page with
+  // anything else asks first (1.6.66, utils/leaveGuard.js), unless session
+  // restore keeps a copy. Compared only when the page is about to unload.
+  const savedCvRef = useRef(null)
+  const formDataRef = useRef(formData)
+  const markCvSaved = useCallback((data) => {
+    savedCvRef.current = JSON.stringify(data)
+  }, [])
+
+  useEffect(() => {
+    formDataRef.current = formData
+    if (savedCvRef.current === null) {
+      savedCvRef.current = JSON.stringify(formData)
+    }
+  }, [formData])
+
+  useEffect(() => {
+    if (sessionRestoreEnabled) {
+      return undefined
+    }
+    return registerUnsavedChangesCheck(
+      () => JSON.stringify(formDataRef.current) !== savedCvRef.current,
+    )
+  }, [sessionRestoreEnabled])
+
   useEffect(() => {
     if (initialSession.storageIssue) {
       reportStorageIssue()
@@ -814,6 +849,7 @@ function ResumeBuilderPage({
       // ?style= wins over any look the example stores for this template.
       const startCv = withStyleVariant(exampleCv, selectedTemplate, initialSession.pendingStyleVariantId ?? DEFAULT_STYLE_VARIANT_ID)
       dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: startCv })
+      markCvSaved(startCv)
       applyStoredStyleVariantLook(startCv, selectedTemplate)
       const roleLabel = EXAMPLES[exampleId].role[locale === 'fi' ? 'fi' : 'en']
       showToast(locale === 'fi' ? `Esimerkki ladattu: ${roleLabel}.` : `Loaded the ${roleLabel} example.`)
@@ -984,6 +1020,7 @@ function ResumeBuilderPage({
 
       if (type === 'json') {
         exportCvAsJson(formData, exportFileName)
+        markCvSaved(formData)
       }
 
       if (type === 'html') {
@@ -1016,7 +1053,7 @@ function ResumeBuilderPage({
     } finally {
       dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
     }
-  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate, templateAccentColors])
+  }, [atsFriendlyMode, exportFileName, formData, locale, markCvSaved, previewRef, selectedTemplate, templateAccentColors])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()
@@ -1048,6 +1085,7 @@ function ResumeBuilderPage({
       const importedData = parseImportedCvData(parsedValue)
 
       dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: importedData })
+      markCvSaved(importedData)
       applyStoredStyleVariantLook(importedData, selectedTemplate)
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
       showToast(locale === 'fi' ? `CV-tiedot tuotu tiedostosta ${file.name}.` : `Imported CV data from ${file.name}.`)
@@ -1071,7 +1109,7 @@ function ResumeBuilderPage({
       dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: false })
       event.target.value = ''
     }
-  }, [applyStoredStyleVariantLook, dispatchFormData, locale, selectedTemplate, setStorageValue])
+  }, [applyStoredStyleVariantLook, dispatchFormData, locale, markCvSaved, selectedTemplate, setStorageValue])
 
   const handleResetForm = useCallback(() => {
     window.clearTimeout(resetConfirmTimeoutRef.current)
@@ -1110,10 +1148,11 @@ function ResumeBuilderPage({
   const handleLoadDemo = useCallback(() => {
     const demo = structuredClone(demoCvData)
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: demo })
+    markCvSaved(demo)
     applyStoredStyleVariantLook(demo, selectedTemplate)
     setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
     showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
-  }, [applyStoredStyleVariantLook, dispatchFormData, locale, selectedTemplate, setStorageValue])
+  }, [applyStoredStyleVariantLook, dispatchFormData, locale, markCvSaved, selectedTemplate, setStorageValue])
 
   const handlePasteCvImport = useCallback(() => {
     try {
@@ -2609,7 +2648,7 @@ function ResumeBuilderPage({
         onDownloadPdf={handleDownloadCoverLetterPdf}
       />
 
-      <ToastStack toasts={toasts} />
+      <ToastStack toasts={toasts} clearBottomBar={builderMode !== 'direct'} />
     </>
   )
 }
