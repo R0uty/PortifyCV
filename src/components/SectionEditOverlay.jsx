@@ -48,6 +48,30 @@ function sectionSelectorFor(sectionKey) {
 const PENCIL_GAP = 6
 const PENCIL_SIZE = 28
 
+// The box of a section's first line of text: its heading, wherever the
+// template puts it inside the section and whatever element it is (an
+// <h2>, a sidebar <p>, a title after an icon). Buttons and screen-reader
+// text are skipped.
+function firstTextLineRect(section) {
+  const walker = section.ownerDocument.createTreeWalker(section, NodeFilter.SHOW_TEXT)
+  const range = section.ownerDocument.createRange()
+
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (!node.textContent.trim() || node.parentElement.closest('button, .sr-only')) {
+      continue
+    }
+
+    range.selectNodeContents(node)
+    const line = [...range.getClientRects()].find((rect) => rect.width > 0 && rect.height > 0)
+
+    if (line) {
+      return line
+    }
+  }
+
+  return null
+}
+
 function placePencils(container, sectionKeys) {
   const parent = container?.parentElement
 
@@ -57,15 +81,28 @@ function placePencils(container, sectionKeys) {
 
   const base = container.getBoundingClientRect()
   const found = sectionKeys
-    .map((sectionKey) => [sectionKey, parent.querySelector(sectionSelectorFor(sectionKey))?.getBoundingClientRect()])
+    .map((sectionKey) => {
+      const section = parent.querySelector(sectionSelectorFor(sectionKey))
+      return [sectionKey, section?.getBoundingClientRect(), section]
+    })
     .filter(([, rect]) => rect)
 
-  return found.map(([sectionKey, rect]) => {
+  return found.map(([sectionKey, rect, section]) => {
+    // Level with the section's heading (1.6.64): centred on its first line
+    // of text, which sits at a different depth in every template, rather
+    // than at the section box's top. A heading on the section's top edge
+    // puts it a few px above the box, never above the preview. The
+    // header's pencil keeps to its corner, beside the name and contact
+    // block as a whole.
+    const line = sectionKey === 'identity' ? null : firstTextLineRect(section)
+    const top = line
+      ? Math.max(base.top, line.top + line.height / 2 - PENCIL_SIZE / 2)
+      : rect.top
     const spot = {
       left: rect.right + PENCIL_GAP,
       right: rect.right + PENCIL_GAP + PENCIL_SIZE,
-      top: rect.top,
-      bottom: rect.top + PENCIL_SIZE,
+      top,
+      bottom: top + PENCIL_SIZE,
     }
     const outside = spot.right <= base.right && !found.some(([otherKey, other]) => (
       otherKey !== sectionKey
@@ -73,7 +110,7 @@ function placePencils(container, sectionKeys) {
       && other.top < spot.bottom && other.bottom > spot.top
     ))
 
-    return { sectionKey, top: rect.top - base.top, right: rect.right - base.left, outside }
+    return { sectionKey, top: top - base.top, right: rect.right - base.left, outside }
   })
 }
 
@@ -328,9 +365,10 @@ export default function SectionEditOverlay({
 
   // Every section shows its pencil all the time, not only while hovered —
   // a hover-only pencil was easy to miss and near-unreachable on touch.
-  // Re-measured after every content change and whenever the preview
+  // Re-measured after every content change, whenever the preview
   // resizes (a template's Showcase chunk loading, an edit reflowing the
-  // page, a window resize), so the pencils follow their sections.
+  // page, a window resize) and when an entrance animation in it ends, so
+  // the pencils follow their sections.
   //
   // Keeps the same array when nothing moved, so a re-measure that changes
   // nothing doesn't re-render every pencil.
@@ -358,9 +396,17 @@ export default function SectionEditOverlay({
       return undefined
     }
 
-    const observer = new ResizeObserver(() => setPencils(keepIfUnchanged(placePencils(container, sections))))
+    const measure = () => setPencils(keepIfUnchanged(placePencils(container, sections)))
+    const observer = new ResizeObserver(measure)
     observer.observe(parent)
-    return () => observer.disconnect()
+    // Developer, Creative and Colorful Compact slide their sections up a few
+    // px as they appear: moved, not resized, so measured mid-slide the
+    // pencils stayed that far below their headings (1.6.64).
+    parent.addEventListener('animationend', measure)
+    return () => {
+      observer.disconnect()
+      parent.removeEventListener('animationend', measure)
+    }
   }, [sections])
 
   const openSection = useCallback(

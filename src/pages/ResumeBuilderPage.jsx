@@ -987,7 +987,7 @@ function ResumeBuilderPage({
       }
 
       if (type === 'html') {
-        exportCvAsHtml(formData, exportFileName, { locale })
+        exportCvAsHtml(formData, exportFileName, { locale, template: selectedTemplate })
       }
 
       if (type === 'docx') {

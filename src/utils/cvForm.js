@@ -1659,8 +1659,10 @@ export function parseImportedCvData(value) {
             role: readOptionalString(item.role, `testimonials[${index}].role`),
           }))
         : [createEmptyTestimonial()],
+    // An empty order means "the template's own order" (CVPreview fills it
+    // in), so it stays empty rather than becoming the full default list.
     sectionOrder:
-      value.sectionOrder === undefined
+      value.sectionOrder === undefined || sectionOrder.length === 0
         ? createSectionOrder()
         : normalizeSectionOrder(sectionOrder),
     sectionVisibility: {

@@ -74,7 +74,8 @@ console.log('\ndocxExport: identity block\n')
   const copy = createExportCopy('en')
   const block = await buildIdentityBlock(snapshot, copy, false)
   check('returns an array', Array.isArray(block))
-  check('has no photo table when includePhoto is false', block.length === 3)
+  // Name, title, tagline, contact line, spacer.
+  check('has no photo table when includePhoto is false', block.length === 5)
   check('every entry is a real docx Paragraph', block.every((entry) => entry instanceof Paragraph))
 }
 
@@ -82,7 +83,7 @@ console.log('\ndocxExport: identity block\n')
   const snapshot = createCvSnapshot({ ...demoCvData, email: '', phone: '', location: '' })
   const copy = createExportCopy('en')
   const block = await buildIdentityBlock(snapshot, copy, false)
-  check('drops the contact line entirely when there is no contact info', block.length === 2)
+  check('drops the contact line entirely when there is no contact info', block.length === 4)
 }
 
 console.log('\ndocxExport: core narrative sections\n')
@@ -108,17 +109,19 @@ console.log('\ndocxExport: core narrative sections\n')
   const blankSnapshot = createCvSnapshot(createInitialCvData())
   const copy = createExportCopy('en')
 
+  // The editor's placeholder text ("Add a professional summary." etc.) is
+  // never written into a file: an empty section is left out (1.6.65).
   const about = buildAboutSection(blankSnapshot, copy)
-  check('About falls back to "Add a professional summary" placeholder copy', about.length === 2)
+  check('About renders nothing (no placeholder) when empty', about.length === 0)
 
   const skills = buildSkillsSection(blankSnapshot, copy)
-  check('Skills falls back to a single placeholder line when empty', skills.length === 2)
+  check('Skills renders nothing (no placeholder) when empty', skills.length === 0)
 
   const experience = buildExperienceSection(blankSnapshot, copy)
-  check('Experience falls back to a single placeholder line when empty', experience.length === 2)
+  check('Experience renders nothing (no placeholder) when empty', experience.length === 0)
 
   const education = buildEducationSection(blankSnapshot, copy)
-  check('Education falls back to a single placeholder line when empty', education.length === 2)
+  check('Education renders nothing (no placeholder) when empty', education.length === 0)
 }
 
 console.log('\ndocxExport: list-shaped sections\n')
@@ -145,7 +148,7 @@ console.log('\ndocxExport: list-shaped sections\n')
   const copy = createExportCopy('en')
 
   const links = buildLinksSection(blankSnapshot, copy)
-  check('Links falls back to a single placeholder line when empty', links.length === 2)
+  check('Links renders nothing (no placeholder) when empty', links.length === 0)
 
   const interests = buildInterestsSection(blankSnapshot, copy)
   check('Interests renders nothing (no orphan heading) when empty', interests.length === 0)
@@ -726,6 +729,48 @@ console.log('\ndocxExport: gridTable never renders an empty bordered cell for a 
     const missing = oneColumnIds.map((id) => labels.get(id)).filter((label) => !guide.includes(label))
     check(`ATS guide names every one-column Word template in ${locale}`, missing.length === 0, `missing: ${missing.join(', ')}`)
   }
+}
+
+console.log('\ndocxExport: what reaches the file (1.6.65)\n')
+
+{
+  const { default: JSZip } = await import('jszip')
+  const readDocx = async (formData, template, locale) => {
+    const buffer = await Packer.toBuffer(await buildDocxDocument(formData, { template, locale }))
+    const xml = await (await JSZip.loadAsync(buffer)).file('word/document.xml').async('string')
+    const rels = await (await JSZip.loadAsync(buffer)).file('word/_rels/document.xml.rels').async('string')
+    const text = [...xml.matchAll(/<w:t(?: [^>]*)?>([^<]*)<\/w:t>/g)].map((match) => match[1]).join('')
+    return { text, rels }
+  }
+  const [job] = demoCvData.experience
+  const sparseCv = { ...createInitialCvData(), fullName: '', title: '', skills: ['Figma'] }
+
+  // One per Word archetype: oneColumn, railTable, darkSidebarTable,
+  // gridTable, labelGridTable.
+  for (const template of ['minimal', 'executive', 'developer', 'quadrant', 'european']) {
+    for (const locale of ['en', 'fi']) {
+      const { text, rels } = await readDocx(demoCvData, template, locale)
+      const label = `${template}/${locale}`
+      check(`${label}: every experience bullet is in the file`, job.achievements.every((line) => text.includes(line)))
+      check(`${label}: the job's technologies are in the file`, text.includes(job.technologies.join(', ')))
+      check(`${label}: a current job ends in "${locale === 'fi' ? 'Nykyinen' : 'Present'}"`,
+        text.includes(`${job.startDate} - ${locale === 'fi' ? 'Nykyinen' : 'Present'}`), text.slice(0, 400))
+      check(`${label}: the job's location is in the file`, text.includes(job.location))
+      check(`${label}: link labels use the app's names (Dev.to, not Devto)`, text.includes('Dev.to') && !text.includes('Devto'))
+      check(`${label}: links are clickable`, rels.includes('Target="https://github.example.com/john-doe"') && rels.includes('TargetMode="External"'))
+      if (template !== 'european') {
+        check(`${label}: the email is a mailto: link`, rels.includes(`Target="mailto:${demoCvData.email}"`))
+      }
+    }
+    const { text } = await readDocx(sparseCv, template, 'en')
+    check(`${template}: a blank CV prints no editor placeholders`,
+      !/Your Name|Professional Title|Add a professional summary|No (experience|education|links) added yet/.test(text), text)
+  }
+
+  const expiring = { ...demoCvData, certificates: [{ ...demoCvData.certificates[0], expiry: '2027', credentialUrl: 'https://cert.example.com/1' }] }
+  const fi = await readDocx(expiring, 'minimal', 'fi')
+  check('fi: a certificate\'s expiry reads "Vanhenee", not "expires"', fi.text.includes('(Vanhenee 2027)') && !fi.text.includes('expires'))
+  check('a certificate\'s credential URL is a link', fi.rels.includes('Target="https://cert.example.com/1"'))
 }
 
 console.log(`\n${failures === 0 ? 'All docx export checks passed.' : `${failures} check(s) failed.`}`)

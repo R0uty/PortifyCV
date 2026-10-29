@@ -31,6 +31,7 @@ import {
   WidthType,
   BorderStyle,
   ImageRun,
+  ExternalHyperlink,
   convertMillimetersToTwip,
 } from 'docx'
 // 'file-saver' is CommonJS-only — a named `import { saveAs }` fails under
@@ -42,8 +43,17 @@ import { defaultTemplateId } from './cvTemplates'
 import { getEffectiveCvTemplate } from './sectionColumns'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
-import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
-import { createExportCopy, cropPhotoDataUrlToSquare, getPhotoDataUrl, getImageFormatFromDataUrl } from './exporters'
+import { formatDateRange, formatLinkDisplayValue } from './shared'
+import {
+  createExportCopy,
+  cropPhotoDataUrlToSquare,
+  getPhotoDataUrl,
+  getImageFormatFromDataUrl,
+  getExportLinkLabel,
+  formatExportDates,
+  formatExportCertificate,
+  getExportHref,
+} from './exporters'
 import { DOCX_ARCHETYPES, buildRailTableBody, buildGridTableBody, buildLabelGridBody } from './docxArchetypes'
 
 // Monochrome by design (see the spec) — no hue anywhere, just tonal
@@ -56,7 +66,7 @@ export const INK_SUBTLE = '666666'
 export const META_SIZE = 20
 const NAME_SIZE = 40
 const ROLE_SIZE = 24
-const BODY_SIZE = 21
+export const BODY_SIZE = 21
 const SUBHEAD_SIZE = 22
 const HEADING_SIZE = 24
 
@@ -67,7 +77,7 @@ export const NO_CELL_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BOR
 // section headings (and, later, a whole rail cell's text) to a
 // template's accent without changing any of the 20 section-builder
 // functions below — they all go through sectionHeading/boldLine/
-// plainLine/bulletLines/emptyNotice, which read this instead of the
+// plainLine/bulletLines/linkLine, which read this instead of the
 // INK/INK_SUBTLE constants directly. Module-level state is safe here
 // because every withPalette callback in this file is fully synchronous —
 // no `await` ever happens between setting a palette and restoring it — so
@@ -88,29 +98,48 @@ export function withPalette(palette, fn) {
   }
 }
 
-function buildIdentityText(snapshot, copy) {
-  const nameText = snapshot.fullName || copy.yourName
-  const titleText = snapshot.title || copy.professionalTitle
-  const contactParts = [snapshot.email, snapshot.phone, snapshot.location].filter(Boolean)
+// A clickable run: `href` when it is a real address, plain text otherwise.
+function linkRun(text, href, opts = {}) {
+  const run = new TextRun({
+    text,
+    size: opts.size ?? META_SIZE,
+    color: opts.color ?? currentPalette.ink,
+    ...(href ? { underline: {} } : {}),
+  })
+  return href ? new ExternalHyperlink({ link: href, children: [run] }) : run
+}
+
+// A blank name or title is left out (1.6.65); it used to print the
+// form's "Your Name" / "Professional Title" placeholders into the file.
+function buildIdentityText(snapshot) {
+  const contactRuns = [
+    snapshot.email ? linkRun(snapshot.email, `mailto:${snapshot.email}`, { color: INK_SUBTLE }) : null,
+    snapshot.phone ? new TextRun({ text: snapshot.phone, size: META_SIZE, color: INK_SUBTLE }) : null,
+    snapshot.location ? new TextRun({ text: snapshot.location, size: META_SIZE, color: INK_SUBTLE }) : null,
+  ].filter(Boolean)
+  const separatedContact = contactRuns.flatMap((run, index) => (
+    index === 0 ? [run] : [new TextRun({ text: '  ·  ', size: META_SIZE, color: INK_SUBTLE }), run]
+  ))
 
   const paragraphs = [
-    new Paragraph({
+    snapshot.fullName ? new Paragraph({
       heading: HeadingLevel.TITLE,
       spacing: { after: 40 },
-      children: [new TextRun({ text: nameText, bold: true, size: NAME_SIZE, color: INK })],
-    }),
-    new Paragraph({
-      spacing: { after: contactParts.length > 0 ? 120 : 240 },
-      children: [new TextRun({ text: titleText, size: ROLE_SIZE, color: INK_SUBTLE })],
-    }),
-  ]
+      children: [new TextRun({ text: snapshot.fullName, bold: true, size: NAME_SIZE, color: INK })],
+    }) : null,
+    snapshot.title ? new Paragraph({
+      spacing: { after: 40 },
+      children: [new TextRun({ text: snapshot.title, size: ROLE_SIZE, color: INK_SUBTLE })],
+    }) : null,
+    snapshot.tagline ? new Paragraph({
+      spacing: { after: 40 },
+      children: [new TextRun({ text: snapshot.tagline, size: META_SIZE, color: INK_SUBTLE, italics: true })],
+    }) : null,
+    separatedContact.length > 0 ? new Paragraph({ spacing: { before: 80 }, children: separatedContact }) : null,
+  ].filter(Boolean)
 
-  if (contactParts.length > 0) {
-    paragraphs.push(new Paragraph({
-      spacing: { after: 240 },
-      children: [new TextRun({ text: contactParts.join('  ·  '), size: META_SIZE, color: INK_SUBTLE })],
-    }))
-  }
+  // Space between the header and the first section.
+  paragraphs.push(new Paragraph({ spacing: { after: 160 }, children: [] }))
 
   return paragraphs
 }
@@ -130,7 +159,7 @@ function dataUrlToUint8Array(dataUrl) {
 // way to float an image beside text without fighting older Word layout
 // engines. Skipped entirely (plain paragraphs only) when there's no photo.
 export async function buildIdentityBlock(snapshot, copy, includePhoto) {
-  const identityParagraphs = buildIdentityText(snapshot, copy)
+  const identityParagraphs = buildIdentityText(snapshot)
   const rawPhotoDataUrl = includePhoto ? getPhotoDataUrl(snapshot.photo) : ''
 
   if (!rawPhotoDataUrl) {
@@ -209,7 +238,7 @@ export function plainLine(text, opts = {}) {
   })
 }
 
-export function bulletLines(items) {
+export function bulletLines(items = []) {
   return items.map((item) => new Paragraph({
     bullet: { level: 0 },
     spacing: { after: 60 },
@@ -217,10 +246,19 @@ export function bulletLines(items) {
   }))
 }
 
-export function emptyNotice(text) {
+// A subtle line ending in a link: "LinkedIn: linkedin.com/in/x", or just
+// the address when there is no label.
+export function linkLine(label, value, opts = {}) {
+  if (!value) {
+    return null
+  }
+  const size = opts.size ?? META_SIZE
   return new Paragraph({
-    spacing: { after: 160 },
-    children: [new TextRun({ text, size: BODY_SIZE, color: currentPalette.inkSubtle, italics: true })],
+    spacing: { after: opts.after ?? 60 },
+    children: [
+      ...(label ? [new TextRun({ text: `${label}: `, size, color: currentPalette.inkSubtle })] : []),
+      linkRun(formatLinkDisplayValue(value), getExportHref(value), { size }),
+    ],
   })
 }
 
@@ -237,29 +275,45 @@ export function descriptionLines(text) {
   return lines.length > 1 ? bulletLines(lines) : [plainLine(lines[0])]
 }
 
+// Every builder returns nothing for an empty section (1.6.65): the file is
+// the one sent to employers, so it never carries the form's "No links
+// added yet." style notes.
 export function buildAboutSection(snapshot, copy) {
-  const body = snapshot.about ? plainLine(snapshot.about) : emptyNotice(copy.addSummary)
-  return [sectionHeading(copy.about), body]
+  if (!snapshot.about) {
+    return []
+  }
+  return [sectionHeading(copy.about), plainLine(snapshot.about)]
 }
 
 export function buildSkillsSection(snapshot, copy) {
   if (snapshot.skills.length === 0) {
-    return [sectionHeading(copy.skills), emptyNotice(copy.addSkills)]
+    return []
   }
   return [sectionHeading(copy.skills), ...bulletLines(snapshot.skills)]
 }
 
+// Dates, then where: "Mar 2019 - Present · Kuopio, Finland".
+function datesAndPlace(item, copy) {
+  return [formatExportDates(item, copy), item.location].filter(Boolean).join(' · ')
+}
+
 export function buildExperienceSection(snapshot, copy) {
   if (snapshot.experience.length === 0) {
-    return [sectionHeading(copy.experience), emptyNotice(copy.noExperience)]
+    return []
   }
   const entries = snapshot.experience.flatMap((item) => {
     const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
-    const dateRange = formatDateRange(item.startDate, item.endDate)
+    const meta = datesAndPlace(item, copy)
     return [
       boldLine(heading),
-      dateRange ? plainLine(dateRange, { subtle: true, size: META_SIZE, after: 120 }) : null,
+      meta ? plainLine(meta, { subtle: true, size: META_SIZE, after: 120 }) : null,
       ...descriptionLines(item.description),
+      // The job's bullet points and technologies, as every template shows
+      // them (getExperienceBullets etc. in directEditExperienceEntry.jsx).
+      ...bulletLines(item.achievements),
+      item.technologies.length > 0
+        ? plainLine(item.technologies.join(', '), { subtle: true, size: META_SIZE })
+        : null,
     ].filter(Boolean)
   })
   return [sectionHeading(copy.experience), ...entries]
@@ -267,15 +321,15 @@ export function buildExperienceSection(snapshot, copy) {
 
 export function buildEducationSection(snapshot, copy) {
   if (snapshot.education.length === 0) {
-    return [sectionHeading(copy.education), emptyNotice(copy.noEducation)]
+    return []
   }
   const entries = snapshot.education.flatMap((item) => {
     const heading = [item.degree, item.school].filter(Boolean).join(', ') || copy.educationEntry
-    const dateRange = formatDateRange(item.startDate, item.endDate)
+    const meta = datesAndPlace(item, copy)
     const gradeLine = [item.grade, item.coursework].filter(Boolean).join(' · ')
     return [
       boldLine(heading),
-      dateRange ? plainLine(dateRange, { subtle: true, size: META_SIZE }) : null,
+      meta ? plainLine(meta, { subtle: true, size: META_SIZE }) : null,
       item.honors ? plainLine(item.honors, { subtle: true, size: META_SIZE }) : null,
       gradeLine ? plainLine(gradeLine, { subtle: true, size: META_SIZE, after: 160 }) : null,
     ].filter(Boolean)
@@ -286,9 +340,9 @@ export function buildEducationSection(snapshot, copy) {
 export function buildLinksSection(snapshot, copy) {
   const links = Object.entries(snapshot.links)
   if (links.length === 0) {
-    return [sectionHeading(copy.links), emptyNotice(copy.noLinks)]
+    return []
   }
-  const lines = links.map(([key, value]) => plainLine(`${formatLinkLabel(key)}: ${formatLinkDisplayValue(value)}`))
+  const lines = links.map(([key, value]) => linkLine(getExportLinkLabel(key, copy.lang), value, { size: BODY_SIZE, after: 100 }))
   return [sectionHeading(copy.links), ...lines]
 }
 
@@ -323,11 +377,20 @@ export function buildCertificatesSection(snapshot, copy) {
     return []
   }
   const lines = snapshot.certificates.map((item) => {
-    const meta = [item.issuer, item.year].filter(Boolean).join(', ')
-    const expiry = item.expiry ? ` (expires ${item.expiry})` : ''
-    return (meta ? `${item.name} — ${meta}` : item.name) + expiry
+    const href = getExportHref(item.credentialUrl)
+    return new Paragraph({
+      bullet: { level: 0 },
+      spacing: { after: 60 },
+      children: [
+        new TextRun({ text: formatExportCertificate(item, copy), size: BODY_SIZE, color: currentPalette.ink }),
+        ...(item.credentialUrl ? [
+          new TextRun({ text: '  ·  ', size: BODY_SIZE, color: currentPalette.inkSubtle }),
+          linkRun(formatLinkDisplayValue(item.credentialUrl), href, { size: BODY_SIZE }),
+        ] : []),
+      ],
+    })
   })
-  return [sectionHeading(copy.certificates), ...bulletLines(lines)]
+  return [sectionHeading(copy.certificates), ...lines]
 }
 
 export function buildAchievementsSection(snapshot, copy) {
@@ -361,6 +424,7 @@ export function buildPublicationsSection(snapshot, copy) {
     return [
       boldLine(item.title),
       meta ? plainLine(meta, { subtle: true, size: META_SIZE }) : null,
+      linkLine('', item.url, { after: 160 }),
     ].filter(Boolean)
   })
   return [sectionHeading(copy.publications), ...entries]
@@ -372,15 +436,16 @@ export function buildProjectsSection(snapshot, copy) {
   }
   const entries = snapshot.projects.flatMap((item) => {
     const contributionLine = [item.teamSize, item.contribution].filter(Boolean).join(' · ')
-    const linkLine = [item.githubUrl, item.demoUrl].filter(Boolean).join('  ·  ')
+    const organizationLine = [item.organization, item.date].filter(Boolean).join(' · ')
     return [
       boldLine(item.name),
-      item.organization ? plainLine(item.organization, { subtle: true, size: META_SIZE }) : null,
+      organizationLine ? plainLine(organizationLine, { subtle: true, size: META_SIZE }) : null,
       plainLine(item.description),
       item.impact ? boldLine(item.impact, { size: META_SIZE }) : null,
       contributionLine ? plainLine(contributionLine, { subtle: true, size: META_SIZE }) : null,
       item.stack ? plainLine(item.stack, { subtle: true, size: META_SIZE }) : null,
-      linkLine ? plainLine(linkLine, { subtle: true, size: META_SIZE, after: 240 }) : null,
+      linkLine('', item.githubUrl, { after: item.demoUrl ? 60 : 240 }),
+      linkLine('', item.demoUrl, { after: 240 }),
     ].filter(Boolean)
   })
   return [sectionHeading(copy.projects), ...entries]
@@ -398,6 +463,7 @@ export function buildOpenSourceSection(snapshot, copy) {
       boldLine(item.name),
       meta ? plainLine(meta, { subtle: true, size: META_SIZE }) : null,
       plainLine(item.description),
+      linkLine('', item.url, { after: 160 }),
     ].filter(Boolean)
   })
   return [sectionHeading(copy.openSource), ...entries]
@@ -451,10 +517,10 @@ export function buildInternshipsSection(snapshot, copy) {
   }
   const entries = snapshot.internships.flatMap((item) => {
     const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
-    const dateRange = formatDateRange(item.startDate, item.endDate)
+    const meta = datesAndPlace(item, copy)
     return [
       boldLine(heading),
-      dateRange ? plainLine(dateRange, { subtle: true, size: META_SIZE }) : null,
+      meta ? plainLine(meta, { subtle: true, size: META_SIZE }) : null,
       ...descriptionLines(item.description),
       item.technologies ? plainLine(item.technologies, { subtle: true, size: META_SIZE }) : null,
     ].filter(Boolean)
