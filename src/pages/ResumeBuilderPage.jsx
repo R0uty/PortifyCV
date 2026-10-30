@@ -548,10 +548,10 @@ function ResumeBuilderPage({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
-  // "Reset form" is a two-step button: the first click arms it, a second
-  // click within RESET_CONFIRM_WINDOW_MS actually clears the form. Nothing
-  // is persisted, so an accidental single click next to "Load demo CV"
-  // would otherwise wipe real work with no dialog.
+  // "Clear CV" (the toolbar's More menu since 1.6.67) is two-step: the
+  // first click arms it, a second click within RESET_CONFIRM_WINDOW_MS
+  // actually clears the CV. Nothing is persisted, so one stray click would
+  // otherwise wipe real work with no dialog.
   const [resetConfirmArmed, setResetConfirmArmed] = useState(false)
   // Bumped by "Manage" in Settings to force-expand the (collapsed-by-default)
   // "Visible sections" panel it scrolls the user to.
@@ -930,7 +930,6 @@ function ResumeBuilderPage({
   }, [])
 
   const secondaryButtonClassName = `border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
-  const compactButtonClassName = `shrink-0 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
 
   const handleExport = useCallback(async (type) => {
     dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: type })
@@ -1127,21 +1126,12 @@ function ResumeBuilderPage({
     // A cleared CV stores no variants, so every template goes back to its
     // original look (accent, plus the selected template's font/headings).
     applyStoredStyleVariantLook(null, selectedTemplate)
-    // Direct Edit has no form, so its "Clear CV" button gets its own wording.
-    if (builderMode === 'direct') {
-      showToast(
-        locale === 'fi'
-          ? 'CV tyhjennetty. Palauta työkalupalkin kumoa-nuolella.'
-          : 'CV cleared. Restore it with the toolbar undo arrow.',
-      )
-    } else {
-      showToast(
-        locale === 'fi'
-          ? 'Lomake nollattu. Palauta työkalupalkin kumoa-nuolella.'
-          : 'Form reset. Restore it with the toolbar undo arrow.',
-      )
-    }
-  }, [applyStoredStyleVariantLook, builderMode, dispatchFormData, locale, resetConfirmArmed, selectedTemplate])
+    showToast(
+      locale === 'fi'
+        ? 'CV tyhjennetty. Palauta työkalupalkin kumoa-nuolella.'
+        : 'CV cleared. Restore it with the toolbar undo arrow.',
+    )
+  }, [applyStoredStyleVariantLook, dispatchFormData, locale, resetConfirmArmed, selectedTemplate])
 
   useEffect(() => () => window.clearTimeout(resetConfirmTimeoutRef.current), [])
 
@@ -1339,6 +1329,10 @@ function ResumeBuilderPage({
     (mode) => dispatchUi({ type: UI_ACTION.SET_BUILDER_MODE, mode }),
     [dispatchUi],
   )
+
+  const handleOpenCoverLetter = useCallback(() => {
+    setIsCoverLetterOpen(true)
+  }, [])
 
   const handleOpenSettings = useCallback(() => {
     setIsSettingsOpen(true)
@@ -1785,6 +1779,9 @@ function ResumeBuilderPage({
       isResponsivePreview,
       onToggleResponsivePreview: handleToggleResponsivePreview,
       onOpenSettings: handleOpenSettings,
+      onOpenCoverLetter: handleOpenCoverLetter,
+      onClearCv: handleResetForm,
+      isClearArmed: resetConfirmArmed,
       builderMode,
       onSetBuilderMode: handleSetBuilderMode,
     })
@@ -1799,7 +1796,8 @@ function ResumeBuilderPage({
     searchQuery,
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
-    handleOpenSettings,
+    handleOpenSettings, handleOpenCoverLetter,
+    handleResetForm, resetConfirmArmed,
     builderMode, handleSetBuilderMode,
     onHeaderChange,
   ])
@@ -1960,20 +1958,6 @@ function ResumeBuilderPage({
               ? locale === 'fi' ? 'Piilota esikatselu' : 'Hide preview'
               : locale === 'fi' ? 'Näytä esikatselu' : 'Show preview'}
           </button>
-          <button
-            type="button"
-            className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonDanger}`}
-            style={resetConfirmArmed
-              ? { backgroundColor: '#b91c1c', borderColor: '#b91c1c', color: '#ffffff' }
-              : undefined}
-            disabled={isActionBusy}
-            aria-live="polite"
-            onClick={handleResetForm}
-          >
-            {resetConfirmArmed
-              ? locale === 'fi' ? 'Vahvista nollaus' : 'Confirm reset'
-              : locale === 'fi' ? 'Nollaa lomake' : 'Reset form'}
-          </button>
           <div
             className={`editor-status-pill ${ui.surfaceMuted} ${ui.textMuted}`}
             role="status"
@@ -2118,7 +2102,6 @@ function ResumeBuilderPage({
     handleLoadDemo,
     handlePasteCvImport,
     handlePastedCvTextChange,
-    handleResetForm,
     handleToggleAtsFriendlyMode,
     handleToggleMobilePreview,
     isActionBusy,
@@ -2128,14 +2111,12 @@ function ResumeBuilderPage({
     locale,
     mobilePreviewVisible,
     pastedCvText,
-    resetConfirmArmed,
     secondaryButtonClassName,
     sectionSettingsExpandSignal,
     selectedTemplate,
     dispatchFormData,
     ui.button,
     ui.buttonActive,
-    ui.buttonDanger,
     ui.input,
     ui.surface,
     ui.surfaceMuted,
@@ -2240,7 +2221,7 @@ function ResumeBuilderPage({
   const previewContent = useMemo(() => (
     <div
       ref={previewViewportRef}
-      className={`preview-panel pb-28 sm:pb-6 print:p-0${isFullscreenPreview ? ' preview-panel--fullscreen' : ''}${isResponsivePreview ? ' preview-panel--responsive' : ''}`}
+      className={`preview-panel pb-20 lg:pb-6 print:p-0${isFullscreenPreview ? ' preview-panel--fullscreen' : ''}${isResponsivePreview ? ' preview-panel--responsive' : ''}`}
     >
       <div className="preview-scroll px-4 pb-6 pt-4 sm:px-6 lg:px-8 print:px-0">
         <div className="mb-4 lg:hidden print:hidden">
@@ -2406,12 +2387,15 @@ function ResumeBuilderPage({
     ui.textSecondary,
   ])
 
+  // Classic's phone/tablet tab bar: one thin row (1.6.67). It used to add
+  // a second row of PDF/HTML/JSON/Link/Cover letter buttons, which the
+  // toolbar's Export and More menus already offer, and stood ~180px tall.
   const mobileBottomActions = useMemo(() => (
     <div
-      className={`fixed inset-x-0 bottom-0 z-40 border-t px-3 py-2 backdrop-blur md:px-4 lg:hidden print:hidden ${ui.surfaceStrong}`}
+      className={`mobile-tab-bar fixed inset-x-0 bottom-0 z-40 border-t px-3 py-2 backdrop-blur md:px-4 lg:hidden print:hidden ${ui.surfaceStrong}`}
     >
       <div
-        className="mx-auto mb-2 grid max-w-[110rem] grid-cols-3 gap-1.5"
+        className="mx-auto grid max-w-[110rem] grid-cols-3 gap-1.5"
         role="tablist"
         aria-label={locale === 'fi' ? 'Näkymän valinta' : 'View selector'}
       >
@@ -2451,55 +2435,9 @@ function ResumeBuilderPage({
           {locale === 'fi' ? 'Pohjat' : 'Templates'}
         </button>
       </div>
-      <div className="mx-auto flex max-w-[110rem] items-center gap-2 overflow-x-auto no-scrollbar quick-actions-scroll-fade">
-        <button
-          type="button"
-          className={`${compactButtonClassName} border-black bg-gray-100 text-black`}
-          disabled={isActionBusy}
-          onClick={() => handleExport('pdf-designer')}
-        >
-          {activeExport === 'pdf-designer' ? 'PDF...' : locale === 'fi' ? 'Vie PDF' : 'PDF'}
-        </button>
-        <button
-          type="button"
-          className={compactButtonClassName}
-          disabled={isActionBusy}
-          onClick={() => handleExport('html')}
-        >
-          {activeExport === 'html' ? 'HTML...' : 'HTML'}
-        </button>
-        <button
-          type="button"
-          className={compactButtonClassName}
-          disabled={isActionBusy}
-          onClick={() => handleExport('json')}
-        >
-          {activeExport === 'json' ? 'JSON...' : 'JSON'}
-        </button>
-        <button
-          type="button"
-          className={compactButtonClassName}
-          disabled={isActionBusy}
-          onClick={handleCopyShareLink}
-        >
-          {locale === 'fi' ? 'Linkki' : 'Link'}
-        </button>
-        <button
-          type="button"
-          className={compactButtonClassName}
-          onClick={() => setIsCoverLetterOpen(true)}
-        >
-          {locale === 'fi' ? 'Hakemuskirje' : 'Cover letter'}
-        </button>
-      </div>
     </div>
   ), [
-    activeExport,
-    compactButtonClassName,
-    handleCopyShareLink,
-    handleExport,
     handleToggleMobilePreview,
-    isActionBusy,
     locale,
     mobilePreviewVisible,
     ui.button,
@@ -2526,8 +2464,6 @@ function ResumeBuilderPage({
               <DirectEditPreview
                 overlayApiRef={directEditOverlayRef}
                 onLoadDemo={handleLoadDemo}
-                onClear={handleResetForm}
-                clearArmed={resetConfirmArmed}
                 formData={formData}
                 dispatchFormData={dispatchFormData}
                 selectedTemplate={selectedTemplate}

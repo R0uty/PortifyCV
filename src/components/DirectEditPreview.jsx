@@ -19,11 +19,6 @@ export default function DirectEditPreview({
   cvFontId,
   overlayApiRef = null,
   onLoadDemo = null,
-  // Classic's two-step "Reset form" (ResumeBuilderPage's handleResetForm):
-  // the first click arms it (`clearArmed`), a second one within its
-  // window clears the CV.
-  onClear = null,
-  clearArmed = false,
   // The app-wide ATS-friendly mode (also in Settings and Classic's ATS
   // panel). When on, both copies below render the ATS layout, so the CV
   // you edit is the one that exports.
@@ -57,7 +52,9 @@ export default function DirectEditPreview({
     <>
       <div className="direct-edit-preview" style={fontStyle}>
         {/* The preview's own top-right controls. Classic mode keeps "Load
-            demo CV" in its form column, which Direct Edit doesn't have. */}
+            demo CV" in its form column, which Direct Edit doesn't have.
+            Clear CV lives in the toolbar's More menu (1.6.67), away from
+            these harmless ones. */}
         <div className="direct-edit-actions">
           <SectionsMenu
             formData={formData}
@@ -78,18 +75,6 @@ export default function DirectEditPreview({
           {onLoadDemo ? (
             <button type="button" className="direct-edit-sections__trigger" onClick={onLoadDemo}>
               {locale === 'fi' ? 'Lataa demo-CV' : 'Load demo CV'}
-            </button>
-          ) : null}
-          {onClear ? (
-            <button
-              type="button"
-              className={`direct-edit-sections__trigger direct-edit-clear${clearArmed ? ' direct-edit-clear--armed' : ''}`}
-              aria-live="polite"
-              onClick={onClear}
-            >
-              {clearArmed
-                ? locale === 'fi' ? 'Vahvista tyhjennys' : 'Confirm clear'
-                : locale === 'fi' ? 'Tyhjennä CV' : 'Clear CV'}
             </button>
           ) : null}
         </div>

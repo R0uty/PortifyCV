@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft,
   ChevronDown,
-  Link2,
+  Mail,
   Maximize2,
-  Minimize2,
+  MoreHorizontal,
   Redo2,
   Search,
   Settings,
   Smartphone,
+  Trash2,
   Undo2,
 } from 'lucide-react'
 
@@ -17,6 +18,113 @@ import LocaleFlagIcon from './LocaleFlagIcon'
 import CvFontSwitcher from './CvFontSwitcher'
 import CvStyleSwitcher from './CvStyleSwitcher'
 import CvHeadingColorSwitcher from './CvHeadingColorSwitcher'
+
+// Open/close plumbing shared by the toolbar's three popovers (Design,
+// More, Export): an outside click, Escape or tabbing out closes one, and
+// opening it moves focus to its first item (the ARIA menu-button pattern,
+// so keyboard users don't have to Tab past the trigger). `itemSelector`
+// picks the focusable items for that and for the arrow keys.
+function useToolbarPopover(itemSelector) {
+  const [isOpen, setIsOpen] = useState(false)
+  const containerRef = useRef(null)
+  const triggerRef = useRef(null)
+  const panelRef = useRef(null)
+
+  function getItems() {
+    return panelRef.current ? [...panelRef.current.querySelectorAll(itemSelector)].filter((item) => !item.disabled) : []
+  }
+
+  function focusItem(index) {
+    const items = getItems()
+    if (!items.length) {
+      return
+    }
+    const clamped = ((index % items.length) + items.length) % items.length
+    items[clamped].focus()
+  }
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined
+    }
+
+    focusItem(0)
+
+    function handlePointerDown(event) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+
+    function handleKeyDown(event) {
+      // The Design panel holds dropdowns of its own: Escape closes the
+      // open one first, and only the next Escape closes the panel.
+      if (event.key !== 'Escape' || panelRef.current?.querySelector('[aria-expanded="true"]')) {
+        return
+      }
+      setIsOpen(false)
+      triggerRef.current?.focus()
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+    // focusItem reads refs only; running this again on its identity
+    // would steal focus back to the first item on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
+
+  function handleMenuKeyDown(event) {
+    const items = getItems()
+    const currentIndex = items.indexOf(document.activeElement)
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      focusItem(currentIndex + 1)
+    } else if (event.key === 'ArrowUp') {
+      event.preventDefault()
+      focusItem(currentIndex - 1)
+    } else if (event.key === 'Home') {
+      event.preventDefault()
+      focusItem(0)
+    } else if (event.key === 'End') {
+      event.preventDefault()
+      focusItem(items.length - 1)
+    }
+  }
+
+  // Tabbing out (not just Escape or an outside click) also closes it —
+  // checked via the blur target rather than intercepting Tab itself, since
+  // the DOM the browser computes default Tab order from is a frame ahead
+  // of whatever this component's state update would remove from it. A
+  // blur with no target is a click on something unfocusable, such as a
+  // caption in the Design panel: an outside one is the pointerdown
+  // handler's to close, an inside one keeps the panel open.
+  function handleBlur(event) {
+    if (event.relatedTarget && containerRef.current && !containerRef.current.contains(event.relatedTarget)) {
+      setIsOpen(false)
+    }
+  }
+
+  function close() {
+    setIsOpen(false)
+    triggerRef.current?.focus()
+  }
+
+  return {
+    isOpen,
+    toggle: () => setIsOpen((open) => !open),
+    close,
+    handleBlur,
+    handleMenuKeyDown,
+    containerRef,
+    triggerRef,
+    panelRef,
+  }
+}
 
 function Toolbar({
   locale = 'en',
@@ -50,87 +158,63 @@ function Toolbar({
   onExport = () => {},
   onCopyShareLink = () => {},
   onOpenSettings = () => {},
+  onOpenCoverLetter = () => {},
+  onClearCv = () => {},
+  isClearArmed = false,
 }) {
   const isFinnish = locale === 'fi'
-  const [isExportMenuOpen, setIsExportMenuOpen] = useState(false)
-  const exportMenuRef = useRef(null)
-  const exportTriggerRef = useRef(null)
-
-  function focusExportMenuItem(index) {
-    const items = exportMenuRef.current?.querySelectorAll('[role="menuitem"]')
-    if (!items?.length) {
-      return
-    }
-    const clamped = ((index % items.length) + items.length) % items.length
-    items[clamped].focus()
-  }
-
-  useEffect(() => {
-    if (!isExportMenuOpen) {
-      return undefined
-    }
-
-    // ARIA menu-button pattern: opening moves focus into the menu instead of
-    // leaving it on the trigger, so keyboard users don't have to Tab past it.
-    focusExportMenuItem(0)
-
-    function handlePointerDown(event) {
-      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
-        setIsExportMenuOpen(false)
-      }
-    }
-
-    function handleKeyDown(event) {
-      if (event.key === 'Escape') {
-        setIsExportMenuOpen(false)
-        exportTriggerRef.current?.focus()
-      }
-    }
-
-    document.addEventListener('mousedown', handlePointerDown)
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown)
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isExportMenuOpen])
-
-  function handleExportMenuKeyDown(event) {
-    const items = exportMenuRef.current?.querySelectorAll('[role="menuitem"]')
-    if (!items?.length) {
-      return
-    }
-    const currentIndex = Array.prototype.indexOf.call(items, document.activeElement)
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault()
-      focusExportMenuItem(currentIndex + 1)
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault()
-      focusExportMenuItem(currentIndex - 1)
-    } else if (event.key === 'Home') {
-      event.preventDefault()
-      focusExportMenuItem(0)
-    } else if (event.key === 'End') {
-      event.preventDefault()
-      focusExportMenuItem(items.length - 1)
-    }
-  }
-
-  // Tabbing out (not just Escape or an outside click) should also close the
-  // menu — checked via the blur target rather than intercepting Tab itself,
-  // since the DOM the browser computes default Tab order from is a frame
-  // ahead of whatever this component's state update would remove from it.
-  function handleExportBlur(event) {
-    if (exportMenuRef.current && !exportMenuRef.current.contains(event.relatedTarget)) {
-      setIsExportMenuOpen(false)
-    }
-  }
+  const {
+    isOpen: isExportOpen,
+    toggle: exportToggle,
+    close: exportClose,
+    handleBlur: exportHandleBlur,
+    handleMenuKeyDown: exportHandleMenuKeyDown,
+    containerRef: exportContainerRef,
+    triggerRef: exportTriggerRef,
+    panelRef: exportPanelRef,
+  } = useToolbarPopover('[role="menuitem"]')
+  const {
+    isOpen: isDesignOpen,
+    toggle: designToggle,
+    handleBlur: designHandleBlur,
+    containerRef: designContainerRef,
+    triggerRef: designTriggerRef,
+    panelRef: designPanelRef,
+  } = useToolbarPopover('button')
+  const {
+    isOpen: isMoreOpen,
+    toggle: moreToggle,
+    close: moreClose,
+    handleBlur: moreHandleBlur,
+    handleMenuKeyDown: moreHandleMenuKeyDown,
+    containerRef: moreContainerRef,
+    triggerRef: moreTriggerRef,
+    panelRef: morePanelRef,
+  } = useToolbarPopover('[role="menuitem"], [role="menuitemcheckbox"]')
 
   function handleExportSelect(format) {
-    setIsExportMenuOpen(false)
-    exportTriggerRef.current?.focus()
+    exportClose()
     onExport(format)
+  }
+
+  function handleCopyShareLink() {
+    exportClose()
+    onCopyShareLink()
+  }
+
+  function handleMoreSelect(action) {
+    moreClose()
+    action()
+  }
+
+  // Clear CV stays two-step (ResumeBuilderPage's handleResetForm): the
+  // first pick arms it and keeps the menu open on "Confirm clear", the
+  // second clears and closes it.
+  function handleClearSelect() {
+    if (isClearArmed) {
+      moreClose()
+    }
+    onClearCv()
   }
 
   return (
@@ -195,7 +279,7 @@ function Toolbar({
 
         <div className="app-toolbar__spacer" />
 
-        <div className="app-toolbar__group">
+        <div className="app-toolbar__group app-toolbar__group--actions">
           <div className="app-toolbar__control-cluster">
             <div className="app-toolbar__mode-switch" role="tablist" aria-label={locale === 'fi' ? 'Muokkaustila' : 'Builder mode'}>
               <button
@@ -218,50 +302,79 @@ function Toolbar({
               </button>
             </div>
 
-            <div className="app-toolbar__labeled-control">
-              <span className="app-toolbar__control-label">{isFinnish ? 'Pohja' : 'Template'}</span>
+            <button
+              type="button"
+              className="app-toolbar__template-trigger"
+              onClick={onOpenTemplateGallery}
+            >
+              {/* Visually hidden so sighted users see "Template" and the
+                  name, while screen readers get "Select template: X". */}
+              <span className="sr-only">{isFinnish ? 'Valitse pohja: ' : 'Select template: '}</span>
+              <span className="app-toolbar__trigger-caption" aria-hidden="true">{isFinnish ? 'Pohja' : 'Template'}</span>
+              <span className="app-toolbar__template-trigger-label">
+                {templates.find((template) => template.id === selectedTemplateId)?.label}
+              </span>
+              <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
+            </button>
+
+            {/* The look of the current template (1.6.67): style, font and
+                headings colour used to be three captioned dropdowns in the
+                toolbar, which pushed it onto two rows on most laptop
+                widths. They share one panel now; each keeps its own
+                dropdown inside it. */}
+            <div className="app-toolbar__popover" ref={designContainerRef} onBlur={designHandleBlur}>
               <button
                 type="button"
-                className="app-toolbar__template-trigger"
-                onClick={onOpenTemplateGallery}
+                ref={designTriggerRef}
+                className="app-toolbar__design-trigger"
+                aria-haspopup="true"
+                aria-expanded={isDesignOpen}
+                onClick={designToggle}
               >
-                {/* Visually hidden so sighted users just see the template name, but
-                    screen readers get "Select template: X" instead of only "X". */}
-                <span className="sr-only">{isFinnish ? 'Valitse pohja: ' : 'Select template: '}</span>
-                <span className="app-toolbar__template-trigger-label">
-                  {templates.find((template) => template.id === selectedTemplateId)?.label}
-                </span>
+                {isFinnish ? 'Ulkoasu' : 'Design'}
+                {isStyleVariantModified ? (
+                  <span className="app-toolbar__modified-dot" title={isFinnish ? 'Muokattu' : 'Modified'}>
+                    <span className="sr-only">{isFinnish ? ', muokattu' : ', modified'}</span>
+                  </span>
+                ) : null}
                 <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
               </button>
-            </div>
 
-            <div className="app-toolbar__labeled-control app-toolbar__labeled-control--style">
-              <span className="app-toolbar__control-label">{isFinnish ? 'Tyyli' : 'Style'}</span>
-              <CvStyleSwitcher
-                variants={styleVariants}
-                variantId={styleVariantId}
-                isModified={isStyleVariantModified}
-                onSelectVariant={onSelectStyleVariant}
-                locale={locale}
-              />
-            </div>
-
-            <div className="app-toolbar__labeled-control">
-              <span className="app-toolbar__control-label">{isFinnish ? 'Fontti' : 'Font'}</span>
-              <CvFontSwitcher
-                fontId={cvFontId}
-                onSelectFont={onCvFontChange}
-                locale={locale}
-              />
-            </div>
-
-            <div className="app-toolbar__labeled-control">
-              <span className="app-toolbar__control-label">{isFinnish ? 'Otsikot' : 'Headings'}</span>
-              <CvHeadingColorSwitcher
-                color={cvHeadingColor}
-                onSelectColor={onCvHeadingColorChange}
-                locale={locale}
-              />
+              {isDesignOpen ? (
+                <div
+                  className="app-toolbar__menu app-toolbar__design-panel"
+                  role="group"
+                  aria-label={isFinnish ? 'Ulkoasu' : 'Design'}
+                  ref={designPanelRef}
+                >
+                  <div className="app-toolbar__design-row">
+                    <span className="app-toolbar__design-label">{isFinnish ? 'Tyyli' : 'Style'}</span>
+                    <CvStyleSwitcher
+                      variants={styleVariants}
+                      variantId={styleVariantId}
+                      isModified={isStyleVariantModified}
+                      onSelectVariant={onSelectStyleVariant}
+                      locale={locale}
+                    />
+                  </div>
+                  <div className="app-toolbar__design-row">
+                    <span className="app-toolbar__design-label">{isFinnish ? 'Fontti' : 'Font'}</span>
+                    <CvFontSwitcher
+                      fontId={cvFontId}
+                      onSelectFont={onCvFontChange}
+                      locale={locale}
+                    />
+                  </div>
+                  <div className="app-toolbar__design-row">
+                    <span className="app-toolbar__design-label">{isFinnish ? 'Otsikot' : 'Headings'}</span>
+                    <CvHeadingColorSwitcher
+                      color={cvHeadingColor}
+                      onSelectColor={onCvHeadingColorChange}
+                      locale={locale}
+                    />
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -276,66 +389,98 @@ function Toolbar({
             {isFinnish ? 'FI' : 'EN'}
           </button>
 
-          <button
-            type="button"
-            className={`app-toolbar__icon-button${isResponsivePreview ? ' app-toolbar__icon-button--active' : ''}`}
-            onClick={onToggleResponsivePreview}
-            aria-pressed={isResponsivePreview}
-            aria-label={isFinnish ? 'Kapea esikatselu' : 'Narrow preview'}
-            title={isFinnish
-              ? 'Näytä pohja kapealla leveydellä (kuten HTML-vienti puhelimessa)'
-              : 'Show the template at a narrow width (like the HTML export on a phone)'}
-          >
-            <Smartphone size={16} strokeWidth={2} aria-hidden="true" />
-          </button>
+          <div className="app-toolbar__popover" ref={moreContainerRef} onBlur={moreHandleBlur}>
+            <button
+              type="button"
+              ref={moreTriggerRef}
+              className="app-toolbar__icon-button"
+              aria-haspopup="menu"
+              aria-expanded={isMoreOpen}
+              aria-label={isFinnish ? 'Lisää toimintoja' : 'More actions'}
+              title={isFinnish ? 'Lisää toimintoja' : 'More actions'}
+              onClick={moreToggle}
+            >
+              <MoreHorizontal size={16} strokeWidth={2} aria-hidden="true" />
+            </button>
 
-          <button
-            type="button"
-            className={`app-toolbar__icon-button${isFullscreenPreview ? ' app-toolbar__icon-button--active' : ''}`}
-            onClick={onToggleFullscreenPreview}
-            aria-pressed={isFullscreenPreview}
-            aria-label={isFinnish ? 'Koko näytön esikatselu' : 'Fullscreen preview'}
-            title={isFinnish ? 'Koko näytön esikatselu' : 'Fullscreen preview'}
-          >
-            {isFullscreenPreview ? (
-              <Minimize2 size={16} strokeWidth={2} aria-hidden="true" />
-            ) : (
-              <Maximize2 size={16} strokeWidth={2} aria-hidden="true" />
-            )}
-          </button>
+            {isMoreOpen ? (
+              <div
+                className="app-toolbar__menu"
+                role="menu"
+                aria-label={isFinnish ? 'Lisää toimintoja' : 'More actions'}
+                ref={morePanelRef}
+                onKeyDown={moreHandleMenuKeyDown}
+              >
+                <button
+                  type="button"
+                  role="menuitemcheckbox"
+                  aria-checked={isResponsivePreview}
+                  className="app-toolbar__menu-item"
+                  onClick={() => handleMoreSelect(onToggleResponsivePreview)}
+                  title={isFinnish
+                    ? 'Näytä pohja kapealla leveydellä (kuten HTML-vienti puhelimessa)'
+                    : 'Show the template at a narrow width (like the HTML export on a phone)'}
+                >
+                  <Smartphone size={15} strokeWidth={2} aria-hidden="true" />
+                  {isFinnish ? 'Kapea esikatselu' : 'Narrow preview'}
+                </button>
+                <button
+                  type="button"
+                  role="menuitemcheckbox"
+                  aria-checked={isFullscreenPreview}
+                  className="app-toolbar__menu-item"
+                  onClick={() => handleMoreSelect(onToggleFullscreenPreview)}
+                >
+                  <Maximize2 size={15} strokeWidth={2} aria-hidden="true" />
+                  {isFinnish ? 'Koko näytön esikatselu' : 'Fullscreen preview'}
+                </button>
+                {/* The nav rail has Cover letter and Settings from lg up;
+                    below that this menu is the way in. */}
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-toolbar__menu-item"
+                  onClick={() => handleMoreSelect(onOpenCoverLetter)}
+                >
+                  <Mail size={15} strokeWidth={2} aria-hidden="true" />
+                  {isFinnish ? 'Hakemuskirje' : 'Cover letter'}
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-toolbar__menu-item"
+                  onClick={() => handleMoreSelect(onOpenSettings)}
+                >
+                  <Settings size={15} strokeWidth={2} aria-hidden="true" />
+                  {isFinnish ? 'Asetukset' : 'Settings'}
+                </button>
+                <div className="app-toolbar__menu-separator" role="separator" />
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={`app-toolbar__menu-item app-toolbar__menu-item--danger${isClearArmed ? ' app-toolbar__menu-item--armed' : ''}`}
+                  disabled={isActionBusy}
+                  aria-live="polite"
+                  onClick={handleClearSelect}
+                >
+                  <Trash2 size={15} strokeWidth={2} aria-hidden="true" />
+                  {isClearArmed
+                    ? isFinnish ? 'Vahvista tyhjennys' : 'Confirm clear'
+                    : isFinnish ? 'Tyhjennä CV' : 'Clear CV'}
+                </button>
+              </div>
+            ) : null}
+          </div>
 
-          {/* Desktop widths reach Settings from the nav rail, which both
-              builder modes show from lg up; this is the narrow-screen way in. */}
-          <button
-            type="button"
-            className="app-toolbar__icon-button lg:hidden"
-            onClick={onOpenSettings}
-            aria-label={isFinnish ? 'Asetukset' : 'Settings'}
-            title={isFinnish ? 'Asetukset' : 'Settings'}
-          >
-            <Settings size={16} strokeWidth={2} aria-hidden="true" />
-          </button>
-
-          <button
-            type="button"
-            className="app-toolbar__icon-button"
-            disabled={isActionBusy}
-            onClick={onCopyShareLink}
-            aria-label={isFinnish ? 'Kopioi jakolinkki' : 'Copy share link'}
-            title={isFinnish ? 'Kopioi jakolinkki' : 'Copy share link'}
-          >
-            <Link2 size={16} strokeWidth={2} aria-hidden="true" />
-          </button>
-
-          <div className="app-toolbar__export" ref={exportMenuRef} onBlur={handleExportBlur}>
+          <div className="app-toolbar__popover" ref={exportContainerRef} onBlur={exportHandleBlur}>
             <button
               type="button"
               ref={exportTriggerRef}
               className="app-toolbar__primary"
               disabled={isActionBusy}
               aria-haspopup="menu"
-              aria-expanded={isExportMenuOpen}
-              onClick={() => setIsExportMenuOpen((open) => !open)}
+              aria-expanded={isExportOpen}
+              onClick={exportToggle}
             >
               {activeExport
                 ? isFinnish ? 'Viedään...' : 'Exporting...'
@@ -343,8 +488,13 @@ function Toolbar({
               <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
             </button>
 
-            {isExportMenuOpen ? (
-              <div className="app-toolbar__export-menu" role="menu" onKeyDown={handleExportMenuKeyDown}>
+            {isExportOpen ? (
+              <div
+                className="app-toolbar__menu"
+                role="menu"
+                ref={exportPanelRef}
+                onKeyDown={exportHandleMenuKeyDown}
+              >
                 <button
                   type="button"
                   role="menuitem"
@@ -393,6 +543,19 @@ function Toolbar({
                     {isFinnish
                       ? 'Muokattava .docx, toimii kaikkien ATS-järjestelmien kanssa'
                       : 'Editable .docx, works with any ATS'}
+                  </span>
+                </button>
+                <div className="app-toolbar__menu-separator" role="separator" />
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-toolbar__export-item"
+                  disabled={isActionBusy}
+                  onClick={handleCopyShareLink}
+                >
+                  {isFinnish ? 'Kopioi jakolinkki' : 'Copy share link'}
+                  <span className="app-toolbar__export-item-hint">
+                    {isFinnish ? 'CV kulkee linkissä, kuvat jäävät pois' : 'The CV travels in the link, without photos'}
                   </span>
                 </button>
               </div>

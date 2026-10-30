@@ -2,6 +2,7 @@ import { test, expect } from './fixtures/base.js'
 import { getTemplateVariants, getVariantLook } from '../src/utils/templateVariants.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { CV_FONT_OPTIONS, getCvFontStack } from '../src/utils/cvFonts.js'
+import { fontTrigger, styleTrigger } from './helpers/builderToolbar.js'
 
 // Phase 4: the style looks outside the builder's Style picker. These are
 // the builder's template gallery, the Free CV Templates grid, the template
@@ -11,8 +12,6 @@ import { CV_FONT_OPTIONS, getCvFontStack } from '../src/utils/cvFonts.js'
 
 const label = (id) => cvTemplates.find((template) => template.id === id).label
 const fontLabel = (fontId) => CV_FONT_OPTIONS.find((font) => font.id === fontId).label
-const styleTrigger = (page) => page.getByRole('banner').getByRole('button', { name: /^Select style:/ })
-const fontTrigger = (page) => page.getByRole('banner').getByRole('button', { name: /^Select font:/ })
 const templateLabel = (page) => page.locator('.app-toolbar__template-trigger-label')
 
 // The first palette variable whose value differs between two looks, so
@@ -49,7 +48,7 @@ test.describe('Template gallery looks', () => {
 
   test('cards open on each template\'s stored look; a swatch previews only its own card', async ({ page }) => {
     await page.goto('/cv?template=developer')
-    await styleTrigger(page).click()
+    await (await styleTrigger(page)).click()
     await page.getByRole('radiogroup', { name: 'Select style' }).getByRole('radio', { name: developer[1].label.en }).click()
     await page.getByRole('button', { name: /^Select template:/ }).click()
     const dialog = page.getByRole('dialog', { name: 'Template gallery' })
@@ -67,7 +66,7 @@ test.describe('Template gallery looks', () => {
 
   test('the open template\'s card mirrors live tweaks until another look is previewed', async ({ page }) => {
     await page.goto('/cv?template=developer')
-    await fontTrigger(page).click()
+    await (await fontTrigger(page)).click()
     await page.getByRole('option', { name: 'Georgia' }).click()
     const dialog = await openGallery(page)
     const developerCard = card(dialog, 'developer')
@@ -90,39 +89,39 @@ test.describe('Template gallery looks', () => {
     await card(dialog, 'developer').getByRole('button').click()
     await expect(dialog).toBeHidden()
     await expect(templateLabel(page)).toHaveText(label('developer'))
-    await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[1].label.en}`)
-    await expect(fontTrigger(page)).toHaveAccessibleName(`Select font: ${fontLabel(developer[1].fontId)}`)
+    await expect(await styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[1].label.en}`)
+    await expect(await fontTrigger(page)).toHaveAccessibleName(`Select font: ${fontLabel(developer[1].fontId)}`)
     await expect.poll(() => paletteVar(page.locator('.app-shell__preview'), developerVar)).toBe(developer[1].palette[developerVar])
 
     // A Use is one undo step (1.6.6): Undo goes back to the template and
     // look it replaced, Redo forward again.
     await page.getByRole('button', { name: 'Undo' }).click()
     await expect(templateLabel(page)).toHaveText(label('minimal'))
-    await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original')
-    await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
+    await expect(await styleTrigger(page)).toHaveAccessibleName('Select style: Original')
+    await expect(await fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
 
     await page.getByRole('button', { name: 'Redo' }).click()
     await expect(templateLabel(page)).toHaveText(label('developer'))
-    await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[1].label.en}`)
+    await expect(await styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[1].label.en}`)
   })
 
   test('Undo after a Use that changed nothing stored brings back the font tweak', async ({ page }) => {
     await page.goto('/cv?template=minimal')
-    await fontTrigger(page).click()
+    await (await fontTrigger(page)).click()
     await page.getByRole('option', { name: 'Georgia' }).click()
     const dialog = await openGallery(page)
     await card(dialog, 'developer').getByRole('button').click()
     await expect(templateLabel(page)).toHaveText(label('developer'))
-    await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
+    await expect(await fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
 
     await page.getByRole('button', { name: 'Undo' }).click()
     await expect(templateLabel(page)).toHaveText(label('minimal'))
-    await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Georgia')
-    await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original, Modified')
+    await expect(await fontTrigger(page)).toHaveAccessibleName('Select font: Georgia')
+    await expect(await styleTrigger(page)).toHaveAccessibleName('Select style: Original, Modified')
 
     await page.getByRole('button', { name: 'Redo' }).click()
     await expect(templateLabel(page)).toHaveText(label('developer'))
-    await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
+    await expect(await fontTrigger(page)).toHaveAccessibleName('Select font: Inter')
   })
 
   test('an edit made after a Use is undone first, then the Use', async ({ page }) => {
@@ -144,13 +143,13 @@ test.describe('Template gallery looks', () => {
 
   test('Use on the open template\'s stored look keeps the tweaks', async ({ page }) => {
     await page.goto('/cv?template=developer')
-    await fontTrigger(page).click()
+    await (await fontTrigger(page)).click()
     await page.getByRole('option', { name: 'Georgia' }).click()
     const dialog = await openGallery(page)
     await card(dialog, 'developer').getByRole('button').click()
     await expect(dialog).toBeHidden()
-    await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original, Modified')
-    await expect(fontTrigger(page)).toHaveAccessibleName('Select font: Georgia')
+    await expect(await styleTrigger(page)).toHaveAccessibleName('Select style: Original, Modified')
+    await expect(await fontTrigger(page)).toHaveAccessibleName('Select font: Georgia')
   })
 
   test('View examples carries the previewed look', async ({ page }) => {
@@ -169,7 +168,7 @@ test.describe('Template gallery looks', () => {
   // look in a caption (1.6.7).
   test('a card names its checked look', async ({ page }) => {
     await page.goto('/cv?template=developer')
-    await styleTrigger(page).click()
+    await (await styleTrigger(page)).click()
     await page.getByRole('radiogroup', { name: 'Select style' }).getByRole('radio', { name: developer[1].label.en }).click()
     const dialog = await openGallery(page)
     const caption = card(dialog, 'developer').locator('.style-swatches__caption')
@@ -272,8 +271,8 @@ test.describe('?style= handoff into the builder', () => {
     await lookRadio(page, 'Style', developer[1]).check()
     await page.getByRole('button', { name: 'Use this example' }).click()
     await expect(page.getByText(/^Loaded the .+ example\.$/)).toBeVisible()
-    await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[1].label.en}`)
-    await expect(fontTrigger(page)).toHaveAccessibleName(`Select font: ${fontLabel(developer[1].fontId)}`)
+    await expect(await styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[1].label.en}`)
+    await expect(await fontTrigger(page)).toHaveAccessibleName(`Select font: ${fontLabel(developer[1].fontId)}`)
     await expect(page).toHaveURL(/\/cv\?template=developer$/)
   })
 
@@ -281,7 +280,7 @@ test.describe('?style= handoff into the builder', () => {
     await page.goto(`/free-cv-templates/${developerSlug}?style=${developer[2].id}`)
     await page.getByRole('button', { name: 'Start blank with this template' }).click()
     await expect(page).toHaveURL(/\/cv\?template=developer$/)
-    await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[2].label.en}`)
+    await expect(await styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[2].label.en}`)
   })
 
   test('a grid card\'s "Use this template" opens the builder on the card\'s look', async ({ page }) => {
@@ -292,13 +291,13 @@ test.describe('?style= handoff into the builder', () => {
       .getByRole('button', { name: 'Use this template' })
       .click()
     await expect(templateLabel(page)).toHaveText(label('developer'))
-    await expect(styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[2].label.en}`)
+    await expect(await styleTrigger(page)).toHaveAccessibleName(`Select style: ${developer[2].label.en}`)
     await expect(page).toHaveURL(/\/cv\?template=developer$/)
   })
 
   test('an unknown ?style= opens on Original and is stripped', async ({ page }) => {
     await page.goto('/cv?template=developer&style=no-such-look')
-    await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original')
+    await expect(await styleTrigger(page)).toHaveAccessibleName('Select style: Original')
     await expect(page).toHaveURL(/\/cv\?template=developer$/)
   })
 
@@ -313,7 +312,7 @@ test.describe('?style= handoff into the builder', () => {
 
     await page.goto(`/cv?template=developer&style=${developer[1].id}`)
     await expect(page.getByText("Kept your restored CV. Use 'Load demo CV' to start over.")).toBeVisible()
-    await expect(styleTrigger(page)).toHaveAccessibleName('Select style: Original')
+    await expect(await styleTrigger(page)).toHaveAccessibleName('Select style: Original')
     await expect(page).toHaveURL(/\/cv\?template=developer$/)
   })
 })
