@@ -2,6 +2,7 @@ import { test, expect } from './fixtures/base.js'
 import { pickTemplate } from './helpers/templateGallery.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { TEMPLATE_EXAMPLES } from '../src/utils/exampleCvs.js'
+import { clearCv } from './helpers/builderToolbar.js'
 
 // The demo CV's fixed skill list (src/utils/cvForm.js's DEMO_CV-equivalent
 // seed data) — used by the Skills/EditableChip test below so it doesn't
@@ -1324,8 +1325,7 @@ test.describe('Direct Edit builder', () => {
   // the full investigation.
   function runDirectEditEmptyPlaceholderCheck(label, classPrefix, contactRowSuffix = 'meta', labelOrder = ['Location', 'Email', 'Phone']) {
     test(`${label}: an empty contact field shows its placeholder label, not a stray separator, in Direct Edit mode`, async ({ page }) => {
-      await page.getByRole('button', { name: 'Reset form' }).click()
-      await page.getByRole('button', { name: 'Confirm reset' }).click()
+      await clearCv(page)
 
       await pickTemplate(page, label)
       await page.getByRole('tab', { name: 'Direct Edit' }).click()
@@ -1591,8 +1591,7 @@ test.describe('Direct Edit builder', () => {
   // Direct Edit would leave nothing to click into. While editing it shows
   // with a placeholder instead.
   test('Graduate: an empty Career Objective can be written inline', async ({ page }) => {
-    await page.getByRole('button', { name: 'Reset form' }).click()
-    await page.getByRole('button', { name: 'Confirm reset' }).click()
+    await clearCv(page)
     await pickTemplate(page, 'Graduate')
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
 
@@ -1837,7 +1836,17 @@ test.describe('Direct Edit nav rail, entry highlight and placeholders', () => {
     const panel = page.locator('.direct-edit-sections__panel')
 
     // The panel hangs over the CV's right edge, where the pencils hang
-    // outside each section's top-right corner: at least one is under it.
+    // outside each section's top-right corner. Whether one lands under it
+    // depends on how wide the row of buttons beside Sections is (none did
+    // once Clear CV left that row, 1.6.67), so slide one under the panel's
+    // middle. A translate moves it without lifting it out of the overlay's
+    // stacking order, which is what this guards.
+    await panel.evaluate((el) => {
+      const box = el.getBoundingClientRect()
+      const pencil = document.querySelector('.direct-edit-pencil')
+      const p = pencil.getBoundingClientRect()
+      pencil.style.translate = `${box.left + box.width / 2 - (p.left + p.width / 2)}px ${box.top + box.height / 2 - (p.top + p.height / 2)}px`
+    })
     const pencilsUnderPanel = await panel.evaluate((el) => {
       const box = el.getBoundingClientRect()
       return [...document.querySelectorAll('.direct-edit-pencil')].filter((pencil) => {
@@ -2128,25 +2137,29 @@ test.describe('Direct Edit pencils and Load demo CV', () => {
     await expect.poll(async () => (await offset('education')).dy).toBe(before.dy)
   })
 
-  // Two-step, like Classic's "Reset form": one stray click can't wipe the CV.
+  // Two-step: one stray click can't wipe the CV. It sits in the toolbar's
+  // More menu (1.6.67), not beside Load demo CV and the other harmless
+  // buttons above the CV.
   test('Clear CV arms on the first click, clears on the second, and Undo restores the CV', async ({ page }) => {
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
-    const actions = page.locator('.direct-edit-actions')
     const nameField = page.locator('.direct-edit-preview h3 .direct-edit-field')
     await expect(nameField).toHaveText('John Doe')
+    await expect(page.locator('.direct-edit-actions').getByRole('button', { name: 'Clear CV' })).toHaveCount(0)
     // Let the demo load settle into its own undo step (HISTORY_COMMIT_DELAY_MS).
     await page.waitForTimeout(800)
 
-    await actions.getByRole('button', { name: 'Clear CV' }).click()
-    await expect(actions.getByRole('button', { name: 'Confirm clear' })).toBeVisible()
+    await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: 'Clear CV' }).click()
+    // Armed: the menu stays open on the confirming item.
+    await expect(page.getByRole('menuitem', { name: 'Confirm clear' })).toBeVisible()
     await expect(nameField).toHaveText('John Doe')
 
-    await actions.getByRole('button', { name: 'Confirm clear' }).click()
+    await page.getByRole('menuitem', { name: 'Confirm clear' }).click()
     await expect(page.getByText('CV cleared. Restore it with the toolbar undo arrow.')).toBeVisible()
+    await expect(page.getByRole('menu')).toBeHidden()
     await expect(nameField).toHaveText('')
     await expect(page.locator('.direct-edit-preview [data-export-section="experience"]').first())
       .not.toContainText('Senior Product Designer')
-    await expect(actions.getByRole('button', { name: 'Clear CV' })).toBeVisible()
 
     await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()
     await expect(nameField).toHaveText('John Doe')

@@ -1623,39 +1623,68 @@ select.floating-field__control {
   flex: 1 1 auto;
 }
 
-/* Groups the Template/Font/Color labeled controls with a gap wide enough
-   that each label reads as bound to its own dropdown, not the neighboring
-   one — the opposite arrangement (tight cross-group gap, loose in-group
-   gap) is what made the toolbar look like one crowded row instead of three
-   distinct fields. Keep this gap clearly larger than
-   .app-toolbar__labeled-control's own label-to-control gap below. */
+/* The mode switch, Template and Design sit together, a little further
+   apart than the toolbar's other groups. */
 .app-toolbar__control-cluster {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-5);
+  gap: var(--space-2);
 }
 
-/* Wraps each dropdown with a tiny inline caption so it's clear at a glance
-   which is which, instead of a value-only button (e.g. "Minimalisti") with
-   no indication of what category it picks from. This gap must stay smaller
-   than .app-toolbar__control-cluster's gap above, so a label visually
-   belongs to the control right next to it. */
-.app-toolbar__labeled-control {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.75rem;
-  padding-inline: 0.15rem;
+/* The section search filters Classic's nav rail, which only shows from
+   lg up, so below that it would filter nothing. */
+@media (max-width: 1023.98px) {
+  .app-toolbar__group--search {
+    display: none;
+  }
 }
 
-.app-toolbar__control-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--app-text-subtle);
-  white-space: nowrap;
+/* Phones (1.6.67): two rows instead of five. The first holds back, undo,
+   language, More and Export; the mode switch, Template and Design fill
+   the second. The actions group dissolves into the toolbar's own flex row
+   so the cluster can drop below the rest by itself. */
+@media (max-width: 639.98px) {
+  .app-toolbar__inner {
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .app-toolbar .app-toolbar__title {
+    display: none;
+  }
+
+  .app-toolbar__group--actions {
+    display: contents;
+  }
+
+  .app-toolbar__control-cluster {
+    order: 1;
+    flex: 1 0 100%;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+
+  .app-toolbar__control-cluster > .app-toolbar__template-trigger {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+  }
+
+  .app-toolbar__control-cluster .app-toolbar__trigger-caption {
+    display: none;
+  }
+
+  .app-toolbar .app-toolbar__mode-switch-btn {
+    padding-inline: 0.6rem;
+    white-space: nowrap;
+  }
+
+  /* Design ends the row here, so its panel hangs leftward. */
+  .app-toolbar .app-toolbar__design-panel {
+    left: auto;
+    right: 0;
+  }
 }
 
 .app-toolbar__title {
@@ -1753,18 +1782,6 @@ select.floating-field__control {
   box-shadow: none;
 }
 
-.app-toolbar__select {
-  height: 2.15rem;
-  padding: 0 2rem 0 0.75rem;
-  border: 1px solid var(--app-border);
-  border-radius: var(--radius-sm);
-  background: var(--app-surface);
-  color: var(--app-text);
-  font-size: 0.78rem;
-  font-weight: 600;
-  max-width: 10rem;
-}
-
 .app-toolbar__primary {
   display: inline-flex;
   align-items: center;
@@ -1793,11 +1810,12 @@ select.floating-field__control {
   transform: none;
 }
 
-.app-toolbar__export {
+.app-toolbar__popover {
   position: relative;
 }
 
-.app-toolbar__export-menu {
+/* The Design panel and the More and Export menus. */
+.app-toolbar__menu {
   position: absolute;
   top: calc(100% + 0.5rem);
   right: 0;
@@ -1810,6 +1828,114 @@ select.floating-field__control {
   border-radius: var(--radius-sm);
   background: var(--app-surface);
   box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.2);
+}
+
+/* Rows in the toolbar's menus and dropdowns. Without this they kept the
+   browser's own button border and fill (a box around every row) — on the
+   live site too, before 1.6.67. Each row's own rules below and in the
+   switcher sections add its hover and selected looks on top. */
+.app-toolbar__menu-item,
+.app-toolbar__export-item,
+.cv-font-switcher__option,
+.cv-style-switcher__option {
+  border: 0;
+  background: transparent;
+}
+
+.app-toolbar__menu-separator {
+  height: 1px;
+  margin: 0.3rem 0.2rem;
+  background: var(--app-border);
+}
+
+.app-toolbar__menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.25rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: calc(var(--radius-sm) - 2px);
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--app-text);
+  transition: background-color 140ms ease, color 140ms ease;
+}
+
+.app-toolbar__menu-item svg {
+  flex-shrink: 0;
+  color: var(--app-text-muted);
+}
+
+.app-toolbar__menu-item:hover:not(:disabled),
+.app-toolbar__menu-item:focus-visible {
+  background: var(--app-surface-strong);
+}
+
+/* A checked toggle (Narrow preview, Fullscreen preview) shows a tick. */
+.app-toolbar__menu-item[aria-checked="true"]::after {
+  content: '\2713';
+  margin-left: auto;
+  color: var(--accent-solid);
+}
+
+.app-toolbar__menu-item--danger,
+.app-toolbar__menu-item--danger svg {
+  color: #b91c1c;
+}
+
+/* Armed by the first click, waiting for the confirming second one. */
+.app-toolbar__menu-item.app-toolbar__menu-item--armed,
+.app-toolbar__menu-item--armed:hover:not(:disabled),
+.app-toolbar__menu-item--armed:focus-visible,
+.app-toolbar__menu-item--armed svg {
+  background: #b91c1c;
+  color: #ffffff;
+}
+
+.app-toolbar__menu-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Style, Font and Headings, one captioned row each. Their own dropdowns
+   open from here (position: fixed, so this panel never clips them). */
+.app-toolbar__design-panel {
+  left: 0;
+  right: auto;
+  gap: 0.35rem;
+  min-width: 17rem;
+  padding: 0.6rem;
+}
+
+.app-toolbar__design-row {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.app-toolbar__design-row > :last-child > button {
+  width: 100%;
+  max-width: none;
+}
+
+.app-toolbar__design-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--app-text-muted);
+}
+
+.app-toolbar__trigger-caption {
+  color: var(--app-text-muted);
+  font-weight: 500;
+}
+
+.app-toolbar__modified-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 999px;
+  background: var(--accent-solid);
 }
 
 .app-toolbar__export-item {
@@ -1845,13 +1971,14 @@ select.floating-field__control {
    Templates item and the mobile "Templates" tab use — rather than its own
    panel, so there's exactly one template-picking UI in the app. */
 
-.app-toolbar__template-trigger {
+.app-toolbar__template-trigger,
+.app-toolbar__design-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
   height: 2.15rem;
-  max-width: 10rem;
+  max-width: 18rem;
   padding: 0 0.6rem 0 0.75rem;
   border: 1px solid var(--app-border);
   border-radius: var(--radius-sm);
@@ -1861,7 +1988,8 @@ select.floating-field__control {
   font-weight: 600;
 }
 
-.app-toolbar__template-trigger:hover {
+.app-toolbar__template-trigger:hover,
+.app-toolbar__design-trigger:hover {
   border-color: var(--app-border-strong);
 }
 
@@ -2141,43 +2269,6 @@ select.floating-field__control {
 .cv-style-switcher__option-font {
   color: var(--app-text-muted);
   font-size: 0.75rem;
-}
-
-.cv-style-switcher__dot {
-  display: none;
-  flex-shrink: 0;
-  width: 0.4rem;
-  height: 0.4rem;
-  border-radius: 999px;
-  background: var(--app-text-muted);
-}
-
-/* Below 1600px the toolbar is tight, so the trigger keeps only the colour
-   strip plus a dot when modified; the aria-label/title still carry the name
-   and "Modified". The caption goes too (the label names it) and the control
-   cluster tightens, which keeps the Style control from adding a toolbar row
-   at 1280px (guarded in e2e/style-variants.spec.js). Between roughly 1280px
-   and 1700px some template/mode combinations can still wrap a row that the
-   toolbar without Style would not -- an accepted trade-off. */
-@media (max-width: 1599.98px) {
-  .cv-style-switcher__trigger-label,
-  .cv-style-switcher__modified,
-  .app-toolbar__labeled-control--style .app-toolbar__control-label {
-    display: none;
-  }
-
-  .cv-style-switcher__dot {
-    display: block;
-  }
-
-  .cv-style-switcher__trigger {
-    gap: 0.35rem;
-    padding: 0 0.5rem;
-  }
-
-  .app-toolbar__control-cluster {
-    gap: var(--space-3);
-  }
 }
 
 /* ── CV heading color switcher (toolbar) ── */
@@ -4385,12 +4476,17 @@ html:lang(fi) .landing-title {
   }
 }
 
-/* Classic mode's bar pinned to the bottom of the builder below lg
-   (ResumeBuilderPage's mobileBottomActions, the Editor/Preview/Templates
-   tabs and the export row) is about 178px tall: toasts sit above it while
-   it shows (1.6.66). Re-measure if the bar's contents change. */
+/* Classic mode's tab bar pinned to the bottom of the builder below lg
+   (ResumeBuilderPage's mobileBottomActions: Editor, Preview, Templates) is
+   one row, about 3.4rem plus the home indicator (1.6.67; two rows and
+   about 178px before). Toasts sit above it while it shows (1.6.66).
+   Re-measure if the bar's contents change. */
+.mobile-tab-bar.mobile-tab-bar {
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+}
+
 @media (max-width: 1023.98px) {
   .toast-stack.toast-stack--above-bar {
-    bottom: calc(12rem + env(safe-area-inset-bottom, 0px));
+    bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
   }
 }

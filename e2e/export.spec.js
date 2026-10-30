@@ -38,18 +38,23 @@ test.describe('Export menu', () => {
     await page.keyboard.press('ArrowDown')
     await expect(items.nth(3)).toBeFocused()
 
+    // Copy share link ends the menu (1.6.67).
+    await expect(items).toHaveCount(5)
+    await page.keyboard.press('ArrowDown')
+    await expect(items.nth(4)).toBeFocused()
+
     // Wraps back to the first item.
     await page.keyboard.press('ArrowDown')
     await expect(items.nth(0)).toBeFocused()
 
     await page.keyboard.press('ArrowUp')
-    await expect(items.nth(3)).toBeFocused()
+    await expect(items.nth(4)).toBeFocused()
 
     await page.keyboard.press('Home')
     await expect(items.nth(0)).toBeFocused()
 
     await page.keyboard.press('End')
-    await expect(items.nth(3)).toBeFocused()
+    await expect(items.nth(4)).toBeFocused()
   })
 
   test('Escape closes the menu and returns focus to the trigger', async ({ page }) => {
