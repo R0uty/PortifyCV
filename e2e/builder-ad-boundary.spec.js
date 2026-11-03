@@ -42,7 +42,7 @@ test('leaving the builder is a full page load, and Back across its edge reloads'
   expect(await sameDocument(page)).toBe(false)
 })
 
-// 1.6.66: About and the privacy policy are ad-free too (AD_FREE_VIEWS in
+// 1.6.67: About and the privacy policy are ad-free too (AD_FREE_VIEWS in
 // pageMeta.js), so moving between them and a page with ads is a full page
 // load, while moving between two pages on the same side stays in the app.
 test('About and the privacy policy sit behind the same ad edge', async ({ page }) => {

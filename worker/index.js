@@ -45,7 +45,7 @@ const escapeHtml = (text) => String(text)
 // the main pages in its language, and on /fi the Finnish FAQ. React removes
 // the block on load (src/main.jsx), so visitors never see it. Since 1.6.49
 // the block holds the page's full pre-rendered markup instead, which stays
-// on screen until React's copy is ready (1.6.66); this is the fallback when
+// on screen until React's copy is ready (1.6.67); this is the fallback when
 // a build has none.
 const FALLBACK_LINKS = ['landing', 'freeTemplates', 'howToWrite', 'atsGuide', 'cvExamples', 'coverLetterExamples']
 
@@ -156,7 +156,7 @@ function rewriteForRoute(response, view, locale, body) {
 
   // No ads in the builder (1.6.48): it's an app screen, where AdSense
   // doesn't allow them and where Auto ads would sit among its buttons. Nor
-  // on About and the privacy policy (1.6.66) — see AD_FREE_VIEWS.
+  // on About and the privacy policy (1.6.67) — see AD_FREE_VIEWS.
   if (AD_FREE_VIEWS.has(view)) {
     rewriter.on(ADSENSE_SCRIPT, new RemoveElement())
   }

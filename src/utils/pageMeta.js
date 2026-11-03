@@ -17,7 +17,7 @@ export const DEFAULT_OG_IMAGE = '/PortifyCV.jpg'
 // Views served without the AdSense script (the worker removes it; 404s
 // too, separately). The builder is an app screen, where ads aren't allowed
 // (1.6.48); About and the privacy policy carry no content of their own for
-// ads to sit beside (1.6.66). App.jsx crosses this edge with a full page
+// ads to sit beside (1.6.67). App.jsx crosses this edge with a full page
 // load, so a script loaded on one side never carries over to the other.
 export const AD_FREE_VIEWS = new Set(['builder', 'about', 'privacy'])
 

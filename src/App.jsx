@@ -14,6 +14,7 @@ import { getCvTemplates } from './utils/cvTemplates'
 import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX, AD_FREE_VIEWS } from './utils/pageMeta'
 import { LocaleContext } from './components/localeContext'
 import { APP_VERSION } from './utils/appVersion'
+import { hasUnsavedChanges } from './utils/leaveGuard'
 
 const CONTACT_MAILTO = 'mailto:portifycv@gmail.com'
 
@@ -99,7 +100,7 @@ function readRoute() {
 }
 
 // Between a page with ads and one without (the builder, About, the privacy
-// policy, a 404) is a full page load (1.6.66): the worker serves each side
+// policy, a 404) is a full page load (1.6.67): the worker serves each side
 // with or without the AdSense script, which can't be unloaded in place.
 const isAdFree = (view) => view === 'notFound' || AD_FREE_VIEWS.has(view)
 const crossesAdEdge = (fromView, toView) => isAdFree(fromView) !== isAdFree(toView)
@@ -660,7 +661,7 @@ function App({ route = null }) {
 
   // Out of the builder is a full page load too (1.6.48), so the page the
   // visitor goes to loads its ads again; so is any move across the ad edge
-  // (1.6.66, crossesAdEdge).
+  // (1.6.67, crossesAdEdge).
   const loadPage = useCallback((nextView, search = '') => {
     window.location.assign(`${viewPath(nextView, localeRef.current)}${search}`)
   }, [])
@@ -698,6 +699,16 @@ function App({ route = null }) {
       // without ads, reloads, for the same reason the links do (1.6.48).
       if ((route.view === 'builder') !== (viewRef.current === 'builder')
         || crossesAdEdge(viewRef.current, route.view)) {
+        // Leaving a CV with unsaved edits (1.6.66): put the builder's
+        // address back before loading the page the visitor went back to,
+        // so if they cancel the browser's "Leave site?" prompt the address
+        // still matches the builder they stayed on.
+        if (viewRef.current === 'builder' && hasUnsavedChanges()) {
+          const target = window.location.href
+          window.history.pushState(null, '', viewPath('builder', localeRef.current))
+          window.location.assign(target)
+          return
+        }
         window.location.reload()
         return
       }

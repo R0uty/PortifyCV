@@ -1,4 +1,6 @@
-function ToastStack({ toasts = [] }) {
+// `clearBottomBar`: Classic mode's bar pinned to the bottom of a phone or
+// tablet screen is showing, so toasts sit above it rather than on it.
+function ToastStack({ toasts = [], clearBottomBar = false }) {
   if (toasts.length === 0) {
     return null
   }
@@ -23,7 +25,7 @@ function ToastStack({ toasts = [] }) {
 
   return (
     <div
-      className="pointer-events-none fixed right-4 z-50 flex w-[min(92vw,24rem)] flex-col gap-3 print:hidden bottom-[calc(12rem+env(safe-area-inset-bottom,0px))] sm:bottom-4"
+      className={`toast-stack${clearBottomBar ? ' toast-stack--above-bar' : ''} pointer-events-none fixed right-4 z-50 flex w-[min(92vw,24rem)] flex-col gap-3 print:hidden bottom-[calc(1rem+env(safe-area-inset-bottom,0px))]`}
     >
       {toasts.map((toast) => (
         <div
@@ -33,7 +35,7 @@ function ToastStack({ toasts = [] }) {
           role={toast.type === 'error' ? 'alert' : 'status'}
           aria-live="polite"
         >
-          <p className="text-sm font-bold uppercase tracking-[0.04em]">{toast.message}</p>
+          <p className="text-sm font-semibold">{toast.message}</p>
         </div>
       ))}
     </div>

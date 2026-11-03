@@ -381,7 +381,7 @@ check('fieldSearch writes ?field= for a field and nothing for All',
   check("the worker's AdSense selector matches index.html's AdSense tag",
     Boolean(adsenseSrcPart) && new RegExp(`<script[^>]*src="[^"]*${adsenseSrcPart.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}`).test(indexHtml))
 
-  // 1.6.66: a renamed view would silently put ads back on About/privacy.
+  // 1.6.67: a renamed view would silently put ads back on About/privacy.
   const { AD_FREE_VIEWS } = await importSrc('utils/pageMeta.js')
   const unknownAdFree = [...AD_FREE_VIEWS].filter((view) => !VIEW_HEAD[view])
   check('every ad-free view is a real route', unknownAdFree.length === 0, unknownAdFree.join(', '))

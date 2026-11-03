@@ -7,7 +7,7 @@ import App from './App.jsx'
 // The edge worker fills #seo-landing with the page's pre-rendered markup
 // (1.6.49). Removing it before React rendered left only the header and
 // footer on screen while the lazy page chunk loaded, and a blank template
-// preview for a second or more (1.6.66). So when the block holds a real
+// preview for a second or more (1.6.67). So when the block holds a real
 // pre-rendered page, it stays on screen while React renders the same page
 // invisibly on top of it, and swaps once React's copy has its heading (and,
 // on a template page, its example CV) — or after a few seconds regardless.
