@@ -814,6 +814,9 @@ function App({ route = null }) {
           onExport={headerProps.onExport}
           onCopyShareLink={headerProps.onCopyShareLink}
           onOpenSettings={headerProps.onOpenSettings}
+          onOpenCoverLetter={headerProps.onOpenCoverLetter}
+          onClearCv={headerProps.onClearCv}
+          isClearArmed={headerProps.isClearArmed}
           builderMode={headerProps.builderMode}
           onSetBuilderMode={headerProps.onSetBuilderMode}
         />

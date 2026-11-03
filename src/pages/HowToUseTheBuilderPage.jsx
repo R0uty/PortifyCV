@@ -48,7 +48,7 @@ function getCopy(locale) {
           heading: 'Valitse pohja — sisältösi pysyy ennallaan',
           figureLabel: 'Pohjagalleria: alasuodattimet pohjakorttien yllä, kullakin kortilla kolme tyyliä.',
           caption:
-            `Pohjan vaihtaminen ei koskaan kosketa tekstiäsi, joten kaikkien ${TEMPLATE_COUNT} pohjan kokeilu on turvallista. Jokainen pohja käyttää eri osioita — ne, joita pohja ei käytä, piilotetaan editorista ja esikatselusta kunnes vaihdat takaisin. Jokaisella pohjalla on myös kolme tyyliä (värit, fontti ja otsikoiden väri), jotka valitset yläpalkin Tyyli-valikosta.`,
+            `Pohjan vaihtaminen ei koskaan kosketa tekstiäsi, joten kaikkien ${TEMPLATE_COUNT} pohjan kokeilu on turvallista. Jokainen pohja käyttää eri osioita — ne, joita pohja ei käytä, piilotetaan editorista ja esikatselusta kunnes vaihdat takaisin. Jokaisella pohjalla on myös kolme tyyliä (värit, fontti ja otsikoiden väri), jotka valitset yläpalkin Ulkoasu-valikosta.`,
           linkParagraph: {
             before: 'Katso kaikki ',
             linkText: `${TEMPLATE_COUNT} pohjaa`,
@@ -67,9 +67,9 @@ function getCopy(locale) {
         {
           step: 'export',
           heading: 'Vie tiedostoksi tai jaa linkkinä',
-          figureLabel: 'Avattu Vie-valikko: PDF, HTML, JSON ja Word, jakolinkin painikkeen vieressä.',
+          figureLabel: 'Avattu Vie-valikko: PDF, HTML, JSON, Word ja jakolinkki.',
           caption:
-            'Vie-valikossa on neljä muotoa: PDF hakemuksiin, Word muokattavaksi toisessa ohjelmassa, HTML verkkoon ja JSON varmuuskopioksi tai myöhempää muokkausta varten. Jakolinkki koodaa koko CV:n URL-osoitteeseen — sitä ei lähetetä palvelimelle, eivätkä kuvat mahdu mukaan. Vasemman reunan Hakemuskirje-kohta luo CV:si pohjalta hakemuskirjeluonnoksen, jota voit muokata.',
+            'Vie-valikossa on neljä muotoa: PDF hakemuksiin, Word muokattavaksi toisessa ohjelmassa, HTML verkkoon ja JSON varmuuskopioksi tai myöhempää muokkausta varten. Saman valikon lopun Kopioi jakolinkki koodaa koko CV:n URL-osoitteeseen — sitä ei lähetetä palvelimelle, eivätkä kuvat mahdu mukaan. Vasemman reunan Hakemuskirje-kohta (puhelimella ⋯-valikossa) luo CV:si pohjalta hakemuskirjeluonnoksen, jota voit muokata.',
         },
         {
           step: 'restore',
@@ -122,7 +122,7 @@ function getCopy(locale) {
         heading: 'Pick a template — your content stays put',
         figureLabel: 'The template gallery: field filters above the template cards, each with its three looks.',
         caption:
-          `Swapping templates never touches your text, so it's safe to try all ${TEMPLATE_COUNT} before deciding. Each one uses a different set of sections — the ones a template doesn't use are tucked out of the editor and preview until you switch back. Each template also has three looks (a colour palette, a font, and a heading colour), picked from the Style menu in the top bar.`,
+          `Swapping templates never touches your text, so it's safe to try all ${TEMPLATE_COUNT} before deciding. Each one uses a different set of sections — the ones a template doesn't use are tucked out of the editor and preview until you switch back. Each template also has three looks (a colour palette, a font, and a heading colour), picked from Design in the top bar.`,
         linkParagraph: {
           before: 'See all ',
           linkText: `${TEMPLATE_COUNT} templates`,
@@ -141,9 +141,9 @@ function getCopy(locale) {
       {
         step: 'export',
         heading: 'Export a file or share a link',
-        figureLabel: 'The open Export menu offering PDF, HTML, JSON and Word, beside the share-link button.',
+        figureLabel: 'The open Export menu: PDF, HTML, JSON, Word and a share link.',
         caption:
-          'The Export menu offers four formats: PDF for applications, Word for editing in another program, HTML for the web, and JSON as a backup or to keep editing later. The share-link button encodes the whole CV into the URL — never sent to a server, and images don\'t fit. Cover letter, in the rail on the left, drafts an editable cover letter from your CV.',
+          'The Export menu offers four formats: PDF for applications, Word for editing in another program, HTML for the web, and JSON as a backup or to keep editing later. Copy share link, at the bottom of the same menu, encodes the whole CV into the URL — never sent to a server, and images don\'t fit. Cover letter, in the rail on the left (on a phone, in the ⋯ menu), drafts an editable cover letter from your CV.',
       },
       {
         step: 'restore',
