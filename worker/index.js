@@ -17,7 +17,7 @@
 //   4. returns a real 404 (with noindex) for paths that aren't a known
 //      route, instead of the soft-404 the SPA fallback produced (200,
 //      indexable, homepage content, for literally any typo'd URL).
-import { VIEW_HEAD, SITE_ORIGIN, buildViewSchema, localizedHead, PATH_TO_VIEW, prerenderedPath } from '../src/utils/pageMeta.js'
+import { VIEW_HEAD, SITE_ORIGIN, AD_FREE_VIEWS, buildViewSchema, localizedHead, PATH_TO_VIEW, prerenderedPath } from '../src/utils/pageMeta.js'
 import { LANDING_FAQ, faqAnswerText } from '../src/utils/landingFaq.js'
 import { ADSENSE_SCRIPT } from './adsense.js'
 
@@ -44,8 +44,9 @@ const escapeHtml = (text) => String(text)
 // the English front page now gets its own heading and description, links to
 // the main pages in its language, and on /fi the Finnish FAQ. React removes
 // the block on load (src/main.jsx), so visitors never see it. Since 1.6.49
-// the block holds the page's full pre-rendered markup instead; this is the
-// fallback when a build has none.
+// the block holds the page's full pre-rendered markup instead, which stays
+// on screen until React's copy is ready (1.6.66); this is the fallback when
+// a build has none.
 const FALLBACK_LINKS = ['landing', 'freeTemplates', 'howToWrite', 'atsGuide', 'cvExamples', 'coverLetterExamples']
 
 export function fallbackBody(view, head) {
@@ -154,8 +155,9 @@ function rewriteForRoute(response, view, locale, body) {
   }
 
   // No ads in the builder (1.6.48): it's an app screen, where AdSense
-  // doesn't allow them and where Auto ads would sit among its buttons.
-  if (view === 'builder') {
+  // doesn't allow them and where Auto ads would sit among its buttons. Nor
+  // on About and the privacy policy (1.6.66) — see AD_FREE_VIEWS.
+  if (AD_FREE_VIEWS.has(view)) {
     rewriter.on(ADSENSE_SCRIPT, new RemoveElement())
   }
 

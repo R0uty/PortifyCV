@@ -41,3 +41,28 @@ test('leaving the builder is a full page load, and Back across its edge reloads'
   await expect(page).toHaveURL(/\/privacy$/)
   expect(await sameDocument(page)).toBe(false)
 })
+
+// 1.6.66: About and the privacy policy are ad-free too (AD_FREE_VIEWS in
+// pageMeta.js), so moving between them and a page with ads is a full page
+// load, while moving between two pages on the same side stays in the app.
+test('About and the privacy policy sit behind the same ad edge', async ({ page }) => {
+  await page.goto('/how-to-write-a-cv')
+  await mark(page)
+  await page.locator('.site-footer').getByRole('link', { name: 'About' }).click()
+  await expect(page.locator('h1')).toHaveText('About PortifyCV')
+  expect(await sameDocument(page)).toBe(false)
+
+  await mark(page)
+  await page.locator('.site-footer').getByRole('link', { name: 'Privacy policy' }).click()
+  await expect(page).toHaveURL(/\/privacy$/)
+  expect(await sameDocument(page)).toBe(true)
+
+  await page.goBack()
+  await expect(page.locator('h1')).toHaveText('About PortifyCV')
+  expect(await sameDocument(page)).toBe(true)
+
+  await page.goBack()
+  await expect(page).toHaveURL(/\/how-to-write-a-cv$/)
+  await expect(page.locator('h1')).toHaveText('How to Write a CV')
+  expect(await sameDocument(page)).toBe(false)
+})

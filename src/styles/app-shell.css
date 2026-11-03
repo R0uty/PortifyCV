@@ -2650,9 +2650,6 @@ select.floating-field__control {
 .site-footer {
   border-top: 1px solid var(--app-border);
   background: var(--app-bg);
-  position: sticky;
-  bottom: 0;
-  z-index: 30;
 }
 
 .site-footer__inner {
@@ -2974,10 +2971,6 @@ html:lang(fi) .landing-title {
   .landing-hero__actions .landing-cta,
   .landing-hero__templates {
     padding: 0.85rem 1.4rem;
-  }
-
-  .site-footer {
-    position: static;
   }
 
   .landing-sticky-cta:not([hidden]) {

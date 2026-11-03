@@ -11,7 +11,7 @@ import { safeStorageGet, safeStorageSet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
 import { ROUTES, localizePath, pathLocale, templatePath } from './utils/routes'
 import { getCvTemplates } from './utils/cvTemplates'
-import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX } from './utils/pageMeta'
+import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX, AD_FREE_VIEWS } from './utils/pageMeta'
 import { LocaleContext } from './components/localeContext'
 import { APP_VERSION } from './utils/appVersion'
 
@@ -97,6 +97,12 @@ function readRoute() {
   }
   return { view: 'notFound', locale: pathLocale(currentUrl.pathname) }
 }
+
+// Between a page with ads and one without (the builder, About, the privacy
+// policy, a 404) is a full page load (1.6.66): the worker serves each side
+// with or without the AdSense script, which can't be unloaded in place.
+const isAdFree = (view) => view === 'notFound' || AD_FREE_VIEWS.has(view)
+const crossesAdEdge = (fromView, toView) => isAdFree(fromView) !== isAdFree(toView)
 
 // A view's address in `locale`, e.g. '/fi/tietoa' for about in Finnish.
 function viewPath(view, locale) {
@@ -251,6 +257,12 @@ function goToFaq(event, activeView, onNavigate, locale) {
   if (activeView === 'landing') {
     window.history.replaceState(window.history.state, '', faqUrl)
     document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    return
+  }
+  // From About or the privacy policy it's a full page load (crossesAdEdge),
+  // which keeps the hash only when it's in the address being loaded.
+  if (crossesAdEdge(activeView, 'landing')) {
+    window.location.assign(faqUrl)
     return
   }
   onNavigate('landing')
@@ -647,33 +659,34 @@ function App({ route = null }) {
   }, [])
 
   // Out of the builder is a full page load too (1.6.48), so the page the
-  // visitor goes to loads its ads again.
-  const leaveBuilder = useCallback((nextView, search = '') => {
+  // visitor goes to loads its ads again; so is any move across the ad edge
+  // (1.6.66, crossesAdEdge).
+  const loadPage = useCallback((nextView, search = '') => {
     window.location.assign(`${viewPath(nextView, localeRef.current)}${search}`)
   }, [])
 
   const goToLanding = useCallback(() => {
-    if (viewRef.current === 'builder') {
-      leaveBuilder('landing')
+    if (viewRef.current === 'builder' || crossesAdEdge(viewRef.current, 'landing')) {
+      loadPage('landing')
       return
     }
     setView('landing')
     pushViewUrl('landing', '', localeRef.current)
     scrollToTop()
-  }, [leaveBuilder])
+  }, [loadPage])
 
   // Generic version of goToLanding for any non-builder static page (footer
   // guide links, etc.) — builder goes through goToBuilder since it also
   // supports the optional ?template= id.
   const goToView = useCallback((nextView, { search = '' } = {}) => {
-    if (viewRef.current === 'builder' && nextView !== 'builder') {
-      leaveBuilder(nextView, search)
+    if ((viewRef.current === 'builder' && nextView !== 'builder') || crossesAdEdge(viewRef.current, nextView)) {
+      loadPage(nextView, search)
       return
     }
     setView(nextView)
     pushViewUrl(nextView, search, localeRef.current)
     scrollToTop()
-  }, [leaveBuilder])
+  }, [loadPage])
 
   // Keep view state in sync when the user navigates with the browser's
   // back/forward buttons rather than an in-app link — those change the URL
@@ -681,9 +694,10 @@ function App({ route = null }) {
   useEffect(() => {
     function handlePopState() {
       const route = readRoute()
-      // Back/forward across the builder's edge reloads, for the same
-      // reason the links into and out of it do (1.6.48).
-      if ((route.view === 'builder') !== (viewRef.current === 'builder')) {
+      // Back/forward across the builder's edge, or between pages with and
+      // without ads, reloads, for the same reason the links do (1.6.48).
+      if ((route.view === 'builder') !== (viewRef.current === 'builder')
+        || crossesAdEdge(viewRef.current, route.view)) {
         window.location.reload()
         return
       }

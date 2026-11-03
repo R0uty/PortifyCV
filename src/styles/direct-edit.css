@@ -389,24 +389,11 @@
   background: var(--ds-surface-muted, #fafaf9);
 }
 
-/* `.site-footer` (App.jsx) is `position: sticky; bottom: 0` — correct for
-   Classic mode and every static page, where the content above it never
-   grows taller than the viewport (Classic's builder panels scroll inside
-   their own bounded containers). Direct Edit's preview is a normal,
-   unbounded block that can genuinely be taller than the viewport for a
-   real CV, so a sticky footer stays pinned over the bottom of whatever's
-   currently in view for the entire scroll, not just once you reach the
-   true end of the page. Drop back to normal flow here so the footer
-   only ever appears once, after the content actually ends. */
-.one-pager--direct-edit .site-footer {
-  position: static;
-}
-
 /* `.builder-section` (app-shell.css) is `flex: 1; min-height: 0` — the
    `min-height: 0` is what lets Classic mode's own AppShell panels scroll
    *inside* a viewport-bounded box instead of growing it. Direct Edit has
    no such internal panel: `.direct-edit-preview` is meant to grow the
-   whole page (see the position:static rule above). But `min-height: 0`
+   whole page (the footer sits in normal flow after it). But `min-height: 0`
    also drops the flex item's content-based minimum, so once a real CV's
    preview is taller than the box's flex-computed share of the viewport,
    the overflow paints past `.builder-section`'s own boundary with
