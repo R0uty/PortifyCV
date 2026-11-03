@@ -119,9 +119,6 @@ function CvStyleSwitcher({
         {isModified ? (
           <span className="cv-style-switcher__modified" aria-hidden="true">{modifiedText}</span>
         ) : null}
-        {isModified ? (
-          <span className="cv-style-switcher__dot" aria-hidden="true" />
-        ) : null}
         <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
       </button>
 
