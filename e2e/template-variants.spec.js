@@ -6,6 +6,7 @@ import { EXPECTED_PDF_PAGES } from './fixtures/pdfPages.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { TEMPLATE_EXAMPLES, loadExampleCv } from '../src/utils/exampleCvs.js'
 import { getTemplateVariants } from '../src/utils/templateVariants.js'
+import { styleTrigger } from './helpers/builderToolbar.js'
 
 // Phase 3: every non-default style variant (#2, #3) of every template,
 // through the Phase 2 layout harness and a PDF page budget. Variant #1 is
@@ -35,8 +36,8 @@ for (const template of cvTemplates) {
         test(`variant layout / ${template.id} / ${variant.id} / ${exampleId} / ${mode} @slow`, async ({ page }) => {
           const cv = await loadExampleCv(exampleId, 'en')
           await openWithVariant(page, template.id, variant.id, cv)
-          await expect(page.getByRole('banner').getByRole('button', { name: /^Select style:/ }))
-            .toHaveAccessibleName(`Select style: ${variant.label.en}`)
+          await expect(await styleTrigger(page)).toHaveAccessibleName(`Select style: ${variant.label.en}`)
+          await page.keyboard.press('Escape')
           if (mode === 'ats') {
             await page.getByRole('button', { name: 'Settings' }).click()
             const dialog = page.getByRole('dialog', { name: 'Settings' })
@@ -63,8 +64,8 @@ for (const template of cvTemplates) {
       const exampleId = TEMPLATE_EXAMPLES[template.id][0]
       const cv = await loadExampleCv(exampleId, 'en')
       await openWithVariant(page, template.id, variant.id, cv)
-      await expect(page.getByRole('banner').getByRole('button', { name: /^Select style:/ }))
-        .toHaveAccessibleName(`Select style: ${variant.label.en}`)
+      await expect(await styleTrigger(page)).toHaveAccessibleName(`Select style: ${variant.label.en}`)
+      await page.keyboard.press('Escape')
       await waitForStableLayout(page)
 
       await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()

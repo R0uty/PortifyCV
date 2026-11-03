@@ -69,17 +69,22 @@ test.describe('Cover letter', () => {
 
 test.describe('Cover letter on mobile', () => {
   // The nav rail — the cover letter's only desktop entry point — is hidden
-  // below the lg breakpoint, so the mobile bottom action bar carries its own
-  // "Cover letter" button (audit-1.0.3.md finding 1 / todo item 26a).
+  // below the lg breakpoint, so the toolbar's More menu carries it too
+  // (audit-1.0.3.md finding 1 / todo item 26a; the mobile bottom bar's own
+  // button until 1.6.67, which reached Classic mode only).
   test.use({ viewport: { width: 390, height: 844 } })
 
-  test('the bottom action bar opens the cover letter modal', async ({ page }) => {
-    await page.goto('/cv')
-    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+  for (const mode of ['Classic', 'Direct Edit']) {
+    test(`the More menu opens the cover letter modal (${mode})`, async ({ page }) => {
+      await page.goto('/cv')
+      await page.getByRole('tab', { name: mode }).click()
+      await page.getByRole('button', { name: 'Load demo CV' }).first().click()
 
-    await expect(navRail(page)).toBeHidden()
+      await expect(navRail(page)).toBeHidden()
 
-    await page.getByRole('button', { name: 'Cover letter' }).click()
-    await expect(page.getByRole('dialog', { name: 'Cover letter' })).toBeVisible()
-  })
+      await page.getByRole('button', { name: 'More actions' }).click()
+      await page.getByRole('menuitem', { name: 'Cover letter' }).click()
+      await expect(page.getByRole('dialog', { name: 'Cover letter' })).toBeVisible()
+    })
+  }
 })

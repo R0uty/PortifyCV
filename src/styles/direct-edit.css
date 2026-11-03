@@ -391,14 +391,6 @@
   color: #ffffff;
 }
 
-/* "Clear CV": armed by its first click, like Classic's "Reset form", and
-   red while waiting for the confirming second click. */
-.direct-edit-clear--armed {
-  background: #b91c1c;
-  border-color: #b91c1c;
-  color: #ffffff;
-}
-
 .direct-edit-sections__panel {
   position: absolute;
   /* Above "Load demo CV", which sits right below the trigger. */

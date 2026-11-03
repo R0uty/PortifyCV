@@ -59,7 +59,7 @@ function getLandingCopy(locale) {
       steps: [
         { step: 'template', title: 'Valitse pohja', body: `${TEMPLATE_COUNT} asettelua, kolme tyyliä kussakin. Vaihda milloin vain, tekstisi säilyy.`, figureLabel: 'Pohjagalleria: alasuodattimet pohjakorttien yllä, kullakin kortilla kolme tyyliä.' },
         { step: 'edit', title: 'Muokkaa suoraan CV:ssä', body: 'Napsauta mitä tahansa tekstiä ja kirjoita, tai avaa osion kynä nähdäksesi kaikki sen kentät.', figureLabel: 'Editori Suora muokkaus -tilassa: demo-CV, jonka yhteenvedon kentät ovat auki ponnahdusikkunassa sen vieressä.' },
-        { step: 'export', title: 'Vie tai jaa', body: 'Lataa PDF- tai Word-tiedosto tai kopioi jakolinkki. Mitään ei ladata palvelimelle.', figureLabel: 'Avattu Vie-valikko: PDF, HTML, JSON ja Word, jakolinkin painikkeen vieressä.' },
+        { step: 'export', title: 'Vie tai jaa', body: 'Lataa PDF- tai Word-tiedosto tai kopioi jakolinkki. Mitään ei ladata palvelimelle.', figureLabel: 'Avattu Vie-valikko: PDF, HTML, JSON, Word ja jakolinkki.' },
       ],
       howLink: 'Lue koko käyttöopas',
       templatesTitle: 'Katso pohjat',
@@ -110,7 +110,7 @@ function getLandingCopy(locale) {
     steps: [
       { step: 'template', title: 'Pick a template', body: `${TEMPLATE_COUNT} layouts, three looks each. Switch any time; your text stays.`, figureLabel: 'The template gallery: field filters above the template cards, each with its three looks.' },
       { step: 'edit', title: 'Edit right on the CV', body: 'Click any text and type, or open a section’s pencil for all its fields.', figureLabel: 'The builder in Direct Edit: the demo CV, with its summary\'s fields open in a popup beside it.' },
-      { step: 'export', title: 'Export or share', body: 'Download a PDF or Word file, or copy a share link. Nothing is uploaded.', figureLabel: 'The open Export menu offering PDF, HTML, JSON and Word, beside the share-link button.' },
+      { step: 'export', title: 'Export or share', body: 'Download a PDF or Word file, or copy a share link. Nothing is uploaded.', figureLabel: 'The open Export menu: PDF, HTML, JSON, Word and a share link.' },
     ],
     howLink: 'Read the full walkthrough',
     templatesTitle: 'See the templates',

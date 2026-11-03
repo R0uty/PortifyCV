@@ -4,6 +4,49 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Builder toolbar: one row, Clear CV in a menu, slimmer phone bars — 1.6.67, 2026-10-30
+
+From a design review of the builder:
+- **One toolbar row on a laptop.** Style, Font and Headings were three
+  captioned dropdowns in the toolbar, which wrapped it onto a second row
+  at most laptop widths. They share a Design panel now, each keeping its
+  own dropdown (Escape closes the open dropdown first, then the panel; a
+  dot on Design marks a modified look). The narrow and fullscreen
+  previews, Cover letter and Settings moved into a More (⋯) menu, and
+  Copy share link to the end of the Export menu. The toolbar is mode
+  switch, Template, Design, language, More and Export: one row from
+  1024px in Direct Edit, and at 1280px in Classic too (its section
+  search still takes a second row at 1024px). The uppercase captions
+  are gone.
+- **Clear CV is in the More menu.** It sat among harmless buttons: next
+  to Sections, ATS view and Load demo CV in Direct Edit, and as "Reset
+  form" next to Load demo CV in Classic. Both modes now clear from the
+  More menu, still in two steps (the menu stays open on "Confirm
+  clear"), with the same toast.
+- **Phones.** The toolbar was five rows (about 245px) and is two (about
+  100px): back, undo, language, More and Export on top, the mode switch,
+  Template and Design below. The section search, which filters the
+  desktop nav rail only, is hidden below 1024px. Classic's bottom bar
+  was about 178px: its three tabs stacked, because the `grid-cols-3`
+  utility was never defined, above a row of export buttons the toolbar
+  already has. It is one row of tabs now, about 54px. Cover letter is
+  reachable from the More menu in both modes (Direct Edit on a phone
+  had no way in).
+- **Menu rows lost their browser button look.** The Export menu's rows
+  and the font and style dropdowns' options kept the browser's default
+  button border, a box around each row (on the live site too).
+
+The builder guide and the front page say where Design and Copy share
+link are; the walkthrough and product screenshots are regenerated.
+
+Tests: new `builder-toolbar.spec.js` and `helpers/builderToolbar.js`
+(open the Design panel, Clear CV, Copy share link), used by the specs
+that reached those controls directly. The slow "Style control adds no
+toolbar row" check became "the toolbar is one row" for every template.
+`direct-edit.spec.js`'s pencils-under-the-Sections-panel guard now
+slides a pencil under the panel itself: none landed there by chance
+once Clear CV left that row.
+
 ## Builder usability: leave warning, tap targets, toasts, hero chips — 1.6.66, 2026-10-29
 
 From a usability review of the live site:

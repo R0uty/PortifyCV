@@ -1,4 +1,5 @@
 import { test, expect } from './fixtures/base.js'
+import { fontTrigger, headingColorTrigger } from './helpers/builderToolbar.js'
 
 // Regression guard for audit-1.0.2.md: .app-toolbar__group had no
 // flex-wrap, so its ~7 children (template select, locale, print,
@@ -123,10 +124,12 @@ test.describe('Mobile layout', () => {
   // (app-shell__nav, display: none below the lg breakpoint) with no
   // equivalent anywhere in the mobile bottom bar — mobile users had no way
   // to reach ATS-friendly mode, section visibility, or session restore.
-  test('Settings is reachable via the toolbar gear icon on mobile', async ({ page }) => {
+  // The toolbar's More menu carries it at every width (1.6.67).
+  test('Settings is reachable via the toolbar\'s More menu on mobile', async ({ page }) => {
     await page.goto('/cv')
 
-    await page.getByRole('button', { name: 'Settings' }).click()
+    await page.getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: 'Settings' }).click()
     await expect(page.getByRole('dialog')).toBeVisible()
   })
 })
@@ -150,9 +153,10 @@ test.describe('Desktop toolbar dropdowns', () => {
   // here anymore.
   test.use({ viewport: { width: 1280, height: 800 } })
 
-  async function expectPanelOnScreen(page, triggerNamePattern, panelRole = 'dialog') {
+  // Both pickers sit in the toolbar's Design panel since 1.6.67.
+  async function expectPanelOnScreen(page, trigger, panelRole = 'dialog') {
     const viewport = page.viewportSize()
-    await page.getByRole('button', { name: triggerNamePattern }).click()
+    await (await trigger(page)).click()
     const panel = page.getByRole(panelRole)
     const box = await panel.boundingBox()
     expect(box).not.toBeNull()
@@ -162,11 +166,11 @@ test.describe('Desktop toolbar dropdowns', () => {
 
   test('the font picker panel stays on-screen when the toolbar wraps', async ({ page }) => {
     await page.goto('/cv')
-    await expectPanelOnScreen(page, /^Select font:/, 'listbox')
+    await expectPanelOnScreen(page, fontTrigger, 'listbox')
   })
 
   test('the heading color picker panel stays on-screen when the toolbar wraps', async ({ page }) => {
     await page.goto('/cv')
-    await expectPanelOnScreen(page, /^Select heading color:/)
+    await expectPanelOnScreen(page, headingColorTrigger)
   })
 })
