@@ -530,5 +530,5 @@ export function removeShareDataParamFromCurrentUrl() {
   const nextHash = hashParams.toString()
   const nextUrl = `${currentUrl.pathname}${nextSearch ? `?${nextSearch}` : ''}${nextHash ? `#${nextHash}` : ''}`
 
-  window.history.replaceState({}, '', nextUrl)
+  window.history.replaceState(window.history.state, '', nextUrl)
 }

@@ -14,7 +14,7 @@ import { getCvTemplates } from './utils/cvTemplates'
 import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX, AD_FREE_VIEWS } from './utils/pageMeta'
 import { LocaleContext } from './components/localeContext'
 import { APP_VERSION } from './utils/appVersion'
-import { hasUnsavedChanges, leavePage } from './utils/leaveGuard'
+import { hasUnsavedChanges, leaveBack, leavePage } from './utils/leaveGuard'
 import LeaveConfirmDialog from './components/LeaveConfirmDialog'
 
 const CONTACT_MAILTO = 'mailto:portifycv@gmail.com'
@@ -103,6 +103,16 @@ function readRoute() {
 // Between a page with ads and one without (the builder, About, the privacy
 // policy, a 404) is a full page load (1.6.67): the worker serves each side
 // with or without the AdSense script, which can't be unloaded in place.
+// The builder's Back guard (1.6.69): the builder's own history entry is
+// marked as its base, with a copy of it on top, so the browser's Back
+// button lands on the base inside the same page (a popstate the app can
+// answer with its own dialog) instead of unloading straight away, which
+// only the browser's plain "Leave site?" prompt could stop.
+const BUILDER_BASE_STATE = 'portifycv-builder-base'
+const BUILDER_GUARD_STATE = 'portifycv-builder-guard'
+// LeaveConfirmDialog's target when the visitor pressed Back.
+const LEAVE_BACK = 'back'
+
 const isAdFree = (view) => view === 'notFound' || AD_FREE_VIEWS.has(view)
 const crossesAdEdge = (fromView, toView) => isAdFree(fromView) !== isAdFree(toView)
 
@@ -675,10 +685,23 @@ function App({ route = null }) {
     window.location.assign(url)
   }, [])
 
+  const leave = useCallback((target) => {
+    if (target === LEAVE_BACK) {
+      leaveBack(viewPath('landing', localeRef.current))
+    } else if (target) {
+      leavePage(target)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (view !== 'builder') return
+    if (window.history.state?.portifycv === BUILDER_GUARD_STATE) return
+    window.history.replaceState({ portifycv: BUILDER_BASE_STATE }, '')
+    window.history.pushState({ portifycv: BUILDER_GUARD_STATE }, '')
+  }, [view])
+
   const handleStay = useCallback(() => setLeaveTarget(null), [])
-  const handleLeave = useCallback(() => {
-    if (leaveTarget) leavePage(leaveTarget)
-  }, [leaveTarget])
+  const handleLeave = useCallback(() => leave(leaveTarget), [leave, leaveTarget])
   // The download starts before the page goes; the short wait lets the
   // browser take the file before the page that made it unloads.
   const handleSaveAndLeave = useCallback(async () => {
@@ -687,8 +710,8 @@ function App({ route = null }) {
       throw new Error('JSON export did not finish')
     }
     await new Promise((resolve) => window.setTimeout(resolve, 400))
-    if (leaveTarget) leavePage(leaveTarget)
-  }, [leaveTarget])
+    leave(leaveTarget)
+  }, [leave, leaveTarget])
 
   const goToLanding = useCallback(() => {
     if (viewRef.current === 'builder' || crossesAdEdge(viewRef.current, 'landing')) {
@@ -717,7 +740,18 @@ function App({ route = null }) {
   // back/forward buttons rather than an in-app link — those change the URL
   // without going through goToBuilder/goToLanding.
   useEffect(() => {
-    function handlePopState() {
+    function handlePopState(event) {
+      // Back from the builder's guard entry to its base (1.6.69): ask about
+      // unsaved edits and put the guard back, or carry on back.
+      if (viewRef.current === 'builder' && event.state?.portifycv === BUILDER_BASE_STATE) {
+        if (hasUnsavedChanges()) {
+          window.history.pushState({ portifycv: BUILDER_GUARD_STATE }, '')
+          setLeaveTarget(LEAVE_BACK)
+        } else {
+          window.history.back()
+        }
+        return
+      }
       const route = readRoute()
       // Back/forward across the builder's edge, or between pages with and
       // without ads, reloads, for the same reason the links do (1.6.48).

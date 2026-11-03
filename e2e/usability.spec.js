@@ -65,6 +65,37 @@ test.describe('Leaving the builder', () => {
     expect(dialogs).toEqual([])
   })
 
+  // 1.6.69: the browser's Back button too, not its plain prompt.
+  test('Back asks in the same dialog, and Keep editing stays', async ({ page }) => {
+    await page.goto('/about')
+    await page.locator('.project-header__actions').getByRole('button', { name: 'Build my CV' }).click()
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await page.getByLabel('Full name').fill('Jordan Rivera')
+    const dialogs = recordDialogs(page)
+
+    await page.goBack()
+    await expect(leaveDialog(page)).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(leaveDialog(page)).toBeHidden()
+    await expect(page).toHaveURL(/\/cv$/)
+    await expect(page.getByLabel('Full name')).toHaveValue('Jordan Rivera')
+
+    // Asks again on a second Back, and Leave goes to the page before.
+    await page.goBack()
+    await page.getByRole('button', { name: 'Leave without saving' }).click()
+    await expect(page).toHaveURL(/\/about$/)
+    expect(dialogs).toEqual([])
+  })
+
+  test('Back without an edit just goes back', async ({ page }) => {
+    await page.goto('/about')
+    await page.locator('.project-header__actions').getByRole('button', { name: 'Build my CV' }).click()
+    await expect(page.getByRole('tab', { name: 'Direct Edit' })).toBeVisible()
+
+    await page.goBack()
+    await expect(page).toHaveURL(/\/about$/)
+  })
+
   test('without an edit, it leaves without asking', async ({ page }) => {
     await page.goto('/cv')
     const dialogs = recordDialogs(page)
