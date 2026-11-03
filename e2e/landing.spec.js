@@ -41,9 +41,25 @@ test.describe('Landing page', () => {
     await expect(shot).toHaveAttribute('src', '/thumbnails/product/direct-edit-en.webp')
     await expect.poll(() => shot.evaluate((img) => img.complete && img.naturalWidth)).toBe(1280)
     await expect(page.getByRole('list', { name: 'Included' }).getByRole('listitem')).toHaveCount(4)
+    // Each chip links to the page about it (1.6.66), in the page's language.
+    const chipLinks = (name) => page.getByRole('list', { name }).getByRole('link')
+      .evaluateAll((links) => links.map((link) => link.getAttribute('href')))
+    expect(await chipLinks('Included')).toEqual([
+      '/free-cv-templates', '/ats-friendly-cv-guide', '/finnish-cv-examples', '/cover-letter-examples',
+    ])
 
     await page.getByRole('button', { name: 'Switch language' }).click()
     await expect(shot).toHaveAttribute('src', '/thumbnails/product/direct-edit-fi.webp')
+    await expect.poll(() => chipLinks('Mukana')).toEqual([
+      '/fi/ilmaiset-cv-pohjat', '/fi/ats-ystavallinen-cv', '/fi/suomalainen-cv', '/fi/hakemuskirje-esimerkit',
+    ])
+  })
+
+  test('a chip opens its page', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('list', { name: 'Included' }).getByRole('link', { name: 'ATS view' }).click()
+    await expect(page).toHaveURL(/\/ats-friendly-cv-guide$/)
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   })
 })
 

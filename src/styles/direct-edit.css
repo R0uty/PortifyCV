@@ -62,6 +62,9 @@
 .direct-edit-entry__remove {
   position: absolute;
   top: 2px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
   border: none;
   background: transparent;
   color: var(--ds-text-muted, #a1a1aa);
@@ -80,7 +83,32 @@
    not be clicked, and over them once shown. */
 .direct-edit-entry__remove {
   left: 0;
-  top: 24px;
+  top: 30px;
+}
+
+/* On a touch screen (1.6.66) the 22px buttons were too small for a
+   finger, and the paper clips anything outside its edge, where they sit on
+   a phone, so they can't take an invisible larger hit area. The gutter
+   widens to 32px buttons instead, nudging the entry's text 10px right in
+   this editable copy only; the min-height keeps a one-line entry's buttons
+   off the next entry's. */
+@media (pointer: coarse) {
+  .direct-edit-entry {
+    min-height: 68px;
+    padding-left: 32px;
+  }
+
+  .direct-edit-entry__handle,
+  .direct-edit-entry__remove {
+    top: 0;
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .direct-edit-entry__remove {
+    top: 36px;
+  }
 }
 
 /* Shown on hover, while the entry is being edited, and when one of them
@@ -188,9 +216,19 @@
 }
 
 .direct-edit-chip__remove {
+  position: relative;
   margin-left: 2px;
   opacity: 0.65;
   cursor: pointer;
+}
+
+/* The × is a 9px glyph; its hit area (1.6.66) fills the chip's height and
+   right padding, at least 24 × 24px, and reaches only into the gap before
+   it, never over the skill's name (a click there renames it). */
+.direct-edit-chip__remove::before {
+  content: '';
+  position: absolute;
+  inset: -5px -11px -5px -5px;
 }
 
 .direct-edit-chip__remove:hover {

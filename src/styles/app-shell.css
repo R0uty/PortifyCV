@@ -2806,7 +2806,8 @@ html:lang(fi) .landing-title {
   list-style: none;
 }
 
-.landing-chips li {
+.landing-chips a {
+  display: inline-block;
   padding: 0.35rem 0.8rem;
   border: 1px solid var(--app-border);
   border-radius: var(--radius-pill);
@@ -2814,6 +2815,18 @@ html:lang(fi) .landing-title {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--app-text-muted);
+  text-decoration: none;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.landing-chips a:hover {
+  border-color: var(--app-text);
+  color: var(--app-text);
+}
+
+.landing-chips a:focus-visible {
+  outline: 2px solid var(--app-text);
+  outline-offset: 2px;
 }
 
 .landing-cta {
@@ -4369,5 +4382,15 @@ html:lang(fi) .landing-title {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Classic mode's bar pinned to the bottom of the builder below lg
+   (ResumeBuilderPage's mobileBottomActions, the Editor/Preview/Templates
+   tabs and the export row) is about 178px tall: toasts sit above it while
+   it shows (1.6.66). Re-measure if the bar's contents change. */
+@media (max-width: 1023.98px) {
+  .toast-stack.toast-stack--above-bar {
+    bottom: calc(12rem + env(safe-area-inset-bottom, 0px));
   }
 }

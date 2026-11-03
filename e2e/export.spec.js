@@ -160,11 +160,14 @@ test.describe('Export contents', () => {
     // An example whose template order differs from the full default
     // order, which an empty sectionOrder used to be expanded into.
     await page.goto('/cv?template=modern&example=project-manager')
-    const sectionTitles = () => page.locator('[data-export-section]').evaluateAll(
+    // The visible preview only: the builder's off-screen export copy
+    // renders the same sections a moment later.
+    const sectionTitles = () => page.locator('.app-shell__preview [data-export-section]').evaluateAll(
       (nodes) => nodes.map((node) => node.getAttribute('data-export-section')),
     )
-    await expect.poll(async () => (await sectionTitles()).length).toBeGreaterThan(0)
+    await expect(page.getByText('Loaded the Project manager example.')).toBeVisible()
     const before = await sectionTitles()
+    expect(before.length).toBeGreaterThan(0)
 
     const exported = JSON.parse((await exportAs(page, 'JSON')).toString('utf8'))
     expect(exported.sectionOrder).toEqual([])
@@ -177,6 +180,6 @@ test.describe('Export contents', () => {
     })
     await expect(page.locator('[data-cv-name]').first()).toContainText('Reimported Person')
 
-    expect(await sectionTitles()).toEqual(before)
+    await expect.poll(sectionTitles).toEqual(before)
   })
 })
