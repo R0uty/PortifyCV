@@ -14,7 +14,8 @@ import { getCvTemplates } from './utils/cvTemplates'
 import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX, AD_FREE_VIEWS } from './utils/pageMeta'
 import { LocaleContext } from './components/localeContext'
 import { APP_VERSION } from './utils/appVersion'
-import { hasUnsavedChanges } from './utils/leaveGuard'
+import { hasUnsavedChanges, leavePage } from './utils/leaveGuard'
+import LeaveConfirmDialog from './components/LeaveConfirmDialog'
 
 const CONTACT_MAILTO = 'mailto:portifycv@gmail.com'
 
@@ -578,6 +579,9 @@ function App({ route = null }) {
   }, [locale, view])
   const [headerProps, setHeaderProps] = useState(null)
   const headerPropsRef = useRef(null)
+  // Where the visitor was going when the builder asked about unsaved
+  // edits (1.6.68, LeaveConfirmDialog); null while it isn't asking.
+  const [leaveTarget, setLeaveTarget] = useState(null)
 
   useDocumentHead(view, locale)
 
@@ -661,10 +665,30 @@ function App({ route = null }) {
 
   // Out of the builder is a full page load too (1.6.48), so the page the
   // visitor goes to loads its ads again; so is any move across the ad edge
-  // (1.6.67, crossesAdEdge).
+  // (1.6.67, crossesAdEdge). Unsaved edits ask first (1.6.68).
   const loadPage = useCallback((nextView, search = '') => {
-    window.location.assign(`${viewPath(nextView, localeRef.current)}${search}`)
+    const url = `${viewPath(nextView, localeRef.current)}${search}`
+    if (viewRef.current === 'builder' && hasUnsavedChanges()) {
+      setLeaveTarget(url)
+      return
+    }
+    window.location.assign(url)
   }, [])
+
+  const handleStay = useCallback(() => setLeaveTarget(null), [])
+  const handleLeave = useCallback(() => {
+    if (leaveTarget) leavePage(leaveTarget)
+  }, [leaveTarget])
+  // The download starts before the page goes; the short wait lets the
+  // browser take the file before the page that made it unloads.
+  const handleSaveAndLeave = useCallback(async () => {
+    await headerPropsRef.current?.onExport?.('json')
+    if (hasUnsavedChanges()) {
+      throw new Error('JSON export did not finish')
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 400))
+    if (leaveTarget) leavePage(leaveTarget)
+  }, [leaveTarget])
 
   const goToLanding = useCallback(() => {
     if (viewRef.current === 'builder' || crossesAdEdge(viewRef.current, 'landing')) {
@@ -700,13 +724,12 @@ function App({ route = null }) {
       if ((route.view === 'builder') !== (viewRef.current === 'builder')
         || crossesAdEdge(viewRef.current, route.view)) {
         // Leaving a CV with unsaved edits (1.6.66): put the builder's
-        // address back before loading the page the visitor went back to,
-        // so if they cancel the browser's "Leave site?" prompt the address
-        // still matches the builder they stayed on.
+        // address back and ask (1.6.68), so if the visitor keeps editing
+        // the address still matches the builder they stayed on.
         if (viewRef.current === 'builder' && hasUnsavedChanges()) {
           const target = window.location.href
           window.history.pushState(null, '', viewPath('builder', localeRef.current))
-          window.location.assign(target)
+          setLeaveTarget(target)
           return
         }
         window.location.reload()
@@ -844,6 +867,15 @@ function App({ route = null }) {
       </section>
 
       <SiteFooter locale={locale} onNavigate={goToView} />
+
+      {leaveTarget !== null && (
+        <LeaveConfirmDialog
+          locale={locale}
+          onStay={handleStay}
+          onLeave={handleLeave}
+          onSaveAndLeave={handleSaveAndLeave}
+        />
+      )}
     </div>
     </LocaleContext.Provider>
   )

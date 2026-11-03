@@ -1,12 +1,13 @@
 import { test, expect } from './fixtures/base.js'
 
-// 1.6.66: the builder asks before a page load would lose edits, its touch
-// targets are big enough for a finger, and its toasts sit at the bottom of
-// a phone screen instead of over the CV.
+// 1.6.66: the builder asks before a page load would lose edits (in its own
+// dialog since 1.6.68), its touch targets are big enough for a finger, and
+// its toasts sit at the bottom of a phone screen instead of over the CV.
 
 const returnButton = (page) => page.getByRole('button', { name: 'Return to landing' })
 
-// Records every dialog and answers "Stay" to a "Leave site?" prompt.
+// Records every browser-drawn dialog, answering "Stay" to a "Leave site?"
+// prompt; the app's own leave dialog never shows up here.
 const recordDialogs = (page) => {
   const dialogs = []
   page.on('dialog', (dialog) => {
@@ -17,17 +18,51 @@ const recordDialogs = (page) => {
 }
 
 test.describe('Leaving the builder', () => {
-  test('with an edit, the browser asks first and Stay keeps the CV', async ({ page }) => {
+  const leaveDialog = (page) => page.getByRole('alertdialog', { name: 'Leave without saving?' })
+  const editName = async (page) => {
     await page.goto('/cv')
     await page.getByRole('tab', { name: 'Classic' }).click()
     await page.getByLabel('Full name').fill('Jordan Rivera')
+  }
+
+  // 1.6.68: the app's own dialog, not the browser's "Leave site?" prompt.
+  test('with an edit, the app asks first and Keep editing keeps the CV', async ({ page }) => {
+    await editName(page)
     const dialogs = recordDialogs(page)
 
     await returnButton(page).click()
 
-    await expect.poll(() => dialogs).toEqual(['beforeunload'])
+    await expect(leaveDialog(page)).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Keep editing' })).toBeFocused()
+    await page.getByRole('button', { name: 'Keep editing' }).click()
+    await expect(leaveDialog(page)).toBeHidden()
     await expect(page).toHaveURL(/\/cv$/)
     await expect(page.getByLabel('Full name')).toHaveValue('Jordan Rivera')
+    expect(dialogs).toEqual([])
+  })
+
+  test('Leave without saving goes without a second, browser prompt', async ({ page }) => {
+    await editName(page)
+    const dialogs = recordDialogs(page)
+
+    await returnButton(page).click()
+    await page.getByRole('button', { name: 'Leave without saving' }).click()
+
+    await expect(page).toHaveURL(/\/$/)
+    expect(dialogs).toEqual([])
+  })
+
+  test('Download JSON & leave saves a copy, then goes', async ({ page }) => {
+    await editName(page)
+    const dialogs = recordDialogs(page)
+
+    await returnButton(page).click()
+    const downloadPromise = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'Download JSON & leave' }).click()
+
+    expect((await downloadPromise).suggestedFilename()).toMatch(/\.json$/)
+    await expect(page).toHaveURL(/\/$/)
+    expect(dialogs).toEqual([])
   })
 
   test('without an edit, it leaves without asking', async ({ page }) => {
