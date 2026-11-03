@@ -14,6 +14,13 @@ export const SITE_ORIGIN = 'https://portifycv.app'
 // The share image of every page without one of its own.
 export const DEFAULT_OG_IMAGE = '/PortifyCV.jpg'
 
+// Views served without the AdSense script (the worker removes it; 404s
+// too, separately). The builder is an app screen, where ads aren't allowed
+// (1.6.48); About and the privacy policy carry no content of their own for
+// ads to sit beside (1.6.67). App.jsx crosses this edge with a full page
+// load, so a script loaded on one side never carries over to the other.
+export const AD_FREE_VIEWS = new Set(['builder', 'about', 'privacy'])
+
 // Read off the template registry instead of a hardcoded number in the
 // freeTemplates description below — this previously drifted out of sync
 // with cvTemplates.js after a template was added without this file being

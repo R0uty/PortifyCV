@@ -890,6 +890,126 @@ select.floating-field__control {
   overflow-y: auto;
 }
 
+/* ── Leave dialog (1.6.68, LeaveConfirmDialog.jsx) ── */
+
+.leave-dialog-overlay {
+  z-index: 90;
+  align-items: center;
+}
+
+.leave-dialog {
+  position: relative;
+  width: 100%;
+  max-width: 27rem;
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-xl);
+  background: var(--app-bg-elevated);
+  box-shadow: 0 30px 70px rgba(10, 10, 14, 0.28), 0 4px 14px rgba(10, 10, 14, 0.1);
+  text-align: center;
+  overflow: hidden;
+  animation: scale-in 180ms ease-out both;
+}
+
+.leave-dialog::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 6.5rem;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(217, 119, 6, 0.16), transparent 70%);
+  pointer-events: none;
+}
+
+.leave-dialog__icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: var(--space-4);
+  border-radius: 50%;
+  background: #fef3c7;
+  color: #b45309;
+  box-shadow: 0 0 0 6px rgba(254, 243, 199, 0.55);
+}
+
+.leave-dialog__title {
+  position: relative;
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--app-text);
+}
+
+.leave-dialog__body {
+  margin-top: var(--space-3);
+  font-size: var(--text-body-sm);
+  color: var(--app-text-muted);
+}
+
+.leave-dialog__hint {
+  margin-top: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--app-surface-strong);
+  font-size: var(--text-caption);
+  color: var(--app-text-muted);
+}
+
+.leave-dialog__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}
+
+.leave-dialog__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 2.9rem;
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 700;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.leave-dialog__button--primary {
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
+}
+
+.leave-dialog__button--primary:hover {
+  background: var(--accent-solid-hover);
+}
+
+.leave-dialog__button--secondary {
+  border-color: var(--app-border-strong);
+  background: var(--app-bg-elevated);
+  color: var(--app-text);
+}
+
+.leave-dialog__button--secondary:hover:not(:disabled) {
+  background: var(--app-surface-strong);
+}
+
+.leave-dialog__button--danger {
+  min-height: 2.5rem;
+  background: transparent;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.leave-dialog__button--danger:hover:not(:disabled) {
+  background: #fef2f2;
+}
+
 @keyframes scale-in {
   from {
     opacity: 0;
@@ -904,7 +1024,8 @@ select.floating-field__control {
 
 @media (prefers-reduced-motion: reduce) {
   .modal-overlay,
-  .modal-panel {
+  .modal-panel,
+  .leave-dialog {
     animation: none;
   }
 }
@@ -2650,9 +2771,6 @@ select.floating-field__control {
 .site-footer {
   border-top: 1px solid var(--app-border);
   background: var(--app-bg);
-  position: sticky;
-  bottom: 0;
-  z-index: 30;
 }
 
 .site-footer__inner {
@@ -2987,10 +3105,6 @@ html:lang(fi) .landing-title {
   .landing-hero__actions .landing-cta,
   .landing-hero__templates {
     padding: 0.85rem 1.4rem;
-  }
-
-  .site-footer {
-    position: static;
   }
 
   .landing-sticky-cta:not([hidden]) {

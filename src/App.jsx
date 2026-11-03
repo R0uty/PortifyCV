@@ -11,10 +11,11 @@ import { safeStorageGet, safeStorageSet } from './utils/cvForm'
 import { SHARE_QUERY_PARAM } from './utils/shareLinks'
 import { ROUTES, localizePath, pathLocale, templatePath } from './utils/routes'
 import { getCvTemplates } from './utils/cvTemplates'
-import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX } from './utils/pageMeta'
+import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX, AD_FREE_VIEWS } from './utils/pageMeta'
 import { LocaleContext } from './components/localeContext'
 import { APP_VERSION } from './utils/appVersion'
-import { hasUnsavedChanges } from './utils/leaveGuard'
+import { hasUnsavedChanges, leavePage } from './utils/leaveGuard'
+import LeaveConfirmDialog from './components/LeaveConfirmDialog'
 
 const CONTACT_MAILTO = 'mailto:portifycv@gmail.com'
 
@@ -98,6 +99,12 @@ function readRoute() {
   }
   return { view: 'notFound', locale: pathLocale(currentUrl.pathname) }
 }
+
+// Between a page with ads and one without (the builder, About, the privacy
+// policy, a 404) is a full page load (1.6.67): the worker serves each side
+// with or without the AdSense script, which can't be unloaded in place.
+const isAdFree = (view) => view === 'notFound' || AD_FREE_VIEWS.has(view)
+const crossesAdEdge = (fromView, toView) => isAdFree(fromView) !== isAdFree(toView)
 
 // A view's address in `locale`, e.g. '/fi/tietoa' for about in Finnish.
 function viewPath(view, locale) {
@@ -252,6 +259,12 @@ function goToFaq(event, activeView, onNavigate, locale) {
   if (activeView === 'landing') {
     window.history.replaceState(window.history.state, '', faqUrl)
     document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    return
+  }
+  // From About or the privacy policy it's a full page load (crossesAdEdge),
+  // which keeps the hash only when it's in the address being loaded.
+  if (crossesAdEdge(activeView, 'landing')) {
+    window.location.assign(faqUrl)
     return
   }
   onNavigate('landing')
@@ -566,6 +579,9 @@ function App({ route = null }) {
   }, [locale, view])
   const [headerProps, setHeaderProps] = useState(null)
   const headerPropsRef = useRef(null)
+  // Where the visitor was going when the builder asked about unsaved
+  // edits (1.6.68, LeaveConfirmDialog); null while it isn't asking.
+  const [leaveTarget, setLeaveTarget] = useState(null)
 
   useDocumentHead(view, locale)
 
@@ -648,33 +664,54 @@ function App({ route = null }) {
   }, [])
 
   // Out of the builder is a full page load too (1.6.48), so the page the
-  // visitor goes to loads its ads again.
-  const leaveBuilder = useCallback((nextView, search = '') => {
-    window.location.assign(`${viewPath(nextView, localeRef.current)}${search}`)
+  // visitor goes to loads its ads again; so is any move across the ad edge
+  // (1.6.67, crossesAdEdge). Unsaved edits ask first (1.6.68).
+  const loadPage = useCallback((nextView, search = '') => {
+    const url = `${viewPath(nextView, localeRef.current)}${search}`
+    if (viewRef.current === 'builder' && hasUnsavedChanges()) {
+      setLeaveTarget(url)
+      return
+    }
+    window.location.assign(url)
   }, [])
 
+  const handleStay = useCallback(() => setLeaveTarget(null), [])
+  const handleLeave = useCallback(() => {
+    if (leaveTarget) leavePage(leaveTarget)
+  }, [leaveTarget])
+  // The download starts before the page goes; the short wait lets the
+  // browser take the file before the page that made it unloads.
+  const handleSaveAndLeave = useCallback(async () => {
+    await headerPropsRef.current?.onExport?.('json')
+    if (hasUnsavedChanges()) {
+      throw new Error('JSON export did not finish')
+    }
+    await new Promise((resolve) => window.setTimeout(resolve, 400))
+    if (leaveTarget) leavePage(leaveTarget)
+  }, [leaveTarget])
+
   const goToLanding = useCallback(() => {
-    if (viewRef.current === 'builder') {
-      leaveBuilder('landing')
+    if (viewRef.current === 'builder' || crossesAdEdge(viewRef.current, 'landing')) {
+      loadPage('landing')
       return
     }
     setView('landing')
     pushViewUrl('landing', '', localeRef.current)
     scrollToTop()
-  }, [leaveBuilder])
+  }, [loadPage])
 
   // Generic version of goToLanding for any non-builder static page (footer
   // guide links, etc.) — builder goes through goToBuilder since it also
   // supports the optional ?template= id.
   const goToView = useCallback((nextView, { search = '' } = {}) => {
-    if (viewRef.current === 'builder' && nextView !== 'builder') {
-      leaveBuilder(nextView, search)
+    if ((viewRef.current === 'builder' && nextView !== 'builder') || crossesAdEdge(viewRef.current, nextView)) {
+      loadPage(nextView, search)
       return
     }
     setView(nextView)
     pushViewUrl(nextView, search, localeRef.current)
     scrollToTop()
-  }, [leaveBuilder])
+  }, [loadPage])
 
   // Keep view state in sync when the user navigates with the browser's
   // back/forward buttons rather than an in-app link — those change the URL
@@ -682,17 +719,17 @@ function App({ route = null }) {
   useEffect(() => {
     function handlePopState() {
       const route = readRoute()
-      // Back/forward across the builder's edge reloads, for the same
-      // reason the links into and out of it do (1.6.48).
-      if ((route.view === 'builder') !== (viewRef.current === 'builder')) {
+      // Back/forward across the builder's edge, or between pages with and
+      // without ads, reloads, for the same reason the links do (1.6.48).
+      if ((route.view === 'builder') !== (viewRef.current === 'builder')
+        || crossesAdEdge(viewRef.current, route.view)) {
         // Leaving a CV with unsaved edits (1.6.66): put the builder's
-        // address back before loading the page the visitor went back to,
-        // so if they cancel the browser's "Leave site?" prompt the address
-        // still matches the builder they stayed on.
+        // address back and ask (1.6.68), so if the visitor keeps editing
+        // the address still matches the builder they stayed on.
         if (viewRef.current === 'builder' && hasUnsavedChanges()) {
           const target = window.location.href
           window.history.pushState(null, '', viewPath('builder', localeRef.current))
-          window.location.assign(target)
+          setLeaveTarget(target)
           return
         }
         window.location.reload()
@@ -830,6 +867,15 @@ function App({ route = null }) {
       </section>
 
       <SiteFooter locale={locale} onNavigate={goToView} />
+
+      {leaveTarget !== null && (
+        <LeaveConfirmDialog
+          locale={locale}
+          onStay={handleStay}
+          onLeave={handleLeave}
+          onSaveAndLeave={handleSaveAndLeave}
+        />
+      )}
     </div>
     </LocaleContext.Provider>
   )
