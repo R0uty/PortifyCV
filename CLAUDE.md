@@ -214,6 +214,10 @@ above `collectCanvasPageBreakpoints`/`collectCanvasContentBlocks`/
 logic, since main-column and sidebar breakpoints are deliberately handled
 asymmetrically (main column drives the page-break decision; sidebar content
 is filtered out of that calculation and just falls wherever it lands).
+Each page is still a picture; `src/utils/pdfTextLayer.js` writes every line
+over it as invisible text and adds the links, which is what an ATS reads. Its
+font only has Windows-1252, so other Latin letters lose their accent in that
+text and other scripts are left out of it.
 Since 1.6.59 a final pass, `keepPageBreaksOutOfText`, moves any break that
 would cut a text line or small icon in *either* column up above it and
 re-flows the pages after it, so the sidebar can no longer be sliced

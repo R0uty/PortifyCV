@@ -88,12 +88,11 @@ export default {
   // Color class for link icons (unused in cards mode)
   linkIconColor: '',
 
-  // Header contact line mode — null means no contact line in header
-  headerContactMode: null,
-
-  // No contact line properties needed
-  headerContactGap: null,
-  headerContactTextSize: null,
+  // This flat layout only shows in ATS mode (the Showcase has its own
+  // contact block), where a CV without contact details is useless (1.6.71).
+  headerContactMode: 'piped',
+  headerContactGap: 'gap-x-3',
+  headerContactTextSize: 'text-xs',
   headerContactTextColor: null,
   headerContactIconColor: null,
 
