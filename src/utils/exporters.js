@@ -466,7 +466,7 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
   const experienceItems = snapshot.experience
     .map((item) => {
       const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
-      const meta = metaLine(item)
+      const meta = [metaLine(item), item.employmentType].filter(Boolean).join(' · ')
       // The job's bullet points and technologies, as every template shows
       // them (getExperienceBullets etc. in directEditExperienceEntry.jsx).
       const bullets = item.achievements.length > 0

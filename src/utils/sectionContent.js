@@ -103,3 +103,29 @@ export function hideEmptySections(cv) {
   })
   return { ...cv, sectionVisibility }
 }
+
+// Sections a template shows somewhere other than its section list: Links in
+// the header of four templates (or as a section in the rest), Core Strengths
+// as Creative's pills.
+function isShownOutsideSectionList(templateId, sectionKey) {
+  return sectionKey === 'links' || (templateId === 'creative' && sectionKey === 'coreStrengths')
+}
+
+/**
+ * Filled-in, visible sections a template has no place for, which a PDF from
+ * it silently leaves out. The data stays in the CV; other templates show it.
+ *
+ * @param {object} cv
+ * @param {{ id: string, primarySections: string[], secondarySections: string[] }} template
+ * @returns {string[]}
+ */
+export function getSectionsHiddenByTemplate(cv, template) {
+  const shown = new Set([...template.primarySections, ...template.secondarySections])
+
+  return CV_SECTION_ORDER_KEYS.filter((key) => (
+    !shown.has(key)
+    && cv?.sectionVisibility?.[key] !== false
+    && hasSectionContent(cv, key)
+    && !isShownOutsideSectionList(template.id, key)
+  ))
+}
