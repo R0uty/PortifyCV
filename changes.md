@@ -4,6 +4,27 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## PDF pages fill the paper, and breaks read the painted pixels — 1.6.72, 2026-11-06
+
+- **Design no longer lost.** The check for a failed capture sampled 80 points,
+  and on a sparse white template all could miss the text, so a good capture was
+  swapped for the unstyled text-only PDF (Editorial with the sample CV). It now
+  reads the whole canvas.
+- **Full-page designs.** Designer pages lose the 12 mm white frame and print 13%
+  larger. Backgrounds and sidebars run to the paper's edges on every page, and
+  a footer band stays at the bottom. ATS pages keep their margins.
+- **Clean breaks.** A cut chosen from the DOM moves to a row the painted pixels
+  show is empty, since html2canvas paints text a few px off the DOM (it sliced
+  Minimal's "Links" heading). Section headings no longer end a page alone, and
+  a page no longer ends after one job with the rest blank.
+- **Short spills.** A last page under a third full widens the layout, up to the
+  old print scale, if that removes the page. A spill too long to pull back stays.
+- **Blank CV.** Exporting one shows a message instead of an empty PDF.
+- `src/utils/pdfPageCanvas.js` is new. `e2e/pdf-page-layout.spec.js` is new, and
+  `pdf-page-breaks.spec.js` now also checks pixels at each cut and the sample CV.
+- Page counts: Classic Professional's example 2→1, Editorial's sample 3→2 (now
+  with its design). Five templates' long test CV went 5→6, from the larger print.
+
 ## PDF export has real text and links — 1.6.71, 2026-11-06
 
 Every PDF page was only a JPEG, so nothing could read it: no selecting or

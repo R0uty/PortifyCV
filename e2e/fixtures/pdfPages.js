@@ -48,6 +48,10 @@
 // exact 831px-wide designer export clone html2canvas rasterizes):
 // techExec/engineering-director ~7.4%, quadrant/marketing-manager ~5.2%.
 // techExec 2→1, quadrant 2→1.
+// Full-page designer PDFs (1.6.72): pages print 13% larger with no white
+// frame, and a short spill now widens the layout to fit. classicProfessional's
+// example only spilled its certificates onto page 2, so it now fits on one.
+// classicProfessional 2→1.
 export const EXPECTED_PDF_PAGES = {
   minimal: 2,
   developer: 2,
@@ -59,7 +63,7 @@ export const EXPECTED_PDF_PAGES = {
   compact: 1,
   portfolio: 2,
   techExec: 1,
-  classicProfessional: 2,
+  classicProfessional: 1,
   navyProfessional: 1,
   modernOrange: 2,
   colorfulCompact: 1,

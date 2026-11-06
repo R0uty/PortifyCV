@@ -2,6 +2,7 @@ import { test, expect } from './fixtures/base.js'
 import { readFile } from 'node:fs/promises'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { TEMPLATE_EXAMPLES, loadExampleCv } from '../src/utils/exampleCvs.js'
+import { demoCvData } from '../src/utils/cvForm.js'
 import { installPdfProbe, findCutLines, pdfPageSizes } from './helpers/pdfTextCuts.js'
 
 // 1.6.59: a PDF page break must never run through a line of text. Page
@@ -38,8 +39,9 @@ async function exportPdf(page, testInfo, name) {
 }
 
 async function expectCleanA4Pages(page, bytes) {
-  const { pages, cut } = await findCutLines(page)
+  const { pages, cut, paintedCuts } = await findCutLines(page)
   expect(cut, 'lines cut by a page break').toEqual([])
+  expect(paintedCuts, 'page breaks through painted pixels').toEqual([])
   const sizes = pdfPageSizes(bytes)
   expect(sizes).toHaveLength(pages)
   for (const [width, height] of sizes) {
@@ -62,6 +64,27 @@ for (const [templateId, exampleId] of exampleCases) {
     await expect(page.locator('.direct-edit-export-source [data-export-header]')).toContainText(cv.title)
     await page.waitForLoadState('networkidle')
     const bytes = await exportPdf(page, testInfo, `${templateId}-${exampleId}`)
+    await expectCleanA4Pages(page, bytes)
+  })
+}
+
+// The sample CV is what a first-time visitor exports. Minimal's "Links"
+// heading was sliced here (1.6.72) by a cut the DOM measured as clear of it,
+// which is why expectCleanA4Pages also checks the painted pixels.
+for (const template of cvTemplates) {
+  test(`pdf page breaks / ${template.id} / sample CV @slow`, async ({ page }, testInfo) => {
+    test.setTimeout(120_000)
+    await installPdfProbe(page)
+    await page.goto(`/cv?template=${template.id}`)
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await page.locator('input[type="file"][accept=".json,application/json"]').setInputFiles({
+      name: 'sample-cv.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(demoCvData)),
+    })
+    await expect(page.locator('.app-shell__preview [data-export-variant]').first()).toContainText(demoCvData.fullName.split(' ')[0])
+    await page.waitForLoadState('networkidle')
+    const bytes = await exportPdf(page, testInfo, `${template.id}-sample`)
     await expectCleanA4Pages(page, bytes)
   })
 }

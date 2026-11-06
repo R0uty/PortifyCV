@@ -214,6 +214,9 @@ above `collectCanvasPageBreakpoints`/`collectCanvasContentBlocks`/
 logic, since main-column and sidebar breakpoints are deliberately handled
 asymmetrically (main column drives the page-break decision; sidebar content
 is filtered out of that calculation and just falls wherever it lands).
+Cuts are then checked against the painted pixels, and designer pages are
+painted full-page by repeating empty rows (`src/utils/pdfPageCanvas.js`), since
+html2canvas paints text a few px from where the DOM puts it.
 Each page is still a picture; `src/utils/pdfTextLayer.js` writes every line
 over it as invisible text and adds the links, which is what an ATS reads. Its
 font only has Windows-1252, so other Latin letters lose their accent in that

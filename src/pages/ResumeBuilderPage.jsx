@@ -961,9 +961,20 @@ function ResumeBuilderPage({
         exportCvAsJson,
         exportCvAsPdf,
         exportCvAsHtml,
+        isCvBlank,
       } = await import('../utils/exporters')
 
       if (type === 'pdf-designer') {
+        if (isCvBlank(formData)) {
+          showToast(
+            locale === 'fi'
+              ? 'CV on vielä tyhjä. Lisää tietosi ja vie PDF sitten.'
+              : 'Your CV is still empty. Add your details, then export the PDF.',
+            'error',
+          )
+          return
+        }
+
         const expectedVariant = getCvTemplate(selectedTemplate, locale).variant
         const exportPdfMode = atsFriendlyMode ? 'ats' : 'designer'
         const didSyncPreviewMode = await waitForPreviewModeSync(
