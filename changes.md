@@ -4,6 +4,23 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## PDF export has real text and links — 1.6.71, 2026-11-06
+
+Every PDF page was only a JPEG, so nothing could read it: no selecting or
+searching, no clickable links, and an ATS got an empty document, in ATS mode
+too.
+- **Real text.** Every line is also written as invisible text over its page
+  picture (`src/utils/pdfTextLayer.js`). The look doesn't change.
+- **Links.** URLs and emails are clickable, including those templates show as
+  plain text. "Node.js" and "ASP.NET" stay plain.
+- **Character limit.** The text uses jsPDF's built-in Windows-1252 font: all of
+  Finnish is kept, other Latin letters lose their accent in the text only
+  ("Čapek" reads "Capek"), and other scripts stay in the picture only.
+- **ATS contact details.** Compact, Graduate, Modern and Portfolio had no email,
+  phone or location in their ATS layout. They do now.
+- New `e2e/pdf-text-layer.spec.js` reads the text and links back out of each
+  template's PDF, designer and ATS.
+
 ## Builder toolbar: one row, Clear CV in a menu, slimmer phone bars — 1.6.67, 2026-10-30
 
 From a design review of the builder:

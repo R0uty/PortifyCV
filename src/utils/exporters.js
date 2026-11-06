@@ -8,6 +8,7 @@ import { getEffectiveCvTemplate } from './sectionColumns'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate, getLinkFields } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
 import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
+import { collectPdfTextLayer, drawPdfTextLayer, placePdfTextLayer } from './pdfTextLayer'
 
 const PDF_MODES = {
   designer: {
@@ -1580,6 +1581,7 @@ function addCanvasPagesToPdf(
   sectionRanges = [],
   headingBottoms = new Map(),
   unbreakableRanges = [],
+  textLayer = { lines: [], links: [] },
 ) {
   const renderedWidth = A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right
   const printableHeight = A4_HEIGHT_MM - pdfMode.marginMm.top - pdfMode.marginMm.bottom
@@ -1640,6 +1642,8 @@ function addCanvasPagesToPdf(
       sliceHeightMm,
     )
 
+    drawPdfTextLayer(pdf, placePdfTextLayer(textLayer, slice, pdfMode.marginMm, renderedWidth / canvas.width))
+
     const nextSlice = pageSlices[pageIndex + 1]
     const boundaryY = slice.bottom
     const continuedSections = nextSlice
@@ -1679,7 +1683,7 @@ function addCanvasPagesToPdf(
   })
 }
 
-function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks = [], sectionRanges = [], headingBottoms = new Map(), unbreakableRanges = []) {
+function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks = [], sectionRanges = [], headingBottoms = new Map(), unbreakableRanges = [], textLayer = { lines: [], links: [] }) {
   const renderedWidth = A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right
   const printableHeight = A4_HEIGHT_MM - pdfMode.marginMm.top - pdfMode.marginMm.bottom
   const pageBottomY = A4_HEIGHT_MM - pdfMode.marginMm.bottom
@@ -1765,6 +1769,7 @@ function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks
       imageDataUrl: pageCanvas.toDataURL(PDF_PAGE_IMAGE_MIME, PDF_PAGE_IMAGE_QUALITY),
       sliceHeightMm,
       separatorLineSegments,
+      textLayer: placePdfTextLayer(textLayer, slice, pdfMode.marginMm, renderedWidth / canvas.width),
     }
   })
 }
@@ -2627,6 +2632,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     const sectionRanges = collectCanvasSectionRanges(captureRoot, canvas)
     const headingBottoms = collectCanvasSectionHeadingBottoms(captureRoot, canvas)
     const unbreakableRanges = collectCanvasUnbreakableRanges(captureRoot, canvas)
+    const textLayer = collectPdfTextLayer(captureRoot, canvas)
     const exportName =
       mode === 'designer' ? fileName : `${fileName}-${createPdfMode(mode).fileSuffix}`
     const workerPages = createWorkerPageSlices(
@@ -2637,6 +2643,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
       sectionRanges,
       headingBottoms,
       unbreakableRanges,
+      textLayer,
     )
 
     try {
@@ -2651,7 +2658,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
         format: 'a4',
       })
 
-      addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints, contentBlocks, sectionRanges, headingBottoms, unbreakableRanges)
+      addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints, contentBlocks, sectionRanges, headingBottoms, unbreakableRanges, textLayer)
       const blob = pdf.output('blob')
       saveAs(blob, `${exportName}.pdf`)
     }

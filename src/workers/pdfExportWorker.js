@@ -1,4 +1,5 @@
 import { jsPDF } from 'jspdf'
+import { drawPdfTextLayer } from '../utils/pdfTextLayer'
 
 self.onmessage = (event) => {
   const payload = event.data ?? {}
@@ -34,6 +35,8 @@ self.onmessage = (event) => {
         renderedWidth,
         page.sliceHeightMm,
       )
+
+      drawPdfTextLayer(pdf, page.textLayer)
 
       if (page.separatorLineSegments?.length > 0) {
         pdf.setDrawColor(203, 213, 225)
