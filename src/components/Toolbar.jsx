@@ -128,6 +128,7 @@ function useToolbarPopover(itemSelector) {
 
 function Toolbar({
   locale = 'en',
+  atsFriendlyMode = false,
   onReturn = () => {},
   onLocaleChange = () => {},
   canUndo = false,
@@ -504,7 +505,9 @@ function Toolbar({
                 >
                   PDF
                   <span className="app-toolbar__export-item-hint">
-                    {isFinnish ? 'Tulostusvalmis CV, valmis lähetettäväksi' : 'Print-ready CV, ready to send'}
+                    {atsFriendlyMode
+                      ? isFinnish ? 'ATS-asettelu: pelkistetty ja helposti luettava' : 'ATS layout: plain and easy to parse'
+                      : isFinnish ? 'Oma ulkoasusi, valmis lähetettäväksi' : 'Your design, ready to send'}
                   </span>
                 </button>
                 <button

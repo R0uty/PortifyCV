@@ -226,6 +226,14 @@ would cut a text line or small icon in *either* column up above it and
 re-flows the pages after it, so the sidebar can no longer be sliced
 mid-line; `e2e/pdf-page-breaks.spec.js` (@slow) fails on any cut line.
 
+**A new CV field has to reach the exports.** `e2e/export-fields.spec.js`
+(`@slow`) fills every field the empty-entry factories in `cvForm.js` define and
+looks for each in the HTML, Word, JSON and ATS PDF files of every template, so
+a new field fails it until the flat renderer in `CVPreview.jsx`, the ATS
+branches of Timeline/Navy/Modern Orange (`src/utils/atsDetails.js`), and
+`docxExport.js`/`docxArchetypes.js`/`exporters.js` carry it. Designer PDFs
+aren't covered: each Showcase chooses what it shows.
+
 **Share links carry the whole CV in the URL, never a server.**
 `src/utils/shareLinks.js` encodes CV state with short single/double-letter
 keys (`ROOT_STRING_KEYS`, etc.) to keep links short — never repurpose an

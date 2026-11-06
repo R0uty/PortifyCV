@@ -73,7 +73,8 @@ import {
 import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
-import { hideEmptySections } from '../utils/sectionContent'
+import { getSectionsHiddenByTemplate, hideEmptySections } from '../utils/sectionContent'
+import { getSectionSchema } from '../utils/sectionSchema'
 import { DEFAULT_STYLE_VARIANT_ID, TEMPLATE_VARIANTS, getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, parseStyleVariantParam, resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
@@ -435,6 +436,16 @@ function loadInitialCvSession(locale = 'en') {
     storageIssue: hasStorageIssue,
     pendingExampleId: null,
   }
+}
+
+// The names of the sections `templateId` would leave out of this CV.
+function listSectionsHiddenByTemplate(formData, templateId, locale) {
+  return getSectionsHiddenByTemplate(formData, getEffectiveCvTemplate(templateId, locale, formData))
+    .map((key) => {
+      const schema = getSectionSchema(key)
+      return locale === 'fi' ? schema.labelFi : schema.labelEn
+    })
+    .join(', ')
 }
 
 function ResumeBuilderPage({
@@ -1046,10 +1057,16 @@ function ResumeBuilderPage({
         })
       }
 
+      // HTML and JSON keep every section, and so does Word except for the
+      // European layout, which only has rows for its own sections.
+      const hiddenSections = type === 'pdf-designer' || (type === 'docx' && selectedTemplate === 'european')
+        ? listSectionsHiddenByTemplate(formData, selectedTemplate, locale)
+        : ''
+
       showToast(
         locale === 'fi'
-          ? `${exportLabel} on ladattu.`
-          : `${exportLabel} export downloaded.`,
+          ? `${exportLabel} on ladattu.${hiddenSections ? ` Tämä pohja ei näytä osioita: ${hiddenSections}.` : ''}`
+          : `${exportLabel} export downloaded.${hiddenSections ? ` This template doesn't show: ${hiddenSections}.` : ''}`,
       )
     } catch (error) {
       showToast(
@@ -1294,6 +1311,19 @@ function ResumeBuilderPage({
   // the step carries the template look it replaces, so Undo puts back the
   // previous template with its exact accent, font and headings colour.
   const handleSelectTemplate = useCallback((templateId, variantId) => {
+    if (templateId !== selectedTemplate) {
+      const hiddenSections = listSectionsHiddenByTemplate(formData, templateId, locale)
+
+      if (hiddenSections) {
+        showToast(
+          locale === 'fi'
+            ? `Tämä pohja ei näytä osioita: ${hiddenSections}. Tietosi säilyvät.`
+            : `This template doesn't show: ${hiddenSections}. Your data is kept.`,
+          'info',
+        )
+      }
+    }
+
     if (variantId === undefined) {
       dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
       return
@@ -1316,7 +1346,7 @@ function ResumeBuilderPage({
 
     dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
     selectStyleVariant(templateId, variantId)
-  }, [formData, historyPast, selectedTemplate, selectStyleVariant, uiState])
+  }, [formData, historyPast, locale, selectedTemplate, selectStyleVariant, uiState])
 
   // Picking a variant — even the active one again — stores it and resets
   // the accent, font and headings colour to its values.
@@ -1764,6 +1794,7 @@ function ResumeBuilderPage({
     onHeaderChange({
       activeExport,
       isActionBusy,
+      atsFriendlyMode,
       locale,
       onExport: handleExport,
       onCopyShareLink: handleCopyShareLink,
@@ -1797,7 +1828,7 @@ function ResumeBuilderPage({
       onSetBuilderMode: handleSetBuilderMode,
     })
   }, [
-    activeExport, isActionBusy, locale,
+    activeExport, atsFriendlyMode, isActionBusy, locale,
     handleExport, handleCopyShareLink, handleLocaleChange,
     canUndo, canRedo, handleUndo, handleRedo,
     templates, selectedTemplate, handleOpenTemplateGallery,
@@ -2073,11 +2104,6 @@ function ResumeBuilderPage({
           </div>
         </details>
 
-        <p className={`ds-kicker lg:hidden ${ui.textMuted}`}>
-          {locale === 'fi'
-            ? 'Mobiilinäkymässä lomake on esikatselun yläpuolella.'
-            : 'Mobile layout stacks the form above the preview.'}
-        </p>
       </div>
 
       <AppErrorBoundary
