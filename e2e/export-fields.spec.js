@@ -5,6 +5,7 @@ import { createEveryFieldCv } from './fixtures/everyFieldCv.js'
 import { pdfText } from './helpers/pdfFile.js'
 import { pickTemplate } from './helpers/templateGallery.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
+import { downloadFromPdfPreview } from './helpers/pdfPreview.js'
 
 // What a person typed has to reach the file they send (1.6.73). ATS mode used
 // to lose employment type, tagline and the detail lines of education,
@@ -28,9 +29,9 @@ async function openWithCv(page, templateId) {
 
 async function download(page, item, path) {
   await banner(page).getByRole('button', { name: 'Export', exact: true }).click()
-  const downloadPromise = page.waitForEvent('download', { timeout: 90_000 })
+  const downloadPromise = item === 'PDF' ? null : page.waitForEvent('download', { timeout: 90_000 })
   await page.getByRole('menuitem', { name: item }).click()
-  await (await downloadPromise).saveAs(path)
+  await (await (downloadPromise ?? downloadFromPdfPreview(page, { timeout: 90_000 }))).saveAs(path)
 }
 
 async function turnOnAts(page) {

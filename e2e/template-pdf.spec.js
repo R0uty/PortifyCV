@@ -4,6 +4,7 @@ import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { TEMPLATE_EXAMPLES, loadExampleCv } from '../src/utils/exampleCvs.js'
 import { waitForStableLayout } from './helpers/layoutAudit.js'
 import { EXPECTED_PDF_PAGES } from './fixtures/pdfPages.js'
+import { downloadFromPdfPreview } from './helpers/pdfPreview.js'
 
 // PDF smoke per template (Phase 2): the real export path must finish, produce
 // a non-blank file, and paginate deterministically. The PDF is image-based
@@ -29,8 +30,8 @@ for (const template of cvTemplates) {
     await waitForStableLayout(page)
 
     await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
-    const downloadPromise = page.waitForEvent('download', { timeout: 60_000 })
     await page.getByRole('menuitem', { name: 'PDF' }).click()
+    const downloadPromise = downloadFromPdfPreview(page, { timeout: 60_000 })
     const download = await downloadPromise
     expect(download.suggestedFilename()).toMatch(/\.pdf$/)
 
@@ -119,8 +120,8 @@ for (const builderMode of ['classic', 'direct']) {
     await waitForStableLayout(page)
 
     await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
-    const downloadPromise = page.waitForEvent('download', { timeout: 60_000 })
     await page.getByRole('menuitem', { name: 'PDF' }).click()
+    const downloadPromise = downloadFromPdfPreview(page, { timeout: 60_000 })
     const download = await downloadPromise
     const path = testInfo.outputPath(`compact-${builderMode}-wide.pdf`)
     await download.saveAs(path)

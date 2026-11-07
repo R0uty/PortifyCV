@@ -36,6 +36,7 @@ import AppErrorBoundary from '../components/AppErrorBoundary'
 import ATSScorePanel from '../components/ATSScorePanel'
 import BadgeModal from '../components/BadgeModal'
 import CoverLetterModal from '../components/CoverLetterModal'
+import PdfPreviewModal from '../components/PdfPreviewModal'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
 import CVSuggestionsPanel from '../components/CVSuggestionsPanel'
@@ -942,6 +943,111 @@ function ResumeBuilderPage({
 
   const secondaryButtonClassName = `border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
 
+  // PDF export opens a preview first (1.6.74). The paper and fit picked there
+  // last for the life of the tab, like the rest of the CV.
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false)
+  const [pdfPaper, setPdfPaper] = useState('a4')
+  const [pdfFit, setPdfFit] = useState('auto')
+
+  const handleClosePdfPreview = useCallback(() => {
+    setIsPdfPreviewOpen(false)
+  }, [])
+
+  // One render at a time: each lays the CV out in its own off-screen copy and
+  // briefly re-lays-out the export source, so two at once (options flipped
+  // quickly) would slow each other down for a result that's thrown away.
+  const pdfRenderQueueRef = useRef(Promise.resolve())
+
+  const renderPdfPreview = useCallback(({ paper, fit }) => {
+    const renderPages = async () => {
+      const { renderCvPdf } = await import('../utils/exporters')
+
+      const expectedVariant = getCvTemplate(selectedTemplate, locale).variant
+      const exportPdfMode = atsFriendlyMode ? 'ats' : 'designer'
+      const didSyncPreviewMode = await waitForPreviewModeSync(
+        previewRef.current,
+        exportPdfMode,
+      )
+
+      if (!didSyncPreviewMode) {
+        throw new Error(
+          locale === 'fi'
+            ? `Esikatselutila ei ole synkronoitu (${exportPdfMode.toUpperCase()}). Yritä hetken kuluttua uudelleen.`
+            : `Preview mode is not synced (${exportPdfMode.toUpperCase()}). Try exporting again in a moment.`,
+        )
+      }
+
+      const didSyncVariant = await waitForPreviewVariantSync(
+        previewRef.current,
+        expectedVariant,
+      )
+
+      if (!didSyncVariant) {
+        const activeVariant =
+          previewRef.current?.querySelector('[data-export-variant]')?.getAttribute('data-export-variant')
+          || previewRef.current?.getAttribute('data-export-variant')
+          || 'unknown'
+
+        throw new Error(
+          locale === 'fi'
+            ? `Pohjan esikatselu ei ole vielä synkronoitu (odotettu ${expectedVariant}, saatu ${activeVariant}). Yritä uudelleen.`
+            : `Template preview is not synced yet (expected ${expectedVariant}, got ${activeVariant}). Try again.`,
+        )
+      }
+
+      // The chosen CV font may still be an in-flight dynamic import (see
+      // cvFontLoadPromiseRef above) — capturing before its @font-face rules
+      // are registered and painted would bake the fallback font into the PDF.
+      await cvFontLoadPromiseRef.current
+      await window.document.fonts.ready
+
+      return renderCvPdf(previewRef.current, exportFileName, {
+        mode: exportPdfMode,
+        formData,
+        template: selectedTemplate,
+        variant: selectedTemplate,
+        atsFriendlyMode,
+        locale,
+        paper,
+        fit,
+      })
+    }
+    const next = pdfRenderQueueRef.current.catch(() => {}).then(renderPages)
+
+    pdfRenderQueueRef.current = next
+    return next
+  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate])
+
+  const handleDownloadPdfPreview = useCallback(async (rendered) => {
+    const exportLabel = atsFriendlyMode ? 'ATS PDF' : 'Designer PDF'
+
+    dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: 'pdf-designer' })
+
+    try {
+      const { saveRenderedCvPdf } = await import('../utils/exporters')
+      await saveRenderedCvPdf(rendered)
+      const hiddenSections = listSectionsHiddenByTemplate(formData, selectedTemplate, locale)
+
+      setIsPdfPreviewOpen(false)
+      showToast(
+        locale === 'fi'
+          ? `${exportLabel} on ladattu.${hiddenSections ? ` Tämä pohja ei näytä osioita: ${hiddenSections}.` : ''}`
+          : `${exportLabel} export downloaded.${hiddenSections ? ` This template doesn't show: ${hiddenSections}.` : ''}`,
+      )
+    } catch (error) {
+      showToast(
+        error instanceof Error && error.message
+          ? error.message
+          : locale === 'fi'
+            ? `${exportLabel}-vienti epäonnistui.`
+            : `Failed to export ${exportLabel}.`,
+        'error',
+      )
+    } finally {
+      dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
+    }
+  }, [atsFriendlyMode, formData, locale, selectedTemplate])
+
   const handleExport = useCallback(async (type) => {
     dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: type })
 
@@ -965,12 +1071,13 @@ function ResumeBuilderPage({
             ? locale === 'fi' ? 'Valmistellaan Word-vientiä...' : 'Preparing Word export...'
             : locale === 'fi' ? 'Valmistellaan JSON-vientiä...' : 'Preparing JSON export...'
 
-    showToast(toastLabel, 'info')
+    if (type !== 'pdf-designer') {
+      showToast(toastLabel, 'info')
+    }
 
     try {
       const {
         exportCvAsJson,
-        exportCvAsPdf,
         exportCvAsHtml,
         isCvBlank,
       } = await import('../utils/exporters')
@@ -986,57 +1093,10 @@ function ResumeBuilderPage({
           return
         }
 
-        const expectedVariant = getCvTemplate(selectedTemplate, locale).variant
-        const exportPdfMode = atsFriendlyMode ? 'ats' : 'designer'
-        const didSyncPreviewMode = await waitForPreviewModeSync(
-          previewRef.current,
-          exportPdfMode,
-        )
-
-        if (!didSyncPreviewMode) {
-          showToast(
-            locale === 'fi'
-              ? `Esikatselutila ei ole synkronoitu (${exportPdfMode.toUpperCase()}). Yritä hetken kuluttua uudelleen.`
-              : `Preview mode is not synced (${exportPdfMode.toUpperCase()}). Try exporting again in a moment.`,
-            'error',
-          )
-          return
-        }
-
-        const didSyncVariant = await waitForPreviewVariantSync(
-          previewRef.current,
-          expectedVariant,
-        )
-
-        if (!didSyncVariant) {
-          const activeVariant =
-            previewRef.current?.querySelector('[data-export-variant]')?.getAttribute('data-export-variant')
-            || previewRef.current?.getAttribute('data-export-variant')
-            || 'unknown'
-
-          showToast(
-            locale === 'fi'
-              ? `Pohjan esikatselu ei ole vielä synkronoitu (odotettu ${expectedVariant}, saatu ${activeVariant}). Yritä uudelleen.`
-              : `Template preview is not synced yet (expected ${expectedVariant}, got ${activeVariant}). Try again.`,
-            'error',
-          )
-          return
-        }
-
-        // The chosen CV font may still be an in-flight dynamic import (see
-        // cvFontLoadPromiseRef above) — capturing before its @font-face rules
-        // are registered and painted would bake the fallback font into the PDF.
-        await cvFontLoadPromiseRef.current
-        await window.document.fonts.ready
-
-        await exportCvAsPdf(previewRef.current, exportFileName, {
-          mode: exportPdfMode,
-          formData,
-          template: selectedTemplate,
-          variant: selectedTemplate,
-          atsFriendlyMode,
-          locale,
-        })
+        // The preview checks the export source is in sync, builds the pages
+        // and downloads them (renderPdfPreview, handleDownloadPdfPreview).
+        setIsPdfPreviewOpen(true)
+        return
       }
 
       if (type === 'json') {
@@ -1059,7 +1119,7 @@ function ResumeBuilderPage({
 
       // HTML and JSON keep every section, and so does Word except for the
       // European layout, which only has rows for its own sections.
-      const hiddenSections = type === 'pdf-designer' || (type === 'docx' && selectedTemplate === 'european')
+      const hiddenSections = type === 'docx' && selectedTemplate === 'european'
         ? listSectionsHiddenByTemplate(formData, selectedTemplate, locale)
         : ''
 
@@ -1080,7 +1140,7 @@ function ResumeBuilderPage({
     } finally {
       dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
     }
-  }, [atsFriendlyMode, exportFileName, formData, locale, markCvSaved, previewRef, selectedTemplate, templateAccentColors])
+  }, [atsFriendlyMode, exportFileName, formData, locale, markCvSaved, selectedTemplate, templateAccentColors])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()
@@ -2620,6 +2680,20 @@ function ResumeBuilderPage({
         onDownloadText={handleDownloadCoverLetterText}
         onDownloadPdf={handleDownloadCoverLetterPdf}
       />
+
+      {isPdfPreviewOpen ? (
+        <PdfPreviewModal
+          onClose={handleClosePdfPreview}
+          locale={locale}
+          atsFriendlyMode={atsFriendlyMode}
+          paper={pdfPaper}
+          fit={pdfFit}
+          onPaperChange={setPdfPaper}
+          onFitChange={setPdfFit}
+          onRender={renderPdfPreview}
+          onDownload={handleDownloadPdfPreview}
+        />
+      ) : null}
 
       <ToastStack toasts={toasts} clearBottomBar={builderMode !== 'direct'} />
     </>

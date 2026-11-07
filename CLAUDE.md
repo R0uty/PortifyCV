@@ -205,7 +205,12 @@ Tailwind's naming.
 imports html2canvas + jsPDF only when an export is triggered (not from the
 entry graph — see `vite.config.js`'s `manualChunks` comment on why these are
 deliberately *not* grouped into a named vendor chunk). Page assembly runs in
-`src/workers/pdfExportWorker.js`. Page-break placement reads
+`src/workers/pdfExportWorker.js`. Export → PDF never downloads straight away:
+it opens `PdfPreviewModal.jsx`, which builds the pages with `renderCvPdf`
+(paper `a4`/`letter`, fit `auto`/`one-page`/`two-pages`/`actual`, see
+`PDF_PAPER_SIZES`/`PDF_FIT_MODES`) and saves exactly those pages with
+`saveRenderedCvPdf` — e2e specs reach the file through
+`e2e/helpers/pdfPreview.js`'s `downloadFromPdfPreview`. Page-break placement reads
 `data-export-section`/`data-export-header`/`data-export-placement` attributes
 that every Showcase's section wrapper renders, to avoid slicing a page
 mid-card or leaving an orphaned section heading — see the block comments
