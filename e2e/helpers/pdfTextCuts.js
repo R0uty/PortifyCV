@@ -52,11 +52,33 @@ export async function installPdfProbe(page) {
       }
     }).observe(document, { childList: true, subtree: true })
 
+    // How many pixels differ between the rows either side of a cut, in the
+    // painted capture itself. DOM boxes can't see text html2canvas paints a
+    // few px from where the DOM puts it; this can.
+    const countPaintedAcross = (source, y) => {
+      if (y < 1) return 0
+      const { data } = source.getContext('2d').getImageData(0, y - 1, source.width, 2)
+      let count = 0
+      for (let offset = 0; offset < source.width * 4; offset += 4) {
+        const here = offset + source.width * 4
+        const difference = Math.abs(data[here] - data[offset]) + Math.abs(data[here + 1] - data[offset + 1]) + Math.abs(data[here + 2] - data[offset + 2])
+        if (difference > 36) count += 1
+      }
+      return count
+    }
+
     const drawImage = CanvasRenderingContext2D.prototype.drawImage
     CanvasRenderingContext2D.prototype.drawImage = function (...args) {
-      const [source, sx, sy, sw, sh, dx, dy] = args
-      if (args.length === 9 && source instanceof HTMLCanvasElement && sx === 0 && dx === 0 && dy === 0 && sw === source.width) {
-        window.__pdfProbe.slices.push({ top: sy, height: sh, canvasHeight: source.height })
+      const [source, sx, sy, sw, sh, dx] = args
+      // A designer page also draws one-row stretches, and on a last page
+      // redraws the part of its slice below a stretch. Neither is a new slice.
+      const slices = window.__pdfProbe.slices
+      const previous = slices[slices.length - 1]
+      const isNewSlice = args.length === 9 && source instanceof HTMLCanvasElement && sx === 0 && dx === 0 && sw === source.width
+        && sh > 1 && (!previous || sy >= previous.top + previous.height)
+      if (isNewSlice) {
+        window.__pdfProbe.canvasWidth = source.width
+        slices.push({ top: sy, height: sh, canvasHeight: source.height, paintedAcross: countPaintedAcross(source, sy) })
       }
       return drawImage.apply(this, args)
     }
@@ -88,7 +110,13 @@ export async function findCutLines(page) {
     }
   }
 
-  return { pages: probe.slices.length, cut }
+  // A cut passing through painted ink changes many pixels between its rows.
+  // A few are fine: a card's rounded corner or an edge of a tall photo.
+  const paintedCuts = probe.slices.slice(1)
+    .map((slice, index) => ({ page: index + 2, pixels: slice.paintedAcross }))
+    .filter(({ pixels }) => pixels > 0.01 * probe.canvasWidth)
+
+  return { pages: probe.slices.length, cut, paintedCuts }
 }
 
 // Every page of a jsPDF document is A4: its MediaBox is 595.28 × 841.89 pt.

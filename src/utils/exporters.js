@@ -9,17 +9,39 @@ import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTempla
 import { createCvSnapshot } from './cvSnapshot'
 import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
 import { collectPdfTextLayer, drawPdfTextLayer, placePdfTextLayer } from './pdfTextLayer'
+import { findLastPageStretchRow, isSliceBlank, measureQuietRows, paintFullBleedPage, quietRunLength, snapCutToQuietRow } from './pdfPageCanvas'
 
 const PDF_MODES = {
   designer: {
     fileSuffix: 'designer',
+    // For the text-only fallback. Captured pages have no margins (FULL_BLEED).
     marginMm: { top: 12, right: 12, bottom: 14, left: 12 },
+    // Designer pages used to sit at 186mm wide; this wide a layout prints at
+    // that same scale, so fitting a short spill never makes text smaller
+    // than it was then.
+    maxFitWidthFactor: 210 / 186,
   },
   ats: {
     fileSuffix: 'ats',
     marginMm: { top: 16, right: 16, bottom: 18, left: 16 },
+    maxFitWidthFactor: 1.08,
   },
 }
+// Designer pages run off the paper on every side, with their backgrounds
+// carried into this much room above and below a page break (a first page
+// starts at the top edge, where a template's own header padding is). Every
+// page holds the same height of content: 285mm, the least that still fits
+// the 297mm-tall `min-height` Compact and European fit themselves to, once
+// that is printed at 210/220 of its size.
+const FULL_BLEED = { topPadMm: 7, bottomPadMm: 5 }
+// A last page holding less than this share of a page counts as a short
+// spill, worth widening the layout to get rid of.
+const SHORT_SPILL_SHARE = 1 / 3
+const FIT_WIDTH_STEP = 0.02
+const ORPHAN_HEADING_SLACK_SHARE = 0.03
+// Sampled pixels with colour in them that make a capture more than blank:
+// about a word's worth, so a stray speck doesn't count.
+const MIN_INK_PIXELS = 40
 const A4_WIDTH_MM = 210
 const A4_HEIGHT_MM = 297
 // Must match --preview-paper-width in src/styles/tokens.css. The live preview
@@ -260,6 +282,26 @@ export function isExportSectionPopulated(snapshot, section) {
   }
 
   return Array.isArray(snapshot[section]) && snapshot[section].length > 0
+}
+
+// Whether a CV has nothing in it yet, not even a name, so a PDF of it would
+// be an empty page.
+export function isCvBlank(formData) {
+  const snapshot = createCvSnapshot(formData)
+  const textFields = [
+    snapshot.fullName,
+    snapshot.title,
+    snapshot.tagline,
+    snapshot.about,
+    snapshot.email,
+    snapshot.phone,
+    snapshot.location,
+    snapshot.photo,
+  ]
+
+  return textFields.every((value) => !value)
+    && Object.keys(snapshot.links).length === 0
+    && Object.values(snapshot).every((value) => !Array.isArray(value) || value.length === 0)
 }
 
 export function getPhotoDataUrl(value) {
@@ -990,6 +1032,10 @@ function applyComputedColorFallbackStyles(sourceRoot, cloneRoot) {
   }
 }
 
+// Reads the whole canvas, every other pixel. It once sampled just 80 points,
+// and on a sparse white template (Editorial with the sample CV, until 1.6.72)
+// all 80 could miss the text, so a good capture was thrown away for the
+// unstyled text-only PDF.
 function isCanvasLikelyBlank(canvas) {
   const context = canvas.getContext('2d', { willReadFrequently: true })
 
@@ -997,27 +1043,22 @@ function isCanvasLikelyBlank(canvas) {
     return true
   }
 
-  const sampleColumns = 8
-  const sampleRows = 10
-  let nonWhitePixelCount = 0
-
   try {
-    for (let row = 0; row < sampleRows; row += 1) {
-      for (let column = 0; column < sampleColumns; column += 1) {
-        const x = Math.min(
-          canvas.width - 1,
-          Math.floor(((column + 0.5) / sampleColumns) * canvas.width),
-        )
-        const y = Math.min(
-          canvas.height - 1,
-          Math.floor(((row + 0.5) / sampleRows) * canvas.height),
-        )
-        const [r, g, b, a] = context.getImageData(x, y, 1, 1).data
-        const isTransparent = a < 8
-        const isNearWhite = r > 248 && g > 248 && b > 248
+    const { data } = context.getImageData(0, 0, canvas.width, canvas.height)
+    const rowBytes = canvas.width * 4
+    let inkPixelCount = 0
+
+    for (let rowStart = 0; rowStart < data.length; rowStart += rowBytes * 2) {
+      for (let index = rowStart; index < rowStart + rowBytes; index += 8) {
+        const isTransparent = data[index + 3] < 8
+        const isNearWhite = data[index] > 248 && data[index + 1] > 248 && data[index + 2] > 248
 
         if (!isTransparent && !isNearWhite) {
-          nonWhitePixelCount += 1
+          inkPixelCount += 1
+
+          if (inkPixelCount >= MIN_INK_PIXELS) {
+            return false
+          }
         }
       }
     }
@@ -1029,7 +1070,7 @@ function isCanvasLikelyBlank(canvas) {
     return true
   }
 
-  return nonWhitePixelCount === 0
+  return true
 }
 
 // Every `[data-export-section]` also carries `data-export-placement="main"`
@@ -1182,11 +1223,11 @@ function collectCanvasSectionHeadingBottoms(captureRoot, canvas) {
   const sourceHeight = Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1)
   const sourceRect = captureRoot.getBoundingClientRect()
   const scaleY = canvas.height / sourceHeight
-  // Main-column only, matching `collectCanvasContentBlocks` — a sidebar
-  // section's top never appears as a `block.top` for lookup once that
-  // filtering is in place, so this mirrors it for consistency.
+  // Both columns: a page shouldn't end on a sidebar heading either, and an
+  // ATS layout stacks its "side" sections in the one column. A sidebar
+  // section's top never matches a `block.top`, so the page-fill logic above
+  // still only looks up main-column sections.
   const sections = Array.from(captureRoot.querySelectorAll('[data-export-section]'))
-    .filter((element) => !isSidebarPlacedElement(element))
 
   sections.forEach((section) => {
     const sectionRect = section.getBoundingClientRect()
@@ -1301,7 +1342,7 @@ function findSafeBreakY(y, pageTop, pageHeightPx, unbreakableRanges) {
 // so shifts the pages after it slightly, instead of pushing the next page
 // over the limit and splitting it into a full page and a near-empty stub.
 // No page is ever taller than one page.
-function keepPageBreaksOutOfText(slices, pageHeightPx, breakpoints = [], unbreakableRanges = []) {
+function keepPageBreaksOutOfText(slices, pageHeightPx, breakpoints = [], unbreakableRanges = [], { quiet = null, runLength = 0, headingBottoms = new Map() } = {}) {
   if (!slices.length || !unbreakableRanges.length) {
     return slices
   }
@@ -1315,10 +1356,10 @@ function keepPageBreaksOutOfText(slices, pageHeightPx, breakpoints = [], unbreak
 
   while (end - top > pageHeightPx) {
     const limit = top + pageHeightPx
-    // The original layout's own boundary when one still fits and, kept out
-    // of text, leaves the page at least a quarter full. A boundary just
-    // past one that moved up would otherwise make a sliver of a page.
-    const original = [...originalBoundaries].reverse().find((y) => y > top + minPage && y <= limit)
+    // The original layout's own boundary when one still fits and leaves the
+    // page at least half full. A boundary just past one that moved up would
+    // otherwise end a page after a single job, with the rest of it blank.
+    const original = [...originalBoundaries].reverse().find((y) => y > top + pageHeightPx / 2 && y <= limit)
     const originalCut = original === undefined
       ? undefined
       : findSafeBreakY(original, top, pageHeightPx, unbreakableRanges)
@@ -1337,11 +1378,35 @@ function keepPageBreaksOutOfText(slices, pageHeightPx, breakpoints = [], unbreak
         : fallbackCut
     }
 
-    result.push({ top, bottom: cutY })
-    top = cutY
+    // A section's heading goes with what it introduces: a cut just below
+    // one moves above it, unless that would leave the page too empty.
+    const headingSlackPx = Math.floor(pageHeightPx * ORPHAN_HEADING_SLACK_SHARE)
+    for (const [sectionTop, headingBottom] of headingBottoms) {
+      if (sectionTop > top + minPage && cutY > sectionTop && cutY <= headingBottom + headingSlackPx) {
+        cutY = sectionTop
+        break
+      }
+    }
+
+    // The last word goes to the painted pixels: DOM boxes and html2canvas's
+    // text can disagree by enough for a "safe" cut to slice a heading.
+    const snappedY = snapCutToQuietRow(
+      cutY,
+      Math.max(top + minPage, cutY - Math.floor(pageHeightPx / 10)),
+      quiet,
+      runLength,
+      unbreakableRanges,
+    )
+
+    result.push({ top, bottom: snappedY })
+    top = snappedY
   }
 
-  result.push({ top, bottom: end })
+  // Only a template's bottom padding left: not worth a page of its own.
+  if (result.length === 0 || !isSliceBlank(top, end, quiet)) {
+    result.push({ top, bottom: end })
+  }
+
   return result
 }
 
@@ -1572,122 +1637,90 @@ function mergeRanges(ranges) {
   return merged
 }
 
-function addCanvasPagesToPdf(
-  pdf,
-  canvas,
-  pdfMode,
-  breakpoints = [],
-  contentBlocks = [],
-  sectionRanges = [],
-  headingBottoms = new Map(),
-  unbreakableRanges = [],
-  textLayer = { lines: [], links: [] },
-) {
-  const renderedWidth = A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right
-  const printableHeight = A4_HEIGHT_MM - pdfMode.marginMm.top - pdfMode.marginMm.bottom
-  const pageBottomY = A4_HEIGHT_MM - pdfMode.marginMm.bottom
-  const pageHeightPx = Math.max(1, Math.floor((printableHeight * canvas.width) / renderedWidth))
-  const pageCanvas = document.createElement('canvas')
-  const pageContext = pageCanvas.getContext('2d')
+// Where the page images go on the paper, in mm.
+function getPageGeometry(pdfMode, mode) {
+  const marginMm = mode === 'designer'
+    ? { top: 0, right: 0, bottom: 0, left: 0 }
+    : pdfMode.marginMm
+  const fullBleed = mode === 'designer' ? FULL_BLEED : null
+  const renderedWidth = A4_WIDTH_MM - marginMm.left - marginMm.right
+  const printableHeight = A4_HEIGHT_MM - marginMm.top - marginMm.bottom
+    - (fullBleed ? fullBleed.topPadMm + fullBleed.bottomPadMm : 0)
 
-  if (!pageContext) {
-    throw new Error('Unable to prepare page canvas for PDF export.')
-  }
-
-  const pageSlices = keepPageBreaksOutOfText(
-    buildPageSlicesFromBlocks(
-      pageHeightPx,
-      contentBlocks.length > 0 ? contentBlocks : [{ top: 0, bottom: canvas.height }],
-      breakpoints,
-      headingBottoms,
-    ),
-    pageHeightPx,
-    breakpoints,
-    unbreakableRanges,
-  )
-  const effectiveContentBlocks = contentBlocks.length > 0
-    ? contentBlocks
-    : [{ top: 0, bottom: canvas.height }]
-
-  pageSlices.forEach((slice, pageIndex) => {
-    const sliceHeight = slice.bottom - slice.top
-
-    pageCanvas.width = canvas.width
-    pageCanvas.height = sliceHeight
-    pageContext.clearRect(0, 0, pageCanvas.width, pageCanvas.height)
-    pageContext.drawImage(
-      canvas,
-      0,
-      slice.top,
-      canvas.width,
-      sliceHeight,
-      0,
-      0,
-      canvas.width,
-      sliceHeight,
-    )
-
-    if (pageIndex > 0) {
-      pdf.addPage()
-    }
-
-    const sliceHeightMm = (sliceHeight * renderedWidth) / canvas.width
-
-    pdf.addImage(
-      pageCanvas.toDataURL(PDF_PAGE_IMAGE_MIME, PDF_PAGE_IMAGE_QUALITY),
-      PDF_PAGE_IMAGE_FORMAT,
-      pdfMode.marginMm.left,
-      pdfMode.marginMm.top,
-      renderedWidth,
-      sliceHeightMm,
-    )
-
-    drawPdfTextLayer(pdf, placePdfTextLayer(textLayer, slice, pdfMode.marginMm, renderedWidth / canvas.width))
-
-    const nextSlice = pageSlices[pageIndex + 1]
-    const boundaryY = slice.bottom
-    const continuedSections = nextSlice
-      ? sectionRanges.filter((section) => boundaryY > section.top && boundaryY < section.bottom)
-      : []
-    const shouldDrawFallbackLine = Boolean(
-      nextSlice
-      && continuedSections.length === 0
-      && doesBoundarySplitRange(boundaryY, effectiveContentBlocks),
-    )
-
-    if (continuedSections.length > 0 || shouldDrawFallbackLine) {
-      const lineY = Math.min(pageBottomY, pdfMode.marginMm.top + sliceHeightMm)
-      pdf.setDrawColor(203, 213, 225)
-      pdf.setLineWidth(0.3)
-
-      if (continuedSections.length > 0) {
-        const lineRanges = mergeRanges(
-          continuedSections.map((section) => ({
-            start: pdfMode.marginMm.left + (section.left * renderedWidth) / canvas.width,
-            end: pdfMode.marginMm.left + (section.right * renderedWidth) / canvas.width,
-          })),
-        )
-
-        lineRanges.forEach((range) => {
-          pdf.line(range.start, lineY, range.end, lineY)
-        })
-      } else {
-        pdf.line(
-          pdfMode.marginMm.left,
-          lineY,
-          A4_WIDTH_MM - pdfMode.marginMm.right,
-          lineY,
-        )
-      }
-    }
-  })
+  return { marginMm, fullBleed, renderedWidth, printableHeight }
 }
 
-function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks = [], sectionRanges = [], headingBottoms = new Map(), unbreakableRanges = [], textLayer = { lines: [], links: [] }) {
-  const renderedWidth = A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right
-  const printableHeight = A4_HEIGHT_MM - pdfMode.marginMm.top - pdfMode.marginMm.bottom
-  const pageBottomY = A4_HEIGHT_MM - pdfMode.marginMm.bottom
-  const pageHeightPx = Math.max(1, Math.floor((printableHeight * canvas.width) / renderedWidth))
+function getPageSlices(pageHeightPx, totalHeight, layout, cutOptions) {
+  const blocks = layout.contentBlocks.length > 0
+    ? layout.contentBlocks
+    : [{ top: 0, bottom: totalHeight }]
+
+  return keepPageBreaksOutOfText(
+    buildPageSlicesFromBlocks(pageHeightPx, blocks, layout.breakpoints, layout.headingBottoms),
+    pageHeightPx,
+    layout.breakpoints,
+    layout.unbreakableRanges,
+    { ...cutOptions, headingBottoms: layout.headingBottoms },
+  )
+}
+
+function collectPageLayout(captureRoot, canvas) {
+  return {
+    breakpoints: collectCanvasPageBreakpoints(captureRoot, canvas),
+    contentBlocks: collectCanvasContentBlocks(captureRoot, canvas),
+    headingBottoms: collectCanvasSectionHeadingBottoms(captureRoot, canvas),
+    unbreakableRanges: collectCanvasUnbreakableRanges(captureRoot, canvas),
+  }
+}
+
+// A CV that runs just past a page gets a new page holding next to nothing.
+// Laying it out slightly wider lets its lines wrap less and prints it
+// slightly smaller, usually pulling that back. This only measures the DOM,
+// so trying each width costs far less than the one capture that follows.
+function fitSandboxToPages({ sandbox, captureRoot, clone }, pdfMode, mode) {
+  const geometry = getPageGeometry(pdfMode, mode)
+  const baseWidth = captureRoot.offsetWidth
+  const setWidth = (width) => {
+    [sandbox, captureRoot, clone].forEach((element) => {
+      element.style.width = `${width}px`
+    })
+  }
+  const measure = () => {
+    const size = {
+      width: Math.max(captureRoot.scrollWidth, captureRoot.offsetWidth, 1),
+      height: Math.max(captureRoot.scrollHeight, captureRoot.offsetHeight, 1),
+    }
+    const pageHeightPx = Math.floor((geometry.printableHeight * size.width) / geometry.renderedWidth)
+    const slices = getPageSlices(pageHeightPx, size.height, collectPageLayout(captureRoot, size))
+    const last = slices[slices.length - 1]
+
+    return { pages: slices.length, lastShare: (last.bottom - last.top) / pageHeightPx }
+  }
+
+  const start = measure()
+
+  if (start.pages < 2 || start.lastShare >= SHORT_SPILL_SHARE) {
+    return
+  }
+
+  for (let factor = 1 + FIT_WIDTH_STEP; factor <= pdfMode.maxFitWidthFactor; factor += FIT_WIDTH_STEP) {
+    setWidth(Math.round(baseWidth * factor))
+
+    if (measure().pages < start.pages) {
+      return
+    }
+  }
+
+  setWidth(baseWidth)
+}
+
+function createPdfPages(canvas, pdfMode, mode, layout, sectionRanges, textLayer, captureScale) {
+  const geometry = getPageGeometry(pdfMode, mode)
+  const { marginMm, fullBleed, renderedWidth, printableHeight } = geometry
+  const mmPerCanvasPx = renderedWidth / canvas.width
+  const pageHeightPx = Math.max(1, Math.floor(printableHeight / mmPerCanvasPx))
+  const pageBottomY = A4_HEIGHT_MM - marginMm.bottom
+  const quiet = measureQuietRows(canvas)
   const pageCanvas = document.createElement('canvas')
   const pageContext = pageCanvas.getContext('2d')
 
@@ -1695,41 +1728,57 @@ function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks
     throw new Error('Unable to prepare page canvas for PDF export.')
   }
 
-  const pageSlices = keepPageBreaksOutOfText(
-    buildPageSlicesFromBlocks(
-      pageHeightPx,
-      contentBlocks.length > 0 ? contentBlocks : [{ top: 0, bottom: canvas.height }],
-      breakpoints,
-      headingBottoms,
-    ),
-    pageHeightPx,
-    breakpoints,
-    unbreakableRanges,
-  )
-  const effectiveContentBlocks = contentBlocks.length > 0
-    ? contentBlocks
+  const pageSlices = getPageSlices(pageHeightPx, canvas.height, layout, {
+    quiet,
+    runLength: quietRunLength(captureScale),
+  })
+  const effectiveContentBlocks = layout.contentBlocks.length > 0
+    ? layout.contentBlocks
     : [{ top: 0, bottom: canvas.height }]
 
   return pageSlices.map((slice, pageIndex) => {
     const sliceHeight = slice.bottom - slice.top
-
-    pageCanvas.width = canvas.width
-    pageCanvas.height = sliceHeight
-    pageContext.clearRect(0, 0, pageCanvas.width, pageCanvas.height)
-    pageContext.drawImage(
-      canvas,
-      0,
-      slice.top,
-      canvas.width,
-      sliceHeight,
-      0,
-      0,
-      canvas.width,
-      sliceHeight,
-    )
-
-    const sliceHeightMm = (sliceHeight * renderedWidth) / canvas.width
     const nextSlice = pageSlices[pageIndex + 1]
+    const topPadMm = fullBleed && pageIndex > 0 ? fullBleed.topPadMm : 0
+    const pageTextLayer = placePdfTextLayer(
+      textLayer,
+      slice,
+      { left: marginMm.left, top: marginMm.top + topPadMm },
+      mmPerCanvasPx,
+    )
+    const lowestBottom = (boxes) => boxes.reduce(
+      (lowest, box) => (box.top < slice.bottom ? Math.max(lowest, box.bottom) : lowest),
+      slice.top,
+    )
+    const stretchRowY = fullBleed && !nextSlice
+      ? findLastPageStretchRow(slice, lowestBottom(sectionRanges), lowestBottom(textLayer.lines), quiet)
+      : null
+
+    // A footer below the stretch moves down the page, and its text with it.
+    if (stretchRowY !== null) {
+      const stretchMm = A4_HEIGHT_MM - marginMm.top - topPadMm - sliceHeight * mmPerCanvasPx
+      const stretchFromMm = marginMm.top + topPadMm + (stretchRowY - slice.top) * mmPerCanvasPx
+      const moveBelowStretch = (box) => (box.y >= stretchFromMm ? { ...box, y: box.y + stretchMm } : box)
+      pageTextLayer.lines = pageTextLayer.lines.map(moveBelowStretch)
+      pageTextLayer.links = pageTextLayer.links.map(moveBelowStretch)
+    }
+
+    if (fullBleed) {
+      paintFullBleedPage(pageCanvas, canvas, slice, {
+        paperHeightPx: Math.round(A4_HEIGHT_MM / mmPerCanvasPx),
+        topPadPx: Math.round(topPadMm / mmPerCanvasPx),
+        isLastPage: !nextSlice,
+        stretchRowY,
+        quiet,
+      })
+    } else {
+      pageCanvas.width = canvas.width
+      pageCanvas.height = sliceHeight
+      pageContext.clearRect(0, 0, pageCanvas.width, pageCanvas.height)
+      pageContext.drawImage(canvas, 0, slice.top, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight)
+    }
+
+    const sliceHeightMm = sliceHeight * mmPerCanvasPx
     const boundaryY = slice.bottom
     const continuedSections = nextSlice
       ? sectionRanges.filter((section) => boundaryY > section.top && boundaryY < section.bottom)
@@ -1743,13 +1792,13 @@ function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks
     let separatorLineSegments = []
 
     if (continuedSections.length > 0 || shouldDrawFallbackLine) {
-      const lineY = Math.min(pageBottomY, pdfMode.marginMm.top + sliceHeightMm)
+      const lineY = Math.min(pageBottomY, marginMm.top + topPadMm + sliceHeightMm)
 
       if (continuedSections.length > 0) {
         separatorLineSegments = mergeRanges(
           continuedSections.map((section) => ({
-            start: pdfMode.marginMm.left + (section.left * renderedWidth) / canvas.width,
-            end: pdfMode.marginMm.left + (section.right * renderedWidth) / canvas.width,
+            start: marginMm.left + section.left * mmPerCanvasPx,
+            end: marginMm.left + section.right * mmPerCanvasPx,
           })),
         ).map((segment) => ({
           start: segment.start,
@@ -1758,8 +1807,8 @@ function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks
         }))
       } else {
         separatorLineSegments = [{
-          start: pdfMode.marginMm.left,
-          end: A4_WIDTH_MM - pdfMode.marginMm.right,
+          start: marginMm.left,
+          end: A4_WIDTH_MM - marginMm.right,
           y: lineY,
         }]
       }
@@ -1767,14 +1816,41 @@ function createWorkerPageSlices(canvas, pdfMode, breakpoints = [], contentBlocks
 
     return {
       imageDataUrl: pageCanvas.toDataURL(PDF_PAGE_IMAGE_MIME, PDF_PAGE_IMAGE_QUALITY),
-      sliceHeightMm,
+      sliceHeightMm: fullBleed ? A4_HEIGHT_MM : sliceHeightMm,
       separatorLineSegments,
-      textLayer: placePdfTextLayer(textLayer, slice, pdfMode.marginMm, renderedWidth / canvas.width),
+      textLayer: pageTextLayer,
     }
   })
 }
 
-async function exportPdfInWorker(pages, pdfMode) {
+// The main-thread twin of src/workers/pdfExportWorker.js, for when the worker
+// can't run.
+function addPagesToPdf(pdf, pages, geometry) {
+  pages.forEach((page, pageIndex) => {
+    if (pageIndex > 0) {
+      pdf.addPage()
+    }
+
+    pdf.addImage(
+      page.imageDataUrl,
+      PDF_PAGE_IMAGE_FORMAT,
+      geometry.marginMm.left,
+      geometry.marginMm.top,
+      geometry.renderedWidth,
+      page.sliceHeightMm,
+    )
+
+    drawPdfTextLayer(pdf, page.textLayer)
+
+    pdf.setDrawColor(203, 213, 225)
+    pdf.setLineWidth(0.3)
+    page.separatorLineSegments.forEach((segment) => {
+      pdf.line(segment.start, segment.y, segment.end, segment.y)
+    })
+  })
+}
+
+async function exportPdfInWorker(pages, geometry) {
   if (typeof Worker === 'undefined') {
     throw new Error('Web Worker is not available in this browser.')
   }
@@ -1806,9 +1882,9 @@ async function exportPdfInWorker(pages, pdfMode) {
     worker.postMessage({
       type: 'export-pdf',
       pages,
-      pdfMode,
+      pdfMode: { marginMm: geometry.marginMm },
       imageFormat: PDF_PAGE_IMAGE_FORMAT,
-      renderedWidth: A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right,
+      renderedWidth: geometry.renderedWidth,
     })
   })
 }
@@ -2595,6 +2671,8 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
   )
 
   try {
+    fitSandboxToPages({ sandbox, captureRoot, clone }, pdfMode, mode)
+
     let canvas = await captureCanvasOrNull(captureRoot, {
       foreignObjectRendering: false,
     })
@@ -2627,27 +2705,23 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
       throw new Error('Captured preview is empty. Open preview and try exporting again.')
     }
 
-    const breakpoints = collectCanvasPageBreakpoints(captureRoot, canvas)
-    const contentBlocks = collectCanvasContentBlocks(captureRoot, canvas)
     const sectionRanges = collectCanvasSectionRanges(captureRoot, canvas)
-    const headingBottoms = collectCanvasSectionHeadingBottoms(captureRoot, canvas)
-    const unbreakableRanges = collectCanvasUnbreakableRanges(captureRoot, canvas)
     const textLayer = collectPdfTextLayer(captureRoot, canvas)
     const exportName =
       mode === 'designer' ? fileName : `${fileName}-${createPdfMode(mode).fileSuffix}`
-    const workerPages = createWorkerPageSlices(
+    const geometry = getPageGeometry(pdfMode, mode)
+    const pages = createPdfPages(
       canvas,
       pdfMode,
-      breakpoints,
-      contentBlocks,
+      mode,
+      collectPageLayout(captureRoot, canvas),
       sectionRanges,
-      headingBottoms,
-      unbreakableRanges,
       textLayer,
+      canvas.width / Math.max(captureRoot.offsetWidth, 1),
     )
 
     try {
-      const workerBlob = await exportPdfInWorker(workerPages, pdfMode)
+      const workerBlob = await exportPdfInWorker(pages, geometry)
       saveAs(workerBlob, `${exportName}.pdf`)
       return
     } catch {
@@ -2658,7 +2732,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
         format: 'a4',
       })
 
-      addCanvasPagesToPdf(pdf, canvas, pdfMode, breakpoints, contentBlocks, sectionRanges, headingBottoms, unbreakableRanges, textLayer)
+      addPagesToPdf(pdf, pages, geometry)
       const blob = pdf.output('blob')
       saveAs(blob, `${exportName}.pdf`)
     }
