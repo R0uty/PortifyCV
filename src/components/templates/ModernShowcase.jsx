@@ -206,8 +206,8 @@ export default function ModernShowcase({
   )
   const about = snapshot.about
     || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
+      ? 'Ammatillinen yhteenvetosi tulee tähän.'
+      : 'Your professional summary goes here.')
 
   const personalContactItems = [
     ['email', snapshot.email],
@@ -276,8 +276,8 @@ export default function ModernShowcase({
                 value={formData.about}
                 placeholder={
                   isFinnish
-                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-                    : 'Your professional summary will appear here as you fill out the CV form.'
+                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
+                    : 'Your professional summary goes here.'
                 }
                 multiline
               />

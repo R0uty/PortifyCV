@@ -273,8 +273,8 @@ export default function ModernOrangeShowcase({
   )
   const about = snapshot.about
     || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
+      ? 'Ammatillinen yhteenvetosi tulee tähän.'
+      : 'Your professional summary goes here.')
 
   // Personal info: location, email, phone, website, LinkedIn — deliberately
   // no date-of-birth row, since CvData has no such field anywhere in the
@@ -334,8 +334,8 @@ export default function ModernOrangeShowcase({
                 value={formData.about}
                 placeholder={
                   isFinnish
-                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-                    : 'Your professional summary will appear here as you fill out the CV form.'
+                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
+                    : 'Your professional summary goes here.'
                 }
                 multiline
               />
