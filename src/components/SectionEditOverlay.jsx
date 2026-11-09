@@ -551,6 +551,12 @@ export default function SectionEditOverlay({
                 type="button"
                 className="direct-edit-keyboard-trigger"
                 data-direct-edit-trigger={sectionKey}
+                // Shown beside its own section while focused. It used to
+                // appear at the canvas's top-left corner, far from the
+                // section it edits (1.6.77). Focus sets `hovered` first.
+                style={hovered?.sectionKey === sectionKey
+                  ? { top: `${hovered.top}px`, left: `${hovered.left}px` }
+                  : undefined}
                 onFocus={() => focusSection(sectionKey)}
                 onClick={() => openSection(sectionKey)}
               >
