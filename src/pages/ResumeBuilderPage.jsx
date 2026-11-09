@@ -53,6 +53,7 @@ import {
 } from '../utils/designSystem'
 import {
   CV_ONBOARDING_SEEN_STORAGE_KEY,
+  CV_SECTION_ORDER_KEYS,
   CV_SESSION_RESTORE_ENABLED_STORAGE_KEY,
   CV_SESSION_SNAPSHOT_STORAGE_KEY,
   createInitialCvData,
@@ -74,7 +75,7 @@ import {
 import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
-import { getSectionsHiddenByTemplate, hideEmptySections } from '../utils/sectionContent'
+import { getSectionsHiddenByTemplate, hasSectionContent, hideEmptySections } from '../utils/sectionContent'
 import { getSectionSchema } from '../utils/sectionSchema'
 import { DEFAULT_STYLE_VARIANT_ID, TEMPLATE_VARIANTS, getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, parseStyleVariantParam, resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
@@ -1225,11 +1226,25 @@ function ResumeBuilderPage({
 
   const handleLoadDemo = useCallback(() => {
     const demo = structuredClone(demoCvData)
+    // One click replaces whatever is on the page. Undo brings it back, so
+    // say so when there was a CV of the visitor's own to lose (1.6.78).
+    const current = formDataRef.current
+    const replacesOwnCv = JSON.stringify(current) !== JSON.stringify(demo)
+      && (Boolean(current.fullName?.trim())
+        || CV_SECTION_ORDER_KEYS.some((section) => hasSectionContent(current, section)))
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: demo })
     markCvSaved(demo)
     applyStoredStyleVariantLook(demo, selectedTemplate)
     setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
-    showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
+    if (replacesOwnCv) {
+      showToast(
+        locale === 'fi'
+          ? 'Demo-CV ladattu. Palauta oma CV:si työkalupalkin kumoa-nuolella.'
+          : 'Demo CV loaded. Get your own CV back with the toolbar undo arrow.',
+      )
+    } else {
+      showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
+    }
   }, [applyStoredStyleVariantLook, dispatchFormData, locale, markCvSaved, selectedTemplate, setStorageValue])
 
   const handlePasteCvImport = useCallback(() => {
