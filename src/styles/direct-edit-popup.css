@@ -433,7 +433,10 @@
 }
 
 .direct-edit-keyboard-trigger:focus-visible {
-  position: static;
+  /* Absolute, at the top/left SectionEditOverlay sets inline: the
+     focused section's own corner. */
+  position: absolute;
+  transform: translateY(calc(-100% - 4px));
   width: auto;
   height: auto;
   margin: 0;

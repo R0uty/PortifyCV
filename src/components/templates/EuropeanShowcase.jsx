@@ -166,8 +166,8 @@ export default function EuropeanShowcase({
   const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
   const about = snapshot.about
     || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
+      ? 'Ammatillinen yhteenvetosi tulee tähän.'
+      : 'Your professional summary goes here.')
   const photo = snapshot.photo
   const showPhoto = Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
@@ -298,8 +298,8 @@ export default function EuropeanShowcase({
                   value={formData.about}
                   placeholder={
                     isFinnish
-                      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-                      : 'Your professional summary will appear here as you fill out the CV form.'
+                      ? 'Ammatillinen yhteenvetosi tulee tähän.'
+                      : 'Your professional summary goes here.'
                   }
                   multiline
                 />

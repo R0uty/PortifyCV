@@ -1873,6 +1873,51 @@ test.describe('Direct Edit nav rail, entry highlight and placeholders', () => {
     expect(covered).toEqual([])
   })
 
+  // The panel had only its own button to close it, so it stayed open under
+  // the toolbar menus and over a section popup (1.6.75).
+  test('the Sections panel closes on Escape and on a press outside it', async ({ page }) => {
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    const trigger = page.getByRole('button', { name: 'Sections', exact: true })
+    const panel = page.locator('.direct-edit-sections__panel')
+
+    await trigger.click()
+    await expect(panel).toBeVisible()
+    // A press inside it keeps it open.
+    const aboutCheckbox = panel.getByRole('checkbox').first()
+    await aboutCheckbox.click()
+    await aboutCheckbox.click()
+    await expect(panel).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(panel).toHaveCount(0)
+    await expect(trigger).toBeFocused()
+
+    await trigger.click()
+    await expect(panel).toBeVisible()
+    await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+    await expect(panel).toHaveCount(0)
+  })
+
+  // Focused, the hidden "Edit <section>" button used to show at the
+  // canvas's top-left corner, wherever its section was (1.6.77).
+  test('a focused keyboard trigger shows beside its own section', async ({ page }) => {
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await expect(page.locator('.direct-edit-pencil').first()).toBeVisible()
+
+    await page.getByRole('button', { name: 'Edit Header section' }).focus()
+    await page.keyboard.press('Tab')
+    const trigger = page.getByRole('button', { name: 'Edit About section' })
+    await expect(trigger).toBeFocused()
+
+    const gap = await trigger.evaluate((el) => {
+      const section = document.querySelector('.direct-edit-preview [data-export-section="about"]')
+      return Math.abs(section.getBoundingClientRect().top - el.getBoundingClientRect().bottom)
+    })
+    expect(gap).toBeLessThan(12)
+  })
+
   test('the entry being edited is highlighted while one of its fields has focus', async ({ page }) => {
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
     await page.getByRole('tab', { name: 'Direct Edit' }).click()
@@ -2182,7 +2227,9 @@ test.describe('Direct Edit pencils and Load demo CV', () => {
 
     await page.locator('.direct-edit-actions').getByRole('button', { name: 'Load demo CV' }).click()
     // .last(): the beforeEach's own Load demo CV toast may still be up.
-    await expect(page.getByText('Demo CV loaded.').last()).toBeVisible()
+    // It replaced a CV of the visitor's own, so the toast says how to get
+    // that one back (1.6.78).
+    await expect(page.getByText('Demo CV loaded. Get your own CV back with the toolbar undo arrow.')).toBeVisible()
     await expect(nameField).toHaveText('John Doe')
 
     await page.getByRole('banner').getByRole('button', { name: 'Undo' }).click()

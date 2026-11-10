@@ -169,8 +169,8 @@ export default function CreativeShowcase({
     templateConfig.id,
   )
   const aboutPlaceholder = isFinnish
-    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-    : 'Your professional summary will appear here as you fill out the CV form.'
+    ? 'Ammatillinen yhteenvetosi tulee tähän.'
+    : 'Your professional summary goes here.'
   // In the read-only export/preview render (no directEditDispatch), never
   // fall back to the "will appear here" placeholder when About's own text
   // is blank but coreStrengths pills are present — those pills render
