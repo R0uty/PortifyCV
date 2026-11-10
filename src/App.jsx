@@ -887,6 +887,7 @@ function App({ route = null }) {
           onCopyShareLink={headerProps.onCopyShareLink}
           onOpenSettings={headerProps.onOpenSettings}
           onOpenCoverLetter={headerProps.onOpenCoverLetter}
+          onOpenImport={headerProps.onOpenImport}
           onClearCv={headerProps.onClearCv}
           isClearArmed={headerProps.isClearArmed}
           builderMode={headerProps.builderMode}

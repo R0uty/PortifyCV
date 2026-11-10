@@ -11,6 +11,7 @@ import {
   Smartphone,
   Trash2,
   Undo2,
+  Upload,
 } from 'lucide-react'
 
 import Logo from './Logo'
@@ -162,6 +163,7 @@ function Toolbar({
   onOpenCoverLetter = () => {},
   onClearCv = () => {},
   isClearArmed = false,
+  onOpenImport,
 }) {
   const isFinnish = locale === 'fi'
   const {
@@ -455,6 +457,19 @@ function Toolbar({
                   <Settings size={15} strokeWidth={2} aria-hidden="true" />
                   {isFinnish ? 'Asetukset' : 'Settings'}
                 </button>
+                {/* Direct Edit only: Classic has Import CV in its form
+                    column (1.6.80). */}
+                {builderMode === 'direct' && onOpenImport ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="app-toolbar__menu-item"
+                    onClick={() => handleMoreSelect(onOpenImport)}
+                  >
+                    <Upload size={15} strokeWidth={2} aria-hidden="true" />
+                    {isFinnish ? 'Tuo CV' : 'Import CV'}
+                  </button>
+                ) : null}
                 <div className="app-toolbar__menu-separator" role="separator" />
                 <button
                   type="button"

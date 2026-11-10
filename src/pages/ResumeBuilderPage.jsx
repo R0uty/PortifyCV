@@ -34,8 +34,10 @@ import {
 import AppShell from '../components/AppShell'
 import AppErrorBoundary from '../components/AppErrorBoundary'
 import ATSScorePanel from '../components/ATSScorePanel'
+import AtsCheckModal from '../components/AtsCheckModal'
 import BadgeModal from '../components/BadgeModal'
 import CoverLetterModal from '../components/CoverLetterModal'
+import ImportCvModal from '../components/ImportCvModal'
 import PdfPreviewModal from '../components/PdfPreviewModal'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
@@ -559,6 +561,9 @@ function ResumeBuilderPage({
   const directEditNavLockRef = useRef(false)
   const [directEditToolbarHeight, setDirectEditToolbarHeight] = useState(0)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  // Direct Edit's ways into what Classic keeps in its form column.
+  const [isImportOpen, setIsImportOpen] = useState(false)
+  const [isAtsCheckOpen, setIsAtsCheckOpen] = useState(false)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
   // "Clear CV" (the toolbar's More menu since 1.6.67) is two-step: the
@@ -1176,6 +1181,7 @@ function ResumeBuilderPage({
       markCvSaved(importedData)
       applyStoredStyleVariantLook(importedData, selectedTemplate)
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+      setIsImportOpen(false)
       showToast(locale === 'fi' ? `CV-tiedot tuotu tiedostosta ${file.name}.` : `Imported CV data from ${file.name}.`)
     } catch (error) {
       if (error instanceof SyntaxError) {
@@ -1254,6 +1260,7 @@ function ResumeBuilderPage({
       dispatchFormData({ type: FORM_ACTION.MERGE_FORM_DATA, partialData: parsedData })
       dispatchUi({ type: UI_ACTION.SET_PASTED_CV_TEXT, value: '' })
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+      setIsImportOpen(false)
       showToast(locale === 'fi' ? 'Liitetty CV-teksti tuotu.' : 'Pasted CV text imported.')
     } catch (error) {
       showToast(
@@ -1453,6 +1460,11 @@ function ResumeBuilderPage({
   const handleOpenSettings = useCallback(() => {
     setIsSettingsOpen(true)
   }, [])
+
+  const handleOpenImport = useCallback(() => setIsImportOpen(true), [])
+  const handleCloseImport = useCallback(() => setIsImportOpen(false), [])
+  const handleOpenAtsCheck = useCallback(() => setIsAtsCheckOpen(true), [])
+  const handleCloseAtsCheck = useCallback(() => setIsAtsCheckOpen(false), [])
 
   const handleLocaleChange = useCallback((nextLocale) => {
     dispatchUi({ type: UI_ACTION.SET_LOCALE, locale: nextLocale === 'fi' ? 'fi' : 'en' })
@@ -1897,6 +1909,7 @@ function ResumeBuilderPage({
       onToggleResponsivePreview: handleToggleResponsivePreview,
       onOpenSettings: handleOpenSettings,
       onOpenCoverLetter: handleOpenCoverLetter,
+      onOpenImport: handleOpenImport,
       onClearCv: handleResetForm,
       isClearArmed: resetConfirmArmed,
       builderMode,
@@ -1913,7 +1926,7 @@ function ResumeBuilderPage({
     searchQuery,
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
-    handleOpenSettings, handleOpenCoverLetter,
+    handleOpenSettings, handleOpenCoverLetter, handleOpenImport,
     handleResetForm, resetConfirmArmed,
     builderMode, handleSetBuilderMode,
     onHeaderChange,
@@ -2047,13 +2060,6 @@ function ResumeBuilderPage({
 
   const sidebarContent = useMemo(() => (
     <div className="editor-panel p-4 sm:p-6 lg:p-8" ref={editorScrollRef}>
-      <input
-        ref={importInputRef}
-        type="file"
-        accept=".json,application/json"
-        className="hidden"
-        onChange={handleImportFile}
-      />
       <div className="stack-5">
         <div className="flex flex-wrap gap-3">
           <button
@@ -2209,7 +2215,6 @@ function ResumeBuilderPage({
     handleClearJobDescription,
     handleCopyMissingKeywords,
     handleImportClick,
-    handleImportFile,
     handleJobDescriptionChange,
     handleLoadDemo,
     handlePasteCvImport,
@@ -2560,6 +2565,15 @@ function ResumeBuilderPage({
   return (
     <>
       <h1 className="sr-only">{locale === 'fi' ? 'Rakenna CV:si' : 'Build Your CV'}</h1>
+      {/* One picker for both modes: Classic's Import CV panel and Direct
+          Edit's Import CV dialog both open it (1.6.80). */}
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".json,application/json"
+        className="hidden"
+        onChange={handleImportFile}
+      />
       {builderMode === 'direct' ? (
         <div
           className={`direct-edit-layout${navRailCollapsed ? ' direct-edit-layout--nav-collapsed' : ''}`}
@@ -2576,6 +2590,9 @@ function ResumeBuilderPage({
               <DirectEditPreview
                 overlayApiRef={directEditOverlayRef}
                 onLoadDemo={handleLoadDemo}
+                atsScore={atsScore}
+                onOpenAtsCheck={handleOpenAtsCheck}
+                onOpenTemplateGallery={handleOpenTemplateGallery}
                 formData={formData}
                 dispatchFormData={dispatchFormData}
                 selectedTemplate={selectedTemplate}
@@ -2668,6 +2685,34 @@ function ResumeBuilderPage({
         onTemplateAccentColorChange={handleTemplateAccentColorChange}
         classicNameAlignment={classicNameAlignment}
         onClassicNameAlignmentChange={handleClassicNameAlignmentChange}
+      />
+
+      <ImportCvModal
+        isOpen={isImportOpen}
+        onClose={handleCloseImport}
+        locale={locale}
+        pastedCvText={pastedCvText}
+        onPastedCvTextChange={handlePastedCvTextChange}
+        onPasteImport={handlePasteCvImport}
+        onImportJson={handleImportClick}
+        isImporting={isImporting}
+        isBusy={isActionBusy}
+      />
+
+      <AtsCheckModal
+        isOpen={isAtsCheckOpen}
+        onClose={handleCloseAtsCheck}
+        locale={locale}
+        feedback={feedback}
+        atsScore={atsScore}
+        atsFriendlyMode={atsFriendlyMode}
+        onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
+        jobDescription={jobDescription}
+        onJobDescriptionChange={handleJobDescriptionChange}
+        onAddMissingKeyword={handleAddMissingKeyword}
+        onCopyMissingKeywords={handleCopyMissingKeywords}
+        onClearJobDescription={handleClearJobDescription}
+        jobDescriptionAnalysis={jobDescriptionAnalysis}
       />
 
       <BadgeModal
