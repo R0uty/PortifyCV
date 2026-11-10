@@ -31,6 +31,8 @@ import {
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { AtsDetails } from './AtsDetails'
+import { getCertificateDetails, getEducationDetails } from '../../utils/atsDetails'
 
 // Experience and Education share the `entry` class, whose spacing and
 // divider depend on position. Both pass isFirst/isLast from their own
@@ -50,12 +52,12 @@ function entryClassName(isFirst, isLast) {
 // editable inline; location stays read-only-appended text. `index` is
 // formData-relative in the directEditDispatch branch (EditableList's own
 // index); the read-only call site passes the snapshot's `sourceIndex`.
-function renderExperienceEntry(item, index, { directEditDispatch, copy, isFirst, isLast, sourceIndex = index }) {
+function renderExperienceEntry(item, index, { atsFriendlyMode, directEditDispatch, copy, isFirst, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = getExperienceBullets(item)
   const achievements = getExperienceAchievements(item)
   const technologies = getExperienceTechnologies(item)
-  const metaLine = [item.company, item.location].filter(Boolean).join(', ')
+  const metaLine = [item.company, item.location, atsFriendlyMode ? item.employmentType : ''].filter(Boolean).join(', ')
 
   return (
     <div key={`${item.role}-${item.company}-${index}`} className={entryClassName(isFirst, isLast)} data-export-card="true" data-direct-edit-index={sourceIndex}>
@@ -263,6 +265,7 @@ export default function NavyProfessionalShowcase({
                 addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
+                  atsFriendlyMode,
                   directEditDispatch,
                   copy,
                   isFirst: index === 0,
@@ -272,6 +275,7 @@ export default function NavyProfessionalShowcase({
             ) : snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) =>
                 renderExperienceEntry(item, index, {
+                  atsFriendlyMode,
                   directEditDispatch,
                   copy,
                   isFirst: index === 0,
@@ -309,6 +313,7 @@ export default function NavyProfessionalShowcase({
                       <p className="navy-professional-showcase__entry-dates">{formatDateRange(item.startDate, item.endDate)}</p>
                     </div>
                     {metaLine ? <p className="navy-professional-showcase__entry-meta">{metaLine}</p> : null}
+                    {atsFriendlyMode ? <AtsDetails lines={getEducationDetails(item)} /> : null}
                   </div>
                 )
               })
@@ -330,7 +335,10 @@ export default function NavyProfessionalShowcase({
               snapshot.certificates.map((item, index) => (
                 <li key={`${item.name}-${index}`} className="navy-professional-showcase__cert-item" data-direct-edit-index={snapshot.sourceIndices.certificates[index]}>
                   <span className="navy-professional-showcase__cert-dot" aria-hidden="true" />
-                  <span>{[item.name, item.issuer].filter(Boolean).join(' – ')}</span>
+                  <span>
+                    {[item.name, item.issuer, atsFriendlyMode ? item.year : ''].filter(Boolean).join(' – ')}
+                    {atsFriendlyMode ? <AtsDetails lines={getCertificateDetails(item, isFinnish)} /> : null}
+                  </span>
                 </li>
               ))
             ) : (
@@ -457,6 +465,7 @@ export default function NavyProfessionalShowcase({
               />
             ) : title}
           </p>
+          {atsFriendlyMode && snapshot.tagline ? <AtsDetails lines={[snapshot.tagline]} /> : null}
         </div>
 
         <div className="navy-professional-showcase__sidebar-divider" aria-hidden="true" />

@@ -36,6 +36,8 @@ import {
 } from './shared'
 import { MODERN_ORANGE_DEFAULT_ACCENT_COLOR } from './modernOrange'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { AtsDetails } from './AtsDetails'
+import { getCertificateDetails, getEducationDetails, getProjectDetails } from '../../utils/atsDetails'
 
 // ATS mode is monochrome for every template in this app (see
 // CVPreview.jsx's generic-path comments) — this template is no exception,
@@ -168,7 +170,7 @@ function EducationRow({ isLast, entryIndex, children }) {
 // formData.experience-relative (only ever read inside directEditDispatch-
 // gated branches or the React key) — never assume it lines up with
 // snapshot.experience's own (filtered) indices in the read-only call site.
-function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, sourceIndex = index }) {
+function renderExperienceEntry(item, index, { atsFriendlyMode, directEditDispatch, copy, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = getExperienceBullets(item)
   const achievements = getExperienceAchievements(item)
@@ -202,6 +204,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, 
             />
           ) : item.company}
           {item.company && item.location ? ` · ${item.location}` : item.location || null}
+          {atsFriendlyMode && item.employmentType ? ` · ${item.employmentType}` : null}
         </p>
       ) : null}
       {directEditDispatch ? (
@@ -353,6 +356,7 @@ export default function ModernOrangeShowcase({
                 addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
+                  atsFriendlyMode,
                   directEditDispatch,
                   copy,
                   isLast: index === formData.experience.length - 1,
@@ -360,6 +364,7 @@ export default function ModernOrangeShowcase({
               </EditableList>
             ) : snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
+                atsFriendlyMode,
                 directEditDispatch,
                 sourceIndex: snapshot.sourceIndices.experience[index],
                 copy,
@@ -400,6 +405,7 @@ export default function ModernOrangeShowcase({
                         ))}
                       </div>
                     ) : null}
+                    {atsFriendlyMode ? <AtsDetails lines={getProjectDetails(item)} /> : null}
                     {projectUrl ? (
                       <a href={getSafeHref(projectUrl)} target="_blank" rel="noreferrer" className="modern-orange-showcase__project-link">
                         {copy.viewProject} ↗
@@ -429,6 +435,7 @@ export default function ModernOrangeShowcase({
                     <div className="modern-orange-showcase__cert-text">
                       {item.name ? <p className="modern-orange-showcase__cert-name">{item.name}</p> : null}
                       {item.issuer ? <p className="modern-orange-showcase__cert-issuer">{item.issuer}</p> : null}
+                      {atsFriendlyMode ? <AtsDetails lines={getCertificateDetails(item, isFinnish)} /> : null}
                     </div>
                     {item.year ? <p className="modern-orange-showcase__cert-year">{item.year}</p> : null}
                   </div>
@@ -513,6 +520,7 @@ export default function ModernOrangeShowcase({
                     <p className="modern-orange-showcase__edu-dates">{formatDateRange(item.startDate, item.endDate)}</p>
                     <p className="modern-orange-showcase__edu-degree">{item.degree || copy.untitledRole}</p>
                     {metaLine ? <p className="modern-orange-showcase__edu-meta">{metaLine}</p> : null}
+                    {atsFriendlyMode ? <AtsDetails lines={getEducationDetails(item)} /> : null}
                   </EducationRow>
                 )
               })
@@ -600,6 +608,7 @@ export default function ModernOrangeShowcase({
             />
           ) : title}
         </span>
+        {atsFriendlyMode && snapshot.tagline ? <AtsDetails lines={[snapshot.tagline]} /> : null}
       </header>
 
       <aside className="modern-orange-showcase__sidebar" data-export-secondary="true">

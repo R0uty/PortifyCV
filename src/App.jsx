@@ -857,6 +857,7 @@ function App({ route = null }) {
       {headerProps && (
         <Toolbar
           locale={headerProps.locale}
+          atsFriendlyMode={headerProps.atsFriendlyMode}
           onReturn={goToLanding}
           onLocaleChange={headerProps.onLocaleChange}
           canUndo={headerProps.canUndo}

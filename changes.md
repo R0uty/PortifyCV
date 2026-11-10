@@ -4,6 +4,27 @@ Running log of notable work, newest first. Fuller reasoning and verification
 notes for each item live in `todo.md`; per-commit detail is in git history.
 (This file replaces the old `CHANGELOG.md`, folded in below.)
 
+## Exports keep what you typed — 1.6.73, 2026-11-06
+
+- **ATS PDF.** It lost the tagline, employment type, and the detail lines of
+  education, certificates and projects, varying by template. Every field of a
+  section the template supports now reaches the PDF on all 18 templates.
+- **Employment type.** No format carried it. It's now in Word and HTML too.
+- **European Word file.** It lost employment type, honors, grade, coursework,
+  certificate expiry and link, and most project details. All are in now.
+- **Hidden sections.** Switching to a template that can't show a filled section
+  says which ones and that the data is kept. The PDF toast names them too, as
+  does the Word toast on European, whose layout leaves them out.
+- **Export menu.** The PDF item says which layout you'll get: your design or
+  the ATS one.
+- **Phone.** Removed leftover developer text from the mobile builder.
+- **Minimal.** Its designer view shares the ATS renderer, so it gains the same
+  lines. Its thumbnails and the walkthrough images are regenerated.
+- `e2e/export-fields.spec.js` is new: a CV with a unique word in every field,
+  looked for in the HTML, Word, JSON and ATS PDF files of every template.
+- Designer PDFs still leave out some fields, varying by template. Not changed
+  here, since showing them changes all 18 layouts and their page counts.
+
 ## PDF pages fill the paper, and breaks read the painted pixels — 1.6.72, 2026-11-06
 
 - **Design no longer lost.** The check for a failed capture sampled 80 points,

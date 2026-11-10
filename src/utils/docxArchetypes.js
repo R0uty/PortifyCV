@@ -10,7 +10,7 @@
 import { Table, TableRow, TableCell, WidthType, ShadingType, Paragraph, BorderStyle } from 'docx'
 import { sectionHeading, boldLine, plainLine, bulletLines, linkLine, descriptionLines, NO_CELL_BORDERS, META_SIZE, BODY_SIZE } from './docxExport'
 import { formatDateRange } from './shared'
-import { formatExportDates, getExportLinkLabel } from './exporters'
+import { formatExportCertificate, formatExportDates, getExportLinkLabel } from './exporters'
 
 const RAIL_WIDTH_PERCENT = 32
 const MAIN_WIDTH_PERCENT = 68
@@ -132,7 +132,7 @@ function buildLabelGridExperience(snapshot, copy) {
   }
   const rows = snapshot.experience.map((item) => {
     const heading = item.role || copy.untitledRole
-    const metaLine = [item.company, item.location].filter(Boolean).join(' · ')
+    const metaLine = [item.company, item.location, item.employmentType].filter(Boolean).join(' · ')
     const dateRange = formatExportDates(item, copy)
     const value = [
       boldLine(heading),
@@ -156,9 +156,12 @@ function buildLabelGridEducation(snapshot, copy) {
     const heading = item.degree || copy.educationEntry
     const metaLine = [item.school, item.location].filter(Boolean).join(' · ')
     const dateRange = formatDateRange(item.startDate, item.endDate)
+    const gradeLine = [item.grade, item.coursework].filter(Boolean).join(' · ')
     const value = [
       boldLine(heading),
       metaLine ? plainLine(metaLine, { subtle: true, size: META_SIZE }) : null,
+      item.honors ? plainLine(item.honors, { subtle: true, size: META_SIZE }) : null,
+      gradeLine ? plainLine(gradeLine, { subtle: true, size: META_SIZE }) : null,
     ]
     return buildLabelGridRow(dateRange, value)
   })
@@ -181,10 +184,16 @@ function buildLabelGridProjects(snapshot, copy) {
     return []
   }
   const rows = snapshot.projects.map((item) => {
+    const contributionLine = [item.teamSize, item.contribution].filter(Boolean).join(' · ')
     const value = [
       item.name ? boldLine(item.name) : null,
+      item.organization ? plainLine(item.organization, { subtle: true, size: META_SIZE }) : null,
       item.description ? plainLine(item.description) : null,
+      item.impact ? boldLine(item.impact, { size: META_SIZE }) : null,
+      contributionLine ? plainLine(contributionLine, { subtle: true, size: META_SIZE }) : null,
       item.stack ? plainLine(item.stack, { subtle: true, size: META_SIZE }) : null,
+      linkLine('', item.githubUrl, { size: META_SIZE, after: 60 }),
+      linkLine('', item.demoUrl, { size: META_SIZE, after: 60 }),
     ]
     return buildLabelGridRow(item.date ?? '', value)
   })
@@ -213,8 +222,12 @@ function buildLabelGridCertificates(snapshot, copy) {
     return []
   }
   const rows = snapshot.certificates.map((item) => {
-    const text = [item.name, item.issuer].filter(Boolean).join(' – ')
-    return buildLabelGridRow(item.year ?? '', [plainLine(text)])
+    // The year is the row's label, so it isn't repeated in the line.
+    const text = formatExportCertificate({ ...item, year: '' }, copy)
+    return buildLabelGridRow(item.year ?? '', [
+      plainLine(text),
+      linkLine('', item.credentialUrl, { size: META_SIZE, after: 60 }),
+    ])
   })
   return [sectionHeading(copy.certificates), ...rows]
 }
