@@ -1,6 +1,7 @@
 import { test, expect } from './fixtures/base.js'
 import { readFile } from 'node:fs/promises'
 import { CV_ONBOARDING_SEEN_STORAGE_KEY, demoCvData } from '../src/utils/cvForm.js'
+import { downloadFromPdfPreview } from './helpers/pdfPreview.js'
 
 // How a designer PDF's pages sit on the paper (1.6.72): each page image fills
 // the whole A4 sheet, with no white frame. ATS pages keep their margins. And
@@ -26,8 +27,8 @@ async function importCv(page, cv) {
 
 async function exportPdf(page, testInfo, name) {
   await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
-  const downloadPromise = page.waitForEvent('download', { timeout: 90_000 })
   await page.getByRole('menuitem', { name: 'PDF' }).click()
+  const downloadPromise = downloadFromPdfPreview(page, { timeout: 90_000 })
   const path = testInfo.outputPath(`${name}.pdf`)
   await (await downloadPromise).saveAs(path)
   return readFile(path)

@@ -3,6 +3,7 @@ import { pickTemplate } from './helpers/templateGallery.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { TEMPLATE_EXAMPLES } from '../src/utils/exampleCvs.js'
 import { clearCv } from './helpers/builderToolbar.js'
+import { downloadFromPdfPreview } from './helpers/pdfPreview.js'
 
 // The demo CV's fixed skill list (src/utils/cvForm.js's DEMO_CV-equivalent
 // seed data) — used by the Skills/EditableChip test below so it doesn't
@@ -23,8 +24,8 @@ const PNG_1X1 = Buffer.from(
 // over variable.
 async function exportPdfAndExpectSuccess(page) {
   await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
-  const downloadPromise = page.waitForEvent('download')
   await page.getByRole('menuitem', { name: 'PDF' }).click()
+  const downloadPromise = downloadFromPdfPreview(page)
   const download = await downloadPromise
   expect(download.suggestedFilename()).toMatch(/\.pdf$/)
   await expect(page.getByRole('alert')).toHaveCount(0)

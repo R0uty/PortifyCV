@@ -7,6 +7,7 @@ import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { TEMPLATE_EXAMPLES, loadExampleCv } from '../src/utils/exampleCvs.js'
 import { getTemplateVariants } from '../src/utils/templateVariants.js'
 import { styleTrigger } from './helpers/builderToolbar.js'
+import { downloadFromPdfPreview } from './helpers/pdfPreview.js'
 
 // Phase 3: every non-default style variant (#2, #3) of every template,
 // through the Phase 2 layout harness and a PDF page budget. Variant #1 is
@@ -69,8 +70,8 @@ for (const template of cvTemplates) {
       await waitForStableLayout(page)
 
       await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
-      const downloadPromise = page.waitForEvent('download', { timeout: 60_000 })
       await page.getByRole('menuitem', { name: 'PDF' }).click()
+      const downloadPromise = downloadFromPdfPreview(page, { timeout: 60_000 })
       const download = await downloadPromise
       const path = testInfo.outputPath(`${template.id}-${variant.id}.pdf`)
       await download.saveAs(path)

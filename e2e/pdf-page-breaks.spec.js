@@ -4,6 +4,7 @@ import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { TEMPLATE_EXAMPLES, loadExampleCv } from '../src/utils/exampleCvs.js'
 import { demoCvData } from '../src/utils/cvForm.js'
 import { installPdfProbe, findCutLines, pdfPageSizes } from './helpers/pdfTextCuts.js'
+import { downloadFromPdfPreview } from './helpers/pdfPreview.js'
 
 // 1.6.59: a PDF page break must never run through a line of text. Page
 // breaks were chosen from the main column only, so a sidebar line could be
@@ -31,8 +32,8 @@ async function buildLongCv() {
 
 async function exportPdf(page, testInfo, name) {
   await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
-  const downloadPromise = page.waitForEvent('download', { timeout: 90_000 })
   await page.getByRole('menuitem', { name: 'PDF' }).click()
+  const downloadPromise = downloadFromPdfPreview(page, { timeout: 90_000 })
   const path = testInfo.outputPath(`${name}.pdf`)
   await (await downloadPromise).saveAs(path)
   return readFile(path)
