@@ -219,8 +219,8 @@ export default function ExecutiveShowcase({
   )
   const about = snapshot.about
     || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your executive summary will appear here as you fill out the CV form.')
+      ? 'Ammatillinen yhteenvetosi tulee tähän.'
+      : 'Your executive summary goes here.')
 
   const personalContactItems = [
     ['email', snapshot.email],
@@ -293,8 +293,8 @@ export default function ExecutiveShowcase({
                 value={formData.about}
                 placeholder={
                   isFinnish
-                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-                    : 'Your executive summary will appear here as you fill out the CV form.'
+                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
+                    : 'Your executive summary goes here.'
                 }
                 multiline
               />

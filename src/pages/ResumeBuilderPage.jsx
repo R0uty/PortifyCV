@@ -36,6 +36,7 @@ import AppErrorBoundary from '../components/AppErrorBoundary'
 import ATSScorePanel from '../components/ATSScorePanel'
 import BadgeModal from '../components/BadgeModal'
 import CoverLetterModal from '../components/CoverLetterModal'
+import PdfPreviewModal from '../components/PdfPreviewModal'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
 import CVSuggestionsPanel from '../components/CVSuggestionsPanel'
@@ -52,6 +53,7 @@ import {
 } from '../utils/designSystem'
 import {
   CV_ONBOARDING_SEEN_STORAGE_KEY,
+  CV_SECTION_ORDER_KEYS,
   CV_SESSION_RESTORE_ENABLED_STORAGE_KEY,
   CV_SESSION_SNAPSHOT_STORAGE_KEY,
   createInitialCvData,
@@ -73,7 +75,8 @@ import {
 import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
-import { hideEmptySections } from '../utils/sectionContent'
+import { getSectionsHiddenByTemplate, hasSectionContent, hideEmptySections } from '../utils/sectionContent'
+import { getSectionSchema } from '../utils/sectionSchema'
 import { DEFAULT_STYLE_VARIANT_ID, TEMPLATE_VARIANTS, getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, parseStyleVariantParam, resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
@@ -435,6 +438,16 @@ function loadInitialCvSession(locale = 'en') {
     storageIssue: hasStorageIssue,
     pendingExampleId: null,
   }
+}
+
+// The names of the sections `templateId` would leave out of this CV.
+function listSectionsHiddenByTemplate(formData, templateId, locale) {
+  return getSectionsHiddenByTemplate(formData, getEffectiveCvTemplate(templateId, locale, formData))
+    .map((key) => {
+      const schema = getSectionSchema(key)
+      return locale === 'fi' ? schema.labelFi : schema.labelEn
+    })
+    .join(', ')
 }
 
 function ResumeBuilderPage({
@@ -931,6 +944,111 @@ function ResumeBuilderPage({
 
   const secondaryButtonClassName = `border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
 
+  // PDF export opens a preview first (1.6.74). The paper and fit picked there
+  // last for the life of the tab, like the rest of the CV.
+  const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false)
+  const [pdfPaper, setPdfPaper] = useState('a4')
+  const [pdfFit, setPdfFit] = useState('auto')
+
+  const handleClosePdfPreview = useCallback(() => {
+    setIsPdfPreviewOpen(false)
+  }, [])
+
+  // One render at a time: each lays the CV out in its own off-screen copy and
+  // briefly re-lays-out the export source, so two at once (options flipped
+  // quickly) would slow each other down for a result that's thrown away.
+  const pdfRenderQueueRef = useRef(Promise.resolve())
+
+  const renderPdfPreview = useCallback(({ paper, fit }) => {
+    const renderPages = async () => {
+      const { renderCvPdf } = await import('../utils/exporters')
+
+      const expectedVariant = getCvTemplate(selectedTemplate, locale).variant
+      const exportPdfMode = atsFriendlyMode ? 'ats' : 'designer'
+      const didSyncPreviewMode = await waitForPreviewModeSync(
+        previewRef.current,
+        exportPdfMode,
+      )
+
+      if (!didSyncPreviewMode) {
+        throw new Error(
+          locale === 'fi'
+            ? `Esikatselutila ei ole synkronoitu (${exportPdfMode.toUpperCase()}). Yritä hetken kuluttua uudelleen.`
+            : `Preview mode is not synced (${exportPdfMode.toUpperCase()}). Try exporting again in a moment.`,
+        )
+      }
+
+      const didSyncVariant = await waitForPreviewVariantSync(
+        previewRef.current,
+        expectedVariant,
+      )
+
+      if (!didSyncVariant) {
+        const activeVariant =
+          previewRef.current?.querySelector('[data-export-variant]')?.getAttribute('data-export-variant')
+          || previewRef.current?.getAttribute('data-export-variant')
+          || 'unknown'
+
+        throw new Error(
+          locale === 'fi'
+            ? `Pohjan esikatselu ei ole vielä synkronoitu (odotettu ${expectedVariant}, saatu ${activeVariant}). Yritä uudelleen.`
+            : `Template preview is not synced yet (expected ${expectedVariant}, got ${activeVariant}). Try again.`,
+        )
+      }
+
+      // The chosen CV font may still be an in-flight dynamic import (see
+      // cvFontLoadPromiseRef above) — capturing before its @font-face rules
+      // are registered and painted would bake the fallback font into the PDF.
+      await cvFontLoadPromiseRef.current
+      await window.document.fonts.ready
+
+      return renderCvPdf(previewRef.current, exportFileName, {
+        mode: exportPdfMode,
+        formData,
+        template: selectedTemplate,
+        variant: selectedTemplate,
+        atsFriendlyMode,
+        locale,
+        paper,
+        fit,
+      })
+    }
+    const next = pdfRenderQueueRef.current.catch(() => {}).then(renderPages)
+
+    pdfRenderQueueRef.current = next
+    return next
+  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate])
+
+  const handleDownloadPdfPreview = useCallback(async (rendered) => {
+    const exportLabel = atsFriendlyMode ? 'ATS PDF' : 'Designer PDF'
+
+    dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: 'pdf-designer' })
+
+    try {
+      const { saveRenderedCvPdf } = await import('../utils/exporters')
+      await saveRenderedCvPdf(rendered)
+      const hiddenSections = listSectionsHiddenByTemplate(formData, selectedTemplate, locale)
+
+      setIsPdfPreviewOpen(false)
+      showToast(
+        locale === 'fi'
+          ? `${exportLabel} on ladattu.${hiddenSections ? ` Tämä pohja ei näytä osioita: ${hiddenSections}.` : ''}`
+          : `${exportLabel} export downloaded.${hiddenSections ? ` This template doesn't show: ${hiddenSections}.` : ''}`,
+      )
+    } catch (error) {
+      showToast(
+        error instanceof Error && error.message
+          ? error.message
+          : locale === 'fi'
+            ? `${exportLabel}-vienti epäonnistui.`
+            : `Failed to export ${exportLabel}.`,
+        'error',
+      )
+    } finally {
+      dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
+    }
+  }, [atsFriendlyMode, formData, locale, selectedTemplate])
+
   const handleExport = useCallback(async (type) => {
     dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: type })
 
@@ -954,12 +1072,13 @@ function ResumeBuilderPage({
             ? locale === 'fi' ? 'Valmistellaan Word-vientiä...' : 'Preparing Word export...'
             : locale === 'fi' ? 'Valmistellaan JSON-vientiä...' : 'Preparing JSON export...'
 
-    showToast(toastLabel, 'info')
+    if (type !== 'pdf-designer') {
+      showToast(toastLabel, 'info')
+    }
 
     try {
       const {
         exportCvAsJson,
-        exportCvAsPdf,
         exportCvAsHtml,
         isCvBlank,
       } = await import('../utils/exporters')
@@ -975,57 +1094,10 @@ function ResumeBuilderPage({
           return
         }
 
-        const expectedVariant = getCvTemplate(selectedTemplate, locale).variant
-        const exportPdfMode = atsFriendlyMode ? 'ats' : 'designer'
-        const didSyncPreviewMode = await waitForPreviewModeSync(
-          previewRef.current,
-          exportPdfMode,
-        )
-
-        if (!didSyncPreviewMode) {
-          showToast(
-            locale === 'fi'
-              ? `Esikatselutila ei ole synkronoitu (${exportPdfMode.toUpperCase()}). Yritä hetken kuluttua uudelleen.`
-              : `Preview mode is not synced (${exportPdfMode.toUpperCase()}). Try exporting again in a moment.`,
-            'error',
-          )
-          return
-        }
-
-        const didSyncVariant = await waitForPreviewVariantSync(
-          previewRef.current,
-          expectedVariant,
-        )
-
-        if (!didSyncVariant) {
-          const activeVariant =
-            previewRef.current?.querySelector('[data-export-variant]')?.getAttribute('data-export-variant')
-            || previewRef.current?.getAttribute('data-export-variant')
-            || 'unknown'
-
-          showToast(
-            locale === 'fi'
-              ? `Pohjan esikatselu ei ole vielä synkronoitu (odotettu ${expectedVariant}, saatu ${activeVariant}). Yritä uudelleen.`
-              : `Template preview is not synced yet (expected ${expectedVariant}, got ${activeVariant}). Try again.`,
-            'error',
-          )
-          return
-        }
-
-        // The chosen CV font may still be an in-flight dynamic import (see
-        // cvFontLoadPromiseRef above) — capturing before its @font-face rules
-        // are registered and painted would bake the fallback font into the PDF.
-        await cvFontLoadPromiseRef.current
-        await window.document.fonts.ready
-
-        await exportCvAsPdf(previewRef.current, exportFileName, {
-          mode: exportPdfMode,
-          formData,
-          template: selectedTemplate,
-          variant: selectedTemplate,
-          atsFriendlyMode,
-          locale,
-        })
+        // The preview checks the export source is in sync, builds the pages
+        // and downloads them (renderPdfPreview, handleDownloadPdfPreview).
+        setIsPdfPreviewOpen(true)
+        return
       }
 
       if (type === 'json') {
@@ -1046,10 +1118,16 @@ function ResumeBuilderPage({
         })
       }
 
+      // HTML and JSON keep every section, and so does Word except for the
+      // European layout, which only has rows for its own sections.
+      const hiddenSections = type === 'docx' && selectedTemplate === 'european'
+        ? listSectionsHiddenByTemplate(formData, selectedTemplate, locale)
+        : ''
+
       showToast(
         locale === 'fi'
-          ? `${exportLabel} on ladattu.`
-          : `${exportLabel} export downloaded.`,
+          ? `${exportLabel} on ladattu.${hiddenSections ? ` Tämä pohja ei näytä osioita: ${hiddenSections}.` : ''}`
+          : `${exportLabel} export downloaded.${hiddenSections ? ` This template doesn't show: ${hiddenSections}.` : ''}`,
       )
     } catch (error) {
       showToast(
@@ -1063,7 +1141,7 @@ function ResumeBuilderPage({
     } finally {
       dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
     }
-  }, [atsFriendlyMode, exportFileName, formData, locale, markCvSaved, previewRef, selectedTemplate, templateAccentColors])
+  }, [atsFriendlyMode, exportFileName, formData, locale, markCvSaved, selectedTemplate, templateAccentColors])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()
@@ -1148,11 +1226,25 @@ function ResumeBuilderPage({
 
   const handleLoadDemo = useCallback(() => {
     const demo = structuredClone(demoCvData)
+    // One click replaces whatever is on the page. Undo brings it back, so
+    // say so when there was a CV of the visitor's own to lose (1.6.78).
+    const current = formDataRef.current
+    const replacesOwnCv = JSON.stringify(current) !== JSON.stringify(demo)
+      && (Boolean(current.fullName?.trim())
+        || CV_SECTION_ORDER_KEYS.some((section) => hasSectionContent(current, section)))
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: demo })
     markCvSaved(demo)
     applyStoredStyleVariantLook(demo, selectedTemplate)
     setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
-    showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
+    if (replacesOwnCv) {
+      showToast(
+        locale === 'fi'
+          ? 'Demo-CV ladattu. Palauta oma CV:si työkalupalkin kumoa-nuolella.'
+          : 'Demo CV loaded. Get your own CV back with the toolbar undo arrow.',
+      )
+    } else {
+      showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
+    }
   }, [applyStoredStyleVariantLook, dispatchFormData, locale, markCvSaved, selectedTemplate, setStorageValue])
 
   const handlePasteCvImport = useCallback(() => {
@@ -1294,6 +1386,19 @@ function ResumeBuilderPage({
   // the step carries the template look it replaces, so Undo puts back the
   // previous template with its exact accent, font and headings colour.
   const handleSelectTemplate = useCallback((templateId, variantId) => {
+    if (templateId !== selectedTemplate) {
+      const hiddenSections = listSectionsHiddenByTemplate(formData, templateId, locale)
+
+      if (hiddenSections) {
+        showToast(
+          locale === 'fi'
+            ? `Tämä pohja ei näytä osioita: ${hiddenSections}. Tietosi säilyvät.`
+            : `This template doesn't show: ${hiddenSections}. Your data is kept.`,
+          'info',
+        )
+      }
+    }
+
     if (variantId === undefined) {
       dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
       return
@@ -1316,7 +1421,7 @@ function ResumeBuilderPage({
 
     dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
     selectStyleVariant(templateId, variantId)
-  }, [formData, historyPast, selectedTemplate, selectStyleVariant, uiState])
+  }, [formData, historyPast, locale, selectedTemplate, selectStyleVariant, uiState])
 
   // Picking a variant — even the active one again — stores it and resets
   // the accent, font and headings colour to its values.
@@ -1764,6 +1869,7 @@ function ResumeBuilderPage({
     onHeaderChange({
       activeExport,
       isActionBusy,
+      atsFriendlyMode,
       locale,
       onExport: handleExport,
       onCopyShareLink: handleCopyShareLink,
@@ -1797,7 +1903,7 @@ function ResumeBuilderPage({
       onSetBuilderMode: handleSetBuilderMode,
     })
   }, [
-    activeExport, isActionBusy, locale,
+    activeExport, atsFriendlyMode, isActionBusy, locale,
     handleExport, handleCopyShareLink, handleLocaleChange,
     canUndo, canRedo, handleUndo, handleRedo,
     templates, selectedTemplate, handleOpenTemplateGallery,
@@ -2073,11 +2179,6 @@ function ResumeBuilderPage({
           </div>
         </details>
 
-        <p className={`ds-kicker lg:hidden ${ui.textMuted}`}>
-          {locale === 'fi'
-            ? 'Mobiilinäkymässä lomake on esikatselun yläpuolella.'
-            : 'Mobile layout stacks the form above the preview.'}
-        </p>
       </div>
 
       <AppErrorBoundary
@@ -2594,6 +2695,20 @@ function ResumeBuilderPage({
         onDownloadText={handleDownloadCoverLetterText}
         onDownloadPdf={handleDownloadCoverLetterPdf}
       />
+
+      {isPdfPreviewOpen ? (
+        <PdfPreviewModal
+          onClose={handleClosePdfPreview}
+          locale={locale}
+          atsFriendlyMode={atsFriendlyMode}
+          paper={pdfPaper}
+          fit={pdfFit}
+          onPaperChange={setPdfPaper}
+          onFitChange={setPdfFit}
+          onRender={renderPdfPreview}
+          onDownload={handleDownloadPdfPreview}
+        />
+      ) : null}
 
       <ToastStack toasts={toasts} clearBottomBar={builderMode !== 'direct'} />
     </>

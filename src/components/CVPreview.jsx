@@ -786,8 +786,8 @@ function CVPreview({
                 value={formData.about}
                 placeholder={
                   isFinnish
-                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-                    : 'Your professional summary will appear here as you fill out the CV form.'
+                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
+                    : 'Your professional summary goes here.'
                 }
                 multiline
               />
@@ -818,6 +818,9 @@ function CVPreview({
                   const heading = [item.role.trim(), item.company.trim()]
                     .filter(Boolean)
                     .join(' @ ')
+                  const placeAndType = [item.location.trim(), item.employmentType.trim()]
+                    .filter(Boolean)
+                    .join(' · ')
                   const renderDescription = (text) => {
                     const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
 
@@ -880,9 +883,9 @@ function CVPreview({
                             >
                               {item.role.trim() || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')}
                             </p>
-                            {item.company.trim() || item.location.trim() ? (
+                            {item.company.trim() || placeAndType ? (
                               <p className={`text-sm font-medium ${resolvedExperienceCompanyColor}`}>
-                                {[item.company.trim(), item.location.trim()].filter(Boolean).join(' · ')}
+                                {[item.company.trim(), placeAndType].filter(Boolean).join(' · ')}
                               </p>
                             ) : null}
                             {item.description.trim() ? renderDescription(item.description) : null}
@@ -928,7 +931,7 @@ function CVPreview({
                                 item.role.trim() || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')
                               )}
                             </p>
-                            {directEditDispatch || item.company.trim() ? (
+                            {directEditDispatch || item.company.trim() || placeAndType ? (
                               <p className="text-sm text-gray-500">
                                 {directEditDispatch ? (
                                   <EditableField
@@ -940,6 +943,8 @@ function CVPreview({
                                 ) : (
                                   item.company
                                 )}
+                                {(directEditDispatch || item.company.trim()) && placeAndType ? ' · ' : null}
+                                {placeAndType}
                               </p>
                             ) : null}
                             {directEditDispatch || item.description.trim() ? (
@@ -992,6 +997,9 @@ function CVPreview({
                           >
                             {heading || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')}
                           </p>
+                          {placeAndType ? (
+                            <p className="text-sm text-gray-500">{placeAndType}</p>
+                          ) : null}
                           {item.description.trim() ? (
                             <p className={`mt-2 whitespace-pre-line ${experienceDescSize} ${bodyTextClasses}`}>
                               {item.description}
@@ -1351,6 +1359,12 @@ function CVPreview({
                           {isFinnish ? `Vanhenee ${item.expiry}` : `Expires ${item.expiry}`}
                         </span>
                       ) : null}
+                      {item.credentialUrl ? (
+                        <span className={metaTextClasses}>
+                          {' · '}
+                          {item.credentialUrl}
+                        </span>
+                      ) : null}
                     </span>
                   </li>
                 ))}
@@ -1390,8 +1404,16 @@ function CVPreview({
                     {item.name ? (
                       <p className={`text-sm font-semibold tracking-tight ${accentTextClasses}`}>{item.name}</p>
                     ) : null}
+                    {item.organization || item.date ? (
+                      <p className={`mt-1 text-xs ${metaTextClasses}`}>
+                        {[item.organization, item.date].filter(Boolean).join(' · ')}
+                      </p>
+                    ) : null}
                     {item.description ? (
                       <p className={`mt-1 whitespace-pre-line text-xs leading-6 ${bodyTextClasses}`}>{item.description}</p>
+                    ) : null}
+                    {item.impact ? (
+                      <p className={`mt-1 text-xs font-semibold ${bodyTextClasses}`}>{item.impact}</p>
                     ) : null}
                     {item.teamSize || item.contribution ? (
                       <p className={`mt-1 text-xs ${metaTextClasses}`}>
@@ -1970,6 +1992,10 @@ function CVPreview({
                 placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
               />
             </p>
+
+            {snapshot.tagline ? (
+              <p className={`mt-1 text-sm ${metaTextClasses}`}>{snapshot.tagline}</p>
+            ) : null}
 
             {/* Contact info — piped layout (minimal: email/phone/location separated by |,
                 no icons — GitHub/LinkedIn/Portfolio/website stay in the Links section) */}

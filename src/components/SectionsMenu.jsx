@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { normalizeSectionOrder } from '../utils/cvForm'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 
@@ -25,6 +25,41 @@ const SECTION_LABELS_FI = {
 
 export default function SectionsMenu({ formData, dispatchFormData, templateConfig, locale }) {
   const [isOpen, setIsOpen] = useState(false)
+  const rootRef = useRef(null)
+  const triggerRef = useRef(null)
+
+  // The panel used to close only from its own button, so it stayed open
+  // under the toolbar menus and over a section popup (1.6.75). A press
+  // anywhere else closes it; Escape closes it and hands focus back.
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined
+    }
+
+    const handlePointerDown = (event) => {
+      if (!rootRef.current?.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+    const handleKeyDown = (event) => {
+      if (event.key !== 'Escape') {
+        return
+      }
+
+      const focusWasInside = rootRef.current?.contains(document.activeElement)
+      setIsOpen(false)
+      if (focusWasInside) {
+        triggerRef.current?.focus()
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown, true)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen])
   const isFinnish = locale === 'fi'
   const labels = isFinnish ? SECTION_LABELS_FI : SECTION_LABELS_EN
   const templateSectionOrder = [
@@ -42,8 +77,9 @@ export default function SectionsMenu({ formData, dispatchFormData, templateConfi
     .filter((section) => templateSectionKeySet.has(section))
 
   return (
-    <div className="direct-edit-sections">
+    <div className="direct-edit-sections" ref={rootRef}>
       <button
+        ref={triggerRef}
         type="button"
         className="direct-edit-sections__trigger"
         onClick={() => setIsOpen((open) => !open)}

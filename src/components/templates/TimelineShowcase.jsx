@@ -34,6 +34,8 @@ import {
 } from './shared'
 import { TIMELINE_DEFAULT_ACCENT_COLOR } from './timeline'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { AtsDetails } from './AtsDetails'
+import { getCertificateDetails, getEducationDetails, getProjectDetails } from '../../utils/atsDetails'
 
 // ATS mode is monochrome for every template in this app (see
 // CVPreview.jsx's generic-path comments) — this template is no exception,
@@ -92,7 +94,7 @@ function TimelineRow({ date, isLast, entryIndex, children }) {
   )
 }
 
-function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, sourceIndex = index }) {
+function renderExperienceEntry(item, index, { atsFriendlyMode, directEditDispatch, copy, isLast, sourceIndex = index }) {
   const dateRange = formatDateRange(item.startDate, item.endDate)
   const bullets = getExperienceBullets(item)
   const achievements = getExperienceAchievements(item)
@@ -130,6 +132,7 @@ function renderExperienceEntry(item, index, { directEditDispatch, copy, isLast, 
             item.company
           )}
           {item.company && item.location ? ` · ${item.location}` : item.location || null}
+          {atsFriendlyMode && item.employmentType ? ` · ${item.employmentType}` : null}
         </p>
       ) : null}
       {directEditDispatch ? (
@@ -252,8 +255,8 @@ export default function TimelineShowcase({
               value={formData.about}
               placeholder={
                 isFinnish
-                  ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-                  : 'Your professional summary will appear here as you fill out the CV form.'
+                  ? 'Ammatillinen yhteenvetosi tulee tähän.'
+                  : 'Your professional summary goes here.'
               }
               multiline
             />
@@ -273,6 +276,7 @@ export default function TimelineShowcase({
                 addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
+                  atsFriendlyMode,
                   directEditDispatch,
                   copy,
                   isLast: index === formData.experience.length - 1,
@@ -280,6 +284,7 @@ export default function TimelineShowcase({
               </EditableList>
             ) : snapshot.experience.length > 0 ? (
               snapshot.experience.map((item, index) => renderExperienceEntry(item, index, {
+                atsFriendlyMode,
                 directEditDispatch,
                 sourceIndex: snapshot.sourceIndices.experience[index],
                 copy,
@@ -312,6 +317,7 @@ export default function TimelineShowcase({
                   >
                     <p className="timeline-showcase__entry-role">{item.degree || copy.untitledRole}</p>
                     {metaLine ? <p className="timeline-showcase__entry-meta">{metaLine}</p> : null}
+                    {atsFriendlyMode ? <AtsDetails lines={getEducationDetails(item)} /> : null}
                   </TimelineRow>
                 )
               })
@@ -350,6 +356,7 @@ export default function TimelineShowcase({
                         ))}
                       </div>
                     ) : null}
+                    {atsFriendlyMode ? <AtsDetails lines={getProjectDetails(item)} /> : null}
                     {projectUrl ? (
                       <a href={getSafeHref(projectUrl)} target="_blank" rel="noreferrer" className="timeline-showcase__project-link">
                         {copy.viewProject} ↗
@@ -442,6 +449,7 @@ export default function TimelineShowcase({
                     <div className="min-w-0">
                       {item.name ? <p className="timeline-showcase__cert-name">{item.name}</p> : null}
                       {item.issuer ? <p className="timeline-showcase__cert-issuer">{item.issuer}</p> : null}
+                      {atsFriendlyMode ? <AtsDetails lines={getCertificateDetails(item, isFinnish)} /> : null}
                     </div>
                     {item.year ? <p className="timeline-showcase__cert-year">{item.year}</p> : null}
                   </div>
@@ -522,6 +530,7 @@ export default function TimelineShowcase({
               placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
             />
           </p>
+          {atsFriendlyMode && snapshot.tagline ? <AtsDetails lines={[snapshot.tagline]} /> : null}
 
           {directEditDispatch || personalContactItems.length > 0 ? (
             <div className="timeline-showcase__contact">

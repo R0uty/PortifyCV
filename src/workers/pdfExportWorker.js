@@ -12,6 +12,7 @@ self.onmessage = (event) => {
     pages = [],
     pdfMode,
     renderedWidth,
+    paperFormat = 'a4',
     imageFormat = 'JPEG',
   } = payload
 
@@ -19,7 +20,7 @@ self.onmessage = (event) => {
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4',
+      format: paperFormat,
     })
 
     pages.forEach((page, index) => {

@@ -44,6 +44,29 @@ const ORPHAN_HEADING_SLACK_SHARE = 0.03
 const MIN_INK_PIXELS = 40
 const A4_WIDTH_MM = 210
 const A4_HEIGHT_MM = 297
+// Paper the captured PDF can be laid out on (1.6.74). The text-only fallback
+// stays on A4.
+export const PDF_PAPER_SIZES = {
+  a4: { id: 'a4', widthMm: A4_WIDTH_MM, heightMm: A4_HEIGHT_MM },
+  letter: { id: 'letter', widthMm: 215.9, heightMm: 279.4 },
+}
+// How the CV is fitted to its pages: 'auto' only gets rid of a short last
+// page (the behaviour before 1.6.74), 'one-page'/'two-pages' shrink the CV
+// until it fits that many pages if it can, 'actual' prints it as laid out.
+export const PDF_FIT_MODES = ['auto', 'one-page', 'two-pages', 'actual']
+const FIT_TARGET_PAGES = { 'one-page': 1, 'two-pages': 2 }
+// The furthest 'one-page'/'two-pages' widen the layout: past this, printed
+// text gets too small to read comfortably (about 68% of its on-screen size
+// for a designer page, 77% for ATS).
+const MAX_FIT_PAGES_WIDTH_FACTOR = { designer: 1.4, ats: 1.3 }
+
+function resolvePdfPaper(paper) {
+  return PDF_PAPER_SIZES[paper] ?? PDF_PAPER_SIZES.a4
+}
+
+function resolvePdfFit(fit) {
+  return PDF_FIT_MODES.includes(fit) ? fit : 'auto'
+}
 // Must match --preview-paper-width in src/styles/tokens.css. The live preview
 // pane is only ever this wide on a roomy desktop viewport — on mobile (and in
 // the narrower split-pane layout) it's clamped down to fit the screen via
@@ -466,7 +489,7 @@ export function exportCvAsHtml(formData, fileName, options = {}) {
   const experienceItems = snapshot.experience
     .map((item) => {
       const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
-      const meta = metaLine(item)
+      const meta = [metaLine(item), item.employmentType].filter(Boolean).join(' · ')
       // The job's bullet points and technologies, as every template shows
       // them (getExperienceBullets etc. in directEditExperienceEntry.jsx).
       const bullets = item.achievements.length > 0
@@ -840,7 +863,7 @@ function createPdfMode(mode) {
 // clone instead of pruning `[data-export-section]` nodes out of it here
 // after the fact (that ordering is what broke Creative/Editorial's running
 // section numbers whenever a middle section was empty).
-function createExportSandbox(previewElement, mode, expectedVariant = '') {
+function createExportSandbox(previewElement, mode, expectedVariant = '', paper = PDF_PAPER_SIZES.a4) {
   const pdfMode = createPdfMode(mode)
   const exportRoot = resolveExportRoot(previewElement)
 
@@ -851,7 +874,7 @@ function createExportSandbox(previewElement, mode, expectedVariant = '') {
   const clone = exportRoot.cloneNode(true)
   const designerContentWidthPx = mmToPx(DESIGNER_PAPER_WIDTH_MM)
   const a4ContentWidthPx = mmToPx(
-    A4_WIDTH_MM - pdfMode.marginMm.left - pdfMode.marginMm.right,
+    paper.widthMm - pdfMode.marginMm.left - pdfMode.marginMm.right,
   )
   const contentWidthPx = mode === 'designer' ? designerContentWidthPx : a4ContentWidthPx
   const sandbox = document.createElement('div')
@@ -880,6 +903,18 @@ function createExportSandbox(previewElement, mode, expectedVariant = '') {
   clone.style.color = '#111111'
   clone.style.setProperty('--app-text', '#111111', 'important')
   clone.style.setProperty('--app-text-muted', 'rgba(17, 17, 17, 0.45)', 'important')
+
+  // Templates stretch to at least one A4 sheet (--preview-paper-min-height).
+  // A shorter sheet would have that stretch spill a sliver onto a page of its
+  // own, so it gets a min-height that fits one of its pages instead.
+  if (mode === 'designer') {
+    const { renderedWidth, printableHeight } = getPageGeometry(pdfMode, mode, paper)
+    const pageHeightMm = Math.floor((printableHeight * DESIGNER_PAPER_WIDTH_MM) / renderedWidth)
+
+    if (pageHeightMm < A4_HEIGHT_MM) {
+      clone.style.setProperty('--preview-paper-min-height', `${pageHeightMm}mm`)
+    }
+  }
 
   captureRoot.appendChild(clone)
   sandbox.appendChild(captureRoot)
@@ -1638,16 +1673,16 @@ function mergeRanges(ranges) {
 }
 
 // Where the page images go on the paper, in mm.
-function getPageGeometry(pdfMode, mode) {
+function getPageGeometry(pdfMode, mode, paper = PDF_PAPER_SIZES.a4) {
   const marginMm = mode === 'designer'
     ? { top: 0, right: 0, bottom: 0, left: 0 }
     : pdfMode.marginMm
   const fullBleed = mode === 'designer' ? FULL_BLEED : null
-  const renderedWidth = A4_WIDTH_MM - marginMm.left - marginMm.right
-  const printableHeight = A4_HEIGHT_MM - marginMm.top - marginMm.bottom
+  const renderedWidth = paper.widthMm - marginMm.left - marginMm.right
+  const printableHeight = paper.heightMm - marginMm.top - marginMm.bottom
     - (fullBleed ? fullBleed.topPadMm + fullBleed.bottomPadMm : 0)
 
-  return { marginMm, fullBleed, renderedWidth, printableHeight }
+  return { marginMm, fullBleed, renderedWidth, printableHeight, paper }
 }
 
 function getPageSlices(pageHeightPx, totalHeight, layout, cutOptions) {
@@ -1677,8 +1712,11 @@ function collectPageLayout(captureRoot, canvas) {
 // Laying it out slightly wider lets its lines wrap less and prints it
 // slightly smaller, usually pulling that back. This only measures the DOM,
 // so trying each width costs far less than the one capture that follows.
-function fitSandboxToPages({ sandbox, captureRoot, clone }, pdfMode, mode) {
-  const geometry = getPageGeometry(pdfMode, mode)
+// 'one-page'/'two-pages' push the same trick further, up to
+// MAX_FIT_PAGES_WIDTH_FACTOR; a CV that still doesn't fit falls back to
+// 'auto' and says so (`missedTarget`).
+function fitSandboxToPages({ sandbox, captureRoot, clone }, pdfMode, mode, paper, fit = 'auto') {
+  const geometry = getPageGeometry(pdfMode, mode, paper)
   const baseWidth = captureRoot.offsetWidth
   const setWidth = (width) => {
     [sandbox, captureRoot, clone].forEach((element) => {
@@ -1696,30 +1734,52 @@ function fitSandboxToPages({ sandbox, captureRoot, clone }, pdfMode, mode) {
 
     return { pages: slices.length, lastShare: (last.bottom - last.top) / pageHeightPx }
   }
+  const widenUntil = (maxFactor, isDone) => {
+    for (let factor = 1 + FIT_WIDTH_STEP; factor <= maxFactor + 1e-9; factor += FIT_WIDTH_STEP) {
+      setWidth(Math.round(baseWidth * factor))
 
-  const start = measure()
+      if (isDone(measure())) {
+        return factor
+      }
+    }
 
-  if (start.pages < 2 || start.lastShare >= SHORT_SPILL_SHARE) {
-    return
+    setWidth(baseWidth)
+    return null
   }
 
-  for (let factor = 1 + FIT_WIDTH_STEP; factor <= pdfMode.maxFitWidthFactor; factor += FIT_WIDTH_STEP) {
-    setWidth(Math.round(baseWidth * factor))
+  if (fit === 'actual') {
+    return { widthFactor: 1, missedTarget: false }
+  }
 
-    if (measure().pages < start.pages) {
-      return
+  const start = measure()
+  const targetPages = FIT_TARGET_PAGES[fit]
+
+  if (targetPages) {
+    if (start.pages <= targetPages) {
+      return { widthFactor: 1, missedTarget: false }
+    }
+
+    const factor = widenUntil(MAX_FIT_PAGES_WIDTH_FACTOR[mode], (result) => result.pages <= targetPages)
+
+    if (factor) {
+      return { widthFactor: factor, missedTarget: false }
     }
   }
 
-  setWidth(baseWidth)
+  if (start.pages < 2 || start.lastShare >= SHORT_SPILL_SHARE) {
+    return { widthFactor: 1, missedTarget: Boolean(targetPages) }
+  }
+
+  const factor = widenUntil(pdfMode.maxFitWidthFactor, (result) => result.pages < start.pages)
+
+  return { widthFactor: factor ?? 1, missedTarget: Boolean(targetPages) }
 }
 
-function createPdfPages(canvas, pdfMode, mode, layout, sectionRanges, textLayer, captureScale) {
-  const geometry = getPageGeometry(pdfMode, mode)
-  const { marginMm, fullBleed, renderedWidth, printableHeight } = geometry
+function createPdfPages(canvas, geometry, layout, sectionRanges, textLayer, captureScale) {
+  const { marginMm, fullBleed, renderedWidth, printableHeight, paper } = geometry
   const mmPerCanvasPx = renderedWidth / canvas.width
   const pageHeightPx = Math.max(1, Math.floor(printableHeight / mmPerCanvasPx))
-  const pageBottomY = A4_HEIGHT_MM - marginMm.bottom
+  const pageBottomY = paper.heightMm - marginMm.bottom
   const quiet = measureQuietRows(canvas)
   const pageCanvas = document.createElement('canvas')
   const pageContext = pageCanvas.getContext('2d')
@@ -1756,7 +1816,7 @@ function createPdfPages(canvas, pdfMode, mode, layout, sectionRanges, textLayer,
 
     // A footer below the stretch moves down the page, and its text with it.
     if (stretchRowY !== null) {
-      const stretchMm = A4_HEIGHT_MM - marginMm.top - topPadMm - sliceHeight * mmPerCanvasPx
+      const stretchMm = paper.heightMm - marginMm.top - topPadMm - sliceHeight * mmPerCanvasPx
       const stretchFromMm = marginMm.top + topPadMm + (stretchRowY - slice.top) * mmPerCanvasPx
       const moveBelowStretch = (box) => (box.y >= stretchFromMm ? { ...box, y: box.y + stretchMm } : box)
       pageTextLayer.lines = pageTextLayer.lines.map(moveBelowStretch)
@@ -1765,7 +1825,7 @@ function createPdfPages(canvas, pdfMode, mode, layout, sectionRanges, textLayer,
 
     if (fullBleed) {
       paintFullBleedPage(pageCanvas, canvas, slice, {
-        paperHeightPx: Math.round(A4_HEIGHT_MM / mmPerCanvasPx),
+        paperHeightPx: Math.round(paper.heightMm / mmPerCanvasPx),
         topPadPx: Math.round(topPadMm / mmPerCanvasPx),
         isLastPage: !nextSlice,
         stretchRowY,
@@ -1808,7 +1868,7 @@ function createPdfPages(canvas, pdfMode, mode, layout, sectionRanges, textLayer,
       } else {
         separatorLineSegments = [{
           start: marginMm.left,
-          end: A4_WIDTH_MM - marginMm.right,
+          end: paper.widthMm - marginMm.right,
           y: lineY,
         }]
       }
@@ -1816,7 +1876,7 @@ function createPdfPages(canvas, pdfMode, mode, layout, sectionRanges, textLayer,
 
     return {
       imageDataUrl: pageCanvas.toDataURL(PDF_PAGE_IMAGE_MIME, PDF_PAGE_IMAGE_QUALITY),
-      sliceHeightMm: fullBleed ? A4_HEIGHT_MM : sliceHeightMm,
+      sliceHeightMm: fullBleed ? paper.heightMm : sliceHeightMm,
       separatorLineSegments,
       textLayer: pageTextLayer,
     }
@@ -1883,6 +1943,7 @@ async function exportPdfInWorker(pages, geometry) {
       type: 'export-pdf',
       pages,
       pdfMode: { marginMm: geometry.marginMm },
+      paperFormat: [geometry.paper.widthMm, geometry.paper.heightMm],
       imageFormat: PDF_PAGE_IMAGE_FORMAT,
       renderedWidth: geometry.renderedWidth,
     })
@@ -2626,7 +2687,14 @@ async function exportCvAsPdfTextFallback(
   saveAs(blob, `${exportName}.pdf`)
 }
 
-export async function exportCvAsPdf(previewElement, fileName, options = {}) {
+// Builds the PDF's pages without saving anything, so the builder can show
+// them before the download (1.6.74). Returns `{ fallback: true }` when the
+// page can't be captured and only the text-only PDF can be made; that one is
+// made by saveRenderedCvPdf, with no preview.
+//
+// options: mode ('designer' | 'ats'), template/variant, formData, locale,
+// paper (a key of PDF_PAPER_SIZES), fit (one of PDF_FIT_MODES).
+export async function renderCvPdf(previewElement, fileName, options = {}) {
   if (!previewElement) {
     throw new Error('Preview element is unavailable for PDF export.')
   }
@@ -2638,12 +2706,15 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
   }
 
   const mode = options.mode === 'ats' ? 'ats' : 'designer'
+  const paper = resolvePdfPaper(options.paper)
+  const fit = resolvePdfFit(options.fit)
   const expectedVariant =
     typeof options.variant === 'string'
       ? options.variant
       : typeof options.template === 'string'
         ? options.template
         : ''
+  const fallback = { fallback: true, fileName, mode, options }
 
   const didMatchExpectedVariant = await waitForPreviewVariant(exportRoot, expectedVariant)
 
@@ -2668,10 +2739,11 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     exportRoot,
     mode,
     expectedVariant,
+    paper,
   )
 
   try {
-    fitSandboxToPages({ sandbox, captureRoot, clone }, pdfMode, mode)
+    const fitResult = fitSandboxToPages({ sandbox, captureRoot, clone }, pdfMode, mode, paper, fit)
 
     let canvas = await captureCanvasOrNull(captureRoot, {
       foreignObjectRendering: false,
@@ -2691,14 +2763,7 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     }
 
     if ((!canvas || isCanvasLikelyBlank(canvas)) && options.formData) {
-      await exportCvAsPdfTextFallback(
-        options.formData,
-        fileName,
-        mode,
-        options.template,
-        options.locale === 'fi' ? 'fi' : 'en',
-      )
-      return
+      return fallback
     }
 
     if (!canvas || canvas.width <= 0 || canvas.height <= 0) {
@@ -2709,50 +2774,79 @@ export async function exportCvAsPdf(previewElement, fileName, options = {}) {
     const textLayer = collectPdfTextLayer(captureRoot, canvas)
     const exportName =
       mode === 'designer' ? fileName : `${fileName}-${createPdfMode(mode).fileSuffix}`
-    const geometry = getPageGeometry(pdfMode, mode)
+    const geometry = getPageGeometry(pdfMode, mode, paper)
     const pages = createPdfPages(
       canvas,
-      pdfMode,
-      mode,
+      geometry,
       collectPageLayout(captureRoot, canvas),
       sectionRanges,
       textLayer,
       canvas.width / Math.max(captureRoot.offsetWidth, 1),
     )
+    // Printed size against the size the CV is laid out at on screen.
+    const layoutWidthMm = mode === 'designer'
+      ? DESIGNER_PAPER_WIDTH_MM
+      : geometry.renderedWidth
 
-    try {
-      const workerBlob = await exportPdfInWorker(pages, geometry)
-      saveAs(workerBlob, `${exportName}.pdf`)
-      return
-    } catch {
-      const jsPDF = await loadJsPdf()
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      })
-
-      addPagesToPdf(pdf, pages, geometry)
-      const blob = pdf.output('blob')
-      saveAs(blob, `${exportName}.pdf`)
+    return {
+      fallback: false,
+      exportName,
+      mode,
+      paper: paper.id,
+      fit,
+      pages,
+      geometry,
+      pageCount: pages.length,
+      missedFitTarget: fitResult.missedTarget,
+      printScale: geometry.renderedWidth / (layoutWidthMm * fitResult.widthFactor),
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : ''
-    const isUnsupportedColorError = /unsupported color|oklch/i.test(message)
 
-    if (isUnsupportedColorError && options.formData) {
-      await exportCvAsPdfTextFallback(
-        options.formData,
-        fileName,
-        mode,
-        options.template,
-        options.locale === 'fi' ? 'fi' : 'en',
-      )
-      return
+    if (/unsupported color|oklch/i.test(message) && options.formData) {
+      return fallback
     }
 
     throw error
   } finally {
     removeExportSandbox(sandbox)
   }
+}
+
+async function buildRenderedPdfBlob({ pages, geometry }) {
+  try {
+    return await exportPdfInWorker(pages, geometry)
+  } catch {
+    const jsPDF = await loadJsPdf()
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: [geometry.paper.widthMm, geometry.paper.heightMm],
+    })
+
+    addPagesToPdf(pdf, pages, geometry)
+    return pdf.output('blob')
+  }
+}
+
+// Downloads what renderCvPdf made.
+export async function saveRenderedCvPdf(rendered) {
+  if (rendered.fallback) {
+    const { fileName, mode, options } = rendered
+
+    await exportCvAsPdfTextFallback(
+      options.formData,
+      fileName,
+      mode,
+      options.template,
+      options.locale === 'fi' ? 'fi' : 'en',
+    )
+    return
+  }
+
+  saveAs(await buildRenderedPdfBlob(rendered), `${rendered.exportName}.pdf`)
+}
+
+export async function exportCvAsPdf(previewElement, fileName, options = {}) {
+  await saveRenderedCvPdf(await renderCvPdf(previewElement, fileName, options))
 }

@@ -205,7 +205,12 @@ Tailwind's naming.
 imports html2canvas + jsPDF only when an export is triggered (not from the
 entry graph — see `vite.config.js`'s `manualChunks` comment on why these are
 deliberately *not* grouped into a named vendor chunk). Page assembly runs in
-`src/workers/pdfExportWorker.js`. Page-break placement reads
+`src/workers/pdfExportWorker.js`. Export → PDF never downloads straight away:
+it opens `PdfPreviewModal.jsx`, which builds the pages with `renderCvPdf`
+(paper `a4`/`letter`, fit `auto`/`one-page`/`two-pages`/`actual`, see
+`PDF_PAPER_SIZES`/`PDF_FIT_MODES`) and saves exactly those pages with
+`saveRenderedCvPdf` — e2e specs reach the file through
+`e2e/helpers/pdfPreview.js`'s `downloadFromPdfPreview`. Page-break placement reads
 `data-export-section`/`data-export-header`/`data-export-placement` attributes
 that every Showcase's section wrapper renders, to avoid slicing a page
 mid-card or leaving an orphaned section heading — see the block comments
@@ -225,6 +230,14 @@ Since 1.6.59 a final pass, `keepPageBreaksOutOfText`, moves any break that
 would cut a text line or small icon in *either* column up above it and
 re-flows the pages after it, so the sidebar can no longer be sliced
 mid-line; `e2e/pdf-page-breaks.spec.js` (@slow) fails on any cut line.
+
+**A new CV field has to reach the exports.** `e2e/export-fields.spec.js`
+(`@slow`) fills every field the empty-entry factories in `cvForm.js` define and
+looks for each in the HTML, Word, JSON and ATS PDF files of every template, so
+a new field fails it until the flat renderer in `CVPreview.jsx`, the ATS
+branches of Timeline/Navy/Modern Orange (`src/utils/atsDetails.js`), and
+`docxExport.js`/`docxArchetypes.js`/`exporters.js` carry it. Designer PDFs
+aren't covered: each Showcase chooses what it shows.
 
 **Share links carry the whole CV in the URL, never a server.**
 `src/utils/shareLinks.js` encodes CV state with short single/double-letter

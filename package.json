@@ -1,7 +1,7 @@
 {
   "name": "portifycv",
   "private": true,
-  "version": "1.6.72",
+  "version": "1.6.79",
   "type": "module",
   "scripts": {
     "dev": "vite",

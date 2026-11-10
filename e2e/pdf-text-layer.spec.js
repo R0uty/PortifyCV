@@ -2,6 +2,8 @@ import { test, expect } from './fixtures/base.js'
 import { readFile } from 'node:fs/promises'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { TEMPLATE_EXAMPLES, loadExampleCv } from '../src/utils/exampleCvs.js'
+import { pdfLinks, pdfText } from './helpers/pdfFile.js'
+import { downloadFromPdfPreview } from './helpers/pdfPreview.js'
 
 // 1.6.71: a PDF page is a picture, so nothing could read it: an ATS got an
 // empty document. Every line is now also real, invisible text, and URLs and
@@ -9,21 +11,12 @@ import { TEMPLATE_EXAMPLES, loadExampleCv } from '../src/utils/exampleCvs.js'
 // can be read straight out of the file.
 async function exportPdf(page, testInfo, name) {
   await page.getByRole('banner').getByRole('button', { name: /^(Export|Vie)$/ }).click()
-  const downloadPromise = page.waitForEvent('download', { timeout: 90_000 })
-  await page.getByRole('menuitem', { name: /PDF/ }).first().click()
+  await page.getByRole('menuitem', { name: 'PDF' }).click()
+  const downloadPromise = downloadFromPdfPreview(page, { timeout: 90_000 })
   const path = testInfo.outputPath(`${name}.pdf`)
   await (await downloadPromise).saveAs(path)
   return new TextDecoder('windows-1252').decode(await readFile(path))
 }
-
-const unescapePdf = (value) => value.replace(/\\([()\\])/g, '$1')
-
-const pdfText = (pdf) => [...pdf.matchAll(/\(((?:[^()\\]|\\.)*)\)\s*Tj/g)]
-  .map((match) => unescapePdf(match[1]))
-  .join(' ')
-  .replace(/\s+/g, ' ')
-
-const pdfLinks = (pdf) => [...pdf.matchAll(/\/URI \(((?:[^()\\]|\\.)*)\)/g)].map((match) => unescapePdf(match[1]))
 
 const normalized = (value) => value.replace(/\s+/g, ' ').trim()
 

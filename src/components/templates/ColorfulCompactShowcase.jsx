@@ -185,8 +185,8 @@ export default function ColorfulCompactShowcase({
   )
   const about = snapshot.about
     || (isFinnish
-      ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-      : 'Your professional summary will appear here as you fill out the CV form.')
+      ? 'Ammatillinen yhteenvetosi tulee tähän.'
+      : 'Your professional summary goes here.')
 
   const websiteUrl = snapshot.links.website
   const contactItems = [
@@ -247,8 +247,8 @@ export default function ColorfulCompactShowcase({
                 value={formData.about}
                 placeholder={
                   isFinnish
-                    ? 'Ammatillinen yhteenvetosi näkyy tässä, kun täytät CV-lomaketta.'
-                    : 'Your professional summary will appear here as you fill out the CV form.'
+                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
+                    : 'Your professional summary goes here.'
                 }
                 multiline
               />

@@ -1,0 +1,86 @@
+# Builder, UI and code review — 1.6.74
+
+Reviewed 2026-11-09 on the `pdf-preview` branch (1.6.74 = main 1.6.72 plus
+open PRs #20 and #21). Evidence is from the running dev build at 1024, 1440
+and 375 px wide, plus reading the code named in each item.
+
+State at review time: `npm run lint`, all nine `check:*` scripts and
+`npm run build` pass.
+
+Not covered: the e2e suite, the other 17 templates (only Minimalist was
+walked), the Finnish UI, Word and HTML export, a keyboard-only pass, and a
+real phone.
+
+## Phase 1: bugs (small, one version bump each)
+
+- [x] **1. Sections panel never closes.** It ignores Escape and outside
+      clicks, and stays open under the More menu and over the section popup.
+      `src/components/SectionsMenu.jsx` has only a toggle.
+- [x] **2. ATS guide states something false.**
+      `src/pages/AtsFriendlyCvGuidePage.jsx:249` still says the PDF is a
+      picture with no selectable text; that stopped being true in 1.6.71.
+      Check the Finnish copy too.
+- [x] **3. Stray "Edit About section" label.** After closing a section popup
+      with Escape, the hidden keyboard button
+      (`.direct-edit-keyboard-trigger`, `src/styles/direct-edit-popup.css`)
+      appears at the top-left of the canvas, away from the section it
+      belongs to.
+- [x] **4. "Load demo CV" replaces the CV with no confirmation.**
+      `handleLoadDemo` in `src/pages/ResumeBuilderPage.jsx`. The button sits
+      permanently beside Sections and ATS view. Hide it once the CV has
+      content, or move it into the More menu.
+- [x] **5. Placeholder text mentions a form that isn't there.** Direct Edit
+      shows "…as you fill out the CV form" (found in `CompactShowcase.jsx`,
+      `PortraitShowcase.jsx`, `ModernShowcase.jsx`; check the others).
+
+## Phase 2: Direct Edit gaps
+
+- [ ] **6. No import in Direct Edit.** The Export menu describes JSON as a
+      "backup you can import again later", but import exists only in the
+      Classic form.
+- [ ] **7. No ATS score or suggestions in Direct Edit.** Both live only in
+      the Classic form.
+- [ ] **8. The default template supports only five sections.** Minimalist
+      has no Languages, Certificates or Projects
+      (`src/utils/cvTemplates.js`), and nothing tells the user other
+      templates do. Show unsupported sections greyed out with an "available
+      in other templates" hint.
+- [ ] **9. A reload wipes the CV by default.** Session restore is off unless
+      the user finds it in Settings (`uiReducer.js`). **Decision needed:**
+      turning it on by default keeps the CV in this tab's `sessionStorage`
+      only, cleared on tab close, but the "no data saved" footer and the
+      privacy page wording need a check first.
+
+## Phase 3: visual consistency
+
+- [ ] **10. Two design languages.** The Direct Edit toolbar is soft and
+      rounded; Classic, the cover letter dialog and the landing page use
+      square, uppercase buttons and oversized panel titles.
+- [ ] **11. Classic at 1024 px is cramped.** The toolbar wraps to two rows
+      and the form column is roughly 240 px wide. The zoom bar is seven
+      heavy grey buttons, with no selected state for Fit Width.
+- [ ] **12. Phone Classic buries the form.** The first field starts around
+      700 px down an 812 px screen, and "Show preview" duplicates the bottom
+      "Preview" tab.
+- [ ] **13. Tiny touch targets.** "Remove skill" is 9×21 px; drag and remove
+      handles are 22×22 px.
+- [ ] **14. "Minimalist Template" label above the name.** It is not exported
+      (`data-export-ignore`), but it looks like CV content.
+
+## Phase 4: code health (no user-visible change)
+
+- [ ] **15. Split the largest files.**
+      `src/pages/ResumeBuilderPage.jsx` is 2,703 lines with 26 effects and
+      56 handlers: extract hooks for history, export, zoom and toasts.
+      `src/components/CVForm.jsx` is 2,673 lines with 21 panels: move to one
+      file per section.
+- [ ] **16. Split the CSS.** `src/styles/app-shell.css` is 4,875 lines, and
+      everything ships as one 270 KB (uncompressed) stylesheet to every
+      landing visitor, including all 18 templates and the builder.
+- [ ] **17. One source for section labels.** `SectionsMenu.jsx` keeps its
+      own copy with a "must stay in sync" comment; `sectionSchema.js`
+      already has `labelEn`/`labelFi`.
+- [ ] **18. Smaller items.** The mode switch claims `role="tablist"` without
+      tab keyboard behaviour (`Toolbar.jsx`), and a ResizeObserver
+      "Unhandled error" is logged (`main.jsx:41`) when the PDF preview
+      opens.

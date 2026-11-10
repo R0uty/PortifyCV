@@ -303,7 +303,7 @@ export function buildExperienceSection(snapshot, copy) {
   }
   const entries = snapshot.experience.flatMap((item) => {
     const heading = [item.role, item.company].filter(Boolean).join(' @ ') || copy.untitledRole
-    const meta = datesAndPlace(item, copy)
+    const meta = [datesAndPlace(item, copy), item.employmentType].filter(Boolean).join(' · ')
     return [
       boldLine(heading),
       meta ? plainLine(meta, { subtle: true, size: META_SIZE, after: 120 }) : null,
