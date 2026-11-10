@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { normalizeSectionOrder } from '../utils/cvForm'
+import { CV_SECTION_ORDER_KEYS, normalizeSectionOrder } from '../utils/cvForm'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 
 // Wording here must stay in sync with `sectionVisibilityFieldsEn`/`Fi` in
@@ -23,7 +23,18 @@ const SECTION_LABELS_FI = {
   internships: 'Harjoittelut', caseStudies: 'Tapaustutkimukset', testimonials: 'Suositukset',
 }
 
-export default function SectionsMenu({ formData, dispatchFormData, templateConfig, locale }) {
+// Sections a template leaves out, most often missed first. The panel names
+// the first few and counts the rest.
+const MISSING_SECTION_PRIORITY = ['languages', 'certificates', 'projects', 'links', 'education', 'skills']
+const MISSING_SECTIONS_NAMED = 4
+
+export default function SectionsMenu({
+  formData,
+  dispatchFormData,
+  templateConfig,
+  locale,
+  onOpenTemplateGallery = null,
+}) {
   const [isOpen, setIsOpen] = useState(false)
   const rootRef = useRef(null)
   const triggerRef = useRef(null)
@@ -75,6 +86,17 @@ export default function SectionsMenu({ formData, dispatchFormData, templateConfi
   const templateSectionKeySet = new Set(templateSectionOrder)
   const sections = normalizeSectionOrder(formData.sectionOrder, templateSectionOrder)
     .filter((section) => templateSectionKeySet.has(section))
+  // The panel listed only what this template has, so nothing said that
+  // Languages or Certificates exist at all, in another template (1.6.81).
+  const missingSections = [
+    ...MISSING_SECTION_PRIORITY,
+    ...CV_SECTION_ORDER_KEYS.filter((section) => !MISSING_SECTION_PRIORITY.includes(section)),
+  ].filter((section) => !templateSectionKeySet.has(section))
+  const namedMissing = missingSections.slice(0, MISSING_SECTIONS_NAMED).map((section) => labels[section] || section)
+  const unnamedMissingCount = missingSections.length - namedMissing.length
+  const missingText = isFinnish
+    ? `Tässä pohjassa ei ole: ${namedMissing.join(', ')}${unnamedMissingCount > 0 ? ` ja ${unnamedMissingCount} muuta` : ''}.`
+    : `Not in this template: ${namedMissing.join(', ')}${unnamedMissingCount > 0 ? ` and ${unnamedMissingCount} more` : ''}.`
 
   return (
     <div className="direct-edit-sections" ref={rootRef}>
@@ -99,6 +121,23 @@ export default function SectionsMenu({ formData, dispatchFormData, templateConfi
               {labels[section] || section}
             </label>
           ))}
+          {missingSections.length ? (
+            <div className="direct-edit-sections__missing">
+              <p>{missingText}</p>
+              {onOpenTemplateGallery ? (
+                <button
+                  type="button"
+                  className="direct-edit-sections__missing-link"
+                  onClick={() => {
+                    setIsOpen(false)
+                    onOpenTemplateGallery()
+                  }}
+                >
+                  {isFinnish ? 'Katso muut pohjat' : 'See other templates'}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>

@@ -35,12 +35,12 @@ real phone.
 
 ## Phase 2: Direct Edit gaps
 
-- [ ] **6. No import in Direct Edit.** The Export menu describes JSON as a
+- [x] **6. No import in Direct Edit.** The Export menu describes JSON as a
       "backup you can import again later", but import exists only in the
       Classic form.
-- [ ] **7. No ATS score or suggestions in Direct Edit.** Both live only in
+- [x] **7. No ATS score or suggestions in Direct Edit.** Both live only in
       the Classic form.
-- [ ] **8. The default template supports only five sections.** Minimalist
+- [x] **8. The default template supports only five sections.** Minimalist
       has no Languages, Certificates or Projects
       (`src/utils/cvTemplates.js`), and nothing tells the user other
       templates do. Show unsupported sections greyed out with an "available
