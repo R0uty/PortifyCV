@@ -53,19 +53,32 @@ real phone.
 
 ## Phase 3: visual consistency
 
-- [ ] **10. Two design languages.** The Direct Edit toolbar is soft and
+- [x] **10. Two design languages.** The Direct Edit toolbar is soft and
       rounded; Classic, the cover letter dialog and the landing page use
       square, uppercase buttons and oversized panel titles.
-- [ ] **11. Classic at 1024 px is cramped.** The toolbar wraps to two rows
+- [x] **11. Classic at 1024 px is cramped.** The toolbar wraps to two rows
       and the form column is roughly 240 px wide. The zoom bar is seven
       heavy grey buttons, with no selected state for Fit Width.
-- [ ] **12. Phone Classic buries the form.** The first field starts around
+- [x] **12. Phone Classic buries the form.** The first field starts around
       700 px down an 812 px screen, and "Show preview" duplicates the bottom
       "Preview" tab.
-- [ ] **13. Tiny touch targets.** "Remove skill" is 9×21 px; drag and remove
+- [x] **13. Tiny touch targets.** "Remove skill" is 9×21 px; drag and remove
       handles are 22×22 px.
-- [ ] **14. "Minimalist Template" label above the name.** It is not exported
+- [x] **14. "Minimalist Template" label above the name.** It is not exported
       (`data-export-ignore`), but it looks like CV content.
+
+Phase 3 notes (1.6.83-1.6.84):
+
+- Item 10 covers the builder only (Classic, its dialogs, the phone tab
+  bar). The landing page keeps its square, uppercase buttons. The heavy
+  grey buttons turned out to be a missing reset: buttons with no
+  background or border of their own kept the browser's.
+- Item 13 was mostly a measuring error: the skill chip's remove button
+  already had a 24px hit area and entry handles are 32px on touch
+  screens (both 1.6.66). Only Classic's tag remove button got a larger
+  hit area.
+- Item 14: the label is hidden in the builder's editing previews only.
+  Gallery thumbnails and template pages keep it.
 
 ## Phase 4: code health (no user-visible change)
 

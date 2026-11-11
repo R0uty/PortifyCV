@@ -526,3 +526,13 @@
     scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
 }
+
+/* The "<Template> Template" line above the name (1.6.84). Exports leave it
+   out ([data-export-ignore], app-shell.css), but in the builder it read as
+   part of the CV. Hidden in both modes' editing previews, so the page on
+   screen starts where the PDF does; the toolbar already names the
+   template. Gallery thumbnails and the template pages keep it. */
+.direct-edit-preview [data-export-ignore='true'][class*='kicker'],
+.preview-zoom-wrapper [data-export-ignore='true'][class*='kicker'] {
+  display: none;
+}

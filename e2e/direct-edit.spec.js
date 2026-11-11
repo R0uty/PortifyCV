@@ -1464,25 +1464,39 @@ test.describe('Direct Edit builder', () => {
   }
 
   // Each template's kicker label ("<Template> Template") is preview-only
-  // (excluded from exports), but it is the first thing a user reads, and
+  // (excluded from exports), but it is the first thing a visitor reads, and
   // three sat under WCAG AA's 4.5:1 for text this small: Tech Executive
   // 4.13:1 on its navy masthead, Creative 3.35:1 (its default Coral accent
   // on the peach page) and Executive 4.37:1 on its rail. Portfolio Hybrid
   // passes (4.82:1 at its weakest swatch) but is not listed here:
   // minTextContrast reads a gradient's first stop as the background, and
   // Portfolio's header gradient starts with a translucent accent tint.
-  for (const { label, kicker } of [
-    { label: 'Tech Executive', kicker: '.tech-exec-showcase__kicker' },
-    { label: 'Creative', kicker: '.creative-showcase__kicker' },
-    { label: 'Executive', kicker: '.executive-showcase__kicker' },
+  // Measured on the template's own page: the builder's editing previews
+  // no longer show the label (1.6.84).
+  for (const { label, slug, kicker } of [
+    { label: 'Tech Executive', slug: 'tech-executive', kicker: '.tech-exec-showcase__kicker' },
+    { label: 'Creative', slug: 'creative', kicker: '.creative-showcase__kicker' },
+    { label: 'Executive', slug: 'executive', kicker: '.executive-showcase__kicker' },
   ]) {
     test(`${label}: the kicker label meets 4.5:1 contrast`, async ({ page }) => {
-      await pickTemplate(page, label)
-      const selector = `.preview-document--designer ${kicker}`
+      await page.goto(`/free-cv-templates/${slug}`)
+      const selector = `.template-page__preview ${kicker}`
       await expect(page.locator(selector).first()).toBeVisible()
       expect(await minTextContrast(page, selector)).toBeGreaterThanOrEqual(4.5)
     })
   }
+
+  // The label is left out of every export, so the builder leaves it out of
+  // the CV being edited too: the page on screen starts where the PDF does.
+  test('the builder does not show the template-name label on the CV, in either mode', async ({ page }) => {
+    const label = page.getByText('Minimalist Template', { exact: true })
+    await expect(page.locator('.preview-zoom-wrapper [data-cv-name]')).toBeVisible()
+    await expect(label.locator('visible=true')).toHaveCount(0)
+
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    await expect(page.locator('.direct-edit-preview [data-cv-name]').first()).toBeVisible()
+    await expect(label.locator('visible=true')).toHaveCount(0)
+  })
 
   // Executive's secondary text (--ex-ink-faint) read 4.37:1 on its rail:
   // the tagline and contact details, which are exported CV content, plus
