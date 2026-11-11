@@ -41,7 +41,7 @@ function BadgeModal({ isOpen, onClose, locale = 'en', onCopy }) {
 
       <button
         type="button"
-        className={`mt-3 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonActive}`}
+        className={`mt-3 ui-button ${ui.buttonActive}`}
         onClick={() => onCopy(snippet)}
       >
         {isFinnish ? 'Kopioi HTML' : 'Copy HTML'}

@@ -197,6 +197,15 @@
    grid-row animation as .sortable-card__body, one level up: every numbered
    section (Section 01, 02, 03, ...) can now be folded, not just the entries
    inside Experience/Education. */
+/* A form panel's heading (1.6.83). It was uppercase at 1.5rem, louder than
+   anything else on the page. */
+.panel-section__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
 .panel-section__toggle {
   display: inline-flex;
   align-items: center;
@@ -414,6 +423,18 @@ select.floating-field__control {
   border-radius: 50%;
   color: inherit;
   transition: background-color 120ms ease;
+}
+
+/* The button is a 17px circle; its hit area reaches 5px further out, and
+   only 2px towards the tag's text, where a click renames it (1.6.83). */
+.tags-input__remove {
+  position: relative;
+}
+
+.tags-input__remove::before {
+  content: '';
+  position: absolute;
+  inset: -5px -6px -5px -2px;
 }
 
 .tags-input__remove svg {
@@ -1640,6 +1661,27 @@ select.floating-field__control {
   max-width: 24rem;
 }
 
+/* The builder's secondary button (1.6.83): the toolbar's shape and weight,
+   in place of the square, uppercase buttons Classic and the dialogs had. */
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.15rem;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.ui-button:hover:not(:disabled) {
+  border-color: var(--app-text-muted);
+}
+
 .settings-link {
   flex-shrink: 0;
   padding: 0.4rem 0.7rem;
@@ -2032,6 +2074,28 @@ select.floating-field__control {
 @media (max-width: 1023.98px) {
   .app-toolbar__group--search {
     display: none;
+  }
+}
+
+/* Small laptops (1.6.83): Classic's toolbar wrapped to a second row at
+   1024px and its form column kept 2rem + 1.5rem of padding on each side
+   of a 22rem column. One toolbar row, and the room goes to the fields.
+   Doubled class names to win over the utility padding classes. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .app-toolbar__trigger-caption {
+    display: none;
+  }
+
+  .app-toolbar__group--search {
+    flex-basis: 7rem;
+  }
+
+  .editor-panel.editor-panel {
+    padding: 1.25rem;
+  }
+
+  .editor-panel .editor-card.editor-card {
+    padding: 1.125rem;
   }
 }
 
@@ -2995,6 +3059,10 @@ select.floating-field__control {
      inside that scroll box. */
   padding: var(--space-2) var(--space-2) 0;
   overflow-x: auto;
+  /* Fit Width measures this box. Without a reserved gutter a scrollbar
+     coming and going changed that width, the fit flipped between two
+     zooms, and it could settle on the one that scrolls sideways (1.6.83). */
+  scrollbar-gutter: stable;
 }
 
 .preview-mobile-toggle {

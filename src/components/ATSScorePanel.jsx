@@ -80,7 +80,7 @@ function ATSScorePanel({
           </div>
           <button
             type="button"
-            className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
+            className={`ui-button ${
               atsFriendlyMode ? ui.buttonActive : ui.button
             }`}
             onClick={onToggleAtsFriendlyMode}
@@ -191,7 +191,7 @@ function ATSScorePanel({
         <div className="mt-3 flex flex-wrap gap-2">
           <button
             type="button"
-            className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+            className={`ui-button ${ui.button}`}
             onClick={onCopyMissingKeywords}
             disabled={jobDescriptionAnalysis.missingKeywords.length === 0}
           >
@@ -199,7 +199,7 @@ function ATSScorePanel({
           </button>
           <button
             type="button"
-            className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+            className={`ui-button ${ui.button}`}
             onClick={onClearJobDescription}
             disabled={!jobDescription.trim()}
           >

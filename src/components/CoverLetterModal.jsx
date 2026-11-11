@@ -78,7 +78,7 @@ function CoverLetterModal({
 
       <button
         type="button"
-        className={`mt-4 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonActive}`}
+        className={`mt-4 ui-button ${ui.buttonActive}`}
         onClick={onGenerate}
         disabled={!fullName.trim()}
       >
@@ -111,7 +111,7 @@ function CoverLetterModal({
       <div className="mt-3 flex flex-wrap gap-2">
         <button
           type="button"
-          className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+          className={`ui-button ${ui.button}`}
           onClick={onCopy}
           disabled={!hasBody}
         >
@@ -119,7 +119,7 @@ function CoverLetterModal({
         </button>
         <button
           type="button"
-          className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+          className={`ui-button ${ui.button}`}
           onClick={onDownloadText}
           disabled={!hasBody}
         >
@@ -127,7 +127,7 @@ function CoverLetterModal({
         </button>
         <button
           type="button"
-          className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+          className={`ui-button ${ui.button}`}
           onClick={onDownloadPdf}
           disabled={!hasBody}
         >

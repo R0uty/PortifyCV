@@ -54,7 +54,7 @@ function AppErrorBoundary({ children, theme = 'dark', panelTitle = 'Panel', loca
           </p>
           <button
             type="button"
-            className={`mt-4 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+            className={`mt-4 ui-button ${ui.button}`}
             onClick={onRetry}
           >
             {isFinnish ? 'Yritä uudelleen' : 'Retry panel'}
