@@ -73,10 +73,10 @@ function getCopy(locale) {
         },
         {
           step: 'restore',
-          heading: 'Suojaa työsi vahinkopäivitykseltä (valinnainen)',
+          heading: 'Työsi on suojattu vahinkopäivitykseltä',
           figureLabel: 'Asetukset-ikkuna, jossa "Palauta viimeisin istunto" on päällä.',
           caption:
-            'Oletuksena mitään CV:stäsi ei tallenneta — välilehden sulkeminen pyyhkii kaiken. Ota Asetuksista käyttöön "Palauta viimeisin istunto": työkopio säilyy vain siinä välilehdessä ja poistuu heti kun suljet sen.',
+            '"Palauta viimeisin istunto" on oletuksena päällä: muokkaamastasi CV:stä säilyy työkopio vain siinä välilehdessä, joten sivun päivitys ei hävitä sitä. Välilehden sulkeminen poistaa kopion, joten vie JSON, jos haluat jatkaa myöhemmin. Toiminnon voi kytkeä pois Asetuksista.',
         },
       ],
       ctaLabel: 'Aloita CV:si rakentaminen',
@@ -147,10 +147,10 @@ function getCopy(locale) {
       },
       {
         step: 'restore',
-        heading: 'Guard against an accidental refresh (optional)',
+        heading: 'Your work survives an accidental refresh',
         figureLabel: 'The Settings dialog with "Restore last session" switched on.',
         caption:
-          'By default nothing about your CV is saved — closing or refreshing the tab clears everything. Enable "Restore last session" in Settings and a working copy is kept in that tab only, cleared the moment you close it.',
+          '"Restore last session" is on by default: a working copy of the CV you have edited is kept in that tab only, so refreshing the page does not lose it. Closing the tab clears the copy, so export JSON if you want to carry on later. You can turn the feature off in Settings.',
       },
     ],
     ctaLabel: 'Start building your CV',

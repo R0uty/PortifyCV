@@ -320,6 +320,7 @@ function loadInitialCvSession(locale = 'en') {
         // The sender's selected template (1.6.8); createInitialUiState
         // opens on it when it resolves.
         sharedTemplateId: shared.templateId,
+        isOwnCv: true,
         initialToast: createToast(isFinnish ? 'CV ladattu jakolinkistä.' : 'Loaded CV from share link.', 'success'),
         clearShareParam: false,
         storageIssue: hasStorageIssue,
@@ -350,7 +351,7 @@ function loadInitialCvSession(locale = 'en') {
   const requestedTemplateId = readInitialTemplateId()
   const requestedStyleId = parseStyleVariantParam(requestedTemplateId, params.get('style'))
 
-  const sessionRestoreEnabled = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value === 'true'
+  const sessionRestoreEnabled = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'true').value !== 'false'
 
   if (sessionRestoreEnabled) {
     const snapshotState = safeSessionStorageGet(CV_SESSION_SNAPSHOT_STORAGE_KEY)
@@ -368,6 +369,7 @@ function loadInitialCvSession(locale = 'en') {
 
         return {
           formData: restoredFormData,
+          isOwnCv: true,
           initialToast: createToast(
             hasPendingExample || hasPendingStyle
               ? isFinnish
@@ -525,6 +527,10 @@ function ResumeBuilderPage({
   const importInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
   const storageWarningShownRef = useRef(false)
+  // The demo, example or blank CV the builder last loaded, untouched; null
+  // once the CV came from the visitor (restored, shared or imported).
+  // Session restore keeps no copy of a CV that still matches it.
+  const pristineCvRef = useRef(initialSession.isOwnCv ? null : JSON.stringify(initialSession.formData))
   const sessionRestoreWarningShownRef = useRef(false)
   const shareWarningShownRef = useRef(false)
   const editorScrollRef = useRef(null)
@@ -768,8 +774,23 @@ function ResumeBuilderPage({
       return undefined
     }
 
+    // Only a CV the visitor has made their own is kept. An untouched demo,
+    // example or blank CV isn't: with restore on by default (1.6.82) a
+    // kept copy of the sample CV would win over every "Use this example"
+    // link the visitor follows next (see loadInitialCvSession).
+    const writeSnapshot = () => {
+      const serialized = JSON.stringify(formData)
+
+      if (serialized === pristineCvRef.current) {
+        safeSessionStorageRemove(CV_SESSION_SNAPSHOT_STORAGE_KEY)
+        return { ok: true }
+      }
+
+      return safeSessionStorageSet(CV_SESSION_SNAPSHOT_STORAGE_KEY, serialized)
+    }
+
     const timeoutId = window.setTimeout(() => {
-      const result = safeSessionStorageSet(CV_SESSION_SNAPSHOT_STORAGE_KEY, JSON.stringify(formData))
+      const result = writeSnapshot()
 
       if (!result.ok && !sessionRestoreWarningShownRef.current) {
         sessionRestoreWarningShownRef.current = true
@@ -781,9 +802,12 @@ function ResumeBuilderPage({
         )
       }
     }, HISTORY_COMMIT_DELAY_MS)
+    // An edit made just before the page goes would miss the timer.
+    window.addEventListener('pagehide', writeSnapshot)
 
     return () => {
       window.clearTimeout(timeoutId)
+      window.removeEventListener('pagehide', writeSnapshot)
     }
   }, [formData, locale, sessionRestoreEnabled])
 
@@ -804,14 +828,10 @@ function ResumeBuilderPage({
     }
   }, [formData])
 
-  useEffect(() => {
-    if (sessionRestoreEnabled) {
-      return undefined
-    }
-    return registerUnsavedChangesCheck(
-      () => JSON.stringify(formDataRef.current) !== savedCvRef.current,
-    )
-  }, [sessionRestoreEnabled])
+  useEffect(() => registerUnsavedChangesCheck(
+    () => JSON.stringify(formDataRef.current) !== savedCvRef.current,
+    { keptInTab: () => sessionRestoreEnabled },
+  ), [sessionRestoreEnabled])
 
   useEffect(() => {
     if (initialSession.storageIssue) {
@@ -868,6 +888,7 @@ function ResumeBuilderPage({
       const startCv = withStyleVariant(exampleCv, selectedTemplate, initialSession.pendingStyleVariantId ?? DEFAULT_STYLE_VARIANT_ID)
       dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: startCv })
       markCvSaved(startCv)
+      pristineCvRef.current = JSON.stringify(startCv)
       applyStoredStyleVariantLook(startCv, selectedTemplate)
       const roleLabel = EXAMPLES[exampleId].role[locale === 'fi' ? 'fi' : 'en']
       showToast(locale === 'fi' ? `Esimerkki ladattu: ${roleLabel}.` : `Loaded the ${roleLabel} example.`)
@@ -1217,6 +1238,7 @@ function ResumeBuilderPage({
     }
 
     setResetConfirmArmed(false)
+    pristineCvRef.current = JSON.stringify(createInitialCvData())
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
     // A cleared CV stores no variants, so every template goes back to its
     // original look (accent, plus the selected template's font/headings).
@@ -1232,6 +1254,7 @@ function ResumeBuilderPage({
 
   const handleLoadDemo = useCallback(() => {
     const demo = structuredClone(demoCvData)
+    pristineCvRef.current = JSON.stringify(demo)
     // One click replaces whatever is on the page. Undo brings it back, so
     // say so when there was a CV of the visitor's own to lose (1.6.78).
     const current = formDataRef.current
@@ -2085,7 +2108,9 @@ function ResumeBuilderPage({
             className={`editor-status-pill ${ui.surfaceMuted} ${ui.textMuted}`}
             role="status"
           >
-            {locale === 'fi' ? 'Ei tallenneta minnekään' : 'Nothing saved anywhere'}
+            {sessionRestoreEnabled
+              ? locale === 'fi' ? 'Säilyy vain tässä välilehdessä' : 'Kept in this tab only'
+              : locale === 'fi' ? 'Ei tallenneta minnekään' : 'Nothing saved anywhere'}
           </div>
         </div>
 
@@ -2230,6 +2255,7 @@ function ResumeBuilderPage({
     pastedCvText,
     secondaryButtonClassName,
     sectionSettingsExpandSignal,
+    sessionRestoreEnabled,
     selectedTemplate,
     dispatchFormData,
     ui.button,

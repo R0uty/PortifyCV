@@ -63,11 +63,12 @@ test title) rather than adding a third script.
 ## Architecture
 
 **No backend, no persistence.** This is a static SPA (Vite + React 19) with
-no server and no database. CV data lives only in React state for the life of
-the tab — nothing is saved automatically. The only things that survive a
-reload are the UI locale, an onboarding-seen flag, and (if the user opts in)
-a session-restore snapshot (`sessionStorage`; the rest in `localStorage` — see `src/utils/cvForm.js`
-for the storage keys). Sharing a CV means encoding it into a URL (below), not
+no server and no database. CV data lives in React state for the life of
+the tab and is never sent anywhere. The only things that survive a
+reload are the UI locale, an onboarding-seen flag, and a session-restore
+snapshot of an edited CV (on by default since 1.6.82, off in Settings;
+`sessionStorage`, so it goes when the tab closes; the rest in
+`localStorage` — see `src/utils/cvForm.js` for the storage keys). Sharing a CV means encoding it into a URL (below), not
 uploading it anywhere.
 
 **Hand-rolled routing, no react-router.** `src/App.jsx` owns view state

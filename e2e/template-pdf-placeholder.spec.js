@@ -54,7 +54,7 @@ for (const template of TEMPLATES) {
       test.setTimeout(60_000)
       const cv = STRESS_CVS.sparse
       await page.addInitScript((snapshot) => {
-        window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+        window.localStorage.setItem('portifycv-session-restore', 'true')
         window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
       }, JSON.stringify(cv))
       await page.goto(`/cv?template=${template}`)
@@ -121,7 +121,7 @@ for (const [template, sectionNumClassName] of [
   test(`pdf export numbers consecutive sections with an empty middle section / ${template} @slow`, async ({ page }) => {
     test.setTimeout(60_000)
     await page.addInitScript((snapshot) => {
-      window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+      window.localStorage.setItem('portifycv-session-restore', 'true')
       window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
     }, JSON.stringify(MIDDLE_GAP_CV))
     await page.goto(`/cv?template=${template}`)
@@ -160,7 +160,7 @@ const ALL_ITEMS_HIDDEN_CV = {
 test('pdf export drops a visible section whose items are all hidden / modern @slow', async ({ page }) => {
   test.setTimeout(60_000)
   await page.addInitScript((snapshot) => {
-    window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+    window.localStorage.setItem('portifycv-session-restore', 'true')
     window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
   }, JSON.stringify(ALL_ITEMS_HIDDEN_CV))
   await page.goto('/cv?template=modern')
@@ -192,7 +192,7 @@ const ABOUT_PILLS_ONLY_CV = {
 test('pdf export keeps coreStrengths pills when About text is empty / creative @slow', async ({ page }) => {
   test.setTimeout(60_000)
   await page.addInitScript((snapshot) => {
-    window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+    window.localStorage.setItem('portifycv-session-restore', 'true')
     window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
   }, JSON.stringify(ABOUT_PILLS_ONLY_CV))
   await page.goto('/cv?template=creative')

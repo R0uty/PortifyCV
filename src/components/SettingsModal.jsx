@@ -60,8 +60,8 @@ function SettingsModal({
           <p className="settings-row__label">{isFinnish ? 'Palauta viimeisin istunto' : 'Restore last session'}</p>
           <p className="settings-row__hint">
             {isFinnish
-              ? 'Pois päältä oletuksena. Päällä ollessaan CV:stäsi pidetään työkopiota vain tässä selainvälilehdessä, jotta vahinkopäivitys ei tuhoa työtäsi — kopio poistuu automaattisesti heti kun suljet välilehden, eikä sitä koskaan lähetetä minnekään.'
-              : "Off by default. When on, keeps a working copy of your CV in this browser tab only, so an accidental refresh doesn't lose your work — it's cleared automatically the moment you close the tab and is never sent anywhere."}
+              ? 'Päällä oletuksena. Muokkaamastasi CV:stä pidetään työkopiota vain tässä selainvälilehdessä, jotta vahinkopäivitys ei tuhoa työtäsi. Kopio poistuu heti, kun suljet välilehden, eikä sitä koskaan lähetetä minnekään. Pois kytkeminen poistaa kopion heti.'
+              : "On by default. Keeps a working copy of the CV you've edited in this browser tab only, so an accidental refresh doesn't lose your work. It's cleared the moment you close the tab and is never sent anywhere. Turning this off deletes the copy at once."}
           </p>
         </div>
         <ToggleSwitch checked={sessionRestoreEnabled} onChange={onToggleSessionRestore} />

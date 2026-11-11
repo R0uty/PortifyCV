@@ -33,7 +33,7 @@ export const LANDING_FAQ = {
     },
     {
       q: 'What does PortifyCV store in my browser?',
-      before: 'Only five small settings, such as your language, and never your CV. The optional “Restore last session” keeps a copy in that tab until you close it. The ',
+      before: 'Five small settings, such as your language. “Restore last session”, on by default, also keeps a working copy of your CV in that tab until you close it; you can turn it off in Settings. Nothing is sent anywhere. The ',
       link: { view: 'privacy', text: 'privacy policy' },
       after: ' has the details.',
     },
@@ -69,7 +69,7 @@ export const LANDING_FAQ = {
     },
     {
       q: 'Mitä PortifyCV tallentaa selaimeeni?',
-      before: 'Vain viisi pientä asetusta, kuten kielesi, eikä koskaan CV:täsi. Valinnainen ”Palauta viimeisin istunto” pitää kopion siinä välilehdessä, kunnes suljet sen. ',
+      before: 'Viisi pientä asetusta, kuten kielesi. Oletuksena päällä oleva ”Palauta viimeisin istunto” pitää lisäksi CV:si työkopion siinä välilehdessä, kunnes suljet sen; sen voi kytkeä pois Asetuksista. Mitään ei lähetetä minnekään. ',
       link: { view: 'privacy', text: 'Tietosuojaseloste' },
       after: ' kertoo tarkemmin.',
     },

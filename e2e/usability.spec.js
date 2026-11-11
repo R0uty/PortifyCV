@@ -25,6 +25,13 @@ test.describe('Leaving the builder', () => {
     await page.getByLabel('Full name').fill('Jordan Rivera')
   }
 
+  // Session restore is on by default (1.6.82) and keeps the CV in the tab,
+  // so the app has nothing to ask about. These cover the switch turned
+  // off, except the tests at the end, which turn it back on.
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.setItem('portifycv-session-restore', 'false'))
+  })
+
   // 1.6.68: the app's own dialog, not the browser's "Leave site?" prompt.
   test('with an edit, the app asks first and Keep editing keeps the CV', async ({ page }) => {
     await editName(page)
@@ -122,17 +129,52 @@ test.describe('Leaving the builder', () => {
     expect(dialogs).toEqual([])
   })
 
-  test('with session restore on, it leaves without asking', async ({ page }) => {
-    await page.addInitScript(() => window.localStorage.setItem('portifycv-session-restore-enabled', 'true'))
+  test('with session restore on, it leaves without asking and the CV is there on the way back', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.setItem('portifycv-session-restore', 'true'))
     await page.goto('/cv')
     await page.getByRole('tab', { name: 'Classic' }).click()
     await page.getByLabel('Full name').fill('Jordan Rivera')
     const dialogs = recordDialogs(page)
 
+    // Straight away, before the debounced copy is written.
     await returnButton(page).click()
 
     await expect(page).toHaveURL(/\/$/)
     expect(dialogs).toEqual([])
+
+    await page.goto('/cv')
+    await expect(page.getByLabel('Full name')).toHaveValue('Jordan Rivera')
+  })
+
+  test('with session restore on, Back leaves without asking', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.setItem('portifycv-session-restore', 'true'))
+    await page.goto('/about')
+    await page.locator('.project-header__actions').getByRole('button', { name: 'Build my CV' }).click()
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await page.getByLabel('Full name').fill('Jordan Rivera')
+    const dialogs = recordDialogs(page)
+
+    await page.goBack()
+    await expect(page).toHaveURL(/\/about$/)
+    await expect(leaveDialog(page)).toHaveCount(0)
+    expect(dialogs).toEqual([])
+  })
+
+  // Closing the tab clears the kept copy, and a page can't tell a close
+  // from a reload, so the browser's prompt stays for both.
+  test('with session restore on, closing or reloading the tab still asks', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.setItem('portifycv-session-restore', 'true'))
+    await page.goto('/cv')
+    const asks = () => page.evaluate(() => {
+      const event = new Event('beforeunload', { cancelable: true })
+      window.dispatchEvent(event)
+      return event.defaultPrevented
+    })
+    expect(await asks()).toBe(false)
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await page.getByLabel('Full name').fill('Jordan Rivera')
+    expect(await asks()).toBe(true)
   })
 })
 

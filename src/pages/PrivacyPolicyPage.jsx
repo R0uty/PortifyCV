@@ -1,6 +1,6 @@
 const EFFECTIVE_DATE = {
-  en: '12 October 2026',
-  fi: '12. lokakuuta 2026',
+  en: '11 November 2026',
+  fi: '11. marraskuuta 2026',
 }
 
 function getPrivacyCopy(locale) {
@@ -49,7 +49,7 @@ function getPrivacyCopy(locale) {
           list: [
             'minkä käyttöliittymän kielen valitsit viimeksi (englanti vai suomi)',
             'oletko jo nähnyt kertaluonteisen opastusvinkin',
-            'onko valinnainen "Palauta viimeisin istunto" -toiminto käytössä (katso alla)',
+            'onko "Palauta viimeisin istunto" -toiminto käytössä (katso alla)',
             'kumpaa muokkaustilaa (Suora muokkaus vai Klassinen) käytit viimeksi',
             'onko editorin osiovalikko pienennetty',
           ],
@@ -62,14 +62,16 @@ function getPrivacyCopy(locale) {
           ],
         },
         {
-          heading: 'Palauta viimeisin istunto (valinnainen)',
+          heading: 'Palauta viimeisin istunto',
           paragraphs: [
-            'Asetukset-valikossa on valinnainen, oletuksena pois päältä oleva '
-            + 'toiminto: "Palauta viimeisin istunto". Kun otat sen käyttöön, '
-            + 'CV:stäsi pidetään työkopiota selaimesi istuntokohtaisessa '
+            'Asetukset-valikossa on oletuksena päällä oleva toiminto: '
+            + '"Palauta viimeisin istunto". Kun se on päällä, muokkaamastasi '
+            + 'CV:stä pidetään työkopiota selaimesi istuntokohtaisessa '
             + 'tallennustilassa (session storage) — ei paikallisessa '
             + 'tallennustilassa — jotta vahinkopäivitys tai välilehden '
-            + 'kaatuminen ei tuhoa työtäsi.',
+            + 'kaatuminen ei tuhoa työtäsi. Kopio pysyy omassa selaimessasi, '
+            + 'eikä sitä lähetetä minnekään. Voit kytkeä toiminnon pois '
+            + 'Asetuksista.',
             'Istuntotallennustila eroaa yllä mainitusta paikallisesta '
             + 'tallennustilasta siten, että selain tyhjentää sen pysyvästi '
             + 'heti, kun suljet välilehden — se ei säily edes saman '
@@ -215,7 +217,7 @@ function getPrivacyCopy(locale) {
         list: [
           'which interface language you last selected (English or Finnish)',
           'whether you have already seen the one-time onboarding tip',
-          'whether the optional "Restore last session" feature is turned on (see below)',
+          'whether the "Restore last session" feature is turned on (see below)',
           'which builder mode (Direct Edit or Classic) you last used',
           "whether the builder's section menu is collapsed",
         ],
@@ -228,13 +230,15 @@ function getPrivacyCopy(locale) {
         ],
       },
       {
-        heading: 'Restore last session (optional)',
+        heading: 'Restore last session',
         paragraphs: [
-          'Settings includes an optional, off-by-default feature: "Restore '
-          + 'last session." When you turn it on, a working copy of your CV '
-          + "is kept in your browser tab's session storage — not local "
-          + 'storage — so an accidental refresh or tab crash does not lose '
-          + 'your work.',
+          'Settings includes a feature that is on by default: "Restore '
+          + 'last session." While it is on, a working copy of the CV you '
+          + "have edited is kept in your browser tab's session storage — "
+          + 'not local storage — so an accidental refresh or tab crash '
+          + 'does not lose your work. The copy stays in your own browser '
+          + 'and is not sent anywhere. You can turn the feature off in '
+          + 'Settings.',
           'Session storage differs from the local storage described above '
           + 'in one important way: your browser permanently clears it the '
           + 'moment you close the tab. It does not carry over to your next '

@@ -28,7 +28,7 @@ const LETTER_PT = [612, 792]
 
 async function openWithCv(page, cv, template = 'creative') {
   await page.addInitScript((snapshot) => {
-    window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+    window.localStorage.setItem('portifycv-session-restore', 'true')
     window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
   }, JSON.stringify(cv))
   await page.goto(`/cv?template=${template}`)

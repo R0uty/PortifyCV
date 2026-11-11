@@ -45,7 +45,7 @@ real phone.
       (`src/utils/cvTemplates.js`), and nothing tells the user other
       templates do. Show unsupported sections greyed out with an "available
       in other templates" hint.
-- [ ] **9. A reload wipes the CV by default.** Session restore is off unless
+- [x] **9. A reload wipes the CV by default.** Session restore is off unless
       the user finds it in Settings (`uiReducer.js`). **Decision needed:**
       turning it on by default keeps the CV in this tab's `sessionStorage`
       only, cleared on tab close, but the "no data saved" footer and the

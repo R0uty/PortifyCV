@@ -114,7 +114,7 @@ const STATIC_VIEW_HEAD = {
       'A step-by-step walkthrough of PortifyCV: editing right on the CV, the Classic form, templates and looks, ATS keyword checks, and exporting or sharing your CV.',
     isArticle: true,
     datePublished: '2026-09-01',
-    dateModified: '2026-10-17',
+    dateModified: '2026-11-11',
   },
   coverLetterExamples: {
     title: 'Cover Letter Examples - PortifyCV',
