@@ -31,6 +31,8 @@ import {
   LayoutTemplate,
 } from 'lucide-react'
 
+import useCvSafekeeping from '../hooks/useCvSafekeeping'
+import usePreviewZoom from '../hooks/usePreviewZoom'
 import AppShell from '../components/AppShell'
 import AppErrorBoundary from '../components/AppErrorBoundary'
 import ATSScorePanel from '../components/ATSScorePanel'
@@ -65,7 +67,6 @@ import {
   parseImportedCvData,
   safeSessionStorageGet,
   safeSessionStorageRemove,
-  safeSessionStorageSet,
   safeStorageGet,
   safeStorageSet,
 } from '../utils/cvForm'
@@ -99,14 +100,10 @@ import {
 import { evaluateCvFeedback } from '../utils/cvFeedback'
 import { generateCoverLetterDraft } from '../utils/coverLetter'
 import { EXAMPLES, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
-import { registerUnsavedChangesCheck } from '../utils/leaveGuard'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
 const RESET_CONFIRM_WINDOW_MS = 4000
-// The Classic preview's paper width, 220mm in CSS px — .preview-zoom-wrapper's
-// width in app-shell.css, and the width PDF export renders the CV at.
-const PREVIEW_PAPER_WIDTH_PX = (220 / 25.4) * 96
 
 // Order must match the section cards' actual JSX order in CVForm.jsx (personal,
 // summary, skills, experience, education, coreStrengths, certificates,
@@ -518,23 +515,11 @@ function ResumeBuilderPage({
     cvHeadingColor,
   })
   const previewRef = useRef(null)
-  // The CV the user sees in Classic mode's preview panel. previewRef is the
-  // off-screen export source (see the .direct-edit-export-source copy
-  // below), which hides empty sections and gets .pdf-export-root's PDF-only
-  // spacing — so anything sizing the visible preview, like Fit Page, has to
-  // measure this one instead.
-  const visiblePreviewRef = useRef(null)
   const importInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
   const storageWarningShownRef = useRef(false)
-  // The demo, example or blank CV the builder last loaded, untouched; null
-  // once the CV came from the visitor (restored, shared or imported).
-  // Session restore keeps no copy of a CV that still matches it.
-  const pristineCvRef = useRef(initialSession.isOwnCv ? null : JSON.stringify(initialSession.formData))
-  const sessionRestoreWarningShownRef = useRef(false)
   const shareWarningShownRef = useRef(false)
   const editorScrollRef = useRef(null)
-  const previewViewportRef = useRef(null)
   const resetConfirmTimeoutRef = useRef(null)
 
   // Non-default CV fonts are fetched on demand (see utils/cvFonts.js) rather
@@ -551,13 +536,19 @@ function ResumeBuilderPage({
   const [searchQuery, setSearchQuery] = useState('')
   const [isFullscreenPreview, setIsFullscreenPreview] = useState(false)
   const [isResponsivePreview, setIsResponsivePreview] = useState(false)
-  const [zoomPercent, setZoomPercent] = useState(100)
-  // Fit Width is the default: the Classic preview lays the CV out at its
-  // paper width and scales it to the pane (see .preview-zoom-wrapper in
-  // app-shell.css), re-fitting as the pane resizes. Any other zoom control
-  // leaves it at the zoom picked.
-  const [isFitWidthZoom, setIsFitWidthZoom] = useState(true)
-  const previewStageRef = useRef(null)
+  // The Classic preview's zoom: Fit Width, Fit Page, the presets, the
+  // − and + buttons and Ctrl/Cmd + wheel (hooks/usePreviewZoom.js).
+  const {
+    zoomPercent,
+    isFitWidthZoom,
+    previewStageRef,
+    previewViewportRef,
+    visiblePreviewRef,
+    handleSetZoomPercent,
+    handleZoomBy,
+    handleFitWidth,
+    handleFitPage,
+  } = usePreviewZoom({ builderMode, isResponsivePreview })
   const [isTemplateGalleryOpen, setIsTemplateGalleryOpen] = useState(false)
   // SectionEditOverlay's handle, for Direct Edit's nav rail; see
   // handleDirectEditNavigate.
@@ -759,79 +750,17 @@ function ResumeBuilderPage({
     setStorageValue(UI_BUILDER_MODE_STORAGE_KEY, builderMode)
   }, [builderMode, setStorageValue])
 
-  useEffect(() => {
-    setStorageValue(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, sessionRestoreEnabled ? 'true' : 'false')
-
-    // Turning the feature off clears any saved copy immediately, rather than
-    // waiting for the tab to close — an explicit "stop and forget" action.
-    if (!sessionRestoreEnabled) {
-      safeSessionStorageRemove(CV_SESSION_SNAPSHOT_STORAGE_KEY)
-    }
-  }, [sessionRestoreEnabled, setStorageValue])
-
-  useEffect(() => {
-    if (!sessionRestoreEnabled) {
-      return undefined
-    }
-
-    // Only a CV the visitor has made their own is kept. An untouched demo,
-    // example or blank CV isn't: with restore on by default (1.6.82) a
-    // kept copy of the sample CV would win over every "Use this example"
-    // link the visitor follows next (see loadInitialCvSession).
-    const writeSnapshot = () => {
-      const serialized = JSON.stringify(formData)
-
-      if (serialized === pristineCvRef.current) {
-        safeSessionStorageRemove(CV_SESSION_SNAPSHOT_STORAGE_KEY)
-        return { ok: true }
-      }
-
-      return safeSessionStorageSet(CV_SESSION_SNAPSHOT_STORAGE_KEY, serialized)
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      const result = writeSnapshot()
-
-      if (!result.ok && !sessionRestoreWarningShownRef.current) {
-        sessionRestoreWarningShownRef.current = true
-        showToast(
-          locale === 'fi'
-            ? 'Istunnon palautusta ei voitu tallentaa (tila on täynnä tai estetty). CV on silti tallella tässä välilehdessä.'
-            : 'Could not save a session-restore copy (storage full or blocked). Your CV is still fine in this tab.',
-          'error',
-        )
-      }
-    }, HISTORY_COMMIT_DELAY_MS)
-    // An edit made just before the page goes would miss the timer.
-    window.addEventListener('pagehide', writeSnapshot)
-
-    return () => {
-      window.clearTimeout(timeoutId)
-      window.removeEventListener('pagehide', writeSnapshot)
-    }
-  }, [formData, locale, sessionRestoreEnabled])
-
-  // The CV as it was when the visitor last had a copy they can get back:
-  // opened, imported, loaded, or exported as JSON. Leaving the page with
-  // anything else asks first (1.6.66, utils/leaveGuard.js), unless session
-  // restore keeps a copy. Compared only when the page is about to unload.
-  const savedCvRef = useRef(null)
-  const formDataRef = useRef(formData)
-  const markCvSaved = useCallback((data) => {
-    savedCvRef.current = JSON.stringify(data)
-  }, [])
-
-  useEffect(() => {
-    formDataRef.current = formData
-    if (savedCvRef.current === null) {
-      savedCvRef.current = JSON.stringify(formData)
-    }
-  }, [formData])
-
-  useEffect(() => registerUnsavedChangesCheck(
-    () => JSON.stringify(formDataRef.current) !== savedCvRef.current,
-    { keptInTab: () => sessionRestoreEnabled },
-  ), [sessionRestoreEnabled])
+  // Session restore's kept copy and the ask-before-leaving guard
+  // (hooks/useCvSafekeeping.js).
+  const { formDataRef, markCvSaved, markCvPristine } = useCvSafekeeping({
+    formData,
+    initialSession,
+    sessionRestoreEnabled,
+    locale,
+    showToast,
+    setStorageValue,
+    snapshotDelayMs: HISTORY_COMMIT_DELAY_MS,
+  })
 
   useEffect(() => {
     if (initialSession.storageIssue) {
@@ -888,7 +817,7 @@ function ResumeBuilderPage({
       const startCv = withStyleVariant(exampleCv, selectedTemplate, initialSession.pendingStyleVariantId ?? DEFAULT_STYLE_VARIANT_ID)
       dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: startCv })
       markCvSaved(startCv)
-      pristineCvRef.current = JSON.stringify(startCv)
+      markCvPristine(startCv)
       applyStoredStyleVariantLook(startCv, selectedTemplate)
       const roleLabel = EXAMPLES[exampleId].role[locale === 'fi' ? 'fi' : 'en']
       showToast(locale === 'fi' ? `Esimerkki ladattu: ${roleLabel}.` : `Loaded the ${roleLabel} example.`)
@@ -1238,7 +1167,7 @@ function ResumeBuilderPage({
     }
 
     setResetConfirmArmed(false)
-    pristineCvRef.current = JSON.stringify(createInitialCvData())
+    markCvPristine(createInitialCvData())
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
     // A cleared CV stores no variants, so every template goes back to its
     // original look (accent, plus the selected template's font/headings).
@@ -1248,13 +1177,13 @@ function ResumeBuilderPage({
         ? 'CV tyhjennetty. Palauta työkalupalkin kumoa-nuolella.'
         : 'CV cleared. Restore it with the toolbar undo arrow.',
     )
-  }, [applyStoredStyleVariantLook, dispatchFormData, locale, resetConfirmArmed, selectedTemplate])
+  }, [applyStoredStyleVariantLook, dispatchFormData, locale, markCvPristine, resetConfirmArmed, selectedTemplate])
 
   useEffect(() => () => window.clearTimeout(resetConfirmTimeoutRef.current), [])
 
   const handleLoadDemo = useCallback(() => {
     const demo = structuredClone(demoCvData)
-    pristineCvRef.current = JSON.stringify(demo)
+    markCvPristine(demo)
     // One click replaces whatever is on the page. Undo brings it back, so
     // say so when there was a CV of the visitor's own to lose (1.6.78).
     const current = formDataRef.current
@@ -1274,7 +1203,7 @@ function ResumeBuilderPage({
     } else {
       showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
     }
-  }, [applyStoredStyleVariantLook, dispatchFormData, locale, markCvSaved, selectedTemplate, setStorageValue])
+  }, [applyStoredStyleVariantLook, dispatchFormData, formDataRef, locale, markCvPristine, markCvSaved, selectedTemplate, setStorageValue])
 
   const handlePasteCvImport = useCallback(() => {
     try {
@@ -1574,127 +1503,6 @@ function ResumeBuilderPage({
   const handleToggleResponsivePreview = useCallback(() => {
     setIsResponsivePreview((value) => !value)
   }, [])
-
-  const clampZoomPercent = useCallback((value) => Math.round(Math.min(200, Math.max(40, value))), [])
-
-  const handleSetZoomPercent = useCallback((value) => {
-    setIsFitWidthZoom(false)
-    setZoomPercent(clampZoomPercent(value))
-  }, [clampZoomPercent])
-
-  const handleZoomBy = useCallback((delta) => {
-    setIsFitWidthZoom(false)
-    setZoomPercent((value) => clampZoomPercent(value + delta))
-  }, [clampZoomPercent])
-
-  const handleFitWidth = useCallback(() => {
-    setIsFitWidthZoom(true)
-  }, [])
-
-  // The zoom at which the paper-width CV fills the preview stage, capped at
-  // actual size so a wide pane shows the page at 100% rather than blowing it
-  // up. Narrow preview reflows the CV to its 26rem column instead of
-  // scaling it, so it fits at 100%.
-  useEffect(() => {
-    const stage = previewStageRef.current
-
-    if (!isFitWidthZoom || !stage) {
-      return undefined
-    }
-
-    // A ResizeObserver reports the stage's size as soon as it starts
-    // observing, so this also makes the first fit. The fit waits a frame:
-    // a new zoom resizes the stage (its height, a scrollbar), and resizing
-    // an observed box inside the observer's own callback is a loop error.
-    let frame = 0
-    const observer = new ResizeObserver(() => {
-      cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => {
-        if (isResponsivePreview) {
-          setZoomPercent(100)
-        } else if (stage.clientWidth > 0) {
-          const { paddingLeft, paddingRight } = getComputedStyle(stage)
-          const width = stage.clientWidth - parseFloat(paddingLeft) - parseFloat(paddingRight)
-          setZoomPercent(Math.max(25, Math.min(100, Math.floor((width / PREVIEW_PAPER_WIDTH_PX) * 100))))
-        }
-      })
-    })
-
-    observer.observe(stage)
-
-    return () => {
-      cancelAnimationFrame(frame)
-      observer.disconnect()
-    }
-    // builderMode: the stage exists only in Classic, so coming over from
-    // Direct Edit has to start the fit; it used to stay at 100% (1.6.83).
-  }, [builderMode, isFitWidthZoom, isResponsivePreview])
-
-  const handleFitPage = useCallback(() => {
-    const viewport = previewViewportRef.current
-    const content = visiblePreviewRef.current
-    const zoomWrapper = content?.closest('.preview-zoom-wrapper')
-    const availableHeight = viewport ? viewport.clientHeight - 48 : 0
-
-    setIsFitWidthZoom(false)
-
-    if (!zoomWrapper || availableHeight <= 0 || content.getBoundingClientRect().height <= 0) {
-      setZoomPercent(100)
-      return
-    }
-
-    // In Narrow preview the CV reflows to its zoomed width — zooming in
-    // narrows its layout box and makes it taller — so its height at the
-    // current zoom doesn't predict its height at any other. Binary-search the largest zoom whose
-    // rendered height fits instead, writing each candidate straight onto the
-    // wrapper so getBoundingClientRect forces a synchronous layout at it,
-    // then restore React's value before committing the result. Falls back to
-    // the 40% floor when even that overflows.
-    const committedZoom = zoomWrapper.style.getPropertyValue('--preview-zoom')
-    const fitsAt = (percent) => {
-      zoomWrapper.style.setProperty('--preview-zoom', String(percent / 100))
-      return content.getBoundingClientRect().height <= availableHeight
-    }
-    let low = 40
-    let high = 200
-
-    while (low < high) {
-      const mid = Math.ceil((low + high) / 2)
-
-      if (fitsAt(mid)) {
-        low = mid
-      } else {
-        high = mid - 1
-      }
-    }
-
-    zoomWrapper.style.setProperty('--preview-zoom', committedZoom)
-    setZoomPercent(low)
-  }, [])
-
-  useEffect(() => {
-    const viewport = previewViewportRef.current
-
-    if (!viewport) {
-      return undefined
-    }
-
-    const handleWheel = (event) => {
-      if (!event.ctrlKey && !event.metaKey) {
-        return
-      }
-
-      event.preventDefault()
-      setIsFitWidthZoom(false)
-      setZoomPercent((value) => clampZoomPercent(value - Math.sign(event.deltaY) * 5))
-    }
-
-    viewport.addEventListener('wheel', handleWheel, { passive: false })
-
-    return () => {
-      viewport.removeEventListener('wheel', handleWheel)
-    }
-  }, [clampZoomPercent])
 
   useEffect(() => {
     if (!isFullscreenPreview) {
@@ -2516,6 +2324,9 @@ function ResumeBuilderPage({
     selectedTemplate,
     styleVariantId,
     templateAccentColors,
+    previewStageRef,
+    previewViewportRef,
+    visiblePreviewRef,
     zoomPercent,
     ui.button,
     ui.surface,

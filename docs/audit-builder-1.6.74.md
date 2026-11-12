@@ -90,10 +90,29 @@ Phase 3 notes (1.6.83-1.6.84):
 - [ ] **16. Split the CSS.** `src/styles/app-shell.css` is 4,875 lines, and
       everything ships as one 270 KB (uncompressed) stylesheet to every
       landing visitor, including all 18 templates and the builder.
-- [ ] **17. One source for section labels.** `SectionsMenu.jsx` keeps its
+- [x] **17. One source for section labels.** `SectionsMenu.jsx` keeps its
       own copy with a "must stay in sync" comment; `sectionSchema.js`
       already has `labelEn`/`labelFi`.
-- [ ] **18. Smaller items.** The mode switch claims `role="tablist"` without
+- [x] **18. Smaller items.** The mode switch claims `role="tablist"` without
       tab keyboard behaviour (`Toolbar.jsx`), and a ResizeObserver
       "Unhandled error" is logged (`main.jsx:41`) when the PDF preview
       opens.
+
+Phase 4 notes (1.6.85-1.6.86):
+
+- Item 15 is started, not finished. Two hooks came out of
+  `ResumeBuilderPage.jsx` (2,703 to 2,594 lines): `usePreviewZoom` and
+  `useCvSafekeeping` (session restore and the leave guard). Still in the
+  page: undo history, export, import, and the template look. `CVForm.jsx`
+  is untouched.
+- Item 16 is not done, on purpose. The 270 KB figure was uncompressed; the
+  stylesheet is about 32 KB over the wire (brotli). Splitting the template
+  CSS into the lazy chunks would save roughly half of that on the landing
+  page, but it changes the cascade order for all 18 templates and would
+  leave the pre-rendered template pages unstyled until their chunk loads.
+- Item 17: the five English labels that differed in capitals between the
+  popup and the menus now match, and `check:section-schema` fails if they
+  drift again.
+- Item 18: the ResizeObserver message is the browser's own notice, not a
+  failure, and could not be reproduced on demand; it is no longer logged
+  as an unhandled error.
