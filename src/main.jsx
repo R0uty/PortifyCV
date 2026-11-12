@@ -38,6 +38,12 @@ if (seoLanding?.querySelector('.one-pager')) {
 
 if (typeof window !== 'undefined') {
   window.addEventListener('error', (event) => {
+    // The browser's own notice that a ResizeObserver callback changed a
+    // layout it was watching and will be told again next frame. Nothing
+    // failed, so it isn't reported as an unhandled error (1.6.85).
+    if (!event.error && /^ResizeObserver loop/.test(event.message ?? '')) {
+      return
+    }
     console.error('Unhandled error:', event.error ?? event.message)
   })
   window.addEventListener('unhandledrejection', (event) => {

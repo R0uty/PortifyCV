@@ -129,7 +129,7 @@ export const SECTION_SCHEMA = {
 
   coreStrengths: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Core strengths',
+    labelEn: 'Core Strengths',
     labelFi: 'Vahvuudet',
     fields: [
       text('title', 'Title', 'Otsikko'),
@@ -198,7 +198,7 @@ export const SECTION_SCHEMA = {
 
   openSource: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Open source',
+    labelEn: 'Open Source',
     labelFi: 'Avoin lähdekoodi',
     fields: [
       text('name', 'Name', 'Nimi'),
@@ -224,7 +224,7 @@ export const SECTION_SCHEMA = {
 
   leadership: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Leadership experience',
+    labelEn: 'Leadership Experience',
     labelFi: 'Johtamiskokemus',
     fields: [
       text('role', 'Role', 'Rooli'),
@@ -237,7 +237,7 @@ export const SECTION_SCHEMA = {
 
   memberships: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Professional memberships',
+    labelEn: 'Professional Memberships',
     labelFi: 'Ammattijäsenyydet',
     fields: [
       text('organization', 'Organization', 'Organisaatio'),
@@ -286,7 +286,7 @@ export const SECTION_SCHEMA = {
 
   caseStudies: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Case studies',
+    labelEn: 'Case Studies',
     labelFi: 'Tapaustutkimukset',
     fields: [
       text('title', 'Title', 'Otsikko'),

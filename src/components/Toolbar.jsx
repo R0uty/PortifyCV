@@ -284,10 +284,31 @@ function Toolbar({
 
         <div className="app-toolbar__group app-toolbar__group--actions">
           <div className="app-toolbar__control-cluster">
-            <div className="app-toolbar__mode-switch" role="tablist" aria-label={locale === 'fi' ? 'Muokkaustila' : 'Builder mode'}>
+            {/* A tablist's keys (1.6.85): one tab stop, on the selected
+                mode; the arrow keys, Home and End move between the two and
+                switch. It had the roles without the keyboard behaviour. */}
+            <div
+              className="app-toolbar__mode-switch"
+              role="tablist"
+              aria-label={locale === 'fi' ? 'Muokkaustila' : 'Builder mode'}
+              onKeyDown={(event) => {
+                const next = {
+                  ArrowLeft: builderMode === 'direct' ? 'classic' : 'direct',
+                  ArrowRight: builderMode === 'direct' ? 'classic' : 'direct',
+                  Home: 'direct',
+                  End: 'classic',
+                }[event.key]
+                if (!next) return
+                event.preventDefault()
+                onSetBuilderMode(next)
+                event.currentTarget.querySelector(`[data-builder-mode="${next}"]`)?.focus()
+              }}
+            >
               <button
                 type="button"
                 role="tab"
+                data-builder-mode="direct"
+                tabIndex={builderMode === 'direct' ? 0 : -1}
                 aria-selected={builderMode === 'direct'}
                 className={`app-toolbar__mode-switch-btn${builderMode === 'direct' ? ' app-toolbar__mode-switch-btn--active' : ''}`}
                 onClick={() => onSetBuilderMode('direct')}
@@ -297,6 +318,8 @@ function Toolbar({
               <button
                 type="button"
                 role="tab"
+                data-builder-mode="classic"
+                tabIndex={builderMode === 'classic' ? 0 : -1}
                 aria-selected={builderMode === 'classic'}
                 className={`app-toolbar__mode-switch-btn${builderMode === 'classic' ? ' app-toolbar__mode-switch-btn--active' : ''}`}
                 onClick={() => onSetBuilderMode('classic')}

@@ -1,27 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { CV_SECTION_ORDER_KEYS, normalizeSectionOrder } from '../utils/cvForm'
+import { CV_SECTION_ORDER_KEYS, getSectionVisibilityFields, normalizeSectionOrder } from '../utils/cvForm'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
-
-// Wording here must stay in sync with `sectionVisibilityFieldsEn`/`Fi` in
-// `src/utils/cvForm.js` (CVForm.jsx's own nav rail source), so the Direct
-// Edit menu and the Classic "Visible sections" panel never disagree on a
-// label for the same section key.
-const SECTION_LABELS_EN = {
-  about: 'About', experience: 'Experience', education: 'Education', skills: 'Skills',
-  projects: 'Projects', links: 'Links', languages: 'Languages', certificates: 'Certificates',
-  coreStrengths: 'Core Strengths', achievements: 'Achievements', interests: 'Interests',
-  openSource: 'Open Source', publications: 'Publications', leadership: 'Leadership Experience',
-  memberships: 'Professional Memberships', speaking: 'Speaking', volunteering: 'Volunteering',
-  internships: 'Internships', caseStudies: 'Case Studies', testimonials: 'Testimonials',
-}
-const SECTION_LABELS_FI = {
-  about: 'Esittely', experience: 'Kokemus', education: 'Koulutus', skills: 'Taidot',
-  projects: 'Projektit', links: 'Linkit', languages: 'Kielet', certificates: 'Sertifikaatit',
-  coreStrengths: 'Vahvuudet', achievements: 'Saavutukset', interests: 'Kiinnostuksen kohteet',
-  openSource: 'Avoin lähdekoodi', publications: 'Julkaisut', leadership: 'Johtamiskokemus',
-  memberships: 'Ammattijäsenyydet', speaking: 'Esiintymiset', volunteering: 'Vapaaehtoistyö',
-  internships: 'Harjoittelut', caseStudies: 'Tapaustutkimukset', testimonials: 'Suositukset',
-}
 
 // Sections a template leaves out, most often missed first. The panel names
 // the first few and counts the rest.
@@ -72,7 +51,9 @@ export default function SectionsMenu({
     }
   }, [isOpen])
   const isFinnish = locale === 'fi'
-  const labels = isFinnish ? SECTION_LABELS_FI : SECTION_LABELS_EN
+  // The same table Classic's "Visible sections" panel and nav rail read
+  // (1.6.85). This menu kept its own copy, to be kept in sync by hand.
+  const labels = Object.fromEntries(getSectionVisibilityFields(locale).map((field) => [field.key, field.label]))
   const templateSectionOrder = [
     ...templateConfig.primarySections,
     ...templateConfig.secondarySections,

@@ -151,6 +151,20 @@ for (const key of linkKeys) {
   check(linkSchemaKeys.includes(key), `createEmptyLinks() field "${key}" is missing from the links schema`)
 }
 
+// 6. A section has one name. The Direct Edit popup reads it from the schema;
+// the Sections menu, Classic's "Visible sections" panel and its nav rail
+// read cvForm's table. Five English labels differed in capitals (1.6.85).
+for (const locale of ['en', 'fi']) {
+  for (const { key, label } of cvForm.getSectionVisibilityFields(locale)) {
+    const schema = SECTION_SCHEMA[key]
+    const schemaLabel = locale === 'fi' ? schema?.labelFi : schema?.labelEn
+    check(
+      schemaLabel === label,
+      `section "${key}" is "${label}" in cvForm's ${locale} labels but "${schemaLabel}" in the schema`,
+    )
+  }
+}
+
 if (failures.length > 0) {
   console.error(`check:section-schema FAILED with ${failures.length} problem(s):`)
   failures.forEach((message) => console.error(`  - ${message}`))
