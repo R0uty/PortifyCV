@@ -100,11 +100,13 @@ Phase 3 notes (1.6.83-1.6.84):
 
 Phase 4 notes (1.6.85-1.6.86):
 
-- Item 15 is started, not finished. Two hooks came out of
-  `ResumeBuilderPage.jsx` (2,703 to 2,594 lines): `usePreviewZoom` and
-  `useCvSafekeeping` (session restore and the leave guard). Still in the
-  page: undo history, export, import, and the template look. `CVForm.jsx`
-  is untouched.
+- Item 15 is started, not finished. Three hooks came out of
+  `ResumeBuilderPage.jsx` (2,703 to 2,489 lines): `usePreviewZoom`,
+  `useCvSafekeeping` (session restore and the leave guard) and, in
+  1.6.87, `useCvHistory` (undo and redo). The export and import handlers
+  stay in the page: each reads about ten pieces of page state, so a hook
+  would only move the same wiring into its arguments. `CVForm.jsx` is
+  untouched.
 - Item 16 is not done, on purpose. The 270 KB figure was uncompressed; the
   stylesheet is about 32 KB over the wire (brotli). Splitting the template
   CSS into the lazy chunks would save roughly half of that on the landing
