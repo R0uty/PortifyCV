@@ -70,17 +70,17 @@ Items 1 to 3 fixed in 1.6.88, each with an e2e test.
 The Finnish UI is otherwise complete: 678 strings checked across the
 toolbar, menus, gallery, Settings, Import, ATS and every section popup.
 
-- [ ] **4. Three English leftovers.** The dialog close button's label is
+- [x] **4. Three English leftovers.** The dialog close button's label is
       always "Close" (`Modal.jsx:90`); the ATS hint lists field names in
       English ("Lisää tai laajenna: full name, title, about",
       `atsScore.js`); achievement row buttons read "Move saavutus 1 up",
       "Remove saavutus 1".
-- [ ] **5. One cut-off label.** "Kiinnostuksen kohteet" is clipped in the
+- [x] **5. One cut-off label.** "Kiinnostuksen kohteet" is clipped in the
       section rail at 1024 px.
 
 ### Keyboard and screen reader
 
-- [ ] **6. Inline fields in Direct Edit have no name.** The nine
+- [x] **6. Inline fields in Direct Edit have no name.** The nine
       click-to-type fields in the CV (name, title, email, phone,
       location, summary, role, company, description) are reachable with
       Tab and show a focus ring, but have no role or label, so a screen
@@ -88,11 +88,23 @@ toolbar, menus, gallery, Settings, Import, ATS and every section popup.
 
 ### Phone
 
-- [ ] **7. Small reorder buttons.** "Move section up/down" in Classic's
+- [x] **7. Small reorder buttons.** "Move section up/down" in Classic's
       Visible sections panel are 29x19 px.
-- [ ] **8. "Back to editor" duplicates the bottom "Editor" tab** in
+- [x] **8. "Back to editor" duplicates the bottom "Editor" tab** in
       Classic's phone preview, with an intro box above it. Same kind of
       duplicate as "Show preview", removed in 1.6.83.
+
+Items 4 to 8 fixed in 1.6.89, with e2e tests. The intro card above the
+phone preview went with the "Back to editor" button. The two walkthrough
+images of the Visible sections panel were regenerated because its move
+buttons are now 28 px.
+
+Found while fixing, still open:
+
+- [ ] **12. Drag-and-drop instructions for screen readers are English in
+      the Finnish UI.** The hidden text the sortable lists announce ("To
+      pick up a draggable item, press the space bar…") is the drag
+      library's default.
 
 ### Worth a decision, not clearly bugs
 

@@ -437,6 +437,20 @@ select.floating-field__control {
   inset: -5px -6px -5px -2px;
 }
 
+/* Visible sections' move buttons were 29x19px; a fixed 28px box plus a
+   larger hit area (1.6.89). */
+.section-move-button {
+  position: relative;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.section-move-button::before {
+  content: '';
+  position: absolute;
+  inset: -4px -2px;
+}
+
 .tags-input__remove svg {
   flex-shrink: 0;
   width: 0.7rem;
@@ -2992,6 +3006,14 @@ select.floating-field__control {
   white-space: nowrap;
 }
 
+/* The rail is narrower at this width and the longest Finnish section name
+   ("Kiinnostuksen kohteet") was cut off; it may take two lines (1.6.89). */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .nav-rail__item-label {
+    white-space: normal;
+  }
+}
+
 .nav-rail--collapsed .nav-rail__item {
   justify-content: center;
   gap: 0;
@@ -3063,10 +3085,6 @@ select.floating-field__control {
      coming and going changed that width, the fit flipped between two
      zooms, and it could settle on the one that scrolls sideways (1.6.83). */
   scrollbar-gutter: stable;
-}
-
-.preview-mobile-toggle {
-  align-self: flex-start;
 }
 
 .preview-stage > * {

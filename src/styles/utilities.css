@@ -792,10 +792,6 @@
     width: 100%;
   }
 
-  .preview-mobile-toggle {
-    align-self: stretch;
-  }
-
   .project-header {
     position: static;
     backdrop-filter: none;

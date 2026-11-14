@@ -10,7 +10,7 @@ function BadgeModal({ isOpen, onClose, locale = 'en', onCopy }) {
   const snippet = useMemo(() => buildPortifyCvBadgeSnippet(locale), [locale])
 
   return (
-    <Modal
+    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
       isOpen={isOpen}
       onClose={onClose}
       title={isFinnish ? 'Sisällytettävä tunnus' : 'Embeddable badge'}

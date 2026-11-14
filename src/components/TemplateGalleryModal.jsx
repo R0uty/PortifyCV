@@ -46,7 +46,7 @@ function TemplateGalleryModal({
   const shownTemplates = filterTemplatesByField(templates, field)
 
   return (
-    <Modal
+    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
       isOpen={isOpen}
       onClose={onClose}
       size="lg"

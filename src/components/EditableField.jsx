@@ -138,6 +138,11 @@ export default function EditableField({
       className={`${className ?? ''} direct-edit-field${!value ? ' direct-edit-field--empty' : ''}`.trim()}
       contentEditable
       suppressContentEditableWarning
+      // A contentEditable element has no role or name of its own, so a
+      // screen reader announced nothing for these fields (1.6.89).
+      role="textbox"
+      aria-multiline={multiline}
+      aria-label={placeholder || undefined}
       spellCheck={false}
       data-placeholder={placeholder}
       onInput={handleInput}

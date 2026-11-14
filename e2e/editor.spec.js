@@ -271,3 +271,72 @@ test.describe('Classic chrome', () => {
     expect(Math.max(...tops) - Math.min(...tops)).toBeLessThanOrEqual(4)
   })
 })
+
+// Second builder review (docs/audit-builder-phase-5.md), findings 4 to 8.
+test.describe('Second review fixes (1.6.89)', () => {
+  const useFinnish = (page) => page.addInitScript(() => {
+    try { window.localStorage.setItem('ui-locale', 'fi') } catch { /* storage blocked */ }
+  })
+
+  test('Finnish: dialog close button, ATS hint and achievement row buttons are translated', async ({ page }) => {
+    await useFinnish(page)
+    await page.goto('/cv')
+
+    // A blank CV is missing its first three sections; the hint named them
+    // in English.
+    await page.getByRole('banner').getByRole('button', { name: 'Lisää toimintoja' }).click()
+    await page.getByRole('menuitem', { name: /^Tyhjennä/ }).click()
+    await page.getByRole('menuitem', { name: /^Vahvista/ }).click()
+    const editor = page.locator('.editor-panel')
+    await expect(editor).toContainText('Lisää tai laajenna: nimi, titteli, yhteenveto.')
+
+    await page.getByRole('button', { name: /^Valitse pohja:/ }).click()
+    const gallery = page.getByRole('dialog', { name: 'Pohjagalleria' })
+    await expect(gallery.getByRole('button', { name: 'Sulje', exact: true })).toBeVisible()
+    await page.keyboard.press('Escape')
+
+    await page.getByRole('button', { name: 'Lataa demo-CV' }).first().click()
+    await expect(editor.getByRole('button', { name: 'Siirrä alas: saavutus 1' }).first()).toBeAttached()
+    await expect(editor.getByRole('button', { name: 'Poista: saavutus 1' }).first()).toBeAttached()
+    await expect(editor.locator('[aria-label^="Move "], [aria-label^="Remove "]')).toHaveCount(0)
+  })
+
+  test('Finnish: no section name is cut off in the rail at 1024px', async ({ page }) => {
+    await useFinnish(page)
+    await page.setViewportSize({ width: 1024, height: 800 })
+    await page.goto('/cv?template=graduate')
+
+    const label = page.locator('.nav-rail__item-label', { hasText: 'Kiinnostuksen kohteet' })
+    await expect(label).toBeVisible()
+    const clipped = await page.locator('.nav-rail__item-label').evaluateAll((labels) => labels
+      .filter((element) => element.scrollWidth > element.clientWidth + 1)
+      .map((element) => element.textContent))
+    expect(clipped).toEqual([])
+  })
+
+  test('Direct Edit: the click-to-type fields have a role and a name', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+
+    const preview = page.locator('.direct-edit-preview')
+    await expect(preview.getByRole('textbox', { name: 'Your Name' })).toBeVisible()
+    const unnamed = await preview.locator('[contenteditable="true"]').evaluateAll((fields) => fields
+      .filter((field) => field.getAttribute('role') !== 'textbox' || !field.getAttribute('aria-label'))
+      .length)
+    expect(unnamed).toBe(0)
+  })
+
+  test('phone: section move buttons are at least 28px and the preview has no second way back', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 })
+    await page.goto('/cv')
+
+    await page.getByRole('button', { name: 'Visible sections', exact: true }).click()
+    const box = await page.getByRole('button', { name: 'Move About down' }).boundingBox()
+    expect(box.width).toBeGreaterThanOrEqual(28)
+    expect(box.height).toBeGreaterThanOrEqual(28)
+
+    await page.locator('[class*="tab-bar"] button', { hasText: 'Preview' }).first().click()
+    await expect(page.locator('.preview-zoom-wrapper')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Back to editor' })).toHaveCount(0)
+  })
+})

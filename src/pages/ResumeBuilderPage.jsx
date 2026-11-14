@@ -2060,20 +2060,8 @@ function ResumeBuilderPage({
       className={`preview-panel pb-20 lg:pb-6 print:p-0${isFullscreenPreview ? ' preview-panel--fullscreen' : ''}${isResponsivePreview ? ' preview-panel--responsive' : ''}`}
     >
       <div className="preview-scroll px-4 pb-6 pt-4 sm:px-6 lg:px-8 print:px-0">
-        <div className="mb-4 lg:hidden print:hidden">
-          <div className={`p-4 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
-            <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Esikatselupaneeli' : 'Preview panel'}</p>
-            <h2 className={`ds-section-title mt-2 font-bold uppercase tracking-[-0.02em] ${ui.textPrimary}`}>
-              {locale === 'fi' ? 'CV-esikatselu' : 'Resume document view'}
-            </h2>
-            <p className={`ds-body-sm mt-3 ${ui.textSecondary}`}>
-              {locale === 'fi'
-                ? 'Voit palata editoriin milloin tahansa tai pitää tämän näkymän auki viimeistelyn aikana.'
-                : 'Switch back to the editor any time or keep this view open while you polish the layout.'}
-            </p>
-          </div>
-        </div>
-
+        {/* No intro card or "Back to editor" button here: below lg the bottom
+            tab bar's Editor tab does the same thing (1.6.89). */}
         <div className="preview-zoom-bar print:hidden">
           <div className="preview-zoom-bar__group">
             <button
@@ -2158,15 +2146,6 @@ function ResumeBuilderPage({
         ) : null}
 
         <div ref={previewStageRef} className="preview-stage">
-          <button
-            type="button"
-            className={`preview-mobile-toggle ui-button lg:hidden ${
-              ui.button
-            }`}
-            onClick={handleToggleMobilePreview}
-          >
-            {locale === 'fi' ? 'Takaisin editoriin' : 'Back to editor'}
-          </button>
           <div
             className="preview-zoom-wrapper"
             style={{
@@ -2210,7 +2189,6 @@ function ResumeBuilderPage({
     handleFitWidth,
     handleSetZoomPercent,
     handleToggleFullscreenPreview,
-    handleToggleMobilePreview,
     handleZoomBy,
     isFitWidthZoom,
     isFullscreenPreview,
@@ -2223,11 +2201,6 @@ function ResumeBuilderPage({
     previewViewportRef,
     visiblePreviewRef,
     zoomPercent,
-    ui.button,
-    ui.surface,
-    ui.textMuted,
-    ui.textPrimary,
-    ui.textSecondary,
   ])
 
   // Classic's phone/tablet tab bar: one thin row (1.6.67). It used to add

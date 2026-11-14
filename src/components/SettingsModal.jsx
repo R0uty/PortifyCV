@@ -21,7 +21,7 @@ function SettingsModal({
   const isFinnish = locale === 'fi'
 
   return (
-    <Modal
+    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
       isOpen={isOpen}
       onClose={onClose}
       title={isFinnish ? 'Asetukset' : 'Settings'}

@@ -396,7 +396,7 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
         <Menu size={18} strokeWidth={2} aria-hidden="true" />
       </button>
 
-      <Modal isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} title={navLabel}>
+      <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'} isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} title={navLabel}>
         <nav className="project-header__mobile-nav" aria-label={navLabel}>
           <button
             type="button"
