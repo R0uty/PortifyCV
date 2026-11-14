@@ -120,9 +120,9 @@ function CVForm({
     selectedTemplate,
   )
   const inputClasses = `mt-2 w-full border px-4 py-3 text-sm transition ${ui.input}`
-  const actionButtonClasses = `border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
-  const removeButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.buttonDanger}`
-  const utilityButtonClasses = `border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
+  const actionButtonClasses = `ui-button ${ui.button}`
+  const removeButtonClasses = `ui-button ${ui.buttonDanger}`
+  const utilityButtonClasses = `ui-button ${ui.button}`
   const sectionMoveButtonClasses = `inline-flex h-7 w-7 items-center justify-center border transition ${ui.button}`
   const sectionDragDotClasses = 'h-1 w-1 bg-gray-500'
   const fieldLabelClassName = `${ui.textSoft} uppercase tracking-[0.06em] text-xs font-semibold`
@@ -567,7 +567,7 @@ function CVForm({
             />
             <button
               type="button"
-              className={`mt-2 border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+              className={`mt-2 ui-button ${ui.button}`}
               onClick={() => photoInputRef.current?.click()}
             >
               {isFinnish ? 'Valitse kuva' : 'Choose image'}
@@ -1888,7 +1888,7 @@ function CVForm({
               {hiddenCount > 0 || showAllLinks ? (
                 <button
                   type="button"
-                  className="mt-4 border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.06em] transition"
+                  className="mt-4 ui-button"
                   onClick={() => setShowAllLinks((value) => !value)}
                 >
                   {showAllLinks

@@ -176,8 +176,13 @@ select {
   font: inherit;
 }
 
+/* Without this a button that sets no background or border of its own
+   keeps the browser's: a grey fill and a 2px outset border. The Classic
+   zoom bar, panel toggles and every `.border` button showed it (1.6.83). */
 button {
   cursor: pointer;
+  background-color: transparent;
+  border: 0 solid var(--app-border-strong);
 }
 
 button:disabled {

@@ -968,7 +968,7 @@ function ResumeBuilderPage({
     }
   }, [])
 
-  const secondaryButtonClassName = `border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`
+  const secondaryButtonClassName = `ui-button ${ui.button}`
 
   // PDF export opens a preview first (1.6.74). The paper and fit picked there
   // last for the life of the tab, like the rest of the CV.
@@ -1626,7 +1626,9 @@ function ResumeBuilderPage({
       cancelAnimationFrame(frame)
       observer.disconnect()
     }
-  }, [isFitWidthZoom, isResponsivePreview])
+    // builderMode: the stage exists only in Classic, so coming over from
+    // Direct Edit has to start the fit; it used to stay at 100% (1.6.83).
+  }, [builderMode, isFitWidthZoom, isResponsivePreview])
 
   const handleFitPage = useCallback(() => {
     const viewport = previewViewportRef.current
@@ -2093,17 +2095,8 @@ function ResumeBuilderPage({
           >
             {locale === 'fi' ? 'Lataa demo-CV' : 'Load demo CV'}
           </button>
-          <button
-            type="button"
-            className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition lg:hidden ${
-              mobilePreviewVisible ? ui.buttonActive : ui.button
-            }`}
-            onClick={handleToggleMobilePreview}
-          >
-            {mobilePreviewVisible
-              ? locale === 'fi' ? 'Piilota esikatselu' : 'Hide preview'
-              : locale === 'fi' ? 'Näytä esikatselu' : 'Show preview'}
-          </button>
+          {/* No "Show preview" button here: below lg the bottom tab bar's
+              Preview tab does the same thing (1.6.83). */}
           <div
             className={`editor-status-pill ${ui.surfaceMuted} ${ui.textMuted}`}
             role="status"
@@ -2145,7 +2138,7 @@ function ResumeBuilderPage({
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+                  className={`ui-button ${ui.button}`}
                   disabled={isActionBusy}
                   onClick={handlePasteCvImport}
                 >
@@ -2153,7 +2146,7 @@ function ResumeBuilderPage({
                 </button>
                 <button
                   type="button"
-                  className={`border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+                  className={`ui-button ${ui.button}`}
                   disabled={isActionBusy}
                   onClick={handleImportClick}
                 >
@@ -2245,13 +2238,11 @@ function ResumeBuilderPage({
     handlePasteCvImport,
     handlePastedCvTextChange,
     handleToggleAtsFriendlyMode,
-    handleToggleMobilePreview,
     isActionBusy,
     isImporting,
     jobDescription,
     jobDescriptionAnalysis,
     locale,
-    mobilePreviewVisible,
     pastedCvText,
     secondaryButtonClassName,
     sectionSettingsExpandSignal,
@@ -2259,7 +2250,6 @@ function ResumeBuilderPage({
     selectedTemplate,
     dispatchFormData,
     ui.button,
-    ui.buttonActive,
     ui.input,
     ui.surface,
     ui.surfaceMuted,
@@ -2385,8 +2375,9 @@ function ResumeBuilderPage({
           <div className="preview-zoom-bar__group">
             <button
               type="button"
-              className="preview-zoom-bar__button"
+              className={`preview-zoom-bar__button${isFitWidthZoom ? ' preview-zoom-bar__button--active' : ''}`}
               onClick={handleFitWidth}
+              aria-pressed={isFitWidthZoom}
               aria-label={locale === 'fi' ? 'Sovita leveyteen' : 'Fit width'}
               title={locale === 'fi' ? 'Sovita leveyteen' : 'Fit width'}
             >
@@ -2408,13 +2399,15 @@ function ResumeBuilderPage({
           <div className="preview-zoom-bar__divider" />
 
           <div className="preview-zoom-bar__group">
-            {[100, 125, 150, 200].map((preset) => (
+            {/* Two presets; the − and + buttons reach everything between.
+                Four made the bar wrap to a second row (1.6.83). */}
+            {[100, 150].map((preset) => (
               <button
                 key={preset}
                 type="button"
-                className={`preview-zoom-bar__button${zoomPercent === preset ? ' preview-zoom-bar__button--active' : ''}`}
+                className={`preview-zoom-bar__button${!isFitWidthZoom && zoomPercent === preset ? ' preview-zoom-bar__button--active' : ''}`}
                 onClick={() => handleSetZoomPercent(preset)}
-                aria-pressed={zoomPercent === preset}
+                aria-pressed={!isFitWidthZoom && zoomPercent === preset}
               >
                 {preset}%
               </button>
@@ -2464,7 +2457,7 @@ function ResumeBuilderPage({
         <div ref={previewStageRef} className="preview-stage">
           <button
             type="button"
-            className={`preview-mobile-toggle border px-4 py-2 text-xs font-bold uppercase tracking-[0.06em] transition lg:hidden ${
+            className={`preview-mobile-toggle ui-button lg:hidden ${
               ui.button
             }`}
             onClick={handleToggleMobilePreview}
@@ -2516,6 +2509,7 @@ function ResumeBuilderPage({
     handleToggleFullscreenPreview,
     handleToggleMobilePreview,
     handleZoomBy,
+    isFitWidthZoom,
     isFullscreenPreview,
     isResponsivePreview,
     locale,
@@ -2546,7 +2540,7 @@ function ResumeBuilderPage({
           type="button"
           role="tab"
           aria-selected={!mobilePreviewVisible}
-          className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
+          className={`ui-button ${
             !mobilePreviewVisible ? ui.buttonActive : ui.button
           }`}
           onClick={() => {
@@ -2559,7 +2553,7 @@ function ResumeBuilderPage({
           type="button"
           role="tab"
           aria-selected={mobilePreviewVisible}
-          className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${
+          className={`ui-button ${
             mobilePreviewVisible ? ui.buttonActive : ui.button
           }`}
           onClick={() => {
@@ -2572,7 +2566,7 @@ function ResumeBuilderPage({
           type="button"
           role="tab"
           aria-selected={false}
-          className={`border px-3 py-2 text-xs font-bold uppercase tracking-[0.06em] transition ${ui.button}`}
+          className={`ui-button ${ui.button}`}
           onClick={() => setIsTemplateGalleryOpen(true)}
         >
           {locale === 'fi' ? 'Pohjat' : 'Templates'}

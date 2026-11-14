@@ -170,3 +170,64 @@ test.describe('Classic form in a narrow column', () => {
     await expect.poll(async () => (await layout()).zoom).toBe(fitted.zoom)
   })
 })
+
+// 1.6.83: Classic's chrome after the builder review.
+test.describe('Classic chrome', () => {
+  // A button with no background or border of its own kept the browser's
+  // grey fill and 2px outset border: the zoom bar, the panel toggles and
+  // every `.border` button.
+  test('no button keeps the browser\'s own button look', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await expect(page.locator('.preview-zoom-bar')).toBeVisible()
+
+    const native = await page.evaluate(() => [...document.querySelectorAll('button')]
+      .filter((button) => {
+        const style = getComputedStyle(button)
+        return style.borderTopStyle === 'outset' || style.backgroundColor === 'rgb(239, 239, 239)'
+      })
+      .map((button) => button.className || button.textContent.trim()))
+    expect(native).toEqual([])
+  })
+
+  test('Fit Width shows as selected until another zoom is picked', async ({ page }) => {
+    await page.goto('/cv')
+    const fitWidth = page.getByRole('button', { name: 'Fit width' })
+    const actualSize = page.locator('.preview-zoom-bar').getByRole('button', { name: '100%' })
+    await expect(fitWidth).toHaveAttribute('aria-pressed', 'true')
+    await expect(actualSize).toHaveAttribute('aria-pressed', 'false')
+
+    await actualSize.click()
+    await expect(fitWidth).toHaveAttribute('aria-pressed', 'false')
+    await expect(actualSize).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  // The preview stage exists only in Classic, and the fit used to start
+  // only when the page loaded there.
+  test('coming over from Direct Edit, the preview is fitted to the pane', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.addInitScript(() => window.localStorage.setItem('portifycv-builder-mode', 'direct'))
+    await page.goto('/cv')
+    await expect(page.locator('.direct-edit-preview')).toBeVisible()
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    const stage = page.locator('.preview-stage')
+    await expect
+      .poll(() => page.locator('.preview-zoom-wrapper').evaluate((el) => Number(el.style.getPropertyValue('--preview-zoom'))))
+      .toBeLessThan(1)
+    await expect.poll(() => stage.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(0)
+  })
+
+  test('at 1024px the toolbar stays on one row', async ({ page }) => {
+    await page.setViewportSize({ width: 1024, height: 768 })
+    await page.goto('/cv')
+    await expect(page.getByRole('searchbox', { name: 'Search sections' })).toBeVisible()
+    const tops = await page.locator('.app-toolbar__inner > *').evaluateAll((nodes) => nodes
+      .filter((node) => node.getBoundingClientRect().width > 0)
+      .map((node) => {
+        const box = node.getBoundingClientRect()
+        return Math.round(box.top + box.height / 2)
+      }))
+    expect(Math.max(...tops) - Math.min(...tops)).toBeLessThanOrEqual(4)
+  })
+})
