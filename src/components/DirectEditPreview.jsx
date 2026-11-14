@@ -19,6 +19,11 @@ export default function DirectEditPreview({
   cvFontId,
   overlayApiRef = null,
   onLoadDemo = null,
+  // Direct Edit's way into the ATS score and suggestions, which Classic
+  // shows in its form column (1.6.80).
+  atsScore = null,
+  onOpenAtsCheck = null,
+  onOpenTemplateGallery = null,
   // The app-wide ATS-friendly mode (also in Settings and Classic's ATS
   // panel). When on, both copies below render the ATS layout, so the CV
   // you edit is the one that exports.
@@ -61,7 +66,14 @@ export default function DirectEditPreview({
             dispatchFormData={dispatchFormData}
             templateConfig={templateConfig}
             locale={locale}
+            onOpenTemplateGallery={onOpenTemplateGallery}
           />
+          {onOpenAtsCheck ? (
+            <button type="button" className="direct-edit-sections__trigger" onClick={onOpenAtsCheck}>
+              {locale === 'fi' ? 'ATS-pisteet' : 'ATS score'}
+              {atsScore ? <strong className="direct-edit-ats-score">{atsScore.score}</strong> : null}
+            </button>
+          ) : null}
           {onToggleAtsFriendlyMode ? (
             <button
               type="button"

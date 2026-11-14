@@ -14,7 +14,7 @@ import { getCvTemplates } from './utils/cvTemplates'
 import { VIEW_HEAD, SITE_ORIGIN, DEFAULT_OG_IMAGE, buildViewSchema, localizedHead, PATH_TO_VIEW, TEMPLATE_VIEW_PREFIX, AD_FREE_VIEWS } from './utils/pageMeta'
 import { LocaleContext } from './components/localeContext'
 import { APP_VERSION } from './utils/appVersion'
-import { hasUnsavedChanges, leaveBack, leavePage } from './utils/leaveGuard'
+import { allowUnload, hasUnsavedChanges, leaveBack, leavePage } from './utils/leaveGuard'
 import LeaveConfirmDialog from './components/LeaveConfirmDialog'
 
 const CONTACT_MAILTO = 'mailto:portifycv@gmail.com'
@@ -682,6 +682,7 @@ function App({ route = null }) {
       setLeaveTarget(url)
       return
     }
+    allowUnload()
     window.location.assign(url)
   }, [])
 
@@ -748,6 +749,7 @@ function App({ route = null }) {
           window.history.pushState({ portifycv: BUILDER_GUARD_STATE }, '')
           setLeaveTarget(LEAVE_BACK)
         } else {
+          allowUnload()
           window.history.back()
         }
         return
@@ -766,6 +768,7 @@ function App({ route = null }) {
           setLeaveTarget(target)
           return
         }
+        allowUnload()
         window.location.reload()
         return
       }
@@ -887,6 +890,7 @@ function App({ route = null }) {
           onCopyShareLink={headerProps.onCopyShareLink}
           onOpenSettings={headerProps.onOpenSettings}
           onOpenCoverLetter={headerProps.onOpenCoverLetter}
+          onOpenImport={headerProps.onOpenImport}
           onClearCv={headerProps.onClearCv}
           isClearArmed={headerProps.isClearArmed}
           builderMode={headerProps.builderMode}

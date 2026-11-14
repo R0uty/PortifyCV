@@ -142,6 +142,9 @@ test('a variant survives a share link', async ({ page, context }) => {
 })
 
 test('a variant survives a JSON export and import', async ({ page }, testInfo) => {
+  // Off, so the second visit below starts from a clean builder, not from
+  // the kept copy of this one.
+  await page.addInitScript(() => window.localStorage.setItem('portifycv-session-restore', 'false'))
   await page.goto('/cv?template=minimal')
   await page.getByRole('button', { name: 'Load demo CV' }).first().click()
   await (await styleTrigger(page)).click()
@@ -159,7 +162,7 @@ test('a variant survives a JSON export and import', async ({ page }, testInfo) =
 })
 
 test('a variant survives a session restore', async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.setItem('portifycv-session-restore-enabled', 'true'))
+  await page.addInitScript(() => window.localStorage.setItem('portifycv-session-restore', 'true'))
   await page.goto('/cv?template=minimal')
   await (await styleTrigger(page)).click()
   await styleGroup(page).getByRole('radio', { name: minimalVariant.label.en }).click()

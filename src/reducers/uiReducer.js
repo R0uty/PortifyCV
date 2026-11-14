@@ -124,7 +124,7 @@ export function pickTemplateLook(state) {
 
 export function createInitialUiState(initialSession) {
   const storedLocale = safeStorageGet(UI_LOCALE_STORAGE_KEY).value
-  const storedSessionRestore = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value
+  const storedSessionRestore = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'true').value
   const storedNavRailCollapsed = safeStorageGet(UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, 'false').value
   const storedBuilderMode = safeStorageGet(UI_BUILDER_MODE_STORAGE_KEY, 'direct').value
 
@@ -143,7 +143,7 @@ export function createInitialUiState(initialSession) {
     coverLetterRole: '',
     coverLetterHiringManager: '',
     coverLetterBody: '',
-    sessionRestoreEnabled: storedSessionRestore === 'true',
+    sessionRestoreEnabled: storedSessionRestore !== 'false',
     templateAccentColors: getAllTemplateAccents(),
     cvFontId: DEFAULT_CV_FONT_ID,
     cvHeadingColor: DEFAULT_CV_HEADING_COLOR,

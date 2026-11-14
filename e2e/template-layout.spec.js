@@ -59,7 +59,7 @@ for (const template of cvTemplates) {
   for (const [fixtureId, cv] of Object.entries(STRESS_CVS)) {
     test(`${template.id} / stress:${fixtureId} @slow`, async ({ page }) => {
       await page.addInitScript((snapshot) => {
-        window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+        window.localStorage.setItem('portifycv-session-restore', 'true')
         window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
       }, JSON.stringify(cv))
       await page.goto(`/cv?template=${template.id}`)
@@ -86,7 +86,7 @@ for (const template of cvTemplates) {
   for (const [fixtureId, cv] of Object.entries(STRESS_CVS)) {
     test(`${template.id} / stress:${fixtureId} / ats @slow`, async ({ page }) => {
       await page.addInitScript((snapshot) => {
-        window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+        window.localStorage.setItem('portifycv-session-restore', 'true')
         window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
       }, JSON.stringify(cv))
       await page.goto(`/cv?template=${template.id}`)
@@ -118,7 +118,7 @@ for (const templateId of ['developer', 'navyProfessional', 'modernOrange']) {
   for (const [fixtureId, cv] of Object.entries(STRESS_CVS)) {
     test(`${templateId} / stress:${fixtureId} / direct-edit ats @slow`, async ({ page }) => {
       await page.addInitScript((snapshot) => {
-        window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+        window.localStorage.setItem('portifycv-session-restore', 'true')
         window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
       }, JSON.stringify(cv))
       await page.goto(`/cv?template=${templateId}`)

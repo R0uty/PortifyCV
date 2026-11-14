@@ -2,7 +2,10 @@
 /** @typedef {import('../types/cv').Locale} Locale */
 
 export const CV_ONBOARDING_SEEN_STORAGE_KEY = 'portifycv-onboarding-seen'
-export const CV_SESSION_RESTORE_ENABLED_STORAGE_KEY = 'portifycv-session-restore-enabled'
+// 'false' only when the visitor turned session restore off; on otherwise
+// (1.6.82). A new key: the old one ('portifycv-session-restore-enabled')
+// held 'false' for everyone who had never touched the switch.
+export const CV_SESSION_RESTORE_ENABLED_STORAGE_KEY = 'portifycv-session-restore'
 export const CV_SESSION_SNAPSHOT_STORAGE_KEY = 'portifycv-session-snapshot'
 
 export const EMPLOYMENT_TYPE_OPTIONS = [

@@ -303,7 +303,7 @@ test.describe('?style= handoff into the builder', () => {
 
   test('a restored session ignores ?style= and says so', async ({ page }) => {
     await page.goto('/cv')
-    await page.evaluate(() => window.localStorage.setItem('portifycv-session-restore-enabled', 'true'))
+    await page.evaluate(() => window.localStorage.setItem('portifycv-session-restore', 'true'))
     await page.reload()
     await page.getByRole('textbox', { name: /Full name/ }).fill('Grace Hopper')
     await expect

@@ -34,8 +34,10 @@ import {
 import AppShell from '../components/AppShell'
 import AppErrorBoundary from '../components/AppErrorBoundary'
 import ATSScorePanel from '../components/ATSScorePanel'
+import AtsCheckModal from '../components/AtsCheckModal'
 import BadgeModal from '../components/BadgeModal'
 import CoverLetterModal from '../components/CoverLetterModal'
+import ImportCvModal from '../components/ImportCvModal'
 import PdfPreviewModal from '../components/PdfPreviewModal'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
@@ -318,6 +320,7 @@ function loadInitialCvSession(locale = 'en') {
         // The sender's selected template (1.6.8); createInitialUiState
         // opens on it when it resolves.
         sharedTemplateId: shared.templateId,
+        isOwnCv: true,
         initialToast: createToast(isFinnish ? 'CV ladattu jakolinkistä.' : 'Loaded CV from share link.', 'success'),
         clearShareParam: false,
         storageIssue: hasStorageIssue,
@@ -348,7 +351,7 @@ function loadInitialCvSession(locale = 'en') {
   const requestedTemplateId = readInitialTemplateId()
   const requestedStyleId = parseStyleVariantParam(requestedTemplateId, params.get('style'))
 
-  const sessionRestoreEnabled = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'false').value === 'true'
+  const sessionRestoreEnabled = safeStorageGet(CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, 'true').value !== 'false'
 
   if (sessionRestoreEnabled) {
     const snapshotState = safeSessionStorageGet(CV_SESSION_SNAPSHOT_STORAGE_KEY)
@@ -366,6 +369,7 @@ function loadInitialCvSession(locale = 'en') {
 
         return {
           formData: restoredFormData,
+          isOwnCv: true,
           initialToast: createToast(
             hasPendingExample || hasPendingStyle
               ? isFinnish
@@ -523,6 +527,10 @@ function ResumeBuilderPage({
   const importInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
   const storageWarningShownRef = useRef(false)
+  // The demo, example or blank CV the builder last loaded, untouched; null
+  // once the CV came from the visitor (restored, shared or imported).
+  // Session restore keeps no copy of a CV that still matches it.
+  const pristineCvRef = useRef(initialSession.isOwnCv ? null : JSON.stringify(initialSession.formData))
   const sessionRestoreWarningShownRef = useRef(false)
   const shareWarningShownRef = useRef(false)
   const editorScrollRef = useRef(null)
@@ -559,6 +567,9 @@ function ResumeBuilderPage({
   const directEditNavLockRef = useRef(false)
   const [directEditToolbarHeight, setDirectEditToolbarHeight] = useState(0)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  // Direct Edit's ways into what Classic keeps in its form column.
+  const [isImportOpen, setIsImportOpen] = useState(false)
+  const [isAtsCheckOpen, setIsAtsCheckOpen] = useState(false)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
   // "Clear CV" (the toolbar's More menu since 1.6.67) is two-step: the
@@ -763,8 +774,23 @@ function ResumeBuilderPage({
       return undefined
     }
 
+    // Only a CV the visitor has made their own is kept. An untouched demo,
+    // example or blank CV isn't: with restore on by default (1.6.82) a
+    // kept copy of the sample CV would win over every "Use this example"
+    // link the visitor follows next (see loadInitialCvSession).
+    const writeSnapshot = () => {
+      const serialized = JSON.stringify(formData)
+
+      if (serialized === pristineCvRef.current) {
+        safeSessionStorageRemove(CV_SESSION_SNAPSHOT_STORAGE_KEY)
+        return { ok: true }
+      }
+
+      return safeSessionStorageSet(CV_SESSION_SNAPSHOT_STORAGE_KEY, serialized)
+    }
+
     const timeoutId = window.setTimeout(() => {
-      const result = safeSessionStorageSet(CV_SESSION_SNAPSHOT_STORAGE_KEY, JSON.stringify(formData))
+      const result = writeSnapshot()
 
       if (!result.ok && !sessionRestoreWarningShownRef.current) {
         sessionRestoreWarningShownRef.current = true
@@ -776,9 +802,12 @@ function ResumeBuilderPage({
         )
       }
     }, HISTORY_COMMIT_DELAY_MS)
+    // An edit made just before the page goes would miss the timer.
+    window.addEventListener('pagehide', writeSnapshot)
 
     return () => {
       window.clearTimeout(timeoutId)
+      window.removeEventListener('pagehide', writeSnapshot)
     }
   }, [formData, locale, sessionRestoreEnabled])
 
@@ -799,14 +828,10 @@ function ResumeBuilderPage({
     }
   }, [formData])
 
-  useEffect(() => {
-    if (sessionRestoreEnabled) {
-      return undefined
-    }
-    return registerUnsavedChangesCheck(
-      () => JSON.stringify(formDataRef.current) !== savedCvRef.current,
-    )
-  }, [sessionRestoreEnabled])
+  useEffect(() => registerUnsavedChangesCheck(
+    () => JSON.stringify(formDataRef.current) !== savedCvRef.current,
+    { keptInTab: () => sessionRestoreEnabled },
+  ), [sessionRestoreEnabled])
 
   useEffect(() => {
     if (initialSession.storageIssue) {
@@ -863,6 +888,7 @@ function ResumeBuilderPage({
       const startCv = withStyleVariant(exampleCv, selectedTemplate, initialSession.pendingStyleVariantId ?? DEFAULT_STYLE_VARIANT_ID)
       dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: startCv })
       markCvSaved(startCv)
+      pristineCvRef.current = JSON.stringify(startCv)
       applyStoredStyleVariantLook(startCv, selectedTemplate)
       const roleLabel = EXAMPLES[exampleId].role[locale === 'fi' ? 'fi' : 'en']
       showToast(locale === 'fi' ? `Esimerkki ladattu: ${roleLabel}.` : `Loaded the ${roleLabel} example.`)
@@ -1176,6 +1202,7 @@ function ResumeBuilderPage({
       markCvSaved(importedData)
       applyStoredStyleVariantLook(importedData, selectedTemplate)
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+      setIsImportOpen(false)
       showToast(locale === 'fi' ? `CV-tiedot tuotu tiedostosta ${file.name}.` : `Imported CV data from ${file.name}.`)
     } catch (error) {
       if (error instanceof SyntaxError) {
@@ -1211,6 +1238,7 @@ function ResumeBuilderPage({
     }
 
     setResetConfirmArmed(false)
+    pristineCvRef.current = JSON.stringify(createInitialCvData())
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
     // A cleared CV stores no variants, so every template goes back to its
     // original look (accent, plus the selected template's font/headings).
@@ -1226,6 +1254,7 @@ function ResumeBuilderPage({
 
   const handleLoadDemo = useCallback(() => {
     const demo = structuredClone(demoCvData)
+    pristineCvRef.current = JSON.stringify(demo)
     // One click replaces whatever is on the page. Undo brings it back, so
     // say so when there was a CV of the visitor's own to lose (1.6.78).
     const current = formDataRef.current
@@ -1254,6 +1283,7 @@ function ResumeBuilderPage({
       dispatchFormData({ type: FORM_ACTION.MERGE_FORM_DATA, partialData: parsedData })
       dispatchUi({ type: UI_ACTION.SET_PASTED_CV_TEXT, value: '' })
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+      setIsImportOpen(false)
       showToast(locale === 'fi' ? 'Liitetty CV-teksti tuotu.' : 'Pasted CV text imported.')
     } catch (error) {
       showToast(
@@ -1453,6 +1483,11 @@ function ResumeBuilderPage({
   const handleOpenSettings = useCallback(() => {
     setIsSettingsOpen(true)
   }, [])
+
+  const handleOpenImport = useCallback(() => setIsImportOpen(true), [])
+  const handleCloseImport = useCallback(() => setIsImportOpen(false), [])
+  const handleOpenAtsCheck = useCallback(() => setIsAtsCheckOpen(true), [])
+  const handleCloseAtsCheck = useCallback(() => setIsAtsCheckOpen(false), [])
 
   const handleLocaleChange = useCallback((nextLocale) => {
     dispatchUi({ type: UI_ACTION.SET_LOCALE, locale: nextLocale === 'fi' ? 'fi' : 'en' })
@@ -1897,6 +1932,7 @@ function ResumeBuilderPage({
       onToggleResponsivePreview: handleToggleResponsivePreview,
       onOpenSettings: handleOpenSettings,
       onOpenCoverLetter: handleOpenCoverLetter,
+      onOpenImport: handleOpenImport,
       onClearCv: handleResetForm,
       isClearArmed: resetConfirmArmed,
       builderMode,
@@ -1913,7 +1949,7 @@ function ResumeBuilderPage({
     searchQuery,
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
-    handleOpenSettings, handleOpenCoverLetter,
+    handleOpenSettings, handleOpenCoverLetter, handleOpenImport,
     handleResetForm, resetConfirmArmed,
     builderMode, handleSetBuilderMode,
     onHeaderChange,
@@ -2047,13 +2083,6 @@ function ResumeBuilderPage({
 
   const sidebarContent = useMemo(() => (
     <div className="editor-panel p-4 sm:p-6 lg:p-8" ref={editorScrollRef}>
-      <input
-        ref={importInputRef}
-        type="file"
-        accept=".json,application/json"
-        className="hidden"
-        onChange={handleImportFile}
-      />
       <div className="stack-5">
         <div className="flex flex-wrap gap-3">
           <button
@@ -2079,7 +2108,9 @@ function ResumeBuilderPage({
             className={`editor-status-pill ${ui.surfaceMuted} ${ui.textMuted}`}
             role="status"
           >
-            {locale === 'fi' ? 'Ei tallenneta minnekään' : 'Nothing saved anywhere'}
+            {sessionRestoreEnabled
+              ? locale === 'fi' ? 'Säilyy vain tässä välilehdessä' : 'Kept in this tab only'
+              : locale === 'fi' ? 'Ei tallenneta minnekään' : 'Nothing saved anywhere'}
           </div>
         </div>
 
@@ -2209,7 +2240,6 @@ function ResumeBuilderPage({
     handleClearJobDescription,
     handleCopyMissingKeywords,
     handleImportClick,
-    handleImportFile,
     handleJobDescriptionChange,
     handleLoadDemo,
     handlePasteCvImport,
@@ -2225,6 +2255,7 @@ function ResumeBuilderPage({
     pastedCvText,
     secondaryButtonClassName,
     sectionSettingsExpandSignal,
+    sessionRestoreEnabled,
     selectedTemplate,
     dispatchFormData,
     ui.button,
@@ -2560,6 +2591,15 @@ function ResumeBuilderPage({
   return (
     <>
       <h1 className="sr-only">{locale === 'fi' ? 'Rakenna CV:si' : 'Build Your CV'}</h1>
+      {/* One picker for both modes: Classic's Import CV panel and Direct
+          Edit's Import CV dialog both open it (1.6.80). */}
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".json,application/json"
+        className="hidden"
+        onChange={handleImportFile}
+      />
       {builderMode === 'direct' ? (
         <div
           className={`direct-edit-layout${navRailCollapsed ? ' direct-edit-layout--nav-collapsed' : ''}`}
@@ -2576,6 +2616,9 @@ function ResumeBuilderPage({
               <DirectEditPreview
                 overlayApiRef={directEditOverlayRef}
                 onLoadDemo={handleLoadDemo}
+                atsScore={atsScore}
+                onOpenAtsCheck={handleOpenAtsCheck}
+                onOpenTemplateGallery={handleOpenTemplateGallery}
                 formData={formData}
                 dispatchFormData={dispatchFormData}
                 selectedTemplate={selectedTemplate}
@@ -2668,6 +2711,34 @@ function ResumeBuilderPage({
         onTemplateAccentColorChange={handleTemplateAccentColorChange}
         classicNameAlignment={classicNameAlignment}
         onClassicNameAlignmentChange={handleClassicNameAlignmentChange}
+      />
+
+      <ImportCvModal
+        isOpen={isImportOpen}
+        onClose={handleCloseImport}
+        locale={locale}
+        pastedCvText={pastedCvText}
+        onPastedCvTextChange={handlePastedCvTextChange}
+        onPasteImport={handlePasteCvImport}
+        onImportJson={handleImportClick}
+        isImporting={isImporting}
+        isBusy={isActionBusy}
+      />
+
+      <AtsCheckModal
+        isOpen={isAtsCheckOpen}
+        onClose={handleCloseAtsCheck}
+        locale={locale}
+        feedback={feedback}
+        atsScore={atsScore}
+        atsFriendlyMode={atsFriendlyMode}
+        onToggleAtsFriendlyMode={handleToggleAtsFriendlyMode}
+        jobDescription={jobDescription}
+        onJobDescriptionChange={handleJobDescriptionChange}
+        onAddMissingKeyword={handleAddMissingKeyword}
+        onCopyMissingKeywords={handleCopyMissingKeywords}
+        onClearJobDescription={handleClearJobDescription}
+        jobDescriptionAnalysis={jobDescriptionAnalysis}
       />
 
       <BadgeModal

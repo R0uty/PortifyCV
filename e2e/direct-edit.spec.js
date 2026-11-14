@@ -2452,3 +2452,74 @@ test.describe('Direct Edit chrome stays off the CV', () => {
     expect(pencilBox.x).toBeGreaterThanOrEqual(sectionBox.x + sectionBox.width)
   })
 })
+
+// Classic keeps Import CV and the ATS panels in its form column, which
+// Direct Edit doesn't render, so the default mode had no way to load a
+// JSON backup or see the score (1.6.80-1.6.81).
+test.describe('Direct Edit reaches import, the ATS score and the missing sections', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+  })
+
+  test('More actions > Import CV loads a JSON backup and closes the dialog', async ({ page }) => {
+    await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: 'Import CV' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Import CV' })
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByRole('button', { name: 'Import pasted text' })).toBeDisabled()
+
+    const chooser = page.waitForEvent('filechooser')
+    await dialog.getByRole('button', { name: 'Import JSON' }).click()
+    await (await chooser).setFiles({
+      name: 'backup.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify({ fullName: 'Imported Person', title: 'Welder' })),
+    })
+
+    await expect(dialog).toBeHidden()
+    await expect(page.locator('.direct-edit-preview [data-cv-name]')).toHaveText('Imported Person')
+  })
+
+  test('Import CV reads pasted text', async ({ page }) => {
+    await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: 'Import CV' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Import CV' })
+    await dialog.getByRole('textbox', { name: 'Pasted CV text' }).fill('Pasted Person\nNurse\nSkills: Triage, First aid')
+    await dialog.getByRole('button', { name: 'Import pasted text' }).click()
+
+    await expect(dialog).toBeHidden()
+    await expect(page.locator('.direct-edit-preview [data-cv-name]')).toHaveText('Pasted Person')
+  })
+
+  test('Classic has no Import CV item in More actions', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+    await expect(page.getByRole('menuitem', { name: 'Settings' })).toBeVisible()
+    await expect(page.getByRole('menuitem', { name: 'Import CV' })).toHaveCount(0)
+  })
+
+  test('the ATS score button shows the score and opens the score and suggestions', async ({ page }) => {
+    await page.locator('.direct-edit-actions').getByRole('button', { name: 'Load demo CV' }).click()
+    const button = page.locator('.direct-edit-actions').getByRole('button', { name: /^ATS score/ })
+    await expect(button.locator('.direct-edit-ats-score')).toHaveText(/^\d+$/)
+
+    await button.click()
+    const dialog = page.getByRole('dialog', { name: 'ATS score & suggestions' })
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByText('Parser-readiness overview')).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeHidden()
+  })
+
+  test('the Sections panel names what the template leaves out and links to the gallery', async ({ page }) => {
+    await page.getByRole('button', { name: 'Sections', exact: true }).click()
+    const note = page.locator('.direct-edit-sections__missing')
+    // Minimalist, the default: five sections of twenty.
+    await expect(note).toContainText('Not in this template: Languages, Certificates, Projects, Core Strengths and 11 more.')
+
+    await note.getByRole('button', { name: 'See other templates' }).click()
+    await expect(page.getByRole('dialog', { name: 'Template gallery' })).toBeVisible()
+    await expect(page.locator('.direct-edit-sections__panel')).toHaveCount(0)
+  })
+})

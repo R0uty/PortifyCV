@@ -350,7 +350,7 @@ console.log('\nuiReducer\n')
   check('createInitialUiState starts with no toasts', state.toasts.length === 0)
   const withToast = createInitialUiState({ initialToast: { id: 't1', message: 'hi' } })
   check('createInitialUiState seeds an initial toast when given one', withToast.toasts.length === 1)
-  check('createInitialUiState defaults session restore to off', state.sessionRestoreEnabled === false)
+  check('createInitialUiState defaults session restore to on', state.sessionRestoreEnabled === true)
 }
 
 {
@@ -438,9 +438,9 @@ console.log('\nuiReducer\n')
 {
   const state = createInitialUiState({})
   const next = uiReducer(state, { type: UI_ACTION.TOGGLE_SESSION_RESTORE })
-  check('TOGGLE_SESSION_RESTORE flips session restore on', next.sessionRestoreEnabled === true)
+  check('TOGGLE_SESSION_RESTORE flips session restore off', next.sessionRestoreEnabled === false)
   const backAgain = uiReducer(next, { type: UI_ACTION.TOGGLE_SESSION_RESTORE })
-  check('TOGGLE_SESSION_RESTORE is reversible', backAgain.sessionRestoreEnabled === false)
+  check('TOGGLE_SESSION_RESTORE is reversible', backAgain.sessionRestoreEnabled === true)
 }
 
 {

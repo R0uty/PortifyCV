@@ -239,7 +239,7 @@ test.describe('Template pages', () => {
 
   test('an example link never overwrites a restored session', async ({ page }) => {
     await page.goto('/cv')
-    await page.evaluate(() => window.localStorage.setItem('portifycv-session-restore-enabled', 'true'))
+    await page.evaluate(() => window.localStorage.setItem('portifycv-session-restore', 'true'))
     await page.reload()
     await page.getByRole('textbox', { name: /Full name/ }).fill('Grace Hopper')
     await expect

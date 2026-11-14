@@ -8,9 +8,15 @@
 // allow nothing else.
 
 let currentCheck = null
+let currentKeptInTab = null
 let isLeaving = false
 
-export function registerUnsavedChangesCheck(check) {
+// `keptInTab` (1.6.82): true while session restore holds a copy of the CV
+// in this tab. Moving to another page of the site then loses nothing, so
+// hasUnsavedChanges() says no and App.jsx doesn't ask. Closing the tab
+// still clears that copy, and a page can't tell a close from a reload, so
+// the browser's own prompt stays for both.
+export function registerUnsavedChangesCheck(check, { keptInTab = () => false } = {}) {
   const handleBeforeUnload = (event) => {
     if (!isLeaving && check()) {
       event.preventDefault()
@@ -19,19 +25,36 @@ export function registerUnsavedChangesCheck(check) {
     }
   }
 
+  // A page kept in the back/forward cache comes back with its guard on.
+  const handlePageShow = (event) => {
+    if (event.persisted) {
+      isLeaving = false
+    }
+  }
+
   currentCheck = check
+  currentKeptInTab = keptInTab
   window.addEventListener('beforeunload', handleBeforeUnload)
+  window.addEventListener('pageshow', handlePageShow)
 
   return () => {
     window.removeEventListener('beforeunload', handleBeforeUnload)
+    window.removeEventListener('pageshow', handlePageShow)
     if (currentCheck === check) {
       currentCheck = null
+      currentKeptInTab = null
     }
   }
 }
 
 export function hasUnsavedChanges() {
-  return currentCheck ? currentCheck() : false
+  return currentCheck ? currentCheck() && !currentKeptInTab?.() : false
+}
+
+// For a move within the site that hasUnsavedChanges() didn't need to ask
+// about: the browser's prompt must not ask either.
+export function allowUnload() {
+  isLeaving = true
 }
 
 // A page load the visitor already confirmed in the dialog: no second,

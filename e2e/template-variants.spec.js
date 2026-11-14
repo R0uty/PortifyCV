@@ -22,7 +22,7 @@ const ATS_SHOWCASE_TEMPLATES = new Set(['timeline', 'navyProfessional', 'modernO
 
 async function openWithVariant(page, templateId, variantId, cv) {
   await page.addInitScript((snapshot) => {
-    window.localStorage.setItem('portifycv-session-restore-enabled', 'true')
+    window.localStorage.setItem('portifycv-session-restore', 'true')
     window.sessionStorage.setItem('portifycv-session-snapshot', snapshot)
   }, JSON.stringify({ ...cv, styleVariantByTemplate: { [templateId]: variantId } }))
   await page.goto(`/cv?template=${templateId}`)

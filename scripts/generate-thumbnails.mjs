@@ -223,7 +223,8 @@ async function captureWalkthrough(locale) {
   await page.getByRole('button', { name: text.settings, exact: true }).first().click()
   const settings = page.getByRole('dialog', { name: text.settings })
   await settings.waitFor()
-  await settings.locator('.settings-row', { hasText: text.restore }).locator('.toggle-switch').click()
+  // On by default (1.6.82): the figure shows the switch as a visitor finds it.
+  await settings.locator('.settings-row', { hasText: text.restore }).getByRole('checkbox', { checked: true }).waitFor({ state: 'attached' })
   await shoot(page, 'restore', [settings])
   await page.context().close()
 }
