@@ -9,7 +9,7 @@ function AtsCheckModal({ isOpen, onClose, locale = 'en', feedback, ...atsPanelPr
   const isFinnish = locale === 'fi'
 
   return (
-    <Modal
+    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
       isOpen={isOpen}
       onClose={onClose}
       size="lg"

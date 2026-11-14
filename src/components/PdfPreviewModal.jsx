@@ -186,7 +186,7 @@ function PdfPreviewModal({
   }
 
   return (
-    <Modal
+    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
       isOpen
       onClose={onClose}
       size="xl"

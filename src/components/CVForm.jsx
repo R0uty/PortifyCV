@@ -123,7 +123,7 @@ function CVForm({
   const actionButtonClasses = `ui-button ${ui.button}`
   const removeButtonClasses = `ui-button ${ui.buttonDanger}`
   const utilityButtonClasses = `ui-button ${ui.button}`
-  const sectionMoveButtonClasses = `inline-flex h-7 w-7 items-center justify-center border transition ${ui.button}`
+  const sectionMoveButtonClasses = `section-move-button inline-flex h-7 w-7 items-center justify-center border transition ${ui.button}`
   const sectionDragDotClasses = 'h-1 w-1 bg-gray-500'
   const fieldLabelClassName = `${ui.textSoft} uppercase tracking-[0.06em] text-xs font-semibold`
   const itemCardClasses = `border p-4 ${ui.surfaceMuted}`
@@ -795,6 +795,7 @@ function CVForm({
                             placeholder={isFinnish ? 'Kuvaile mitattava tulos' : 'Describe a measurable result'}
                             addLabel={isFinnish ? 'Lisää saavutus' : 'Add achievement'}
                             itemAriaLabel={isFinnish ? 'Saavutus' : 'Achievement'}
+                            locale={isFinnish ? 'fi' : 'en'}
                           />
                         </div>
                         <div className="mt-4">

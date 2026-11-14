@@ -3,7 +3,7 @@ import { X } from 'lucide-react'
 
 import { getTabStops } from '../utils/focusTrap'
 
-function Modal({ isOpen, onClose, title, description, children, size = 'md' }) {
+function Modal({ isOpen, onClose, title, description, children, size = 'md', closeLabel = 'Close' }) {
   const panelRef = useRef(null)
   const previouslyFocusedRef = useRef(null)
   // Callers commonly pass an inline arrow for onClose. Reading it through a ref
@@ -87,7 +87,7 @@ function Modal({ isOpen, onClose, title, description, children, size = 'md' }) {
             type="button"
             className="modal-panel__close"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={closeLabel}
           >
             <X size={16} strokeWidth={2} aria-hidden="true" />
           </button>

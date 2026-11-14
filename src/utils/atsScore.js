@@ -93,6 +93,10 @@ function createAtsCopy(locale = 'en') {
       ? 'Keskeiset ATS-osiot ovat mukana.'
       : 'Core ATS sections are present.',
     sectionsMissingPrefix: isFinnish ? 'Lisää tai laajenna: ' : 'Add or expand: ',
+    // The names the hint above lists (1.6.89: they used to stay English).
+    sectionNames: isFinnish
+      ? { 'full name': 'nimi', title: 'titteli', about: 'yhteenveto', skills: 'taidot', experience: 'kokemus', education: 'koulutus', links: 'linkit' }
+      : {},
     lengthGood: isFinnish
       ? 'Osioiden pituus on riittävän tiivis ATS:lle ja rekrytoijan silmäilyyn.'
       : 'Section lengths are concise enough for fast ATS and recruiter scanning.',
@@ -225,7 +229,7 @@ function scoreSectionCompleteness(snapshot, copy) {
     summary:
       missingSections.length === 0
         ? copy.sectionsReady
-        : `${copy.sectionsMissingPrefix}${missingSections.slice(0, 3).join(', ')}.`,
+        : `${copy.sectionsMissingPrefix}${missingSections.slice(0, 3).map((name) => copy.sectionNames[name] ?? name).join(', ')}.`,
   }
 }
 

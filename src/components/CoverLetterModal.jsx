@@ -26,7 +26,7 @@ function CoverLetterModal({
   const hasBody = letterBody.trim().length > 0
 
   return (
-    <Modal
+    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
       isOpen={isOpen}
       onClose={onClose}
       size="lg"

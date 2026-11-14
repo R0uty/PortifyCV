@@ -456,10 +456,12 @@ export default function SectionEditOverlay({
   // container (~765px of 1088 with a 380px popup), so neither side fits
   // and covering part of the section is the only option left.
   useLayoutEffect(() => {
-    // No reset-to-null branch here: popupPosition is only read from the
-    // render below while `openSectionKey && hovered` is true, so a stale
-    // value while closed is harmless, and this effect recomputes a fresh
-    // one as soon as a popup opens again.
+    // No reset-to-null branch here: a position is stored with the section
+    // it was measured for (`key`), and the render below ignores one that
+    // belongs to another section. Before 1.6.88 it didn't, so the second
+    // popup of a session was first drawn where the previous one had been,
+    // the scroll-into-view effect below scrolled to that stale spot, and
+    // the popup then moved to its own section, sometimes off-screen.
     if (!openSectionKey || !hovered) {
       return
     }
@@ -499,7 +501,11 @@ export default function SectionEditOverlay({
       left = Math.max(hovered.right, popupWidth)
     }
 
-    setPopupPosition((prev) => (prev && prev.top === top && prev.left === left ? prev : { top, left }))
+    setPopupPosition((prev) => (
+      prev && prev.key === openSectionKey && prev.top === top && prev.left === left
+        ? prev
+        : { key: openSectionKey, top, left }
+    ))
   }, [openSectionKey, hovered, focusEntry])
 
   useImperativeHandle(apiRef, () => ({
@@ -521,15 +527,19 @@ export default function SectionEditOverlay({
 
   // Bring the popup fully into view once it opens (e.g. a section near
   // the bottom of a long, scrollable preview) — complements the clamp
-  // above, which only keeps it inside the container's own bounds.
+  // above, which only keeps it inside the container's own bounds. It
+  // waits for this section's own position: scrolling any earlier would
+  // aim at wherever the popup was drawn before it was placed.
   useEffect(() => {
-    if (!openSectionKey) {
+    if (!openSectionKey || popupPosition?.key !== openSectionKey) {
       return
     }
 
     const popupEl = popupAnchorRef.current?.querySelector('.direct-edit-popup')
     popupEl?.scrollIntoView({ block: 'nearest' })
-  }, [openSectionKey])
+  }, [openSectionKey, popupPosition])
+
+  const placedPosition = popupPosition?.key === openSectionKey ? popupPosition : null
 
   return (
     <div ref={containerRef} className="direct-edit-overlay-host">
@@ -616,8 +626,8 @@ export default function SectionEditOverlay({
           ref={popupAnchorRef}
           className="direct-edit-popup-anchor"
           style={{
-            top: `${popupPosition ? popupPosition.top : (focusEntry ? focusEntry.top : hovered.top)}px`,
-            left: `${popupPosition ? popupPosition.left : hovered.right}px`,
+            top: `${placedPosition ? placedPosition.top : (focusEntry ? focusEntry.top : hovered.top)}px`,
+            left: `${placedPosition ? placedPosition.left : hovered.right}px`,
           }}
         >
           <SectionEditorPopup

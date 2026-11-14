@@ -8,7 +8,10 @@ function ReorderableListInput({
   placeholder = '',
   addLabel = 'Add',
   itemAriaLabel = 'Item',
+  locale = 'en',
 }) {
+  const isFinnish = locale === 'fi'
+  const itemName = itemAriaLabel.toLowerCase()
   // Items are plain strings with no identity of their own, but reordering
   // needs a key that follows the moved value (not its slot) so keyboard
   // focus stays on the row the user just moved. `ids` mirrors every
@@ -92,7 +95,7 @@ function ReorderableListInput({
               className="reorderable-list__icon-button"
               onClick={() => moveBy(index, -1)}
               disabled={index === 0}
-              aria-label={`Move ${itemAriaLabel.toLowerCase()} ${index + 1} up`}
+              aria-label={isFinnish ? `Siirrä ylös: ${itemName} ${index + 1}` : `Move ${itemName} ${index + 1} up`}
             >
               <ChevronUp size={14} strokeWidth={2} aria-hidden="true" />
             </button>
@@ -101,7 +104,7 @@ function ReorderableListInput({
               className="reorderable-list__icon-button"
               onClick={() => moveBy(index, 1)}
               disabled={index === items.length - 1}
-              aria-label={`Move ${itemAriaLabel.toLowerCase()} ${index + 1} down`}
+              aria-label={isFinnish ? `Siirrä alas: ${itemName} ${index + 1}` : `Move ${itemName} ${index + 1} down`}
             >
               <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
             </button>
@@ -109,7 +112,7 @@ function ReorderableListInput({
               type="button"
               className="reorderable-list__icon-button reorderable-list__icon-button--danger"
               onClick={() => removeAt(index)}
-              aria-label={`Remove ${itemAriaLabel.toLowerCase()} ${index + 1}`}
+              aria-label={isFinnish ? `Poista: ${itemName} ${index + 1}` : `Remove ${itemName} ${index + 1}`}
             >
               <X size={14} strokeWidth={2} aria-hidden="true" />
             </button>

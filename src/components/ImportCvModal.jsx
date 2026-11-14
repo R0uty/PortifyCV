@@ -19,7 +19,7 @@ function ImportCvModal({
   const ui = getUiTheme()
 
   return (
-    <Modal
+    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
       isOpen={isOpen}
       onClose={onClose}
       title={isFinnish ? 'Tuo CV' : 'Import CV'}
