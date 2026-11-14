@@ -218,6 +218,26 @@ test.describe('Classic chrome', () => {
     await expect.poll(() => stage.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(0)
   })
 
+  // The mode switch is a tablist: one tab stop, arrow keys to move (1.6.85).
+  test('the mode switch works with the arrow keys and takes one tab stop', async ({ page }) => {
+    await page.goto('/cv')
+    const direct = page.getByRole('tab', { name: 'Direct Edit' })
+    const classic = page.getByRole('tab', { name: 'Classic' })
+    await expect(classic).toHaveAttribute('aria-selected', 'true')
+    await expect(classic).toHaveAttribute('tabindex', '0')
+    await expect(direct).toHaveAttribute('tabindex', '-1')
+
+    await classic.focus()
+    await page.keyboard.press('ArrowLeft')
+    await expect(direct).toHaveAttribute('aria-selected', 'true')
+    await expect(direct).toBeFocused()
+    await expect(page.locator('.direct-edit-preview')).toBeVisible()
+
+    await page.keyboard.press('End')
+    await expect(classic).toHaveAttribute('aria-selected', 'true')
+    await expect(classic).toBeFocused()
+  })
+
   test('at 1024px the toolbar stays on one row', async ({ page }) => {
     await page.setViewportSize({ width: 1024, height: 768 })
     await page.goto('/cv')
