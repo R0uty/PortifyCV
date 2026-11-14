@@ -45,7 +45,7 @@ focus return, and no page overflow at 375 px in either mode.
 
 ### Bugs
 
-- [ ] **1. A section popup can open off-screen.** From the second popup
+- [x] **1. A section popup can open off-screen.** From the second popup
       onwards it is first drawn where the previous one was, the page
       scrolls to that stale spot, and only then does it move to its
       section. Measured at 1440x900: Developer, open Languages (bottom of
@@ -54,14 +54,16 @@ focus return, and no page overflow at 375 px in either mode.
       a 630 px popup with about 230 px showing (Minimalist, Education).
       `SectionEditOverlay.jsx`: the scroll-into-view effect runs before
       `popupPosition` is recomputed.
-- [ ] **2. Collapsed Classic panels keep their controls in the Tab
+- [x] **2. Collapsed Classic panels keep their controls in the Tab
       order.** With "Visible sections" closed (`aria-expanded="false"`,
       body 0 px high) Tab still walks its 16 hidden move buttons and
       switches, so focus disappears for 16 presses. Applies to every
       collapsed `.panel-section`.
-- [ ] **3. HTML export scrolls sideways on a phone.** 38 px of overflow at
+- [x] **3. HTML export scrolls sideways on a phone.** 38 px of overflow at
       375 px: the experience date line (`.xp-date`, `white-space: nowrap`
       in `exporters.js`) cannot wrap.
+
+Items 1 to 3 fixed in 1.6.88, each with an e2e test.
 
 ### Finnish
 

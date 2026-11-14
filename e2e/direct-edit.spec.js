@@ -2537,3 +2537,33 @@ test.describe('Direct Edit reaches import, the ATS score and the missing section
     await expect(page.locator('.direct-edit-sections__panel')).toHaveCount(0)
   })
 })
+
+// 1.6.88: from the second popup of a session onwards the popup was first
+// drawn where the previous one had been, the page scrolled to that stale
+// spot, and the popup then moved to its own section. On Developer that
+// left the About popup several hundred pixels above the window.
+test('a popup opened after another one elsewhere on the page stays on screen', async ({ page }) => {
+  await page.goto('/cv')
+  await page.getByRole('tab', { name: 'Direct Edit' }).click()
+  await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+  await pickTemplate(page, 'Developer')
+
+  const popup = page.locator('.direct-edit-popup')
+  const open = async (sectionKey) => {
+    const section = page.locator(`.direct-edit-preview [data-export-section="${sectionKey}"]`).first()
+    await section.scrollIntoViewIfNeeded()
+    await section.hover({ position: { x: 20, y: 12 } })
+    await page.locator('.direct-edit-pencil--active').click()
+    await expect(popup).toBeVisible()
+  }
+
+  // Languages sits at the bottom of the sidebar, About at the top of the
+  // main column.
+  await open('languages')
+  await page.keyboard.press('Escape')
+  await expect(popup).toBeHidden()
+  await open('about')
+
+  await expect(popup.locator('.direct-edit-popup__title')).toHaveText('About')
+  await expect(popup).toBeInViewport({ ratio: 1 })
+})

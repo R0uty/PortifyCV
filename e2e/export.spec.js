@@ -151,6 +151,20 @@ test.describe('Export contents', () => {
     expect(word.rels).toContain(`Target="${demoCvData.links.github}"`)
   })
 
+  // 1.6.88: the experience date line could not wrap, so the exported
+  // page scrolled sideways on a phone.
+  test('the HTML export fits a phone screen without scrolling sideways', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    const html = (await exportAs(page, 'HTML')).toString('utf8')
+
+    await page.setViewportSize({ width: 375, height: 800 })
+    await page.setContent(html)
+
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+    expect(overflow).toBeLessThanOrEqual(0)
+  })
+
   test('a blank CV exports without the editor placeholders', async ({ page }) => {
     await page.goto('/cv')
     const placeholders = /Your Name|Professional Title|Add a professional summary|No (experience|education|links) added yet/

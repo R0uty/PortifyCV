@@ -73,7 +73,10 @@ function PanelSection({
         </button>
       </div>
       <div className={`panel-section__body${isCollapsed ? ' panel-section__body--collapsed' : ''}`}>
-        <div className="panel-section__body-inner">
+        {/* inert while collapsed (1.6.88): the body is only clipped to
+            zero height, so without it Tab kept walking every hidden
+            control inside a closed panel. */}
+        <div className="panel-section__body-inner" inert={isCollapsed}>
           <div className="mt-6">{children}</div>
         </div>
       </div>

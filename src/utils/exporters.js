@@ -826,6 +826,7 @@ header { display: flex; gap: 1.5rem; align-items: flex-start; justify-content: s
 .volunteer-item { margin-bottom: 1.125rem; }
 .volunteer-role { font-weight: 600; font-size: 0.95rem; }
 .volunteer-desc { margin-top: 0.25rem; font-size: 0.85rem; color: #334155; line-height: 1.6; white-space: pre-line; }
+@media (max-width: 640px) { .xp-date { white-space: normal; } }
 @media print { body { padding: 0; max-width: none; } }
 </style>
 </head>

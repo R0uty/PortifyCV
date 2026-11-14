@@ -173,6 +173,26 @@ test.describe('Classic form in a narrow column', () => {
 
 // 1.6.83: Classic's chrome after the builder review.
 test.describe('Classic chrome', () => {
+  // 1.6.88: a collapsed panel is only clipped to zero height, so Tab kept
+  // walking every hidden control inside it.
+  test('a collapsed panel takes its controls out of the Tab order', async ({ page }) => {
+    await page.goto('/cv')
+
+    const toggle = page.getByRole('button', { name: 'Visible sections', exact: true })
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false')
+
+    await toggle.focus()
+    await page.keyboard.press('Tab')
+    const insideCollapsed = () => page.evaluate(() => Boolean(document.activeElement.closest('.panel-section__body--collapsed')))
+    expect(await insideCollapsed()).toBe(false)
+
+    // Open, its first control is the next Tab stop again.
+    await toggle.click()
+    await toggle.focus()
+    await page.keyboard.press('Tab')
+    await expect(page.getByRole('button', { name: 'Move About down' })).toBeFocused()
+  })
+
   // A button with no background or border of its own kept the browser's
   // grey fill and 2px outset border: the zoom bar, the panel toggles and
   // every `.border` button.
