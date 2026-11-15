@@ -1,9 +1,10 @@
 import Modal from './Modal'
 import { getUiTheme } from '../utils/designSystem'
 
-// Import for Direct Edit (1.6.80). Classic has the same two imports in its
+// Import for Direct Edit (1.6.80). Classic has the same imports in its
 // form column, which Direct Edit doesn't render, so a JSON backup made
-// from the Export menu had no way back in from the default mode.
+// from the Export menu had no way back in from the default mode. The first
+// row (1.7.0) takes the user's existing CV as a PDF or Word file.
 function ImportCvModal({
   isOpen,
   onClose,
@@ -12,6 +13,7 @@ function ImportCvModal({
   onPastedCvTextChange,
   onPasteImport,
   onImportJson,
+  onImportCvFile,
   isImporting = false,
   isBusy = false,
 }) {
@@ -27,6 +29,20 @@ function ImportCvModal({
         ? 'Tiedosto ja teksti käsitellään selaimessasi. Mitään ei lähetetä minnekään.'
         : 'The file and the text are read in your browser. Nothing is sent anywhere.'}
     >
+      <div className="settings-row">
+        <div>
+          <p className="settings-row__label">{isFinnish ? 'Lataa oma CV' : 'Upload your CV'}</p>
+          <p className="settings-row__hint">
+            {isFinnish
+              ? 'PDF- tai Word-tiedosto (.docx). Korvaa nykyisen CV:n; kumoa-nuoli palauttaa sen. Tarkista tulos: palstoitettu asettelu voi siirtyä vain osittain.'
+              : 'A PDF or Word (.docx) file. It replaces the current CV; the undo arrow brings that back. Check the result: a layout with columns may import only partly.'}
+          </p>
+        </div>
+        <button type="button" className="settings-link" disabled={isBusy} onClick={onImportCvFile}>
+          {isFinnish ? 'Valitse PDF tai Word' : 'Choose PDF or Word'}
+        </button>
+      </div>
+
       <div className="settings-row">
         <div>
           <p className="settings-row__label">{isFinnish ? 'PortifyCV:n JSON-tiedosto' : 'PortifyCV JSON file'}</p>

@@ -495,6 +495,7 @@ function ResumeBuilderPage({
   })
   const previewRef = useRef(null)
   const importInputRef = useRef(null)
+  const importCvFileInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
   const storageWarningShownRef = useRef(false)
   const shareWarningShownRef = useRef(false)
@@ -1055,6 +1056,83 @@ function ResumeBuilderPage({
       event.target.value = ''
     }
   }, [applyStoredStyleVariantLook, dispatchFormData, locale, markCvSaved, selectedTemplate, setStorageValue])
+
+  const handleImportCvFileClick = useCallback(() => {
+    importCvFileInputRef.current?.click()
+  }, [])
+
+  // The user's existing CV as a PDF or Word file (1.7.0). Read and parsed in
+  // the browser — both modules, and pdf.js behind them, load only here.
+  const handleImportCvFile = useCallback(async (event) => {
+    const [file] = event.target.files ?? []
+
+    if (!file) {
+      return
+    }
+
+    const isFinnish = locale === 'fi'
+    dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: true })
+
+    try {
+      if (file.size > MAX_IMPORT_FILE_SIZE_BYTES) {
+        showToast(
+          isFinnish
+            ? 'Tiedosto on liian suuri. Tuetun koko on enintään 5 Mt.'
+            : 'File is too large. Maximum supported size is 5MB.',
+          'error',
+        )
+        return
+      }
+
+      showToast(isFinnish ? `Luetaan ${file.name}...` : `Reading ${file.name}...`, 'info')
+      const [{ extractCvFileText }, { parseCvText }] = await Promise.all([
+        import('../utils/cvFileText'),
+        import('../utils/cvTextImport'),
+      ])
+      const { data: importedData, summary } = parseCvText(await extractCvFileText(file), { locale })
+
+      // Same action as JSON import, so the toolbar undo arrow restores the
+      // previous CV. Unlike a JSON backup this is not marked saved: the
+      // imported CV exists nowhere but this tab.
+      dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: importedData })
+      applyStoredStyleVariantLook(importedData, selectedTemplate)
+      setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+      setIsImportOpen(false)
+
+      const count = (value, one, many) => `${value} ${value === 1 ? one : many}`
+      const found = isFinnish
+        ? [count(summary.experience, 'työpaikka', 'työpaikkaa'), count(summary.education, 'tutkinto', 'tutkintoa'), count(summary.skills, 'taito', 'taitoa')]
+        : [count(summary.experience, 'job', 'jobs'), count(summary.education, 'degree', 'degrees'), count(summary.skills, 'skill', 'skills')]
+      showToast(
+        isFinnish
+          ? `Tuotu tiedostosta ${file.name}: ${found.join(', ')}. Tarkista tiedot.`
+          : `Imported from ${file.name}: ${found.join(', ')}. Check the details.`,
+      )
+    } catch (error) {
+      const messages = {
+        unsupported: isFinnish
+          ? 'Tiedostotyyppiä ei tueta. Valitse PDF- tai Word-tiedosto (.docx).'
+          : 'That file type is not supported. Choose a PDF or a Word (.docx) file.',
+        'no-text': isFinnish
+          ? 'Tiedostosta ei löytynyt tekstiä. Se näyttää skannatulta kuvalta.'
+          : 'No text found. The file looks like a scanned image.',
+        unreadable: isFinnish
+          ? 'Tiedostoa ei voitu lukea. Se voi olla vioittunut tai salasanalla suojattu.'
+          : 'Could not read the file. It may be damaged or password-protected.',
+      }
+
+      showToast(
+        messages[error?.code]
+          ?? (error instanceof Error && error.message
+            ? error.message
+            : isFinnish ? 'Valitun tiedoston tuonti epäonnistui.' : 'Failed to import the selected file.'),
+        'error',
+      )
+    } finally {
+      dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: false })
+      event.target.value = ''
+    }
+  }, [applyStoredStyleVariantLook, dispatchFormData, locale, selectedTemplate, setStorageValue])
 
   const handleResetForm = useCallback(() => {
     window.clearTimeout(resetConfirmTimeoutRef.current)
@@ -1822,6 +1900,25 @@ function ResumeBuilderPage({
 
           <div className="editor-tools__body stack-5">
             <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
+              <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Lataa oma CV' : 'Upload your CV'}</p>
+              <p className={`mt-3 text-sm ${ui.textSecondary}`}>
+                {locale === 'fi'
+                  ? 'PDF- tai Word-tiedosto (.docx). Korvaa nykyisen CV:n; kumoa-nuoli palauttaa sen. Tarkista tulos: palstoitettu asettelu voi siirtyä vain osittain.'
+                  : 'A PDF or Word (.docx) file. It replaces the current CV; the undo arrow brings that back. Check the result: a layout with columns may import only partly.'}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className={`ui-button ${ui.button}`}
+                  disabled={isActionBusy}
+                  onClick={handleImportCvFileClick}
+                >
+                  {locale === 'fi' ? 'Valitse PDF tai Word' : 'Choose PDF or Word'}
+                </button>
+              </div>
+            </section>
+
+            <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
               <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Pikatuonti' : 'Quick import'}</p>
               <p className={`mt-3 text-sm ${ui.textSecondary}`}>
                 {locale === 'fi'
@@ -1936,6 +2033,7 @@ function ResumeBuilderPage({
     handleClearJobDescription,
     handleCopyMissingKeywords,
     handleImportClick,
+    handleImportCvFileClick,
     handleJobDescriptionChange,
     handleLoadDemo,
     handlePasteCvImport,
@@ -2273,6 +2371,13 @@ function ResumeBuilderPage({
         className="hidden"
         onChange={handleImportFile}
       />
+      <input
+        ref={importCvFileInputRef}
+        type="file"
+        accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        className="hidden"
+        onChange={handleImportCvFile}
+      />
       {builderMode === 'direct' ? (
         <div
           className={`direct-edit-layout${navRailCollapsed ? ' direct-edit-layout--nav-collapsed' : ''}`}
@@ -2394,6 +2499,7 @@ function ResumeBuilderPage({
         onPastedCvTextChange={handlePastedCvTextChange}
         onPasteImport={handlePasteCvImport}
         onImportJson={handleImportClick}
+        onImportCvFile={handleImportCvFileClick}
         isImporting={isImporting}
         isBusy={isActionBusy}
       />
