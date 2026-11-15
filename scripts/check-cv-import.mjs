@@ -33,6 +33,7 @@ const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, rel
 
 const { parseCvText } = await importSrc('utils/cvTextImport.js')
 const { parseImportedCvData } = await importSrc('utils/cvForm.js')
+const { COLUMN_BREAK, pdfPagesToLines } = await importSrc('utils/cvFileText.js')
 const { ENGLISH_CV_LINES, FINNISH_CV_LINES } = await import('./fixtures/cvImportSamples.mjs')
 
 let failures = 0
@@ -165,6 +166,97 @@ const throws = (label, fn) => {
   same('layout: a paragraph is not a bullet', prose.achievements, [])
 }
 
+// --- Layouts found by re-importing this app's own PDF exports ---------------
+{
+  const cv = (lines) => parseCvText(['Pat Example', 'Experience', ...lines]).data
+  const first = (lines) => cv(lines).experience[0]
+
+  const below = cv([
+    'Product Manager  Jan 2022 - Present', 'Fabrikam Inc · Helsinki, Finland · Full-time',
+    'Owned the roadmap for the billing product and its two integrations.', 'Figma · Design Systems · Storybook',
+    'Analyst  Jun 2019 - Dec 2021', 'Contoso Ltd · Remote', 'Built the reporting pipeline.',
+  ]).experience
+  same('company row below the role: job 1', [below[0].role, below[0].company, below[0].location, below[0].employmentType], ['Product Manager', 'Fabrikam Inc', 'Helsinki, Finland', 'Full-time'])
+  same('an unlabelled row of short items is the job\'s technologies', below[0].technologies, ['Figma', 'Design Systems', 'Storybook'])
+  same('a technology row is not the next job\'s role', [below[1].role, below[1].company, below[1].location], ['Analyst', 'Contoso Ltd', 'Remote'])
+  check('the description keeps single spaces', !below[0].description.includes('  '), below[0].description)
+
+  const leading = first(['Jan 2022  Product Manager', 'Fabrikam Inc · Helsinki, Finland'])
+  same('a date before the role', [leading.role, leading.company, leading.startDate], ['Product Manager', 'Fabrikam Inc', 'Jan 2022'])
+
+  const trailing = first(['Product Manager  Jan 2022', 'Fabrikam Inc · Helsinki, Finland'])
+  same('a lone date after the role', [trailing.role, trailing.company, trailing.startDate], ['Product Manager', 'Fabrikam Inc', 'Jan 2022'])
+
+  const sentence = cv(['Product Manager', 'Fabrikam Inc', '2018 – 2020', 'Shipped the new roadmap in 2020']).experience
+  same('a sentence ending in a year is not a new job', sentence.length, 1)
+
+  const wrapped = first(['Jun 2019 - Dec  Product Manager', '2021  Fabrikam Inc · Remote', 'Built the reporting pipeline.'])
+  same('a date range wrapped over two rows', [wrapped.role, wrapped.company, wrapped.startDate, wrapped.endDate], ['Product Manager', 'Fabrikam Inc', 'Jun 2019', 'Dec 2021'])
+
+  const degree = parseCvText(['Pat Example', 'Education', 'B.A. Graphic Design  2014 - 2018', 'Example University · Helsinki, Finland']).data.education[0]
+  same('education with the school row below', [degree.degree, degree.school, degree.location, degree.startDate, degree.endDate], ['B.A. Graphic Design', 'Example University', 'Helsinki, Finland', '2014', '2018'])
+
+  const chips = parseCvText(['Pat Example', 'Key Skills', 'Other', 'Product Strategy  Design Systems  Figma', 'Language Skills', 'English  Fluent']).data
+  same('skill chips separated only by gaps, minus the "Other" group label', chips.skills, ['Product Strategy', 'Design Systems', 'Figma'])
+  same('a language and its level separated by a gap', chips.languages, [{ language: 'English', level: 'Fluent' }])
+
+  const decorated = parseCvText(['Pat Example', 'Featured Projects', 'Atlas', 'Professional Experience', 'Analyst', 'Fabrikam Inc', '2019 – 2021']).data
+  same('"Professional Experience" is the experience heading', decorated.experience[0].role, 'Analyst')
+  check('"Featured Projects" is a heading, not content', !JSON.stringify(decorated).includes('Atlas'))
+
+  const twoLineName = parseCvText(['Pat', 'Example', 'Data Analyst', 'pat@example.com']).data
+  same('a name set on two lines', [twoLineName.fullName, twoLineName.title], ['Pat Example', 'Data Analyst'])
+}
+
+// --- Two-column PDFs --------------------------------------------------------
+{
+  // The sidebar came first; the name is above the other column's first heading.
+  const sidebarFirst = parseCvText([
+    'Tech Stack', 'SQL  Excel', 'Languages', 'English  Fluent',
+    COLUMN_BREAK,
+    'Pat Example', 'Data Analyst', 'pat@example.com  +358 50 555 0100  Helsinki, Finland',
+    'Experience', 'Analyst  2019 – 2021', 'Fabrikam Inc · Remote',
+  ]).data
+  same('name and title from the second column', [sidebarFirst.fullName, sidebarFirst.title], ['Pat Example', 'Data Analyst'])
+  same('contact details from the second column', [sidebarFirst.email, sidebarFirst.phone, sidebarFirst.location], ['pat@example.com', '+358 50 555 0100', 'Helsinki, Finland'])
+  same('skills from the sidebar', sidebarFirst.skills, ['SQL', 'Excel'])
+
+  const mainFirst = parseCvText([
+    'Pat Example', 'Data Analyst', 'Experience', 'Analyst  2019 – 2021', 'Fabrikam Inc · Remote', 'Built dashboards.',
+    COLUMN_BREAK,
+    'Personal Info', 'Helsinki, Finland', 'pat@example.com', 'Skills', 'SQL',
+  ]).data
+  same('a column break ends the open section', mainFirst.experience[0].description, 'Built dashboards.')
+  same('a location on its own line under a contact heading', mainFirst.location, 'Helsinki, Finland')
+  same('e-mail from the sidebar', mainFirst.email, 'pat@example.com')
+
+  // pdf.js text items: x, y (from the bottom), width, height.
+  const item = (str, x, y, height = 10) => ({ str, transform: [height, 0, 0, height, x, y], width: str.length * height * 0.5, height })
+  const column = (x, top, texts) => texts.map((text, index) => item(text, x, top - index * 14))
+  const sidebar = column(40, 700, ['Skills', 'SQL', 'Excel', 'Tableau', 'Python', 'Languages', 'English', 'Finnish', 'Swedish', 'German', 'Contact', 'Helsinki'])
+  const main = [
+    item('Pat Example', 220, 760, 22),
+    ...column(220, 700, ['Experience', 'Analyst at Fabrikam Inc', '2019 – 2021', 'Built the reporting pipeline', 'for the whole finance team', 'Education', 'Example University', 'B.Sc. Statistics', '2015 – 2019', 'Projects', 'Dashboards', 'Forecasts']),
+  ]
+  const lines = pdfPagesToLines([[...sidebar, ...main]])
+  same('columns are read one after the other, the name\'s column first', lines.slice(0, 3), ['Pat Example', 'Experience', 'Analyst at Fabrikam Inc'])
+  same('a column break separates them', [lines.indexOf(COLUMN_BREAK), lines[lines.indexOf(COLUMN_BREAK) + 1]], [13, 'Skills'])
+
+  const dated = [
+    item('Pat Example', 40, 760, 22),
+    ...[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].flatMap((row) => [
+      item(row % 4 === 0 ? 'Analyst at Fabrikam Inc' : 'Built the reporting pipeline for the finance team', 40, 700 - row * 14),
+      ...(row % 4 === 0 ? [item('2019 – 2021', 480, 700 - row * 14)] : []),
+    ]),
+  ]
+  const single = pdfPagesToLines([dated])
+  check('right-aligned dates are not a second column', !single.includes(COLUMN_BREAK), JSON.stringify(single.slice(0, 3)))
+  same('the date stays on its row, after a gap', single[1], 'Analyst at Fabrikam Inc  2019 – 2021')
+
+  const chipsOnPageTwo = [item('Product Strategy', 40, 700), item('Design Systems', 120, 700), item('Figma', 300, 700)]
+  check('a later page is not split when page one has no columns', !pdfPagesToLines([dated, chipsOnPageTwo]).includes(COLUMN_BREAK))
+}
+
 // --- Inputs the parser must survive ---------------------------------------
 {
   const headingless = parseCvText(['Pat Example', 'Data Analyst', 'pat@example.com', 'Worked at Fabrikam for two years doing analysis.', 'Built dashboards.'])
@@ -174,7 +266,7 @@ const throws = (label, fn) => {
   same('no headings: experience stays the single empty entry', [headingless.data.experience.length, headingless.data.experience[0].role], [1, ''])
   same('no headings: nothing is guessed into the summary', headingless.data.about, '')
 
-  // A two-column PDF read row by row: sidebar and main column interleave.
+  // Columns the extractor could not separate: sidebar and main column interleave.
   const interleaved = parseCvText([
     'Pat Example', 'Contact Experience', 'pat@example.com Analyst, Fabrikam Inc', '+358 50 555 0100 2019 – 2021',
     'Skills • Built dashboards.', 'SQL, Excel',

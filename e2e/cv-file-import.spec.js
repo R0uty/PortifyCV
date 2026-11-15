@@ -1,6 +1,6 @@
 import { test, expect } from './fixtures/base.js'
 import { ENGLISH_CV_LINES } from '../scripts/fixtures/cvImportSamples.mjs'
-import { DOCX_MIME, PDF_MIME, makeDocx, makePdf } from './helpers/cvImportFiles.js'
+import { DOCX_MIME, PDF_MIME, makeDocx, makePdf, makeTwoColumnPdf } from './helpers/cvImportFiles.js'
 
 // Importing someone's existing CV from a PDF or Word file (1.7.0). The
 // parser's own rules are covered by scripts/check-cv-import.mjs; this is
@@ -65,6 +65,28 @@ test.describe('CV file import', () => {
 
     await expectJaneImported(page, 'jane.docx')
     await expect(dialog).toBeHidden()
+  })
+
+  test('a two-column PDF is read column by column', async ({ page }) => {
+    const [fullName, title, , , ...body] = ENGLISH_CV_LINES
+    const skillsAt = body.indexOf('Skills')
+    const dialog = await openImportDialog(page)
+    await chooseFile(page, dialog, {
+      name: 'columns.pdf',
+      mimeType: PDF_MIME,
+      buffer: makeTwoColumnPdf({
+        name: fullName,
+        main: [title, ...body.slice(0, skillsAt)],
+        sidebar: ['Contact', 'jane@example.com', '+358 40 123 4567', 'Helsinki, Finland', ...body.slice(skillsAt)],
+      }),
+    })
+
+    await expect(page.getByText('Imported from columns.pdf: 2 jobs, 1 degree, 5 skills. Check the details.')).toBeVisible()
+    await expect(name(page)).toHaveText('Jane Example')
+    const preview = page.locator('.direct-edit-preview')
+    await expect(preview).toContainText('Northwind Oy')
+    await expect(preview).toContainText('jane@example.com')
+    await expect(preview).toContainText('PostgreSQL')
   })
 
   test('Undo brings back the CV the import replaced', async ({ page }) => {

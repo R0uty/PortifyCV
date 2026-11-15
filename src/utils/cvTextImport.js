@@ -26,12 +26,12 @@ import {
 const HEADINGS = {
   summary: [
     'summary', 'professional summary', 'executive summary', 'career summary', 'profile', 'professional profile',
-    'personal profile', 'about', 'about me', 'objective', 'career objective', 'personal statement',
+    'personal profile', 'executive profile', 'about', 'about me', 'objective', 'career objective', 'personal statement',
     'profiili', 'yhteenveto', 'tiivistelmä', 'esittely', 'kuvaus', 'minusta', 'tietoja minusta',
   ],
   experience: [
     'experience', 'work experience', 'professional experience', 'relevant experience', 'employment',
-    'employment history', 'work history', 'career history',
+    'employment history', 'work history', 'career history', 'work',
     'työkokemus', 'työhistoria', 'kokemus', 'työura', 'ansiotyö',
   ],
   education: [
@@ -42,17 +42,23 @@ const HEADINGS = {
     'skills', 'technical skills', 'key skills', 'core skills', 'core competencies', 'competencies', 'expertise',
     'areas of expertise', 'technologies', 'tools', 'skills and tools',
     'taidot', 'osaaminen', 'tekniset taidot', 'erityisosaaminen', 'avaintaidot', 'it-taidot', 'atk-taidot',
-    'teknologiat', 'työkalut', 'ydinosaaminen',
+    'teknologiat', 'työkalut', 'ydinosaaminen', 'tech stack', 'toolkit', 'stack',
   ],
   languages: ['languages', 'language skills', 'kielet', 'kielitaito'],
+  // Contact details under a heading of their own, often in a sidebar.
+  contact: [
+    'contact', 'contact details', 'contact information', 'personal details', 'personal information',
+    'personal info', 'details', 'links', 'find me', 'yhteystiedot', 'henkilötiedot', 'linkit',
+  ],
   other: [
-    'projects', 'personal projects', 'certifications', 'certificates', 'licenses', 'licences', 'courses',
+    'projects', 'case studies', 'open source', 'research', 'leadership', 'speaking', 'testimonials',
+    'core strengths', 'strengths', 'internships', 'leadership experience', 'board roles', 'summary of qualifications',
+    'avoin lähdekoodi', 'tutkimus', 'johtaminen', 'puheet', 'suositukset', 'vahvuudet', 'harjoittelut', 'certifications', 'certificates', 'licenses', 'licences', 'courses',
     'training', 'references', 'interests', 'hobbies', 'hobbies and interests', 'awards', 'honors', 'honours',
-    'achievements', 'publications', 'volunteering', 'volunteer experience', 'volunteer work', 'contact',
-    'contact details', 'contact information', 'links', 'personal details', 'personal information',
+    'achievements', 'publications', 'volunteering', 'volunteer experience', 'volunteer work',
     'additional information', 'activities', 'memberships', 'positions of trust',
     'projektit', 'sertifikaatit', 'kurssit', 'lisäkoulutus', 'suosittelijat', 'harrastukset', 'saavutukset',
-    'julkaisut', 'vapaaehtoistyö', 'yhteystiedot', 'linkit', 'henkilötiedot', 'lisätiedot', 'luottamustoimet',
+    'julkaisut', 'vapaaehtoistyö', 'lisätiedot', 'luottamustoimet',
     'muu toiminta', 'palkinnot', 'jäsenyydet',
   ],
 }
@@ -60,6 +66,8 @@ const HEADINGS = {
 const HEADING_KIND = new Map(
   Object.entries(HEADINGS).flatMap(([kind, names]) => names.map((name) => [name, kind])),
 )
+
+const HEADING_DECORATION = /^(?:featured|selected|key|relevant|professional|additional|other|technical|personal|my|core|main|recent|notable)\s+/
 
 // A document title above the name, not the name itself.
 const DOCUMENT_TITLES = new Set(['cv', 'curriculum vitae', 'resume', 'résumé', 'ansioluettelo'])
@@ -114,6 +122,25 @@ const COMPANY_LIKE = /\b(oy|oyj|ab|ltd|limited|inc|llc|gmbh|corp|corporation|plc
 const SCHOOL_LIKE = /university|college|school|institute|academy|polytechnic|yliopisto|korkeakoulu|opisto|lukio|koulu|instituutti/i
 const DEGREE_LIKE = /\b(bachelor|master|b\.?sc|m\.?sc|b\.?a|m\.?a|b\.?eng|m\.?eng|ph\.?d|mba|doctor|degree|diploma|certificate|kandidaatti|maisteri|tutkinto|insinööri|tradenomi|ylioppilas|tohtori|diplomi|amk|yamk|merkonomi|lähihoitaja|ammattitutkinto)\b/i
 
+// cvFileText.js puts this between the columns of a two-column PDF.
+const COLUMN_BREAK = '\f'
+
+// "Role    Jan 2022": a lone date counts as the entry's date only when it
+// ends the line after a real gap or separator. "…shipped the roadmap in
+// 2020" is a sentence that happens to end in a year.
+const TRAILING_DATE = new RegExp(`(?:\\s{2,}|[|·•,(]\\s*)(${DATE})\\)?$`, 'iu')
+
+// The same on the other side: "Jan 2022    Role", as timeline layouts set it.
+const LEADING_DATE = new RegExp(`^(${DATE})(?:\\s{2,}|\\s*[|·•,]\\s*)(?=\\S)`, 'iu')
+
+const EMPLOYMENT_TYPES = [
+  [/^(full[- ]time|kokoaikainen|kokopäiväinen|vakituinen)$/i, 'Full-time'],
+  [/^(part[- ]time|osa-aikainen)$/i, 'Part-time'],
+  [/^(contract|fixed[- ]term|määräaikainen)$/i, 'Contract'],
+  [/^(internship|intern|harjoittelu|harjoittelija)$/i, 'Internship'],
+  [/^(freelance|freelancer)$/i, 'Freelance'],
+]
+
 const squash = (value) => value.replace(/\s+/g, ' ').trim()
 const stripBullet = (line) => line.replace(BULLET, '').trim()
 const trimSeparators = (value) => value.replace(/^[\s,;:|•·–—-]+|[\s,;:|•·–—-]+$/gu, '').trim()
@@ -127,7 +154,9 @@ function headingKind(line) {
     .replace(/^[^\p{L}]+|[^\p{L}]+$/gu, '')
     .replace(/\s+/g, ' ')
 
-  return HEADING_KIND.get(normalized) ?? null
+  // "Featured Projects", "Key Skills", "Relevant Experience": the heading
+  // is the last word(s), the first is decoration.
+  return HEADING_KIND.get(normalized) ?? HEADING_KIND.get(normalized.replace(HEADING_DECORATION, '')) ?? null
 }
 
 // "Skills: SQL, Excel" — a heading with its content on the same line.
@@ -139,9 +168,13 @@ function splitLabel(line) {
 // Lines a wrapped paragraph or bullet continues onto start lower-case; a
 // role, company or school name does not.
 function isHeaderLike(line) {
-  if (!line || line.length > 90 || BULLET.test(line)) return false
+  if (!line || BULLET.test(line)) return false
   if (!/^[\p{Lu}\d]/u.test(line)) return false
-  return !(/[.!?]$/.test(line) && wordCount(line) > 6)
+  if (/[.!?]$/.test(line) && wordCount(line) > 6) return false
+  // A role, company or school line is short. A longer one is only a header
+  // when it is visibly a row of fields ("Acme Oy · Helsinki · Full-time"),
+  // not the first line of a wrapped paragraph.
+  return (line.length <= 60 && wordCount(line) <= 8) || (line.length <= 110 && /\s[|·•]\s|\s{2,}/u.test(line))
 }
 
 function splitParts(text) {
@@ -154,6 +187,27 @@ function splitParts(text) {
 function splitCommaParts(text) {
   return text.split(/,\s+/).map(trimSeparators).filter(Boolean)
 }
+
+const fieldParts = (line) => line.split(/\s*[|·•]\s*|\s{2,}/u).filter(Boolean)
+
+// "Figma · Storybook · React": short items in a row, the stack a job used.
+function isChipRow(line) {
+  if (BULLET.test(line) || /[.!?]$/.test(line)) return false
+  const parts = fieldParts(line)
+  return parts.length >= 2 && parts.every((part) => wordCount(part) <= 3 && part.length <= 30)
+}
+
+// "Acme Oy · Helsinki, Finland · Full-time": a row of fields that names a
+// company or a place.
+function isCompanyRow(line) {
+  const parts = fieldParts(line)
+  return parts.some((part) => COMPANY_LIKE.test(part) || LOCATION_LIKE.test(part) || /^(remote|etätyö|hybrid|hybridi)$/i.test(part)) ||
+    (parts.length === 1 && COMPANY_LIKE.test(line))
+}
+
+// A chip row that is not a company row: the end of the previous entry, not
+// the header of the next one.
+const isTechRow = (line) => isChipRow(line) && !isCompanyRow(line)
 
 /** Find a date or a date range on a line and return what is left of the line. */
 function readDates(line, { allowSingle }) {
@@ -184,14 +238,60 @@ function readDates(line, { allowSingle }) {
     }
   }
 
+  const leading = LEADING_DATE.exec(line)
+
+  if (leading) {
+    return { start: squash(leading[1]), end: '', isCurrent: false, isSingle: true, rest: trimSeparators(line.slice(leading[0].length)) }
+  }
+
+  const trailing = TRAILING_DATE.exec(line)
+
+  if (trailing) {
+    return {
+      start: squash(trailing[1]),
+      end: '',
+      isCurrent: false,
+      isSingle: true,
+      rest: trimSeparators(line.slice(0, trailing.index)),
+    }
+  }
+
   return null
+}
+
+// A narrow date column wraps the range over two rows, each row followed by
+// the main column's text:
+//   "Jun 2019 - Dec    Product Designer"
+//   "2021    Acme Oy · Remote"
+// Put the date back together on the first row.
+const WRAPPED_DATE_START = new RegExp(`^(${DATE}\\s*[–—-](?:\\s*${MONTH})?)(?:\\s{2,}(.+))?$`, 'iu')
+const WRAPPED_DATE_END = new RegExp(`^((?:${MONTH}\\s+)?(?:19|20)\\d{2}|${PRESENT})(?:\\s{2,}(.+))?$`, 'iu')
+
+function joinWrappedDates(lines) {
+  const joined = []
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const start = WRAPPED_DATE_START.exec(lines[index])
+    const end = start && index + 1 < lines.length ? WRAPPED_DATE_END.exec(lines[index + 1]) : null
+
+    if (start && end && !DATE_RANGE.test(lines[index])) {
+      joined.push(`${start[1]} ${end[1]}${start[2] ? `  ${start[2]}` : ''}`)
+      if (end[2]) joined.push(end[2])
+      index += 1
+    } else {
+      joined.push(lines[index])
+    }
+  }
+
+  return joined
 }
 
 /**
  * Split a section into dated entries. Each entry gets its header texts (the
  * role/company or degree/school lines) and its body lines.
  */
-function splitEntries(lines, { allowSingle }) {
+function splitEntries(sectionLines, { allowSingle }) {
+  const lines = joinWrappedDates(sectionLines)
   const dated = []
 
   lines.forEach((line, index) => {
@@ -216,10 +316,18 @@ function splitEntries(lines, { allowSingle }) {
     const before = []
     const after = []
 
-    if (restParts.length < 2) {
+    // The role is on the date line; the company is on the line above or the
+    // line below. Below wins when that line looks like a company row
+    // ("Acme Oy · Helsinki"); otherwise above, then below.
+    const nextIsHeader = restParts.length === 1 && isPlainHeader(index + 1)
+    const canLookAbove = index - 1 >= lowerBound && isPlainHeader(index - 1) && !isTechRow(lines[index - 1])
+
+    if (nextIsHeader && (isCompanyRow(lines[index + 1]) || !canLookAbove)) {
+      after.push(lines[index + 1])
+    } else if (restParts.length < 2) {
       const wanted = dates.rest ? 1 : 2
       let cursor = index - 1
-      while (before.length < wanted && cursor >= lowerBound && isPlainHeader(cursor)) {
+      while (before.length < wanted && cursor >= lowerBound && isPlainHeader(cursor) && !isTechRow(lines[cursor])) {
         before.unshift(lines[cursor])
         cursor -= 1
       }
@@ -255,6 +363,7 @@ function readList(value) {
   return value.split(/[,;|•·]|\t|\s{2,}/u).map((item) => trimSeparators(stripBullet(item))).filter(Boolean)
 }
 
+
 function parseExperienceEntry({ texts, dates, body }) {
   const entry = createEmptyExperience()
   const [first = '', second = ''] = texts
@@ -275,7 +384,13 @@ function parseExperienceEntry({ texts, dates, body }) {
 
   entry.role = role
   entry.company = company
-  entry.location = rest.join(', ')
+  entry.location = rest
+    .filter((part) => {
+      const type = EMPLOYMENT_TYPES.find(([pattern]) => pattern.test(part))?.[1]
+      if (type) entry.employmentType = type
+      return !type
+    })
+    .join(', ')
 
   if (dates) {
     entry.startDate = dates.start
@@ -292,8 +407,11 @@ function parseExperienceEntry({ texts, dates, body }) {
     if (labelled && TECH_LABEL.test(labelled.label)) {
       entry.technologies.push(...readList(labelled.rest))
       lastWasBullet = false
+    } else if (isTechRow(line)) {
+      entry.technologies.push(...readList(line))
+      lastWasBullet = false
     } else if (BULLET.test(line)) {
-      entry.achievements.push(stripBullet(line))
+      entry.achievements.push(squash(stripBullet(line)))
       lastWasBullet = true
     } else if (lastWasBullet && /^[\p{Ll}(]/u.test(line)) {
       // A bullet that wrapped onto the next line of the PDF.
@@ -304,7 +422,7 @@ function parseExperienceEntry({ texts, dates, body }) {
     }
   }
 
-  entry.description = description.join(' ')
+  entry.description = squash(description.join(' '))
   return entry
 }
 
@@ -322,6 +440,8 @@ function parseEducationEntry({ texts, dates, body }) {
     else unassigned.push(part)
   }
 
+  const location = unassigned.findIndex((part) => LOCATION_LIKE.test(part))
+  if (location >= 0) [entry.location] = unassigned.splice(location, 1)
   if (!entry.degree && unassigned.length > 0) entry.degree = unassigned.shift()
   if (!entry.school && unassigned.length > 0) entry.school = unassigned.shift()
 
@@ -350,7 +470,7 @@ function parseSkills(lines) {
 
     for (const skill of readList(labelled ? labelled.rest : text)) {
       const key = skill.toLowerCase()
-      if (skill.length <= 50 && !seen.has(key)) {
+      if (skill.length <= 50 && !seen.has(key) && !/^(other|others|muut|muu)$/.test(key)) {
         seen.add(key)
         skills.push(skill)
       }
@@ -365,7 +485,7 @@ function parseLanguages(lines) {
 
   for (const line of lines) {
     for (const item of stripBullet(line).split(/[,;|•·]/u).map((value) => value.trim()).filter(Boolean)) {
-      const match = /^(.+?)(?:\s+[–—-]\s+|:\s*|\s*\()(.+?)\)?$/u.exec(item)
+      const match = /^(.+?)(?:\s+[–—-]\s+|:\s*|\s*\(|\s{2,})(.+?)\)?$/u.exec(item)
       const language = trimSeparators(match ? match[1] : item)
       if (language && language.length <= 30) {
         languages.push({ ...createEmptyLanguage(), language, level: match ? trimSeparators(match[2]) : '' })
@@ -418,11 +538,11 @@ function takeContact(line, contact, { trustBareLinks }) {
 const LOCATION_LIKE = /^(?:\d{5}\s+)?\p{L}[\p{L} .'-]*(?:,\s*\p{L}[\p{L} .'-]*)+$/u
 const isNameLike = (value) =>
   /\p{L}/u.test(value) && !/\d/.test(value) && wordCount(value) <= 5 && value.length <= 60 &&
-  !DOCUMENT_TITLES.has(value.toLowerCase()) && !/[@:]/.test(value)
+  !DOCUMENT_TITLES.has(value.toLowerCase()) && !/[@:,]/.test(value)
 const isTitleLike = (value) => /\p{L}/u.test(value) && wordCount(value) <= 8 && value.length <= 80 && !/[.!?]$/.test(value)
 
 /** Name, title and location from the lines above the first heading. */
-function parseTopBlock(lines, contact, hasHeadings) {
+function parseTopBlock(lines, contact, hasHeadings, { loneLocation = false } = {}) {
   const top = { fullName: '', title: '', location: '', about: [] }
 
   for (const line of lines) {
@@ -442,7 +562,9 @@ function parseTopBlock(lines, contact, hasHeadings) {
 
       if (DOCUMENT_TITLES.has(fragment.toLowerCase())) continue
       if (!top.fullName && isNameLike(fragment)) top.fullName = fragment
-      else if (!top.location && LOCATION_LIKE.test(fragment) && fragment.length <= 40 && (besideOtherDetails || top.title)) top.location = fragment
+      else if (!top.location && LOCATION_LIKE.test(fragment) && fragment.length <= 40 && (besideOtherDetails || top.title || loneLocation)) top.location = fragment
+      // A name set on two lines, one word each ("JANE" / "EXAMPLE").
+      else if (!top.title && wordCount(top.fullName) === 1 && wordCount(fragment) === 1 && !found && /^\p{Lu}/u.test(fragment) && isNameLike(fragment)) top.fullName += ` ${fragment}`
       else if (!top.title && top.fullName && !found && isTitleLike(fragment)) top.title = fragment
       // An unheaded paragraph under the name is the summary, but only in a
       // CV that has headings: without any, everything is "above the first
@@ -466,16 +588,23 @@ export function parseCvText(lines, options = {}) {
     : 'Could not find any CV details in this file.'
 
   const cleaned = (Array.isArray(lines) ? lines : [])
-    .map((line) => (typeof line === 'string' ? squashKeepingGaps(line) : ''))
+    .map((line) => (line === COLUMN_BREAK ? line : typeof line === 'string' ? squashKeepingGaps(line) : ''))
     .filter((line) => line && !/^(?:page|sivu)?\s*\d+\s*(?:\/|of|\/\s*)\s*\d+$/i.test(line) && !/^(?:page|sivu)\s+\d+$/i.test(line))
 
   if (cleaned.length === 0) throw new Error(nothingFound)
 
-  const sections = { top: [], summary: [], experience: [], education: [], skills: [], languages: [], other: [] }
+  const sections = { top: [], aside: [], contact: [], summary: [], experience: [], education: [], skills: [], languages: [], other: [] }
   let current = 'top'
   let hasHeadings = false
 
   for (const line of cleaned) {
+    if (line === COLUMN_BREAK) {
+      // The other column starts: whatever section was open is over. What
+      // comes before that column's first heading is usually contact details.
+      current = 'aside'
+      continue
+    }
+
     const kind = headingKind(line)
 
     if (kind) {
@@ -487,7 +616,7 @@ export function parseCvText(lines, options = {}) {
     const labelled = splitLabel(line)
     const labelKind = labelled ? headingKind(labelled.label) : null
 
-    if (labelKind && labelKind !== 'other') {
+    if (labelKind && labelKind !== 'other' && labelKind !== 'contact') {
       const insideEntry = current === 'experience' || current === 'education'
 
       if (labelKind === 'languages' && !HUMAN_LANGUAGE.test(labelled.rest)) {
@@ -508,6 +637,15 @@ export function parseCvText(lines, options = {}) {
 
   const contact = { email: '', phone: '', links: createEmptyLinks() }
   const top = parseTopBlock(sections.top, contact, hasHeadings)
+  const aside = parseTopBlock(sections.aside, contact, hasHeadings)
+
+  // The name and title sit above the first heading of whichever column
+  // holds them; the extractor tries to put that column first, and this
+  // covers the page where it could not tell.
+  top.fullName ||= aside.fullName
+  top.title ||= aside.title
+  top.location ||= aside.location || parseTopBlock(sections.contact, contact, hasHeadings, { loneLocation: true }).location
+  if (top.about.length === 0) top.about = aside.about
 
   // Contact details can sit anywhere (a sidebar, a footer, a Contact
   // section), so the rest of the text is scanned too.
@@ -524,7 +662,7 @@ export function parseCvText(lines, options = {}) {
     .filter((entry) => entry.school || entry.degree)
   const skills = parseSkills(sections.skills)
   const languages = parseLanguages(sections.languages)
-  const about = (sections.summary.length > 0 ? sections.summary.map(stripBullet) : top.about).join(' ')
+  const about = squash((sections.summary.length > 0 ? sections.summary.map(stripBullet) : top.about).join(' '))
 
   const foundAnything =
     top.fullName || contact.email || about || experience.length > 0 || education.length > 0 || skills.length > 0

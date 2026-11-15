@@ -12,6 +12,17 @@ export function makePdf(lines) {
   return Buffer.from(pdf.output('arraybuffer'))
 }
 
+/** A sidebar on the left, the name and the main column on the right. */
+export function makeTwoColumnPdf({ name, main, sidebar }) {
+  const pdf = new jsPDF({ unit: 'pt', format: 'a4' })
+  pdf.setFontSize(24)
+  pdf.text(name, 220, 64)
+  pdf.setFontSize(10)
+  main.forEach((line, index) => pdf.text(line, 220, 100 + index * 16))
+  sidebar.forEach((line, index) => pdf.text(line, 40, 104 + index * 15))
+  return Buffer.from(pdf.output('arraybuffer'))
+}
+
 /** A .docx with one paragraph per entry. */
 export function makeDocx(lines) {
   return Packer.toBuffer(new Document({ sections: [{ children: lines.map((line) => new Paragraph(line)) }] }))

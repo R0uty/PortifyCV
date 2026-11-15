@@ -37,11 +37,12 @@ export function getCvFileKind(file) {
   return null
 }
 
-// A PDF has no lines, only positioned text runs. Runs on (nearly) the same
-// baseline become one line; a wide horizontal gap inside a line is kept as
-// two spaces, which the parser reads as a column separator.
-function pdfItemsToLines(items) {
-  const runs = items
+// Sent between the two columns of a two-column PDF. cvTextImport.js reads it
+// as "whatever section was open has ended".
+export const COLUMN_BREAK = '\f'
+
+const toRuns = (items) =>
+  items
     .filter((item) => typeof item.str === 'string' && item.str.trim())
     .map((item) => ({
       text: item.str,
@@ -50,11 +51,19 @@ function pdfItemsToLines(items) {
       width: item.width,
       height: item.height || Math.abs(item.transform[3]) || 10,
     }))
-    .sort((a, b) => b.y - a.y || a.x - b.x)
 
+// A PDF has no lines, only positioned text runs. Runs on (nearly) the same
+// baseline become one line. A gap wider than any word space (skill chips, a
+// right-aligned date) is kept as two spaces, which the parser reads as a
+// separator.
+// In font sizes. A word space is about 0.3; the gap between two skill chips
+// measured 0.8 in this app's own tightest export.
+const WIDE_GAP = 0.7
+
+function runsToLines(runs) {
   const rows = []
 
-  for (const run of runs) {
+  for (const run of [...runs].sort((a, b) => b.y - a.y || a.x - b.x)) {
     const row = rows[rows.length - 1]
 
     if (row && Math.abs(row.y - run.y) < Math.max(2, row.height * 0.5)) {
@@ -71,7 +80,7 @@ function pdfItemsToLines(items) {
     for (const run of row.runs.sort((a, b) => a.x - b.x)) {
       if (end !== null) {
         const gap = run.x - end
-        if (gap > run.height * 3) line += '  '
+        if (gap > run.height * WIDE_GAP) line += '  '
         else if (gap > run.height * 0.15 && !/\s$/.test(line) && !/^\s/.test(run.text)) line += ' '
       }
       line += run.text
@@ -80,6 +89,107 @@ function pdfItemsToLines(items) {
 
     return line
   })
+}
+
+// Most designed CVs have a sidebar. Read row by row, its lines interleave
+// with the main column's ("Experience  Skills"), so a page is first split
+// at its gutter: the vertical line almost no text crosses, with a real
+// share of the page's text on each side. That share is what tells a
+// sidebar from a column of right-aligned dates, which is a few characters
+// per job and stays part of its row.
+function findGutter(runs) {
+  if (runs.length < 20) return null
+
+  const left = Math.min(...runs.map((run) => run.x))
+  const right = Math.max(...runs.map((run) => run.x + run.width))
+  const span = right - left
+  const totalChars = runs.reduce((sum, run) => sum + run.text.length, 0)
+  const maxCrossing = runs.length * 0.06
+  let best = null
+  let band = null
+
+  const close = () => {
+    if (band && (!best || band.crossing < best.crossing || (band.crossing === best.crossing && band.to - band.from > best.to - best.from))) {
+      best = band
+    }
+    band = null
+  }
+
+  for (let x = left + span * 0.2; x <= left + span * 0.8; x += 2) {
+    let crossing = 0
+    let leftChars = 0
+    let rightChars = 0
+
+    for (const run of runs) {
+      if (run.x + run.width <= x + 1) leftChars += run.text.length
+      else if (run.x >= x - 1) rightChars += run.text.length
+      else crossing += 1
+    }
+
+    const isValid = crossing <= maxCrossing && leftChars >= totalChars * 0.15 && rightChars >= totalChars * 0.15
+
+    if (!isValid) {
+      close()
+    } else if (band && band.crossing === crossing) {
+      band.to = x
+    } else {
+      close()
+      band = { crossing, from: x, to: x }
+    }
+  }
+
+  close()
+  return best ? { x: (best.from + best.to) / 2, leftWidth: (best.from + best.to) / 2 - left, rightWidth: right - (best.from + best.to) / 2 } : null
+}
+
+/**
+ * Text lines of a PDF from each page's pdf.js text items, in reading order:
+ * the column holding the name (the largest text on page one) across all
+ * pages, then a COLUMN_BREAK, then the other column across all pages.
+ * @param {Array<Array<object>>} pages
+ * @returns {string[]}
+ */
+export function pdfPagesToLines(pages) {
+  const first = []
+  const second = []
+  let firstIsWider = null
+  let firstPageGutter
+
+  for (const items of pages) {
+    const runs = toRuns(items)
+    let gutter = findGutter(runs)
+
+    // Page one decides whether the CV has columns and where. A later page
+    // is often short, and a short page of chips or links has accidental
+    // gaps that look like a gutter.
+    if (firstPageGutter === undefined) firstPageGutter = gutter
+    else if (!firstPageGutter || (gutter && Math.abs(gutter.x - firstPageGutter.x) > 40)) gutter = null
+
+    if (!gutter) {
+      first.push(...runsToLines(runs))
+      continue
+    }
+
+    const center = (run) => run.x + run.width / 2
+    const leftIsWider = gutter.leftWidth >= gutter.rightWidth
+
+    if (firstIsWider === null) {
+      // The name: the largest text in the top third of the page. (Lower
+      // down, a sidebar label can be set larger than a modest name.)
+      const top = Math.max(...runs.map((run) => run.y))
+      const bottom = Math.min(...runs.map((run) => run.y))
+      const largest = runs
+        .filter((run) => run.y >= top - (top - bottom) / 3)
+        .reduce((a, b) => (b.height > a.height ? b : a))
+      firstIsWider = (center(largest) < gutter.x) === leftIsWider
+    }
+
+    const firstIsLeft = leftIsWider === firstIsWider
+    first.push(...runsToLines(runs.filter((run) => (center(run) < gutter.x) === firstIsLeft)))
+    second.push(...runsToLines(runs.filter((run) => (center(run) < gutter.x) !== firstIsLeft)))
+  }
+
+  return second.length > 0 ? [...first, COLUMN_BREAK, ...second] : first
 }
 
 async function extractPdfLines(file) {
@@ -103,15 +213,14 @@ async function extractPdfLines(file) {
 
   try {
     const pdf = await loadingTask.promise
-    const lines = []
+    const pages = []
 
     for (let pageNumber = 1; pageNumber <= Math.min(pdf.numPages, MAX_PDF_PAGES); pageNumber += 1) {
       const page = await pdf.getPage(pageNumber)
-      const content = await page.getTextContent()
-      lines.push(...pdfItemsToLines(content.items))
+      pages.push((await page.getTextContent()).items)
     }
 
-    return lines
+    return pdfPagesToLines(pages)
   } finally {
     await loadingTask.destroy().catch(() => {})
   }
@@ -191,9 +300,9 @@ export async function extractCvFileText(file) {
     throw importError('unreadable', error)
   }
 
-  const text = lines.map((line) => line.trim()).filter(Boolean)
+  const text = lines.map((line) => (line === COLUMN_BREAK ? line : line.trim())).filter(Boolean)
 
-  if (text.length === 0) throw importError('no-text')
+  if (!text.some((line) => line !== COLUMN_BREAK)) throw importError('no-text')
 
   return text
 }
