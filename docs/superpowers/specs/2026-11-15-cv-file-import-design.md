@@ -84,9 +84,9 @@ not call `markCvSaved`: an imported file is unsaved work.
 
 **UI** — `ImportCvModal.jsx` gets a first row, "Upload your CV (PDF or
 Word)", above the JSON row; Classic's import block gets the same button.
-The paste box switches to the same parser and the same replace-with-undo
-behaviour; its hint is rewritten. `parsePastedCvText` and
-`MERGE_FORM_DATA` are removed if nothing else uses them.
+The paste box and `MERGE_FORM_DATA` stay as they are: a pasted snippet
+merges into the current CV, and replacing the whole CV from three pasted
+lines would be a regression (amended while planning).
 
 **Checks**
 
