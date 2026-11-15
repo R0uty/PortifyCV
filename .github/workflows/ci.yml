@@ -59,6 +59,9 @@ jobs:
       - name: CV import checks
         run: npm run check:cv-import
 
+      - name: Saved CV library checks
+        run: npm run check:cv-library
+
   e2e:
     name: End-to-end smoke tests
     runs-on: ubuntu-latest
