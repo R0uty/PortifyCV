@@ -63,6 +63,14 @@ piece of first-use work.
 - Size limit: the existing 5 MB `MAX_IMPORT_FILE_SIZE_BYTES`.
 - No extractable text → an error saying the file looks scanned.
 
+Added while building: a two-column PDF read row by row interleaves its
+sidebar with its main column, and re-importing this app's own exports
+showed that is the common case, not the exception. The extractor splits
+each page at its gutter (the vertical line almost no text crosses, with
+at least 15% of the page's text on each side) and emits the name's column,
+a `COLUMN_BREAK` line, then the other column. Page one decides whether the
+CV has columns.
+
 **Parsing** — `src/utils/cvTextImport.js`, pure, no DOM, no dependencies.
 `parseCvText(lines, { locale })` returns `{ data, summary }`:
 
@@ -95,6 +103,8 @@ lines would be a regression (amended while planning).
 - `e2e/cv-file-import.spec.js`: uploads a generated PDF and a generated
   `.docx`, asserts the name, an experience entry and the toast, asserts
   no request leaves the origin, and checks undo restores the old CV.
+- `e2e/cv-file-import-roundtrip.spec.js` (`@slow`): every template's PDF
+  export of the demo CV imports back with the name and both jobs.
 
 ## Left to the builder
 

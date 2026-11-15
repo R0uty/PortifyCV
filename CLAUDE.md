@@ -19,6 +19,7 @@ npm run check:section-schema   # validates the Direct Edit popup's section schem
 npm run check:section-columns  # exercises the section column-move rules (src/utils/sectionColumns.js)
 npm run check:template-pages   # validates per-template page slugs, examples, copy, and field tags (src/utils/templatePageCopy.js, src/utils/templateMetaDescriptions.js, src/utils/exampleCvs.js, src/utils/templateFields.js)
 npm run check:template-variants  # validates the style-variant registry against each template's CSS defaults, plus contrast (src/utils/templateVariants.js)
+npm run check:cv-import    # exercises the PDF/Word import's text parser and column detection (src/utils/cvTextImport.js, src/utils/cvFileText.js)
 npm run check:thumbnails   # the pre-rendered thumbnails in public/thumbnails/ exist, match their manifest, and are up to date with the template code
 npm run thumbnails         # regenerate public/thumbnails/ (Vite dev server + Playwright Chromium, ~20s); commit the result
 
@@ -41,11 +42,12 @@ rule-based feedback engine (`check:feedback`), the Word exporter
 rules and their import validation (`check:section-columns`), the
 per-template pages' slugs, examples, copy, and field tags, plus `index.html`'s static template count (`check:template-pages`), or
 a template's style variants or palette variables (`check:template-variants`),
-or anything a template thumbnail is rendered from (`check:thumbnails`). A
+anything a template thumbnail is rendered from (`check:thumbnails`), or the
+CV file import's parser or PDF column detection (`check:cv-import`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.
-CI (`.github/workflows/ci.yml`) runs all nine on every push to `main` and
-`v1.6.0` (the current long-lived branch) and on every pull request.
+CI (`.github/workflows/ci.yml`) runs all ten on every push to `main` and
+`v1.7.0` (the current long-lived branch) and on every pull request.
 
 `test:e2e` (and its `:fast`/`:slow` variants) build and serve the app first
 (`playwright.config.js`'s `webServer`), deliberately not the dev server, so
@@ -239,6 +241,26 @@ a new field fails it until the flat renderer in `CVPreview.jsx`, the ATS
 branches of Timeline/Navy/Modern Orange (`src/utils/atsDetails.js`), and
 `docxExport.js`/`docxArchetypes.js`/`exporters.js` carry it. Designer PDFs
 aren't covered: each Showcase chooses what it shows.
+
+**CV file import (PDF and Word) is two lazy modules, and never a server.**
+`src/utils/cvFileText.js` reads a `.pdf` (pdf.js, its worker bundled and
+served from our own origin) or a `.docx` (jszip + `DOMParser`) into text
+lines; `src/utils/cvTextImport.js` turns lines into `CvData` with
+heading tables and patterns in English and Finnish. Both are reached only
+through the `import()` in `ResumeBuilderPage.jsx`'s `handleImportCvFile`,
+so pdf.js (about 1.9 MB with its worker) is downloaded when someone picks a
+file and not before; don't import either module statically, and don't give
+pdf.js a `manualChunks` entry (same reason as html2canvas/jsPDF, see
+`vite.config.js`). The parser's rule is that a field it is unsure of stays
+empty. A two-column PDF is split at its gutter before parsing
+(`pdfPagesToLines`), with a `COLUMN_BREAK` line between the columns; page
+one decides whether a CV has columns. When a layout imports badly, add its
+lines as a case in `scripts/check-cv-import.mjs` first, then fix the
+parser. `e2e/cv-file-import-roundtrip.spec.js` (`@slow`) exports the demo CV
+from every template and imports the PDF back, so a template change that
+alters how its PDF reads shows up there. The import applies with
+`SET_FORM_DATA`, like JSON import, so undo restores the previous CV; the
+paste box is separate and still merges (`parsePastedCvText`).
 
 **Share links carry the whole CV in the URL, never a server.**
 `src/utils/shareLinks.js` encodes CV state with short single/double-letter
