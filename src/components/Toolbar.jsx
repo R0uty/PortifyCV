@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft,
+  Check,
   ChevronDown,
+  FolderOpen,
   Mail,
   Maximize2,
   MoreHorizontal,
   Redo2,
+  Save,
   Search,
   Settings,
   Smartphone,
@@ -164,6 +167,9 @@ function Toolbar({
   onClearCv = () => {},
   isClearArmed = false,
   onOpenImport,
+  savedCvStatus = null,
+  onSaveCv = () => {},
+  onOpenSavedCvs = () => {},
 }) {
   const isFinnish = locale === 'fi'
   const {
@@ -415,6 +421,35 @@ function Toolbar({
             {isFinnish ? 'FI' : 'EN'}
           </button>
 
+          {/* Save on this device (1.7.1). Nothing is stored until this is
+              pressed; once the CV is saved it opens My CVs instead. */}
+          {savedCvStatus ? (
+            <button
+              type="button"
+              className={`app-toolbar__save${savedCvStatus.needsAttention ? ' app-toolbar__save--attention' : savedCvStatus.isSaved ? ' app-toolbar__save--saved' : ''}`}
+              onClick={onSaveCv}
+              aria-label={savedCvStatus.needsAttention
+                ? isFinnish ? `Tallennus tauolla: ${savedCvStatus.name}. Tallenna nyt` : `Saving paused: ${savedCvStatus.name}. Save now`
+                : savedCvStatus.isSaved
+                  ? isFinnish ? `Tallennettu tälle laitteelle: ${savedCvStatus.name}` : `Saved on this device: ${savedCvStatus.name}`
+                  : isFinnish ? 'Tallenna tälle laitteelle' : 'Save on this device'}
+              title={savedCvStatus.needsAttention
+                ? isFinnish ? 'Tallennus on tauolla. Tallenna nyt' : 'Saving is paused. Save now'
+                : savedCvStatus.isSaved
+                  ? isFinnish ? `Tallennettu tälle laitteelle: ${savedCvStatus.name}` : `Saved on this device: ${savedCvStatus.name}`
+                  : isFinnish ? 'Tallenna tälle laitteelle' : 'Save on this device'}
+            >
+              {savedCvStatus.isSaved && !savedCvStatus.needsAttention
+                ? <Check size={15} strokeWidth={2.4} aria-hidden="true" />
+                : <Save size={15} strokeWidth={2} aria-hidden="true" />}
+              <span className="app-toolbar__save-label" aria-hidden="true">
+                {savedCvStatus.isSaved && !savedCvStatus.needsAttention
+                  ? isFinnish ? 'Tallennettu' : 'Saved'
+                  : isFinnish ? 'Tallenna' : 'Save'}
+              </span>
+            </button>
+          ) : null}
+
           <div className="app-toolbar__popover" ref={moreContainerRef} onBlur={moreHandleBlur}>
             <button
               type="button"
@@ -493,6 +528,16 @@ function Toolbar({
                     {isFinnish ? 'Tuo CV' : 'Import CV'}
                   </button>
                 ) : null}
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-toolbar__menu-item"
+                  onClick={() => handleMoreSelect(onOpenSavedCvs)}
+                >
+                  <FolderOpen size={15} strokeWidth={2} aria-hidden="true" />
+                  {isFinnish ? 'Omat CV:t' : 'My CVs'}
+                  {savedCvStatus?.count ? ` (${savedCvStatus.count})` : ''}
+                </button>
                 <div className="app-toolbar__menu-separator" role="separator" />
                 <button
                   type="button"

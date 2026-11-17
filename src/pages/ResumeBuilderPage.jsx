@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 
 import useCvHistory from '../hooks/useCvHistory'
+import useCvLibrary from '../hooks/useCvLibrary'
 import useCvSafekeeping from '../hooks/useCvSafekeeping'
 import usePreviewZoom from '../hooks/usePreviewZoom'
 import AppShell from '../components/AppShell'
@@ -41,6 +42,7 @@ import AtsCheckModal from '../components/AtsCheckModal'
 import BadgeModal from '../components/BadgeModal'
 import CoverLetterModal from '../components/CoverLetterModal'
 import ImportCvModal from '../components/ImportCvModal'
+import SavedCvsModal from '../components/SavedCvsModal'
 import PdfPreviewModal from '../components/PdfPreviewModal'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
@@ -84,7 +86,8 @@ import { getSectionSchema } from '../utils/sectionSchema'
 import { DEFAULT_STYLE_VARIANT_ID, getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, parseStyleVariantParam, resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
-import { uiReducer, createInitialUiState, readInitialTemplateId, UI_ACTION } from '../reducers/uiReducer'
+import { uiReducer, createInitialUiState, readInitialTemplateId, resolveTemplateId, UI_ACTION } from '../reducers/uiReducer'
+import { defaultCvName } from '../utils/cvLibrary'
 import {
   createExportFileName,
 } from '../utils/cvSnapshot'
@@ -346,6 +349,9 @@ function loadInitialCvSession(locale = 'en') {
         return {
           formData: restoredFormData,
           isOwnCv: true,
+          // The one start that may still be the saved CV this tab had open
+          // (hooks/useCvLibrary.js).
+          restoredFromSession: true,
           initialToast: createToast(
             hasPendingExample || hasPendingStyle
               ? isFinnish
@@ -540,6 +546,9 @@ function ResumeBuilderPage({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   // Direct Edit's ways into what Classic keeps in its form column.
   const [isImportOpen, setIsImportOpen] = useState(false)
+  // null, 'save' (the name prompt) or 'list' (My CVs).
+  const [savedCvsView, setSavedCvsView] = useState(null)
+  const [savedCvsUnsaved, setSavedCvsUnsaved] = useState(false)
   const [isAtsCheckOpen, setIsAtsCheckOpen] = useState(false)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
@@ -628,7 +637,7 @@ function ResumeBuilderPage({
   }, [])
 
   // Undo and redo (hooks/useCvHistory.js).
-  const { canUndo, canRedo, handleUndo, handleRedo, recordTemplateLookStep } = useCvHistory({
+  const { canUndo, canRedo, handleUndo, handleRedo, recordTemplateLookStep, resetHistory } = useCvHistory({
     formData,
     initialFormData: initialSession.formData,
     dispatchFormData,
@@ -654,7 +663,7 @@ function ResumeBuilderPage({
 
   // Session restore's kept copy and the ask-before-leaving guard
   // (hooks/useCvSafekeeping.js).
-  const { formDataRef, markCvSaved, markCvPristine } = useCvSafekeeping({
+  const { formDataRef, markCvSaved, markCvPristine, hasUnsavedCvChanges } = useCvSafekeeping({
     formData,
     initialSession,
     sessionRestoreEnabled,
@@ -663,6 +672,24 @@ function ResumeBuilderPage({
     setStorageValue,
     snapshotDelayMs: HISTORY_COMMIT_DELAY_MS,
   })
+
+  // CVs saved on this device, and the one open here (hooks/useCvLibrary.js).
+  const handleReattachSavedCv = useCallback(({ templateId }) => {
+    if (resolveTemplateId(templateId)) {
+      dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId })
+    }
+  }, [])
+  const cvLibrary = useCvLibrary({
+    formData,
+    selectedTemplate,
+    locale,
+    showToast,
+    markCvSaved,
+    saveDelayMs: HISTORY_COMMIT_DELAY_MS,
+    canReattach: Boolean(initialSession.restoredFromSession) && sessionRestoreEnabled,
+    onReattach: handleReattachSavedCv,
+  })
+  const { detach: detachSavedCv } = cvLibrary
 
   useEffect(() => {
     if (initialSession.storageIssue) {
@@ -1029,6 +1056,8 @@ function ResumeBuilderPage({
       const parsedValue = JSON.parse(fileText)
       const importedData = parseImportedCvData(parsedValue)
 
+      // A different CV: it must not be auto-saved over the saved one that was open.
+      detachSavedCv()
       dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: importedData })
       markCvSaved(importedData)
       applyStoredStyleVariantLook(importedData, selectedTemplate)
@@ -1055,7 +1084,7 @@ function ResumeBuilderPage({
       dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: false })
       event.target.value = ''
     }
-  }, [applyStoredStyleVariantLook, dispatchFormData, locale, markCvSaved, selectedTemplate, setStorageValue])
+  }, [applyStoredStyleVariantLook, detachSavedCv, dispatchFormData, locale, markCvSaved, selectedTemplate, setStorageValue])
 
   const handleImportCvFileClick = useCallback(() => {
     importCvFileInputRef.current?.click()
@@ -1094,6 +1123,7 @@ function ResumeBuilderPage({
       // Same action as JSON import, so the toolbar undo arrow restores the
       // previous CV. Unlike a JSON backup this is not marked saved: the
       // imported CV exists nowhere but this tab.
+      detachSavedCv()
       dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: importedData })
       applyStoredStyleVariantLook(importedData, selectedTemplate)
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
@@ -1132,7 +1162,7 @@ function ResumeBuilderPage({
       dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: false })
       event.target.value = ''
     }
-  }, [applyStoredStyleVariantLook, dispatchFormData, locale, selectedTemplate, setStorageValue])
+  }, [applyStoredStyleVariantLook, detachSavedCv, dispatchFormData, locale, selectedTemplate, setStorageValue])
 
   const handleResetForm = useCallback(() => {
     window.clearTimeout(resetConfirmTimeoutRef.current)
@@ -1146,6 +1176,8 @@ function ResumeBuilderPage({
     }
 
     setResetConfirmArmed(false)
+    // Clearing empties the screen, not the saved CV that was open on it.
+    detachSavedCv()
     markCvPristine(createInitialCvData())
     dispatchFormData({ type: FORM_ACTION.RESET_FORM })
     // A cleared CV stores no variants, so every template goes back to its
@@ -1156,7 +1188,7 @@ function ResumeBuilderPage({
         ? 'CV tyhjennetty. Palauta työkalupalkin kumoa-nuolella.'
         : 'CV cleared. Restore it with the toolbar undo arrow.',
     )
-  }, [applyStoredStyleVariantLook, dispatchFormData, locale, markCvPristine, resetConfirmArmed, selectedTemplate])
+  }, [applyStoredStyleVariantLook, detachSavedCv, dispatchFormData, locale, markCvPristine, resetConfirmArmed, selectedTemplate])
 
   useEffect(() => () => window.clearTimeout(resetConfirmTimeoutRef.current), [])
 
@@ -1169,6 +1201,7 @@ function ResumeBuilderPage({
     const replacesOwnCv = JSON.stringify(current) !== JSON.stringify(demo)
       && (Boolean(current.fullName?.trim())
         || CV_SECTION_ORDER_KEYS.some((section) => hasSectionContent(current, section)))
+    detachSavedCv()
     dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: demo })
     markCvSaved(demo)
     applyStoredStyleVariantLook(demo, selectedTemplate)
@@ -1182,7 +1215,7 @@ function ResumeBuilderPage({
     } else {
       showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
     }
-  }, [applyStoredStyleVariantLook, dispatchFormData, formDataRef, locale, markCvPristine, markCvSaved, selectedTemplate, setStorageValue])
+  }, [applyStoredStyleVariantLook, detachSavedCv, dispatchFormData, formDataRef, locale, markCvPristine, markCvSaved, selectedTemplate, setStorageValue])
 
   const handlePasteCvImport = useCallback(() => {
     try {
@@ -1387,6 +1420,87 @@ function ResumeBuilderPage({
   }, [])
 
   const handleOpenImport = useCallback(() => setIsImportOpen(true), [])
+
+  // ── Saved CVs (1.7.1) ──
+  const openSavedCvs = useCallback((view) => {
+    setSavedCvsUnsaved(hasUnsavedCvChanges())
+    setSavedCvsView(view)
+  }, [hasUnsavedCvChanges])
+  const handleOpenSavedCvs = useCallback(() => {
+    cvLibrary.refreshSavedCvs()
+    openSavedCvs('list')
+  }, [cvLibrary, openSavedCvs])
+  const handleCloseSavedCvs = useCallback(() => setSavedCvsView(null), [])
+  // The toolbar button. Not saved yet: ask for a name. Saved: the list.
+  // Paused by another tab's save: this press is the "keep mine" the toast
+  // asked for.
+  const handleSaveCvClick = useCallback(() => {
+    if (cvLibrary.activeCv && (cvLibrary.saveState === 'conflict' || cvLibrary.saveState === 'error')) {
+      cvLibrary.saveNow()
+    } else if (cvLibrary.activeCv) {
+      handleOpenSavedCvs()
+    } else {
+      openSavedCvs('save')
+    }
+  }, [cvLibrary, handleOpenSavedCvs, openSavedCvs])
+  const handleSaveCvAs = useCallback(async (name) => {
+    if (await cvLibrary.saveAs(name)) {
+      setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+      setSavedCvsView(null)
+    }
+  }, [cvLibrary, setStorageValue])
+  // Puts a saved CV on screen as a CV of its own: its template, a clean
+  // undo history, and nothing to ask about on leaving.
+  const applySavedCv = useCallback(({ data, templateId }) => {
+    const nextTemplateId = resolveTemplateId(templateId) ?? selectedTemplate
+
+    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: data })
+    if (nextTemplateId !== selectedTemplate) {
+      dispatchUi({ type: UI_ACTION.SET_SELECTED_TEMPLATE, templateId: nextTemplateId })
+    }
+    applyStoredStyleVariantLook(data, nextTemplateId)
+    resetHistory(data)
+    markCvSaved(data)
+    return nextTemplateId
+  }, [applyStoredStyleVariantLook, dispatchFormData, markCvSaved, resetHistory, selectedTemplate])
+  const handleOpenSavedCv = useCallback(async (id) => {
+    if (await cvLibrary.openCv(id, applySavedCv)) {
+      setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
+      setSavedCvsView(null)
+      const opened = cvLibrary.savedCvs.find((cv) => cv.id === id)
+      showToast(locale === 'fi' ? `Avattu: ${opened?.name ?? 'CV'}.` : `Opened ${opened?.name ?? 'the CV'}.`)
+    }
+  }, [applySavedCv, cvLibrary, locale, setStorageValue])
+  const handleDuplicateSavedCv = useCallback(async (id) => {
+    const copyId = await cvLibrary.duplicateCv(id)
+
+    if (copyId && await cvLibrary.openCv(copyId, applySavedCv)) {
+      setSavedCvsView(null)
+      showToast(locale === 'fi' ? 'Kopio tehty ja avattu.' : 'Copy made and opened.')
+    }
+  }, [applySavedCv, cvLibrary, locale])
+  const handleNewCv = useCallback(() => {
+    const blank = createInitialCvData()
+
+    detachSavedCv()
+    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: blank })
+    applyStoredStyleVariantLook(null, selectedTemplate)
+    resetHistory(blank)
+    markCvPristine(blank)
+    markCvSaved(blank)
+    setSavedCvsView(null)
+    showToast(locale === 'fi' ? 'Uusi tyhjä CV aloitettu.' : 'Started a new, empty CV.')
+  }, [applyStoredStyleVariantLook, detachSavedCv, dispatchFormData, locale, markCvPristine, markCvSaved, resetHistory, selectedTemplate])
+  const savedCvTemplateLabels = useMemo(
+    () => Object.fromEntries(templates.map((template) => [template.id, template.label])),
+    [templates],
+  )
+  const savedCvStatus = useMemo(() => ({
+    isSaved: Boolean(cvLibrary.activeCv),
+    name: cvLibrary.activeCv?.name ?? '',
+    needsAttention: cvLibrary.saveState === 'conflict' || cvLibrary.saveState === 'error',
+    count: cvLibrary.savedCvs.length,
+  }), [cvLibrary.activeCv, cvLibrary.saveState, cvLibrary.savedCvs.length])
   const handleCloseImport = useCallback(() => setIsImportOpen(false), [])
   const handleOpenAtsCheck = useCallback(() => setIsAtsCheckOpen(true), [])
   const handleCloseAtsCheck = useCallback(() => setIsAtsCheckOpen(false), [])
@@ -1716,6 +1830,9 @@ function ResumeBuilderPage({
       onOpenSettings: handleOpenSettings,
       onOpenCoverLetter: handleOpenCoverLetter,
       onOpenImport: handleOpenImport,
+      savedCvStatus,
+      onSaveCv: handleSaveCvClick,
+      onOpenSavedCvs: handleOpenSavedCvs,
       onClearCv: handleResetForm,
       isClearArmed: resetConfirmArmed,
       builderMode,
@@ -1733,6 +1850,7 @@ function ResumeBuilderPage({
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
     handleOpenSettings, handleOpenCoverLetter, handleOpenImport,
+    savedCvStatus, handleSaveCvClick, handleOpenSavedCvs,
     handleResetForm, resetConfirmArmed,
     builderMode, handleSetBuilderMode,
     onHeaderChange,
@@ -1882,7 +2000,9 @@ function ResumeBuilderPage({
             className={`editor-status-pill ${ui.surfaceMuted} ${ui.textMuted}`}
             role="status"
           >
-            {sessionRestoreEnabled
+            {cvLibrary.activeCv
+              ? locale === 'fi' ? 'Tallennettu tälle laitteelle' : 'Saved on this device'
+              : sessionRestoreEnabled
               ? locale === 'fi' ? 'Säilyy vain tässä välilehdessä' : 'Kept in this tab only'
               : locale === 'fi' ? 'Ei tallenneta minnekään' : 'Nothing saved anywhere'}
           </div>
@@ -2048,6 +2168,7 @@ function ResumeBuilderPage({
     secondaryButtonClassName,
     sectionSettingsExpandSignal,
     sessionRestoreEnabled,
+    cvLibrary.activeCv,
     selectedTemplate,
     dispatchFormData,
     ui.button,
@@ -2489,6 +2610,28 @@ function ResumeBuilderPage({
         onTemplateAccentColorChange={handleTemplateAccentColorChange}
         classicNameAlignment={classicNameAlignment}
         onClassicNameAlignmentChange={handleClassicNameAlignmentChange}
+        savedCvCount={cvLibrary.savedCvs.length}
+        onDeleteAllSavedCvs={cvLibrary.deleteAll}
+      />
+
+      <SavedCvsModal
+        isOpen={savedCvsView !== null}
+        view={savedCvsView ?? 'list'}
+        onViewChange={setSavedCvsView}
+        onClose={handleCloseSavedCvs}
+        locale={locale}
+        isAvailable={cvLibrary.isAvailable}
+        savedCvs={cvLibrary.savedCvs}
+        activeCv={cvLibrary.activeCv}
+        suggestedName={defaultCvName(formData, locale)}
+        hasUnsavedChanges={savedCvsUnsaved}
+        templateLabels={savedCvTemplateLabels}
+        onSaveAs={handleSaveCvAs}
+        onOpen={handleOpenSavedCv}
+        onDuplicate={handleDuplicateSavedCv}
+        onRename={cvLibrary.renameCv}
+        onDelete={cvLibrary.deleteCv}
+        onNewCv={handleNewCv}
       />
 
       <ImportCvModal

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import Modal from './Modal'
 import ToggleSwitch from './fields/ToggleSwitch'
 import { getTemplateAccent, resolveTemplateAccent } from '../utils/cvTemplates'
@@ -17,8 +18,11 @@ function SettingsModal({
   onTemplateAccentColorChange,
   classicNameAlignment = 'center',
   onClassicNameAlignmentChange,
+  savedCvCount = 0,
+  onDeleteAllSavedCvs,
 }) {
   const isFinnish = locale === 'fi'
+  const [isDeleteAllArmed, setIsDeleteAllArmed] = useState(false)
 
   return (
     <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
@@ -136,6 +140,36 @@ function SettingsModal({
               )
             })}
           </div>
+        </div>
+      ) : null}
+      {savedCvCount > 0 && onDeleteAllSavedCvs ? (
+        <div className="settings-row">
+          <div>
+            <p className="settings-row__label">
+              {isFinnish ? `Tälle laitteelle tallennetut CV:t (${savedCvCount})` : `CVs saved on this device (${savedCvCount})`}
+            </p>
+            <p className="settings-row__hint">
+              {isFinnish
+                ? 'Poistaa kaikki tähän selaimeen tallentamasi CV:t. Tätä ei voi kumota. Näytöllä oleva CV pysyy auki.'
+                : 'Removes every CV you saved in this browser. This cannot be undone. The CV on screen stays open.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            className={`settings-link${isDeleteAllArmed ? ' settings-link--armed' : ''}`}
+            onClick={() => {
+              if (!isDeleteAllArmed) {
+                setIsDeleteAllArmed(true)
+                return
+              }
+              setIsDeleteAllArmed(false)
+              onDeleteAllSavedCvs()
+            }}
+          >
+            {isDeleteAllArmed
+              ? isFinnish ? 'Vahvista kaikkien poisto' : 'Confirm delete all'
+              : isFinnish ? 'Poista kaikki' : 'Delete all saved CVs'}
+          </button>
         </div>
       ) : null}
     </Modal>

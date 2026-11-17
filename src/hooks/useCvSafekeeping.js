@@ -111,5 +111,13 @@ export default function useCvSafekeeping({
     { keptInTab: () => sessionRestoreEnabled },
   ), [sessionRestoreEnabled])
 
-  return { formDataRef, markCvSaved, markCvPristine }
+  // Asked before a saved CV or a new one replaces the CV on screen
+  // (1.7.1). Unlike the leave guard this ignores session restore: the tab's
+  // copy is about to be replaced too.
+  const hasUnsavedCvChanges = useCallback(
+    () => JSON.stringify(formDataRef.current) !== savedCvRef.current && JSON.stringify(formDataRef.current) !== pristineCvRef.current,
+    [],
+  )
+
+  return { formDataRef, markCvSaved, markCvPristine, hasUnsavedCvChanges }
 }

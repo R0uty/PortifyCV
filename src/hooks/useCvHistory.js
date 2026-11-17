@@ -141,5 +141,15 @@ export default function useCvHistory({
     historySkipNextCommitRef.current = skipNextCommit
   }, [formData, historyPast, uiState])
 
-  return { canUndo, canRedo, handleUndo, handleRedo, recordTemplateLookStep }
+  // A different CV altogether is on screen (a saved CV was opened, or a new
+  // one started): undo must not walk back into the previous CV, whose
+  // content would then be auto-saved into this one (1.7.1).
+  const resetHistory = useCallback((nextFormData) => {
+    setHistoryPast([])
+    setHistoryFuture([])
+    historyCommittedRef.current = nextFormData
+    historySkipNextCommitRef.current = nextFormData !== formData
+  }, [formData])
+
+  return { canUndo, canRedo, handleUndo, handleRedo, recordTemplateLookStep, resetHistory }
 }
