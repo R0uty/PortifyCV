@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react'
 import AutoGrowTextarea from '../AutoGrowTextarea'
+import BulletHints from './BulletHints'
 
 function ReorderableListInput({
   items = [],
@@ -9,8 +10,13 @@ function ReorderableListInput({
   addLabel = 'Add',
   itemAriaLabel = 'Item',
   locale = 'en',
+  // Optional writing hints per item, in items' order (achievements only).
+  hints = null,
 }) {
   const isFinnish = locale === 'fi'
+  const hintIdBase = useId()
+  // The row being typed in shows no hints until the caret leaves it.
+  const [focusedIndex, setFocusedIndex] = useState(null)
   const itemName = itemAriaLabel.toLowerCase()
   // Items are plain strings with no identity of their own, but reordering
   // needs a key that follows the moved value (not its slot) so keyboard
@@ -79,14 +85,22 @@ function ReorderableListInput({
 
   return (
     <div className="reorderable-list">
-      {items.map((item, index) => (
-        <div className="reorderable-list__row" key={ids[index] ?? index}>
+      {items.map((item, index) => {
+        const rowHints = focusedIndex === index ? [] : (hints?.[index] ?? [])
+        const hintId = `${hintIdBase}-hint-${index}`
+
+        return (
+        <div className="reorderable-list__item" key={ids[index] ?? index}>
+        <div className="reorderable-list__row">
           <AutoGrowTextarea
             className="reorderable-list__input"
             value={item}
             placeholder={placeholder}
             minHeight={40}
             aria-label={`${itemAriaLabel} ${index + 1}`}
+            aria-describedby={rowHints.length > 0 ? hintId : undefined}
+            onFocus={() => setFocusedIndex(index)}
+            onBlur={() => setFocusedIndex(null)}
             onChange={(event) => updateAt(index, event.target.value)}
           />
           <div className="reorderable-list__actions">
@@ -118,7 +132,10 @@ function ReorderableListInput({
             </button>
           </div>
         </div>
-      ))}
+        <BulletHints id={hintId} hints={rowHints} />
+        </div>
+        )
+      })}
       <button type="button" className="reorderable-list__add" onClick={addItem}>
         <Plus size={14} strokeWidth={2.5} aria-hidden="true" />
         {addLabel}

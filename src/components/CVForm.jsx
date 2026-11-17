@@ -17,6 +17,7 @@ import { ChevronDown, ChevronUp, Sparkles } from 'lucide-react'
 import AutoGrowTextarea from './AutoGrowTextarea'
 import EntryBadge from './EntryBadge'
 import InlineTipList from './InlineTipList'
+import { getBulletHints } from '../utils/cvFeedback'
 import PanelSection from './PanelSection'
 import SortableItemCard from './SortableItemCard'
 import DragDropUpload from './fields/DragDropUpload'
@@ -796,6 +797,7 @@ function CVForm({
                             addLabel={isFinnish ? 'Lisää saavutus' : 'Add achievement'}
                             itemAriaLabel={isFinnish ? 'Saavutus' : 'Achievement'}
                             locale={isFinnish ? 'fi' : 'en'}
+                            hints={getBulletHints(item.achievements, { locale: isFinnish ? 'fi' : 'en' })}
                           />
                         </div>
                         <div className="mt-4">

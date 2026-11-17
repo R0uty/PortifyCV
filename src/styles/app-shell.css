@@ -5118,3 +5118,27 @@ html:lang(fi) .landing-title {
     white-space: nowrap;
   }
 }
+
+/* Writing hints under an achievement bullet (1.7.3, fields/BulletHints.jsx). */
+.bullet-hints {
+  margin: 0.3rem 0 0.15rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.bullet-hints__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--app-text-muted);
+}
+
+.bullet-hints__icon {
+  flex: none;
+  margin-top: 0.15rem;
+  color: var(--accent-text);
+}

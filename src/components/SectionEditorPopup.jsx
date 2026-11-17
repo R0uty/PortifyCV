@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { SECTION_SHAPE, getSectionSchema, getColumnNeighbourSection } from '../utils/sectionSchema'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 import InlineTagEditor from './fields/InlineTagEditor'
+import BulletHints from './fields/BulletHints'
+import { getBulletHints } from '../utils/cvFeedback'
 import { isPhotoVisibleForTemplate, normalizeSectionOrder } from '../utils/cvForm'
 import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/profilePhoto'
 import { canMoveSection, getSectionColumn, setSectionColumn } from '../utils/sectionColumns'
@@ -16,6 +18,9 @@ import { getTabStops } from '../utils/focusTrap'
 
 function FieldInput({ field, value, isFinnish, onChange }) {
   const label = isFinnish ? field.labelFi : field.labelEn
+  // Achievement bullets get writing hints (1.7.3), hidden on the one being typed in.
+  const hintIdBase = useId()
+  const [focusedIndex, setFocusedIndex] = useState(null)
   // No <label htmlFor> or anything else references these ids (labels wrap
   // their inputs instead), and a record-array section renders one
   // FieldInput per entry, so a stable id-per-field would duplicate across
@@ -34,21 +39,30 @@ function FieldInput({ field, value, isFinnish, onChange }) {
   if (field.type === 'list') {
     const items = Array.isArray(value) ? value : []
     const itemLabel = isFinnish ? field.itemLabelFi : field.itemLabelEn
+    const hints = field.key === 'achievements' ? getBulletHints(items, { locale: isFinnish ? 'fi' : 'en' }) : null
 
     return (
       <div className="direct-edit-popup__field">
         <span className="direct-edit-popup__label">{label}</span>
         <div className="direct-edit-popup__list" data-field={field.key}>
-          {items.map((item, index) => (
+          {items.map((item, index) => {
+            const rowHints = focusedIndex === index ? [] : (hints?.[index] ?? [])
+            const hintId = `${hintIdBase}-hint-${index}`
+
+            return (
             // Keyed by index on purpose: these are plain strings with no
             // stable identity, and keying by value would remount every
             // row that shares text with another (and lose the caret while
             // typing a duplicate).
-            <div className="direct-edit-popup__list-item" key={index}>
+            <div key={index}>
+            <div className="direct-edit-popup__list-item">
               <input
                 type="text"
                 className="direct-edit-popup__input"
                 aria-label={`${itemLabel} ${index + 1}`}
+                aria-describedby={rowHints.length > 0 ? hintId : undefined}
+                onFocus={() => setFocusedIndex(index)}
+                onBlur={() => setFocusedIndex(null)}
                 value={item ?? ''}
                 onChange={(event) =>
                   onChange(items.map((entry, i) => (i === index ? event.target.value : entry)))
@@ -63,7 +77,10 @@ function FieldInput({ field, value, isFinnish, onChange }) {
                 &times;
               </button>
             </div>
-          ))}
+            <BulletHints id={hintId} hints={rowHints} />
+            </div>
+            )
+          })}
           <button
             type="button"
             className="direct-edit-popup__list-add"
