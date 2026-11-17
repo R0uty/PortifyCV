@@ -271,3 +271,23 @@ test.describe('Saved CVs', () => {
     await expect(dialog.getByLabel('Name for this CV')).toHaveCount(0)
   })
 })
+
+test.describe('Saved CVs on a phone', () => {
+  test.use({ viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true })
+
+  // The toolbar has no room for Save there; it is the More menu's top item.
+  test('Save is in More actions', async ({ page }) => {
+    await page.goto('/cv')
+    await fullName(page).fill('Ada Lovelace')
+    await expect(saveButton(page)).toBeHidden()
+
+    await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: 'Save on this device' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Save on this device' })
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(page.getByText('Saved on this device as "Ada Lovelace CV".')).toBeVisible()
+
+    await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+    await expect(page.getByRole('menuitem', { name: 'Saved: Ada Lovelace CV' })).toBeVisible()
+  })
+})

@@ -5086,6 +5086,28 @@ html:lang(fi) .landing-title {
   color: #b42318;
 }
 
+/* Small laptops: the title gives way so Save fits on Classic's one row. */
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .app-toolbar .app-toolbar__title {
+    display: none;
+  }
+}
+
+/* Phones: no room on the first row, so Save is the More menu's top item. */
+.app-toolbar__menu-item--save {
+  display: none;
+}
+
+@media (max-width: 639.98px) {
+  .app-toolbar__save {
+    display: none;
+  }
+
+  .app-toolbar__menu-item.app-toolbar__menu-item--save {
+    display: flex;
+  }
+}
+
 @media (max-width: 720px) {
   .app-toolbar__save-label {
     position: absolute;

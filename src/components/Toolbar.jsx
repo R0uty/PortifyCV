@@ -528,6 +528,25 @@ function Toolbar({
                     {isFinnish ? 'Tuo CV' : 'Import CV'}
                   </button>
                 ) : null}
+                {/* Phones only (CSS): the toolbar's Save button has no
+                    room there, so it moves to the top of this menu. */}
+                {savedCvStatus ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="app-toolbar__menu-item app-toolbar__menu-item--save"
+                    onClick={() => handleMoreSelect(onSaveCv)}
+                  >
+                    {savedCvStatus.isSaved && !savedCvStatus.needsAttention
+                      ? <Check size={15} strokeWidth={2.4} aria-hidden="true" />
+                      : <Save size={15} strokeWidth={2} aria-hidden="true" />}
+                    {savedCvStatus.needsAttention
+                      ? isFinnish ? 'Tallennus tauolla. Tallenna nyt' : 'Saving paused. Save now'
+                      : savedCvStatus.isSaved
+                        ? isFinnish ? `Tallennettu: ${savedCvStatus.name}` : `Saved: ${savedCvStatus.name}`
+                        : isFinnish ? 'Tallenna tälle laitteelle' : 'Save on this device'}
+                  </button>
+                ) : null}
                 <button
                   type="button"
                   role="menuitem"
