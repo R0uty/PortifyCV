@@ -97,7 +97,7 @@ function getCopy(locale) {
         heading: 'Kokonainen tietoturva-analyytikon CV',
         intro: 'Sama esimerkkihenkilö kahdessa pohjassa. Kumpikin avautuu valmiina CV:nä, ja "Käytä tätä esimerkkiä" lataa sen editoriin muokattavaksi.',
       },
-      ctaNote: 'Ei kirjautumista. Ei mitään tallennettua ennen kuin viet CV:n.',
+      ctaNote: 'Ei kirjautumista. Mitään ei tallenneta, ellet itse tallenna.',
       seeAlso: [
         { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV:n taito-osion esimerkkejä' },
         { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-ystävällinen CV-opas' },
@@ -195,7 +195,7 @@ function getCopy(locale) {
       heading: 'A full cybersecurity analyst CV',
       intro: 'The same example person in two templates. Each opens as a complete CV, and "Use this example" loads it into the builder to edit.',
     },
-    ctaNote: 'No login. Nothing saved until you export.',
+    ctaNote: 'No login. Nothing saved unless you choose to.',
     seeAlso: [
       { to: ROUTES.cvSkills, view: 'cvSkills', text: 'CV Skills Examples' },
       { to: ROUTES.atsGuide, view: 'atsGuide', text: 'ATS-Friendly CV Guide' },

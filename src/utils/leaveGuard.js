@@ -1,5 +1,6 @@
 // Asks before the builder's page unloads with edits the visitor can't
-// get back (1.6.66). Nothing is saved, so closing the tab, going back or
+// get back (1.6.66). Nothing is saved unless the visitor presses Save
+// (1.7.1, which marks the CV saved), so closing the tab, going back or
 // following a link used to lose the CV without a word. The builder
 // registers a check. In-app links and the Back button ask through App.jsx's
 // LeaveConfirmDialog (1.6.68/1.6.70), which reads hasUnsavedChanges() and

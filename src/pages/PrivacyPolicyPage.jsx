@@ -1,6 +1,6 @@
 const EFFECTIVE_DATE = {
-  en: '11 November 2026',
-  fi: '11. marraskuuta 2026',
+  en: '17 November 2026',
+  fi: '17. marraskuuta 2026',
 }
 
 function getPrivacyCopy(locale) {
@@ -21,7 +21,8 @@ function getPrivacyCopy(locale) {
           paragraphs: [
             'Kaikki mitä kirjoitat PortifyCV:hen — nimesi, työhistoriasi, '
             + 'koulutuksesi ja jokainen muu kenttä — pysyy selaimesi muistissa '
-            + 'istuntosi ajan. Sitä ei koskaan lähetetä palvelimelle, koska '
+            + 'istuntosi ajan, ellet itse tallenna sitä tälle laitteelle (katso '
+            + '"Tälle laitteelle tallennetut CV:t" alla). Sitä ei koskaan lähetetä palvelimelle, koska '
             + 'PortifyCV:llä ei ole sellaista, johon sen voisi lähettää. Se '
             + 'poistuu laitteeltasi vain, jos valitset itse tiedoston viennin '
             + '(PDF, Word, HTML tai JSON) tai luot jakolinkin, ja silloinkin se '
@@ -78,6 +79,21 @@ function getPrivacyCopy(locale) {
             + 'selaimen seuraavaan istuntoon, saati lähetä mitään '
             + 'minnekään. Toiminnon kytkeminen takaisin pois päältä '
             + 'tyhjentää tallennetun kopion välittömästi.',
+          ],
+        },
+        {
+          heading: 'Tälle laitteelle tallennetut CV:t',
+          paragraphs: [
+            'Mitään ei tallenneta, ellet itse tallenna. Kun painat '
+            + 'rakentajan Tallenna-painiketta ja annat CV:lle nimen, CV '
+            + 'tallennetaan selaimesi IndexedDB-tallennustilaan tällä '
+            + 'laitteella, ja sen jälkeiset muutokset tallentuvat siihen '
+            + 'itsestään. Se ei lähde laitteeltasi, eikä PortifyCV näe sitä.',
+            'Tallennetut CV:t säilyvät käyntikertojen välillä, kunnes poistat '
+            + 'ne: yksitellen kohdasta Omat CV:t, kaikki kerralla Asetuksista '
+            + 'tai tyhjentämällä selaimesi sivustokohtaiset tiedot tälle '
+            + 'verkkotunnukselle. Ne eivät siirry toiseen selaimeen tai '
+            + 'laitteeseen; vie JSON-tiedosto, jos haluat kopion muualle.',
           ],
         },
         {
@@ -146,8 +162,8 @@ function getPrivacyCopy(locale) {
           paragraphs: [
             'Koska mitään CV:stäsi ei koskaan tallenneta oman selaimesi '
             + 'ulkopuolelle, meidän puoleltamme ei ole mitään pyydettävää, '
-            + 'korjattavaa tai poistettavaa. Voit tyhjentää yllä mainitut '
-            + 'paikalliset asetukset tai kieltäytyä kohdennetuista '
+            + 'korjattavaa tai poistettavaa. Voit poistaa tallentamasi CV:t ja '
+            + 'tyhjentää yllä mainitut paikalliset asetukset tai kieltäytyä kohdennetuista '
             + 'mainoksista milloin tahansa tämän selosteen linkkien avulla.',
           ],
         },
@@ -190,7 +206,9 @@ function getPrivacyCopy(locale) {
         paragraphs: [
           "Everything you type into PortifyCV — your name, work history, "
           + "education, and every other field — stays in your browser's "
-          + 'memory for the duration of your session. It is never uploaded to '
+          + 'memory for the duration of your session, unless you choose to save '
+          + 'it on this device (see "CVs saved on this device" below). It is '
+          + 'never uploaded to '
           + 'a server, because PortifyCV does not have one to upload it to. It '
           + 'leaves your device only if you explicitly choose to export a file '
           + '(PDF, Word, HTML, or JSON) or generate a share link, and even then it '
@@ -245,6 +263,21 @@ function getPrivacyCopy(locale) {
           + 'visit, even in the same browser, and it is never sent '
           + 'anywhere. Turning the feature back off clears the saved copy '
           + 'immediately.',
+        ],
+      },
+      {
+        heading: 'CVs saved on this device',
+        paragraphs: [
+          'Nothing is saved unless you choose to. When you press Save in the '
+          + 'builder and name a CV, it is stored in your browser\'s IndexedDB '
+          + 'storage on this device, and your later edits to it are saved '
+          + 'there automatically. It does not leave your device, and '
+          + 'PortifyCV never sees it.',
+          'Saved CVs stay between visits until you delete them: one at a '
+          + 'time from My CVs, all at once from Settings, or by clearing '
+          + "your browser's site data for this domain. They do not move to "
+          + 'another browser or device; export JSON if you want a copy '
+          + 'elsewhere.',
         ],
       },
       {
@@ -311,7 +344,8 @@ function getPrivacyCopy(locale) {
         paragraphs: [
           'Because nothing about your CV is ever stored outside your own '
           + 'browser, there is nothing on our end to request, correct, or '
-          + 'delete. You can clear the local preferences above, or opt '
+          + 'delete. You can delete your saved CVs and clear the local '
+          + 'preferences above, or opt '
           + 'out of personalized ads, at any time using the links in this '
           + 'policy.',
         ],

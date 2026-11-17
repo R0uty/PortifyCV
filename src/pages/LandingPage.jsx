@@ -26,7 +26,7 @@ const TEMPLATE_COUNT = cvTemplates.length
 function getLandingCopy(locale) {
   if (locale === 'fi') {
     return {
-      kicker: 'Ei kirjautumista. Ei tallennettua dataa.',
+      kicker: 'Ei kirjautumista. Mitään ei tallenneta, ellet itse tallenna.',
       startButton: 'Aloita rakentaminen',
       viewTemplatesButton: 'Katso pohjat',
       howItWorksLink: 'Katso miten se toimii',
@@ -77,7 +77,7 @@ function getLandingCopy(locale) {
   }
 
   return {
-    kicker: 'No login. No data saved.',
+    kicker: 'No login. Nothing saved unless you choose to.',
     startButton: 'Start building',
     viewTemplatesButton: 'View templates',
     howItWorksLink: 'See how it works',

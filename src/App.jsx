@@ -542,7 +542,7 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
     <footer className="site-footer print:hidden">
       <div className="site-footer__inner">
         <span>
-          {isFinnish ? 'Ei kirjautumista. Ei tallennettua dataa.' : 'No login. No data saved.'}
+          {isFinnish ? 'Ei kirjautumista. Mitään ei tallenneta, ellet itse tallenna.' : 'No login. Nothing saved unless you choose to.'}
           {' '}
           <span className="site-footer__version">{APP_VERSION}</span>
         </span>

@@ -34,9 +34,9 @@ const STATIC_VIEW_HEAD = {
     pathFi: ROUTES_FI.landing,
     titleFi: 'Ilmainen CV-työkalu ilman kirjautumista - PortifyCV',
     descriptionFi:
-      'Tee CV ilmaiseksi muutamassa minuutissa. Ei kirjautumista, mitään ei tallenneta. 18 pohjaa, ATS-näkymä sekä vienti PDF-, Word-, HTML- ja JSON-muotoon.',
+      'Tee CV ilmaiseksi muutamassa minuutissa. Ei kirjautumista, mitään ei tallenneta, ellet itse tallenna. 18 pohjaa, ATS-näkymä sekä vienti PDF-, Word-, HTML- ja JSON-muotoon.',
     description:
-      'Build a free CV in minutes. No login, no data saved. Live preview, ATS-friendly mode, and PDF/Word/HTML/JSON export.',
+      'Build a free CV in minutes. No login, nothing saved unless you choose to. Live preview, ATS-friendly mode, and PDF/Word/HTML/JSON export.',
   },
   builder: {
     title: 'PortifyCV - Build Your CV Online',

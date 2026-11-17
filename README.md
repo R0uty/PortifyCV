@@ -32,8 +32,11 @@ A modern, minimal CV builder for creating and exporting professional resumes in 
 - **Share & Import**: Generate a shareable link that carries the CV text in the URL,
   or import a JSON backup / paste raw resume text
 - **Bilingual UI**: English and Finnish
-- **No persistence**: No CV data is saved to a server or to browser storage; the CV lives
-  in the page for as long as the tab is open. Local storage only holds UI preferences
+- **Nothing saved unless you choose to**: No CV data is ever sent to a server. Until you
+  press Save, the CV lives in the page for as long as the tab is open. Save names it and
+  keeps it in this browser's IndexedDB, where later edits save themselves; More actions ›
+  My CVs opens, duplicates, renames and deletes saved CVs, and Settings deletes them all.
+  Local storage only holds UI preferences
   (language, editor mode, onboarding dismissed). If you turn on "restore last
   session" in Settings, a snapshot is kept in session storage, so it survives a
   reload but is gone once the tab is closed.
@@ -94,6 +97,9 @@ npm run check:section-columns
 
 # Verify the per-template page slugs, examples, and copy (no browser needed)
 npm run check:template-pages
+
+# The saved-CV library's names, records and validation (src/utils/cvLibrary.js)
+npm run check:cv-library
 
 # Run the end-to-end smoke suite against a production build
 npm run test:e2e

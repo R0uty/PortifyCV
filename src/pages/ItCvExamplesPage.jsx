@@ -107,7 +107,7 @@ function getCopy(locale) {
         },
       ],
       ctaLabel: 'Aloita CV:si rakentaminen',
-      ctaNote: 'Ei kirjautumista. Mitään ei tallenneta ennen kuin viet CV:n.',
+      ctaNote: 'Ei kirjautumista. Mitään ei tallenneta, ellet itse tallenna.',
       fullExamples: {
         heading: 'Kokonainen IT-tukihenkilön CV',
         intro: 'Sama esimerkkihenkilö kahdessa pohjassa: kuuden vuoden palvelupistekokemus, ympäristön koko luvuin, automatisointi ja voimassaolevat sertifikaatit. "Käytä tätä esimerkkiä" lataa sen editoriin muokattavaksi.',
@@ -219,7 +219,7 @@ function getCopy(locale) {
       },
     ],
     ctaLabel: 'Start building your CV',
-    ctaNote: 'No login. Nothing saved until you export.',
+    ctaNote: 'No login. Nothing saved unless you choose to.',
     fullExamples: {
       heading: 'A full IT support specialist CV',
       intro: 'The same example person in two templates: six years on service desks, the environment in numbers, automation and certificates with their expiry dates. "Use this example" loads it into the builder to edit.',

@@ -80,7 +80,7 @@ function getCopy(locale) {
         },
       ],
       ctaLabel: 'Aloita CV:si rakentaminen',
-      ctaNote: 'Ei kirjautumista. Ei mitään tallennettua ennen kuin viet CV:n.',
+      ctaNote: 'Ei kirjautumista. Mitään ei tallenneta, ellet itse tallenna.',
     }
   }
 
@@ -154,7 +154,7 @@ function getCopy(locale) {
       },
     ],
     ctaLabel: 'Start building your CV',
-    ctaNote: 'No login. Nothing saved until you export.',
+    ctaNote: 'No login. Nothing saved unless you choose to.',
   }
 }
 

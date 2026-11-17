@@ -9,7 +9,7 @@ test.describe('Landing page', () => {
 
     await expect(page.getByRole('heading', { name: 'Free CV builder. Build it, take it, done.' })).toBeVisible()
     await expect(page.getByRole('img', { name: 'The PortifyCV editor: a CV with its About section open for editing beside it.' })).toBeVisible()
-    await expect(page.getByText('No login. No data saved.').first()).toBeVisible()
+    await expect(page.getByText('No login. Nothing saved unless you choose to.').first()).toBeVisible()
   })
 
   test('Start building opens the CV editor', async ({ page }) => {

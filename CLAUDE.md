@@ -19,6 +19,7 @@ npm run check:section-schema   # validates the Direct Edit popup's section schem
 npm run check:section-columns  # exercises the section column-move rules (src/utils/sectionColumns.js)
 npm run check:template-pages   # validates per-template page slugs, examples, copy, and field tags (src/utils/templatePageCopy.js, src/utils/templateMetaDescriptions.js, src/utils/exampleCvs.js, src/utils/templateFields.js)
 npm run check:template-variants  # validates the style-variant registry against each template's CSS defaults, plus contrast (src/utils/templateVariants.js)
+npm run check:cv-library   # exercises the saved-CV library's names, records and save rules (src/utils/cvLibrary.js)
 npm run check:cv-import    # exercises the PDF/Word import's text parser and column detection (src/utils/cvTextImport.js, src/utils/cvFileText.js)
 npm run check:thumbnails   # the pre-rendered thumbnails in public/thumbnails/ exist, match their manifest, and are up to date with the template code
 npm run thumbnails         # regenerate public/thumbnails/ (Vite dev server + Playwright Chromium, ~20s); commit the result
@@ -43,10 +44,11 @@ rules and their import validation (`check:section-columns`), the
 per-template pages' slugs, examples, copy, and field tags, plus `index.html`'s static template count (`check:template-pages`), or
 a template's style variants or palette variables (`check:template-variants`),
 anything a template thumbnail is rendered from (`check:thumbnails`), or the
-CV file import's parser or PDF column detection (`check:cv-import`). A
+CV file import's parser or PDF column detection (`check:cv-import`), or the
+saved-CV library (`check:cv-library`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.
-CI (`.github/workflows/ci.yml`) runs all ten on every push to `main` and
+CI (`.github/workflows/ci.yml`) runs all eleven on every push to `main` and
 `v1.7.0` (the current long-lived branch) and on every pull request.
 
 `test:e2e` (and its `:fast`/`:slow` variants) build and serve the app first
@@ -64,14 +66,30 @@ test title) rather than adding a third script.
 
 ## Architecture
 
-**No backend, no persistence.** This is a static SPA (Vite + React 19) with
-no server and no database. CV data lives in React state for the life of
-the tab and is never sent anywhere. The only things that survive a
-reload are the UI locale, an onboarding-seen flag, and a session-restore
-snapshot of an edited CV (on by default since 1.6.82, off in Settings;
-`sessionStorage`, so it goes when the tab closes; the rest in
-`localStorage` — see `src/utils/cvForm.js` for the storage keys). Sharing a CV means encoding it into a URL (below), not
-uploading it anywhere.
+**No backend; nothing saved unless the visitor chooses to.** This is a
+static SPA (Vite + React 19) with no server and no database. CV data lives
+in React state for the life of the tab and is never sent anywhere. The
+only things that survive a reload without asking are the UI locale, an
+onboarding-seen flag, and a session-restore snapshot of an edited CV (on
+by default since 1.6.82, off in Settings; `sessionStorage`, so it goes
+when the tab closes; the rest in `localStorage` — see `src/utils/cvForm.js`
+for the storage keys). Sharing a CV means encoding it into a URL (below),
+not uploading it anywhere.
+
+**Saved CVs (1.7.1) live in IndexedDB, and only after Save.**
+`src/utils/cvLibrary.js` is the store (db `portifycv`, store `cvs`, one
+record per CV with its template; writes check `updatedAt` so a second tab
+can't silently overwrite the first). `src/hooks/useCvLibrary.js` holds
+the "active" saved CV: once the visitor presses the toolbar's Save and
+names it, edits auto-save after `HISTORY_COMMIT_DELAY_MS`; another tab's
+save pauses this tab until Save is pressed again. Anything that replaces
+the whole CV on screen (clear, demo, JSON or file import, New CV) must call
+`detach()` first, or the replacement would be auto-saved over the saved CV.
+Opening a saved CV resets undo history (`useCvHistory`'s `resetHistory`),
+so Undo never crosses CVs. A reload reattaches only when session restore
+brought the same CV back (`ACTIVE_CV_SESSION_KEY` in `sessionStorage`).
+`e2e/saved-cvs.spec.js` covers the flows, the two-tab conflict and a
+browser that blocks IndexedDB.
 
 **Hand-rolled routing, no react-router.** `src/App.jsx` owns view state
 directly (`useState` + `history.pushState`/`popstate`), matching the current
