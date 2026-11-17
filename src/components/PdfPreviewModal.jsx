@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react'
 import { Download, LoaderCircle, TriangleAlert } from 'lucide-react'
 
 import Modal from './Modal'
+import PdfParserView from './PdfParserView'
 
 // The PDF before it downloads (1.6.74): the pages exactly as the file will
 // have them, with the paper and fit options that change them. `onRender`
@@ -126,6 +127,8 @@ function PdfPreviewModal({
   onFitChange,
   onRender,
   onDownload,
+  // Reads the rendered PDF back as a parser would (1.7.4); optional.
+  onReadAsParser = null,
 }) {
   const isFinnish = locale === 'fi'
   const nameId = useId()
@@ -134,6 +137,11 @@ function PdfPreviewModal({
   const [result, setResult] = useState({ key: '', rendered: null, error: '' })
   const [isDownloading, setIsDownloading] = useState(false)
   const optionsKey = `${paper}|${fit}`
+  // 'pages' or 'parser' ("What a parser reads").
+  const [view, setView] = useState('pages')
+  // The last finished parser reading, keyed like `result`.
+  const [parserResult, setParserResult] = useState({ key: '', result: null, error: '' })
+  const tabsId = useId()
 
   useEffect(() => {
     let isCurrent = true
@@ -165,6 +173,44 @@ function PdfPreviewModal({
 
   const { rendered, error } = result
   const isRendering = result.key !== optionsKey
+  const canReadAsParser = Boolean(onReadAsParser) && !isRendering && Boolean(rendered) && !rendered.fallback
+  const needsParserReading = view === 'parser' && canReadAsParser && parserResult.key !== optionsKey
+
+  // Reads this render's PDF once the tab is open; again after a new render.
+  useEffect(() => {
+    if (!needsParserReading) return undefined
+
+    let isCurrent = true
+    const key = optionsKey
+
+    onReadAsParser(rendered)
+      .then((reading) => {
+        if (isCurrent) setParserResult({ key, result: reading, error: '' })
+      })
+      .catch((readError) => {
+        if (isCurrent) {
+          setParserResult({
+            key,
+            result: null,
+            error: readError instanceof Error && readError.message
+              ? readError.message
+              : isFinnish ? 'PDF:ää ei voitu lukea.' : 'Could not read the PDF.',
+          })
+        }
+      })
+
+    return () => {
+      isCurrent = false
+    }
+  }, [isFinnish, needsParserReading, onReadAsParser, optionsKey, rendered])
+
+  const parserState = rendered?.fallback && !isRendering
+    ? { status: 'unavailable' }
+    : isRendering || parserResult.key !== optionsKey
+      ? { status: 'reading' }
+      : parserResult.error
+        ? { status: 'error', error: parserResult.error }
+        : { status: 'ready', result: parserResult.result }
   const status = isRendering ? 'rendering' : error ? 'error' : 'ready'
   const canDownload = status === 'ready' && Boolean(rendered) && !isDownloading
   const pageCount = rendered && !rendered.fallback ? rendered.pageCount : 0
@@ -259,7 +305,54 @@ function PdfPreviewModal({
           </div>
         </div>
 
-        <div className="pdf-preview__pages" aria-busy={isRendering}>
+        <div className="pdf-preview__main">
+        {onReadAsParser ? (
+          <div className="pdf-preview__tabs" role="tablist" aria-label={isFinnish ? 'Näkymä' : 'View'}>
+            {[
+              ['pages', isFinnish ? 'Sivut' : 'Pages'],
+              ['parser', isFinnish ? 'Mitä jäsennin lukee' : 'What a parser reads'],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                id={`${tabsId}-${value}-tab`}
+                aria-controls={`${tabsId}-${value}`}
+                aria-selected={view === value}
+                tabIndex={view === value ? 0 : -1}
+                className={`pdf-preview__tab${view === value ? ' pdf-preview__tab--active' : ''}`}
+                onClick={() => setView(value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+                    event.preventDefault()
+                    const next = value === 'pages' ? 'parser' : 'pages'
+                    setView(next)
+                    document.getElementById(`${tabsId}-${next}-tab`)?.focus()
+                  }
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        {view === 'parser' && onReadAsParser ? (
+          <div
+            className="pdf-preview__pages pdf-preview__pages--parser"
+            role="tabpanel"
+            id={`${tabsId}-parser`}
+            aria-labelledby={`${tabsId}-parser-tab`}
+            aria-busy={parserState.status === 'reading'}
+          >
+            <PdfParserView state={parserState} isFinnish={isFinnish} atsFriendlyMode={atsFriendlyMode} />
+          </div>
+        ) : (
+        <div
+          className="pdf-preview__pages"
+          aria-busy={isRendering}
+          {...(onReadAsParser ? { role: 'tabpanel', id: `${tabsId}-pages`, 'aria-labelledby': `${tabsId}-pages-tab` } : {})}
+        >
           {status === 'error' ? (
             <p className="pdf-preview__message pdf-preview__message--error" role="alert">{error}</p>
           ) : null}
@@ -293,6 +386,8 @@ function PdfPreviewModal({
               <LoaderCircle size={22} strokeWidth={2} className="pdf-preview__spinner" />
             </div>
           ) : null}
+        </div>
+        )}
         </div>
       </div>
     </Modal>

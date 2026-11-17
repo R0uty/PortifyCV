@@ -904,6 +904,17 @@ function ResumeBuilderPage({
     return next
   }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate])
 
+  // The preview's "What a parser reads" tab (1.7.4): the same PDF, read back
+  // by the CV file import's reader and parser, and compared with the CV.
+  const readPdfAsParser = useCallback(async (rendered) => {
+    const [{ renderedCvPdfToBlob }, { readCvPdfAsParser }] = await Promise.all([
+      import('../utils/exporters'),
+      import('../utils/parserView'),
+    ])
+
+    return readCvPdfAsParser(await renderedCvPdfToBlob(rendered), formData, locale)
+  }, [formData, locale])
+
   const handleDownloadPdfPreview = useCallback(async (rendered) => {
     const exportLabel = atsFriendlyMode ? 'ATS PDF' : 'Designer PDF'
 
@@ -2722,6 +2733,7 @@ function ResumeBuilderPage({
           onFitChange={setPdfFit}
           onRender={renderPdfPreview}
           onDownload={handleDownloadPdfPreview}
+          onReadAsParser={readPdfAsParser}
         />
       ) : null}
 

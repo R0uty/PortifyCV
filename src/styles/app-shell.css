@@ -5142,3 +5142,158 @@ html:lang(fi) .landing-title {
   margin-top: 0.15rem;
   color: var(--accent-text);
 }
+
+/* The PDF preview's view tabs and "What a parser reads" (1.7.4,
+   PdfParserView.jsx). */
+.pdf-preview__main {
+  min-width: 0;
+}
+
+.pdf-preview__tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--app-border);
+}
+
+.pdf-preview__tab {
+  padding: 0.5rem 0.85rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.pdf-preview__tab--active {
+  color: var(--app-text);
+  border-bottom-color: var(--app-text);
+}
+
+.pdf-preview__tab:focus-visible {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 2px;
+}
+
+.pdf-parser {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 44rem;
+  margin: 0 auto;
+}
+
+.pdf-parser__intro,
+.pdf-parser__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--app-text-muted);
+}
+
+.pdf-parser__summary {
+  margin: 0;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.pdf-parser__message {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-6) auto;
+  font-size: 0.85rem;
+  color: var(--app-text);
+}
+
+.pdf-parser__rows {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pdf-parser__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+}
+
+.pdf-parser__icon {
+  flex: none;
+  margin-top: 0.1rem;
+  color: var(--app-text-muted);
+}
+
+.pdf-parser__row--ok .pdf-parser__icon {
+  color: #15803d;
+}
+
+.pdf-parser__row--missing .pdf-parser__icon {
+  color: #b42318;
+}
+
+.pdf-parser__row--unrecognised .pdf-parser__icon,
+.pdf-parser__row--partial .pdf-parser__icon {
+  color: #b45309;
+}
+
+.pdf-parser__text {
+  min-width: 0;
+}
+
+.pdf-parser__field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.6rem;
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.pdf-parser__status {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--app-text-muted);
+}
+
+.pdf-parser__value {
+  display: -webkit-box;
+  margin: 0.15rem 0 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: 0.8rem;
+  color: var(--app-text-muted);
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.pdf-parser__raw summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.pdf-parser__lines {
+  max-height: 22rem;
+  margin: var(--space-2) 0 0;
+  padding: var(--space-3);
+  overflow: auto;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
