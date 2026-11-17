@@ -117,6 +117,16 @@ hidden on the bullet being typed in and linked with `aria-describedby`.
 `check:feedback` also requires that no example CV bullet gets a phrasing
 hint, so a new example has to model the advice.
 
+**"What a parser reads" (1.7.4) reuses the CV import on the exact PDF.**
+The PDF preview's second tab (`PdfParserView.jsx`) turns the rendered
+pages into the download's bytes (`renderedCvPdfToBlob`), reads them back
+with `cvFileText.js` + `cvTextImport.js` and compares the result with the
+CV (`src/utils/parserView.js`'s `compareParsedCv`: per field `ok`,
+`partial`, `unrecognised` = in the text but not placed, `missing` = not in
+the text). It runs only when the tab opens, and again after a paper/fit
+change; the browser's text-only fallback PDF shows a note instead. Cases
+live in `check:cv-import`; `e2e/pdf-parser-view.spec.js` covers the tab.
+
 **Hand-rolled routing, no react-router.** `src/App.jsx` owns view state
 directly (`useState` + `history.pushState`/`popstate`), matching the current
 path against `ROUTES`/`VIEW_HEAD` (`src/utils/routes.js`,
