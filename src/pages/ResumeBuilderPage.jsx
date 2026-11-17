@@ -72,6 +72,7 @@ import {
   safeSessionStorageRemove,
   safeStorageGet,
   safeStorageSet,
+  resolveCvLocale,
 } from '../utils/cvForm'
 import {
   getCvTemplates,
@@ -572,6 +573,9 @@ function ResumeBuilderPage({
   )
 
   const exportFileName = createExportFileName(formData) || 'cv'
+  // The CV's own language (1.7.5): what the preview and every export are
+  // written in. The builder's own text stays in `locale`.
+  const cvLocale = resolveCvLocale(formData, locale)
   const currentTemplate = useMemo(
     () => getEffectiveCvTemplate(selectedTemplate, locale, formData),
     // Only the column overrides matter here, not every keystroke in formData.
@@ -893,7 +897,7 @@ function ResumeBuilderPage({
         template: selectedTemplate,
         variant: selectedTemplate,
         atsFriendlyMode,
-        locale,
+        locale: cvLocale,
         paper,
         fit,
       })
@@ -902,7 +906,7 @@ function ResumeBuilderPage({
 
     pdfRenderQueueRef.current = next
     return next
-  }, [atsFriendlyMode, exportFileName, formData, locale, previewRef, selectedTemplate])
+  }, [atsFriendlyMode, cvLocale, exportFileName, formData, locale, previewRef, selectedTemplate])
 
   // The preview's "What a parser reads" tab (1.7.4): the same PDF, read back
   // by the CV file import's reader and parser, and compared with the CV.
@@ -912,8 +916,8 @@ function ResumeBuilderPage({
       import('../utils/parserView'),
     ])
 
-    return readCvPdfAsParser(await renderedCvPdfToBlob(rendered), formData, locale)
-  }, [formData, locale])
+    return readCvPdfAsParser(await renderedCvPdfToBlob(rendered), formData, cvLocale)
+  }, [cvLocale, formData])
 
   const handleDownloadPdfPreview = useCallback(async (rendered) => {
     const exportLabel = atsFriendlyMode ? 'ATS PDF' : 'Designer PDF'
@@ -1002,14 +1006,14 @@ function ResumeBuilderPage({
       }
 
       if (type === 'html') {
-        exportCvAsHtml(formData, exportFileName, { locale, template: selectedTemplate })
+        exportCvAsHtml(formData, exportFileName, { locale: cvLocale, template: selectedTemplate })
       }
 
       if (type === 'docx') {
         const { exportCvAsDocx } = await import('../utils/docxExport')
         await exportCvAsDocx(formData, exportFileName, {
           template: selectedTemplate,
-          locale,
+          locale: cvLocale,
           accentColor: resolveTemplateAccent(templateAccentColors, selectedTemplate),
         })
       }
@@ -1037,7 +1041,7 @@ function ResumeBuilderPage({
     } finally {
       dispatchUi({ type: UI_ACTION.SET_ACTIVE_EXPORT, value: '' })
     }
-  }, [atsFriendlyMode, exportFileName, formData, locale, markCvSaved, selectedTemplate, templateAccentColors])
+  }, [atsFriendlyMode, cvLocale, exportFileName, formData, locale, markCvSaved, selectedTemplate, templateAccentColors])
 
   const handleImportClick = useCallback(() => {
     importInputRef.current?.click()
@@ -1314,6 +1318,10 @@ function ResumeBuilderPage({
   const handleTemplateAccentColorChange = useCallback((color) => {
     dispatchUi({ type: UI_ACTION.SET_TEMPLATE_ACCENT_COLOR, templateId: selectedTemplate, color })
   }, [selectedTemplate])
+
+  const handleCvLanguageChange = useCallback((cvLanguage) => {
+    dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'cvLanguage', value: cvLanguage })
+  }, [dispatchFormData])
 
   const handleClassicNameAlignmentChange = useCallback((alignment) => {
     dispatchUi({ type: UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT, alignment })
@@ -2641,6 +2649,8 @@ function ResumeBuilderPage({
         onTemplateAccentColorChange={handleTemplateAccentColorChange}
         classicNameAlignment={classicNameAlignment}
         onClassicNameAlignmentChange={handleClassicNameAlignmentChange}
+        cvLanguage={formData.cvLanguage ?? ''}
+        onCvLanguageChange={handleCvLanguageChange}
         savedCvCount={cvLibrary.savedCvs.length}
         onDeleteAllSavedCvs={cvLibrary.deleteAll}
       />

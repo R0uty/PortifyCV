@@ -18,6 +18,8 @@ function SettingsModal({
   onTemplateAccentColorChange,
   classicNameAlignment = 'center',
   onClassicNameAlignmentChange,
+  cvLanguage = '',
+  onCvLanguageChange,
   savedCvCount = 0,
   onDeleteAllSavedCvs,
 }) {
@@ -70,6 +72,40 @@ function SettingsModal({
         </div>
         <ToggleSwitch checked={sessionRestoreEnabled} onChange={onToggleSessionRestore} />
       </div>
+
+      {onCvLanguageChange ? (
+        <div className="settings-row">
+          <div>
+            <p className="settings-row__label" id="settings-cv-language">{isFinnish ? 'CV:n kieli' : 'CV language'}</p>
+            <p className="settings-row__hint">
+              {isFinnish
+                ? 'Otsikoiden, päivämäärien ja vientien kieli. Sovellus pysyy omalla kielellään. Kirjoittamasi teksti ei käänny.'
+                : 'The language of the headings, dates and exports. The app stays in its own language. Your own text is not translated.'}
+            </p>
+          </div>
+          <div className="settings-swatch-row" role="group" aria-labelledby="settings-cv-language">
+            {[
+              ['', isFinnish ? 'Sama kuin sovellus' : 'Same as the app'],
+              ['en', 'English'],
+              ['fi', 'Suomi'],
+            ].map(([value, label]) => {
+              const isActive = cvLanguage === value
+              return (
+                <button
+                  key={value || 'app'}
+                  type="button"
+                  lang={value || undefined}
+                  className={`settings-choice${isActive ? ' settings-choice--active' : ''}`}
+                  aria-pressed={isActive}
+                  onClick={() => onCvLanguageChange(value)}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      ) : null}
 
       {(() => {
         const accentConfig = getTemplateAccent(selectedTemplate)
