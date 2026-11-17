@@ -7,12 +7,6 @@ function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
 }
 
-const COMMON_STOP_WORDS = new Set([
-  'about', 'after', 'also', 'and', 'any', 'are', 'but', 'can', 'for', 'from', 'have',
-  'into', 'its', 'job', 'more', 'not', 'our', 'role', 'such', 'that', 'the', 'their',
-  'them', 'then', 'this', 'use', 'using', 'with', 'your', 'you', 'will', 'who',
-])
-
 function countWords(text) {
   const normalized = text.trim()
 
@@ -42,30 +36,6 @@ function extractKeywords(snapshot) {
         .filter((value) => value.length >= 3),
     ),
   )
-}
-
-function extractTextTokens(text) {
-  if (!text.trim()) {
-    return []
-  }
-
-  return text
-    .toLowerCase()
-    .split(/[^a-z0-9+#/.%-]+/)
-    .map((token) => token.trim())
-    .filter((token) => token.length >= 4 && !COMMON_STOP_WORDS.has(token))
-}
-
-function sortByFrequency(tokens) {
-  const frequencyMap = new Map()
-
-  tokens.forEach((token) => {
-    frequencyMap.set(token, (frequencyMap.get(token) ?? 0) + 1)
-  })
-
-  return [...frequencyMap.entries()]
-    .sort((left, right) => right[1] - left[1])
-    .map(([token]) => token)
 }
 
 function createAtsCopy(locale = 'en') {
@@ -127,44 +97,6 @@ function createAtsCopy(locale = 'en') {
     tipStrong: isFinnish
       ? 'CV on ATS-näkökulmasta vahva. Räätälöi avainsanat jokaiseen hakemukseen.'
       : 'Your CV is in strong ATS shape. Tailor keywords to each application for even better alignment.',
-  }
-}
-
-/**
- * @param {CvData} formData
- * @param {string} [jobDescription='']
- */
-export function analyzeJobDescription(formData, jobDescription = '') {
-  const snapshot = createCvSnapshot(formData)
-  const normalizedDescription = jobDescription.trim()
-
-  if (!normalizedDescription) {
-    return {
-      hasInput: false,
-      coverageScore: 0,
-      totalKeywords: 0,
-      matchedKeywords: [],
-      missingKeywords: [],
-    }
-  }
-
-  const jobTokens = sortByFrequency(extractTextTokens(normalizedDescription)).slice(0, 30)
-  const cvKeywordSet = new Set([
-    ...extractKeywords(snapshot),
-    ...extractTextTokens(snapshot.about),
-    ...snapshot.experience.flatMap((item) => extractTextTokens(item.description)),
-  ])
-  const matchedKeywords = jobTokens.filter((token) => cvKeywordSet.has(token))
-  const missingKeywords = jobTokens.filter((token) => !cvKeywordSet.has(token))
-  const coverageScore =
-    jobTokens.length > 0 ? Math.round((matchedKeywords.length / jobTokens.length) * 100) : 0
-
-  return {
-    hasInput: true,
-    coverageScore,
-    totalKeywords: jobTokens.length,
-    matchedKeywords,
-    missingKeywords,
   }
 }
 

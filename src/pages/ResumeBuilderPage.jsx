@@ -87,7 +87,7 @@ import { DEFAULT_STYLE_VARIANT_ID, getTemplateVariant, getTemplateVariants, getV
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
 import { uiReducer, createInitialUiState, readInitialTemplateId, resolveTemplateId, UI_ACTION } from '../reducers/uiReducer'
-import { defaultCvName } from '../utils/cvLibrary'
+import { defaultCvName, MAX_CV_NAME_LENGTH } from '../utils/cvLibrary'
 import {
   createExportFileName,
 } from '../utils/cvSnapshot'
@@ -97,10 +97,8 @@ import {
   removeShareDataParamFromCurrentUrl,
   shareLinkOmitsImages,
 } from '../utils/shareLinks'
-import {
-  analyzeJobDescription,
-  evaluateAtsScore,
-} from '../utils/atsScore'
+import { evaluateAtsScore } from '../utils/atsScore'
+import { matchJobAd } from '../utils/jobMatch'
 import { evaluateCvFeedback } from '../utils/cvFeedback'
 import { generateCoverLetterDraft } from '../utils/coverLetter'
 import { EXAMPLES, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
@@ -549,6 +547,9 @@ function ResumeBuilderPage({
   // null, 'save' (the name prompt) or 'list' (My CVs).
   const [savedCvsView, setSavedCvsView] = useState(null)
   const [savedCvsUnsaved, setSavedCvsUnsaved] = useState(false)
+  // The name the Save dialog suggests when it isn't the CV's own (a copy
+  // for a job, 1.7.2).
+  const [savedCvsSuggestedName, setSavedCvsSuggestedName] = useState(null)
   const [isAtsCheckOpen, setIsAtsCheckOpen] = useState(false)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
@@ -585,7 +586,7 @@ function ResumeBuilderPage({
     [atsFriendlyMode, formData, locale],
   )
   const jobDescriptionAnalysis = useMemo(
-    () => analyzeJobDescription(formData, jobDescription),
+    () => matchJobAd(formData, jobDescription),
     [formData, jobDescription],
   )
   const showToast = (message, type = 'success') => {
@@ -1422,8 +1423,9 @@ function ResumeBuilderPage({
   const handleOpenImport = useCallback(() => setIsImportOpen(true), [])
 
   // ── Saved CVs (1.7.1) ──
-  const openSavedCvs = useCallback((view) => {
+  const openSavedCvs = useCallback((view, suggestedName = null) => {
     setSavedCvsUnsaved(hasUnsavedCvChanges())
+    setSavedCvsSuggestedName(suggestedName)
     setSavedCvsView(view)
   }, [hasUnsavedCvChanges])
   const handleOpenSavedCvs = useCallback(() => {
@@ -1501,6 +1503,20 @@ function ResumeBuilderPage({
     needsAttention: cvLibrary.saveState === 'conflict' || cvLibrary.saveState === 'error',
     count: cvLibrary.savedCvs.length,
   }), [cvLibrary.activeCv, cvLibrary.saveState, cvLibrary.savedCvs.length])
+  // The job-ad box's "Save a copy for this job": a saved CV of its own to
+  // tailor, named after the ad's first line when that reads like a title.
+  // A saved CV that was open stays as it was last saved.
+  const handleSaveCopyForJob = useCallback(() => {
+    const firstLine = jobDescription.split('\n').map((line) => line.trim()).find(Boolean) ?? ''
+    const jobTitle = firstLine.replace(/[.:;,]+$/, '')
+    const base = cvLibrary.activeCv?.name ?? defaultCvName(formData, locale)
+    const suffix = jobTitle && jobTitle.length <= 40
+      ? jobTitle
+      : locale === 'fi' ? 'räätälöity' : 'tailored'
+
+    setIsAtsCheckOpen(false)
+    openSavedCvs('save', `${base} – ${suffix}`.slice(0, MAX_CV_NAME_LENGTH))
+  }, [cvLibrary.activeCv, formData, jobDescription, locale, openSavedCvs])
   const handleCloseImport = useCallback(() => setIsImportOpen(false), [])
   const handleOpenAtsCheck = useCallback(() => setIsAtsCheckOpen(true), [])
   const handleCloseAtsCheck = useCallback(() => setIsAtsCheckOpen(false), [])
@@ -1884,12 +1900,12 @@ function ResumeBuilderPage({
   }, [dispatchFormData, formData.skills, locale])
 
   const handleCopyMissingKeywords = useCallback(async () => {
-    if (jobDescriptionAnalysis.missingKeywords.length === 0) {
+    if (jobDescriptionAnalysis.missing.length === 0) {
       return
     }
 
     try {
-      await window.navigator.clipboard.writeText(jobDescriptionAnalysis.missingKeywords.join(', '))
+      await window.navigator.clipboard.writeText(jobDescriptionAnalysis.missing.join(', '))
       showToast(
         locale === 'fi'
           ? 'Puuttuvat avainsanat kopioitu.'
@@ -1903,7 +1919,7 @@ function ResumeBuilderPage({
         'error',
       )
     }
-  }, [jobDescriptionAnalysis.missingKeywords, locale])
+  }, [jobDescriptionAnalysis.missing, locale])
 
   const handleClearJobDescription = useCallback(() => {
     dispatchUi({ type: UI_ACTION.SET_JOB_DESCRIPTION, value: '' })
@@ -2114,6 +2130,8 @@ function ResumeBuilderPage({
               onCopyMissingKeywords={handleCopyMissingKeywords}
               onClearJobDescription={handleClearJobDescription}
               jobDescriptionAnalysis={jobDescriptionAnalysis}
+              onSaveCopyForJob={cvLibrary.isAvailable ? handleSaveCopyForJob : null}
+              savedCvName={cvLibrary.activeCv?.name ?? ''}
             />
 
             <CVSuggestionsPanel
@@ -2152,6 +2170,8 @@ function ResumeBuilderPage({
     handleAddMissingKeyword,
     handleClearJobDescription,
     handleCopyMissingKeywords,
+    handleSaveCopyForJob,
+    cvLibrary.isAvailable,
     handleImportClick,
     handleImportCvFileClick,
     handleJobDescriptionChange,
@@ -2623,7 +2643,7 @@ function ResumeBuilderPage({
         isAvailable={cvLibrary.isAvailable}
         savedCvs={cvLibrary.savedCvs}
         activeCv={cvLibrary.activeCv}
-        suggestedName={defaultCvName(formData, locale)}
+        suggestedName={savedCvsSuggestedName ?? defaultCvName(formData, locale)}
         hasUnsavedChanges={savedCvsUnsaved}
         templateLabels={savedCvTemplateLabels}
         onSaveAs={handleSaveCvAs}
@@ -2661,6 +2681,8 @@ function ResumeBuilderPage({
         onCopyMissingKeywords={handleCopyMissingKeywords}
         onClearJobDescription={handleClearJobDescription}
         jobDescriptionAnalysis={jobDescriptionAnalysis}
+        onSaveCopyForJob={cvLibrary.isAvailable ? handleSaveCopyForJob : null}
+              savedCvName={cvLibrary.activeCv?.name ?? ''}
       />
 
       <BadgeModal

@@ -83,9 +83,13 @@ function SavedCvsView({
               {isFinnish ? 'CV:n nimi' : 'Name for this CV'}
             </label>
             <p className="settings-row__hint">
-              {isFinnish
-                ? 'Vain sinulle, esim. työpaikan tai yrityksen mukaan. Tämän jälkeen muutokset tallentuvat itsestään.'
-                : 'Only for you, e.g. the job or the company. After this, your edits to it save themselves.'}
+              {activeCv
+                ? isFinnish
+                  ? `Tallentaa uuden kopion, ja muutokset tallentuvat siihen itsestään. "${activeCv.name}" pysyy sellaisena kuin se tallennettiin.`
+                  : `Saves a new copy, and your edits save to it by themselves. "${activeCv.name}" stays as it was saved.`
+                : isFinnish
+                  ? 'Vain sinulle, esim. työpaikan tai yrityksen mukaan. Tämän jälkeen muutokset tallentuvat itsestään.'
+                  : 'Only for you, e.g. the job or the company. After this, your edits to it save themselves.'}
             </p>
             <input
               id="saved-cv-name"

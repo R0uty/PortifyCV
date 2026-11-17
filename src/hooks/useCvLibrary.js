@@ -209,6 +209,10 @@ export default function useCvLibrary({
   }, [activeCv, formData, saveDelayMs, saveState, selectedTemplate, write])
 
   const saveAs = useCallback(async (name) => {
+    // Saving as a new CV while another is open: that one keeps what was
+    // typed a moment ago, and the new one starts from the same content.
+    if (activeRef.current) await write()
+
     const { formData: data, selectedTemplate: templateId, markCvSaved: markSaved } = latestRef.current
     const record = createCvRecord({ name: normalizeCvName(name), data, templateId })
 
@@ -230,7 +234,7 @@ export default function useCvLibrary({
       reportFailure(error)
       return false
     }
-  }, [refreshSavedCvs, reportFailure, say, setActive])
+  }, [refreshSavedCvs, reportFailure, say, setActive, write])
 
   // The visitor pressing Save on a CV that is already saved: write now, and
   // over whatever another tab stored.

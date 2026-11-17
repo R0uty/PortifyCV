@@ -29,13 +29,19 @@ function ATSScorePanel({
   onAddMissingKeyword = () => {},
   onCopyMissingKeywords = () => {},
   onClearJobDescription = () => {},
+  // utils/jobMatch.js's matchJobAd() (1.7.2).
   jobDescriptionAnalysis = {
     hasInput: false,
     coverageScore: 0,
-    totalKeywords: 0,
-    matchedKeywords: [],
-    missingKeywords: [],
+    total: 0,
+    found: [],
+    missing: [],
+    skillsOnly: [],
   },
+  // Null where this browser can't save CVs.
+  onSaveCopyForJob = null,
+  // The saved CV open now, if any: the copy leaves it as it is.
+  savedCvName = '',
 }) {
   const ui = useMemo(() => getUiTheme(theme), [theme])
   const isFinnish = locale === 'fi'
@@ -175,8 +181,8 @@ function ATSScorePanel({
         </p>
         <p className={`mt-1 text-sm ${ui.textSecondary}`}>
           {isFinnish
-            ? 'Liitä työpaikkakuvaus löytääksesi tärkeät termit, joita CV:stäsi puuttuu.'
-            : 'Paste a target role description to spot important terms your CV is missing.'}
+            ? 'Liitä työpaikkailmoitus: näet, mitä taitoja ja vaatimuksia siinä mainitaan ja mitkä niistä CV:stäsi jo löytyvät.'
+            : 'Paste a job ad to see the skills and requirements it names, and which of them your CV already mentions.'}
         </p>
         <textarea
           className={`mt-3 min-h-28 w-full border px-4 py-3 text-sm transition ${ui.input}`}
@@ -193,7 +199,7 @@ function ATSScorePanel({
             type="button"
             className={`ui-button ${ui.button}`}
             onClick={onCopyMissingKeywords}
-            disabled={jobDescriptionAnalysis.missingKeywords.length === 0}
+            disabled={jobDescriptionAnalysis.missing.length === 0}
           >
             {isFinnish ? 'Kopioi puuttuvat' : 'Copy missing'}
           </button>
@@ -208,25 +214,38 @@ function ATSScorePanel({
         </div>
 
         {jobDescriptionAnalysis.hasInput ? (
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 space-y-3" data-job-match>
             <div className="flex flex-wrap items-center gap-2">
               <span className="px-3 py-1 text-xs font-bold" style={{ ...scoreTone(ui, jobDescriptionAnalysis.coverageScore), border: '1px solid var(--app-border)' }}>
                 {isFinnish ? 'Kattavuus' : 'Coverage'} {jobDescriptionAnalysis.coverageScore}%
               </span>
               <span className={`px-3 py-1 text-xs font-bold ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
                 {isFinnish
-                  ? `${jobDescriptionAnalysis.matchedKeywords.length}/${jobDescriptionAnalysis.totalKeywords} avainsanaa osui`
-                  : `${jobDescriptionAnalysis.matchedKeywords.length}/${jobDescriptionAnalysis.totalKeywords} keywords matched`}
+                  ? `${jobDescriptionAnalysis.found.length}/${jobDescriptionAnalysis.total} vaatimusta löytyy CV:stä`
+                  : `${jobDescriptionAnalysis.found.length} of ${jobDescriptionAnalysis.total} requirements in your CV`}
               </span>
             </div>
 
-            {jobDescriptionAnalysis.missingKeywords.length > 0 ? (
+            {jobDescriptionAnalysis.total === 0 ? (
+              <p className={`text-sm ${ui.textSecondary}`}>
+                {isFinnish
+                  ? 'Ilmoituksesta ei löytynyt tunnistettavia taitoja tai työkaluja.'
+                  : 'No skills or tools recognised in this ad.'}
+              </p>
+            ) : null}
+
+            {jobDescriptionAnalysis.missing.length > 0 ? (
               <div>
                 <p className={`text-xs font-bold uppercase tracking-[0.14em] ${ui.textMuted}`}>
                   {isFinnish ? 'Puuttuvat avainsanat' : 'Missing keywords'}
                 </p>
+                <p className={`mt-1 text-xs ${ui.textSecondary}`}>
+                  {isFinnish
+                    ? 'Lisää vain se, minkä oikeasti osaat. Napautus lisää taitoihin.'
+                    : 'Add only what you can honestly claim. Tap one to add it to your skills.'}
+                </p>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {jobDescriptionAnalysis.missingKeywords.slice(0, 12).map((keyword) => (
+                  {jobDescriptionAnalysis.missing.map((keyword) => (
                     <button
                       type="button"
                       key={`missing-${keyword}`}
@@ -239,13 +258,57 @@ function ATSScorePanel({
                   ))}
                 </div>
               </div>
-            ) : (
+            ) : jobDescriptionAnalysis.total > 0 ? (
               <p className={`text-sm ${ui.textSecondary}`}>
                 {isFinnish
-                  ? 'Vahva osuma. CV:si kattaa jo ilmoituksen yleisimmät avainsanat.'
-                  : 'Strong match. Your CV already covers the most frequent JD keywords.'}
+                  ? 'Vahva osuma. CV:si mainitsee kaiken, mitä ilmoituksesta tunnistettiin.'
+                  : 'Strong match. Your CV mentions everything recognised in the ad.'}
               </p>
-            )}
+            ) : null}
+
+            {jobDescriptionAnalysis.found.length > 0 ? (
+              <div>
+                <p className={`text-xs font-bold uppercase tracking-[0.14em] ${ui.textMuted}`}>
+                  {isFinnish ? 'Löytyy CV:stä' : 'In your CV'}
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {jobDescriptionAnalysis.found.map(({ label }) => (
+                    <span
+                      key={`found-${label}`}
+                      className="border px-3 py-1 text-xs font-semibold"
+                      style={{ borderColor: 'var(--app-border)', color: 'var(--app-text)' }}
+                    >
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {jobDescriptionAnalysis.skillsOnly.length > 0 ? (
+              <p className={`text-sm ${ui.textSecondary}`} data-job-match-skills-only>
+                {isFinnish
+                  ? `Vain taitolistassa: ${jobDescriptionAnalysis.skillsOnly.join(', ')}. Kerro työkokemuksessa, missä käytit niitä, niin lukija näkee ne käytössä.`
+                  : `Only in your skills list: ${jobDescriptionAnalysis.skillsOnly.join(', ')}. Say where you used them in your experience, so a reader sees them in use.`}
+              </p>
+            ) : null}
+
+            {onSaveCopyForJob ? (
+              <div className="pt-1">
+                <button type="button" className={`ui-button ${ui.button}`} onClick={onSaveCopyForJob}>
+                  {isFinnish ? 'Tallenna kopio tätä työpaikkaa varten' : 'Save a copy for this job'}
+                </button>
+                <p className={`mt-1 text-xs ${ui.textSecondary}`}>
+                  {savedCvName
+                    ? isFinnish
+                      ? `Muokkaat kopiota; "${savedCvName}" pysyy sellaisena kuin se tallennettiin.`
+                      : `You edit the copy; "${savedCvName}" stays as it was saved.`
+                    : isFinnish
+                      ? 'Tallentaa tämän CV:n tälle laitteelle tämän työpaikan nimellä.'
+                      : 'Saves this CV on this device under a name for this job.'}
+                </p>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </div>
