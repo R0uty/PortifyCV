@@ -2830,6 +2830,17 @@ async function buildRenderedPdfBlob({ pages, geometry }) {
   }
 }
 
+// The PDF renderCvPdf's pages make, byte for byte what saveRenderedCvPdf
+// downloads, for the preview's "What a parser reads" tab (1.7.4). Not for
+// the text-only fallback, which has no rendered pages.
+export async function renderedCvPdfToBlob(rendered) {
+  if (rendered.fallback) {
+    throw new Error('The text-only fallback PDF has no rendered pages.')
+  }
+
+  return buildRenderedPdfBlob(rendered)
+}
+
 // Downloads what renderCvPdf made.
 export async function saveRenderedCvPdf(rendered) {
   if (rendered.fallback) {

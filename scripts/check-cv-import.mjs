@@ -35,6 +35,7 @@ const { parseCvText } = await importSrc('utils/cvTextImport.js')
 const { parseImportedCvData } = await importSrc('utils/cvForm.js')
 const { COLUMN_BREAK, pdfPagesToLines } = await importSrc('utils/cvFileText.js')
 const { ENGLISH_CV_LINES, FINNISH_CV_LINES } = await import('./fixtures/cvImportSamples.mjs')
+const { compareParsedCv } = await importSrc('utils/parserView.js')
 
 let failures = 0
 function check(label, passed, detail = '') {
@@ -306,6 +307,42 @@ const throws = (label, fn) => {
     message = error.message
   }
   check('the error is in Finnish for the Finnish locale', /CV/.test(message) && /ei|löytynyt/i.test(message), message)
+}
+
+// ── "What a parser reads" (1.7.4, src/utils/parserView.js) ──
+// The PDF preview's second tab: the CV on screen against what the parser
+// made of the PDF's text.
+console.log('\ncompareParsedCv\n')
+{
+  // The CV as the builder holds it: what the sample lines were made from.
+  const parsed = parseCvText(ENGLISH_CV_LINES).data
+  const builderCv = parseImportedCvData(JSON.parse(JSON.stringify(parsed)))
+  const status = (rows, field) => rows.filter((row) => row.field === field).map((row) => row.status)
+
+  const allRead = compareParsedCv(builderCv, parsed, ENGLISH_CV_LINES)
+  check('a CV read back from its own text: every row is ok', allRead.every((row) => row.status === 'ok'), JSON.stringify(allRead.filter((row) => row.status !== 'ok')))
+  same('rows follow the CV: one per job and school', allRead.map((row) => row.field), ['name', 'headline', 'email', 'phone', 'summary', 'job', 'job', 'education', 'skills', 'languages'])
+  same('skills carry a count', allRead.find((row) => row.field === 'skills').count, { found: 5, total: 5 })
+
+  // The parser placed nothing: everything is still in the text.
+  const unplaced = compareParsedCv(builderCv, null, ENGLISH_CV_LINES)
+  check('nothing parsed, all in the text: unrecognised, not missing', unplaced.every((row) => row.status === 'unrecognised'), JSON.stringify(unplaced.filter((row) => row.status !== 'unrecognised')))
+
+  // A PDF whose text lost the contact line and the school.
+  const lossy = ENGLISH_CV_LINES.filter((line) => !line.includes('@') && line !== 'M.Sc. Computer Science' && line !== 'Aalto University')
+  const lossyRows = compareParsedCv(builderCv, parseCvText(lossy).data, lossy)
+  same('a line missing from the text: email and phone are missing', [...status(lossyRows, 'email'), ...status(lossyRows, 'phone')], ['missing', 'missing'])
+  same('a school missing from the text is missing; the jobs still read', [...status(lossyRows, 'education'), ...status(lossyRows, 'job')], ['missing', 'ok', 'ok'])
+
+  // Skills partly read.
+  const someSkills = { ...parsed, skills: parsed.skills.slice(0, 2) }
+  const partial = compareParsedCv(builderCv, someSkills, ENGLISH_CV_LINES).find((row) => row.field === 'skills')
+  same('some skills read: partial, with the count', [partial.status, partial.count], ['partial', { found: 2, total: 5 }])
+
+  // Phone numbers compare by digits; an empty CV field gets no row.
+  const reformatted = { ...parsed, phone: '+358401234567' }
+  same('a phone written differently still reads', status(compareParsedCv(builderCv, reformatted, ENGLISH_CV_LINES), 'phone'), ['ok'])
+  same('a field the CV leaves empty has no row', compareParsedCv({ ...builderCv, email: '', phone: '' }, parsed, ENGLISH_CV_LINES).some((row) => row.field === 'email' || row.field === 'phone'), false)
 }
 
 console.log()
