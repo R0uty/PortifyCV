@@ -97,7 +97,7 @@ function getCopy(locale) {
             before: 'PortifyCV:n ',
             linkText: 'ATS-paneeli',
             linkTo: ROUTES.atsGuide,
-            after: ' näyttää liittämääsi työpaikkailmoitukseen verrattuna, mitkä termit puuttuvat CV:stäsi — ei arvausta.',
+            after: ' listaa liittämästäsi työpaikkailmoituksesta tunnistamansa taidot ja vaatimukset sekä sen, mitkä niistä puuttuvat CV:stäsi.',
           },
         },
         {
@@ -221,7 +221,7 @@ function getCopy(locale) {
           before: 'PortifyCV’s ',
           linkText: 'ATS panel',
           linkTo: ROUTES.atsGuide,
-          after: ' shows exactly which terms from a pasted job posting are missing from your CV — no guessing.',
+          after: ' lists the skills and requirements it recognises in a pasted job posting, and which of them your CV is missing.',
         },
       },
       {

@@ -20,6 +20,7 @@ npm run check:section-columns  # exercises the section column-move rules (src/ut
 npm run check:template-pages   # validates per-template page slugs, examples, copy, and field tags (src/utils/templatePageCopy.js, src/utils/templateMetaDescriptions.js, src/utils/exampleCvs.js, src/utils/templateFields.js)
 npm run check:template-variants  # validates the style-variant registry against each template's CSS defaults, plus contrast (src/utils/templateVariants.js)
 npm run check:cv-library   # exercises the saved-CV library's names, records and save rules (src/utils/cvLibrary.js)
+npm run check:job-match    # exercises the ATS panel's job-ad matcher in English and Finnish (src/utils/jobMatch.js, src/utils/jobTerms.js)
 npm run check:cv-import    # exercises the PDF/Word import's text parser and column detection (src/utils/cvTextImport.js, src/utils/cvFileText.js)
 npm run check:thumbnails   # the pre-rendered thumbnails in public/thumbnails/ exist, match their manifest, and are up to date with the template code
 npm run thumbnails         # regenerate public/thumbnails/ (Vite dev server + Playwright Chromium, ~20s); commit the result
@@ -45,10 +46,11 @@ per-template pages' slugs, examples, copy, and field tags, plus `index.html`'s s
 a template's style variants or palette variables (`check:template-variants`),
 anything a template thumbnail is rendered from (`check:thumbnails`), or the
 CV file import's parser or PDF column detection (`check:cv-import`), or the
-saved-CV library (`check:cv-library`). A
+saved-CV library (`check:cv-library`), or the job-ad matcher and its term
+list (`check:job-match`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.
-CI (`.github/workflows/ci.yml`) runs all eleven on every push to `main` and
+CI (`.github/workflows/ci.yml`) runs all twelve on every push to `main` and
 `v1.7.0` (the current long-lived branch) and on every pull request.
 
 `test:e2e` (and its `:fast`/`:slow` variants) build and serve the app first
@@ -90,6 +92,20 @@ so Undo never crosses CVs. A reload reattaches only when session restore
 brought the same CV back (`ACTIVE_CV_SESSION_KEY` in `sessionStorage`).
 `e2e/saved-cvs.spec.js` covers the flows, the two-tab conflict and a
 browser that blocks IndexedDB.
+
+**The job-ad match (1.7.2) is a term list, not word counting.**
+`src/utils/jobMatch.js`'s `matchJobAd(formData, ad)` returns the ad's
+requirements in ad order, split into `found` (with where in the CV:
+skills, experience, summary, other), `missing` and `skillsOnly`. A
+requirement is a `jobTerms.js` entry, a tech name or acronym recognised by
+its shape (TypeScript, Next.js, CI/CD, C#, WCAG), or one of the CV's own
+skills; plain capitalised words (cities, companies) never are. Finnish
+endings are a closed list (`ENDINGS`), so "Reactista" is React while
+"JavaScript" is never Java. When an ad reads badly, add it as a case to
+`scripts/check-job-match.mjs` first. The panel's "Save a copy for this
+job" opens the Save dialog with a suggested name; `saveAs` flushes the
+open saved CV first, so that one keeps its state and the copy becomes the
+active CV.
 
 **Hand-rolled routing, no react-router.** `src/App.jsx` owns view state
 directly (`useState` + `history.pushState`/`popstate`), matching the current

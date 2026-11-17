@@ -75,7 +75,7 @@ function getCopy(locale) {
         {
           heading: 'Avainsanapisteytys — tarkista oikeaa työpaikkailmoitusta vasten',
           paragraphs: [
-            'ATS-tulospaneeli laskee parseroitavuuspisteesi suoraan CV:n sisällöstä selaimessasi. Liitä tavoiteroolisi työpaikkailmoitus samaan paneeliin, ja PortifyCV näyttää, mitkä ilmoituksen tärkeistä termeistä eivät tällä hetkellä esiinny CV:ssäsi — ei arvausta siitä, mitkä avainsanat puuttuvat.',
+            'ATS-tulospaneeli laskee parseroitavuuspisteesi suoraan CV:n sisällöstä selaimessasi. Liitä tavoiteroolisi työpaikkailmoitus samaan paneeliin, ja PortifyCV listaa ilmoituksesta tunnistamansa taidot ja vaatimukset: mitkä CV:si jo mainitsee ja mitkä siitä puuttuvat. Sen jälkeen voit tallentaa CV:stä kopion juuri tätä työpaikkaa varten ja muokata sitä.',
           ],
           linkParagraphs: [
             {
@@ -219,7 +219,7 @@ function getCopy(locale) {
       {
         heading: 'Keyword scoring — check against a real job posting',
         paragraphs: [
-          'The ATS score panel calculates your parser-readiness score directly from your CV content in your browser. Paste the job posting for the role you’re targeting into the same panel, and PortifyCV shows exactly which of the posting’s important terms don’t currently appear on your CV — no guessing which keywords are missing.',
+          'The ATS score panel calculates your parser-readiness score directly from your CV content in your browser. Paste the job posting for the role you’re targeting into the same panel, and PortifyCV lists the skills and requirements it recognises in the posting: which your CV already mentions and which are missing. Then you can save a copy of your CV for that job and tailor it.',
         ],
         linkParagraphs: [
           {

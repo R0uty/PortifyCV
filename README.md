@@ -101,6 +101,9 @@ npm run check:template-pages
 # The saved-CV library's names, records and validation (src/utils/cvLibrary.js)
 npm run check:cv-library
 
+# The ATS panel's job-ad matcher, English and Finnish (src/utils/jobMatch.js)
+npm run check:job-match
+
 # Run the end-to-end smoke suite against a production build
 npm run test:e2e
 
