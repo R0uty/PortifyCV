@@ -36,7 +36,7 @@ const en = buildExampleCv({
       achievements: [
         'Cut food cost from 34% to 27% of revenue by redesigning the menu around whole-animal and whole-vegetable use.',
         'Held a 4.7/5 average guest rating across more than 3,000 covers a year.',
-        'Cut kitchen staff turnover from 60% to 25% annually by restructuring shift rotations and training.',
+        'Reduced kitchen staff turnover from 60% to 25% annually by restructuring shift rotations and training.',
       ],
       technologies: [],
     },
@@ -130,7 +130,7 @@ const fi = buildExampleCv({
       achievements: [
         'Laskin ruokakustannukset 34 %:sta 27 %:iin liikevaihdosta suunnittelemalla menun uudelleen koko eläimen ja koko kasviksen hyödyntämisen pohjalta.',
         'Pidin asiakasarvion keskiarvossa 4,7/5 yli 3 000 vuosittaisen asiakkaan yli.',
-        'Laskin keittiöhenkilöstön vuosittaisen vaihtuvuuden 60 %:sta 25 %:iin uudistamalla vuorojärjestelyt ja koulutuksen.',
+        'Vähensin keittiöhenkilöstön vuosittaista vaihtuvuutta 60 %:sta 25 %:iin uudistamalla vuorojärjestelyt ja koulutuksen.',
       ],
       technologies: [],
     },

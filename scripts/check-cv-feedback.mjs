@@ -29,7 +29,7 @@ registerHooks({
 const srcDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src')
 const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, relativePath)).href)
 
-const { evaluateCvFeedback } = await importSrc('utils/cvFeedback.js')
+const { evaluateCvFeedback, getBulletHints } = await importSrc('utils/cvFeedback.js')
 const { createInitialCvData, createEmptyExperience } = await importSrc('utils/cvForm.js')
 const { EXAMPLES, loadExampleCv } = await importSrc('utils/exampleCvs.js')
 
@@ -186,6 +186,47 @@ console.log('\nevaluateCvFeedback — the example CVs model good phrasing (1.6.5
     }
   }
   check('no example CV gets a weak-phrase or action-verb tip, in either language', flagged.length === 0, flagged.join('; '))
+}
+
+console.log('\ngetBulletHints — one bullet at a time (1.7.3)\n')
+{
+  const same = (label, actual, expected) =>
+    check(label, JSON.stringify(actual) === JSON.stringify(expected), `got ${JSON.stringify(actual)}, expected ${JSON.stringify(expected)}`)
+  const ids = (bullets, locale = 'en') => getBulletHints(bullets, { locale }).map((hints) => hints.map((hint) => hint.id))
+
+  same('a strong bullet with a number gets nothing', ids(['Cut checkout latency by 40% by moving pricing to an edge cache.']), [[]])
+  same('duty-list phrasing', ids(['Responsible for the design system used by 6 teams.']), [['weak-phrase']])
+  same('a weak opener', ids(['I built the billing service for 300 customers.']), [['weak-opener']])
+  same('weak phrasing outranks the opener, not both', ids(['Worked on the API for 3 years.']), [['weak-phrase']])
+  same('filler', ids(['Successfully launched the app to 20,000 users.']), [['filler']])
+  same('filler as a phrase', ids(['Built dashboards, reports, etc. for 5 teams.']), [['filler']])
+  same('no number in a full sentence', ids(['Led the migration of the payments platform to TypeScript.']), [['no-number']])
+  same('a short bullet gets no number hint', ids(['Led the migration.']), [[]])
+  check('too long, with its word count', getBulletHints([`Built ${'a very long and winding bullet '.repeat(6)}for 4 teams.`])[0][0].message.startsWith('40 words'))
+  same('the same opening verb as an earlier bullet', ids(['Led a team of 5.', 'Led the 2024 migration.', 'Built a CLI used by 40 engineers.']), [[], ['repeated-opener'], []])
+  same('at most two hints a bullet', ids([`I successfully worked ${'without any figures at all '.repeat(6)}`]).map((list) => list.length), [2])
+  same('an empty bullet gets nothing', ids(['', '  ']), [[], []])
+  same('Finnish: duty phrasing and filler', ids(['Vastuualueena asiakaspalvelu.', 'Rakensin onnistuneesti uuden varausjärjestelmän 3 kuukaudessa.'], 'fi'), [['weak-phrase'], ['filler']])
+  same('Finnish: a weak opener', ids(['Olin mukana 12 hengen projektissa.'], 'fi'), [['weak-phrase']])
+  same('Finnish: "Olen" opener', ids(['Olen tehnyt asiakkaille 40 kotikäyntiä viikossa.'], 'fi'), [['weak-opener']])
+  same('Finnish: "Tein" is a fine opener', ids(['Tein 90+ asiakashaastattelua kolmessa segmentissä.'], 'fi'), [[]])
+  check('hints follow the UI language', getBulletHints(['I led 3 teams.'], { locale: 'fi' })[0][0].message.startsWith('Aloita'))
+
+  // The example CVs are what visitors copy from: their bullets should
+  // model the advice, so none gets a phrasing hint.
+  const flagged = []
+  for (const exampleId of Object.keys(EXAMPLES)) {
+    for (const locale of ['en', 'fi']) {
+      const data = await loadExampleCv(exampleId, locale)
+      data.experience.forEach((entry, entryIndex) => {
+        getBulletHints(entry.achievements ?? [], { locale }).forEach((hints, bulletIndex) => {
+          const phrasing = hints.filter((hint) => hint.id !== 'no-number')
+          if (phrasing.length) flagged.push(`${exampleId} (${locale}) role ${entryIndex + 1} bullet ${bulletIndex + 1}: ${phrasing.map((hint) => hint.id).join(', ')}`)
+        })
+      })
+    }
+  }
+  check('no example CV bullet gets a phrasing hint, in either language', flagged.length === 0, flagged.join('; '))
 }
 
 console.log()

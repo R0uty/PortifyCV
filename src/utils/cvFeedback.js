@@ -349,3 +349,116 @@ export function evaluateCvFeedback(formData, options = {}) {
     },
   }
 }
+
+// ── Bullet hints (1.7.3) ──
+// One achievement bullet at a time, shown under that bullet where it is
+// edited (Classic's Achievements list, Direct Edit's entry popup). The
+// role-level tips above say a role needs work; these say which bullet and
+// why. Every rule is a closed list or a count, so a bullet the lists don't
+// cover gets no hint rather than a wrong one.
+
+const BULLET_WORD_LIMIT = 30
+const MAX_HINTS_PER_BULLET = 2
+// A bullet this short is still being written, or a label; no number hint.
+const NUMBER_HINT_MIN_WORDS = 6
+
+// Openers that describe the person or a duty, not what they did.
+const WEAK_OPENERS = new Set([
+  'i', 'my', 'we', 'our', 'was', 'were', 'did', 'worked', 'helped', 'assisted',
+  'participated', 'involved', 'tasked', 'took',
+  // Not "tein": "Tein 90+ asiakashaastattelua" is how Finnish says "Ran".
+  'minä', 'me', 'olin', 'olen', 'työskentelin', 'autoin', 'osallistuin',
+])
+
+// Words that take space without saying anything a reader can check.
+const FILLER_WORDS = [
+  'successfully', 'various', 'a variety of', 'etc', 'and more', 'and so on',
+  'menestyksekkäästi', 'onnistuneesti', 'erilaisia', 'erilaisten', 'yms', 'jne',
+]
+
+function firstWordOf(text) {
+  const word = text.trim().replace(/^[-•*–\d.)\s]+/, '').split(/\s+/)[0] ?? ''
+  return word.toLowerCase().replace(/[^a-zäöå]/g, '')
+}
+
+function findFiller(text) {
+  const lowerText = ` ${text.toLowerCase().replace(/[.,;:!?()]/g, ' ')} `
+  return FILLER_WORDS.find((word) => lowerText.includes(` ${word} `)) ?? null
+}
+
+/**
+ * Hints for each bullet of one experience entry, in the bullets' order.
+ * @param {string[]} bullets the entry's achievements
+ * @param {{ locale?: 'en' | 'fi' }} [options] the UI language of the hints
+ * @returns {{ id: string, message: string }[][]}
+ */
+export function getBulletHints(bullets, options = {}) {
+  const isFinnish = options.locale === 'fi'
+  const openers = (Array.isArray(bullets) ? bullets : []).map((bullet) => firstWordOf(String(bullet ?? '')))
+
+  return (Array.isArray(bullets) ? bullets : []).map((bullet, index) => {
+    const text = normalizeText(String(bullet ?? ''))
+    if (!text) return []
+
+    const hints = []
+    const words = countWords(text)
+    const opener = openers[index]
+    const weakPhrase = findWeakPhrase(text)
+
+    if (weakPhrase) {
+      hints.push({
+        id: 'weak-phrase',
+        message: isFinnish
+          ? `"${weakPhrase}" kuulostaa tehtävälistalta. Kerro, mitä teit ja mitä siitä seurasi.`
+          : `"${weakPhrase}" reads like a duty list. Say what you did and what came of it.`,
+      })
+    } else if (WEAK_OPENERS.has(opener)) {
+      hints.push({
+        id: 'weak-opener',
+        message: isFinnish
+          ? 'Aloita sillä, mitä teit, esim. "Johdin", "Rakensin" tai "Lyhensin".'
+          : 'Start with what you did, e.g. "Led", "Built" or "Cut".',
+      })
+    }
+
+    const filler = findFiller(text)
+    if (filler) {
+      hints.push({
+        id: 'filler',
+        message: isFinnish
+          ? `"${filler}" ei kerro lukijalle mitään. Poista se tai nimeä asia.`
+          : `"${filler}" tells the reader nothing. Cut it or name the thing.`,
+      })
+    }
+
+    if (words > BULLET_WORD_LIMIT) {
+      hints.push({
+        id: 'too-long',
+        message: isFinnish
+          ? `${words} sanaa yhdessä kohdassa. Yksi tulos per kohta, noin ${BULLET_WORD_LIMIT} sanaa.`
+          : `${words} words in one bullet. One result per bullet, about ${BULLET_WORD_LIMIT} words.`,
+      })
+    }
+
+    const earlier = opener ? openers.slice(0, index).indexOf(opener) : -1
+    if (earlier !== -1 && !WEAK_OPENERS.has(opener)) {
+      hints.push({
+        id: 'repeated-opener',
+        message: isFinnish
+          ? `Alkaa samalla sanalla kuin kohta ${earlier + 1}. Vaihtele verbiä.`
+          : `Starts with the same word as bullet ${earlier + 1}. Vary the verb.`,
+      })
+    }
+
+    if (words >= NUMBER_HINT_MIN_WORDS && !/\d/.test(text)) {
+      hints.push({
+        id: 'no-number',
+        message: isFinnish
+          ? 'Lisää luku, jos sinulla on: kuinka moni, kuinka paljon tai kuinka nopeasti.'
+          : 'Add a number if you have one: how many, how much, or how fast.',
+      })
+    }
+
+    return hints.slice(0, MAX_HINTS_PER_BULLET)
+  })
+}
