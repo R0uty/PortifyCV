@@ -339,6 +339,15 @@ component.
 `App.jsx` down; most user-facing strings are inline `isFinnish ? '...' :
 '...'` pairs rather than a translation-file/i18n library.
 
+**The CV has its own language (1.7.5).** `formData.cvLanguage` (`''` =
+follow the app, `'en'`, `'fi'`; Settings › CV language) decides the
+language of everything drawn on the CV page and of every export.
+`CVPreview` resolves it itself (`resolveCvLocale` in `cvForm.js`) from its
+`locale` prop, which stays the app's language and still feeds
+`DirectEditProvider` (popups, menus); the builder page passes `cvLocale`
+to the PDF/HTML/Word exports and the parser view. Hints, the ATS panel and
+the importer stay in the app's language. Share links carry it as `cl`.
+
 **Finnish pages have their own addresses (1.6.35).** Every content page and
 template page also lives under `/fi/…` (`ROUTES_FI` in `routes.js`;
 template pages at `/fi/ilmaiset-cv-pohjat/<same slug>`), and the address

@@ -61,7 +61,7 @@ function getCopy(locale) {
         {
           heading: 'Rakenna se suomeksi — tai molemmilla kielillä',
           paragraphs: [
-            'PortifyCV toimii kokonaan suomeksi kielivalitsimen kautta: koko rakentaja, esikatselu ja viennit kääntyvät, joten voit kirjoittaa CV:n suoraan suomalaiselle työnantajalle sopivalla kielellä sen sijaan, että kirjoittaisit sen englanniksi ja kääntäisit jälkikäteen.',
+            'PortifyCV toimii kokonaan suomeksi kielivalitsimen kautta: koko rakentaja, esikatselu ja viennit kääntyvät, joten voit kirjoittaa CV:n suoraan suomalaiselle työnantajalle sopivalla kielellä sen sijaan, että kirjoittaisit sen englanniksi ja kääntäisit jälkikäteen. CV:n kieli voi myös poiketa sovelluksen kielestä: Asetukset › CV:n kieli määrää CV:n otsikot, päivämäärät ja viennit, joten voit käyttää rakentajaa suomeksi ja tehdä englanninkielisen CV:n tai päinvastoin.',
           ],
         },
         {
@@ -173,7 +173,7 @@ function getCopy(locale) {
       {
         heading: 'Build it in Finnish — or both languages',
         paragraphs: [
-          'PortifyCV runs entirely in Finnish through the language toggle: the whole builder, preview, and exports switch, so you can write a CV directly in the language your target employer expects instead of writing it in English and translating afterward.',
+          'PortifyCV runs entirely in Finnish through the language toggle: the whole builder, preview, and exports switch, so you can write a CV directly in the language your target employer expects instead of writing it in English and translating afterward. The CV’s own language can also differ from the app’s: Settings › CV language sets the CV’s headings, dates and exports, so you can use the builder in English and still get a Finnish CV, or the other way round.',
         ],
       },
       {
