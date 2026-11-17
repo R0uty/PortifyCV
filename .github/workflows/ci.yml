@@ -62,6 +62,9 @@ jobs:
       - name: Saved CV library checks
         run: npm run check:cv-library
 
+      - name: Job-ad matcher checks
+        run: npm run check:job-match
+
   e2e:
     name: End-to-end smoke tests
     runs-on: ubuntu-latest

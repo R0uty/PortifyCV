@@ -17,6 +17,7 @@
     "check:template-variants": "node scripts/check-template-variants.mjs",
     "check:cv-import": "node scripts/check-cv-import.mjs",
     "check:cv-library": "node scripts/check-cv-library.mjs",
+    "check:job-match": "node scripts/check-job-match.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "test:e2e:fast": "playwright test --grep-invert @slow",
