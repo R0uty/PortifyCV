@@ -272,6 +272,11 @@ function compressCvData(formData) {
     }
   }
 
+  // 'cl' (1.7.5) — the CV's own language; nothing when it follows the app.
+  if (formData.cvLanguage === 'en' || formData.cvLanguage === 'fi') {
+    data.cl = formData.cvLanguage
+  }
+
   return { v: SHARE_PAYLOAD_VERSION, d: data }
 }
 
@@ -322,6 +327,10 @@ function expandCurrentPayload(data) {
 
   if (data.va !== undefined) {
     formData.styleVariantByTemplate = data.va
+  }
+
+  if (data.cl !== undefined) {
+    formData.cvLanguage = data.cl
   }
 
   return formData

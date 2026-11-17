@@ -183,6 +183,28 @@ for (const [label, value] of [
   }
   check(`import rejects styleVariantByTemplate as ${label}`, threw)
 }
+// cvLanguage (1.7.5) travels as 'cl', and only when the CV chose one.
+const finnishCv = parseImportedCvData({ ...structuredClone(demoCvData), cvLanguage: 'fi' })
+const finnishEncoded = share.encodeCvStateForUrl(finnishCv)
+check('cvLanguage survives the round trip', share.decodeCvStateFromUrl(finnishEncoded).cvLanguage === 'fi')
+check('cvLanguage travels as cl', rawPayload(finnishEncoded).d.cl === 'fi')
+check('a CV that follows the app language encodes no cl key', !('cl' in rawPayload(demoEncoded).d))
+check('a link without cl follows the app language', share.decodeCvStateFromUrl(demoEncoded).cvLanguage === '')
+check('an unknown cvLanguage imports as following the app',
+  parseImportedCvData({ ...structuredClone(demoCvData), cvLanguage: 'sv' }).cvLanguage === '')
+{
+  let threw = false
+  try {
+    parseImportedCvData({ ...structuredClone(demoCvData), cvLanguage: 3 })
+  } catch {
+    threw = true
+  }
+  check('import rejects a non-text cvLanguage', threw)
+}
+const { cvLanguage: _omitLanguage, ...preLanguageCv } = structuredClone(demoCvData)
+check('a file from before 1.7.5 imports following the app language',
+  parseImportedCvData(preLanguageCv).cvLanguage === '')
+
 const { styleVariantByTemplate: _omitVariants, ...legacyCv } = structuredClone(demoCvData)
 check('a file from before Phase 3 imports with no stored variants',
   JSON.stringify(parseImportedCvData(legacyCv).styleVariantByTemplate) === '{}')

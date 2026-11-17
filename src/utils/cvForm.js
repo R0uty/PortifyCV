@@ -317,6 +317,7 @@ export const createInitialCvData = () => ({
   photoVisibilityByTemplate: createTemplatePhotoVisibility(),
   sectionColumnsByTemplate: {},
   styleVariantByTemplate: {},
+  cvLanguage: '',
   sectionOrder: createSectionOrder(),
   skills: [],
   experience: [createEmptyExperience()],
@@ -343,6 +344,18 @@ export const createInitialCvData = () => ({
 
 export const initialCvData = createInitialCvData()
 
+// The language the CV itself is written in (1.7.5): its headings, dates and
+// export labels. '' follows the app's language, so a CV that never chose
+// one (every CV before 1.7.5, every example) reads as before.
+export const CV_LANGUAGES = ['en', 'fi']
+
+/** @returns {'en' | 'fi'} */
+export function resolveCvLocale(formData, uiLocale = 'en') {
+  const chosen = formData?.cvLanguage
+  if (CV_LANGUAGES.includes(chosen)) return chosen
+  return uiLocale === 'fi' ? 'fi' : 'en'
+}
+
 export const demoCvData = {
   fullName: 'John Doe',
   title: 'Senior Product Designer',
@@ -356,6 +369,7 @@ export const demoCvData = {
   photoVisibilityByTemplate: createTemplatePhotoVisibility(),
   sectionColumnsByTemplate: {},
   styleVariantByTemplate: {},
+  cvLanguage: '',
   sectionOrder: createSectionOrder(),
   skills: [
     'Product Strategy',
@@ -1014,6 +1028,7 @@ export function parseImportedCvData(value) {
       'photoVisibilityByTemplate',
       'sectionColumnsByTemplate',
       'styleVariantByTemplate',
+      'cvLanguage',
       'skills',
       'experience',
       'education',
@@ -1455,6 +1470,10 @@ export function parseImportedCvData(value) {
       Object.entries(sectionColumnsByTemplate).map(([templateId, columns]) => [templateId, { ...columns }]),
     ),
     styleVariantByTemplate: { ...styleVariantByTemplate },
+    // A language this version doesn't know follows the app, like no choice.
+    cvLanguage: CV_LANGUAGES.includes(readOptionalString(value.cvLanguage, 'cvLanguage'))
+      ? value.cvLanguage
+      : '',
     skills: skills.map((skill, index) => readOptionalString(skill, `skills[${index}]`)),
     experience:
       experience.length > 0
