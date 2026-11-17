@@ -107,6 +107,16 @@ job" opens the Save dialog with a suggested name; `saveAs` flushes the
 open saved CV first, so that one keeps its state and the copy becomes the
 active CV.
 
+**Bullet hints (1.7.3) are per achievement, beside the field.**
+`cvFeedback.js`'s `getBulletHints(bullets, { locale })` returns up to two
+hints per bullet (duty phrase, weak opener, filler, over 30 words, repeated
+opening verb, no number), every rule a closed list or a count.
+`fields/BulletHints.jsx` renders them under the bullet in Classic's
+`ReorderableListInput` and Direct Edit's popup list (`SectionEditorPopup`),
+hidden on the bullet being typed in and linked with `aria-describedby`.
+`check:feedback` also requires that no example CV bullet gets a phrasing
+hint, so a new example has to model the advice.
+
 **Hand-rolled routing, no react-router.** `src/App.jsx` owns view state
 directly (`useState` + `history.pushState`/`popstate`), matching the current
 path against `ROUTES`/`VIEW_HEAD` (`src/utils/routes.js`,

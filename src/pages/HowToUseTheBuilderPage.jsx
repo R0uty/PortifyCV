@@ -39,9 +39,9 @@ function getCopy(locale) {
         {
           step: 'bullets',
           heading: 'Terävöitä kokemuskohdat',
-          figureLabel: 'Kokemusosio Klassinen-tilassa: heikko luettelokohta ja sen alla vinkki "Vahvista sanamuotoa".',
+          figureLabel: 'Kokemusosio Klassinen-tilassa: heikko luettelokohta, sen alla kohdan oma vinkki ja roolin vinkki "Vahvista sanamuotoa".',
           caption:
-            'Klassinen-tilassa heikot kohdat merkitään kirjoittaessasi suoraan kentän viereen: passiiviset ilmaukset kuten "vastuualueena", aloitukset jotka eivät ole vahva verbi, ja kohdat joista puuttuu mitattava luku. "ATS-pisteet ja ehdotukset" -paneeli laskee ne yhteen.',
+            'Jokainen saavutuskohta saa omat vinkkinsä heti, kun siirryt siitä eteenpäin, sekä Klassinen- että Suora muokkaus -tilassa: tehtävälistan kaltaiset ilmaukset kuten "vastuualueena", heikot aloitukset kuten "Olin", täytesanat kuten "onnistuneesti", yli 30 sanan kohdat, edellisen kohdan kanssa sama aloitusverbi ja kohdat ilman lukua. "ATS-pisteet ja ehdotukset" -paneeli laskee roolien vinkit yhteen.',
         },
         {
           step: 'template',
@@ -113,9 +113,9 @@ function getCopy(locale) {
       {
         step: 'bullets',
         heading: 'Tighten your experience bullets',
-        figureLabel: 'An experience entry in Classic mode: a weak bullet, with the "Strengthen the wording" tip below it.',
+        figureLabel: 'An experience entry in Classic mode: a weak bullet with its own hint underneath, and the role\'s "Strengthen the wording" tip below.',
         caption:
-          'In Classic mode, weak bullets get flagged inline next to the field as you write: passive phrases like "responsible for," openers that aren\'t a strong verb, and bullets with no measurable number. The ATS score & suggestions panel totals them up.',
+          'Each achievement bullet gets its own hints as soon as you move on from it, in Classic and Direct Edit alike: duty-list phrases like "responsible for," weak openers like "I" or "Worked," filler like "successfully," bullets over 30 words, the same opening verb as an earlier bullet, and bullets with no number. The ATS score & suggestions panel totals up the tips for each role.',
       },
       {
         step: 'template',
