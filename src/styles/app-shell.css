@@ -2065,8 +2065,12 @@ select.floating-field__control {
   gap: var(--space-2);
 }
 
+/* A small basis, because the toolbar wraps rather than shrinks: at 12rem
+   the 1.7.1 Save button tipped Classic's row onto two lines at 1280px
+   once the Design button carried its Modified dot. It still grows to the
+   search box's 16rem wherever there is room. */
 .app-toolbar__group--search {
-  flex: 1 1 12rem;
+  flex: 1 1 7rem;
   min-width: 0;
 }
 
