@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useDirectEdit } from './DirectEditContext'
+import { useCvTextProps } from './cvLanguageContext'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 
 function buildAction(path, value) {
@@ -46,6 +47,7 @@ export default function EditableField({
   multiline = false,
 }) {
   const { isEditing, dispatchFormData } = useDirectEdit()
+  const cvTextProps = useCvTextProps({ field: path?.kind === 'link' ? 'link' : path?.field })
   const elementRef = useRef(null)
   // The latest value, for the blur handler below.
   const valueRef = useRef(value)
@@ -143,7 +145,10 @@ export default function EditableField({
       role="textbox"
       aria-multiline={multiline}
       aria-label={placeholder || undefined}
-      spellCheck={false}
+      // In the CV's language, checked except for names, contact details,
+      // links and dates (1.7.7). Off outside the builder, as before.
+      lang={cvTextProps.lang}
+      spellCheck={cvTextProps.spellCheck ?? false}
       data-placeholder={placeholder}
       onInput={handleInput}
       onBlur={handleBlur}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useCvTextProps } from '../cvLanguageContext'
 import { X } from 'lucide-react'
 
 import InlineTagEditor from './InlineTagEditor'
@@ -9,7 +10,10 @@ function TagsInput({
   placeholder = '',
   ariaLabel = 'Tags',
   locale = 'en',
+  // false for tech names (1.7.7); skills are checked.
+  spellCheck,
 }) {
+  const cvTextProps = useCvTextProps({ spellCheck })
   const isFinnish = locale === 'fi'
   const [draft, setDraft] = useState('')
   const [editingIndex, setEditingIndex] = useState(null)
@@ -129,6 +133,7 @@ function TagsInput({
         </span>
       ))}
       <input
+        {...cvTextProps}
         type="text"
         className="tags-input__input"
         value={draft}

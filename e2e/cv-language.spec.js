@@ -45,6 +45,35 @@ test.describe('CV language', () => {
     await expect(preview(page)).toContainText('Experience')
   })
 
+  // Spell check (1.7.7): the fields the CV is typed into carry its language,
+  // so the browser checks a Finnish CV in Finnish; names, contact details,
+  // organisations and dates are left unchecked.
+  test('CV fields carry the CV language and spell check, in both modes', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+
+    const title = page.getByRole('textbox', { name: 'Professional title' })
+    await expect(title).toHaveAttribute('lang', 'en')
+    await expect(title).toHaveAttribute('spellcheck', 'true')
+
+    await chooseCvLanguage(page, 'Settings', 'Settings', 'More actions', 'Suomi')
+
+    await expect(title).toHaveAttribute('lang', 'fi')
+    await expect(page.getByRole('textbox', { name: 'About' })).toHaveAttribute('spellcheck', 'true')
+    await expect(page.getByRole('textbox', { name: 'Full name' })).toHaveAttribute('spellcheck', 'false')
+    await expect(page.getByRole('textbox', { name: 'Company' }).first()).toHaveAttribute('spellcheck', 'false')
+    await expect(page.getByRole('textbox', { name: 'Achievement 1' }).first()).toHaveAttribute('lang', 'fi')
+
+    await page.getByRole('tab', { name: 'Direct Edit' }).click()
+    const preview = page.locator('.direct-edit-preview')
+    // Its fields' names follow the CV's language, so find them by content.
+    const field = (text) => preview.locator('[contenteditable]', { hasText: text }).first()
+    await expect(field('Senior Product Designer')).toHaveAttribute('lang', 'fi')
+    await expect(field('Senior Product Designer')).toHaveAttribute('spellcheck', 'true')
+    await expect(field('John Doe')).toHaveAttribute('spellcheck', 'false')
+    await expect(field('john.doe@example.com')).toHaveAttribute('spellcheck', 'false')
+  })
+
   test('an English CV in the Finnish builder', async ({ page }) => {
     await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'fi'))
     await page.goto('/cv')

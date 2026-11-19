@@ -8,6 +8,7 @@ import { isPhotoVisibleForTemplate, normalizeSectionOrder } from '../utils/cvFor
 import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/profilePhoto'
 import { canMoveSection, getSectionColumn, setSectionColumn } from '../utils/sectionColumns'
 import { getTabStops } from '../utils/focusTrap'
+import { useCvTextProps } from './cvLanguageContext'
 
 // The popup editor for one section. Renders real <input>/<textarea>
 // elements and reads formData directly — never the DOM and never
@@ -17,6 +18,10 @@ import { getTabStops } from '../utils/focusTrap'
 
 
 function FieldInput({ field, value, isFinnish, onChange }) {
+  const cvTextProps = useCvTextProps({
+    type: field.type === 'url' ? 'url' : field.type === 'month' ? 'month' : undefined,
+    field: field.key,
+  })
   const label = isFinnish ? field.labelFi : field.labelEn
   // Achievement bullets get writing hints (1.7.3), hidden on the one being typed in.
   const hintIdBase = useId()
@@ -29,6 +34,7 @@ function FieldInput({ field, value, isFinnish, onChange }) {
   const shared = {
     'data-field': field.key,
     className: 'direct-edit-popup__input',
+    ...(field.type === 'checkbox' ? {} : cvTextProps),
   }
 
   // A string[] sub-editor: one row per item plus an Add row. It writes
@@ -57,6 +63,7 @@ function FieldInput({ field, value, isFinnish, onChange }) {
             <div key={index}>
             <div className="direct-edit-popup__list-item">
               <input
+                {...cvTextProps}
                 type="text"
                 className="direct-edit-popup__input"
                 aria-label={`${itemLabel} ${index + 1}`}
@@ -148,6 +155,7 @@ export default function SectionEditorPopup({
   atsFriendlyMode = false,
   onClose,
 }) {
+  const skillTextProps = useCvTextProps()
   const isFinnish = locale === 'fi'
   const schema = getSectionSchema(sectionKey)
   const [draftSkill, setDraftSkill] = useState('')
@@ -608,6 +616,7 @@ export default function SectionEditorPopup({
         ))}
         <div className="direct-edit-popup__skill-row">
           <input
+            {...skillTextProps}
             type="text"
             className="direct-edit-popup__input direct-edit-popup__skill-input"
             value={draftSkill}

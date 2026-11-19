@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useCvTextProps } from '../cvLanguageContext'
 
 // One tag's text as an editable input — shared by Classic's TagsInput, Direct
 // Edit's skill chips and the Skills popup, so renaming a skill behaves the
@@ -22,6 +23,7 @@ export default function InlineTagEditor({
   persistent = false,
   autoFocus = true,
 }) {
+  const cvTextProps = useCvTextProps()
   const [draft, setDraft] = useState(value)
   const [isDuplicate, setIsDuplicate] = useState(false)
   // A new value from outside (a reorder, a removal above it, an undo)
@@ -93,6 +95,7 @@ export default function InlineTagEditor({
   return (
     <span className={`inline-tag-editor ${className}`.trim()}>
       <input
+        {...cvTextProps}
         ref={inputRef}
         type="text"
         className="inline-tag-editor__input"

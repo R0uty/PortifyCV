@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react'
 import AutoGrowTextarea from '../AutoGrowTextarea'
 import BulletHints from './BulletHints'
+import { useCvTextProps } from '../cvLanguageContext'
 
 function ReorderableListInput({
   items = [],
@@ -13,6 +14,7 @@ function ReorderableListInput({
   // Optional writing hints per item, in items' order (achievements only).
   hints = null,
 }) {
+  const cvTextProps = useCvTextProps()
   const isFinnish = locale === 'fi'
   const hintIdBase = useId()
   // The row being typed in shows no hints until the caret leaves it.
@@ -93,6 +95,7 @@ function ReorderableListInput({
         <div className="reorderable-list__item" key={ids[index] ?? index}>
         <div className="reorderable-list__row">
           <AutoGrowTextarea
+            {...cvTextProps}
             className="reorderable-list__input"
             value={item}
             placeholder={placeholder}

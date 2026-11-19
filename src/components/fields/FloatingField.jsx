@@ -1,4 +1,5 @@
 import { cloneElement, isValidElement, useId } from 'react'
+import { useCvTextProps } from '../cvLanguageContext'
 
 function FloatingField({
   label,
@@ -16,9 +17,12 @@ function FloatingField({
   // with htmlFor is what gives the control its accessible name and makes a click
   // on the label focus it.
   const controlId = child?.props.id ?? generatedControlId
+  // Every FloatingField holds CV text: the CV's language and spell check.
+  const cvTextProps = useCvTextProps({ type: child?.props.type, spellCheck: child?.props.spellCheck })
 
   const enhancedChild = child
     ? cloneElement(child, {
+      ...cvTextProps,
       id: controlId,
       placeholder: child.props.placeholder ?? ' ',
       'aria-describedby': error ? errorId : child.props['aria-describedby'],

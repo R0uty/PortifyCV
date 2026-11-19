@@ -103,6 +103,7 @@ import { matchJobAd } from '../utils/jobMatch'
 import { evaluateCvFeedback } from '../utils/cvFeedback'
 import { generateCoverLetterDraft } from '../utils/coverLetter'
 import { EXAMPLES, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
+import { CvLanguageContext } from '../components/cvLanguageContext'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
@@ -2520,7 +2521,10 @@ function ResumeBuilderPage({
   ])
 
   return (
-    <>
+    // The CV's language for every field the CV is typed into (1.7.7):
+    // spell check and screen readers follow it, the builder's own text
+    // stays in `locale`.
+    <CvLanguageContext value={cvLocale}>
       <h1 className="sr-only">{locale === 'fi' ? 'Rakenna CV:si' : 'Build Your CV'}</h1>
       {/* One picker for both modes: Classic's Import CV panel and Direct
           Edit's Import CV dialog both open it (1.6.80). */}
@@ -2748,7 +2752,7 @@ function ResumeBuilderPage({
       ) : null}
 
       <ToastStack toasts={toasts} clearBottomBar={builderMode !== 'direct'} />
-    </>
+    </CvLanguageContext>
   )
 }
 

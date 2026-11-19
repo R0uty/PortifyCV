@@ -39,6 +39,7 @@ import {
 } from '../utils/cvForm'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/profilePhoto'
+import { useCvTextProps } from './cvLanguageContext'
 
 function isSectionItemVisible(sectionItemVisibility, section, itemKey) {
   return sectionItemVisibility?.[section]?.[String(itemKey)] !== false
@@ -73,6 +74,8 @@ function CVForm({
   selectedTemplateLabel = 'Current template',
   sectionSettingsExpandSignal = 0,
 }) {
+  // The interests rows are the form's only CV text outside a FloatingField.
+  const cvTextProps = useCvTextProps()
   const [draggedSectionKey, setDraggedSectionKey] = useState('')
   const [collapsedItems, setCollapsedItems] = useState(() => new Set())
   // Only surface the "required" message once the user has left the field —
@@ -488,6 +491,7 @@ function CVForm({
             <input
               type="text"
               autoComplete="name"
+              spellCheck={false}
               value={formData.fullName}
               onChange={(event) => updateRootField('fullName', event.target.value)}
               onBlur={() => markIdentityTouched('fullName')}
@@ -522,6 +526,7 @@ function CVForm({
               <input
                 type="email"
                 autoComplete="email"
+                spellCheck={false}
                 value={formData.email}
                 onChange={(event) => updateRootField('email', event.target.value)}
               />
@@ -530,6 +535,7 @@ function CVForm({
               <input
                 type="tel"
                 autoComplete="tel"
+                spellCheck={false}
                 value={formData.phone}
                 onChange={(event) => updateRootField('phone', event.target.value)}
               />
@@ -709,6 +715,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Yritys' : 'Company'}>
                             <input
                               type="text"
+                              spellCheck={false}
                               value={item.company}
                               onChange={(event) =>
                                 updateArrayItem('experience', index, 'company', event.target.value)
@@ -740,6 +747,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Aloituspäivä' : 'Start date'}>
                             <input
                               type="text"
+                              spellCheck={false}
                               value={item.startDate}
                               placeholder={isFinnish ? 'esim. tammikuu 2022' : 'e.g. Jan 2022'}
                               onChange={(event) =>
@@ -750,6 +758,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Lopetuspäivä' : 'End date'}>
                             <input
                               type="text"
+                              spellCheck={false}
                               value={item.isCurrent ? '' : item.endDate}
                               disabled={item.isCurrent}
                               placeholder={
@@ -805,6 +814,7 @@ function CVForm({
                             {isFinnish ? 'Teknologiat' : 'Technologies'}
                           </p>
                           <TagsInput
+                            spellCheck={false}
                             value={item.technologies}
                             onChange={(next) => updateArrayItem('experience', index, 'technologies', next)}
                             placeholder={isFinnish ? 'Lisää teknologia' : 'Add a technology'}
@@ -899,6 +909,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Oppilaitos' : 'School'}>
                             <input
                               type="text"
+                              spellCheck={false}
                               value={item.school}
                               onChange={(event) =>
                                 updateArrayItem('education', index, 'school', event.target.value)
@@ -926,6 +937,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Arvosana (valinnainen)' : 'Grade (optional)'}>
                             <input
                               type="text"
+                              spellCheck={false}
                               value={item.grade}
                               onChange={(event) =>
                                 updateArrayItem('education', index, 'grade', event.target.value)
@@ -935,6 +947,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Aloituspäivä' : 'Start date'}>
                             <input
                               type="text"
+                              spellCheck={false}
                               value={item.startDate}
                               placeholder={isFinnish ? 'esim. syyskuu 2018' : 'e.g. Sep 2018'}
                               onChange={(event) =>
@@ -945,6 +958,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Lopetuspäivä' : 'End date'}>
                             <input
                               type="text"
+                              spellCheck={false}
                               value={item.endDate}
                               placeholder={isFinnish ? 'esim. kesäkuu 2022' : 'e.g. Jun 2022'}
                               onChange={(event) =>
@@ -1151,6 +1165,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Myöntäjä' : 'Issuer'}>
                             <input
                               type="text"
+                              spellCheck={false}
                               value={item.issuer}
                               onChange={(event) =>
                                 updateArrayItem('certificates', index, 'issuer', event.target.value)
@@ -1160,6 +1175,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Vuosi' : 'Year'}>
                             <input
                               type="text"
+                              spellCheck={false}
                               value={item.year}
                               onChange={(event) =>
                                 updateArrayItem('certificates', index, 'year', event.target.value)
@@ -1169,6 +1185,7 @@ function CVForm({
                           <FloatingField label={isFinnish ? 'Vanhenee (valinnainen)' : 'Expiry (optional)'}>
                             <input
                               type="text"
+                              spellCheck={false}
                               value={item.expiry}
                               onChange={(event) =>
                                 updateArrayItem('certificates', index, 'expiry', event.target.value)
@@ -1179,6 +1196,7 @@ function CVForm({
                             <FloatingField label={isFinnish ? 'Todennuslinkki (valinnainen)' : 'Credential URL (optional)'}>
                               <input
                                 type="url"
+                                spellCheck={false}
                                 value={item.credentialUrl}
                                 onChange={(event) =>
                                   updateArrayItem('certificates', index, 'credentialUrl', event.target.value)
@@ -1292,6 +1310,7 @@ function CVForm({
                             <FloatingField label={isFinnish ? 'Teknologiat (valinnainen)' : 'Tech stack (optional)'}>
                               <input
                                 type="text"
+                                spellCheck={false}
                                 value={item.stack}
                                 onChange={(event) =>
                                   updateArrayItem('projects', index, 'stack', event.target.value)
@@ -1301,6 +1320,7 @@ function CVForm({
                             <FloatingField label={isFinnish ? 'Päivämäärä (valinnainen)' : 'Date (optional)'}>
                               <input
                                 type="text"
+                                spellCheck={false}
                                 value={item.date}
                                 onChange={(event) =>
                                   updateArrayItem('projects', index, 'date', event.target.value)
@@ -1312,6 +1332,7 @@ function CVForm({
                             <FloatingField label={isFinnish ? 'Organisaatio (valinnainen)' : 'Organization (optional)'}>
                               <input
                                 type="text"
+                                spellCheck={false}
                                 value={item.organization}
                                 onChange={(event) =>
                                   updateArrayItem('projects', index, 'organization', event.target.value)
@@ -1332,6 +1353,7 @@ function CVForm({
                             <FloatingField label={isFinnish ? 'Tiimin koko (valinnainen)' : 'Team size (optional)'}>
                               <input
                                 type="text"
+                                spellCheck={false}
                                 value={item.teamSize}
                                 onChange={(event) =>
                                   updateArrayItem('projects', index, 'teamSize', event.target.value)
@@ -1352,6 +1374,7 @@ function CVForm({
                             <FloatingField label={isFinnish ? 'GitHub-linkki (valinnainen)' : 'GitHub URL (optional)'}>
                               <input
                                 type="url"
+                                spellCheck={false}
                                 value={item.githubUrl}
                                 onChange={(event) =>
                                   updateArrayItem('projects', index, 'githubUrl', event.target.value)
@@ -1361,6 +1384,7 @@ function CVForm({
                             <FloatingField label={isFinnish ? 'Demo-linkki (valinnainen)' : 'Demo URL (optional)'}>
                               <input
                                 type="url"
+                                spellCheck={false}
                                 value={item.demoUrl}
                                 onChange={(event) =>
                                   updateArrayItem('projects', index, 'demoUrl', event.target.value)
@@ -1464,6 +1488,7 @@ function CVForm({
           {formData.interests.map((item, index) => (
             <div key={`interest-${index}`} className="flex items-center gap-2">
               <input
+                {...cvTextProps}
                 className={inputClasses.replace('mt-2 ', '')}
                 type="text"
                 value={item.name}
@@ -1566,6 +1591,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Vuosi' : 'Year'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.year}
                     onChange={(event) =>
                       updateArrayItem('achievements', index, 'year', event.target.value)
@@ -1683,6 +1709,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Linkki' : 'URL'}>
                   <input
                     type="url"
+                    spellCheck={false}
                     value={item.url}
                     onChange={(event) =>
                       updateArrayItem('openSource', index, 'url', event.target.value)
@@ -1692,6 +1719,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Tähdet' : 'Stars'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.stars}
                     onChange={(event) =>
                       updateArrayItem('openSource', index, 'stars', event.target.value)
@@ -1701,6 +1729,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Haarautumat' : 'Forks'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.forks}
                     onChange={(event) =>
                       updateArrayItem('openSource', index, 'forks', event.target.value)
@@ -1789,6 +1818,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Julkaisija' : 'Publisher'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.publisher}
                     onChange={(event) =>
                       updateArrayItem('publications', index, 'publisher', event.target.value)
@@ -1798,6 +1828,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Vuosi' : 'Year'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.year}
                     onChange={(event) =>
                       updateArrayItem('publications', index, 'year', event.target.value)
@@ -1808,6 +1839,7 @@ function CVForm({
                   <FloatingField label={isFinnish ? 'Linkki (valinnainen)' : 'URL (optional)'}>
                     <input
                       type="url"
+                      spellCheck={false}
                       value={item.url}
                       onChange={(event) =>
                         updateArrayItem('publications', index, 'url', event.target.value)
@@ -1973,6 +2005,7 @@ function CVForm({
                   <FloatingField label={isFinnish ? 'Organisaatio' : 'Organization'}>
                     <input
                       type="text"
+                      spellCheck={false}
                       value={item.organization}
                       onChange={(event) =>
                         updateArrayItem('leadership', index, 'organization', event.target.value)
@@ -1992,6 +2025,7 @@ function CVForm({
                   <FloatingField label={isFinnish ? 'Alkoi' : 'Start date'}>
                     <input
                       type="text"
+                      spellCheck={false}
                       value={item.startDate}
                       onChange={(event) =>
                         updateArrayItem('leadership', index, 'startDate', event.target.value)
@@ -2001,6 +2035,7 @@ function CVForm({
                   <FloatingField label={isFinnish ? 'Päättyi' : 'End date'}>
                     <input
                       type="text"
+                      spellCheck={false}
                       value={item.endDate}
                       onChange={(event) =>
                         updateArrayItem('leadership', index, 'endDate', event.target.value)
@@ -2080,6 +2115,7 @@ function CVForm({
                   <FloatingField label={isFinnish ? 'Organisaatio' : 'Organization'}>
                     <input
                       type="text"
+                      spellCheck={false}
                       value={item.organization}
                       onChange={(event) =>
                         updateArrayItem('memberships', index, 'organization', event.target.value)
@@ -2099,6 +2135,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Vuosi (valinnainen)' : 'Year (optional)'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.year}
                     onChange={(event) =>
                       updateArrayItem('memberships', index, 'year', event.target.value)
@@ -2176,6 +2213,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Konferenssi' : 'Conference'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.conference}
                     onChange={(event) =>
                       updateArrayItem('speaking', index, 'conference', event.target.value)
@@ -2185,6 +2223,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Päivämäärä' : 'Date'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.date}
                     onChange={(event) =>
                       updateArrayItem('speaking', index, 'date', event.target.value)
@@ -2284,6 +2323,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Organisaatio' : 'Organization'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.organization}
                     onChange={(event) =>
                       updateArrayItem('volunteering', index, 'organization', event.target.value)
@@ -2389,6 +2429,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Yritys' : 'Company'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.company}
                     onChange={(event) =>
                       updateArrayItem('internships', index, 'company', event.target.value)
@@ -2407,6 +2448,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.technologies}
                     onChange={(event) =>
                       updateArrayItem('internships', index, 'technologies', event.target.value)
@@ -2416,6 +2458,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Alkoi' : 'Start date'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.startDate}
                     onChange={(event) =>
                       updateArrayItem('internships', index, 'startDate', event.target.value)
@@ -2425,6 +2468,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Päättyi' : 'End date'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.endDate}
                     onChange={(event) =>
                       updateArrayItem('internships', index, 'endDate', event.target.value)
@@ -2537,6 +2581,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.technologies}
                     onChange={(event) =>
                       updateArrayItem('caseStudies', index, 'technologies', event.target.value)
@@ -2640,6 +2685,7 @@ function CVForm({
                 <FloatingField label={isFinnish ? 'Nimi' : 'Author'}>
                   <input
                     type="text"
+                    spellCheck={false}
                     value={item.author}
                     onChange={(event) =>
                       updateArrayItem('testimonials', index, 'author', event.target.value)
