@@ -125,12 +125,16 @@ hint, so a new example has to model the advice.
 the example chunks aren't downloaded before then) and returns each role's
 bullets with every number turned into `[__]`, except after a closed list of
 standard names (`STANDARD_NAMES`: WCAG, ISO, SOC …). `rankIdeaRoles` orders
-the roles by word overlap with the job's role, else the CV title.
+the roles by word overlap with the job's role, else the CV title (in
+Finnish a shared compound tail of 6+ letters, "-kehittäjä", "-hoitaja",
+also counts, below an exact match).
 `fields/BulletIdeas.jsx` is the panel, used by Classic's
 `ReorderableListInput` and Direct Edit's `SectionEditorPopup`.
 `getBulletHints` adds a `blank` hint for a bullet still holding `[__]`, and
 `countBlankBullets` feeds the PDF/HTML/Word download toasts. Cases live in
-`check:bullet-ideas` and `check:feedback`; `e2e/bullet-ideas.spec.js` covers
+`check:bullet-ideas` (which also requires each English idea and its Finnish
+twin to blank the same number of figures, and no figure written as a word,
+so write example figures as digits) and `check:feedback`; `e2e/bullet-ideas.spec.js` covers
 the panel.
 
 **"What a parser reads" (1.7.4) reuses the CV import on the exact PDF.**
