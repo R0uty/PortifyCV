@@ -478,10 +478,13 @@ export function getBulletHints(bullets, options = {}) {
 
 /**
  * How many achievements in the exported jobs still hold a blank.
- * @param {{ experience?: { achievements?: string[] }[], sectionItemVisibility?: { experience?: Record<string, boolean> } }} formData
+ * A switched-off Experience section exports no jobs, so it counts 0, like a
+ * hidden job (the exporters' `sectionVisibility[key] !== false` rule).
+ * @param {{ experience?: { achievements?: string[] }[], sectionVisibility?: Record<string, boolean>, sectionItemVisibility?: { experience?: Record<string, boolean> } }} formData
  * @returns {number}
  */
 export function countBlankBullets(formData) {
+  if (formData?.sectionVisibility?.experience === false) return 0
   const visibility = formData?.sectionItemVisibility?.experience
   return (Array.isArray(formData?.experience) ? formData.experience : []).reduce((total, job, index) => {
     if (visibility?.[String(index)] === false) return total

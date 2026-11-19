@@ -218,6 +218,11 @@ console.log('\ngetBulletHints — one bullet at a time (1.7.3)\n')
     }
     same('countBlankBullets counts blanked bullets in a visible job', countBlankBullets(blankJob(false)), 2)
     same('countBlankBullets ignores a hidden job', countBlankBullets(blankJob(true)), 0)
+    {
+      const cv = blankJob(false)
+      cv.sectionVisibility = { ...cv.sectionVisibility, experience: false }
+      same('countBlankBullets ignores a switched-off Experience section', countBlankBullets(cv), 0)
+    }
     same('countBlankBullets is 0 on an empty CV', countBlankBullets(createInitialCvData()), 0)
   }
   same('an empty bullet gets nothing', ids(['', '  ']), [[], []])
