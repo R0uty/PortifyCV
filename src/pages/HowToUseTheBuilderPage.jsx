@@ -41,7 +41,7 @@ function getCopy(locale) {
           heading: 'Terävöitä kokemuskohdat',
           figureLabel: 'Kokemusosio Klassinen-tilassa: heikko luettelokohta, sen alla kohdan oma vinkki ja roolin vinkki "Vahvista sanamuotoa".',
           caption:
-            'Jokainen saavutuskohta saa omat vinkkinsä heti, kun siirryt siitä eteenpäin, sekä Klassinen- että Suora muokkaus -tilassa: tehtävälistan kaltaiset ilmaukset kuten "vastuualueena", heikot aloitukset kuten "Olin", täytesanat kuten "onnistuneesti", yli 30 sanan kohdat, edellisen kohdan kanssa sama aloitusverbi ja kohdat ilman lukua. "ATS-pisteet ja ehdotukset" -paneeli laskee roolien vinkit yhteen.',
+            'Jokainen saavutuskohta saa omat vinkkinsä heti, kun siirryt siitä eteenpäin, sekä Klassinen- että Suora muokkaus -tilassa: tehtävälistan kaltaiset ilmaukset kuten "vastuualueena", heikot aloitukset kuten "Olin", täytesanat kuten "onnistuneesti", yli 30 sanan kohdat, edellisen kohdan kanssa sama aloitusverbi ja kohdat ilman lukua. "ATS-pisteet ja ehdotukset" -paneeli laskee roolien vinkit yhteen. Kunkin työpaikan saavutusten alla oleva "Hae ideoita" lisää esimerkki-CV:iden kohtia, joissa luvut on korvattu merkillä [__]; täytä oma lukusi, sillä hakuvinkki merkitsee kohdan, jossa [__] on yhä jäljellä.',
         },
         {
           step: 'template',
@@ -115,7 +115,7 @@ function getCopy(locale) {
         heading: 'Tighten your experience bullets',
         figureLabel: 'An experience entry in Classic mode: a weak bullet with its own hint underneath, and the role\'s "Strengthen the wording" tip below.',
         caption:
-          'Each achievement bullet gets its own hints as soon as you move on from it, in Classic and Direct Edit alike: duty-list phrases like "responsible for," weak openers like "I" or "Worked," filler like "successfully," bullets over 30 words, the same opening verb as an earlier bullet, and bullets with no number. The ATS score & suggestions panel totals up the tips for each role.',
+          'Each achievement bullet gets its own hints as soon as you move on from it, in Classic and Direct Edit alike: duty-list phrases like "responsible for," weak openers like "I" or "Worked," filler like "successfully," bullets over 30 words, the same opening verb as an earlier bullet, and bullets with no number. The ATS score & suggestions panel totals up the tips for each role. "Get ideas" under each job\'s achievements adds bullets from the example CVs with their numbers replaced by [__]; fill in your own figure, since a hint flags any bullet that still holds [__].',
       },
       {
         step: 'template',
