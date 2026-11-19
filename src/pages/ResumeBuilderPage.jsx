@@ -172,7 +172,7 @@ function createToast(message, type = 'success') {
 function blankBulletsNote(count, isFinnish) {
   if (!count) return ''
   return isFinnish
-    ? ` ${count} kohdassa on vielä ${BULLET_BLANK}.`
+    ? ` ${count} saavutuskohdassa on vielä ${BULLET_BLANK}.`
     : ` ${count} ${count === 1 ? 'bullet still holds' : 'bullets still hold'} ${BULLET_BLANK}.`
 }
 
