@@ -29,7 +29,7 @@ registerHooks({
 const srcDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src')
 const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, relativePath)).href)
 
-const { evaluateCvFeedback, getBulletHints } = await importSrc('utils/cvFeedback.js')
+const { evaluateCvFeedback, getBulletHints, countBlankBullets } = await importSrc('utils/cvFeedback.js')
 const { createInitialCvData, createEmptyExperience } = await importSrc('utils/cvForm.js')
 const { EXAMPLES, loadExampleCv } = await importSrc('utils/exampleCvs.js')
 
@@ -205,6 +205,21 @@ console.log('\ngetBulletHints — one bullet at a time (1.7.3)\n')
   check('too long, with its word count', getBulletHints([`Built ${'a very long and winding bullet '.repeat(6)}for 4 teams.`])[0][0].message.startsWith('40 words'))
   same('the same opening verb as an earlier bullet', ids(['Led a team of 5.', 'Led the 2024 migration.', 'Built a CLI used by 40 engineers.']), [[], ['repeated-opener'], []])
   same('at most two hints a bullet', ids([`I successfully worked ${'without any figures at all '.repeat(6)}`]).map((list) => list.length), [2])
+  same('a blank left in a bullet', ids(['Cut the monthly close from [__] days to [__].']), [['blank']])
+  same('the blank hint comes first and replaces the number hint', ids(['Led the migration of the payments platform for [__] teams.']), [['blank']])
+  same('Finnish: the blank hint copy', getBulletHints(['Lyhensin kuukausikirjanpidon [__] päivästä [__] päivään.'], { locale: 'fi' })[0][0].message, 'Täytä aukko: kohdassa on vielä [__].')
+  same('English: the blank hint copy', getBulletHints(['Cut the monthly close from [__] days to [__].'])[0][0].message, 'Fill in the blank: [__] is still in this bullet.')
+  {
+    const blankJob = (hidden) => {
+      const cv = createInitialCvData()
+      cv.experience = [{ ...createEmptyExperience(), achievements: ['Cut close to [__] days.', 'Led [__] people.', 'Shipped it.'] }]
+      if (hidden) cv.sectionItemVisibility = { experience: { '0': false } }
+      return cv
+    }
+    same('countBlankBullets counts blanked bullets in a visible job', countBlankBullets(blankJob(false)), 2)
+    same('countBlankBullets ignores a hidden job', countBlankBullets(blankJob(true)), 0)
+    same('countBlankBullets is 0 on an empty CV', countBlankBullets(createInitialCvData()), 0)
+  }
   same('an empty bullet gets nothing', ids(['', '  ']), [[], []])
   same('Finnish: duty phrasing and filler', ids(['Vastuualueena asiakaspalvelu.', 'Rakensin onnistuneesti uuden varausjärjestelmän 3 kuukaudessa.'], 'fi'), [['weak-phrase'], ['filler']])
   same('Finnish: a weak opener', ids(['Olin mukana 12 hengen projektissa.'], 'fi'), [['weak-phrase']])

@@ -406,6 +406,16 @@ export function getBulletHints(bullets, options = {}) {
     const hints = []
     const words = countWords(text)
     const opener = openers[index]
+    const hasBlank = text.includes(BULLET_BLANK)
+
+    if (hasBlank) {
+      hints.push({
+        id: 'blank',
+        message: isFinnish
+          ? `Täytä aukko: kohdassa on vielä ${BULLET_BLANK}.`
+          : `Fill in the blank: ${BULLET_BLANK} is still in this bullet.`,
+      })
+    }
     const weakPhrase = findWeakPhrase(text)
 
     if (weakPhrase) {
@@ -453,7 +463,7 @@ export function getBulletHints(bullets, options = {}) {
       })
     }
 
-    if (words >= NUMBER_HINT_MIN_WORDS && !/\d/.test(text)) {
+    if (!hasBlank && words >= NUMBER_HINT_MIN_WORDS && !/\d/.test(text)) {
       hints.push({
         id: 'no-number',
         message: isFinnish
@@ -464,4 +474,18 @@ export function getBulletHints(bullets, options = {}) {
 
     return hints.slice(0, MAX_HINTS_PER_BULLET)
   })
+}
+
+/**
+ * How many achievements in the exported jobs still hold a blank.
+ * @param {{ experience?: { achievements?: string[] }[], sectionItemVisibility?: { experience?: Record<string, boolean> } }} formData
+ * @returns {number}
+ */
+export function countBlankBullets(formData) {
+  const visibility = formData?.sectionItemVisibility?.experience
+  return (Array.isArray(formData?.experience) ? formData.experience : []).reduce((total, job, index) => {
+    if (visibility?.[String(index)] === false) return total
+    const bullets = Array.isArray(job?.achievements) ? job.achievements : []
+    return total + bullets.filter((bullet) => String(bullet ?? '').includes(BULLET_BLANK)).length
+  }, 0)
 }

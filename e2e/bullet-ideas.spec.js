@@ -74,4 +74,14 @@ test.describe('Bullet ideas', () => {
     await page.getByRole('button', { name: 'Get ideas' }).first().click()
     await expect(page.getByLabel('Ideas from').first().locator('option', { hasText: 'Sairaanhoitaja' })).toHaveCount(1)
   })
+
+  test('export warns about blanks left in', async ({ page }) => {
+    await openClassicExperience(page)
+    await page.getByRole('button', { name: 'Get ideas' }).first().click()
+    await page.getByRole('button', { name: /^Add: / }).first().click()
+
+    await page.getByRole('banner').getByRole('button', { name: 'Export' }).click()
+    await page.getByRole('menuitem', { name: 'JSON' }).click()
+    await expect(page.getByText('1 bullet still holds [__].')).toBeVisible()
+  })
 })

@@ -100,7 +100,7 @@ import {
 } from '../utils/shareLinks'
 import { evaluateAtsScore } from '../utils/atsScore'
 import { matchJobAd } from '../utils/jobMatch'
-import { evaluateCvFeedback } from '../utils/cvFeedback'
+import { BULLET_BLANK, countBlankBullets, evaluateCvFeedback } from '../utils/cvFeedback'
 import { generateCoverLetterDraft } from '../utils/coverLetter'
 import { EXAMPLES, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
 import { CvLanguageContext } from '../components/cvLanguageContext'
@@ -166,6 +166,14 @@ function createToast(message, type = 'success') {
     message,
     type,
   }
+}
+
+// Appended to a download toast when a bullet still holds a [__] blank.
+function blankBulletsNote(count, isFinnish) {
+  if (!count) return ''
+  return isFinnish
+    ? ` ${count} kohdassa on vielä ${BULLET_BLANK}.`
+    : ` ${count} ${count === 1 ? 'bullet still holds' : 'bullets still hold'} ${BULLET_BLANK}.`
 }
 
 function getScrollBehavior() {
@@ -931,10 +939,13 @@ function ResumeBuilderPage({
       const hiddenSections = listSectionsHiddenByTemplate(formData, selectedTemplate, locale)
 
       setIsPdfPreviewOpen(false)
+      const blanks = countBlankBullets(formData)
+
       showToast(
         locale === 'fi'
-          ? `${exportLabel} on ladattu.${hiddenSections ? ` Tämä pohja ei näytä osioita: ${hiddenSections}.` : ''}`
-          : `${exportLabel} export downloaded.${hiddenSections ? ` This template doesn't show: ${hiddenSections}.` : ''}`,
+          ? `${exportLabel} on ladattu.${hiddenSections ? ` Tämä pohja ei näytä osioita: ${hiddenSections}.` : ''}${blankBulletsNote(blanks, true)}`
+          : `${exportLabel} export downloaded.${hiddenSections ? ` This template doesn't show: ${hiddenSections}.` : ''}${blankBulletsNote(blanks, false)}`,
+        blanks ? 'info' : 'success',
       )
     } catch (error) {
       showToast(
@@ -1025,10 +1036,13 @@ function ResumeBuilderPage({
         ? listSectionsHiddenByTemplate(formData, selectedTemplate, locale)
         : ''
 
+      const blanks = countBlankBullets(formData)
+
       showToast(
         locale === 'fi'
-          ? `${exportLabel} on ladattu.${hiddenSections ? ` Tämä pohja ei näytä osioita: ${hiddenSections}.` : ''}`
-          : `${exportLabel} export downloaded.${hiddenSections ? ` This template doesn't show: ${hiddenSections}.` : ''}`,
+          ? `${exportLabel} on ladattu.${hiddenSections ? ` Tämä pohja ei näytä osioita: ${hiddenSections}.` : ''}${blankBulletsNote(blanks, true)}`
+          : `${exportLabel} export downloaded.${hiddenSections ? ` This template doesn't show: ${hiddenSections}.` : ''}${blankBulletsNote(blanks, false)}`,
+        blanks ? 'info' : 'success',
       )
     } catch (error) {
       showToast(
