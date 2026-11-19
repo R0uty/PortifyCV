@@ -15,17 +15,19 @@ const NUMBER_PATTERN = new RegExp(
   '(?<![\\p{L}\\d])' +
     '[€$£]?' +
     '(?:\\d{1,3}(?:[ \\u00a0]\\d{3}(?!\\d))+(?:[.,]\\d+)*|\\d+(?:[.,]\\d+)*)' +
-    '(?:\\s?M€|\\s?k€|\\s?€|\\s?%|\\+|[x×](?![\\p{L}\\d])|[kKM](?![\\p{L}\\d]))?' +
+    '(?:\\s?M€|\\s?k€|\\s?M(?![\\p{L}\\d])|\\s?€|\\s?%|\\+|[x×](?![\\p{L}\\d])|[kKM](?![\\p{L}\\d]))?' +
     '(?:/\\d+(?:[.,]\\d+)*)?',
   'gu',
 )
 
-// "WCAG 2.1", "ISO 27001": a number after an acronym names a standard.
-const ACRONYM_BEFORE = /(?:^|[^\p{L}])\p{Lu}{2,}\s$/u
+// "WCAG 2.1", "ISO 27001": after one of these, the number is part of the
+// standard's name. A closed list, so "AWS 3 regions" still gets blanked.
+const STANDARD_NAMES = ['WCAG', 'ISO', 'IEC', 'SOC', 'PCI', 'GDPR', 'IFRS', 'ITIL']
+const STANDARD_BEFORE = new RegExp(`(?:^|[^\\p{L}])(?:${STANDARD_NAMES.join('|')})\\s$`, 'u')
 
 export function blankNumbers(text) {
   return String(text ?? '').replace(NUMBER_PATTERN, (match, offset, whole) => {
-    if (ACRONYM_BEFORE.test(whole.slice(Math.max(0, offset - 24), offset))) return match
+    if (STANDARD_BEFORE.test(whole.slice(Math.max(0, offset - 24), offset))) return match
     return BULLET_BLANK
   })
 }
@@ -56,10 +58,9 @@ export function rankIdeaRoles(roleText, roles, locale) {
     const score = typed.filter((word) => labelWords.some((label) => wordsMatch(word, label))).length
     return { ...role, score, index }
   })
-  const strip = ({ index, ...role }) => (void index, role)
   const hits = scored.filter((item) => item.score > 0).sort((a, b) => b.score - a.score || a.index - b.index)
   const rest = scored.filter((item) => item.score === 0)
-  return [...hits, ...rest].map(strip)
+  return [...hits, ...rest].map(({ score, roleId, roleLabel, jobRoles, bullets }) => ({ roleId, roleLabel, jobRoles, bullets, score }))
 }
 
 const cache = new Map()

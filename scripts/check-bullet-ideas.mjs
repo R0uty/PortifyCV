@@ -45,6 +45,9 @@ const blankCases = [
   ['Kasvatin myyntiä 35 % ja 1,2 M€ vuonna 2023.', 'Kasvatin myyntiä [__] ja [__] vuonna [__].'],
   ['Käsittelin 1 200 laskua kuukaudessa.', 'Käsittelin [__] laskua kuukaudessa.'],
   ['Made checkout WCAG 2.1 AA compliant and ISO 27001 ready in Q3 using HTML5 and S3.', 'Made checkout WCAG 2.1 AA compliant and ISO 27001 ready in Q3 using HTML5 and S3.'],
+  ['Lifted NPS 45 in FY 2023 for AWS 3 regions.', 'Lifted NPS [__] in FY [__] for AWS [__] regions.'],
+  ['Met WCAG 2.1, ISO 27001 and SOC 2.', 'Met WCAG 2.1, ISO 27001 and SOC 2.'],
+  ['Raised 5 M in funding.', 'Raised [__] in funding.'],
   ['Cut build time 3x.', 'Cut build time [__].'],
 ]
 for (const [input, expected] of blankCases) {
