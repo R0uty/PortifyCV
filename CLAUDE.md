@@ -347,6 +347,14 @@ language of everything drawn on the CV page and of every export.
 `DirectEditProvider` (popups, menus); the builder page passes `cvLocale`
 to the PDF/HTML/Word exports and the parser view. Hints, the ATS panel and
 the importer stay in the app's language. Share links carry it as `cl`.
+Since 1.7.7 the builder also provides it as `CvLanguageContext`
+(`src/components/cvLanguageContext.js`): every control the CV is typed
+into (`FloatingField`'s child, `EditableField`, the Direct Edit popup,
+list/tag/chip inputs) spreads `useCvTextProps()`, which sets `lang` so the
+browser spell-checks in the CV's language, with spell check off for names,
+contact details, organisations, tech names and dates (`NO_SPELLING_FIELDS`;
+Classic's inputs say `spellCheck={false}` themselves). A new CV text input
+should use the hook too.
 
 **Finnish pages have their own addresses (1.6.35).** Every content page and
 template page also lives under `/fi/…` (`ROUTES_FI` in `routes.js`;
