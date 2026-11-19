@@ -38,6 +38,13 @@ test.describe('Bullet ideas', () => {
     const last = page.locator('.reorderable-list').first().getByRole('textbox', { name: /^Achievement \d+$/ }).last()
     await expect(last).toHaveValue(/\[__\]/)
     await expect(page.getByRole('button', { name: label, exact: true })).toHaveCount(0)
+
+    // The clicked Add button is gone with its idea; focus moves to the next
+    // one in the panel instead of dropping to the page.
+    const panel = page.locator('.bullet-ideas__panel').first()
+    await expect(panel.getByRole('status')).toHaveText('Added to this job.')
+    await expect.poll(() => panel.evaluate((node) => node.contains(document.activeElement))).toBe(true)
+    await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute('aria-label') || '')).toMatch(/^Add: /)
   })
 
   test('Direct Edit: the entry popup offers the same ideas', async ({ page }) => {
@@ -53,6 +60,12 @@ test.describe('Bullet ideas', () => {
 
     const list = entry.locator('.direct-edit-popup__list[data-field="achievements"]')
     await expect(list.locator('input').last()).toHaveValue(/\[__\]/)
+
+    // Focus stays inside the modal popup, so the next Tab is still trapped.
+    await expect(entry.locator('.bullet-ideas__panel').getByRole('status')).toHaveText('Added to this job.')
+    await expect.poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('.direct-edit-popup .bullet-ideas__panel')))).toBe(true)
+    await page.keyboard.press('Tab')
+    await expect.poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('.direct-edit-popup')))).toBe(true)
   })
 
   test('a role that matches nothing asks for a role', async ({ page }) => {

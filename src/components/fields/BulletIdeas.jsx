@@ -1,4 +1,4 @@
-import { useContext, useEffect, useId, useMemo, useState } from 'react'
+import { useContext, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { ChevronDown, Lightbulb, Plus } from 'lucide-react'
 import { CvLanguageContext } from '../cvLanguageContext'
 import { loadBulletIdeas, rankIdeaRoles } from '../../utils/bulletIdeas'
@@ -21,6 +21,13 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
   const [attempt, setAttempt] = useState(0)
   const [chosen, setChosen] = useState(null)
   const [expanded, setExpanded] = useState(false)
+  const [status, setStatus] = useState('')
+  const toggleRef = useRef(null)
+  const listRef = useRef(null)
+  // The clicked Add button leaves with its idea, so focus would drop to the
+  // page (and out of Direct Edit's modal popup). Once the idea is in `items`,
+  // focus the Add button now in its place, else the one before, else the toggle.
+  const pendingFocus = useRef(null)
   const loadKey = `${cvLocale}:${attempt}`
   const roles = loaded?.locale === cvLocale ? loaded.roles : null
   const failed = failedKey === loadKey
@@ -42,6 +49,26 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
   const remaining = selected ? selected.bullets.filter((bullet) => !items.includes(bullet)) : []
   const shown = expanded ? remaining : remaining.slice(0, VISIBLE_BULLETS)
 
+  useEffect(() => {
+    const pending = pendingFocus.current
+    if (!pending || !items.includes(pending.bullet)) return
+    pendingFocus.current = null
+    const buttons = listRef.current ? [...listRef.current.querySelectorAll('.bullet-ideas__add')] : []
+    const target = buttons[pending.index] ?? buttons[pending.index - 1] ?? toggleRef.current
+    target?.focus()
+  })
+
+  function handleAdd(bullet, index) {
+    pendingFocus.current = { bullet, index }
+    setStatus(isFinnish ? 'Lisätty tähän työhön.' : 'Added to this job.')
+    onAdd(bullet)
+  }
+
+  function handleToggle() {
+    setOpen(!open)
+    setStatus('')
+  }
+
   return (
     <div className="bullet-ideas" data-bullet-ideas>
       <button
@@ -49,7 +76,8 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
         className="bullet-ideas__toggle"
         aria-expanded={open}
         aria-controls={panelId}
-        onClick={() => setOpen(!open)}
+        ref={toggleRef}
+        onClick={handleToggle}
       >
         <Lightbulb size={14} strokeWidth={2} aria-hidden="true" />
         {isFinnish ? 'Hae ideoita' : 'Get ideas'}
@@ -89,15 +117,15 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
                 </p>
               )}
               {shown.length > 0 && (
-                <ul className="bullet-ideas__list">
-                  {shown.map((bullet) => (
+                <ul className="bullet-ideas__list" ref={listRef}>
+                  {shown.map((bullet, index) => (
                     <li key={bullet} className="bullet-ideas__item">
                       <span className="bullet-ideas__text">{bullet}</span>
                       <button
                         type="button"
                         className="bullet-ideas__add"
                         aria-label={isFinnish ? `Lisää: ${bullet}` : `Add: ${bullet}`}
-                        onClick={() => onAdd(bullet)}
+                        onClick={() => handleAdd(bullet, index)}
                       >
                         <Plus size={14} strokeWidth={2.5} aria-hidden="true" />
                         {isFinnish ? 'Lisää' : 'Add'}
@@ -111,6 +139,7 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
                   {isFinnish ? 'Näytä lisää' : 'Show more'}
                 </button>
               )}
+              <p className={status ? 'bullet-ideas__note' : 'sr-only'} role="status">{status}</p>
             </>
           )}
         </div>
