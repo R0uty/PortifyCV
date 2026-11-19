@@ -21,6 +21,7 @@ npm run check:template-pages   # validates per-template page slugs, examples, co
 npm run check:template-variants  # validates the style-variant registry against each template's CSS defaults, plus contrast (src/utils/templateVariants.js)
 npm run check:cv-library   # exercises the saved-CV library's names, records and save rules (src/utils/cvLibrary.js)
 npm run check:job-match    # exercises the ATS panel's job-ad matcher in English and Finnish (src/utils/jobMatch.js, src/utils/jobTerms.js)
+npm run check:bullet-ideas  # exercises the example-bullet blanking, role ranking and loading (src/utils/bulletIdeas.js)
 npm run check:cv-import    # exercises the PDF/Word import's text parser and column detection (src/utils/cvTextImport.js, src/utils/cvFileText.js)
 npm run check:thumbnails   # the pre-rendered thumbnails in public/thumbnails/ exist, match their manifest, and are up to date with the template code
 npm run thumbnails         # regenerate public/thumbnails/ (Vite dev server + Playwright Chromium, ~20s); commit the result
@@ -47,10 +48,11 @@ a template's style variants or palette variables (`check:template-variants`),
 anything a template thumbnail is rendered from (`check:thumbnails`), or the
 CV file import's parser or PDF column detection (`check:cv-import`), or the
 saved-CV library (`check:cv-library`), or the job-ad matcher and its term
-list (`check:job-match`). A
+list (`check:job-match`), or the example bullets' number blanking and
+role ranking (`check:bullet-ideas`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.
-CI (`.github/workflows/ci.yml`) runs all twelve on every push to `main` and
+CI (`.github/workflows/ci.yml`) runs all thirteen on every push to `main` and
 `v1.7.0` (the current long-lived branch) and on every pull request.
 
 `test:e2e` (and its `:fast`/`:slow` variants) build and serve the app first

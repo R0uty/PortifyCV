@@ -357,6 +357,9 @@ export function evaluateCvFeedback(formData, options = {}) {
 // why. Every rule is a closed list or a count, so a bullet the lists don't
 // cover gets no hint rather than a wrong one.
 
+// Stands in for a figure in an example bullet the visitor has to fill in.
+export const BULLET_BLANK = '[__]'
+
 const BULLET_WORD_LIMIT = 30
 const MAX_HINTS_PER_BULLET = 2
 // A bullet this short is still being written, or a label; no number hint.
