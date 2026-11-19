@@ -32,7 +32,7 @@ const en = buildExampleCv({
       achievements: [
         'Led the platform through SOC 2 Type II and ISO 27001 certification in 11 months, unlocking 3 enterprise contracts worth 6 million EUR combined.',
         'Cut infrastructure cost per transaction by 44% by moving the core ledger service to a multi-tenant architecture.',
-        'Scaled engineering from 28 to 90 while holding system uptime at 99.95% through two funding-driven growth spurts.',
+        'Scaled engineering from 28 to 90 while holding system uptime at 99.95% through 2 funding-driven growth spurts.',
       ],
       technologies: [],
     },
@@ -90,7 +90,7 @@ const fi = buildExampleCv({
       achievements: [
         'Johdin alustan SOC 2 Type II- ja ISO 27001 -sertifiointiin 11 kuukaudessa, mikä avasi 3 yritysasiakassopimusta, yhteisarvo 6 miljoonaa euroa.',
         'Vähensin infrastruktuurikustannusta per transaktio 44 % siirtämällä ydinkirjanpitopalvelun monivuokralaisarkkitehtuuriin.',
-        'Kasvatin kehitysorganisaation 28:sta 90:een pitäen järjestelmän käytettävyyden 99,95 %:ssa kahden rahoituskierroksen kasvupiikin aikana.',
+        'Kasvatin kehitysorganisaation 28:sta 90:een pitäen järjestelmän käytettävyyden 99,95 %:ssa 2 rahoituskierroksen kasvupiikin aikana.',
       ],
       technologies: [],
     },

@@ -30,7 +30,7 @@ const en = buildExampleCv({
       description: 'Lead UX for a fintech client portfolio and maintain the studio’s shared design system.',
       achievements: [
         'Redesigned the onboarding flow for a fintech client, lifting trial-to-paid conversion by 18%.',
-        'Ran 30+ moderated usability tests over two years, directly shaping 3 major releases.',
+        'Ran 30+ moderated usability tests over 2 years, directly shaping 3 major releases.',
         'Built and maintain a shared design system now used by 4 product teams.',
       ],
       technologies: ['Figma', 'Design systems', 'User research'],
@@ -131,7 +131,7 @@ const fi = buildExampleCv({
       description: 'Vastaan fintech-asiakassalkun UX-työstä ja ylläpidän studion yhteistä design-järjestelmää.',
       achievements: [
         'Uudistin fintech-asiakkaan onboarding-polun, nostaen kokeilusta maksavaksi käyttäjäksi siirtymisen 18 %.',
-        'Toteutin kahden vuoden aikana yli 30 ohjattua käytettävyystestiä, jotka vaikuttivat suoraan 3 isoon julkaisuun.',
+        'Toteutin 2 vuoden aikana yli 30 ohjattua käytettävyystestiä, jotka vaikuttivat suoraan 3 isoon julkaisuun.',
         'Rakensin ja ylläpidän yhteistä design-järjestelmää, jota käyttää nyt 4 tuotetiimiä.',
       ],
       technologies: ['Figma', 'Design-järjestelmät', 'Käyttäjätutkimus'],

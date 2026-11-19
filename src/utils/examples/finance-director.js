@@ -225,7 +225,7 @@ const fi = buildExampleCv({
       description: 'Vastasin konsernin konsolidoinnista ja lakisääteisestä raportoinnista logistiikkaholdingyhtiössä.',
       achievements: [
         'Toteutin ensimmäisen koko konsernin kattavan IFRS-konsolidoinnin, korvaten taulukkolaskentaprosessin, joka vaati kuukausittaisia oikaisuja.',
-        'Vähensin tilintarkastushavaintoja 14:stä 2:een kolmen peräkkäisen vuositarkastuksen aikana.',
+        'Vähensin tilintarkastushavaintoja 14:stä 2:een 3 peräkkäisen vuositarkastuksen aikana.',
       ],
       technologies: [],
     },
@@ -239,7 +239,7 @@ const fi = buildExampleCv({
       isCurrent: false,
       description: 'Vastasin tehtaan kustannuslaskennasta ja kuukausiraportoinnista paperintuotantolaitoksella.',
       achievements: [
-        'Löysin laskutusvirhekaavan, joka oli aliarvioinut konsernin sisäistä liikevaihtoa 400 000 eurolla kahden vuoden aikana.',
+        'Löysin laskutusvirhekaavan, joka oli aliarvioinut konsernin sisäistä liikevaihtoa 400 000 eurolla 2 vuoden aikana.',
         'Lyhensin tehtaan kuukausittaisen raportointikierron 9 päivästä 4 päivään automatisoimalla kustannusten kohdistuslaskennan.',
       ],
       technologies: [],

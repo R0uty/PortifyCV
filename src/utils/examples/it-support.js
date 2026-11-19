@@ -36,7 +36,7 @@ const en = buildExampleCv({
       achievements: [
         'Cut average resolution time for second-line tickets from 48 to 6 hours by building a 120-article knowledge base and a triage checklist for first line.',
         'Automated password resets and new-starter accounts with PowerShell, removing about 35 tickets a week.',
-        'Moved 450 laptops to Intune management in four months with no missed working days for users.',
+        'Moved 450 laptops to Intune management in 4 months with no missed working days for users.',
       ],
       technologies: ['Microsoft 365', 'Intune', 'PowerShell'],
     },
@@ -51,7 +51,7 @@ const en = buildExampleCv({
       description: 'First-line phone, chat and walk-in support for 300 users.',
       achievements: [
         'Handled about 40 tickets a day at a 92% first-contact resolution rate.',
-        'Wrote the step-by-step guides that halved repeat questions about VPN and printers.',
+        'Wrote the step-by-step guides that cut repeat questions about VPN and printers by 50%.',
       ],
       technologies: ['ServiceNow', 'Active Directory'],
     },
@@ -137,7 +137,7 @@ const fi = buildExampleCv({
       achievements: [
         'Lyhensin toisen tason tikettien keskimääräisen ratkaisuajan 48 tunnista 6 tuntiin rakentamalla 120 artikkelin tietopankin ja luokittelulistan ensimmäiselle tasolle.',
         'Automatisoin salasanojen nollaukset ja uusien tunnusten luonnin PowerShellillä, mikä poisti noin 35 tikettiä viikossa.',
-        'Siirsin 450 kannettavaa Intune-hallintaan neljässä kuukaudessa ilman yhtään käyttäjien menetettyä työpäivää.',
+        'Siirsin 450 kannettavaa Intune-hallintaan 4 kuukaudessa ilman yhtään käyttäjien menetettyä työpäivää.',
       ],
       technologies: ['Microsoft 365', 'Intune', 'PowerShell'],
     },
@@ -152,7 +152,7 @@ const fi = buildExampleCv({
       description: 'Ensimmäisen tason puhelin-, chat- ja lähituki 300 käyttäjälle.',
       achievements: [
         'Käsittelin noin 40 tikettiä päivässä, ja niistä 92 % ratkesi ensimmäisellä yhteydenotolla.',
-        'Kirjoitin vaiheittaiset ohjeet, jotka puolittivat VPN:ää ja tulostimia koskevat toistuvat kysymykset.',
+        'Kirjoitin vaiheittaiset ohjeet, jotka vähensivät VPN:ää ja tulostimia koskevia toistuvia kysymyksiä 50 %.',
       ],
       technologies: ['ServiceNow', 'Active Directory'],
     },

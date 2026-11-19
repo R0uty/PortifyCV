@@ -118,7 +118,7 @@ const fi = buildExampleCv({
       achievements: [
         'Lyhensin tilauksen keskimääräisen käsittelyajan 36 tunnista 9 tuntiin uudistamalla keräily- ja pakkausprosessin vyöhykekeräilyn pohjalta.',
         'Vähensin varaston työvoimakustannusta tilausta kohti 19 % uudistamalla vuorosuunnittelun tuntikohtaisten tilausennusteiden mukaan.',
-        'Nostin ajallaan lähetettyjen tilausten osuuden 91 %:sta 98,6 %:iin kahden sesonkipiikin aikana.',
+        'Nostin ajallaan lähetettyjen tilausten osuuden 91 %:sta 98,6 %:iin 2 sesonkipiikin aikana.',
       ],
       technologies: [],
     },

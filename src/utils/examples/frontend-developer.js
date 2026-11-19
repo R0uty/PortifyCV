@@ -46,7 +46,7 @@ const en = buildExampleCv({
       isCurrent: false,
       description: 'Built storefront features for three Nordic retail clients.',
       achievements: [
-        'Rebuilt the product listing page as a reusable component set used across all three storefronts.',
+        'Rebuilt the product listing page as a reusable component set used across all 3 storefronts.',
         'Raised mobile conversion 9% with a simplified checkout flow.',
       ],
       technologies: ['React', 'Next.js', 'GraphQL'],
@@ -140,7 +140,7 @@ const fi = buildExampleCv({
       achievements: [
         'Lyhensin näkymän latausajan 4,1 sekunnista 1,6 sekuntiin pilkkomalla paketit ja siirtämällä kaaviot workeriin.',
         'Johdin WCAG 2.2 AA -auditoinnin ja korjasin yli 120 ongelmaa; saavutettavuudesta ei ole tullut yhtään valitusta sen jälkeen.',
-        'Otin käyttöön Playwright-visuaalitestit, jotka löytävät noin viisi regressiota kuukaudessa ennen julkaisua.',
+        'Otin käyttöön Playwright-visuaalitestit, jotka löytävät noin 5 regressiota kuukaudessa ennen julkaisua.',
       ],
       technologies: ['React', 'TypeScript', 'Playwright'],
     },
@@ -154,7 +154,7 @@ const fi = buildExampleCv({
       isCurrent: false,
       description: 'Rakensin verkkokauppatoimintoja kolmelle pohjoismaiselle vähittäiskauppa-asiakkaalle.',
       achievements: [
-        'Uudistin tuotelistaussivun uudelleenkäytettäviksi komponenteiksi, jotka otettiin käyttöön kaikissa kolmessa verkkokaupassa.',
+        'Uudistin tuotelistaussivun uudelleenkäytettäviksi komponenteiksi, jotka otettiin käyttöön kaikissa 3 verkkokaupassa.',
         'Nostin mobiilikonversiota 9 % yksinkertaistetulla kassaprosessilla.',
       ],
       technologies: ['React', 'Next.js', 'GraphQL'],

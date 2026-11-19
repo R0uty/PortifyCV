@@ -47,7 +47,7 @@ const en = buildExampleCv({
       isCurrent: false,
       description: 'Taught mathematics and physics to grades 7–9 and ran extracurricular activities.',
       achievements: [
-        'Ran an after-school math club for 40 students that lifted their average grade by half a point.',
+        'Ran an after-school math club for 40 students that lifted their average grade by 0.5 points.',
         'Introduced a peer-tutoring system that cut failing grades in grade 9 math from 15% to 5%.',
       ],
       technologies: [],
@@ -151,7 +151,7 @@ const fi = buildExampleCv({
       isCurrent: false,
       description: 'Opetin matematiikkaa ja fysiikkaa yläkoulussa ja vedin koulun jälkeisiä kerhoja.',
       achievements: [
-        'Vedin koulun jälkeistä matematiikkakerhoa 40 oppilaalle ja nostin heidän keskiarvoaan puolella numerolla.',
+        'Vedin koulun jälkeistä matematiikkakerhoa 40 oppilaalle ja nostin heidän keskiarvoaan 0,5 numerolla.',
         'Otin käyttöön vertaistukiohjelman, joka laski 9. luokan matematiikan hylättyjen arvosanojen osuutta 15 %:sta 5 %:iin.',
       ],
       technologies: [],

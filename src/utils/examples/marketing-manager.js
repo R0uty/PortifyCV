@@ -29,7 +29,7 @@ const en = buildExampleCv({
       isCurrent: true,
       description: 'Lead marketing strategy and a 5-person team across content, paid media, and lifecycle campaigns.',
       achievements: [
-        'Grew organic traffic 85% in two years by rebuilding the content and SEO strategy from scratch.',
+        'Grew organic traffic 85% in 2 years by rebuilding the content and SEO strategy from scratch.',
         'Managed a 450,000 EUR annual paid-media budget across 6 channels, improving ROAS from 2.1x to 3.4x.',
         'Built and led a 5-person marketing team, cutting campaign turnaround time from 3 weeks to 8 days.',
       ],
@@ -118,7 +118,7 @@ const fi = buildExampleCv({
       isCurrent: true,
       description: 'Vastaan markkinointistrategiasta ja 5 hengen tiimistä sisällön, maksetun median ja elinkaarikampanjoiden osalta.',
       achievements: [
-        'Kasvatin organista liikennettä 85 % kahdessa vuodessa rakentamalla sisältö- ja SEO-strategian uudelleen alusta.',
+        'Kasvatin organista liikennettä 85 % 2 vuodessa rakentamalla sisältö- ja SEO-strategian uudelleen alusta.',
         'Vastasin 450 000 euron vuosittaisesta maksetun median budjetista 6 kanavalla, parantaen ROASia 2,1x:stä 3,4x:ään.',
         'Rakensin ja johdin 5 hengen markkinointitiimiä, lyhentäen kampanjoiden läpimenoajan 3 viikosta 8 päivään.',
       ],

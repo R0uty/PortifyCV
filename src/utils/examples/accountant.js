@@ -97,7 +97,7 @@ const fi = buildExampleCv({
       description: 'Vastaan 45 pk-yritysasiakkaan koko kirjanpitoprosessista ja verotuksesta.',
       achievements: [
         'Lyhensin kuukausikatkon 10 päivästä 5 päivään automatisoimalla täsmäytykset kaikille 45 asiakastilille.',
-        'Hoidin ALV- ja veroilmoitukset 60+ pk-asiakkaalle ilman yhtään myöhästynyttä ilmoitusta neljänä peräkkäisenä vuonna.',
+        'Hoidin ALV- ja veroilmoitukset 60+ pk-asiakkaalle ilman yhtään myöhästynyttä ilmoitusta 4 peräkkäisenä vuonna.',
         'Koulutin 3 nuorempaa kirjanpitäjää ja lyhensin heidän perehdytysaikansa 6 viikosta 3 viikkoon.',
       ],
       technologies: [],

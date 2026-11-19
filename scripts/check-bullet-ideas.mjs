@@ -92,6 +92,37 @@ for (const id of ids) {
   const fi = ideas.fi.find((r) => r.roleId === id)
   check(`${id}: en and fi bullet counts match`, en.bullets.length === fi.bullets.length, `${en.bullets.length} vs ${fi.bullets.length}`)
 }
+// A figure written as a word escapes blankNumbers, so an idea would carry
+// the example person's fact. Closed lists, used only to guard the example
+// content: ordinals and determiners ("first", "one client", "yhdessä") are
+// not figures and stay out.
+const NUMBER_WORDS = {
+  en: /\b(?:two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|twenty|dozens?|half|halved|twice|doubled|tripled)\b/iu,
+  fi: /(?<!\p{L})(?:kaksi|kahde\p{L}*|kahte\p{L}*|kolme\p{L}*|kolmi\p{L}*|neljä(?!nnes)\p{L}*|viisi|viide\p{L}*|viitt\p{L}*|kuusi\p{L}*|kuude\p{L}*|kuutt\p{L}*|seitsem\p{L}*|yhdeksä\p{L}*|kymmen\p{L}*|puoli\p{L}*|puole\p{L}*|puolitt\p{L}*|puolet)(?!\p{L})/iu,
+}
+const blankCount = (text) => text.split(BULLET_BLANK).length - 1
+for (const id of ids) {
+  const en = ideas.en.find((r) => r.roleId === id)
+  const fi = ideas.fi.find((r) => r.roleId === id)
+  en.bullets.forEach((bullet, index) => {
+    const twin = fi.bullets[index] ?? ''
+    check(`${id} #${index + 1}: en and fi blank the same figures`, blankCount(bullet) === blankCount(twin), `en ${blankCount(bullet)}: ${bullet}\n        fi ${blankCount(twin)}: ${twin}`)
+  })
+}
+for (const locale of ['en', 'fi']) {
+  for (const role of ideas[locale]) {
+    for (const bullet of role.bullets) {
+      const word = bullet.match(NUMBER_WORDS[locale])
+      check(`${role.roleId} ${locale}: no figure written as a word`, !word, `${word?.[0]} in: ${bullet}`)
+    }
+  }
+}
+check('number-word guard catches en "all three storefronts"', NUMBER_WORDS.en.test('used across all three storefronts'))
+check('number-word guard catches fi "kolminkertaiseksi"', NUMBER_WORDS.fi.test('sitoutumisen kolminkertaiseksi'))
+check('number-word guard catches fi "Kuusiosainen"', NUMBER_WORDS.fi.test('Kuusiosainen selvitys'))
+check('number-word guard ignores fi "neljännesvuosibudjetin"', !NUMBER_WORDS.fi.test('Pidin neljännesvuosibudjetin toteuman'))
+check('number-word guard ignores en "first" and "one client"', !NUMBER_WORDS.en.test('Launched the first program for one client'))
+
 for (const locale of ['en', 'fi']) {
   for (const role of ideas[locale]) {
     for (const bullet of role.bullets) {

@@ -129,7 +129,7 @@ const fi = buildExampleCv({
       description: 'Toimin itsenäisenä suunnittelijana pienyritysasiakkaille Lahden alueella, ensitapaamisesta valmiiseen toimitukseen.',
       achievements: [
         'Suunnittelin brändi-identiteetit yli 20 pienyritykselle, mukaan lukien logo, pakkaukset ja sosiaalisen median mallit.',
-        'Kasvatin asiakkaan sosiaalisen median sitoutumisen kolminkertaiseksi uudistetulla visuaalisella mallistolla.',
+        'Kasvatin asiakkaan sosiaalisen median sitoutumisen 3-kertaiseksi uudistetulla visuaalisella mallistolla.',
       ],
       technologies: ['Adobe Photoshop', 'Adobe Illustrator'],
     },

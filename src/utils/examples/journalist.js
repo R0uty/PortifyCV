@@ -127,7 +127,7 @@ const fi = buildExampleCv({
       isCurrent: true,
       description: 'Seuraan asumista, kunnallispolitiikkaa ja ympäristöä 140 000 lukijan aluelehdessä.',
       achievements: [
-        'Kuusiosainen selvitys kunnallisten vuokra-asuntojen vuokrankorotuksista sai kaupunginvaltuuston jäädyttämään vuokrat 1 200 vuokralaiselle.',
+        '6-osainen selvitys kunnallisten vuokra-asuntojen vuokrankorotuksista sai kaupunginvaltuuston jäädyttämään vuokrat 1 200 vuokralaiselle.',
         'Kasvatin asumisaiheen digitaalista lukijakuntaa 65 % viikoittaisen data-pohjaisen selitysartikkelisarjan myötä.',
         'Tein ja voitin 14 tietopyyntövalitusta, jotka pakottivat julkistamaan aiemmin salassa pidettyjä kaavoitusasiakirjoja.',
       ],

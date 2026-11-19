@@ -136,7 +136,7 @@ const fi = buildExampleCv({
       achievements: [
         'Lanseerasin käyttöperusteisen laskutuksen, kasvattaen nykyasiakkaiden laajennusmyyntiä 24 % ensimmäisenä vuonna.',
         'Laskin tilauspoistuman 6,8 %:sta 4,1 %:iin kuukaudessa julkaisemalla itsepalvelullisen alennusprosessin tukipyynnön sijaan.',
-        'Tein 90+ asiakashaastattelua kolmessa segmentissä ja priorisoin roadmapin uudelleen kahden suurimman tyydyttämättömän tarpeen ympärille.',
+        'Tein 90+ asiakashaastattelua 3 segmentissä ja priorisoin roadmapin uudelleen 2 suurimman tyydyttämättömän tarpeen ympärille.',
       ],
       technologies: [],
     },
@@ -150,7 +150,7 @@ const fi = buildExampleCv({
       isCurrent: false,
       description: 'Johdin raportoinnin ja hallintapaneelien tuotelinjaa keskisuurelle analytiikkatyökalulle.',
       achievements: [
-        'Julkaisin räätälöitävän hallintapaneelityökalun, jota mainittiin useimmin win/loss-haastatteluissa syynä valita meidät kilpailijoiden sijaan.',
+        'Julkaisin räätälöitävän hallintapaneelityökalun, josta tuli win/loss-haastatteluissa syy nro 1 valita meidät kilpailijoiden sijaan.',
         'Kasvatin raportointimoduulin viikoittaista aktiivikäyttöä 31 %:sta 58 %:iin 18 kuukaudessa.',
       ],
       technologies: [],

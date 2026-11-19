@@ -120,7 +120,7 @@ const fi = buildExampleCv({
       description: 'Kesätyö 6 hengen tiimissä, joka ylläpitää yrityksen sisäistä koodauskurssialustaa.',
       achievements: [
         'Rakensin pienen sisäisen työkalun, joka automatisoi viikkoraporttien laadinnan ja säästi tiimiltä noin 3 tuntia viikossa.',
-        'Korjasin yli 25 virhettä tiketöintijärjestelmässä kolmen kuukauden harjoittelun aikana.',
+        'Korjasin yli 25 virhettä tiketöintijärjestelmässä 3 kuukauden harjoittelun aikana.',
       ],
       technologies: ['JavaScript', 'React'],
     },
