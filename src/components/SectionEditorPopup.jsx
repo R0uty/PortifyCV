@@ -3,6 +3,7 @@ import { SECTION_SHAPE, getSectionSchema, getColumnNeighbourSection } from '../u
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 import InlineTagEditor from './fields/InlineTagEditor'
 import BulletHints from './fields/BulletHints'
+import BulletIdeas from './fields/BulletIdeas'
 import { getBulletHints } from '../utils/cvFeedback'
 import { isPhotoVisibleForTemplate, normalizeSectionOrder } from '../utils/cvForm'
 import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/profilePhoto'
@@ -17,7 +18,7 @@ import { useCvTextProps } from './cvLanguageContext'
 // any index derived from the DOM would target the wrong record.
 
 
-function FieldInput({ field, value, isFinnish, onChange }) {
+function FieldInput({ field, value, isFinnish, onChange, ideas = null }) {
   const cvTextProps = useCvTextProps({
     type: field.type === 'url' ? 'url' : field.type === 'month' ? 'month' : undefined,
     field: field.key,
@@ -95,6 +96,14 @@ function FieldInput({ field, value, isFinnish, onChange }) {
           >
             {isFinnish ? `+ Lisää: ${itemLabel}` : `+ Add ${itemLabel.toLowerCase()}`}
           </button>
+          {field.key === 'achievements' && ideas && (
+            <BulletIdeas
+              roleText={ideas.roleText}
+              items={items}
+              locale={isFinnish ? 'fi' : 'en'}
+              onAdd={(text) => onChange([...items, text])}
+            />
+          )}
         </div>
       </div>
     )
@@ -339,6 +348,7 @@ export default function SectionEditorPopup({
                   field={field}
                   value={item[field.key]}
                   isFinnish={isFinnish}
+                  ideas={sectionKey === 'experience' ? { roleText: item.role || formData.title } : null}
                   onChange={(value) =>
                     dispatchFormData({
                       type: FORM_ACTION.UPDATE_ARRAY_ITEM,

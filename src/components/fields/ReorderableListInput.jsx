@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react'
 import AutoGrowTextarea from '../AutoGrowTextarea'
 import BulletHints from './BulletHints'
+import BulletIdeas from './BulletIdeas'
 import { useCvTextProps } from '../cvLanguageContext'
 
 function ReorderableListInput({
@@ -13,6 +14,8 @@ function ReorderableListInput({
   locale = 'en',
   // Optional writing hints per item, in items' order (achievements only).
   hints = null,
+  // Optional example bullets for the job's role ({ roleText }, achievements only).
+  ideas = null,
 }) {
   const cvTextProps = useCvTextProps()
   const isFinnish = locale === 'fi'
@@ -143,6 +146,18 @@ function ReorderableListInput({
         <Plus size={14} strokeWidth={2.5} aria-hidden="true" />
         {addLabel}
       </button>
+      {ideas && (
+        <BulletIdeas
+          roleText={ideas.roleText}
+          items={items}
+          locale={locale}
+          onAdd={(text) => {
+            setIds([...ids, nextId])
+            setNextId(nextId + 1)
+            onChange([...items, text])
+          }}
+        />
+      )}
     </div>
   )
 }

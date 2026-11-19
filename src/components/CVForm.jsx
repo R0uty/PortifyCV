@@ -807,6 +807,7 @@ function CVForm({
                             itemAriaLabel={isFinnish ? 'Saavutus' : 'Achievement'}
                             locale={isFinnish ? 'fi' : 'en'}
                             hints={getBulletHints(item.achievements, { locale: isFinnish ? 'fi' : 'en' })}
+                            ideas={{ roleText: item.role || formData.title }}
                           />
                         </div>
                         <div className="mt-4">

@@ -5147,6 +5147,116 @@ html:lang(fi) .landing-title {
   color: var(--accent-text);
 }
 
+/* "Get ideas" under a job's achievements (1.7.8, BulletIdeas.jsx). */
+.bullet-ideas {
+  margin-top: 0.5rem;
+  font-size: 0.78rem;
+}
+
+.bullet-ideas__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.1rem;
+  color: var(--accent-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.bullet-ideas__chevron {
+  transition: transform 120ms ease;
+}
+
+.bullet-ideas__chevron--open {
+  transform: rotate(180deg);
+}
+
+.bullet-ideas__panel {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+}
+
+.bullet-ideas__note {
+  margin: 0;
+  color: var(--app-text-muted);
+  line-height: 1.4;
+}
+
+.bullet-ideas__picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.bullet-ideas__label {
+  color: var(--app-text-muted);
+  font-weight: 600;
+}
+
+.bullet-ideas__select {
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  color: inherit;
+  font-size: 0.78rem;
+}
+
+.bullet-ideas__list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bullet-ideas__item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.bullet-ideas__text {
+  min-width: 0;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.bullet-ideas__add {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px dashed var(--app-border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.bullet-ideas__add:hover {
+  color: var(--accent-text);
+  border-color: var(--accent-border);
+}
+
+.bullet-ideas__link {
+  justify-self: start;
+  color: var(--accent-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 /* The PDF preview's view tabs and "What a parser reads" (1.7.4,
    PdfParserView.jsx). */
 .pdf-preview__main {
