@@ -108,7 +108,7 @@ const fi = buildExampleCv({
       achievements: [
         'Lyhensin triagesta hoitoon kuluvan keskimääräisen ajan 38 minuutista 21 minuuttiin suunnittelemalla yhdessä nopean kaistan matalan kiireellisyyden tapauksille.',
         'Koulutin yli 25 uutta hoitajaa osaston triage-protokollaan 3 vuoden aikana.',
-        'Pidin potilastyytyväisyyspisteet yli 4,6/5 4 peräkkäisessä vuosikyselyssä.',
+        'Pidin potilastyytyväisyyspisteet 4 peräkkäisessä vuosikyselyssä yli 4,6/5:n.',
       ],
       technologies: [],
     },

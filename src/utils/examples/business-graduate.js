@@ -150,7 +150,7 @@ const fi = buildExampleCv({
       isCurrent: false,
       description: 'Työskentelin osa-aikaisena myyjänä opintojen ohella, osana 12 hengen myyntitiimiä.',
       achievements: [
-        'Sijoituin 2 vuotena peräkkäin 3 parhaan joukkoon 12 myyjästä kuukausittaisessa myynnissä.',
+        'Sijoituin kuukausimyynnissä 2 vuotta peräkkäin 3 parhaan joukkoon 12 myyjästä.',
         'Koulutin 5 uutta osa-aikaista työntekijää kassajärjestelmän ja asiakaspalvelun käytäntöihin.',
       ],
       technologies: [],

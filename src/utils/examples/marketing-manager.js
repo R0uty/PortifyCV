@@ -118,7 +118,7 @@ const fi = buildExampleCv({
       isCurrent: true,
       description: 'Vastaan markkinointistrategiasta ja 5 hengen tiimistä sisällön, maksetun median ja elinkaarikampanjoiden osalta.',
       achievements: [
-        'Kasvatin organista liikennettä 85 % 2 vuodessa rakentamalla sisältö- ja SEO-strategian uudelleen alusta.',
+        'Kasvatin 2 vuodessa organista liikennettä 85 % rakentamalla sisältö- ja SEO-strategian uudelleen alusta.',
         'Vastasin 450 000 euron vuosittaisesta maksetun median budjetista 6 kanavalla, parantaen ROASia 2,1x:stä 3,4x:ään.',
         'Rakensin ja johdin 5 hengen markkinointitiimiä, lyhentäen kampanjoiden läpimenoajan 3 viikosta 8 päivään.',
       ],

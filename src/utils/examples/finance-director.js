@@ -225,7 +225,7 @@ const fi = buildExampleCv({
       description: 'Vastasin konsernin konsolidoinnista ja lakisääteisestä raportoinnista logistiikkaholdingyhtiössä.',
       achievements: [
         'Toteutin ensimmäisen koko konsernin kattavan IFRS-konsolidoinnin, korvaten taulukkolaskentaprosessin, joka vaati kuukausittaisia oikaisuja.',
-        'Vähensin tilintarkastushavaintoja 14:stä 2:een 3 peräkkäisen vuositarkastuksen aikana.',
+        'Vähensin 3 peräkkäisen vuositarkastuksen aikana tilintarkastushavaintoja 14:stä 2:een.',
       ],
       technologies: [],
     },

@@ -45,7 +45,7 @@ const en = buildExampleCv({
       isCurrent: false,
       description: 'Led the reporting and dashboards product line for a mid-market analytics tool.',
       achievements: [
-        'Shipped a custom-dashboard builder that became the #1 reason cited in win/loss interviews for choosing us over competitors.',
+        'Shipped a custom-dashboard builder that became the most-cited reason in win/loss interviews for choosing us over competitors.',
         'Grew weekly active usage of the reporting module from 31% to 58% of the customer base in 18 months.',
       ],
       technologies: [],
@@ -150,7 +150,7 @@ const fi = buildExampleCv({
       isCurrent: false,
       description: 'Johdin raportoinnin ja hallintapaneelien tuotelinjaa keskisuurelle analytiikkatyökalulle.',
       achievements: [
-        'Julkaisin räätälöitävän hallintapaneelityökalun, josta tuli win/loss-haastatteluissa syy nro 1 valita meidät kilpailijoiden sijaan.',
+        'Julkaisin räätälöitävän hallintapaneelityökalun, josta tuli win/loss-haastatteluissa useimmin mainittu syy valita meidät kilpailijoiden sijaan.',
         'Kasvatin raportointimoduulin viikoittaista aktiivikäyttöä 31 %:sta 58 %:iin 18 kuukaudessa.',
       ],
       technologies: [],

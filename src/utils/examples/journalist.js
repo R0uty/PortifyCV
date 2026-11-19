@@ -33,7 +33,7 @@ const en = buildExampleCv({
       isCurrent: true,
       description: 'Cover housing, local government, and the environment for a regional daily with 140,000 readers.',
       achievements: [
-        'A 6-part investigation into rent increases in municipal housing led the city council to freeze rents for 1,200 tenants.',
+        'Wrote a 6-part investigation into rent increases in municipal housing that led the city council to freeze rents for 1,200 tenants.',
         'Grew the housing beat\'s digital readership by 65% after launching a data-driven weekly explainer series.',
         'Filed and won 14 freedom-of-information appeals that forced release of previously withheld planning documents.',
       ],
@@ -127,7 +127,7 @@ const fi = buildExampleCv({
       isCurrent: true,
       description: 'Seuraan asumista, kunnallispolitiikkaa ja ympäristöä 140 000 lukijan aluelehdessä.',
       achievements: [
-        '6-osainen selvitys kunnallisten vuokra-asuntojen vuokrankorotuksista sai kaupunginvaltuuston jäädyttämään vuokrat 1 200 vuokralaiselle.',
+        'Kirjoitin 6-osaisen selvityksen kunnallisten vuokra-asuntojen vuokrankorotuksista, minkä jälkeen kaupunginvaltuusto jäädytti vuokrat 1 200 vuokralaiselle.',
         'Kasvatin asumisaiheen digitaalista lukijakuntaa 65 % viikoittaisen data-pohjaisen selitysartikkelisarjan myötä.',
         'Tein ja voitin 14 tietopyyntövalitusta, jotka pakottivat julkistamaan aiemmin salassa pidettyjä kaavoitusasiakirjoja.',
       ],
