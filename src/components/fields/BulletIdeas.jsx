@@ -60,7 +60,12 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
 
   function handleAdd(bullet, index) {
     pendingFocus.current = { bullet, index }
-    setStatus(isFinnish ? 'Lisätty tähän työhön.' : 'Added to this job.')
+    // The count changes with every Add, so a screen reader announces each
+    // one (a live region repeating the same text is usually not re-read).
+    const count = items.length + 1
+    setStatus(isFinnish
+      ? `Lisätty. Työssä on nyt ${count} ${count === 1 ? 'saavutus' : 'saavutusta'}.`
+      : `Added. This job now has ${count} ${count === 1 ? 'achievement' : 'achievements'}.`)
     onAdd(bullet)
   }
 
@@ -103,7 +108,7 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
                   id={pickerId}
                   className="bullet-ideas__select"
                   value={selectedId}
-                  onChange={(event) => { setChosen(event.target.value); setExpanded(false) }}
+                  onChange={(event) => { setChosen(event.target.value); setExpanded(false); setStatus('') }}
                 >
                   <option value="">{isFinnish ? 'Valitse rooli' : 'Choose a role'}</option>
                   {ranked.map((role) => (

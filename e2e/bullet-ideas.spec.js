@@ -42,7 +42,7 @@ test.describe('Bullet ideas', () => {
     // The clicked Add button is gone with its idea; focus moves to the next
     // one in the panel instead of dropping to the page.
     const panel = page.locator('.bullet-ideas__panel').first()
-    await expect(panel.getByRole('status')).toHaveText('Added to this job.')
+    await expect(panel.getByRole('status')).toHaveText(/^Added\. This job now has \d+ achievements?\.$/)
     await expect.poll(() => panel.evaluate((node) => node.contains(document.activeElement))).toBe(true)
     await expect.poll(() => page.evaluate(() => document.activeElement?.getAttribute('aria-label') || '')).toMatch(/^Add: /)
   })
@@ -62,7 +62,7 @@ test.describe('Bullet ideas', () => {
     await expect(list.locator('input').last()).toHaveValue(/\[__\]/)
 
     // Focus stays inside the modal popup, so the next Tab is still trapped.
-    await expect(entry.locator('.bullet-ideas__panel').getByRole('status')).toHaveText('Added to this job.')
+    await expect(entry.locator('.bullet-ideas__panel').getByRole('status')).toHaveText(/^Added\. This job now has \d+ achievements?\.$/)
     await expect.poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('.direct-edit-popup .bullet-ideas__panel')))).toBe(true)
     await page.keyboard.press('Tab')
     await expect.poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('.direct-edit-popup')))).toBe(true)
