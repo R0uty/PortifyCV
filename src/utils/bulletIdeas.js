@@ -41,21 +41,38 @@ function words(text) {
     .filter((word) => word && !STOPWORDS.has(word))
 }
 
-function wordsMatch(a, b) {
-  if (a === b) return true
+// Finnish compounds put the role in the tail: "Ohjelmistokehittäjä" and
+// "Frontend-kehittäjä" share "kehittäjä", "Lähihoitaja" and "Sairaanhoitaja"
+// share "hoitaja". A shared tail of at least 6 letters counts, so endings
+// like "-ja" or "-ttaja" never do. English titles are separate words, and a
+// shared tail there is just a suffix ("operations"/"relations"), so this is
+// Finnish only.
+const MIN_SHARED_TAIL = 6
+
+function sharedTailLength(a, b) {
+  let length = 0
+  while (length < a.length && length < b.length && a[a.length - 1 - length] === b[b.length - 1 - length]) length += 1
+  return length
+}
+
+// 2 for the same word (or one a 5+ letter start of the other, which covers
+// Finnish case endings), 1 for a shared compound tail, 0 otherwise.
+function matchStrength(a, b, locale) {
+  if (a === b) return 2
   const [short, long] = a.length <= b.length ? [a, b] : [b, a]
-  return short.length >= 5 && long.startsWith(short)
+  if (short.length >= 5 && long.startsWith(short)) return 2
+  if (locale === 'fi' && sharedTailLength(a, b) >= MIN_SHARED_TAIL) return 1
+  return 0
 }
 
 // Roles with a score above 0 first, best first, ties in registry order; the
-// rest follow in registry order. `locale` is kept for symmetry: each role's
-// labels are already in that locale.
-// eslint-disable-next-line no-unused-vars
+// rest follow in registry order. Each typed word scores its best match
+// against the role's labels, which are already in `locale`.
 export function rankIdeaRoles(roleText, roles, locale) {
   const typed = words(roleText)
   const scored = roles.map((role, index) => {
     const labelWords = words([role.roleLabel, ...(role.jobRoles || [])].join(' '))
-    const score = typed.filter((word) => labelWords.some((label) => wordsMatch(word, label))).length
+    const score = typed.reduce((sum, word) => sum + Math.max(0, ...labelWords.map((label) => matchStrength(word, label, locale))), 0)
     return { ...role, score, index }
   })
   const hits = scored.filter((item) => item.score > 0).sort((a, b) => b.score - a.score || a.index - b.index)
