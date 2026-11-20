@@ -1442,9 +1442,29 @@ function ResumeBuilderPage({
     [dispatchUi],
   )
 
-  const handleOpenCoverLetter = useCallback(() => {
+  // The letter's latest value, read by every letter edit. Each user action
+  // dispatches ONE whole next letter built from this, so two fields changed in
+  // the same tick (prefill on open, generate) cannot overwrite each other.
+  const coverLetterRef = useRef(formData.coverLetter)
+  useEffect(() => {
+    coverLetterRef.current = formData.coverLetter
+  }, [formData.coverLetter])
+
+  const updateCoverLetter = useCallback((patch) => {
+    const next = { ...coverLetterRef.current, ...patch }
+    coverLetterRef.current = next
+    dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'coverLetter', value: next })
+  }, [dispatchFormData])
+
+  const openCoverLetterDialog = useCallback(() => {
+    if (!coverLetterRef.current.role.trim() && jobDescription.trim()) {
+      const adTitle = jobTitleFromAd(jobDescription)
+      if (adTitle) updateCoverLetter({ role: adTitle })
+    }
     setIsCoverLetterOpen(true)
-  }, [])
+  }, [jobDescription, updateCoverLetter])
+
+  const handleOpenCoverLetter = openCoverLetterDialog
 
   const handleOpenSettings = useCallback(() => {
     setIsSettingsOpen(true)
@@ -1561,7 +1581,7 @@ function ResumeBuilderPage({
       } else if (item.id === 'settings') {
         setIsSettingsOpen(true)
       } else if (item.id === 'coverLetter') {
-        setIsCoverLetterOpen(true)
+        openCoverLetterDialog()
       }
       return
     }
@@ -1573,7 +1593,7 @@ function ResumeBuilderPage({
       scrollSectionIntoView(container, target)
       setActiveSectionId(item.id)
     }
-  }, [])
+  }, [openCoverLetterDialog])
 
   const handleManageSections = useCallback(() => {
     setIsSettingsOpen(false)
@@ -1957,33 +1977,32 @@ function ResumeBuilderPage({
   const coverLetter = formData.coverLetter
   const coverLetterBody = coverLetter.body
 
-  const handleCoverLetterFieldChange = useCallback((key, value) => {
-    dispatchFormData({
-      type: FORM_ACTION.SET_ROOT_FIELD,
-      field: 'coverLetter',
-      value: { ...formData.coverLetter, [key]: value },
-    })
-  }, [dispatchFormData, formData.coverLetter])
-
   const handleCoverLetterCompanyChange = useCallback(
-    (value) => handleCoverLetterFieldChange('company', value), [handleCoverLetterFieldChange])
+    (value) => updateCoverLetter({ company: value }), [updateCoverLetter])
   const handleCoverLetterRoleChange = useCallback(
-    (value) => handleCoverLetterFieldChange('role', value), [handleCoverLetterFieldChange])
+    (value) => updateCoverLetter({ role: value }), [updateCoverLetter])
   const handleCoverLetterHiringManagerChange = useCallback(
-    (value) => handleCoverLetterFieldChange('hiringManager', value), [handleCoverLetterFieldChange])
+    (value) => updateCoverLetter({ hiringManager: value }), [updateCoverLetter])
   const handleCoverLetterBodyChange = useCallback(
-    (value) => handleCoverLetterFieldChange('body', value), [handleCoverLetterFieldChange])
+    (value) => updateCoverLetter({ body: value }), [updateCoverLetter])
 
   const handleGenerateCoverLetter = useCallback(() => {
+    const letter = coverLetterRef.current
     const draft = generateCoverLetterDraft(formData, {
       locale: cvLocale,
       jobAd: jobDescription,
-      companyName: coverLetter.company,
-      roleTitle: coverLetter.role,
-      hiringManagerName: coverLetter.hiringManager,
+      companyName: letter.company,
+      roleTitle: letter.role,
+      hiringManagerName: letter.hiringManager,
     })
-    handleCoverLetterBodyChange(draft)
-  }, [coverLetter, cvLocale, formData, handleCoverLetterBodyChange, jobDescription])
+    if (letter.body.trim() && letter.body !== draft) {
+      const message = locale === 'fi'
+        ? 'Korvataanko muokattu kirje uudella luonnoksella?'
+        : 'Replace your edited letter with a new draft?'
+      if (!window.confirm(message)) return
+    }
+    updateCoverLetter({ body: draft })
+  }, [cvLocale, formData, jobDescription, locale, updateCoverLetter])
 
   const handleCopyCoverLetter = useCallback(async () => {
     if (!coverLetterBody.trim()) {
@@ -2740,6 +2759,7 @@ function ResumeBuilderPage({
         roleTitle={coverLetter.role}
         hiringManagerName={coverLetter.hiringManager}
         letterBody={coverLetterBody}
+        hasJobAd={jobDescription.trim().length > 0}
         onCompanyNameChange={handleCoverLetterCompanyChange}
         onRoleTitleChange={handleCoverLetterRoleChange}
         onHiringManagerNameChange={handleCoverLetterHiringManagerChange}

@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 
 import Modal from './Modal'
 import { getUiTheme } from '../utils/designSystem'
+import { useCvTextProps } from './cvLanguageContext'
 
 function CoverLetterModal({
   isOpen,
@@ -12,6 +13,7 @@ function CoverLetterModal({
   roleTitle,
   hiringManagerName,
   letterBody,
+  hasJobAd = false,
   onCompanyNameChange,
   onRoleTitleChange,
   onHiringManagerNameChange,
@@ -23,6 +25,9 @@ function CoverLetterModal({
 }) {
   const ui = useMemo(() => getUiTheme(), [])
   const isFinnish = locale === 'fi'
+  const textProps = useCvTextProps()
+  const companyProps = useCvTextProps({ field: 'company' })
+  const managerProps = useCvTextProps({ field: 'organization' })
   const hasBody = letterBody.trim().length > 0
 
   return (
@@ -35,6 +40,11 @@ function CoverLetterModal({
         ? 'Luo hakemuskirjeen luonnos CV:si tiedoista. Kaikki pysyy selaimessasi, aivan kuten muukin sovellus.'
         : 'Draft a cover letter from your CV data. Everything stays in your browser, same as the rest of the app.'}
     >
+      {hasJobAd ? (
+        <p className={`mb-3 text-xs ${ui.textMuted}`}>
+          {isFinnish ? 'Käytössä ATS-tarkistuksen työpaikkailmoitus.' : 'Using the job ad from the ATS check.'}
+        </p>
+      ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
           <span className={`text-xs font-bold uppercase tracking-[0.1em] ${ui.textMuted}`}>
@@ -43,6 +53,7 @@ function CoverLetterModal({
           <input
             type="text"
             className={`border px-3 py-2 text-sm transition ${ui.input}`}
+            {...companyProps}
             value={companyName}
             onChange={(event) => onCompanyNameChange(event.target.value)}
             placeholder={isFinnish ? 'esim. Acme Oy' : 'e.g. Acme Inc'}
@@ -56,6 +67,7 @@ function CoverLetterModal({
           <input
             type="text"
             className={`border px-3 py-2 text-sm transition ${ui.input}`}
+            {...textProps}
             value={roleTitle}
             onChange={(event) => onRoleTitleChange(event.target.value)}
             placeholder={isFinnish ? 'Oletuksena CV:n ammattinimike' : 'Defaults to your CV title'}
@@ -69,6 +81,7 @@ function CoverLetterModal({
           <input
             type="text"
             className={`border px-3 py-2 text-sm transition ${ui.input}`}
+            {...managerProps}
             value={hiringManagerName}
             onChange={(event) => onHiringManagerNameChange(event.target.value)}
             placeholder={isFinnish ? 'esim. Jane Doe' : 'e.g. Jane Doe'}
@@ -100,6 +113,7 @@ function CoverLetterModal({
         </span>
         <textarea
           className={`min-h-72 w-full border px-4 py-3 text-sm leading-6 transition ${ui.input}`}
+          {...textProps}
           value={letterBody}
           onChange={(event) => onLetterBodyChange(event.target.value)}
           placeholder={isFinnish
