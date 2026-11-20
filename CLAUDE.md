@@ -152,10 +152,13 @@ an edited letter. The PDF comes from an off-screen `CoverLetterPage.jsx`
 `coverLetterLook.js`; plain in ATS mode) captured by `renderCvPdf(…,
 { document: 'letter' })` (the `letter` entry of `PDF_MODES`, fit always
 `actual`, so a long letter takes a second page) and previewed by
-`PdfPreviewModal kind="letter"` (paper size only). The letter's name takes
-the headings colour only where the CV's name does:
-`cvHeadingColors.js`'s `nameTakesHeadingColor`/`NAME_OWN_COLOR_VARIABLES` is
-the one rule both use. If the page can't be captured, `exportCoverLetterAsPdf`
+`PdfPreviewModal kind="letter"` (paper size only). The letter's name is
+exactly the colour the CV paints its name in: the chosen headings colour,
+else the look's own name colour, read from its palette through
+`cvHeadingColors.js`'s `NAME_DEFAULT_COLOR_VARIABLES`; the four templates
+in `NAME_OWN_COLOR_VARIABLES` give it the solid colour their own name shows.
+The accent is only the thin rule under the letter's header.
+`check:template-variants` requires every template in one of those tables. If the page can't be captured, `exportCoverLetterAsPdf`
 in `exporters.js` writes the jsPDF text letter with the name and contact
 line. Covered by `e2e/cover-letter.spec.js` (the all-template colour
 comparison and the PDF checks are `@slow`); `e2e/export-fields.spec.js`

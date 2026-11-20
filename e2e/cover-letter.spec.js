@@ -193,6 +193,13 @@ const rgb = (hex) => {
   return `rgb(${value >> 16}, ${(value >> 8) & 255}, ${value & 255})`
 }
 
+// The visible CV's name (the builder's live preview, not the off-screen
+// export copy).
+const cvNameColor = (page) => page
+  .locator('.app-shell__preview [data-cv-name], .direct-edit-preview [data-cv-name]')
+  .first()
+  .evaluate((el) => getComputedStyle(el).color)
+
 const normalized = (value) => value.replace(/\s+/g, ' ').trim()
 
 test.describe('Cover letter PDF', () => {
@@ -232,8 +239,9 @@ test.describe('Cover letter PDF', () => {
   })
 
   test('the letter page follows the chosen look', async ({ page }) => {
-    // Timeline's looks change both the font and the accent, which the
-    // letter's name takes when no headings colour is chosen.
+    // Timeline's looks change both the font and the name colour; with no
+    // headings colour chosen the letter's name is the CV's own name colour
+    // (the look's ink), never the accent.
     await page.goto('/cv?template=timeline')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
     const look = () => letterPage(page).evaluate((root) => ({
@@ -241,41 +249,64 @@ test.describe('Cover letter PDF', () => {
       color: getComputedStyle(root.querySelector('[data-cv-name]')).color,
     }))
     const before = await look()
+    expect(before.color).toBe(await cvNameColor(page))
 
     const [, blue] = getTemplateVariants('timeline')
     await (await styleTrigger(page)).click()
     await page.getByRole('radiogroup', { name: 'Select style' }).getByRole('radio', { name: blue.label.en }).click()
 
     await expect.poll(async () => (await look()).font).not.toBe(before.font)
-    await expect.poll(async () => (await look()).color).toBe(rgb(blue.accent))
-    expect(before.color).not.toBe(rgb(blue.accent))
+    await expect.poll(async () => (await look()).color).not.toBe(before.color)
+    await expect.poll(async () => (await look()).color === await cvNameColor(page)).toBe(true)
+    expect((await look()).color).not.toBe(rgb(blue.accent))
   })
 
-  // The headings colour reaches every template's name but three
-  // (cvHeadingColors.js's NAME_OWN_COLOR_VARIABLES); the letter's name
-  // follows the CV's own name, so the two never disagree.
-  test('the letter\'s name takes the headings colour only where the CV\'s name does @slow', async ({ page }) => {
-    test.setTimeout(180_000)
+  // The letter's name is always the colour the CV paints its name in: with
+  // no headings colour, each look's own name colour
+  // (cvHeadingColors.js's NAME_DEFAULT_COLOR_VARIABLES); with one, that
+  // colour. The four templates whose name keeps its own colour
+  // (NAME_OWN_COLOR_VARIABLES: a gradient, or white on a dark band) give
+  // the letter the solid colour behind or under that name instead, and
+  // their CV name never takes the headings colour.
+  test('the letter\'s name is the CV\'s name colour on every template and look @slow', async ({ page }) => {
+    test.setTimeout(300_000)
     const burgundy = '#7f1d1d'
     const mismatches = []
+    const letterNameColor = () => letterPage(page).locator('[data-cv-name]').evaluate((el) => getComputedStyle(el).color)
 
     for (const template of cvTemplates) {
+      const ownVariable = NAME_OWN_COLOR_VARIABLES[template.id]
+      const compare = async (label, variant) => {
+        const expected = async () => (ownVariable ? rgb(variant.palette[ownVariable]) : cvNameColor(page))
+        try {
+          await expect.poll(async () => (await letterNameColor()) === await expected(), { timeout: 5_000 }).toBe(true)
+        } catch {
+          mismatches.push(`${label}: letter ${await letterNameColor()}, expected ${await expected()}`)
+        }
+      }
+
       await page.goto(`/cv?template=${template.id}`)
       await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+      const [first, second] = getTemplateVariants(template.id)
+      await compare(`${template.id}/${first.id}, no headings colour`, first)
+
+      // A look carrying its own headings colour sets it, so clear it again
+      // to test that look's own name colour as well.
+      await (await styleTrigger(page)).click()
+      await page.getByRole('radiogroup', { name: 'Select style' }).getByRole('radio', { name: second.label.en }).click()
+      await compare(`${template.id}/${second.id}`, second)
+      if (second.headingColor) {
+        await (await headingColorTrigger(page)).click()
+        await page.getByRole('dialog', { name: 'Select heading color' }).getByRole('button', { name: 'Use template default' }).click()
+        await compare(`${template.id}/${second.id}, headings colour reset`, second)
+      }
+
       await (await headingColorTrigger(page)).click()
       await page.getByRole('dialog', { name: 'Select heading color' }).getByRole('button', { name: 'Burgundy' }).click()
-      const cvName = page.locator('.app-shell__preview [data-cv-name], .direct-edit-preview [data-cv-name]').first()
-      const letterName = letterPage(page).locator('[data-cv-name]')
-      const ownVariable = NAME_OWN_COLOR_VARIABLES[template.id]
-
-      if (ownVariable) {
-        await expect(letterName).toHaveCSS('color', rgb(getTemplateVariants(template.id)[0].palette[ownVariable]))
-        const cvColor = await cvName.evaluate((el) => getComputedStyle(el).color)
-        if (cvColor === rgb(burgundy)) mismatches.push(`${template.id}: the CV name took the headings colour`)
-      } else {
-        await expect(letterName).toHaveCSS('color', rgb(burgundy))
-        const cvColor = await cvName.evaluate((el) => getComputedStyle(el).color)
-        if (cvColor !== rgb(burgundy)) mismatches.push(`${template.id}: the CV name is ${cvColor}`)
+      await compare(`${template.id}/${second.id}, Burgundy`, second)
+      const cvColor = await cvNameColor(page)
+      if (ownVariable ? cvColor === rgb(burgundy) : cvColor !== rgb(burgundy)) {
+        mismatches.push(`${template.id}: with Burgundy the CV name is ${cvColor}`)
       }
     }
 

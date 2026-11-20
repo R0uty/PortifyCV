@@ -57,6 +57,31 @@ export const NAME_OWN_COLOR_VARIABLES = {
   techExec: '--te-navy',
 }
 
+// Every other template's name is `color: var(--cv-heading-color,
+// var(<its default>))` in its stylesheet (Minimalist's flat-renderer name:
+// minimal.css's `.min-ink`), so with no headings colour picked it shows
+// this palette variable of the current look. The cover letter page reads
+// it from the look's palette (coverLetterLook.js), so the letter's name is
+// the CV's name colour in every state; check:template-variants requires
+// every template to be in exactly one of the two tables, with its variable
+// in each look's palette.
+export const NAME_DEFAULT_COLOR_VARIABLES = {
+  minimal: '--min-ink',
+  creative: '--cr-ink',
+  modern: '--ms-navy',
+  executive: '--ex-ink',
+  timeline: '--tl-ink',
+  graduate: '--gr-ink',
+  compact: '--cp-ink',
+  portfolio: '--pf-slate',
+  classicProfessional: '--cp-text',
+  modernOrange: '--mo-text',
+  quadrant: '--qd-text',
+  editorial: '--ed-ink',
+  portrait: '--pt-ink',
+  european: '--eu-ink',
+}
+
 export function nameTakesHeadingColor(templateId) {
   return !Object.hasOwn(NAME_OWN_COLOR_VARIABLES, templateId)
 }

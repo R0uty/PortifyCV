@@ -354,5 +354,31 @@ console.log('\nLooks outside the builder (Phase 4)\n')
   check('styleVariantSearch: a look writes ?style=', styleVariantSearch(developerIds[1]) === `?style=${developerIds[1]}`)
 }
 
+// The cover letter's name colour (coverLetterLook.js) reads each
+// template's name colour variable from the current look's palette, so every
+// template needs exactly one entry across the two tables, naming a variable
+// every one of its looks defines.
+{
+  const { NAME_OWN_COLOR_VARIABLES, NAME_DEFAULT_COLOR_VARIABLES } = await importSrc('utils/cvHeadingColors.js')
+  const problems = []
+  cvTemplates.forEach(({ id }) => {
+    const own = NAME_OWN_COLOR_VARIABLES[id]
+    const fallback = NAME_DEFAULT_COLOR_VARIABLES[id]
+    if (Boolean(own) === Boolean(fallback)) {
+      problems.push(`${id}: in ${own ? 'both tables' : 'neither table'}`)
+      return
+    }
+    getTemplateVariants(id).forEach((variant) => {
+      if (!variant.palette[own || fallback]) problems.push(`${id}/${variant.id}: no ${own || fallback}`)
+    })
+  })
+  const known = new Set(cvTemplates.map(({ id }) => id))
+  Object.keys({ ...NAME_OWN_COLOR_VARIABLES, ...NAME_DEFAULT_COLOR_VARIABLES })
+    .filter((id) => !known.has(id))
+    .forEach((id) => problems.push(`${id}: not a template`))
+  check('every template names its name colour variable once, and each look defines it',
+    problems.length === 0, problems.join(', '))
+}
+
 console.log(failures === 0 ? '\nAll template-variant checks passed.' : `\n${failures} check(s) failed.`)
 process.exit(failures === 0 ? 0 : 1)
