@@ -69,7 +69,7 @@ function getCopy(locale) {
           heading: 'Vie tiedostoksi tai jaa linkkinä',
           figureLabel: 'Avattu Vie-valikko: PDF, HTML, JSON, Word ja jakolinkki.',
           caption:
-            'Vie-valikossa on neljä muotoa: PDF hakemuksiin, Word muokattavaksi toisessa ohjelmassa, HTML verkkoon ja JSON varmuuskopioksi tai myöhempää muokkausta varten. Saman valikon lopun Kopioi jakolinkki koodaa koko CV:n URL-osoitteeseen — sitä ei lähetetä palvelimelle, eivätkä kuvat mahdu mukaan. Vasemman reunan Hakemuskirje-kohta (puhelimella ⋯-valikossa) luo CV:si pohjalta hakemuskirjeluonnoksen CV:si kielellä, jota voit muokata, ja vie sen PDF:ksi CV:si ulkoasulla.',
+            'Vie-valikossa on neljä muotoa: PDF hakemuksiin, Word muokattavaksi toisessa ohjelmassa, HTML verkkoon ja JSON varmuuskopioksi tai myöhempää muokkausta varten. Saman valikon lopun Kopioi jakolinkki koodaa koko CV:n URL-osoitteeseen — sitä ei lähetetä palvelimelle, eivätkä kuvat mahdu mukaan. Vasemman reunan Hakemuskirje-kohta (puhelimella ⋯-valikossa) luo CV:si pohjalta muokattavan hakemuskirjeluonnoksen CV:n kielellä ja vie sen PDF:ksi CV:n ulkoasussa.',
         },
         {
           step: 'restore',
