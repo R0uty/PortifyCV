@@ -475,10 +475,6 @@ function ResumeBuilderPage({
     isImporting,
     pastedCvText,
     jobDescription,
-    coverLetterCompany,
-    coverLetterRole,
-    coverLetterHiringManager,
-    coverLetterBody,
     sessionRestoreEnabled,
     templateAccentColors,
     cvFontId,
@@ -1959,31 +1955,35 @@ function ResumeBuilderPage({
     dispatchUi({ type: UI_ACTION.SET_JOB_DESCRIPTION, value: '' })
   }, [])
 
-  const handleCoverLetterCompanyChange = useCallback((value) => {
-    dispatchUi({ type: UI_ACTION.SET_COVER_LETTER_COMPANY, value })
-  }, [])
+  const coverLetter = formData.coverLetter
+  const coverLetterBody = coverLetter.body
 
-  const handleCoverLetterRoleChange = useCallback((value) => {
-    dispatchUi({ type: UI_ACTION.SET_COVER_LETTER_ROLE, value })
-  }, [])
+  const handleCoverLetterFieldChange = useCallback((key, value) => {
+    dispatchFormData({
+      type: FORM_ACTION.SET_ROOT_FIELD,
+      field: 'coverLetter',
+      value: { ...formData.coverLetter, [key]: value },
+    })
+  }, [dispatchFormData, formData.coverLetter])
 
-  const handleCoverLetterHiringManagerChange = useCallback((value) => {
-    dispatchUi({ type: UI_ACTION.SET_COVER_LETTER_HIRING_MANAGER, value })
-  }, [])
-
-  const handleCoverLetterBodyChange = useCallback((value) => {
-    dispatchUi({ type: UI_ACTION.SET_COVER_LETTER_BODY, value })
-  }, [])
+  const handleCoverLetterCompanyChange = useCallback(
+    (value) => handleCoverLetterFieldChange('company', value), [handleCoverLetterFieldChange])
+  const handleCoverLetterRoleChange = useCallback(
+    (value) => handleCoverLetterFieldChange('role', value), [handleCoverLetterFieldChange])
+  const handleCoverLetterHiringManagerChange = useCallback(
+    (value) => handleCoverLetterFieldChange('hiringManager', value), [handleCoverLetterFieldChange])
+  const handleCoverLetterBodyChange = useCallback(
+    (value) => handleCoverLetterFieldChange('body', value), [handleCoverLetterFieldChange])
 
   const handleGenerateCoverLetter = useCallback(() => {
     const draft = generateCoverLetterDraft(formData, {
       locale,
-      companyName: coverLetterCompany,
-      roleTitle: coverLetterRole,
-      hiringManagerName: coverLetterHiringManager,
+      companyName: coverLetter.company,
+      roleTitle: coverLetter.role,
+      hiringManagerName: coverLetter.hiringManager,
     })
-    dispatchUi({ type: UI_ACTION.SET_COVER_LETTER_BODY, value: draft })
-  }, [coverLetterCompany, coverLetterHiringManager, coverLetterRole, formData, locale])
+    handleCoverLetterBodyChange(draft)
+  }, [coverLetter, formData, handleCoverLetterBodyChange, locale])
 
   const handleCopyCoverLetter = useCallback(async () => {
     if (!coverLetterBody.trim()) {
@@ -2736,9 +2736,9 @@ function ResumeBuilderPage({
         onClose={handleCloseCoverLetter}
         locale={locale}
         fullName={formData.fullName}
-        companyName={coverLetterCompany}
-        roleTitle={coverLetterRole}
-        hiringManagerName={coverLetterHiringManager}
+        companyName={coverLetter.company}
+        roleTitle={coverLetter.role}
+        hiringManagerName={coverLetter.hiringManager}
         letterBody={coverLetterBody}
         onCompanyNameChange={handleCoverLetterCompanyChange}
         onRoleTitleChange={handleCoverLetterRoleChange}

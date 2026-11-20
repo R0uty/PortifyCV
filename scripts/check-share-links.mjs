@@ -37,7 +37,7 @@ globalThis.window = {
 const utilsDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src/utils')
 const importUtil = (name) => import(pathToFileURL(resolvePath(utilsDir, name)).href)
 
-const { demoCvData, createInitialCvData, parseImportedCvData } = await importUtil('cvForm.js')
+const { demoCvData, createInitialCvData, parseImportedCvData, createEmptyCoverLetter } = await importUtil('cvForm.js')
 const share = await importUtil('shareLinks.js')
 
 let failures = 0
@@ -183,6 +183,16 @@ for (const [label, value] of [
   }
   check(`import rejects styleVariantByTemplate as ${label}`, threw)
 }
+// The cover letter (1.7.9) is the sender's own text and never travels.
+{
+  const withLetter = { ...demo, coverLetter: { company: 'Acme', role: 'Designer', hiringManager: 'Jane', body: 'Dear Jane,' } }
+  check('a cover letter does not change the encoded link',
+    share.encodeCvStateForUrl(withLetter) === share.encodeCvStateForUrl({ ...demo, coverLetter: createEmptyCoverLetter() }))
+  check('the decoded CV has an empty cover letter',
+    JSON.stringify(share.decodeCvStateFromUrl(share.encodeCvStateForUrl(withLetter)).coverLetter)
+      === JSON.stringify(createEmptyCoverLetter()))
+}
+
 // cvLanguage (1.7.5) travels as 'cl', and only when the CV chose one.
 const finnishCv = parseImportedCvData({ ...structuredClone(demoCvData), cvLanguage: 'fi' })
 const finnishEncoded = share.encodeCvStateForUrl(finnishCv)

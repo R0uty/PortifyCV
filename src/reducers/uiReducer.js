@@ -16,10 +16,6 @@ export const UI_ACTION = {
   SET_LOCALE: 'SET_LOCALE',
   SET_PASTED_CV_TEXT: 'SET_PASTED_CV_TEXT',
   SET_JOB_DESCRIPTION: 'SET_JOB_DESCRIPTION',
-  SET_COVER_LETTER_COMPANY: 'SET_COVER_LETTER_COMPANY',
-  SET_COVER_LETTER_ROLE: 'SET_COVER_LETTER_ROLE',
-  SET_COVER_LETTER_HIRING_MANAGER: 'SET_COVER_LETTER_HIRING_MANAGER',
-  SET_COVER_LETTER_BODY: 'SET_COVER_LETTER_BODY',
   TOGGLE_SESSION_RESTORE: 'TOGGLE_SESSION_RESTORE',
   SET_TEMPLATE_ACCENT_COLOR: 'SET_TEMPLATE_ACCENT_COLOR',
   SET_CV_FONT: 'SET_CV_FONT',
@@ -139,10 +135,6 @@ export function createInitialUiState(initialSession) {
     isImporting: false,
     pastedCvText: '',
     jobDescription: '',
-    coverLetterCompany: '',
-    coverLetterRole: '',
-    coverLetterHiringManager: '',
-    coverLetterBody: '',
     sessionRestoreEnabled: storedSessionRestore !== 'false',
     templateAccentColors: getAllTemplateAccents(),
     cvFontId: DEFAULT_CV_FONT_ID,
@@ -197,18 +189,6 @@ export function uiReducer(state, action) {
 
     case UI_ACTION.SET_JOB_DESCRIPTION:
       return { ...state, jobDescription: action.value }
-
-    case UI_ACTION.SET_COVER_LETTER_COMPANY:
-      return { ...state, coverLetterCompany: action.value }
-
-    case UI_ACTION.SET_COVER_LETTER_ROLE:
-      return { ...state, coverLetterRole: action.value }
-
-    case UI_ACTION.SET_COVER_LETTER_HIRING_MANAGER:
-      return { ...state, coverLetterHiringManager: action.value }
-
-    case UI_ACTION.SET_COVER_LETTER_BODY:
-      return { ...state, coverLetterBody: action.value }
 
     case UI_ACTION.TOGGLE_SESSION_RESTORE:
       return { ...state, sessionRestoreEnabled: !state.sessionRestoreEnabled }

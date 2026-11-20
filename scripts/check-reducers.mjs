@@ -33,7 +33,7 @@ const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, rel
 
 const { cvFormReducer, FORM_ACTION } = await importSrc('reducers/cvFormReducer.js')
 const { uiReducer, UI_ACTION, createInitialUiState, pickTemplateLook, resolveTemplateId } = await importSrc('reducers/uiReducer.js')
-const { createInitialCvData, createSectionVisibility, createSectionItemVisibility } =
+const { createInitialCvData, createSectionVisibility, createSectionItemVisibility, createEmptyCoverLetter, parseImportedCvData } =
   await importSrc('utils/cvForm.js')
 
 let failures = 0
@@ -411,28 +411,29 @@ console.log('\nuiReducer\n')
   check('SET_JOB_DESCRIPTION stores the job description', next.jobDescription === 'job text')
 }
 
+// The cover letter is CV data (1.7.9): formData.coverLetter, not UI state.
 {
-  const state = createInitialUiState({})
-  const next = uiReducer(state, { type: UI_ACTION.SET_COVER_LETTER_COMPANY, value: 'Acme Inc' })
-  check('SET_COVER_LETTER_COMPANY stores the company name', next.coverLetterCompany === 'Acme Inc')
-}
-
-{
-  const state = createInitialUiState({})
-  const next = uiReducer(state, { type: UI_ACTION.SET_COVER_LETTER_ROLE, value: 'Product Designer' })
-  check('SET_COVER_LETTER_ROLE stores the target role', next.coverLetterRole === 'Product Designer')
-}
-
-{
-  const state = createInitialUiState({})
-  const next = uiReducer(state, { type: UI_ACTION.SET_COVER_LETTER_HIRING_MANAGER, value: 'Jane Doe' })
-  check('SET_COVER_LETTER_HIRING_MANAGER stores the hiring manager name', next.coverLetterHiringManager === 'Jane Doe')
-}
-
-{
-  const state = createInitialUiState({})
-  const next = uiReducer(state, { type: UI_ACTION.SET_COVER_LETTER_BODY, value: 'Dear Hiring Manager,' })
-  check('SET_COVER_LETTER_BODY stores the letter draft', next.coverLetterBody === 'Dear Hiring Manager,')
+  const state = createInitialCvData()
+  check('the initial CV carries an empty cover letter',
+    JSON.stringify(state.coverLetter) === JSON.stringify(createEmptyCoverLetter()))
+  const letter = { company: 'Acme Inc', role: 'Designer', hiringManager: 'Jane', body: 'Dear Jane,' }
+  const next = cvFormReducer(state, { type: FORM_ACTION.SET_ROOT_FIELD, field: 'coverLetter', value: letter })
+  check('SET_ROOT_FIELD with coverLetter stores the object', next.coverLetter === letter)
+  const { coverLetter: _dropped, ...withoutLetter } = state
+  const loaded = parseImportedCvData(cvFormReducer(state, { type: FORM_ACTION.SET_FORM_DATA, formData: withoutLetter }))
+  check('a CV with no coverLetter normalises to an empty letter',
+    JSON.stringify(loaded.coverLetter) === JSON.stringify(createEmptyCoverLetter()))
+  const odd = parseImportedCvData({ ...state, coverLetter: { company: 5, body: 'x' } })
+  check('a partly wrong coverLetter is coerced key by key',
+    JSON.stringify(odd.coverLetter) === JSON.stringify({ company: '', role: '', hiringManager: '', body: 'x' }))
+  check('a non-object coverLetter becomes empty',
+    JSON.stringify(parseImportedCvData({ ...state, coverLetter: 'hi' }).coverLetter) === JSON.stringify(createEmptyCoverLetter()))
+  check('the letter survives JSON import', parseImportedCvData({ ...state, coverLetter: letter }).coverLetter.body === 'Dear Jane,')
+  check('the four cover letter UI actions are gone',
+    ['SET_COVER_LETTER_COMPANY', 'SET_COVER_LETTER_ROLE', 'SET_COVER_LETTER_HIRING_MANAGER', 'SET_COVER_LETTER_BODY']
+      .every((name) => !(name in UI_ACTION)))
+  check('the UI state no longer holds the letter',
+    !Object.keys(createInitialUiState({})).some((key) => key.startsWith('coverLetter')))
 }
 
 {

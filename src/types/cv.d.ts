@@ -219,6 +219,13 @@ export interface CvSectionItemVisibility {
   testimonials: Record<string, boolean>
 }
 
+export interface CoverLetter {
+  company: string
+  role: string
+  hiringManager: string
+  body: string
+}
+
 export interface CvData {
   fullName: string
   title: string
@@ -235,6 +242,8 @@ export interface CvData {
   styleVariantByTemplate: Record<string, string>
   /** The CV's own language (1.7.5); '' follows the app's language. */
   cvLanguage: '' | 'en' | 'fi'
+  /** The cover letter (1.7.9); kept in JSON and saved CVs, never in a share link. */
+  coverLetter: CoverLetter
   sectionOrder: CvSectionKey[]
   skills: string[]
   experience: CvExperienceItem[]

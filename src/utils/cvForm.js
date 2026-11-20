@@ -304,6 +304,17 @@ export function getSectionVisibilityFields(locale = 'en') {
 
 export const sectionVisibilityFields = getSectionVisibilityFields('en')
 
+/**
+ * The cover letter kept with the CV (1.7.9). Share links never carry it.
+ * @returns {import('../types/cv').CoverLetter}
+ */
+export const createEmptyCoverLetter = () => ({
+  company: '',
+  role: '',
+  hiringManager: '',
+  body: '',
+})
+
 /** @returns {CvData} */
 export const createInitialCvData = () => ({
   fullName: '',
@@ -318,6 +329,7 @@ export const createInitialCvData = () => ({
   sectionColumnsByTemplate: {},
   styleVariantByTemplate: {},
   cvLanguage: '',
+  coverLetter: createEmptyCoverLetter(),
   sectionOrder: createSectionOrder(),
   skills: [],
   experience: [createEmptyExperience()],
@@ -370,6 +382,7 @@ export const demoCvData = {
   sectionColumnsByTemplate: {},
   styleVariantByTemplate: {},
   cvLanguage: '',
+  coverLetter: createEmptyCoverLetter(),
   sectionOrder: createSectionOrder(),
   skills: [
     'Product Strategy',
@@ -979,6 +992,17 @@ export function normalizeSectionOrder(sectionOrder, fallbackOrder = CV_SECTION_O
  * @param {unknown} value
  * @returns {CvData}
  */
+// A missing or odd letter is an empty one; each key is text or empty, so a
+// file from another version never blocks the import.
+function readCoverLetter(value) {
+  const letter = isPlainObject(value) ? value : {}
+  const empty = createEmptyCoverLetter()
+
+  return Object.fromEntries(
+    Object.keys(empty).map((key) => [key, typeof letter[key] === 'string' ? letter[key] : '']),
+  )
+}
+
 export function parseImportedCvData(value) {
   if (!isPlainObject(value)) {
     throw new Error(
@@ -1029,6 +1053,7 @@ export function parseImportedCvData(value) {
       'sectionColumnsByTemplate',
       'styleVariantByTemplate',
       'cvLanguage',
+      'coverLetter',
       'skills',
       'experience',
       'education',
@@ -1474,6 +1499,7 @@ export function parseImportedCvData(value) {
     cvLanguage: CV_LANGUAGES.includes(readOptionalString(value.cvLanguage, 'cvLanguage'))
       ? value.cvLanguage
       : '',
+    coverLetter: readCoverLetter(value.coverLetter),
     skills: skills.map((skill, index) => readOptionalString(skill, `skills[${index}]`)),
     experience:
       experience.length > 0
