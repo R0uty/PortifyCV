@@ -1,5 +1,9 @@
 import { test, expect } from './fixtures/base.js'
 import { readFile } from 'node:fs/promises'
+import { getTemplateVariants } from '../src/utils/templateVariants.js'
+import { pdfText } from './helpers/pdfFile.js'
+import { downloadFromPdfPreview } from './helpers/pdfPreview.js'
+import { styleTrigger } from './helpers/builderToolbar.js'
 
 // Coverage for the cover-letter generator (todo items 20 / 26). It has
 // check:reducers coverage for its UI-state transitions but no end-to-end
@@ -73,8 +77,15 @@ test.describe('Cover letter', () => {
     const draft = dialog.getByRole('textbox', { name: 'Draft (editable)' })
     await expect(draft).toHaveValue(/John Doe/)
     const before = await draft.inputValue()
-    await expect.poll(() => page.evaluate(() => Object.keys(window.sessionStorage).length)).toBeGreaterThan(0)
-    await page.waitForTimeout(900)
+    // Session restore writes the snapshot on a debounce: wait until it holds
+    // this letter, not merely until something is stored.
+    await expect.poll(() => page.evaluate(() => {
+      try {
+        return JSON.parse(window.sessionStorage.getItem('portifycv-session-snapshot') ?? '{}').coverLetter?.body ?? ''
+      } catch {
+        return ''
+      }
+    })).toBe(before)
 
     await page.reload()
     await expect(page.getByText('Restored your last session.')).toBeVisible()
@@ -149,6 +160,128 @@ test.describe('Cover letter', () => {
     await dialog.getByRole('button', { name: 'Regenerate draft' }).click()
     await expect(draft).toHaveValue('My edited letter')
     expect(message).toBe('Replace your edited letter with a new draft?')
+  })
+})
+
+// The letter's own page (1.7.9): drawn in the CV's look, exported through
+// the CV's PDF pipeline (renderCvPdf with `document: 'letter'`).
+const letterPage = (page) => page.locator('[data-cover-letter]')
+
+async function openLetterPdfPreview(dialog) {
+  await dialog.getByRole('button', { name: /^(Download PDF|Lataa PDF)$/ }).click()
+  const preview = dialog.page().getByRole('dialog', { name: /^(Cover letter PDF|Hakemuskirjeen PDF)$/ })
+  await expect(preview).toBeVisible()
+  return preview
+}
+
+async function saveLetterPdf(page, testInfo, name) {
+  const download = await downloadFromPdfPreview(page, { timeout: 90_000 })
+  const path = testInfo.outputPath(`${name}.pdf`)
+  await download.saveAs(path)
+  const bytes = await readFile(path)
+  return {
+    fileName: download.suggestedFilename(),
+    text: pdfText(new TextDecoder('windows-1252').decode(bytes)),
+    pageCount: (bytes.toString('latin1').match(/\/Type\s*\/Page(?!s)/g) || []).length,
+  }
+}
+
+const normalized = (value) => value.replace(/\s+/g, ' ').trim()
+
+test.describe('Cover letter PDF', () => {
+  test('the letter PDF looks like the CV and reads as text @slow', async ({ page }, testInfo) => {
+    test.setTimeout(120_000)
+    const dialog = await openCoverLetter(page)
+    await dialog.getByRole('textbox', { name: 'Company' }).fill('Northwind Labs')
+    await dialog.getByRole('button', { name: 'Generate draft' }).click()
+    const draft = dialog.getByRole('textbox', { name: 'Draft (editable)' })
+    await expect(draft).toHaveValue(/Northwind Labs/)
+    const body = await draft.inputValue()
+    // The first sentence after the greeting.
+    const firstSentence = normalized(body.split(/\n{2,}/)[1].split(/(?<=[.!?])\s/)[0])
+
+    const preview = await openLetterPdfPreview(dialog)
+    await expect(page.getByRole('dialog', { name: 'Cover letter', exact: true })).toBeHidden()
+    await expect(preview.getByRole('group', { name: 'Fit' })).toHaveCount(0)
+    await expect(preview.getByRole('tab', { name: 'What a parser reads' })).toHaveCount(0)
+
+    const pdf = await saveLetterPdf(page, testInfo, 'letter')
+    expect(pdf.fileName).toMatch(/-cover-letter\.pdf$/)
+    expect(pdf.text).toContain('John Doe')
+    expect(pdf.text).toContain('Northwind Labs')
+    expect(pdf.text).toContain(firstSentence)
+    // Downloading returns to the letter.
+    await expect(preview).toBeHidden()
+    await expect(page.getByRole('dialog', { name: 'Cover letter', exact: true })).toBeVisible()
+  })
+
+  test('closing the preview returns to the letter dialog', async ({ page }) => {
+    const dialog = await openCoverLetter(page)
+    await dialog.getByRole('button', { name: 'Generate draft' }).click()
+    const preview = await openLetterPdfPreview(dialog)
+    await preview.getByRole('button', { name: 'Cancel' }).click()
+    await expect(preview).toBeHidden()
+    await expect(page.getByRole('dialog', { name: 'Cover letter', exact: true })).toBeVisible()
+  })
+
+  test('the letter page follows the chosen look', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    const look = () => letterPage(page).evaluate((root) => {
+      const name = root.querySelector('[data-cv-name]')
+      return `${getComputedStyle(root).fontFamily}|${getComputedStyle(name).color}`
+    })
+    const before = await look()
+
+    const [, slate] = getTemplateVariants('minimal')
+    await (await styleTrigger(page)).click()
+    await page.getByRole('radiogroup', { name: 'Select style' }).getByRole('radio', { name: slate.label.en }).click()
+
+    await expect.poll(look).not.toBe(before)
+  })
+
+  test('a Finnish CV\'s letter PDF is in Finnish @slow', async ({ page }, testInfo) => {
+    test.setTimeout(120_000)
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: 'Settings' }).click()
+    await page.getByRole('dialog', { name: 'Settings' }).getByRole('button', { name: 'Suomi', exact: true }).click()
+    await page.keyboard.press('Escape')
+
+    await navRail(page).getByRole('button', { name: 'Cover letter' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Cover letter' })
+    await dialog.getByRole('button', { name: 'Generate draft' }).click()
+    await openLetterPdfPreview(dialog)
+
+    const pdf = await saveLetterPdf(page, testInfo, 'letter-fi')
+    expect(pdf.text).toContain('Ystävällisin terveisin')
+    expect(pdf.fileName).toMatch(/-hakemuskirje\.pdf$/)
+  })
+
+  test('a long letter continues on a second page @slow', async ({ page }, testInfo) => {
+    test.setTimeout(120_000)
+    const dialog = await openCoverLetter(page)
+    const paragraphs = Array.from({ length: 40 }, (_, index) =>
+      `Paragraph ${index + 1}: I led the redesign of a shared component library and shipped it across four product teams.`)
+    await dialog.getByRole('textbox', { name: 'Draft (editable)' }).fill(paragraphs.join('\n\n'))
+    await openLetterPdfPreview(dialog)
+
+    const pdf = await saveLetterPdf(page, testInfo, 'letter-long')
+    expect(pdf.pageCount).toBeGreaterThanOrEqual(2)
+    expect(pdf.text).toContain('Paragraph 40:')
+  })
+
+  test('with ATS-friendly mode on, the letter is plain black', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: 'Settings' }).click()
+    const settings = page.getByRole('dialog', { name: 'Settings' })
+    await settings.locator('.settings-row', { hasText: 'ATS-friendly mode' }).locator('.toggle-switch').click()
+    await page.keyboard.press('Escape')
+
+    await expect(letterPage(page).locator('[data-cv-name]')).toHaveCSS('color', 'rgb(0, 0, 0)')
   })
 })
 

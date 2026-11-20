@@ -41,6 +41,7 @@ import ATSScorePanel from '../components/ATSScorePanel'
 import AtsCheckModal from '../components/AtsCheckModal'
 import BadgeModal from '../components/BadgeModal'
 import CoverLetterModal from '../components/CoverLetterModal'
+import CoverLetterPage from '../components/CoverLetterPage'
 import ImportCvModal from '../components/ImportCvModal'
 import SavedCvsModal from '../components/SavedCvsModal'
 import PdfPreviewModal from '../components/PdfPreviewModal'
@@ -101,7 +102,8 @@ import {
 import { evaluateAtsScore } from '../utils/atsScore'
 import { jobTitleFromAd, matchJobAd } from '../utils/jobMatch'
 import { BULLET_BLANK, countBlankBullets, evaluateCvFeedback } from '../utils/cvFeedback'
-import { generateCoverLetterDraft } from '../utils/coverLetter'
+import { generateCoverLetterDraft, getCoverLetterHeader } from '../utils/coverLetter'
+import { resolveCoverLetterLook } from '../utils/coverLetterLook'
 import { EXAMPLES, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
 import { CvLanguageContext } from '../components/cvLanguageContext'
 
@@ -504,6 +506,8 @@ function ResumeBuilderPage({
     cvHeadingColor,
   })
   const previewRef = useRef(null)
+  // The off-screen cover letter page the letter's PDF is captured from (1.7.9).
+  const letterRef = useRef(null)
   const importInputRef = useRef(null)
   const importCvFileInputRef = useRef(null)
   const toastTimeoutsRef = useRef(new Map())
@@ -843,10 +847,17 @@ function ResumeBuilderPage({
   const [isPdfPreviewOpen, setIsPdfPreviewOpen] = useState(false)
   const [pdfPaper, setPdfPaper] = useState('a4')
   const [pdfFit, setPdfFit] = useState('auto')
+  // 'cv', or 'letter' when the cover letter dialog's Download PDF opened it
+  // (1.7.9); closing a letter's preview returns to the letter dialog.
+  const [pdfPreviewKind, setPdfPreviewKind] = useState('cv')
 
   const handleClosePdfPreview = useCallback(() => {
     setIsPdfPreviewOpen(false)
-  }, [])
+
+    if (pdfPreviewKind === 'letter') {
+      setIsCoverLetterOpen(true)
+    }
+  }, [pdfPreviewKind])
 
   // One render at a time: each lays the CV out in its own off-screen copy and
   // briefly re-lays-out the export source, so two at once (options flipped
@@ -1004,6 +1015,7 @@ function ResumeBuilderPage({
 
         // The preview checks the export source is in sync, builds the pages
         // and downloads them (renderPdfPreview, handleDownloadPdfPreview).
+        setPdfPreviewKind('cv')
         setIsPdfPreviewOpen(true)
         return
       }
@@ -2031,17 +2043,59 @@ function ResumeBuilderPage({
     exportCoverLetterAsText(coverLetterBody, `${exportFileName}-cover-letter`)
   }, [coverLetterBody, exportFileName])
 
-  const handleDownloadCoverLetterPdf = useCallback(async () => {
+  // The letter's PDF (1.7.9): the letter dialog gives way to the PDF
+  // preview, which captures the off-screen CoverLetterPage through the CV's
+  // own pipeline (renderCvPdf's letter mode). Paper only; a letter is never
+  // shrunk.
+  const handleDownloadCoverLetterPdf = useCallback(() => {
     if (!coverLetterBody.trim()) {
       return
     }
 
+    setIsCoverLetterOpen(false)
+    setPdfPreviewKind('letter')
+    setIsPdfPreviewOpen(true)
+  }, [coverLetterBody])
+
+  const letterFileName = `${exportFileName}-${cvLocale === 'fi' ? 'hakemuskirje' : 'cover-letter'}`
+
+  const renderLetterPdf = useCallback(({ paper }) => {
+    const renderPages = async () => {
+      const { renderCvPdf } = await import('../utils/exporters')
+
+      // The letter is drawn in the CV's font, which may still be loading.
+      await cvFontLoadPromiseRef.current
+      await window.document.fonts.ready
+
+      return renderCvPdf(letterRef.current, letterFileName, {
+        document: 'letter',
+        variant: 'cover-letter',
+        formData,
+        locale: cvLocale,
+        paper,
+        letterText: coverLetterBody,
+        letterHeader: getCoverLetterHeader(formData),
+      })
+    }
+    const next = pdfRenderQueueRef.current.catch(() => {}).then(renderPages)
+
+    pdfRenderQueueRef.current = next
+    return next
+  }, [coverLetterBody, cvLocale, formData, letterFileName])
+
+  const handleDownloadLetterPdf = useCallback(async (rendered) => {
     try {
-      const { exportCoverLetterAsPdf } = await import('../utils/exporters')
-      await exportCoverLetterAsPdf(coverLetterBody, `${exportFileName}-cover-letter`)
+      const { saveRenderedCvPdf } = await import('../utils/exporters')
+      await saveRenderedCvPdf(rendered)
+      setIsPdfPreviewOpen(false)
+      setIsCoverLetterOpen(true)
+      showToast(
+        locale === 'fi' ? 'Hakemuskirjeen PDF on ladattu.' : 'Cover letter PDF downloaded.',
+        'success',
+      )
     } catch (error) {
       showToast(
-        error instanceof Error
+        error instanceof Error && error.message
           ? error.message
           : locale === 'fi'
             ? 'PDF-vienti epäonnistui.'
@@ -2049,7 +2103,16 @@ function ResumeBuilderPage({
         'error',
       )
     }
-  }, [coverLetterBody, exportFileName, locale])
+  }, [locale])
+
+  const letterLook = resolveCoverLetterLook({
+    templateId: selectedTemplate,
+    styleVariantId,
+    atsFriendlyMode,
+    templateAccentColors,
+    cvFontId,
+    cvHeadingColor,
+  })
 
   const sidebarContent = useMemo(() => (
     <div className="editor-panel p-4 sm:p-6 lg:p-8" ref={editorScrollRef}>
@@ -2770,19 +2833,52 @@ function ResumeBuilderPage({
         onDownloadPdf={handleDownloadCoverLetterPdf}
       />
 
+      {/* What the cover letter's PDF captures (1.7.9): one off-screen,
+          inert letter page, outside both builder modes, drawn live from the
+          CV, the letter and the current template and look. */}
+      <div className="cover-letter-export-source" aria-hidden="true" inert>
+        <div ref={letterRef}>
+          <CoverLetterPage
+            formData={formData}
+            letter={coverLetter}
+            template={selectedTemplate}
+            atsFriendlyMode={atsFriendlyMode}
+            fontStack={letterLook.fontStack}
+            headingColor={letterLook.headingColor}
+            accent={letterLook.accent}
+            locale={cvLocale}
+          />
+        </div>
+      </div>
+
       {isPdfPreviewOpen ? (
-        <PdfPreviewModal
-          onClose={handleClosePdfPreview}
-          locale={locale}
-          atsFriendlyMode={atsFriendlyMode}
-          paper={pdfPaper}
-          fit={pdfFit}
-          onPaperChange={setPdfPaper}
-          onFitChange={setPdfFit}
-          onRender={renderPdfPreview}
-          onDownload={handleDownloadPdfPreview}
-          onReadAsParser={readPdfAsParser}
-        />
+        pdfPreviewKind === 'letter' ? (
+          <PdfPreviewModal
+            kind="letter"
+            onClose={handleClosePdfPreview}
+            locale={locale}
+            atsFriendlyMode={atsFriendlyMode}
+            paper={pdfPaper}
+            fit="actual"
+            onPaperChange={setPdfPaper}
+            onFitChange={setPdfFit}
+            onRender={renderLetterPdf}
+            onDownload={handleDownloadLetterPdf}
+          />
+        ) : (
+          <PdfPreviewModal
+            onClose={handleClosePdfPreview}
+            locale={locale}
+            atsFriendlyMode={atsFriendlyMode}
+            paper={pdfPaper}
+            fit={pdfFit}
+            onPaperChange={setPdfPaper}
+            onFitChange={setPdfFit}
+            onRender={renderPdfPreview}
+            onDownload={handleDownloadPdfPreview}
+            onReadAsParser={readPdfAsParser}
+          />
+        )
       ) : null}
 
       <ToastStack toasts={toasts} clearBottomBar={builderMode !== 'direct'} />

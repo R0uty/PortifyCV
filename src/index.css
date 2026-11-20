@@ -12,6 +12,7 @@
 @import './styles/utilities.css';
 @import './styles/direct-edit.css';
 @import './styles/direct-edit-popup.css';
+@import './styles/cover-letter.css';
 @import './styles/templates/_system.css';
 @import './styles/templates/minimal.css';
 @import './styles/templates/developer.css';

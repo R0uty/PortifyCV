@@ -10,6 +10,9 @@ import PdfParserView from './PdfParserView'
 // option changes; `onDownload` saves the pages on screen, so the file is
 // what the preview showed. Mounted only while open, so each opening starts
 // from a fresh render.
+//
+// `kind="letter"` (1.7.9) previews the cover letter: paper only, since a
+// letter is never shrunk (no Fit options), and no "What a parser reads" tab.
 
 const PAPER_OPTIONS = [
   { value: 'a4', en: 'A4', fi: 'A4', hintEn: '210 × 297 mm', hintFi: '210 × 297 mm' },
@@ -118,6 +121,7 @@ function PreviewPage({ page, geometry, index, total, isFinnish }) {
 }
 
 function PdfPreviewModal({
+  kind = 'cv',
   onClose,
   locale = 'en',
   atsFriendlyMode = false,
@@ -131,6 +135,7 @@ function PdfPreviewModal({
   onReadAsParser = null,
 }) {
   const isFinnish = locale === 'fi'
+  const isLetter = kind === 'letter'
   const nameId = useId()
   // The last finished render, and the options it was made with. While the
   // options differ from those, a new render is on its way.
@@ -173,7 +178,8 @@ function PdfPreviewModal({
 
   const { rendered, error } = result
   const isRendering = result.key !== optionsKey
-  const canReadAsParser = Boolean(onReadAsParser) && !isRendering && Boolean(rendered) && !rendered.fallback
+  const showParserTab = Boolean(onReadAsParser) && !isLetter
+  const canReadAsParser = showParserTab && !isRendering && Boolean(rendered) && !rendered.fallback
   const needsParserReading = view === 'parser' && canReadAsParser && parserResult.key !== optionsKey
 
   // Reads this render's PDF once the tab is open; again after a new render.
@@ -236,8 +242,14 @@ function PdfPreviewModal({
       isOpen
       onClose={onClose}
       size="xl"
-      title={isFinnish ? 'PDF-esikatselu' : 'PDF preview'}
-      description={atsFriendlyMode
+      title={isLetter
+        ? isFinnish ? 'Hakemuskirjeen PDF' : 'Cover letter PDF'
+        : isFinnish ? 'PDF-esikatselu' : 'PDF preview'}
+      description={isLetter
+        ? isFinnish
+          ? 'Hakemuskirje CV:si ulkoasussa, juuri sellaisena kuin se tallentuu. Valitse paperikoko ennen latausta.'
+          : 'Your cover letter in your CV\'s design, exactly as it will be saved. Pick the paper, then download.'
+        : atsFriendlyMode
         ? isFinnish
           ? 'ATS-asettelu, juuri sellaisena kuin se tallentuu. Valitse paperikoko ja sovitus ennen latausta.'
           : 'Your ATS layout, exactly as it will be saved. Pick the paper and fit, then download.'
@@ -256,27 +268,29 @@ function PdfPreviewModal({
             disabled={isDownloading}
             isFinnish={isFinnish}
           />
-          <OptionGroup
-            legend={isFinnish ? 'Sovitus' : 'Fit'}
-            name={`${nameId}-fit`}
-            options={FIT_OPTIONS}
-            value={fit}
-            onChange={onFitChange}
-            disabled={isDownloading}
-            isFinnish={isFinnish}
-          />
+          {isLetter ? null : (
+            <OptionGroup
+              legend={isFinnish ? 'Sovitus' : 'Fit'}
+              name={`${nameId}-fit`}
+              options={FIT_OPTIONS}
+              value={fit}
+              onChange={onFitChange}
+              disabled={isDownloading}
+              isFinnish={isFinnish}
+            />
+          )}
 
           <div className="pdf-preview__summary" role="status" aria-live="polite">
             {isRendering
               ? isFinnish ? 'Luodaan esikatselua…' : 'Building preview…'
               : pageCount > 0
                 ? isFinnish
-                  ? `${pageCount} ${pageCount === 1 ? 'sivu' : 'sivua'} · ${paperLabel} · tekstin koko ${printScale} %`
-                  : `${pageCount} ${pageCount === 1 ? 'page' : 'pages'} · ${paperLabel} · text at ${printScale}%`
+                  ? `${pageCount} ${pageCount === 1 ? 'sivu' : 'sivua'} · ${paperLabel}${isLetter ? '' : ` · tekstin koko ${printScale} %`}`
+                  : `${pageCount} ${pageCount === 1 ? 'page' : 'pages'} · ${paperLabel}${isLetter ? '' : ` · text at ${printScale}%`}`
                 : ''}
           </div>
 
-          {!isRendering && rendered?.missedFitTarget ? (
+          {!isLetter && !isRendering && rendered?.missedFitTarget ? (
             <p className="pdf-preview__notice">
               <TriangleAlert size={14} strokeWidth={2} aria-hidden="true" />
               {isFinnish
@@ -306,7 +320,7 @@ function PdfPreviewModal({
         </div>
 
         <div className="pdf-preview__main">
-        {onReadAsParser ? (
+        {showParserTab ? (
           <div className="pdf-preview__tabs" role="tablist" aria-label={isFinnish ? 'Näkymä' : 'View'}>
             {[
               ['pages', isFinnish ? 'Sivut' : 'Pages'],
@@ -337,7 +351,7 @@ function PdfPreviewModal({
           </div>
         ) : null}
 
-        {view === 'parser' && onReadAsParser ? (
+        {view === 'parser' && showParserTab ? (
           <div
             className="pdf-preview__pages pdf-preview__pages--parser"
             role="tabpanel"
@@ -351,7 +365,7 @@ function PdfPreviewModal({
         <div
           className="pdf-preview__pages"
           aria-busy={isRendering}
-          {...(onReadAsParser ? { role: 'tabpanel', id: `${tabsId}-pages`, 'aria-labelledby': `${tabsId}-pages-tab` } : {})}
+          {...(showParserTab ? { role: 'tabpanel', id: `${tabsId}-pages`, 'aria-labelledby': `${tabsId}-pages-tab` } : {})}
         >
           {status === 'error' ? (
             <p className="pdf-preview__message pdf-preview__message--error" role="alert">{error}</p>

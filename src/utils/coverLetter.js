@@ -1,6 +1,8 @@
 // @ts-check
+import { createEmptyLinks } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
 import { matchJobAd } from './jobMatch'
+import { formatLinkDisplayValue } from './shared'
 
 /** @typedef {import('../types/cv').CvData} CvData */
 
@@ -133,4 +135,57 @@ export function generateCoverLetterDraft(formData, options = {}) {
   }, formData)
 
   return paragraphs.join('\n\n')
+}
+
+/**
+ * The letter's header (1.7.9): the CV's name, title and one contact line
+ * (email, phone, location, the first link). The letter page and the
+ * text-only fallback PDF both draw it from here.
+ * @param {CvData} formData
+ * @returns {{ name: string, title: string, contacts: string[] }}
+ */
+export function getCoverLetterHeader(formData) {
+  const links = formData?.links ?? {}
+  const linkKeys = [...new Set([...Object.keys(createEmptyLinks()), ...Object.keys(links)])]
+  const firstLink = linkKeys.map((key) => trimValue(links[key])).find(Boolean) ?? ''
+
+  return {
+    name: trimValue(formData?.fullName),
+    title: trimValue(formData?.title),
+    contacts: [
+      trimValue(formData?.email),
+      trimValue(formData?.phone),
+      trimValue(formData?.location),
+      formatLinkDisplayValue(firstLink),
+    ].filter(Boolean),
+  }
+}
+
+/**
+ * "Hiring manager, Company", leaving out whichever is empty.
+ * @param {{ hiringManager?: string, company?: string }} letter
+ */
+export function getCoverLetterRecipient(letter) {
+  return [trimValue(letter?.hiringManager), trimValue(letter?.company)].filter(Boolean).join(', ')
+}
+
+/**
+ * The body's paragraphs: split on blank lines, line breaks inside one kept.
+ * @param {string} body
+ */
+export function splitCoverLetterParagraphs(body) {
+  return String(body ?? '')
+    .trim()
+    .split(/\n[ \t]*\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+}
+
+/**
+ * Today's date in the letter's language ("November 20, 2026", "20. marraskuuta 2026").
+ * @param {string} locale
+ * @param {Date} [date]
+ */
+export function formatCoverLetterDate(locale, date = new Date()) {
+  return new Intl.DateTimeFormat(locale === 'fi' ? 'fi' : 'en', { dateStyle: 'long' }).format(date)
 }

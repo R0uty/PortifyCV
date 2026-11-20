@@ -1,0 +1,106 @@
+/* The cover letter page (1.7.9, CoverLetterPage.jsx): one column of text in
+   the CV's font and colours, captured by the PDF preview through
+   renderCvPdf's letter mode. The page margins are the PDF's own (exporters.js
+   PDF_MODES.letter), so the page itself has none; its off-screen source is
+   laid out at that content width (A4 210mm less 2 × 22mm), and the export
+   clone at the chosen paper's. Colours are hex only: html2canvas
+   can't paint color-mix()/oklch(). */
+
+.cover-letter-export-source {
+  position: fixed;
+  top: 0;
+  left: -200000px;
+  width: 166mm;
+  pointer-events: none;
+}
+
+.cover-letter-page {
+  --letter-heading: #1f2937;
+  --letter-accent: #1f2937;
+  --letter-ink: #1f2937;
+  --letter-muted: #4b5563;
+
+  box-sizing: border-box;
+  width: 100%;
+  background: #ffffff;
+  color: var(--letter-ink);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.cover-letter-page--ats {
+  --letter-ink: #000000;
+  --letter-muted: #000000;
+}
+
+.cover-letter-page :where(p) {
+  margin: 0;
+}
+
+.cover-letter-page__name {
+  color: var(--letter-heading);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.cover-letter-page__title {
+  margin-top: 0.3rem;
+  color: var(--letter-heading);
+  font-size: 1.02rem;
+  font-weight: 500;
+}
+
+.cover-letter-page__contact {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 0.55rem;
+  color: var(--letter-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.cover-letter-page__contact-item {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cover-letter-page__separator {
+  padding: 0 0.5rem;
+}
+
+.cover-letter-page__rule {
+  height: 2px;
+  margin: 1.1rem 0 1.6rem;
+  background: var(--letter-accent);
+}
+
+.cover-letter-page--ats .cover-letter-page__rule {
+  height: 1px;
+}
+
+.cover-letter-page__date {
+  color: var(--letter-muted);
+}
+
+.cover-letter-page__recipient {
+  color: var(--letter-ink);
+  margin-top: 0.15rem;
+}
+
+/* The export sandbox sets its own text colour inline on the cloned root,
+   so the body text carries the ink itself. */
+.cover-letter-page__body {
+  color: var(--letter-ink);
+  margin-top: 1.6rem;
+}
+
+.cover-letter-page__paragraph {
+  white-space: pre-line;
+}
+
+.cover-letter-page__paragraph + .cover-letter-page__paragraph {
+  margin-top: 0.95rem;
+}

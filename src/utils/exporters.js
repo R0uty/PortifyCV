@@ -26,6 +26,14 @@ const PDF_MODES = {
     marginMm: { top: 16, right: 16, bottom: 18, left: 16 },
     maxFitWidthFactor: 1.08,
   },
+  // The cover letter page (1.7.9, renderCvPdf's `document: 'letter'`): one
+  // column of text on white, so real page margins on every page rather than
+  // a designer page's full bleed, and never fitted (always 'actual').
+  letter: {
+    fileSuffix: 'cover-letter',
+    marginMm: { top: 20, right: 22, bottom: 20, left: 22 },
+    maxFitWidthFactor: 1,
+  },
 }
 // Designer pages run off the paper on every side, with their backgrounds
 // carried into this much room above and below a page break (a first page
@@ -417,17 +425,47 @@ export function exportCoverLetterAsText(letterText, fileName) {
 }
 
 /**
- * Renders the letter as plain wrapped paragraphs on A4 pages — no header,
- * palette, or layout machinery, since a cover letter is body text meant to
- * be dropped into any letterhead, not a styled document like the CV export.
+ * The cover letter's text-only PDF: the fallback when the letter page can't
+ * be captured (renderCvPdf's `{ fallback: true }`, 1.7.9). Plain wrapped
+ * paragraphs on A4, under the name and contact line (`header`, from
+ * coverLetter.js's getCoverLetterHeader) when there is one.
  */
-export async function exportCoverLetterAsPdf(letterText, fileName) {
+export async function exportCoverLetterAsPdf(letterText, fileName, { header = null } = {}) {
   const jsPDF = await loadJsPdf()
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const marginMm = { top: 22, right: 22, bottom: 22, left: 22 }
   const maxWidth = A4_WIDTH_MM - marginMm.left - marginMm.right
   const lineHeight = 6
   const cursor = { y: marginMm.top }
+
+  if (header?.name) {
+    pdf.setFont('helvetica', 'bold')
+    pdf.setFontSize(16)
+    pdf.setTextColor(20, 20, 20)
+    pdf.splitTextToSize(header.name, maxWidth).forEach((line) => {
+      pdf.text(line, marginMm.left, cursor.y)
+      cursor.y += 7
+    })
+  }
+
+  const contactLine = (header?.contacts ?? []).join('  ·  ')
+
+  if (contactLine) {
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(9.5)
+    pdf.setTextColor(75, 85, 99)
+    pdf.splitTextToSize(contactLine, maxWidth).forEach((line) => {
+      pdf.text(line, marginMm.left, cursor.y)
+      cursor.y += 5
+    })
+  }
+
+  if (header?.name || contactLine) {
+    pdf.setDrawColor(31, 41, 55)
+    pdf.setLineWidth(0.3)
+    pdf.line(marginMm.left, cursor.y, A4_WIDTH_MM - marginMm.right, cursor.y)
+    cursor.y += lineHeight * 2
+  }
 
   pdf.setFont('helvetica', 'normal')
   pdf.setFontSize(11)
@@ -2695,6 +2733,13 @@ async function exportCvAsPdfTextFallback(
 //
 // options: mode ('designer' | 'ats'), template/variant, formData, locale,
 // paper (a key of PDF_PAPER_SIZES), fit (one of PDF_FIT_MODES).
+//
+// `document: 'letter'` (1.7.9) captures the cover letter page instead
+// (CoverLetterPage.jsx): PDF_MODES.letter's margins, fit always 'actual',
+// the file named `fileName` as given; `letterText`/`letterHeader` are for
+// its text-only fallback. Page breaks go through the same
+// keepPageBreaksOutOfText pass, so no line is cut. `mode` is ignored: the
+// page draws its own ATS look.
 export async function renderCvPdf(previewElement, fileName, options = {}) {
   if (!previewElement) {
     throw new Error('Preview element is unavailable for PDF export.')
@@ -2706,9 +2751,10 @@ export async function renderCvPdf(previewElement, fileName, options = {}) {
     throw new Error('Active template preview root is unavailable for PDF export.')
   }
 
-  const mode = options.mode === 'ats' ? 'ats' : 'designer'
+  const isLetter = options.document === 'letter'
+  const mode = isLetter ? 'letter' : options.mode === 'ats' ? 'ats' : 'designer'
   const paper = resolvePdfPaper(options.paper)
-  const fit = resolvePdfFit(options.fit)
+  const fit = isLetter ? 'actual' : resolvePdfFit(options.fit)
   const expectedVariant =
     typeof options.variant === 'string'
       ? options.variant
@@ -2774,9 +2820,9 @@ export async function renderCvPdf(previewElement, fileName, options = {}) {
     const sectionRanges = collectCanvasSectionRanges(captureRoot, canvas)
     const textLayer = collectPdfTextLayer(captureRoot, canvas)
     const exportName =
-      mode === 'designer' ? fileName : `${fileName}-${createPdfMode(mode).fileSuffix}`
+      mode === 'designer' || isLetter ? fileName : `${fileName}-${createPdfMode(mode).fileSuffix}`
     const geometry = getPageGeometry(pdfMode, mode, paper)
-    const pages = createPdfPages(
+    const builtPages = createPdfPages(
       canvas,
       geometry,
       collectPageLayout(captureRoot, canvas),
@@ -2784,6 +2830,11 @@ export async function renderCvPdf(previewElement, fileName, options = {}) {
       textLayer,
       canvas.width / Math.max(captureRoot.offsetWidth, 1),
     )
+    // A letter continues on the next page as any letter does: no "content
+    // continues" line (that marks a CV section split across pages).
+    const pages = isLetter
+      ? builtPages.map((page) => ({ ...page, separatorLineSegments: [] }))
+      : builtPages
     // Printed size against the size the CV is laid out at on screen.
     const layoutWidthMm = mode === 'designer'
       ? DESIGNER_PAPER_WIDTH_MM
@@ -2845,6 +2896,11 @@ export async function renderedCvPdfToBlob(rendered) {
 export async function saveRenderedCvPdf(rendered) {
   if (rendered.fallback) {
     const { fileName, mode, options } = rendered
+
+    if (mode === 'letter') {
+      await exportCoverLetterAsPdf(options.letterText ?? '', fileName, { header: options.letterHeader })
+      return
+    }
 
     await exportCvAsPdfTextFallback(
       options.formData,
