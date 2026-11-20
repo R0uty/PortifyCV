@@ -14,6 +14,9 @@ import { NAME_OWN_COLOR_VARIABLES } from '../src/utils/cvHeadingColors.js'
 const navRail = (page) =>
   page.getByRole('navigation', { name: 'Section navigation' })
 
+// A skill the demo CV lists, named by the job-ad test's ad.
+const AD_SKILL = 'Figma'
+
 async function openCoverLetter(page) {
   await page.goto('/cv')
   await page.getByRole('button', { name: 'Load demo CV' }).first().click()
@@ -162,6 +165,90 @@ test.describe('Cover letter', () => {
     await dialog.getByRole('button', { name: 'Regenerate draft' }).click()
     await expect(draft).toHaveValue('My edited letter')
     expect(message).toBe('Replace your edited letter with a new draft?')
+
+    page.once('dialog', (d) => d.accept())
+    await dialog.getByRole('button', { name: 'Regenerate draft' }).click()
+    await expect(draft).toHaveValue(/John Doe/)
+    await expect(draft).not.toHaveValue('My edited letter')
+    const fresh = await draft.inputValue()
+
+    // The body is the fresh draft, so Regenerate replaces it without asking.
+    let asked = false
+    const onDialog = (d) => { asked = true; d.dismiss() }
+    page.on('dialog', onDialog)
+    await dialog.getByRole('button', { name: 'Regenerate draft' }).click()
+    await expect(draft).toHaveValue(fresh)
+    page.off('dialog', onDialog)
+    expect(asked).toBe(false)
+  })
+
+  test('a saved CV reopens with its letter', async ({ page }) => {
+    const dialog = await openCoverLetter(page)
+    const draft = dialog.getByRole('textbox', { name: 'Draft (editable)' })
+    await draft.fill('My saved letter')
+    await page.keyboard.press('Escape')
+
+    await page.getByRole('banner').getByRole('button', { name: 'Save on this device' }).click()
+    const saveDialog = page.getByRole('dialog', { name: 'Save on this device' })
+    await saveDialog.getByLabel('Name for this CV').fill('Letter CV')
+    await saveDialog.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(page.getByText('Saved on this device as "Letter CV".')).toBeVisible()
+
+    const myCvs = page.getByRole('dialog', { name: 'My CVs' })
+    await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: /^My CVs/ }).click()
+    await myCvs.getByRole('button', { name: 'New CV' }).click()
+    await expect(page.getByText('Started a new, empty CV.')).toBeVisible()
+    await navRail(page).getByRole('button', { name: 'Cover letter' }).click()
+    await expect(draft).toHaveValue('')
+    await page.keyboard.press('Escape')
+
+    await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: /^My CVs/ }).click()
+    await myCvs.locator('[data-saved-cv="Letter CV"]').getByRole('button', { name: 'Open' }).click()
+    await expect(page.getByText('Opened Letter CV.')).toBeVisible()
+    await navRail(page).getByRole('button', { name: 'Cover letter' }).click()
+    await expect(draft).toHaveValue('My saved letter')
+  })
+
+  test('the letter comes back from an exported JSON file', async ({ page }, testInfo) => {
+    const dialog = await openCoverLetter(page)
+    const draft = dialog.getByRole('textbox', { name: 'Draft (editable)' })
+    await draft.fill('My exported letter')
+    await page.keyboard.press('Escape')
+
+    await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
+    const downloadPromise = page.waitForEvent('download')
+    await page.getByRole('menuitem', { name: 'JSON' }).click()
+    const path = testInfo.outputPath('letter-cv.json')
+    await (await downloadPromise).saveAs(path)
+
+    // Loading the demo empties the letter; importing the file brings it back.
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    await navRail(page).getByRole('button', { name: 'Cover letter' }).click()
+    await expect(draft).toHaveValue('')
+    await page.keyboard.press('Escape')
+
+    await page.getByRole('tab', { name: 'Classic' }).click()
+    await page.locator('input[type="file"][accept=".json,application/json"]').setInputFiles(path)
+    await expect(page.getByText('Imported CV data from letter-cv.json.')).toBeVisible()
+    await navRail(page).getByRole('button', { name: 'Cover letter' }).click()
+    await expect(draft).toHaveValue('My exported letter')
+  })
+
+  test('the draft names a skill the job ad asks for', async ({ page }) => {
+    await page.goto('/cv')
+    await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+    const panel = page.locator('details.editor-tools', { has: page.locator('.editor-tools__stat') })
+    await panel.locator('summary').click()
+    await panel.getByRole('textbox', { name: 'Job description' }).fill(`Frontend Engineer\nYou ship features in ${AD_SKILL} every week.`)
+
+    await navRail(page).getByRole('button', { name: 'Cover letter' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Cover letter' })
+    await dialog.getByRole('button', { name: 'Generate draft' }).click()
+    const draft = dialog.getByRole('textbox', { name: 'Draft (editable)' })
+    await expect(draft).toHaveValue(/My experience covers what this role asks for:/)
+    await expect(draft).toHaveValue(new RegExp(`what this role asks for: [^.]*${AD_SKILL}`))
   })
 })
 
