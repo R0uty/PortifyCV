@@ -254,7 +254,7 @@ test.describe('Cover letter PDF', () => {
   // The headings colour reaches every template's name but three
   // (cvHeadingColors.js's NAME_OWN_COLOR_VARIABLES); the letter's name
   // follows the CV's own name, so the two never disagree.
-  test('the letter\'s name takes the headings colour only where the CV\'s name does', async ({ page }) => {
+  test('the letter\'s name takes the headings colour only where the CV\'s name does @slow', async ({ page }) => {
     test.setTimeout(180_000)
     const burgundy = '#7f1d1d'
     const mismatches = []

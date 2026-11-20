@@ -137,6 +137,30 @@ twin to blank the same number of figures, and no figure written as a word,
 so write example figures as digits) and `check:feedback`; `e2e/bullet-ideas.spec.js` covers
 the panel.
 
+**The cover letter (1.7.9) is CV data, drawn in the CV's look.**
+`formData.coverLetter` (`{ company, role, hiringManager, body }`, factory
+`createEmptyCoverLetter` in `cvForm.js`) is part of `CvData`, so Save, JSON
+export/import and session restore keep it and "Load demo"/New CV replace it.
+`shareLinks.js` has no key for it on purpose: a link never carries the
+letter. `generateCoverLetterDraft(formData, { locale, jobAd, … })` in
+`src/utils/coverLetter.js` drafts it in the CV's language (`cvLanguage`);
+given the ATS panel's pasted ad it fills the role from `jobTitleFromAd` and
+lists up to four requirements `matchJobAd` found in the CV (cases in
+`check:job-match`). `CoverLetterModal.jsx` asks before Regenerate replaces
+an edited letter. The PDF comes from an off-screen `CoverLetterPage.jsx`
+(the template's font, heading colour and accent, resolved by
+`coverLetterLook.js`; plain in ATS mode) captured by `renderCvPdf(…,
+{ document: 'letter' })` (the `letter` entry of `PDF_MODES`, fit always
+`actual`, so a long letter takes a second page) and previewed by
+`PdfPreviewModal kind="letter"` (paper size only). The letter's name takes
+the headings colour only where the CV's name does:
+`cvHeadingColors.js`'s `nameTakesHeadingColor`/`NAME_OWN_COLOR_VARIABLES` is
+the one rule both use. If the page can't be captured, `exportCoverLetterAsPdf`
+in `exporters.js` writes the jsPDF text letter with the name and contact
+line. Covered by `e2e/cover-letter.spec.js` (the all-template colour
+comparison and the PDF checks are `@slow`); `e2e/export-fields.spec.js`
+doesn't sweep it, since the letter is not CV content.
+
 **"What a parser reads" (1.7.4) reuses the CV import on the exact PDF.**
 The PDF preview's second tab (`PdfParserView.jsx`) turns the rendered
 pages into the download's bytes (`renderedCvPdfToBlob`), reads them back

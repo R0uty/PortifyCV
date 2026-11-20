@@ -69,7 +69,7 @@ function getCopy(locale) {
           heading: 'Vie tiedostoksi tai jaa linkkinä',
           figureLabel: 'Avattu Vie-valikko: PDF, HTML, JSON, Word ja jakolinkki.',
           caption:
-            'Vie-valikossa on neljä muotoa: PDF hakemuksiin, Word muokattavaksi toisessa ohjelmassa, HTML verkkoon ja JSON varmuuskopioksi tai myöhempää muokkausta varten. Saman valikon lopun Kopioi jakolinkki koodaa koko CV:n URL-osoitteeseen — sitä ei lähetetä palvelimelle, eivätkä kuvat mahdu mukaan. Vasemman reunan Hakemuskirje-kohta (puhelimella ⋯-valikossa) luo CV:si pohjalta hakemuskirjeluonnoksen, jota voit muokata.',
+            'Vie-valikossa on neljä muotoa: PDF hakemuksiin, Word muokattavaksi toisessa ohjelmassa, HTML verkkoon ja JSON varmuuskopioksi tai myöhempää muokkausta varten. Saman valikon lopun Kopioi jakolinkki koodaa koko CV:n URL-osoitteeseen — sitä ei lähetetä palvelimelle, eivätkä kuvat mahdu mukaan. Vasemman reunan Hakemuskirje-kohta (puhelimella ⋯-valikossa) luo CV:si pohjalta hakemuskirjeluonnoksen CV:si kielellä, jota voit muokata, ja vie sen PDF:ksi CV:si ulkoasulla.',
         },
         {
           step: 'restore',
@@ -143,7 +143,7 @@ function getCopy(locale) {
         heading: 'Export a file or share a link',
         figureLabel: 'The open Export menu: PDF, HTML, JSON, Word and a share link.',
         caption:
-          'The Export menu offers four formats: PDF for applications, Word for editing in another program, HTML for the web, and JSON as a backup or to keep editing later. Copy share link, at the bottom of the same menu, encodes the whole CV into the URL — never sent to a server, and images don\'t fit. Cover letter, in the rail on the left (on a phone, in the ⋯ menu), drafts an editable cover letter from your CV.',
+          'The Export menu offers four formats: PDF for applications, Word for editing in another program, HTML for the web, and JSON as a backup or to keep editing later. Copy share link, at the bottom of the same menu, encodes the whole CV into the URL — never sent to a server, and images don\'t fit. Cover letter, in the rail on the left (on a phone, in the ⋯ menu), drafts an editable cover letter from your CV, in your CV\'s language, and exports it as a PDF in your CV\'s look.',
       },
       {
         step: 'restore',

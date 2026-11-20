@@ -10,6 +10,8 @@ import { downloadFromPdfPreview } from './helpers/pdfPreview.js'
 // What a person typed has to reach the file they send (1.6.73). ATS mode used
 // to lose employment type, tagline and the detail lines of education,
 // certificates and projects, and every format lost employment type.
+// The cover letter is not swept here: it is the letter, not CV content, and
+// it travels in JSON only (never in a share link).
 const { cv, fields, basics } = createEveryFieldCv()
 
 const banner = (page) => page.getByRole('banner')

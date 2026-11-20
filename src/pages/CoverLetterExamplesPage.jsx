@@ -96,7 +96,7 @@ function getCopy(locale) {
         {
           heading: 'Anna PortifyCV:n kirjoittaa ensimmäinen versio',
           paragraphs: [
-            'PortifyCV:n saatekirjegeneraattori ei ole tekoäly — se on määrätietoinen malli, joka poimii CV:si datan suoraan: avaus nimeää hakemasi roolin ja yrityksen (jos annat ne), toinen kappale poimii viimeisimmän roolisi ja sen parhaan saavutuksen tai kuvauksen, kolmas listaa tärkeimmät taitosi, ja lopetus on valmiiksi kirjoitettu. Sama "ei mitään palvelimelle" -periaate kuin muussakin sovelluksessa: luonnos rakennetaan kokonaan selaimessasi.',
+            'PortifyCV:n saatekirjegeneraattori ei ole tekoäly — se on määrätietoinen malli, joka poimii CV:si datan suoraan: avaus nimeää hakemasi roolin ja yrityksen (jos annat ne), toinen kappale poimii viimeisimmän roolisi ja sen parhaan saavutuksen tai kuvauksen, kolmas listaa tärkeimmät taitosi, ja lopetus on valmiiksi kirjoitettu. Jos olet liittänyt työpaikkailmoituksen ATS-paneeliin, kolmas kappale listaa sen sijaan enintään neljä ilmoituksen vaatimusta, jotka CV:si kattaa, ja kirje tallentuu CV:si mukana (mutta ei koskaan jakolinkkiin). Sama "ei mitään palvelimelle" -periaate kuin muussakin sovelluksessa: luonnos rakennetaan kokonaan selaimessasi.',
           ],
           linkParagraph: {
             before: 'Täytä yrityksen nimi, tehtävänimike ja rekrytoijan nimi (valinnaisia) ',
@@ -247,7 +247,7 @@ function getCopy(locale) {
       {
         heading: 'Let PortifyCV draft the first version',
         paragraphs: [
-          'PortifyCV’s cover letter generator isn’t AI — it’s a deterministic template that pulls straight from your CV data: the opening names the role and company you’re applying to (if you provide them), the second paragraph pulls your most recent role and its best achievement or description, the third lists your top skills, and the closing is pre-written. Same "nothing touches a server" principle as the rest of the app — the draft is built entirely in your browser.',
+          'PortifyCV’s cover letter generator isn’t AI — it’s a deterministic template that pulls straight from your CV data: the opening names the role and company you’re applying to (if you provide them), the second paragraph pulls your most recent role and its best achievement or description, the third lists your top skills, and the closing is pre-written. If you have pasted a job ad into the ATS panel, the third paragraph lists up to four of its requirements that your CV covers instead, and the letter is saved with your CV (but never put in a share link). Same "nothing touches a server" principle as the rest of the app — the draft is built entirely in your browser.',
         ],
         linkParagraph: {
           before: 'Fill in the company name, role title, and hiring manager’s name (all optional) in the ',
