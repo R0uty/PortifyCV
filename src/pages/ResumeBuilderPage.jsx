@@ -99,7 +99,7 @@ import {
   shareLinkOmitsImages,
 } from '../utils/shareLinks'
 import { evaluateAtsScore } from '../utils/atsScore'
-import { matchJobAd } from '../utils/jobMatch'
+import { jobTitleFromAd, matchJobAd } from '../utils/jobMatch'
 import { BULLET_BLANK, countBlankBullets, evaluateCvFeedback } from '../utils/cvFeedback'
 import { generateCoverLetterDraft } from '../utils/coverLetter'
 import { EXAMPLES, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
@@ -1537,10 +1537,9 @@ function ResumeBuilderPage({
   // tailor, named after the ad's first line when that reads like a title.
   // A saved CV that was open stays as it was last saved.
   const handleSaveCopyForJob = useCallback(() => {
-    const firstLine = jobDescription.split('\n').map((line) => line.trim()).find(Boolean) ?? ''
-    const jobTitle = firstLine.replace(/[.:;,]+$/, '')
+    const jobTitle = jobTitleFromAd(jobDescription)
     const base = cvLibrary.activeCv?.name ?? defaultCvName(formData, locale)
-    const suffix = jobTitle && jobTitle.length <= 40
+    const suffix = jobTitle
       ? jobTitle
       : locale === 'fi' ? 'räätälöity' : 'tailored'
 
@@ -1977,13 +1976,14 @@ function ResumeBuilderPage({
 
   const handleGenerateCoverLetter = useCallback(() => {
     const draft = generateCoverLetterDraft(formData, {
-      locale,
+      locale: cvLocale,
+      jobAd: jobDescription,
       companyName: coverLetter.company,
       roleTitle: coverLetter.role,
       hiringManagerName: coverLetter.hiringManager,
     })
     handleCoverLetterBodyChange(draft)
-  }, [coverLetter, formData, handleCoverLetterBodyChange, locale])
+  }, [coverLetter, cvLocale, formData, handleCoverLetterBodyChange, jobDescription])
 
   const handleCopyCoverLetter = useCallback(async () => {
     if (!coverLetterBody.trim()) {

@@ -1,5 +1,6 @@
 // Regression check for the job-ad matcher (src/utils/jobMatch.js and its
-// term list, src/utils/jobTerms.js): what counts as a requirement in an
+// term list, src/utils/jobTerms.js), which also covers the cover-letter draft
+// written for an ad (src/utils/coverLetter.js): what counts as a requirement in an
 // English or Finnish ad, and what of it a CV already says.
 //
 //   node scripts/check-job-match.mjs
@@ -29,7 +30,8 @@ registerHooks({
 const srcDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src')
 const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, relativePath)).href)
 
-const { matchJobAd } = await importSrc('utils/jobMatch.js')
+const { matchJobAd, jobTitleFromAd } = await importSrc('utils/jobMatch.js')
+const { generateCoverLetterDraft } = await importSrc('utils/coverLetter.js')
 const { createInitialCvData, createEmptyExperience } = await importSrc('utils/cvForm.js')
 
 let failures = 0
@@ -131,6 +133,28 @@ testauksesta (Jest, Playwright) ja CI/CD-putkista katsotaan eduksi. Hyvä englan
 {
   same('an empty ad has no input', matchJobAd(cv(), '   ').hasInput, false)
   check('a long ad lists at most 30 requirements', matchJobAd(cv(), `${ENGLISH_AD} ${'AWS Azure GCP Docker Kubernetes Terraform Ansible Linux Git GitHub GitLab Jenkins Kafka Redis Python Ruby Rust Scala '.repeat(3)}`).total <= 30)
+}
+
+{
+  same('jobTitleFromAd takes the first line without trailing punctuation', jobTitleFromAd('Senior Frontend Developer.\nWe are looking for…'), 'Senior Frontend Developer')
+  same('jobTitleFromAd skips leading blank lines', jobTitleFromAd('\n  \nQA Engineer:\nBody'), 'QA Engineer')
+  same('jobTitleFromAd gives nothing for a first line over 40 characters', jobTitleFromAd('We are a fast-growing company looking for a developer'), '')
+  same('jobTitleFromAd gives nothing for an empty ad', jobTitleFromAd(''), '')
+}
+{
+  const data = cv({ skills: ['React', 'TypeScript', 'Figma', 'SQL'] })
+  const ad = 'Frontend Developer\nYou know TypeScript and React, WCAG.'
+  const en = generateCoverLetterDraft(data, { locale: 'en', jobAd: ad })
+  check('the draft for an ad names the ad\'s terms the CV has', en.includes('TypeScript') && en.includes('React'))
+  check('the draft for an ad leaves out skills the ad does not ask for', !en.includes('Figma'))
+  check('the draft for an ad uses the ad line', /My experience covers what this role asks for: [^.]*\./.test(en), en)
+  const fi = generateCoverLetterDraft(data, { locale: 'fi', jobAd: ad })
+  check('the Finnish draft signs off in Finnish', fi.includes('Ystävällisin terveisin'))
+  check('the Finnish draft for an ad uses the Finnish line', fi.includes('Kokemukseni kattaa sen, mitä tehtävässä haetaan:'))
+  const plain = generateCoverLetterDraft(data, { locale: 'en' })
+  check('with no ad the draft names the CV skills', plain.includes('Figma') && plain.includes('SQL') && plain.includes('My background includes'))
+  const noMatch = generateCoverLetterDraft(data, { locale: 'en', jobAd: 'Nurse wanted for night shifts.' })
+  check('an ad with nothing found keeps the CV skills', noMatch.includes('My background includes'))
 }
 
 console.log()

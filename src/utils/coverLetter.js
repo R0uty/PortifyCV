@@ -1,5 +1,6 @@
 // @ts-check
 import { createCvSnapshot } from './cvSnapshot'
+import { matchJobAd } from './jobMatch'
 
 /** @typedef {import('../types/cv').CvData} CvData */
 
@@ -26,9 +27,10 @@ function joinWithAnd(items, locale) {
  * Builds a paragraph-by-paragraph draft, dropping any paragraph whose source
  * data is missing rather than emitting an empty or grammatically broken line.
  * @param {CvSnapshot} snapshot
- * @param {{ locale: 'en' | 'fi', companyName: string, roleTitle: string, hiringManagerName: string }} options
+ * (`snapshotSource` is the CV the snapshot came from, for matching the ad)
+ * @param {{ locale: 'en' | 'fi', companyName: string, roleTitle: string, hiringManagerName: string, jobAd?: string }} options
  */
-function buildParagraphs(snapshot, options) {
+function buildParagraphs(snapshot, options, snapshotSource) {
   const isFinnish = options.locale === 'fi'
   const companyName = trimValue(options.companyName)
   const roleTitle = trimValue(options.roleTitle) || snapshot.title
@@ -77,8 +79,15 @@ function buildParagraphs(snapshot, options) {
   }
 
   let skillsParagraph = ''
+  const adTerms = trimValue(options.jobAd)
+    ? matchJobAd(snapshotSource, options.jobAd).found.slice(0, 4).map((item) => item.label)
+    : []
 
-  if (topSkills.length > 0) {
+  if (adTerms.length > 0) {
+    skillsParagraph = isFinnish
+      ? `Kokemukseni kattaa sen, mitä tehtävässä haetaan: ${joinWithAnd(adTerms, 'fi')}.`
+      : `My experience covers what this role asks for: ${joinWithAnd(adTerms, 'en')}.`
+  } else if (topSkills.length > 0) {
     skillsParagraph = isFinnish
       ? `Osaamiseeni kuuluu muun muassa ${joinWithAnd(topSkills, 'fi')}.`
       : `My background includes ${joinWithAnd(topSkills, 'en')}.`
@@ -109,7 +118,7 @@ function buildParagraphs(snapshot, options) {
  * app's "nothing ever touches a server" story — so quality is bounded by
  * template phrasing rather than free-form generation.
  * @param {CvData} formData
- * @param {{ locale?: 'en' | 'fi', companyName?: string, roleTitle?: string, hiringManagerName?: string }} [options]
+ * @param {{ locale?: 'en' | 'fi', companyName?: string, roleTitle?: string, hiringManagerName?: string, jobAd?: string }} [options]
  * @returns {string}
  */
 export function generateCoverLetterDraft(formData, options = {}) {
@@ -120,7 +129,8 @@ export function generateCoverLetterDraft(formData, options = {}) {
     companyName: options.companyName ?? '',
     roleTitle: options.roleTitle ?? '',
     hiringManagerName: options.hiringManagerName ?? '',
-  })
+    jobAd: options.jobAd ?? '',
+  }, formData)
 
   return paragraphs.join('\n\n')
 }

@@ -987,11 +987,6 @@ export function normalizeSectionOrder(sectionOrder, fallbackOrder = CV_SECTION_O
   return nextOrder
 }
 
-/**
- * Parse imported JSON into a validated CV state.
- * @param {unknown} value
- * @returns {CvData}
- */
 // A missing or odd letter is an empty one; each key is text or empty, so a
 // file from another version never blocks the import.
 function readCoverLetter(value) {
@@ -1003,6 +998,11 @@ function readCoverLetter(value) {
   )
 }
 
+/**
+ * Parse imported JSON into a validated CV state.
+ * @param {unknown} value
+ * @returns {CvData}
+ */
 export function parseImportedCvData(value) {
   if (!isPlainObject(value)) {
     throw new Error(

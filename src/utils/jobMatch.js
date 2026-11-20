@@ -237,6 +237,19 @@ function cvSections(formData) {
  */
 
 /**
+ * The ad's first non-empty line, without trailing punctuation, when it is
+ * short enough to read as a job title; otherwise ''.
+ * @param {string} ad
+ * @returns {string}
+ */
+export function jobTitleFromAd(ad) {
+  const firstLine = String(ad ?? '').split('\n').map((line) => line.trim()).find(Boolean) ?? ''
+  const title = firstLine.replace(/[.:;,]+$/, '')
+
+  return title.length <= 40 ? title : ''
+}
+
+/**
  * @param {CvData} formData
  * @param {string} [jobAd='']
  * @returns {JobMatch}
