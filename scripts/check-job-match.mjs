@@ -148,6 +148,13 @@ testauksesta (Jest, Playwright) ja CI/CD-putkista katsotaan eduksi. Hyvä englan
   check('the draft for an ad names the ad\'s terms the CV has', en.includes('TypeScript') && en.includes('React'))
   check('the draft for an ad leaves out skills the ad does not ask for', !en.includes('Figma'))
   check('the draft for an ad uses the ad line', /My experience covers what this role asks for: [^.]*\./.test(en), en)
+  check('the draft for an ad leaves out a term the CV lacks (WCAG)', !en.includes('WCAG'), en)
+  const adLine = (draft) => draft.match(/My experience covers what this role asks for: ([^.]*)\./)?.[1] ?? ''
+  same('the draft names the ad\'s terms in ad order', adLine(en), 'Frontend, TypeScript, and React')
+  const many = cv({ skills: ['React', 'TypeScript', 'Figma', 'SQL', 'Python', 'Docker'] })
+  const manyAd = 'Developer\nWe use Docker, Python, SQL, Figma, TypeScript and React.'
+  const manyLine = adLine(generateCoverLetterDraft(many, { locale: 'en', jobAd: manyAd }))
+  same('the draft names at most 4 of the ad\'s terms, the first ones in ad order', manyLine, 'Docker, Python, SQL, and Figma')
   const fi = generateCoverLetterDraft(data, { locale: 'fi', jobAd: ad })
   check('the Finnish draft signs off in Finnish', fi.includes('Ystävällisin terveisin'))
   check('the Finnish draft for an ad uses the Finnish line', fi.includes('Kokemukseni kattaa sen, mitä tehtävässä haetaan:'))
