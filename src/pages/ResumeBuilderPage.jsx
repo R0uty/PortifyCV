@@ -2034,14 +2034,17 @@ function ResumeBuilderPage({
     }
   }, [coverLetterBody, locale])
 
+  // The letter's file name (.txt and PDF), in the CV's language.
+  const letterFileName = `${exportFileName}-${cvLocale === 'fi' ? 'hakemuskirje' : 'cover-letter'}`
+
   const handleDownloadCoverLetterText = useCallback(async () => {
     if (!coverLetterBody.trim()) {
       return
     }
 
     const { exportCoverLetterAsText } = await import('../utils/exporters')
-    exportCoverLetterAsText(coverLetterBody, `${exportFileName}-cover-letter`)
-  }, [coverLetterBody, exportFileName])
+    exportCoverLetterAsText(coverLetterBody, letterFileName)
+  }, [coverLetterBody, letterFileName])
 
   // The letter's PDF (1.7.9): the letter dialog gives way to the PDF
   // preview, which captures the off-screen CoverLetterPage through the CV's
@@ -2056,8 +2059,6 @@ function ResumeBuilderPage({
     setPdfPreviewKind('letter')
     setIsPdfPreviewOpen(true)
   }, [coverLetterBody])
-
-  const letterFileName = `${exportFileName}-${cvLocale === 'fi' ? 'hakemuskirje' : 'cover-letter'}`
 
   const renderLetterPdf = useCallback(({ paper }) => {
     const renderPages = async () => {
@@ -2861,7 +2862,6 @@ function ResumeBuilderPage({
             paper={pdfPaper}
             fit="actual"
             onPaperChange={setPdfPaper}
-            onFitChange={setPdfFit}
             onRender={renderLetterPdf}
             onDownload={handleDownloadLetterPdf}
           />
