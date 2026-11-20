@@ -122,9 +122,11 @@ For the PDF the user chose **1**:
   renders the letter at paper width, off-screen like the CV's export source,
   marked so the export pipeline finds it.
 - Look, from the builder's current state for the selected template: the CV
-  font (`cvFontId`/the look's `fontId`), the heading colour (`cvHeadingColor`
-  or the look's), the accent (`resolveTemplateAccent(templateAccentColors,
-  template)`, else the heading colour). In ATS-friendly mode the letter is
+  font (`cvFontId`/the look's `fontId`), the name in exactly the colour the
+  CV paints its name (`cvHeadingColor` where the CV's name takes it, else the
+  template's own name colour from the look's palette — `cvHeadingColors.js`,
+  settled in the final review), the accent (`resolveTemplateAccent(
+  templateAccentColors, template)`) on the rule only. In ATS-friendly mode the letter is
   plain: default font, black text, no colour, matching the ATS CV.
 - Content, top to bottom: name (as a heading through `CvHeading`-style
   rules, so marketing pages keep one `<h1>` if it is ever shown there),
