@@ -201,6 +201,4 @@ For the PDF the user chose **1**:
 
 ## Left to the builder
 
-Exact copy, dialog layout, the letter's spacing and type sizes, how
-"edited since generated" is tracked, the share-link key names (new keys
-only), and where the letter page mounts.
+Exact copy, dialog layout, and the letter's spacing and type sizes.
