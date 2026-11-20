@@ -71,9 +71,12 @@ function CVPreview({
   accentColor,
   // Overrides the name and section-title color for every template except
   // Developer (animated gradient name), Colorful Compact (dark header, own
-  // per-section rainbow identity), and Navy Professional's name (white on
-  // its dark sidebar) — see utils/cvHeadingColors.js for why those are
-  // excluded. `null`/undefined means "use the template's own color".
+  // per-section rainbow identity), and Navy Professional's and Tech
+  // Executive's names (white on a dark sidebar/masthead) —
+  // utils/cvHeadingColors.js's NAME_OWN_COLOR_VARIABLES
+  // lists them and says why. The cover letter page reads that same list,
+  // and e2e/cover-letter.spec.js checks every template's name here against
+  // it. `null`/undefined means "use the template's own color".
   headingColor = null,
   // The active style variant's id (templateVariants.js) — only the builder
   // passes one; every other caller (gallery thumbnails, template pages,

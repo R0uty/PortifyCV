@@ -7,6 +7,7 @@ import { defaultTemplateId } from './cvTemplates'
 import { getEffectiveCvTemplate } from './sectionColumns'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate, getLinkFields } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
+import { splitCoverLetterParagraphs } from './coverLetter'
 import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
 import { collectPdfTextLayer, drawPdfTextLayer, placePdfTextLayer } from './pdfTextLayer'
 import { findLastPageStretchRow, isSliceBlank, measureQuietRows, paintFullBleedPage, quietRunLength, snapCutToQuietRow } from './pdfPageCanvas'
@@ -30,7 +31,6 @@ const PDF_MODES = {
   // column of text on white, so real page margins on every page rather than
   // a designer page's full bleed, and never fitted (always 'actual').
   letter: {
-    fileSuffix: 'cover-letter',
     marginMm: { top: 20, right: 22, bottom: 20, left: 22 },
     maxFitWidthFactor: 1,
   },
@@ -471,7 +471,7 @@ export async function exportCoverLetterAsPdf(letterText, fileName, { header = nu
   pdf.setFontSize(11)
   pdf.setTextColor(20, 20, 20)
 
-  const paragraphs = letterText.trim().split(/\n{2,}/)
+  const paragraphs = splitCoverLetterParagraphs(letterText)
 
   paragraphs.forEach((paragraph, index) => {
     const paragraphLines = paragraph.split('\n').flatMap((line) => pdf.splitTextToSize(line, maxWidth))

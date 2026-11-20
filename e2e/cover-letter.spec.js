@@ -3,7 +3,9 @@ import { readFile } from 'node:fs/promises'
 import { getTemplateVariants } from '../src/utils/templateVariants.js'
 import { pdfText } from './helpers/pdfFile.js'
 import { downloadFromPdfPreview } from './helpers/pdfPreview.js'
-import { styleTrigger } from './helpers/builderToolbar.js'
+import { headingColorTrigger, styleTrigger } from './helpers/builderToolbar.js'
+import { cvTemplates } from '../src/utils/cvTemplates.js'
+import { NAME_OWN_COLOR_VARIABLES } from '../src/utils/cvHeadingColors.js'
 
 // Coverage for the cover-letter generator (todo items 20 / 26). It has
 // check:reducers coverage for its UI-state transitions but no end-to-end
@@ -186,6 +188,11 @@ async function saveLetterPdf(page, testInfo, name) {
   }
 }
 
+const rgb = (hex) => {
+  const value = Number.parseInt(hex.slice(1), 16)
+  return `rgb(${value >> 16}, ${(value >> 8) & 255}, ${value & 255})`
+}
+
 const normalized = (value) => value.replace(/\s+/g, ' ').trim()
 
 test.describe('Cover letter PDF', () => {
@@ -225,19 +232,54 @@ test.describe('Cover letter PDF', () => {
   })
 
   test('the letter page follows the chosen look', async ({ page }) => {
-    await page.goto('/cv')
+    // Timeline's looks change both the font and the accent, which the
+    // letter's name takes when no headings colour is chosen.
+    await page.goto('/cv?template=timeline')
     await page.getByRole('button', { name: 'Load demo CV' }).first().click()
-    const look = () => letterPage(page).evaluate((root) => {
-      const name = root.querySelector('[data-cv-name]')
-      return `${getComputedStyle(root).fontFamily}|${getComputedStyle(name).color}`
-    })
+    const look = () => letterPage(page).evaluate((root) => ({
+      font: getComputedStyle(root).fontFamily,
+      color: getComputedStyle(root.querySelector('[data-cv-name]')).color,
+    }))
     const before = await look()
 
-    const [, slate] = getTemplateVariants('minimal')
+    const [, blue] = getTemplateVariants('timeline')
     await (await styleTrigger(page)).click()
-    await page.getByRole('radiogroup', { name: 'Select style' }).getByRole('radio', { name: slate.label.en }).click()
+    await page.getByRole('radiogroup', { name: 'Select style' }).getByRole('radio', { name: blue.label.en }).click()
 
-    await expect.poll(look).not.toBe(before)
+    await expect.poll(async () => (await look()).font).not.toBe(before.font)
+    await expect.poll(async () => (await look()).color).toBe(rgb(blue.accent))
+    expect(before.color).not.toBe(rgb(blue.accent))
+  })
+
+  // The headings colour reaches every template's name but three
+  // (cvHeadingColors.js's NAME_OWN_COLOR_VARIABLES); the letter's name
+  // follows the CV's own name, so the two never disagree.
+  test('the letter\'s name takes the headings colour only where the CV\'s name does', async ({ page }) => {
+    test.setTimeout(180_000)
+    const burgundy = '#7f1d1d'
+    const mismatches = []
+
+    for (const template of cvTemplates) {
+      await page.goto(`/cv?template=${template.id}`)
+      await page.getByRole('button', { name: 'Load demo CV' }).first().click()
+      await (await headingColorTrigger(page)).click()
+      await page.getByRole('dialog', { name: 'Select heading color' }).getByRole('button', { name: 'Burgundy' }).click()
+      const cvName = page.locator('.app-shell__preview [data-cv-name], .direct-edit-preview [data-cv-name]').first()
+      const letterName = letterPage(page).locator('[data-cv-name]')
+      const ownVariable = NAME_OWN_COLOR_VARIABLES[template.id]
+
+      if (ownVariable) {
+        await expect(letterName).toHaveCSS('color', rgb(getTemplateVariants(template.id)[0].palette[ownVariable]))
+        const cvColor = await cvName.evaluate((el) => getComputedStyle(el).color)
+        if (cvColor === rgb(burgundy)) mismatches.push(`${template.id}: the CV name took the headings colour`)
+      } else {
+        await expect(letterName).toHaveCSS('color', rgb(burgundy))
+        const cvColor = await cvName.evaluate((el) => getComputedStyle(el).color)
+        if (cvColor !== rgb(burgundy)) mismatches.push(`${template.id}: the CV name is ${cvColor}`)
+      }
+    }
+
+    expect(mismatches).toEqual([])
   })
 
   test('a Finnish CV\'s letter PDF is in Finnish @slow', async ({ page }, testInfo) => {
