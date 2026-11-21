@@ -401,6 +401,61 @@ console.log('\ncompareParsedCv\n')
   same('li2: honour', two.data.achievements.map((a) => a.title), ['Product of the Year 2022'])
   same('li2: publication', two.data.publications.map((p) => p.title), ['Pricing in Small Markets'])
 
+  // Final review: a wrapped description is never the next role's company.
+  const group = (...body) => parseLinkedInText([
+    'Sam Example', 'Helsinki, Uusimaa, Finland', 'Experience', 'Fabrikam', '4 years 2 months',
+    'Senior PM', 'January 2023 - Present (2 years)', ...body, 'PM', 'October 2021 - December 2022 (1 year 3 months)',
+    'Page 1 of 1', '\f', 'Top Skills', 'SQL',
+  ], { locale: 'en' }).data.experience.map((e) => [e.role, e.company, e.description])
+  same('li: wrapped description stays description', group('Owned the roadmap for the', 'billing team'),
+    [['Senior PM', 'Fabrikam', 'Owned the roadmap for the billing team'], ['PM', 'Fabrikam', '']])
+  same('li: a one-line description stays description', group('Leading pricing and packaging'),
+    [['Senior PM', 'Fabrikam', 'Leading pricing and packaging'], ['PM', 'Fabrikam', '']])
+  same('li: the company carries across the footer', group('Did things here', 'Page 1 of 2'),
+    [['Senior PM', 'Fabrikam', 'Did things here'], ['PM', 'Fabrikam', '']])
+  same('li: a new single-role company after a group', parseLinkedInText([
+    'Sam Example', 'Experience', 'Fabrikam', '4 years 2 months', 'Senior PM', 'January 2023 - Present (2 years)',
+    'PM', 'October 2021 - December 2022 (1 year 3 months)', 'Ran the launch of the new pricing pages.', 'Adatum Oy', 'Analyst', '2019 - 2021 (2 years)',
+    '\f', 'Top Skills', 'SQL', 'Page 1 of 1',
+  ], { locale: 'en' }).data.experience.map((e) => e.company), ['Fabrikam', 'Fabrikam', 'Adatum Oy'])
+
+  // Role and header locations without a comma.
+  const places = parseLinkedInText([
+    'Sam Example', 'Product Manager at Fabrikam', 'Finland', 'Experience',
+    'Fabrikam', 'PM', 'January 2023 - Present (2 years)', 'Helsinki Metropolitan Area', 'Owned stuff.',
+    'Adatum Oy', 'Analyst', '2019 - 2021 (2 years)', 'Remote',
+    'Contoso Oy', 'Intern', '2018 (less than a year)', 'Finland', 'Helped the team.',
+    '\f', 'Top Skills', 'SQL', 'Page 1 of 1',
+  ], { locale: 'en' }).data
+  same('li: header location without a comma', [places.location, places.title], ['Finland', 'Product Manager'])
+  same('li: role locations without a comma', places.experience.map((e) => [e.location, e.description]),
+    [['Helsinki Metropolitan Area', 'Owned stuff.'], ['Remote', ''], ['Finland', 'Helped the team.']])
+
+  // A wrapped degree line, and a school with no degree line before another school.
+  same('li: wrapped degree', parseLinkedInText([
+    'Sam Example', 'Education', 'Aalto University', 'Master of Science - MS, Computer Science and', 'Engineering · (2014 - 2019)',
+    'Tampere University', 'Helsinki University', 'Bachelor of Arts · (2010 - 2013)',
+    '\f', 'Top Skills', 'SQL', 'Page 1 of 1',
+  ], { locale: 'en' }).data.education.map((e) => [e.school, e.degree, e.startDate, e.endDate]), [
+    ['Aalto University', 'Master of Science - MS, Computer Science and Engineering', '2014', '2019'],
+    ['Tampere University', '', '', ''],
+    ['Helsinki University', 'Bachelor of Arts', '2010', '2013'],
+  ])
+
+  // Wrapped items in the narrow sidebar.
+  const wrapped = parseLinkedInText([
+    'Sam Example', 'Experience', 'Fabrikam', 'PM', '2020 - 2021 (1 year)', '\f',
+    'Top Skills', 'Search Engine Optimization', 'Languages', 'Finnish (Professional Working', 'Proficiency)', 'English (Native or Bilingual)',
+    'Certifications', 'AWS Certified Solutions Architect –', 'Associate', 'Certified Scrum Product Owner',
+    'Honors-Awards', 'Product of the Year 2022 for the billing', 'platform', 'Page 1 of 1',
+  ], { locale: 'en' }).data
+  same('li: wrapped language', wrapped.languages, [
+    { language: 'Finnish', level: 'Professional Working Proficiency' },
+    { language: 'English', level: 'Native or Bilingual' },
+  ])
+  same('li: wrapped certificate', wrapped.certificates.map((c) => c.name), ['AWS Certified Solutions Architect – Associate', 'Certified Scrum Product Owner'])
+  same('li: wrapped honour', wrapped.achievements.map((a) => a.title), ['Product of the Year 2022 for the billing platform'])
+
   same('not li: ordinary CV', isLinkedInPdf(ENGLISH_CV_LINES), false)
   same('not li: Finnish CV', isLinkedInPdf(FINNISH_CV_LINES), false)
   same('not li: Top Skills only', isLinkedInPdf(['Jane Example', 'Top Skills', 'Go', 'Experience', 'Dev, Acme', '2020 - 2021']), false)

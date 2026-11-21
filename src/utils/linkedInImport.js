@@ -34,6 +34,17 @@ const DURATION = /^(?:less than a year|\d+\s+(?:years?|months?)(?:\s+\d+\s+month
 const TRAILING_DURATION = /\s*\(\s*(?:less than a year|\d+\s+(?:years?|months?)(?:\s+\d+\s+months?)?)\s*\)$/i
 const LOCATION = /^[\p{L} .'-]+(?:,\s*[\p{L} .'-]+)+$/u
 const TITLE_MAX = 60
+// Places LinkedIn writes without a comma: a metro area, a remote role, or a
+// country on its own. A closed list, like the rest of the importer.
+const PLACE_WORDS = /^(?:remote|hybrid|on-?site)$/i
+const AREA = /^\p{Lu}[\p{L} .'-]* (?:Area|Region)$/u
+const COUNTRIES = new Set([
+  'finland', 'sweden', 'norway', 'denmark', 'iceland', 'estonia', 'latvia', 'lithuania', 'germany', 'netherlands',
+  'belgium', 'france', 'spain', 'portugal', 'italy', 'poland', 'ukraine', 'ireland', 'united kingdom', 'united states',
+  'canada', 'australia', 'india', 'switzerland', 'austria', 'czechia', 'czech republic', 'european union', 'suomi',
+])
+// A wrapped line ends mid-phrase.
+const OPEN_END = /(?:[–—&,(-]|\b(?:and|of|for|in|the|ja))$/i
 
 const MAIN_HEADINGS = new Map([
   ['summary', 'summary'],
@@ -103,6 +114,21 @@ function titleFromHeadline(headline) {
   return title.length <= TITLE_MAX ? title : ''
 }
 
+function isPlace(line, knownLocations) {
+  return line.length <= TITLE_MAX && (
+    LOCATION.test(line) || PLACE_WORDS.test(line) || AREA.test(line)
+    || COUNTRIES.has(line.toLowerCase()) || knownLocations.has(line)
+  )
+}
+
+// A company name capitalises its words ("Contoso Web Oy", "Pinja Group");
+// a description fragment ("billing team", "Did things here") does not.
+function isCapitalisedName(line) {
+  return line.split(/\s+/).every((word) => !/^\p{Ll}{4,}/u.test(word))
+}
+
+const endsSentence = (line) => /[.!?]$/.test(line ?? '')
+
 // A line that can be a company name rather than description text: short, and
 // not a sentence ("Contoso, Inc." is a name; "Owned the roadmap." is not).
 function looksLikeCompany(line) {
@@ -129,27 +155,51 @@ function parseExperience(lines, knownLocations) {
   const consumed = new Set()
   const entries = []
   let company = ''
+  // True while the open company is one with several roles (a total such as
+  // "4 years 2 months" under its name). LinkedIn names the company once for
+  // all its roles, also after a page break, so inside such a group the line
+  // above a role title is usually the end of the previous description.
+  let severalRoles = false
 
   titles.forEach((titleIndex, position) => {
     const before = titleIndex - 1
     const previousDate = position > 0 ? titles[position - 1] + 1 : -1
 
     if (before >= 0 && DURATION.test(lines[before])) {
-      // A company with several roles: its name, then the total time there.
       company = before - 1 > previousDate ? lines[before - 1] : company
       consumed.add(before).add(before - 1)
+      severalRoles = true
     } else if (before > previousDate && before >= 0) {
       const line = lines[before]
       const rightAfterDate = before === previousDate + 1
-      // Right after the previous role's dates, a place-like line is that
-      // role's location unless it can only be this role's company. LinkedIn
-      // writes places as "City, Region, Country"; a two-part name like
-      // "Contoso, Inc." is taken for the company unless it is a place this
-      // profile already uses.
-      const isPlace = rightAfterDate && LOCATION.test(line)
-        && (line.split(',').length >= 3 || knownLocations.has(line))
-      if (!isPlace && looksLikeCompany(line)) {
+      const afterPreviousRole = rightAfterDate
+        || (before === previousDate + 2 && isPlace(lines[previousDate + 1], knownLocations))
+      let isNewCompany
+
+      if (position === 0) {
+        isNewCompany = looksLikeCompany(line)
+      } else if (!severalRoles) {
+        // After a company with one role, the next role needs a company line
+        // of its own: the line above the title is it, unless it is a
+        // "City, Region, Country" place right after the dates. A two-part
+        // name like "Contoso, Inc." is the company unless the profile
+        // already uses it as a place.
+        const isPreviousLocation = rightAfterDate && LOCATION.test(line)
+          && (line.split(',').length >= 3 || knownLocations.has(line))
+        isNewCompany = !isPreviousLocation && looksLikeCompany(line)
+      } else {
+        // Inside a several-role group a new company starts only after the
+        // previous role ends: right after its dates or location, or after a
+        // finished sentence, and only with a capitalised name.
+        isNewCompany = looksLikeCompany(line)
+          && isCapitalisedName(line)
+          && !(rightAfterDate && isPlace(line, knownLocations))
+          && (afterPreviousRole || endsSentence(lines[before - 1]))
+      }
+
+      if (isNewCompany) {
         company = line
+        severalRoles = false
         consumed.add(before)
       }
     }
@@ -171,7 +221,7 @@ function parseExperience(lines, knownLocations) {
       if (!consumed.has(index)) body.push(lines[index])
     }
 
-    if (body.length > 0 && LOCATION.test(body[0]) && body[0].length <= TITLE_MAX) {
+    if (body.length > 0 && isPlace(body[0], knownLocations)) {
       entry.location = body.shift()
       knownLocations.add(entry.location)
     }
@@ -201,12 +251,17 @@ function parseEducation(lines) {
   for (let index = 0; index < lines.length; index += 1) {
     const entry = createEmptyEducation()
     entry.school = lines[index]
-    const next = lines[index + 1]
+    // The degree line, "Degree, Field · (2014 - 2019)", may wrap: its first
+    // part then ends mid-phrase ("Computer Science and").
+    const hasDot = (line) => /(?:^|\s)·(?:\s|$)/.test(line ?? '')
+    let end = index + 1
+    while (end < lines.length && end <= index + 2 && !hasDot(lines[end]) && OPEN_END.test(lines[end])) end += 1
 
-    if (next && /(?:^|\s)·(?:\s|$)/.test(next)) {
-      index += 1
-      const match = /^(.*?)\s*·\s*(?:\((.*)\))?$/.exec(next)
-      entry.degree = squash(match ? match[1] : next)
+    if (hasDot(lines[end])) {
+      const degreeLine = lines.slice(index + 1, end + 1).join(' ')
+      index = end
+      const match = /^(.*?)\s*·\s*(?:\((.*)\))?$/.exec(degreeLine)
+      entry.degree = squash(match ? match[1] : degreeLine)
       const dates = match?.[2] ? readDates(match[2], { allowSingle: true }) : null
       if (dates) {
         entry.startDate = dates.isSingle ? '' : dates.start
@@ -218,6 +273,23 @@ function parseEducation(lines) {
   }
 
   return education
+}
+
+// The sidebar is narrow, so a long item wraps onto the next line: join it
+// back when the line ends mid-phrase, leaves a "(" open, or the next line
+// starts in lower case or with ")".
+function joinWrapped(lines) {
+  const joined = []
+  for (const line of lines) {
+    const previous = joined.at(-1)
+    const openParen = previous && (previous.match(/\(/g) ?? []).length > (previous.match(/\)/g) ?? []).length
+    if (previous && (OPEN_END.test(previous) || openParen || /^[\p{Ll})]/u.test(line))) {
+      joined[joined.length - 1] = `${previous} ${line}`
+    } else {
+      joined.push(line)
+    }
+  }
+  return joined
 }
 
 function toUrl(value) {
@@ -282,10 +354,10 @@ export function parseLinkedInText(lines, options = {}) {
   let location = ''
   let headline = []
   if (headerRest.length >= 2) {
-    location = LOCATION.test(headerRest.at(-1)) ? headerRest.at(-1) : ''
+    location = isPlace(headerRest.at(-1), new Set()) ? headerRest.at(-1) : ''
     headline = location ? headerRest.slice(0, -1) : headerRest
   } else if (headerRest.length === 1) {
-    if (LOCATION.test(headerRest[0])) location = headerRest[0]
+    if (isPlace(headerRest[0], new Set())) location = headerRest[0]
     else headline = headerRest
   }
 
@@ -296,11 +368,11 @@ export function parseLinkedInText(lines, options = {}) {
   if (experience.length === 0 && education.length === 0) return null
 
   const contact = parseContact(side.contact ?? [])
-  const skills = (side.skills ?? []).map(squash).filter(Boolean)
-  const languages = parseLanguages(side.languages ?? [])
-  const certificates = (side.certifications ?? []).map((name) => ({ ...createEmptyCertificate(), name }))
-  const achievements = (side.honors ?? []).map((title) => ({ ...createEmptyAchievement(), title }))
-  const publications = (side.publications ?? []).map((title) => ({ ...createEmptyPublication(), title }))
+  const skills = joinWrapped(side.skills ?? []).map(squash).filter(Boolean)
+  const languages = parseLanguages(joinWrapped(side.languages ?? []))
+  const certificates = joinWrapped(side.certifications ?? []).map((name) => ({ ...createEmptyCertificate(), name }))
+  const achievements = joinWrapped(side.honors ?? []).map((title) => ({ ...createEmptyAchievement(), title }))
+  const publications = joinWrapped(side.publications ?? []).map((title) => ({ ...createEmptyPublication(), title }))
 
   const data = parseImportedCvData({
     ...createInitialCvData(),
