@@ -210,7 +210,7 @@ function isCompanyRow(line) {
 const isTechRow = (line) => isChipRow(line) && !isCompanyRow(line)
 
 /** Find a date or a date range on a line and return what is left of the line. */
-function readDates(line, { allowSingle }) {
+export function readDates(line, { allowSingle }) {
   const range = DATE_RANGE.exec(line)
 
   if (range) {
@@ -480,7 +480,7 @@ function parseSkills(lines) {
   return skills.slice(0, 40)
 }
 
-function parseLanguages(lines) {
+export function parseLanguages(lines) {
   const languages = []
 
   for (const line of lines) {
@@ -699,6 +699,6 @@ export function parseCvText(lines, options = {}) {
 // Collapses runs of spaces to two, not one: a wide gap inside a line is how
 // a PDF shows a column break ("Acme Oy      2019 – 2021"), and the splitters
 // above read two spaces as that separator.
-function squashKeepingGaps(line) {
+export function squashKeepingGaps(line) {
   return line.replace(/\u00a0/g, ' ').replace(/[ \t]{2,}/g, '  ').trim()
 }

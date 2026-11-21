@@ -34,7 +34,8 @@ const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, rel
 const { parseCvText } = await importSrc('utils/cvTextImport.js')
 const { parseImportedCvData } = await importSrc('utils/cvForm.js')
 const { COLUMN_BREAK, pdfPagesToLines } = await importSrc('utils/cvFileText.js')
-const { ENGLISH_CV_LINES, FINNISH_CV_LINES } = await import('./fixtures/cvImportSamples.mjs')
+const { ENGLISH_CV_LINES, FINNISH_CV_LINES, LINKEDIN_PROFILE_LINES, LINKEDIN_TWO_PAGE_LINES } = await import('./fixtures/cvImportSamples.mjs')
+const { isLinkedInPdf, parseLinkedInText } = await importSrc('utils/linkedInImport.js')
 const { compareParsedCv } = await importSrc('utils/parserView.js')
 
 let failures = 0
@@ -343,6 +344,68 @@ console.log('\ncompareParsedCv\n')
   const reformatted = { ...parsed, phone: '+358401234567' }
   same('a phone written differently still reads', status(compareParsedCv(builderCv, reformatted, ENGLISH_CV_LINES), 'phone'), ['ok'])
   same('a field the CV leaves empty has no row', compareParsedCv({ ...builderCv, email: '', phone: '' }, parsed, ENGLISH_CV_LINES).some((row) => row.field === 'email' || row.field === 'phone'), false)
+}
+
+// --- LinkedIn "Save to PDF" (1.7.10) ---------------------------------------
+{
+  same('li: detected', isLinkedInPdf(LINKEDIN_PROFILE_LINES), true)
+  const li = parseLinkedInText(LINKEDIN_PROFILE_LINES, { locale: 'en' })
+  same('li: source', li.summary.source, 'linkedin')
+  same('li: name', li.data.fullName, 'Alex Example')
+  same('li: title from wrapped headline', li.data.title, 'Backend Developer & Security')
+  same('li: location', li.data.location, 'Tampere, Pirkanmaa, Finland')
+  same('li: summary', li.data.about, 'Backend developer by day, open source maintainer by night.')
+  same('li: email', li.data.email, 'alex@example.com')
+  same('li: wrapped profile link', li.data.links.linkedin, 'https://www.linkedin.com/in/alex-example-12ab34')
+  same('li: roles', li.data.experience.map((e) => [e.role, e.company, e.startDate, e.endDate, e.isCurrent, e.location]), [
+    ['Backend Developer Go/SQL', 'Northwind Oy', 'March 2021', '', true, 'Tampere, Pirkanmaa, Finland'],
+    ['Web Developer', 'Contoso Web Oy', 'May 2018', 'February 2021', false, ''],
+  ])
+  same('li: no description', li.data.experience.map((e) => e.description), ['', ''])
+  same('li: education', li.data.education.map((e) => [e.school, e.degree, e.startDate, e.endDate]), [['Tampere University', '', '', 'June 2023']])
+  same('li: top skills', li.data.skills, ['Go', 'PostgreSQL', 'Threat Modeling'])
+  same('li: summary counts', [li.summary.experience, li.summary.education, li.summary.skills], [2, 1, 3])
+
+  // A company whose name has a comma, right after a role with no location.
+  const comma = LINKEDIN_PROFILE_LINES
+    .filter((line, index) => index !== LINKEDIN_PROFILE_LINES.indexOf('Tampere, Pirkanmaa, Finland', 6))
+    .map((line) => (line === 'Contoso Web Oy' ? 'Contoso, Inc.' : line))
+  const commaLi = parseLinkedInText(comma, { locale: 'en' })
+  same('li: a company with a comma is never a location', [commaLi.data.experience.map((e) => e.company), commaLi.data.experience.map((e) => e.location)],
+    [['Northwind Oy', 'Contoso, Inc.'], ['', '']])
+
+  const two = parseLinkedInText(LINKEDIN_TWO_PAGE_LINES, { locale: 'en' })
+  same('li2: detected', isLinkedInPdf(LINKEDIN_TWO_PAGE_LINES), true)
+  same('li2: title before " at "', two.data.title, 'Product Manager')
+  same('li2: location', two.data.location, 'Helsinki, Uusimaa, Finland')
+  same('li2: roles', two.data.experience.map((e) => [e.role, e.company, e.startDate, e.endDate, e.isCurrent]), [
+    ['Senior Product Manager', 'Fabrikam', 'January 2023', '', true],
+    ['Product Manager', 'Fabrikam', 'October 2021', 'December 2022', false],
+    ['Analyst', 'Adatum Oy', '2019', '2021', false],
+  ])
+  same('li2: bullet and text', [two.data.experience[0].achievements, two.data.experience[0].description],
+    [['Led the pricing redesign across 3 markets'], 'Owned the roadmap for the billing team.'])
+  same('li2: no stray description after the page break', two.data.experience.slice(1).map((e) => [e.description, e.achievements.length, e.location]), [['', 0, ''], ['', 0, '']])
+  same('li2: education', two.data.education.map((e) => [e.school, e.degree, e.startDate, e.endDate]),
+    [['Aalto University', 'Master of Science, Industrial Engineering', '2014', '2019']])
+  same('li2: phone', two.data.phone, '+358 40 555 0101')
+  same('li2: email', two.data.email, 'sam@example.com')
+  same('li2: links', [two.data.links.linkedin, two.data.links.portfolio, two.data.links.website],
+    ['https://www.linkedin.com/in/samexample', 'https://samexample.dev', 'https://fabrikam.com'])
+  same('li2: skills', two.data.skills, ['Roadmapping', 'SQL', 'User Research'])
+  same('li2: languages', two.data.languages, [
+    { language: 'English', level: 'Native or Bilingual' },
+    { language: 'Finnish', level: 'Professional Working Proficiency' },
+  ])
+  same('li2: certificate', two.data.certificates.map((c) => c.name), ['Certified Scrum Product Owner'])
+  same('li2: honour', two.data.achievements.map((a) => a.title), ['Product of the Year 2022'])
+  same('li2: publication', two.data.publications.map((p) => p.title), ['Pricing in Small Markets'])
+
+  same('not li: ordinary CV', isLinkedInPdf(ENGLISH_CV_LINES), false)
+  same('not li: Finnish CV', isLinkedInPdf(FINNISH_CV_LINES), false)
+  same('not li: Top Skills only', isLinkedInPdf(['Jane Example', 'Top Skills', 'Go', 'Experience', 'Dev, Acme', '2020 - 2021']), false)
+  same('not li: LinkedIn link only', isLinkedInPdf(['Jane Example', 'www.linkedin.com/in/jane (LinkedIn)', 'Experience']), false)
+  same('li: nothing found → null', parseLinkedInText(['Top Skills', 'Go', 'Page 1 of 1'], { locale: 'en' }), null)
 }
 
 console.log()
