@@ -37,6 +37,11 @@ function ImportCvModal({
               ? 'PDF- tai Word-tiedosto (.docx). Korvaa nykyisen CV:n; kumoa-nuoli palauttaa sen. Tarkista tulos: palstoitettu asettelu voi siirtyä vain osittain.'
               : 'A PDF or Word (.docx) file. It replaces the current CV; the undo arrow brings that back. Check the result: a layout with columns may import only partly.'}
           </p>
+          <p className="settings-row__hint">
+            {isFinnish
+              ? 'LinkedInistä: avaa profiilisi, valitse Lisää › Tallenna PDF-muodossa ja valitse se tiedosto tästä.'
+              : 'From LinkedIn: open your profile, choose More › Save to PDF, then pick that file here.'}
+          </p>
         </div>
         <button type="button" className="settings-link" disabled={isBusy} onClick={onImportCvFile}>
           {isFinnish ? 'Valitse PDF tai Word' : 'Choose PDF or Word'}

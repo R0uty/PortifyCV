@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures/base.js'
-import { ENGLISH_CV_LINES } from '../scripts/fixtures/cvImportSamples.mjs'
+import { ENGLISH_CV_LINES, LINKEDIN_TWO_PAGE_LINES } from '../scripts/fixtures/cvImportSamples.mjs'
 import { DOCX_MIME, PDF_MIME, makeDocx, makePdf, makeTwoColumnPdf } from './helpers/cvImportFiles.js'
 
 // Importing someone's existing CV from a PDF or Word file (1.7.0). The
@@ -144,12 +144,34 @@ test.describe('CV file import', () => {
     await expect(page.locator('[data-cv-name]').first()).toHaveText('Jane Example')
   })
 
+  // A LinkedIn "Save to PDF" profile (1.7.10) goes to its own reader; its
+  // rules are in scripts/check-cv-import.mjs.
+  test("a LinkedIn profile PDF is read with LinkedIn's layout", async ({ page }) => {
+    const at = LINKEDIN_TWO_PAGE_LINES.indexOf('\f')
+    const [fullName, ...main] = LINKEDIN_TWO_PAGE_LINES.slice(0, at)
+    const dialog = await openImportDialog(page)
+    await expect(dialog).toContainText('From LinkedIn: open your profile, choose More › Save to PDF, then pick that file here.')
+    await chooseFile(page, dialog, {
+      name: 'Profile.pdf',
+      mimeType: PDF_MIME,
+      buffer: makeTwoColumnPdf({ name: fullName, main, sidebar: LINKEDIN_TWO_PAGE_LINES.slice(at + 1) }),
+    })
+
+    await expect(page.getByText("Imported your LinkedIn profile: 3 jobs, 1 degree, 3 skills. LinkedIn's PDF lists only your top 3 skills; add the rest under Skills.")).toBeVisible()
+    await expect(name(page)).toHaveText('Sam Example')
+    const preview = page.locator('.direct-edit-preview')
+    await expect(preview).toContainText('Senior Product Manager')
+    await expect(preview).toContainText('Fabrikam')
+    await expect(preview).toContainText('Adatum Oy')
+  })
+
   test('the upload is offered in Finnish', async ({ page }) => {
     await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'fi'))
     await page.goto('/cv')
     await page.getByRole('banner').getByRole('button', { name: 'Lisää toimintoja' }).click()
     await page.getByRole('menuitem', { name: 'Tuo CV' }).click()
 
+    await expect(page.getByRole('dialog', { name: 'Tuo CV' })).toContainText('LinkedInistä: avaa profiilisi, valitse Lisää › Tallenna PDF-muodossa ja valitse se tiedosto tästä.')
     const chooser = page.waitForEvent('filechooser')
     await page.getByRole('dialog', { name: 'Tuo CV' }).getByRole('button', { name: 'Valitse PDF tai Word' }).click()
     await (await chooser).setFiles({ name: 'jane.pdf', mimeType: PDF_MIME, buffer: makePdf(ENGLISH_CV_LINES) })

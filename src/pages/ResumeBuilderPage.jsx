@@ -1153,11 +1153,16 @@ function ResumeBuilderPage({
       }
 
       showToast(isFinnish ? `Luetaan ${file.name}...` : `Reading ${file.name}...`, 'info')
-      const [{ extractCvFileText }, { parseCvText }] = await Promise.all([
+      const [{ extractCvFileText }, { parseCvText }, { isLinkedInPdf, parseLinkedInText }] = await Promise.all([
         import('../utils/cvFileText'),
         import('../utils/cvTextImport'),
+        import('../utils/linkedInImport'),
       ])
-      const { data: importedData, summary } = parseCvText(await extractCvFileText(file), { locale })
+      const lines = await extractCvFileText(file)
+      // A LinkedIn "Save to PDF" profile (1.7.10) has its own reader; when it
+      // finds nothing the file is read like any other CV.
+      const { data: importedData, summary } =
+        (isLinkedInPdf(lines) && parseLinkedInText(lines, { locale })) || parseCvText(lines, { locale })
 
       // Same action as JSON import, so the toolbar undo arrow restores the
       // previous CV. Unlike a JSON backup this is not marked saved: the
@@ -1173,9 +1178,13 @@ function ResumeBuilderPage({
         ? [count(summary.experience, 'työpaikka', 'työpaikkaa'), count(summary.education, 'tutkinto', 'tutkintoa'), count(summary.skills, 'taito', 'taitoa')]
         : [count(summary.experience, 'job', 'jobs'), count(summary.education, 'degree', 'degrees'), count(summary.skills, 'skill', 'skills')]
       showToast(
-        isFinnish
-          ? `Tuotu tiedostosta ${file.name}: ${found.join(', ')}. Tarkista tiedot.`
-          : `Imported from ${file.name}: ${found.join(', ')}. Check the details.`,
+        summary.source === 'linkedin'
+          ? isFinnish
+            ? `LinkedIn-profiilisi tuotiin: ${found.join(', ')}. LinkedInin PDF:ssä on vain kolme kärkitaitoasi; lisää muut Taidot-osioon.`
+            : `Imported your LinkedIn profile: ${found.join(', ')}. LinkedIn's PDF lists only your top 3 skills; add the rest under Skills.`
+          : isFinnish
+            ? `Tuotu tiedostosta ${file.name}: ${found.join(', ')}. Tarkista tiedot.`
+            : `Imported from ${file.name}: ${found.join(', ')}. Check the details.`,
       )
     } catch (error) {
       const messages = {

@@ -363,6 +363,20 @@ alters how its PDF reads shows up there. The import applies with
 `SET_FORM_DATA`, like JSON import, so undo restores the previous CV; the
 paste box is separate and still merges (`parsePastedCvText`).
 
+**A LinkedIn profile PDF (1.7.10) has its own reader.** LinkedIn's "Save to
+PDF" puts the company above the job title, a duration on every date line
+and the profile address over two lines, so `src/utils/linkedInImport.js`
+reads it instead of `parseCvText`. `isLinkedInPdf(lines)` needs two of
+three marks (an address labelled "(LinkedIn)", the "Top Skills" heading, a
+"Page N of M" footer); `parseLinkedInText` returns `null` when it finds no
+job and no degree, and `handleImportCvFile` then falls back to
+`parseCvText`. It is lazy like the other import modules (same `import()`),
+and reuses `readDates`/`parseLanguages`/`squashKeepingGaps` from
+`cvTextImport.js` without changing them. Its cases in `check:cv-import`
+follow a real export line for line (made-up people only; never commit a
+real profile). The PDF lists only the member's top three skills, which the
+import toast says.
+
 **Share links carry the whole CV in the URL, never a server.**
 `src/utils/shareLinks.js` encodes CV state with short single/double-letter
 keys (`ROOT_STRING_KEYS`, etc.) to keep links short — never repurpose an
