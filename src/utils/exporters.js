@@ -431,6 +431,10 @@ export function exportCoverLetterAsText(letterText, fileName) {
  * coverLetter.js's getCoverLetterHeader) when there is one.
  */
 export async function exportCoverLetterAsPdf(letterText, fileName, { header = null } = {}) {
+  saveAs(await buildCoverLetterPdfBlob(letterText, { header }), `${fileName}.pdf`)
+}
+
+async function buildCoverLetterPdfBlob(letterText, { header = null } = {}) {
   const jsPDF = await loadJsPdf()
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const marginMm = { top: 22, right: 22, bottom: 22, left: 22 }
@@ -491,7 +495,7 @@ export async function exportCoverLetterAsPdf(letterText, fileName, { header = nu
     }
   })
 
-  saveAs(pdf.output('blob'), `${fileName}.pdf`)
+  return pdf.output('blob')
 }
 
 export function exportCvAsHtml(formData, fileName, options = {}) {
@@ -2122,7 +2126,13 @@ function drawFallbackBullets(pdf, values, cursor, marginMm, palette) {
   cursor.y += 1.2
 }
 
-async function exportCvAsPdfTextFallback(
+async function exportCvAsPdfTextFallback(formData, fileName, mode, templateId, locale) {
+  const { blob, exportName } = await buildCvPdfTextFallbackBlob(formData, fileName, mode, templateId, locale)
+
+  saveAs(blob, `${exportName}.pdf`)
+}
+
+async function buildCvPdfTextFallbackBlob(
   formData,
   fileName,
   mode,
@@ -2723,7 +2733,7 @@ async function exportCvAsPdfTextFallback(
     ? `${fileName}-styled-fallback`
     : `${fileName}-${createPdfMode(mode).fileSuffix}-styled`
 
-  saveAs(blob, `${exportName}.pdf`)
+  return { blob, exportName }
 }
 
 // Builds the PDF's pages without saving anything, so the builder can show
@@ -2890,6 +2900,43 @@ export async function renderedCvPdfToBlob(rendered) {
   }
 
   return buildRenderedPdfBlob(rendered)
+}
+
+// A rendered PDF as the files an application record keeps (Mark as applied,
+// 1.7.11): the exact PDF `saveRenderedCvPdf` would download, its name, the
+// paper and fit it was made with, and each page's image. On the text-only
+// fallback there are no page images; the text PDF is kept as is.
+export async function renderedCvPdfToStoredFiles(rendered) {
+  if (rendered.fallback) {
+    const { fileName, mode, options } = rendered
+
+    if (mode === 'letter') {
+      return {
+        pdf: await buildCoverLetterPdfBlob(options.letterText ?? '', { header: options.letterHeader }),
+        fileName: `${fileName}.pdf`,
+        paper: 'a4',
+        fit: 'actual',
+        pages: [],
+      }
+    }
+
+    const { blob, exportName } = await buildCvPdfTextFallbackBlob(
+      options.formData,
+      fileName,
+      mode,
+      options.template,
+      options.locale === 'fi' ? 'fi' : 'en',
+    )
+
+    return { pdf: blob, fileName: `${exportName}.pdf`, paper: 'a4', fit: resolvePdfFit(options.fit), pages: [] }
+  }
+
+  const pdf = await buildRenderedPdfBlob(rendered)
+  const pages = await Promise.all(
+    rendered.pages.map(async (page) => ({ image: await (await fetch(page.imageDataUrl)).blob() })),
+  )
+
+  return { pdf, fileName: `${rendered.exportName}.pdf`, paper: rendered.paper, fit: rendered.fit, pages }
 }
 
 // Downloads what renderCvPdf made.
