@@ -8,7 +8,8 @@ import { MAX_APPLICATION_NAME_LENGTH } from '../utils/applicationLog'
 // "Mark as applied" (1.7.11): the CV on screen was sent to a company. Asks
 // for the company, role, date, the ad's link and the PDF's paper and fit;
 // `onSubmit` renders the PDF(s) and stores the application, and rejects
-// when nothing was stored. The builder closes the dialog on success.
+// when nothing was stored. The builder closes the dialog on success; until
+// the save ends the dialog can't be closed, so its outcome is always seen.
 
 // Today in the visitor's own time zone, as YYYY-MM-DD (an <input
 // type="date"> value). toISOString would give UTC's date, a day off around
@@ -20,6 +21,9 @@ function localToday() {
 }
 
 function failureMessage(error, isFinnish) {
+  // The builder's own guard against a second save: its message says it.
+  if (error?.code === 'busy') return error.message
+
   if (error?.code === 'full') {
     return isFinnish
       ? 'Tallennus epäonnistui: selaimen tallennustila on täynnä. Mitään ei tallennettu.'
@@ -56,6 +60,7 @@ function MarkAppliedView({
   initialFit = 'auto',
   onSubmit,
   isAvailable = true,
+  hasLetter = false,
 }) {
   const isFinnish = locale === 'fi'
   const ui = getUiTheme()
@@ -74,6 +79,7 @@ function MarkAppliedView({
 
   const companyMissing = !company.trim()
   const roleMissing = !role.trim()
+  const dateMissing = !appliedOn
   const fitOption = FIT_OPTIONS.find((option) => option.value === fit)
 
   const handleSubmit = async (event) => {
@@ -81,7 +87,7 @@ function MarkAppliedView({
 
     if (savingRef.current) return
 
-    if (companyMissing || roleMissing || !appliedOn) {
+    if (companyMissing || roleMissing || dateMissing) {
       setShowRequired(true)
       return
     }
@@ -100,6 +106,10 @@ function MarkAppliedView({
     }
   }
 
+  const handleClose = () => {
+    if (!savingRef.current) onClose()
+  }
+
   const labelClassName = `text-xs font-bold uppercase tracking-[0.1em] ${ui.textMuted}`
   const inputClassName = `border px-3 py-2 text-sm transition ${ui.input}`
 
@@ -107,11 +117,16 @@ function MarkAppliedView({
     <Modal
       closeLabel={isFinnish ? 'Sulje' : 'Close'}
       isOpen
-      onClose={onClose}
+      onClose={handleClose}
+      isCloseDisabled={isSaving}
       title={isFinnish ? 'Merkitse haetuksi' : 'Mark as applied'}
-      description={isFinnish
-        ? 'Tämän CV:n ja sen hakemuskirjeen PDF, sellaisina kuin ne nyt näyttävät, säilytetään haun mukana tässä selaimessa.'
-        : 'A PDF of this CV and its cover letter, as they look now, is kept with the application in this browser.'}
+      description={hasLetter
+        ? isFinnish
+          ? 'Tämän CV:n ja sen hakemuskirjeen PDF, sellaisina kuin ne nyt näyttävät, säilytetään haun mukana tässä selaimessa.'
+          : 'A PDF of this CV and its cover letter, as they look now, is kept with the application in this browser.'
+        : isFinnish
+          ? 'Tämän CV:n PDF, sellaisena kuin se nyt näyttää, säilytetään haun mukana tässä selaimessa.'
+          : 'A PDF of this CV, as it looks now, is kept with the application in this browser.'}
     >
       {isAvailable ? (
         <form className="mark-applied" noValidate onSubmit={handleSubmit}>
@@ -156,17 +171,24 @@ function MarkAppliedView({
               ) : null}
             </div>
 
-            <label className="flex flex-col gap-1">
-              <span className={labelClassName}>{isFinnish ? 'Hakupäivä' : 'Date applied'}</span>
+            <div className="flex flex-col gap-1">
+              <label htmlFor={`${id}-date`} className={labelClassName}>{isFinnish ? 'Hakupäivä' : 'Date applied'}</label>
               <input
+                id={`${id}-date`}
                 type="date"
                 className={inputClassName}
                 value={appliedOn}
                 required
-                aria-invalid={showRequired && !appliedOn ? 'true' : undefined}
+                aria-invalid={showRequired && dateMissing ? 'true' : undefined}
+                aria-describedby={showRequired && dateMissing ? `${id}-date-error` : undefined}
                 onChange={(event) => setAppliedOn(event.target.value)}
               />
-            </label>
+              {showRequired && dateMissing ? (
+                <span id={`${id}-date-error`} className="mark-applied__error text-xs">
+                  {isFinnish ? 'Valitse päivämäärä.' : 'Choose a date.'}
+                </span>
+              ) : null}
+            </div>
 
             <label className="flex flex-col gap-1">
               <span className={labelClassName}>

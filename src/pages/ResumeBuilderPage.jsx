@@ -2222,7 +2222,11 @@ function ResumeBuilderPage({
   // nothing was stored.
   const markAppliedBusyRef = useRef(false)
   const handleMarkApplied = useCallback(async ({ company, role, appliedOn, adUrl, paper, fit }) => {
-    if (markAppliedBusyRef.current) return
+    if (markAppliedBusyRef.current) {
+      throw Object.assign(new Error(locale === 'fi'
+        ? 'Edellistä hakua tallennetaan vielä.'
+        : 'Still saving the previous application.'), { code: 'busy' })
+    }
     markAppliedBusyRef.current = true
 
     try {
@@ -2989,6 +2993,7 @@ function ResumeBuilderPage({
         initialFit={pdfFit}
         onSubmit={handleMarkApplied}
         isAvailable={isApplicationLogUsable && applicationLog.isAvailable}
+        hasLetter={coverLetterBody.trim() !== ''}
       />
 
       <ImportCvModal

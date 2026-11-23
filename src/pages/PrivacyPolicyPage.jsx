@@ -96,8 +96,8 @@ function getPrivacyCopy(locale) {
             + 'laitteeseen; vie JSON-tiedosto, jos haluat kopion muualle.',
             'Kun merkitset CV:n haetuksi (Merkitse haetuksi), haku '
             + 'tallennetaan omaan IndexedDB-tietokantaansa tähän selaimeen: '
-            + 'yritys, tehtävä, hakupäivä, ilmoituksen linkki, tila ja '
-            + 'muistiinpanosi, lähetetyn CV:n PDF (ja saatekirjeen PDF, jos '
+            + 'yritys, tehtävä, hakupäivä, linkki työpaikkailmoitukseen, tila '
+            + 'ja muistiinpanosi, lähetetyn CV:n PDF (ja hakemuskirjeen PDF, jos '
             + 'kirjeessä on tekstiä) kuvineen sekä CV:n tiedot, pohja ja '
             + 'ulkoasu, joista PDF tehtiin. Mitään näistä ei lähetetä '
             + 'minnekään. Haut säilyvät, kunnes poistat ne: yksitellen '

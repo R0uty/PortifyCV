@@ -69,6 +69,7 @@ function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewC
   // 'cv' or 'letter'; the switch shows only when a letter is stored.
   const [documentKind, setDocumentKind] = useState('cv')
   const [isDownloading, setIsDownloading] = useState(false)
+  const [downloadFailed, setDownloadFailed] = useState(false)
 
   if (!application) return null
 
@@ -86,11 +87,15 @@ function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewC
   const handleDownload = async () => {
     if (!file?.pdf || isDownloading) return
     setIsDownloading(true)
+    setDownloadFailed(false)
     try {
       // 'file-saver' is CommonJS-only: default import, then saveAs (as
       // exporters.js does). Loaded here, on the first download.
       const { default: fileSaver } = await import('file-saver')
       fileSaver.saveAs(file.pdf, file.fileName || 'CV.pdf')
+    } catch {
+      // The chunk didn't load (offline, a new deploy) or the save threw.
+      setDownloadFailed(true)
     } finally {
       setIsDownloading(false)
     }
@@ -153,6 +158,12 @@ function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewC
               {isFinnish ? 'Lataa PDF' : 'Download PDF'}
             </button>
           </div>
+
+          {downloadFailed ? (
+            <p className="mark-applied__error text-sm" role="alert">
+              {isFinnish ? 'PDF:ää ei voitu ladata. Yritä uudelleen.' : 'The PDF couldn\'t be downloaded. Try again.'}
+            </p>
+          ) : null}
         </div>
 
         <div className="pdf-preview__main">

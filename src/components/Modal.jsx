@@ -3,17 +3,24 @@ import { X } from 'lucide-react'
 
 import { getTabStops } from '../utils/focusTrap'
 
-function Modal({ isOpen, onClose, title, description, children, size = 'md', closeLabel = 'Close' }) {
+// `isCloseDisabled` keeps the dialog open while it finishes something it
+// can't abandon (Mark as applied's save): Close is disabled, and Escape and
+// the backdrop do nothing.
+function Modal({
+  isOpen, onClose, title, description, children, size = 'md', closeLabel = 'Close', isCloseDisabled = false,
+}) {
   const panelRef = useRef(null)
   const previouslyFocusedRef = useRef(null)
   // Callers commonly pass an inline arrow for onClose. Reading it through a ref
   // keeps the effect below tied to `isOpen` alone, so a parent re-render cannot
   // tear down the focus trap and bounce focus out of the open dialog.
   const onCloseRef = useRef(onClose)
+  const isCloseDisabledRef = useRef(isCloseDisabled)
 
   useEffect(() => {
     onCloseRef.current = onClose
-  }, [onClose])
+    isCloseDisabledRef.current = isCloseDisabled
+  }, [onClose, isCloseDisabled])
 
   useEffect(() => {
     if (!isOpen) {
@@ -28,7 +35,7 @@ function Modal({ isOpen, onClose, title, description, children, size = 'md', clo
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
-        onCloseRef.current()
+        if (!isCloseDisabledRef.current) onCloseRef.current()
         return
       }
 
@@ -68,7 +75,7 @@ function Modal({ isOpen, onClose, title, description, children, size = 'md', clo
   }
 
   return (
-    <div className="modal-overlay print:hidden" onClick={onClose}>
+    <div className="modal-overlay print:hidden" onClick={isCloseDisabled ? undefined : onClose}>
       <div
         ref={panelRef}
         className={`modal-panel modal-panel--${size}`}
@@ -87,6 +94,7 @@ function Modal({ isOpen, onClose, title, description, children, size = 'md', clo
             type="button"
             className="modal-panel__close"
             onClick={onClose}
+            disabled={isCloseDisabled}
             aria-label={closeLabel}
           >
             <X size={16} strokeWidth={2} aria-hidden="true" />

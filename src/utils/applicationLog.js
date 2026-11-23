@@ -8,7 +8,7 @@
 // paths and clearing one never touches the other (spec, Approaches B).
 //
 // Nothing here runs on its own: every write traces back to the visitor
-// pressing "Log this application".
+// pressing "Mark as applied".
 
 /** @typedef {import('../types/cv').CvData} CvData */
 /**

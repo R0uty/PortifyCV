@@ -22,7 +22,11 @@ const unavailableText = (isFinnish) => (isFinnish
 // One application. The note is the row's own until stored: after a pause in
 // typing, on blur, and when the row goes away (the dialog closing, a tab
 // switch) whatever is still unsaved is written.
-function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onView, onStartFrom }) {
+//
+// Delete keeps the keyboard in place: the confirm step takes focus, Cancel
+// gives it back to Delete, and the list (told by `onDeleting` before the
+// delete starts) hands it to a neighbour once the row is gone.
+function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onDeleting, onView, onStartFrom }) {
   const ui = getUiTheme()
   const labelClassName = `text-xs font-bold uppercase tracking-[0.1em] ${ui.textMuted}`
   const inputClassName = `border px-3 py-2 text-sm transition ${ui.input}`
@@ -32,6 +36,20 @@ function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onView, on
   const savedNoteRef = useRef(application.note ?? '')
   const pendingNoteRef = useRef(null)
   const timerRef = useRef(null)
+  const deleteButtonRef = useRef(null)
+  const confirmButtonRef = useRef(null)
+  // Where focus goes when the confirm step opens or closes; null on mount.
+  const focusAfterRenderRef = useRef(null)
+  useEffect(() => {
+    const target = focusAfterRenderRef.current
+    focusAfterRenderRef.current = null
+    if (target === 'confirm') confirmButtonRef.current?.focus()
+    if (target === 'delete') deleteButtonRef.current?.focus()
+  }, [isConfirmingDelete])
+  const setConfirming = (value) => {
+    focusAfterRenderRef.current = value ? 'confirm' : 'delete'
+    setIsConfirmingDelete(value)
+  }
   const latestRef = useRef({ id: application.id, onUpdate })
   useEffect(() => {
     latestRef.current = { id: application.id, onUpdate }
@@ -60,7 +78,11 @@ function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onView, on
   }
 
   return (
-    <li className="saved-cvs__item applications__item" data-application={application.company}>
+    <li
+      className="saved-cvs__item applications__item"
+      data-application={application.company}
+      data-application-id={application.id}
+    >
       <div className="saved-cvs__text">
         <p className="settings-row__label">{application.company}</p>
         <p className="settings-row__hint">
@@ -101,6 +123,7 @@ function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onView, on
           </p>
           <div className="saved-cvs__row-actions">
             <button
+              ref={confirmButtonRef}
               type="button"
               className="settings-link saved-cvs__delete saved-cvs__delete--armed"
               disabled={isDeleting}
@@ -109,29 +132,51 @@ function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onView, on
                 clearTimeout(timerRef.current)
                 pendingNoteRef.current = null
                 setIsDeleting(true)
+                onDeleting(application.id)
                 const deleted = await onDelete(application.id)
                 if (!deleted) {
+                  onDeleting(null)
                   setIsDeleting(false)
-                  setIsConfirmingDelete(false)
+                  setConfirming(false)
                 }
               }}
             >
               {isFinnish ? 'Vahvista poisto' : 'Confirm delete'}
             </button>
-            <button type="button" className="settings-link" onClick={() => setIsConfirmingDelete(false)}>
+            <button type="button" className="settings-link" onClick={() => setConfirming(false)}>
               {isFinnish ? 'Peruuta' : 'Cancel'}
             </button>
           </div>
         </div>
       ) : (
         <div className="saved-cvs__row-actions">
-          <button type="button" className="settings-link" onClick={() => onView(application.id)}>
+          {/* Each row has the same three buttons, so each name says whose. */}
+          <button
+            type="button"
+            className="settings-link"
+            data-application-view
+            aria-label={isFinnish ? `Näytä ${application.company}:lle lähetetty` : `View sent to ${application.company}`}
+            onClick={() => onView(application.id)}
+          >
             {isFinnish ? 'Näytä lähetetty' : 'View sent'}
           </button>
-          <button type="button" className="settings-link" onClick={() => onStartFrom(application.id)}>
+          <button
+            type="button"
+            className="settings-link"
+            aria-label={isFinnish
+              ? `Aloita uusi CV hausta: ${application.company}`
+              : `Start new CV from the application to ${application.company}`}
+            onClick={() => onStartFrom(application.id)}
+          >
             {isFinnish ? 'Aloita uusi CV tästä' : 'Start new CV from it'}
           </button>
-          <button type="button" className="settings-link saved-cvs__delete" onClick={() => setIsConfirmingDelete(true)}>
+          <button
+            ref={deleteButtonRef}
+            type="button"
+            className="settings-link saved-cvs__delete"
+            aria-label={isFinnish ? `Poista haku: ${application.company}` : `Delete the application to ${application.company}`}
+            onClick={() => setConfirming(true)}
+          >
             {isFinnish ? 'Poista' : 'Delete'}
           </button>
         </div>
@@ -140,7 +185,35 @@ function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onView, on
   )
 }
 
-function ApplicationsList({ isFinnish, isAvailable, applications, ...handlers }) {
+function ApplicationsList({ isFinnish, isAvailable, applications, tabId, ...handlers }) {
+  const listRef = useRef(null)
+  // A delete under way: the row going, and the id of the row whose View
+  // sent takes focus once it has gone (null: the tab).
+  const pendingDeleteRef = useRef(null)
+  useEffect(() => {
+    const pending = pendingDeleteRef.current
+    if (!pending || applications.some((item) => String(item.id) === pending.deletedId)) return
+    pendingDeleteRef.current = null
+    const button = pending.focusId === null
+      ? null
+      : [...(listRef.current?.querySelectorAll('[data-application-id]') ?? [])]
+        .find((row) => row.dataset.applicationId === pending.focusId)
+        ?.querySelector('[data-application-view]')
+    ;(button ?? document.getElementById(tabId))?.focus()
+  }, [applications, tabId])
+
+  // The next row, else the previous one, else the tab; null when the
+  // delete failed.
+  const handleDeleting = (id) => {
+    if (id === null) {
+      pendingDeleteRef.current = null
+      return
+    }
+    const index = applications.findIndex((item) => item.id === id)
+    const neighbour = applications[index + 1] ?? applications[index - 1]
+    pendingDeleteRef.current = { deletedId: String(id), focusId: neighbour ? String(neighbour.id) : null }
+  }
+
   if (!isAvailable) {
     return (
       <p className="settings-row__hint saved-cvs__empty" role="alert">{unavailableText(isFinnish)}</p>
@@ -158,9 +231,15 @@ function ApplicationsList({ isFinnish, isAvailable, applications, ...handlers })
   }
 
   return (
-    <ul className="saved-cvs__list">
+    <ul ref={listRef} className="saved-cvs__list">
       {applications.map((application) => (
-        <ApplicationRow key={application.id} application={application} isFinnish={isFinnish} {...handlers} />
+        <ApplicationRow
+          key={application.id}
+          application={application}
+          isFinnish={isFinnish}
+          onDeleting={handleDeleting}
+          {...handlers}
+        />
       ))}
     </ul>
   )
@@ -339,6 +418,7 @@ function SavedCvsView({
           isFinnish={isFinnish}
           isAvailable={isApplicationLogAvailable}
           applications={applications}
+          tabId={`${tabsId}-applications-tab`}
           onUpdate={onUpdateApplication}
           onDelete={onDeleteApplication}
           onView={onViewApplication}

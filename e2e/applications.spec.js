@@ -94,9 +94,11 @@ test.describe('Mark as applied', () => {
     await loadDemo(page)
     const dialog = await openMarkApplied(page)
 
+    // The demo's letter is blank, so the description doesn't promise one.
     await expect(dialog.getByText(
-      'A PDF of this CV and its cover letter, as they look now, is kept with the application in this browser.',
+      'A PDF of this CV, as it looks now, is kept with the application in this browser.',
     )).toBeVisible()
+    await expect(dialog.getByText(/cover letter/)).toHaveCount(0)
     // Today, in local time, until the visitor changes it.
     await expect(dialog.getByLabel('Date applied')).toHaveValue(await today(page))
     // Paper and fit start from the tab's PDF choices (A4, Auto by default).
@@ -199,6 +201,40 @@ test.describe('Mark as applied', () => {
     await expect(dialog).toBeVisible()
   })
 
+  test('a cleared date says so and stores nothing', async ({ page }) => {
+    await loadDemo(page)
+    const dialog = await openMarkApplied(page)
+    await dialog.getByRole('textbox', { name: 'Company' }).fill('Acme Oy')
+    await dialog.getByRole('textbox', { name: 'Role' }).fill('Frontend Developer')
+    await dialog.getByLabel('Date applied').fill('')
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+
+    await expect(dialog.getByText('Choose a date.')).toBeVisible()
+    await expect(dialog.getByLabel('Date applied')).toHaveAttribute('aria-invalid', 'true')
+    await expect(dialog.getByLabel('Date applied')).toHaveAccessibleDescription('Choose a date.')
+    await page.waitForTimeout(500)
+    expect(await storedApplications(page)).toEqual([])
+    await expect(dialog).toBeVisible()
+  })
+
+  test('the dialog stays open until the save ends', async ({ page }) => {
+    await loadDemo(page)
+    const dialog = await openMarkApplied(page)
+    await dialog.getByRole('textbox', { name: 'Company' }).fill('Acme Oy')
+    await dialog.getByRole('textbox', { name: 'Role' }).fill('Frontend Developer')
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+
+    await expect(dialog.getByRole('button', { name: 'Saving the PDF…' })).toBeDisabled()
+    await expect(dialog.getByRole('button', { name: 'Close' })).toBeDisabled()
+    await page.keyboard.press('Escape')
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByRole('button', { name: 'Saving the PDF…' })).toBeDisabled()
+
+    await expect(page.getByText('Saved to Applications')).toBeVisible({ timeout: 30_000 })
+    await expect(dialog).toBeHidden()
+    expect(await storedApplications(page)).toHaveLength(1)
+  })
+
   test('pressing Save twice stores one application', async ({ page }) => {
     await loadDemo(page)
     const dialog = await openMarkApplied(page)
@@ -232,6 +268,12 @@ test.describe('Mark as applied', () => {
     const letter = page.getByRole('dialog', { name: 'Cover letter' })
     await letter.getByRole('button', { name: 'Generate draft' }).click()
     await letter.getByRole('button', { name: 'Close' }).click()
+
+    const dialog = await openMarkApplied(page)
+    await expect(dialog.getByText(
+      'A PDF of this CV and its cover letter, as they look now, is kept with the application in this browser.',
+    )).toBeVisible()
+    await dialog.getByRole('button', { name: 'Close' }).click()
 
     await markApplied(page)
 
@@ -309,8 +351,8 @@ test.describe('Applications tab', () => {
     const date = await page.evaluate(() => new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }))
     await expect(row).toContainText(date)
     await expect(row.getByLabel('Status')).toHaveValue('applied')
-    await expect(row.getByRole('button', { name: 'View sent' })).toBeVisible()
-    await expect(row.getByRole('button', { name: 'Start new CV from it' })).toBeVisible()
+    await expect(row.getByRole('button', { name: /^View sent to / })).toBeVisible()
+    await expect(row.getByRole('button', { name: 'Start new CV from the application to Acme Oy' })).toBeVisible()
   })
 
   test('status and note survive a reload', async ({ page }) => {
@@ -363,16 +405,24 @@ test.describe('Applications tab', () => {
     await openApplications(page)
 
     const row = applicationRow(page, 'Acme Oy')
-    await row.getByRole('button', { name: 'Delete' }).click()
+    const deleteButton = row.getByRole('button', { name: 'Delete the application to Acme Oy' })
+    // By keyboard: the confirm step takes focus, Cancel gives it back.
+    await deleteButton.focus()
+    await page.keyboard.press('Enter')
     await expect(row.getByText('Delete the application to Acme Oy? The PDF that was sent goes with it.')).toBeVisible()
-    await row.getByRole('button', { name: 'Cancel' }).click()
+    await expect(row.getByRole('button', { name: 'Confirm delete' })).toBeFocused()
+    await row.getByRole('button', { name: 'Cancel' }).focus()
+    await page.keyboard.press('Enter')
     await expect(row.getByText('Delete the application to Acme Oy?')).toHaveCount(0)
+    await expect(deleteButton).toBeFocused()
     expect(await storedApplications(page)).toHaveLength(1)
 
-    await row.getByRole('button', { name: 'Delete' }).click()
+    await deleteButton.click()
     await row.getByRole('button', { name: 'Confirm delete' }).click()
     await expect(row).toHaveCount(0)
+    // The last row gone, focus goes to the tab.
     await expect(myCvsDialog(page).getByRole('tab', { name: 'Applications (0)' })).toBeVisible()
+    await expect(myCvsDialog(page).getByRole('tab', { name: 'Applications (0)' })).toBeFocused()
     expect(await storedApplications(page)).toEqual([])
   })
 
@@ -438,7 +488,7 @@ test.describe('Applications tab', () => {
 
     const status = dialog.locator('[data-application="Acme Oy"]').getByLabel('Tila')
     await expect(status.locator('option')).toHaveText(['Haettu', 'Haastattelu', 'Tarjous', 'Hylätty', 'Ei vastausta'])
-    await expect(dialog.locator('[data-application="Acme Oy"]').getByRole('button', { name: 'Näytä lähetetty' })).toBeVisible()
+    await expect(dialog.locator('[data-application="Acme Oy"]').getByRole('button', { name: 'Näytä Acme Oy:lle lähetetty' })).toBeVisible()
   })
 })
 
@@ -497,7 +547,7 @@ const putApplication = (page, overrides) => page.evaluate((overrides) => new Pro
 
 async function openViewSent(page, company = 'Acme Oy') {
   await openApplications(page)
-  await applicationRow(page, company).getByRole('button', { name: 'View sent' }).click()
+  await applicationRow(page, company).getByRole('button', { name: /^View sent to / }).click()
   await expect(viewDialog(page, company)).toBeVisible()
   return viewDialog(page, company)
 }
@@ -578,7 +628,7 @@ test.describe('View sent and Start new CV', () => {
     await fullNameField(page).fill('Edited Name')
 
     await openApplications(page)
-    await applicationRow(page, 'Acme Oy').getByRole('button', { name: 'Start new CV from it' }).click()
+    await applicationRow(page, 'Acme Oy').getByRole('button', { name: /^Start new CV from the application to / }).click()
     await expect(myCvsDialog(page)).toBeHidden()
     await expect(page.getByText('Started a new CV from the application to Acme Oy.')).toBeVisible()
     await expect(fullNameField(page)).toHaveValue('John Doe')
@@ -606,13 +656,13 @@ test.describe('View sent and Start new CV', () => {
     await expect(templateLabel(page)).toHaveText(templateName('developer'))
     await putApplication(page, {})
     await openApplications(page)
-    await applicationRow(page, 'Initech').getByRole('button', { name: 'Start new CV from it' }).click()
+    await applicationRow(page, 'Initech').getByRole('button', { name: /^Start new CV from the application to / }).click()
     await expect(fullNameField(page)).toHaveValue('Retro Person')
     await expect(templateLabel(page)).toHaveText(templateName('classicProfessional'))
 
     await putApplication(page, { id: 'stored-2', company: 'Umbrella', sourceOverrides: { templateId: 'no-such-template' } })
     await openApplications(page)
-    await applicationRow(page, 'Umbrella').getByRole('button', { name: 'Start new CV from it' }).click()
+    await applicationRow(page, 'Umbrella').getByRole('button', { name: /^Start new CV from the application to / }).click()
     await expect(page.getByText('Started a new CV from the application to Umbrella.')).toBeVisible()
     await expect(templateLabel(page)).toHaveText(templateName(defaultTemplateId))
     await expect(page.locator('[role="alert"]', { hasText: /could not|error/i })).toHaveCount(0)
@@ -622,7 +672,7 @@ test.describe('View sent and Start new CV', () => {
     await loadDemo(page)
     await putApplication(page, { id: 'stored-3', company: 'Broken', sourceOverrides: { data: 'not a CV' } })
     await openApplications(page)
-    await applicationRow(page, 'Broken').getByRole('button', { name: 'Start new CV from it' }).click()
+    await applicationRow(page, 'Broken').getByRole('button', { name: /^Start new CV from the application to / }).click()
     await expect(page.getByText("This application's CV could not be opened.")).toBeVisible()
     await expect(fullNameField(page)).toHaveValue('John Doe')
   })
@@ -644,7 +694,7 @@ test.describe('View sent and Start new CV', () => {
     await page.getByRole('menuitem', { name: /^Omat CV:t/ }).click()
     const list = page.getByRole('dialog', { name: 'Omat CV:t' })
     await list.getByRole('tab', { name: /^Haut/ }).click()
-    await list.locator('[data-application="Acme Oy"]').getByRole('button', { name: 'Näytä lähetetty' }).click()
+    await list.locator('[data-application="Acme Oy"]').getByRole('button', { name: 'Näytä Acme Oy:lle lähetetty' }).click()
     dialog = page.getByRole('dialog', { name: 'Lähetetty: Acme Oy' })
     await expect(dialog.getByText('Tästä PDF:stä ei ole kuvaa. Lataa se nähdäksesi sen.')).toBeVisible()
   })

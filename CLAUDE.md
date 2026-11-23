@@ -389,7 +389,7 @@ clearing one never touches the other. One record per application: `cv` and
 `letter` (`{ pdf, fileName, paper, pages }`, the CV's with `fit`; `letter`
 is `null` without a letter) and `source` (`{ data, templateId, look }`).
 `src/hooks/useApplications.js` feeds My CVs' Applications tab (status and
-note, kept on blur and on close). `ApplicationViewModal.jsx` (View sent)
+note, kept after a short pause in typing, on blur and on close). `ApplicationViewModal.jsx` (View sent)
 never re-renders: it shows the stored page images and downloads the stored
 blob, so today's CV or template code can't change it. Its paper and margin
 constants are copied from `exporters.js`'s `PDF_PAPER_SIZES`/`PDF_MODES`
