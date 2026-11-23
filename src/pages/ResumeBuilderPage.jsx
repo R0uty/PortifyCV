@@ -45,6 +45,7 @@ import CoverLetterPage from '../components/CoverLetterPage'
 import ImportCvModal from '../components/ImportCvModal'
 import SavedCvsModal from '../components/SavedCvsModal'
 import PdfPreviewModal from '../components/PdfPreviewModal'
+import MarkAppliedModal from '../components/MarkAppliedModal'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
 import CVSuggestionsPanel from '../components/CVSuggestionsPanel'
@@ -101,6 +102,12 @@ import {
 } from '../utils/shareLinks'
 import { evaluateAtsScore } from '../utils/atsScore'
 import { jobTitleFromAd, matchJobAd } from '../utils/jobMatch'
+import {
+  addApplication,
+  countApplications,
+  createApplicationRecord,
+  isApplicationLogAvailable,
+} from '../utils/applicationLog'
 import { BULLET_BLANK, countBlankBullets, evaluateCvFeedback } from '../utils/cvFeedback'
 import { generateCoverLetterDraft, getCoverLetterHeader } from '../utils/coverLetter'
 import { resolveCoverLetterLook } from '../utils/coverLetterLook'
@@ -561,6 +568,13 @@ function ResumeBuilderPage({
   // for a job, 1.7.2).
   const [savedCvsSuggestedName, setSavedCvsSuggestedName] = useState(null)
   const [isAtsCheckOpen, setIsAtsCheckOpen] = useState(false)
+  // Mark as applied (1.7.11). The log turns unusable once the browser
+  // refuses its database, so the dialog says so instead of offering Save.
+  const [isMarkAppliedOpen, setIsMarkAppliedOpen] = useState(false)
+  const [isApplicationLogUsable, setIsApplicationLogUsable] = useState(isApplicationLogAvailable)
+  // Bumped after each application is stored, so a list of them knows to
+  // read the database again.
+  const [, setApplicationsVersion] = useState(0)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
   // "Clear CV" (the toolbar's More menu since 1.6.67) is two-step: the
@@ -1504,6 +1518,19 @@ function ResumeBuilderPage({
     openSavedCvs('list')
   }, [cvLibrary, openSavedCvs])
   const handleCloseSavedCvs = useCallback(() => setSavedCvsView(null), [])
+  // Opens the dialog once the database has answered, so a browser that
+  // blocks it shows why straight away rather than after Save.
+  const handleOpenMarkApplied = useCallback(async () => {
+    if (isApplicationLogUsable) {
+      try {
+        await countApplications()
+      } catch (error) {
+        if (error?.code === 'unavailable') setIsApplicationLogUsable(false)
+      }
+    }
+    setIsMarkAppliedOpen(true)
+  }, [isApplicationLogUsable])
+  const handleCloseMarkApplied = useCallback(() => setIsMarkAppliedOpen(false), [])
   // The toolbar button. Not saved yet: ask for a name. Saved: the list.
   // Paused by another tab's save: this press is the "keep mine" the toast
   // asked for.
@@ -1919,6 +1946,7 @@ function ResumeBuilderPage({
       savedCvStatus,
       onSaveCv: handleSaveCvClick,
       onOpenSavedCvs: handleOpenSavedCvs,
+      onMarkApplied: handleOpenMarkApplied,
       onClearCv: handleResetForm,
       isClearArmed: resetConfirmArmed,
       builderMode,
@@ -1936,7 +1964,7 @@ function ResumeBuilderPage({
     isFullscreenPreview, handleToggleFullscreenPreview,
     isResponsivePreview, handleToggleResponsivePreview,
     handleOpenSettings, handleOpenCoverLetter, handleOpenImport,
-    savedCvStatus, handleSaveCvClick, handleOpenSavedCvs,
+    savedCvStatus, handleSaveCvClick, handleOpenSavedCvs, handleOpenMarkApplied,
     handleResetForm, resetConfirmArmed,
     builderMode, handleSetBuilderMode,
     onHeaderChange,
@@ -2092,6 +2120,61 @@ function ResumeBuilderPage({
     pdfRenderQueueRef.current = next
     return next
   }, [coverLetterBody, cvLocale, formData, letterFileName])
+
+  // Mark as applied (1.7.11): the CV, and the letter when it has a body,
+  // rendered exactly as Download would with the dialog's paper and fit, then
+  // stored with the CV's data and look. Rejects (the dialog says why) when
+  // nothing was stored.
+  const markAppliedBusyRef = useRef(false)
+  const handleMarkApplied = useCallback(async ({ company, role, appliedOn, adUrl, paper, fit }) => {
+    if (markAppliedBusyRef.current) return
+    markAppliedBusyRef.current = true
+
+    try {
+      const renderedCv = await renderPdfPreview({ paper, fit })
+      const renderedLetter = coverLetterBody.trim() ? await renderLetterPdf({ paper }) : null
+      const { renderedCvPdfToStoredFiles } = await import('../utils/exporters')
+      const cv = await renderedCvPdfToStoredFiles(renderedCv)
+      const letter = renderedLetter ? await renderedCvPdfToStoredFiles(renderedLetter) : null
+
+      try {
+        await addApplication(createApplicationRecord({
+          company,
+          role,
+          appliedOn,
+          adUrl,
+          cv,
+          // A letter is never shrunk, so it has no fit of its own.
+          letter: letter
+            ? { pdf: letter.pdf, fileName: letter.fileName, paper: letter.paper, pages: letter.pages }
+            : null,
+          source: {
+            data: structuredClone(formData),
+            templateId: selectedTemplate,
+            look: {
+              atsFriendlyMode,
+              cvFontId,
+              cvHeadingColor,
+              accentColor: resolveTemplateAccent(templateAccentColors, selectedTemplate),
+              classicNameAlignment,
+            },
+          },
+        }))
+      } catch (error) {
+        if (error?.code === 'unavailable') setIsApplicationLogUsable(false)
+        throw error
+      }
+
+      setIsMarkAppliedOpen(false)
+      setApplicationsVersion((version) => version + 1)
+      showToast(locale === 'fi' ? 'Tallennettu hakuihin' : 'Saved to Applications')
+    } finally {
+      markAppliedBusyRef.current = false
+    }
+  }, [
+    atsFriendlyMode, classicNameAlignment, coverLetterBody, cvFontId, cvHeadingColor, formData, locale,
+    renderLetterPdf, renderPdfPreview, selectedTemplate, templateAccentColors,
+  ])
 
   const handleDownloadLetterPdf = useCallback(async (rendered) => {
     try {
@@ -2783,6 +2866,18 @@ function ResumeBuilderPage({
         onRename={cvLibrary.renameCv}
         onDelete={cvLibrary.deleteCv}
         onNewCv={handleNewCv}
+      />
+
+      <MarkAppliedModal
+        isOpen={isMarkAppliedOpen}
+        onClose={handleCloseMarkApplied}
+        locale={locale}
+        initialCompany={coverLetter.company}
+        initialRole={coverLetter.role || jobTitleFromAd(jobDescription) || ''}
+        initialPaper={pdfPaper}
+        initialFit={pdfFit}
+        onSubmit={handleMarkApplied}
+        isAvailable={isApplicationLogUsable}
       />
 
       <ImportCvModal

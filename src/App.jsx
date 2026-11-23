@@ -894,6 +894,7 @@ function App({ route = null }) {
           savedCvStatus={headerProps.savedCvStatus}
           onSaveCv={headerProps.onSaveCv}
           onOpenSavedCvs={headerProps.onOpenSavedCvs}
+          onMarkApplied={headerProps.onMarkApplied}
           onClearCv={headerProps.onClearCv}
           isClearArmed={headerProps.isClearArmed}
           builderMode={headerProps.builderMode}

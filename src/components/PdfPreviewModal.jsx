@@ -3,6 +3,7 @@ import { Download, LoaderCircle, TriangleAlert } from 'lucide-react'
 
 import Modal from './Modal'
 import PdfParserView from './PdfParserView'
+import { FIT_OPTIONS, PAPER_OPTIONS } from './pdfPreviewOptions'
 
 // The PDF before it downloads (1.6.74): the pages exactly as the file will
 // have them, with the paper and fit options that change them. `onRender`
@@ -13,42 +14,6 @@ import PdfParserView from './PdfParserView'
 //
 // `kind="letter"` (1.7.9) previews the cover letter: paper only, since a
 // letter is never shrunk (no Fit options), and no "What a parser reads" tab.
-
-const PAPER_OPTIONS = [
-  { value: 'a4', en: 'A4', fi: 'A4', hintEn: '210 × 297 mm', hintFi: '210 × 297 mm' },
-  { value: 'letter', en: 'US Letter', fi: 'US Letter', hintEn: '8.5 × 11 in', hintFi: '8,5 × 11 in' },
-]
-
-const FIT_OPTIONS = [
-  {
-    value: 'auto',
-    en: 'Auto',
-    fi: 'Automaattinen',
-    hintEn: 'Shrinks a little to avoid a nearly empty last page',
-    hintFi: 'Pienentää hieman, ettei viimeinen sivu jää lähes tyhjäksi',
-  },
-  {
-    value: 'one-page',
-    en: 'Fit to 1 page',
-    fi: 'Sovita 1 sivulle',
-    hintEn: 'Shrinks the CV onto one page if the text stays readable',
-    hintFi: 'Pienentää CV:n yhdelle sivulle, jos teksti pysyy luettavana',
-  },
-  {
-    value: 'two-pages',
-    en: 'Fit to 2 pages',
-    fi: 'Sovita 2 sivulle',
-    hintEn: 'Shrinks the CV onto two pages at most',
-    hintFi: 'Pienentää CV:n enintään kahdelle sivulle',
-  },
-  {
-    value: 'actual',
-    en: 'Actual size',
-    fi: 'Todellinen koko',
-    hintEn: 'No shrinking, however many pages it takes',
-    hintFi: 'Ei pienennystä, sivuja tulee tarpeen mukaan',
-  },
-]
 
 function OptionGroup({ legend, name, options, value, onChange, disabled, isFinnish }) {
   return (

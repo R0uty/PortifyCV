@@ -10,6 +10,7 @@ import {
   Redo2,
   Save,
   Search,
+  Send,
   Settings,
   Smartphone,
   Trash2,
@@ -170,6 +171,7 @@ function Toolbar({
   savedCvStatus = null,
   onSaveCv = () => {},
   onOpenSavedCvs = () => {},
+  onMarkApplied = () => {},
 }) {
   const isFinnish = locale === 'fi'
   const {
@@ -556,6 +558,15 @@ function Toolbar({
                   <FolderOpen size={15} strokeWidth={2} aria-hidden="true" />
                   {isFinnish ? 'Omat CV:t' : 'My CVs'}
                   {savedCvStatus?.count ? ` (${savedCvStatus.count})` : ''}
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="app-toolbar__menu-item"
+                  onClick={() => handleMoreSelect(onMarkApplied)}
+                >
+                  <Send size={15} strokeWidth={2} aria-hidden="true" />
+                  {isFinnish ? 'Merkitse haetuksi' : 'Mark as applied'}
                 </button>
                 <div className="app-toolbar__menu-separator" role="separator" />
                 <button

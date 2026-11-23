@@ -5059,6 +5059,26 @@ html:lang(fi) .landing-title {
   cursor: default;
 }
 
+/* ── Mark as applied (1.7.11) ── */
+
+.mark-applied__error {
+  color: #b42318;
+}
+
+.mark-applied__radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  padding-top: 0.35rem;
+}
+
+.mark-applied__radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
 /* The toolbar's Save button: a text button the height of the icon buttons. */
 .app-toolbar__save {
   display: inline-flex;
