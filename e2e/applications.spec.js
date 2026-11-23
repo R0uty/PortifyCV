@@ -488,7 +488,7 @@ test.describe('Applications tab', () => {
 
     const status = dialog.locator('[data-application="Acme Oy"]').getByLabel('Tila')
     await expect(status.locator('option')).toHaveText(['Haettu', 'Haastattelu', 'Tarjous', 'Hylätty', 'Ei vastausta'])
-    await expect(dialog.locator('[data-application="Acme Oy"]').getByRole('button', { name: 'Näytä Acme Oy:lle lähetetty' })).toBeVisible()
+    await expect(dialog.locator('[data-application="Acme Oy"]').getByRole('button', { name: 'Näytä lähetetty: Acme Oy' })).toBeVisible()
   })
 })
 
@@ -694,7 +694,7 @@ test.describe('View sent and Start new CV', () => {
     await page.getByRole('menuitem', { name: /^Omat CV:t/ }).click()
     const list = page.getByRole('dialog', { name: 'Omat CV:t' })
     await list.getByRole('tab', { name: /^Haut/ }).click()
-    await list.locator('[data-application="Acme Oy"]').getByRole('button', { name: 'Näytä Acme Oy:lle lähetetty' }).click()
+    await list.locator('[data-application="Acme Oy"]').getByRole('button', { name: 'Näytä lähetetty: Acme Oy' }).click()
     dialog = page.getByRole('dialog', { name: 'Lähetetty: Acme Oy' })
     await expect(dialog.getByText('Tästä PDF:stä ei ole kuvaa. Lataa se nähdäksesi sen.')).toBeVisible()
   })

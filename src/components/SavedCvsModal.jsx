@@ -155,7 +155,7 @@ function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onDeleting
             type="button"
             className="settings-link"
             data-application-view
-            aria-label={isFinnish ? `Näytä ${application.company}:lle lähetetty` : `View sent to ${application.company}`}
+            aria-label={isFinnish ? `Näytä lähetetty: ${application.company}` : `View sent to ${application.company}`}
             onClick={() => onView(application.id)}
           >
             {isFinnish ? 'Näytä lähetetty' : 'View sent'}
