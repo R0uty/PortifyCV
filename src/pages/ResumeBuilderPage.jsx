@@ -32,6 +32,7 @@ import {
 } from 'lucide-react'
 
 import useCvHistory from '../hooks/useCvHistory'
+import useApplications from '../hooks/useApplications'
 import useCvLibrary from '../hooks/useCvLibrary'
 import useCvSafekeeping from '../hooks/useCvSafekeeping'
 import usePreviewZoom from '../hooks/usePreviewZoom'
@@ -561,7 +562,8 @@ function ResumeBuilderPage({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   // Direct Edit's ways into what Classic keeps in its form column.
   const [isImportOpen, setIsImportOpen] = useState(false)
-  // null, 'save' (the name prompt) or 'list' (My CVs).
+  // null, 'save' (the name prompt), 'list' (My CVs) or 'applications'
+  // (My CVs' Applications tab).
   const [savedCvsView, setSavedCvsView] = useState(null)
   const [savedCvsUnsaved, setSavedCvsUnsaved] = useState(false)
   // The name the Save dialog suggests when it isn't the CV's own (a copy
@@ -574,7 +576,7 @@ function ResumeBuilderPage({
   const [isApplicationLogUsable, setIsApplicationLogUsable] = useState(isApplicationLogAvailable)
   // Bumped after each application is stored, so a list of them knows to
   // read the database again.
-  const [, setApplicationsVersion] = useState(0)
+  const [applicationsVersion, setApplicationsVersion] = useState(0)
   const [isCoverLetterOpen, setIsCoverLetterOpen] = useState(false)
   const [isBadgeOpen, setIsBadgeOpen] = useState(false)
   // "Clear CV" (the toolbar's More menu since 1.6.67) is two-step: the
@@ -718,6 +720,8 @@ function ResumeBuilderPage({
     onReattach: handleReattachSavedCv,
   })
   const { detach: detachSavedCv } = cvLibrary
+  const applicationLog = useApplications({ version: applicationsVersion, locale, showToast })
+  const { refresh: refreshApplications } = applicationLog
 
   useEffect(() => {
     if (initialSession.storageIssue) {
@@ -1502,21 +1506,33 @@ function ResumeBuilderPage({
   const handleOpenCoverLetter = openCoverLetterDialog
 
   const handleOpenSettings = useCallback(() => {
+    // The Delete all applications row needs a count that is current.
+    refreshApplications()
     setIsSettingsOpen(true)
-  }, [])
+  }, [refreshApplications])
 
   const handleOpenImport = useCallback(() => setIsImportOpen(true), [])
 
   // ── Saved CVs (1.7.1) ──
+  // Opening My CVs (either tab) reads the applications again, so one
+  // logged in another tab shows here.
   const openSavedCvs = useCallback((view, suggestedName = null) => {
+    if (view !== 'save') refreshApplications()
     setSavedCvsUnsaved(hasUnsavedCvChanges())
     setSavedCvsSuggestedName(suggestedName)
     setSavedCvsView(view)
-  }, [hasUnsavedCvChanges])
+  }, [hasUnsavedCvChanges, refreshApplications])
+  const handleSavedCvsViewChange = useCallback((view) => {
+    if (view === 'applications') refreshApplications()
+    setSavedCvsView(view)
+  }, [refreshApplications])
   const handleOpenSavedCvs = useCallback(() => {
     cvLibrary.refreshSavedCvs()
     openSavedCvs('list')
   }, [cvLibrary, openSavedCvs])
+  // View sent and Start new CV from it come with the next part of 1.7.11.
+  const handleViewApplication = useCallback(() => {}, [])
+  const handleStartFromApplication = useCallback(() => {}, [])
   const handleCloseSavedCvs = useCallback(() => setSavedCvsView(null), [])
   // Opens the dialog once the database has answered, so a browser that
   // blocks it shows why straight away rather than after Save.
@@ -2167,7 +2183,7 @@ function ResumeBuilderPage({
 
       setIsMarkAppliedOpen(false)
       setApplicationsVersion((version) => version + 1)
-      showToast(locale === 'fi' ? 'Tallennettu hakuihin' : 'Saved to Applications')
+      showToast(locale === 'fi' ? 'Tallennettu kohtaan Omat CV:t › Haut.' : 'Saved to Applications in My CVs.')
     } finally {
       markAppliedBusyRef.current = false
     }
@@ -2846,12 +2862,14 @@ function ResumeBuilderPage({
         onCvLanguageChange={handleCvLanguageChange}
         savedCvCount={cvLibrary.savedCvs.length}
         onDeleteAllSavedCvs={cvLibrary.deleteAll}
+        applicationCount={applicationLog.count}
+        onDeleteAllApplications={applicationLog.removeAll}
       />
 
       <SavedCvsModal
         isOpen={savedCvsView !== null}
         view={savedCvsView ?? 'list'}
-        onViewChange={setSavedCvsView}
+        onViewChange={handleSavedCvsViewChange}
         onClose={handleCloseSavedCvs}
         locale={locale}
         isAvailable={cvLibrary.isAvailable}
@@ -2866,6 +2884,12 @@ function ResumeBuilderPage({
         onRename={cvLibrary.renameCv}
         onDelete={cvLibrary.deleteCv}
         onNewCv={handleNewCv}
+        isApplicationLogAvailable={isApplicationLogUsable && applicationLog.isAvailable}
+        applications={applicationLog.applications}
+        onUpdateApplication={applicationLog.update}
+        onDeleteApplication={applicationLog.remove}
+        onViewApplication={handleViewApplication}
+        onStartFromApplication={handleStartFromApplication}
       />
 
       <MarkAppliedModal
@@ -2877,7 +2901,7 @@ function ResumeBuilderPage({
         initialPaper={pdfPaper}
         initialFit={pdfFit}
         onSubmit={handleMarkApplied}
-        isAvailable={isApplicationLogUsable}
+        isAvailable={isApplicationLogUsable && applicationLog.isAvailable}
       />
 
       <ImportCvModal

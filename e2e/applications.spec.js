@@ -250,3 +250,189 @@ test.describe('Mark as applied', () => {
     await expect(dialog.getByRole('textbox', { name: 'Company' })).toHaveCount(0)
   })
 })
+
+// The Applications tab of My CVs (src/hooks/useApplications.js).
+const myCvsDialog = (page) => page.getByRole('dialog', { name: 'My CVs' })
+const applicationRow = (page, company) => myCvsDialog(page).locator(`[data-application="${company}"]`)
+
+async function openApplications(page) {
+  await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+  await page.getByRole('menuitem', { name: /^My CVs/ }).click()
+  await expect(myCvsDialog(page)).toBeVisible()
+  await myCvsDialog(page).getByRole('tab', { name: /^Applications/ }).click()
+}
+
+const storedNotes = async (page) => (await page.evaluate(() => new Promise((resolve, reject) => {
+  const request = indexedDB.open('portifycv-applications')
+  request.onsuccess = () => {
+    const getAll = request.result.transaction('applications').objectStore('applications').getAll()
+    getAll.onsuccess = () => {
+      request.result.close()
+      resolve(getAll.result.map((record) => ({ company: record.company, status: record.status, note: record.note })))
+    }
+    getAll.onerror = () => reject(getAll.error)
+  }
+  request.onerror = () => reject(request.error)
+})))
+
+test.describe('Applications tab', () => {
+  test('the toast says where the application went', async ({ page }) => {
+    await loadDemo(page)
+    await markApplied(page)
+    await expect(page.getByText('Saved to Applications in My CVs.')).toBeVisible()
+  })
+
+  test('the tab lists applications with their details, newest first', async ({ page }) => {
+    await loadDemo(page)
+    await openApplications(page)
+    await expect(myCvsDialog(page).getByText(
+      'Mark a CV as applied from the menu to keep the PDF you sent here.',
+    )).toBeVisible()
+    await myCvsDialog(page).getByRole('button', { name: 'Close' }).click()
+
+    await markApplied(page, { company: 'Acme Oy', role: 'Frontend Developer' })
+    await markApplied(page, { company: 'Globex', role: 'UI Engineer' })
+    await openApplications(page)
+
+    const tab = myCvsDialog(page).getByRole('tab', { name: 'Applications (2)' })
+    await expect(tab).toHaveAttribute('aria-selected', 'true')
+    await expect(myCvsDialog(page).getByRole('tab', { name: 'My CVs' })).toHaveAttribute('aria-selected', 'false')
+    await expect(myCvsDialog(page).locator('[data-application]')).toHaveText([/Globex/, /Acme Oy/])
+
+    const row = applicationRow(page, 'Acme Oy')
+    await expect(row).toContainText('Frontend Developer')
+    const date = await page.evaluate(() => new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }))
+    await expect(row).toContainText(date)
+    await expect(row.getByLabel('Status')).toHaveValue('applied')
+    await expect(row.getByRole('button', { name: 'View sent' })).toBeVisible()
+    await expect(row.getByRole('button', { name: 'Start new CV from it' })).toBeVisible()
+  })
+
+  test('status and note survive a reload', async ({ page }) => {
+    await loadDemo(page)
+    await markApplied(page)
+    await openApplications(page)
+
+    const row = applicationRow(page, 'Acme Oy')
+    await row.getByLabel('Status').selectOption({ label: 'Interview' })
+    await row.getByLabel('Note').fill('Call on Tuesday')
+    await row.getByLabel('Note').blur()
+    await expect.poll(() => storedNotes(page)).toEqual([{ company: 'Acme Oy', status: 'interview', note: 'Call on Tuesday' }])
+
+    await page.reload()
+    await openApplications(page)
+    await expect(applicationRow(page, 'Acme Oy').getByLabel('Status')).toHaveValue('interview')
+    await expect(applicationRow(page, 'Acme Oy').getByLabel('Note')).toHaveValue('Call on Tuesday')
+  })
+
+  test('a note typed just before closing is kept', async ({ page }) => {
+    await loadDemo(page)
+    await markApplied(page)
+    await openApplications(page)
+
+    await applicationRow(page, 'Acme Oy').getByLabel('Note').fill('Sent on Monday')
+    await page.keyboard.press('Escape')
+    await expect(myCvsDialog(page)).toBeHidden()
+
+    await openApplications(page)
+    await expect(applicationRow(page, 'Acme Oy').getByLabel('Note')).toHaveValue('Sent on Monday')
+    expect(await storedNotes(page)).toEqual([{ company: 'Acme Oy', status: 'applied', note: 'Sent on Monday' }])
+  })
+
+  test('an application from another tab shows when the tab opens', async ({ page }) => {
+    await page.goto('/cv')
+    await expect(page.getByRole('banner').getByRole('button', { name: 'More actions' })).toBeVisible()
+
+    const other = await page.context().newPage()
+    await loadDemo(other)
+    await markApplied(other)
+
+    await openApplications(page)
+    await expect(applicationRow(page, 'Acme Oy')).toBeVisible()
+    await expect(myCvsDialog(page).getByRole('tab', { name: 'Applications (1)' })).toBeVisible()
+  })
+
+  test('delete asks first', async ({ page }) => {
+    await loadDemo(page)
+    await markApplied(page)
+    await openApplications(page)
+
+    const row = applicationRow(page, 'Acme Oy')
+    await row.getByRole('button', { name: 'Delete' }).click()
+    await expect(row.getByText('Delete the application to Acme Oy? The PDF that was sent goes with it.')).toBeVisible()
+    await row.getByRole('button', { name: 'Cancel' }).click()
+    await expect(row.getByText('Delete the application to Acme Oy?')).toHaveCount(0)
+    expect(await storedApplications(page)).toHaveLength(1)
+
+    await row.getByRole('button', { name: 'Delete' }).click()
+    await row.getByRole('button', { name: 'Confirm delete' }).click()
+    await expect(row).toHaveCount(0)
+    await expect(myCvsDialog(page).getByRole('tab', { name: 'Applications (0)' })).toBeVisible()
+    expect(await storedApplications(page)).toEqual([])
+  })
+
+  test('Delete all applications clears only applications', async ({ page }) => {
+    await loadDemo(page)
+    await page.getByRole('banner').getByRole('button', { name: 'Save on this device' }).click()
+    const save = page.getByRole('dialog', { name: 'Save on this device' })
+    await save.getByLabel('Name for this CV').fill('Analyst')
+    await save.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(page.getByText('Saved on this device as "Analyst".')).toBeVisible()
+    await markApplied(page)
+
+    await page.getByRole('button', { name: 'Settings' }).click()
+    const settings = page.getByRole('dialog', { name: 'Settings' })
+    await expect(settings.getByText('Applications on this device (1)')).toBeVisible()
+    await settings.getByRole('button', { name: 'Delete all applications' }).click()
+    await settings.getByRole('button', { name: 'Confirm delete all applications' }).click()
+    await expect(page.getByText('All applications were deleted from this device.')).toBeVisible()
+    await expect(settings.getByText('Applications on this device')).toHaveCount(0)
+    await settings.getByRole('button', { name: 'Close' }).click()
+
+    expect(await storedApplications(page)).toEqual([])
+    await openApplications(page)
+    await expect(myCvsDialog(page).getByText('Mark a CV as applied from the menu to keep the PDF you sent here.')).toBeVisible()
+    await myCvsDialog(page).getByRole('tab', { name: 'My CVs' }).click()
+    await expect(myCvsDialog(page).locator('[data-saved-cv="Analyst"]')).toBeVisible()
+    await myCvsDialog(page).getByRole('button', { name: 'Close' }).click()
+
+    // The other way round: deleting the saved CVs leaves applications.
+    await markApplied(page)
+    await page.getByRole('button', { name: 'Settings' }).click()
+    await settings.getByRole('button', { name: 'Delete all saved CVs' }).click()
+    await settings.getByRole('button', { name: 'Confirm delete all', exact: true }).click()
+    await expect(page.getByText('All saved CVs were deleted from this device.')).toBeVisible()
+    await settings.getByRole('button', { name: 'Close' }).click()
+
+    expect(await storedApplications(page)).toHaveLength(1)
+    await openApplications(page)
+    await expect(applicationRow(page, 'Acme Oy')).toBeVisible()
+  })
+
+  test('IndexedDB blocked shows the unavailable message in the tab', async ({ page }) => {
+    await page.addInitScript(() => {
+      IDBFactory.prototype.open = () => {
+        throw new DOMException('blocked', 'SecurityError')
+      }
+    })
+    await page.goto('/cv')
+    await openApplications(page)
+    await expect(myCvsDialog(page).getByRole('alert')).toContainText('This browser does not allow saving on the device')
+  })
+
+  test('the tab and statuses are in Finnish', async ({ page }) => {
+    await loadDemo(page)
+    await markApplied(page)
+    await page.evaluate(() => window.localStorage.setItem('ui-locale', 'fi'))
+    await page.reload()
+
+    await page.getByRole('banner').getByRole('button', { name: 'Lisää toimintoja' }).click()
+    await page.getByRole('menuitem', { name: /^Omat CV:t/ }).click()
+    const dialog = page.getByRole('dialog', { name: 'Omat CV:t' })
+    await dialog.getByRole('tab', { name: 'Haut (1)' }).click()
+
+    const status = dialog.locator('[data-application="Acme Oy"]').getByLabel('Tila')
+    await expect(status.locator('option')).toHaveText(['Haettu', 'Haastattelu', 'Tarjous', 'Hylätty', 'Ei vastausta'])
+    await expect(dialog.locator('[data-application="Acme Oy"]').getByRole('button', { name: 'Näytä lähetetty' })).toBeVisible()
+  })
+})

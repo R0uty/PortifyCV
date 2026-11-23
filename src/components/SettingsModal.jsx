@@ -22,9 +22,12 @@ function SettingsModal({
   onCvLanguageChange,
   savedCvCount = 0,
   onDeleteAllSavedCvs,
+  applicationCount = 0,
+  onDeleteAllApplications,
 }) {
   const isFinnish = locale === 'fi'
   const [isDeleteAllArmed, setIsDeleteAllArmed] = useState(false)
+  const [isDeleteApplicationsArmed, setIsDeleteApplicationsArmed] = useState(false)
 
   return (
     <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
@@ -205,6 +208,36 @@ function SettingsModal({
             {isDeleteAllArmed
               ? isFinnish ? 'Vahvista kaikkien poisto' : 'Confirm delete all'
               : isFinnish ? 'Poista kaikki' : 'Delete all saved CVs'}
+          </button>
+        </div>
+      ) : null}
+      {applicationCount > 0 && onDeleteAllApplications ? (
+        <div className="settings-row">
+          <div>
+            <p className="settings-row__label">
+              {isFinnish ? `Tälle laitteelle tallennetut haut (${applicationCount})` : `Applications on this device (${applicationCount})`}
+            </p>
+            <p className="settings-row__hint">
+              {isFinnish
+                ? 'Poistaa kaikki Merkitse haetuksi -toiminnolla tallennetut haut ja niiden PDF:t tästä selaimesta. Tätä ei voi kumota. Tallennetut CV:t pysyvät.'
+                : 'Removes every application you marked as applied, and its PDFs, from this browser. This cannot be undone. Your saved CVs stay.'}
+            </p>
+          </div>
+          <button
+            type="button"
+            className={`settings-link${isDeleteApplicationsArmed ? ' settings-link--armed' : ''}`}
+            onClick={() => {
+              if (!isDeleteApplicationsArmed) {
+                setIsDeleteApplicationsArmed(true)
+                return
+              }
+              setIsDeleteApplicationsArmed(false)
+              onDeleteAllApplications()
+            }}
+          >
+            {isDeleteApplicationsArmed
+              ? isFinnish ? 'Vahvista kaikkien hakujen poisto' : 'Confirm delete all applications'
+              : isFinnish ? 'Poista kaikki haut' : 'Delete all applications'}
           </button>
         </div>
       ) : null}

@@ -94,6 +94,17 @@ function getPrivacyCopy(locale) {
             + 'tai tyhjentämällä selaimesi sivustokohtaiset tiedot tälle '
             + 'verkkotunnukselle. Ne eivät siirry toiseen selaimeen tai '
             + 'laitteeseen; vie JSON-tiedosto, jos haluat kopion muualle.',
+            'Kun merkitset CV:n haetuksi (Merkitse haetuksi), haku '
+            + 'tallennetaan omaan IndexedDB-tietokantaansa tähän selaimeen: '
+            + 'yritys, tehtävä, hakupäivä, ilmoituksen linkki, tila ja '
+            + 'muistiinpanosi, lähetetyn CV:n PDF (ja saatekirjeen PDF, jos '
+            + 'kirjeessä on tekstiä) kuvineen sekä CV:n tiedot, pohja ja '
+            + 'ulkoasu, joista PDF tehtiin. Mitään näistä ei lähetetä '
+            + 'minnekään. Haut säilyvät, kunnes poistat ne: yksitellen '
+            + 'kohdasta Omat CV:t › Haut, kaikki kerralla Asetuksista tai '
+            + 'tyhjentämällä selaimesi sivustokohtaiset tiedot. Tallennettujen '
+            + 'CV:iden poistaminen ei poista hakuja, eikä hakujen poistaminen '
+            + 'poista CV:itä.',
           ],
         },
         {
@@ -278,6 +289,17 @@ function getPrivacyCopy(locale) {
           + "your browser's site data for this domain. They do not move to "
           + 'another browser or device; export JSON if you want a copy '
           + 'elsewhere.',
+          'When you mark a CV as applied (Mark as applied), the application '
+          + 'is stored in its own IndexedDB database in this browser: the '
+          + 'company, role, date applied, ad link, status and your notes, the '
+          + 'PDF of the CV that was sent (and of the cover letter, when it has '
+          + 'text) with pictures of its pages, and the CV data, template and '
+          + 'look it was made from. None of it is sent anywhere. Applications '
+          + 'stay until you delete them: one at a time from My CVs › '
+          + 'Applications, all at once from Settings, or by clearing your '
+          + "browser's site data for this domain. Deleting your saved CVs "
+          + 'does not delete applications, and deleting applications does not '
+          + 'delete your saved CVs.',
         ],
       },
       {

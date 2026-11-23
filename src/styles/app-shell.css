@@ -5059,6 +5059,38 @@ html:lang(fi) .landing-title {
   cursor: default;
 }
 
+/* ── My CVs › Applications (1.7.11) ── */
+
+.saved-cvs__tabs {
+  margin-bottom: var(--space-4);
+}
+
+.applications__fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem var(--space-4);
+  flex: 1 1 100%;
+}
+
+.applications__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.applications__field--note {
+  flex: 1 1 14rem;
+}
+
+.applications__note {
+  width: 100%;
+  resize: vertical;
+}
+
+.applications__confirm {
+  flex: 1 1 100%;
+}
+
 /* ── Mark as applied (1.7.11) ── */
 
 .mark-applied__error {
