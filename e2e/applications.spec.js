@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { cvTemplates, defaultTemplateId } from '../src/utils/cvTemplates.js'
 import { pdfText } from './helpers/pdfFile.js'
 import { pickTemplate } from './helpers/templateGallery.js'
+import { downloadFromPdfPreview } from './helpers/pdfPreview.js'
 
 // Applications (1.7.11, src/utils/applicationLog.js): "Mark as applied"
 // renders the CV (and the cover letter, when it has a body) to PDF the way
@@ -663,5 +664,73 @@ test.describe('View sent and Start new CV', () => {
     dialog = await openViewSent(page, 'Evil Corp')
     await expect(dialog.getByText('javascript:alert(1)')).toBeVisible()
     await expect(dialog.getByRole('link')).toHaveCount(0)
+  })
+})
+
+// The PDF that was stored is the PDF Download makes (a worker may stamp
+// dates, so compare page count and text layer, not bytes).
+const pageCount = (bytes) => (bytes.toString('latin1').match(/\/Type\s*\/Page(?!s)/g) || []).length
+
+test.describe('Stored PDFs', () => {
+  test('the stored PDF is the downloaded PDF @slow', async ({ page }, testInfo) => {
+    test.setTimeout(180_000)
+    await loadDemo(page)
+
+    // What the PDF preview's Download produces for US Letter, one page.
+    await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'PDF' }).click()
+    const download = await downloadFromPdfPreview(page, { timeout: 90_000, paper: 'letter', fit: 'one-page' })
+    const downloadPath = testInfo.outputPath('preview-download.pdf')
+    await download.saveAs(downloadPath)
+    const downloaded = await readFile(downloadPath)
+
+    const dialog = await openMarkApplied(page)
+    await dialog.getByRole('textbox', { name: 'Company' }).fill('Acme Oy')
+    await dialog.getByRole('textbox', { name: 'Role' }).fill('Frontend Developer')
+    await dialog.getByRole('radio', { name: 'US Letter' }).check()
+    await dialog.getByRole('combobox', { name: 'Fit' }).selectOption('one-page')
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(page.getByText('Saved to Applications')).toBeVisible({ timeout: 30_000 })
+
+    const viewDialogHandle = await openViewSent(page)
+    const stored = await downloadStored(viewDialogHandle, testInfo, 'stored-download')
+    const downloadedText = pdfText(new TextDecoder('windows-1252').decode(downloaded))
+
+    expect(stored.text).toContain('John Doe')
+    expect(pageCount(stored.bytes)).toBe(1)
+    expect(pageCount(stored.bytes)).toBe(pageCount(downloaded))
+    expect(stored.text).toBe(downloadedText)
+  })
+
+  test('a letter is stored as its own PDF @slow', async ({ page }, testInfo) => {
+    test.setTimeout(180_000)
+    await loadDemo(page)
+    await navRail(page).getByRole('button', { name: 'Cover letter' }).click()
+    const letter = page.getByRole('dialog', { name: 'Cover letter' })
+    await letter.getByRole('textbox', { name: 'Company' }).fill('Northwind Labs')
+    await letter.getByRole('button', { name: 'Generate draft' }).click()
+    const draft = letter.getByRole('textbox', { name: 'Draft (editable)' })
+    await expect(draft).toHaveValue(/Northwind Labs/)
+    // The first sentence after the greeting.
+    const body = await draft.inputValue()
+    const sentence = body.split(/\n{2,}/)[1].split(/(?<=[.!?])\s/)[0].replace(/\s+/g, ' ').trim()
+    await letter.getByRole('button', { name: 'Close' }).click()
+
+    const dialog = await openMarkApplied(page)
+    await dialog.getByRole('textbox', { name: 'Company' }).fill('Northwind Labs')
+    await dialog.getByRole('textbox', { name: 'Role' }).fill('Frontend Developer')
+    await dialog.getByRole('radio', { name: 'US Letter' }).check()
+    await dialog.getByRole('button', { name: 'Save', exact: true }).click()
+    await expect(page.getByText('Saved to Applications')).toBeVisible({ timeout: 30_000 })
+
+    const [record] = await storedApplications(page)
+    expect(record.letter.paper).toBe('letter')
+
+    const view = await openViewSent(page, 'Northwind Labs')
+    await view.getByRole('tab', { name: 'Cover letter' }).click()
+    const file = await downloadStored(view, testInfo, 'stored-letter')
+    expect(file.fileName).toMatch(/cover-letter\.pdf$/)
+    expect(file.text).toContain('Northwind Labs')
+    expect(file.text).toContain(sentence)
   })
 })

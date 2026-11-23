@@ -379,6 +379,29 @@ follow a real export line for line (made-up people only; never commit a
 real profile). The PDF lists only the member's top three skills, which the
 import toast says.
 
+**Applications (1.7.11) keep the PDF that was sent.** "Mark as applied"
+(More actions; `MarkAppliedModal.jsx`) renders the CV, and the cover letter
+when its body isn't blank, the way Download does, and keeps those PDFs with
+the CV's data. `src/utils/applicationLog.js` is the store, its own
+database `portifycv-applications` and not a second store in `portifycv`,
+since a tab still running old code can't open an upgraded `portifycv` and
+clearing one never touches the other. One record per application: `cv` and
+`letter` (`{ pdf, fileName, paper, pages }`, the CV's with `fit`; `letter`
+is `null` without a letter) and `source` (`{ data, templateId, look }`).
+`src/hooks/useApplications.js` feeds My CVs' Applications tab (status and
+note, kept on blur and on close). `ApplicationViewModal.jsx` (View sent)
+never re-renders: it shows the stored page images and downloads the stored
+blob, so today's CV or template code can't change it. Its paper and margin
+constants are copied from `exporters.js`'s `PDF_PAPER_SIZES`/`PDF_MODES`
+(a lazy chunk), so change them together. Start new CV applies `source` in
+one undo step (`recordTemplateLookStep`, then `SET_FORM_DATA` and the look;
+ATS mode and the Classic name alignment are set but not undone), after
+`detach()` like any whole-CV replacement. Settings' "Delete all
+applications" is separate from "Delete all saved CVs". Cases live in
+`check:applications`; `e2e/applications.spec.js` covers the flows, and its
+`@slow` tests compare View sent's download with the PDF preview's
+(page count and text layer) and read a stored letter's text.
+
 **Share links carry the whole CV in the URL, never a server.**
 `src/utils/shareLinks.js` encodes CV state with short single/double-letter
 keys (`ROOT_STRING_KEYS`, etc.) to keep links short — never repurpose an
