@@ -62,6 +62,9 @@ jobs:
       - name: Saved CV library checks
         run: npm run check:cv-library
 
+      - name: Application log checks
+        run: npm run check:applications
+
       - name: Job-ad matcher checks
         run: npm run check:job-match
 

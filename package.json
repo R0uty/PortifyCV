@@ -17,6 +17,7 @@
     "check:template-variants": "node scripts/check-template-variants.mjs",
     "check:cv-import": "node scripts/check-cv-import.mjs",
     "check:cv-library": "node scripts/check-cv-library.mjs",
+    "check:applications": "node scripts/check-applications.mjs",
     "check:job-match": "node scripts/check-job-match.mjs",
     "check:bullet-ideas": "node scripts/check-bullet-ideas.mjs",
     "preview": "vite preview",

@@ -20,6 +20,7 @@ npm run check:section-columns  # exercises the section column-move rules (src/ut
 npm run check:template-pages   # validates per-template page slugs, examples, copy, and field tags (src/utils/templatePageCopy.js, src/utils/templateMetaDescriptions.js, src/utils/exampleCvs.js, src/utils/templateFields.js)
 npm run check:template-variants  # validates the style-variant registry against each template's CSS defaults, plus contrast (src/utils/templateVariants.js)
 npm run check:cv-library   # exercises the saved-CV library's names, records and save rules (src/utils/cvLibrary.js)
+npm run check:applications  # exercises the application log's records, validation, sorting and edits (src/utils/applicationLog.js)
 npm run check:job-match    # exercises the ATS panel's job-ad matcher in English and Finnish (src/utils/jobMatch.js, src/utils/jobTerms.js)
 npm run check:bullet-ideas  # exercises the example-bullet blanking, role ranking and loading (src/utils/bulletIdeas.js)
 npm run check:cv-import    # exercises the PDF/Word import's text parser and column detection (src/utils/cvTextImport.js, src/utils/cvFileText.js)
@@ -47,12 +48,13 @@ per-template pages' slugs, examples, copy, and field tags, plus `index.html`'s s
 a template's style variants or palette variables (`check:template-variants`),
 anything a template thumbnail is rendered from (`check:thumbnails`), or the
 CV file import's parser or PDF column detection (`check:cv-import`), or the
-saved-CV library (`check:cv-library`), or the job-ad matcher and its term
+saved-CV library (`check:cv-library`), or the application log
+(`check:applications`), or the job-ad matcher and its term
 list (`check:job-match`), or the example bullets' number blanking and
 role ranking (`check:bullet-ideas`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.
-CI (`.github/workflows/ci.yml`) runs all thirteen on every push to `main` and
+CI (`.github/workflows/ci.yml`) runs all fourteen on every push to `main` and
 `v1.7.0` (the current long-lived branch) and on every pull request.
 
 `test:e2e` (and its `:fast`/`:slow` variants) build and serve the app first
