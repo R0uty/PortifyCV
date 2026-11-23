@@ -5091,6 +5091,18 @@ html:lang(fi) .landing-title {
   flex: 1 1 100%;
 }
 
+/* View sent: the stored PDF's ad link (ApplicationViewModal.jsx). */
+.application-view__ad {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.application-view__ad-value {
+  overflow-wrap: anywhere;
+}
+
 /* ── Mark as applied (1.7.11) ── */
 
 .mark-applied__error {

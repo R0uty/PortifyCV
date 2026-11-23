@@ -47,6 +47,7 @@ import ImportCvModal from '../components/ImportCvModal'
 import SavedCvsModal from '../components/SavedCvsModal'
 import PdfPreviewModal from '../components/PdfPreviewModal'
 import MarkAppliedModal from '../components/MarkAppliedModal'
+import ApplicationViewModal from '../components/ApplicationViewModal'
 import CVForm from '../components/CVForm'
 import CVPreview from '../components/CVPreview'
 import CVSuggestionsPanel from '../components/CVSuggestionsPanel'
@@ -78,6 +79,7 @@ import {
   resolveCvLocale,
 } from '../utils/cvForm'
 import {
+  defaultTemplateId,
   getCvTemplates,
   getCvTemplate,
   resolveTemplateAccent,
@@ -90,7 +92,7 @@ import { getSectionSchema } from '../utils/sectionSchema'
 import { DEFAULT_STYLE_VARIANT_ID, getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, parseStyleVariantParam, resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
-import { uiReducer, createInitialUiState, readInitialTemplateId, resolveTemplateId, UI_ACTION } from '../reducers/uiReducer'
+import { applyStoredLooks, pickTemplateLook, uiReducer, createInitialUiState, readInitialTemplateId, resolveTemplateId, UI_ACTION } from '../reducers/uiReducer'
 import { defaultCvName, MAX_CV_NAME_LENGTH } from '../utils/cvLibrary'
 import {
   createExportFileName,
@@ -107,6 +109,7 @@ import {
   addApplication,
   countApplications,
   createApplicationRecord,
+  getApplication,
   isApplicationLogAvailable,
 } from '../utils/applicationLog'
 import { BULLET_BLANK, countBlankBullets, evaluateCvFeedback } from '../utils/cvFeedback'
@@ -565,6 +568,8 @@ function ResumeBuilderPage({
   // null, 'save' (the name prompt), 'list' (My CVs) or 'applications'
   // (My CVs' Applications tab).
   const [savedCvsView, setSavedCvsView] = useState(null)
+  // The application whose sent PDF View sent shows (the full record).
+  const [viewedApplication, setViewedApplication] = useState(null)
   const [savedCvsUnsaved, setSavedCvsUnsaved] = useState(false)
   // The name the Save dialog suggests when it isn't the CV's own (a copy
   // for a job, 1.7.2).
@@ -1530,9 +1535,83 @@ function ResumeBuilderPage({
     cvLibrary.refreshSavedCvs()
     openSavedCvs('list')
   }, [cvLibrary, openSavedCvs])
-  // View sent and Start new CV from it come with the next part of 1.7.11.
-  const handleViewApplication = useCallback(() => {}, [])
-  const handleStartFromApplication = useCallback(() => {}, [])
+  // An application's full record, files included. Null (after a toast)
+  // when it is gone or the database can't be read.
+  const readApplication = useCallback(async (id) => {
+    try {
+      const record = await getApplication(id)
+      if (record) return record
+      refreshApplications()
+      showToast(
+        locale === 'fi' ? 'Tätä hakua ei enää ole tällä laitteella.' : 'This application is no longer on this device.',
+        'error',
+      )
+    } catch {
+      showToast(locale === 'fi' ? 'Hakua ei voitu avata.' : 'Could not open the application.', 'error')
+    }
+    return null
+  }, [locale, refreshApplications])
+  // View sent: one dialog at a time, so My CVs closes while it is open and
+  // comes back on the Applications tab when it closes.
+  const handleViewApplication = useCallback(async (id) => {
+    const record = await readApplication(id)
+    if (!record) return
+    setSavedCvsView(null)
+    setViewedApplication(record)
+  }, [readApplication])
+  const handleCloseViewedApplication = useCallback(() => {
+    setViewedApplication(null)
+    openSavedCvs('applications')
+  }, [openSavedCvs])
+  // Start new CV from it: the CV that was sent, as a new unsaved CV in the
+  // template (a retired one through its replacement, an unknown one as the
+  // default) and look it was sent in. One undo step, like a gallery Use,
+  // so Undo brings back the previous CV, template and look together; ATS
+  // mode and name alignment are set too, but not undone, as everywhere.
+  const handleStartFromApplication = useCallback(async (id) => {
+    const record = viewedApplication?.id === id ? viewedApplication : await readApplication(id)
+    if (!record) return
+
+    let data
+    try {
+      data = parseImportedCvData(record.source?.data)
+    } catch {
+      showToast(
+        locale === 'fi' ? 'Tämän haun CV:tä ei voitu avata.' : 'This application\'s CV could not be opened.',
+        'error',
+      )
+      return
+    }
+
+    const templateId = resolveTemplateId(record.source?.templateId) ?? defaultTemplateId
+    const stored = record.source?.look ?? {}
+    // The look the CV's stored style variant gives, then what was really
+    // on screen when it was sent, where the record has it.
+    const look = pickTemplateLook(applyStoredLooks({ ...uiState, selectedTemplate: templateId }, data, templateId))
+    if (typeof stored.accentColor === 'string' && stored.accentColor) {
+      look.templateAccentColors = { ...look.templateAccentColors, [templateId]: stored.accentColor }
+    }
+    if (typeof stored.cvFontId === 'string' && stored.cvFontId) look.cvFontId = stored.cvFontId
+    if (typeof stored.cvHeadingColor === 'string') look.cvHeadingColor = stored.cvHeadingColor
+
+    // A different CV: it must not be auto-saved over the saved one that was open.
+    detachSavedCv()
+    recordTemplateLookStep({ skipNextCommit: data !== formData })
+    dispatchFormData({ type: FORM_ACTION.SET_FORM_DATA, formData: data })
+    dispatchUi({ type: UI_ACTION.RESTORE_TEMPLATE_LOOK, look })
+    if (typeof stored.atsFriendlyMode === 'boolean' && stored.atsFriendlyMode !== atsFriendlyMode) {
+      dispatchUi({ type: UI_ACTION.TOGGLE_ATS_MODE })
+    }
+    if (typeof stored.classicNameAlignment === 'string') {
+      dispatchUi({ type: UI_ACTION.SET_CLASSIC_NAME_ALIGNMENT, alignment: stored.classicNameAlignment })
+    }
+
+    setViewedApplication(null)
+    setSavedCvsView(null)
+    showToast(locale === 'fi'
+      ? `Uusi CV aloitettu hausta yritykseen ${record.company}.`
+      : `Started a new CV from the application to ${record.company}.`)
+  }, [atsFriendlyMode, detachSavedCv, dispatchFormData, formData, locale, readApplication, recordTemplateLookStep, uiState, viewedApplication])
   const handleCloseSavedCvs = useCallback(() => setSavedCvsView(null), [])
   // Opens the dialog once the database has answered, so a browser that
   // blocks it shows why straight away rather than after Save.
@@ -2890,6 +2969,14 @@ function ResumeBuilderPage({
         onDeleteApplication={applicationLog.remove}
         onViewApplication={handleViewApplication}
         onStartFromApplication={handleStartFromApplication}
+      />
+
+      <ApplicationViewModal
+        key={viewedApplication?.id ?? 'none'}
+        application={viewedApplication}
+        locale={locale}
+        onClose={handleCloseViewedApplication}
+        onStartNewCv={handleStartFromApplication}
       />
 
       <MarkAppliedModal

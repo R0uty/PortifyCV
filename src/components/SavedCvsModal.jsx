@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import Modal from './Modal'
 import { getUiTheme } from '../utils/designSystem'
 import { MAX_CV_NAME_LENGTH } from '../utils/cvLibrary'
-import { APPLICATION_STATUSES, MAX_APPLICATION_NOTE_LENGTH } from '../utils/applicationLog'
+import { APPLICATION_STATUSES, MAX_APPLICATION_NOTE_LENGTH, formatAppliedOn } from '../utils/applicationLog'
 
 // How long a note waits after the last key before it is stored.
 const NOTE_SAVE_DELAY_MS = 600
@@ -18,15 +18,6 @@ const STATUS_LABELS = {
 const unavailableText = (isFinnish) => (isFinnish
   ? 'Tämä selain ei salli tallennusta laitteelle (esimerkiksi yksityisessä ikkunassa). Vie CV JSON-tiedostona, jos haluat säilyttää sen.'
   : 'This browser does not allow saving on the device (a private window, for example). Export the CV as JSON to keep it.')
-
-// 'YYYY-MM-DD' is a calendar day, not an instant: read it in local time.
-function formatAppliedOn(appliedOn, isFinnish) {
-  const [year, month, day] = String(appliedOn).split('-').map(Number)
-  if (!year || !month || !day) return appliedOn
-  return new Date(year, month - 1, day).toLocaleDateString(isFinnish ? 'fi-FI' : 'en-GB', {
-    day: 'numeric', month: 'short', year: 'numeric',
-  })
-}
 
 // One application. The note is the row's own until stored: after a pause in
 // typing, on blur, and when the row goes away (the dialog closing, a tab

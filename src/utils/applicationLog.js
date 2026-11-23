@@ -230,6 +230,16 @@ export function countApplications() {
   })
 }
 
+// How the dialogs show `appliedOn`. 'YYYY-MM-DD' is a calendar day, not
+// an instant: read it in local time.
+export function formatAppliedOn(appliedOn, isFinnish) {
+  const [year, month, day] = String(appliedOn).split('-').map(Number)
+  if (!year || !month || !day) return appliedOn
+  return new Date(year, month - 1, day).toLocaleDateString(isFinnish ? 'fi-FI' : 'en-GB', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  })
+}
+
 /** @returns {Promise<ApplicationRecord | null>} */
 export function getApplication(id) {
   return withStore('readonly', (store, resolve) => {

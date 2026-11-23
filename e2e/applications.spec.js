@@ -1,4 +1,8 @@
 import { test, expect } from './fixtures/base.js'
+import { readFile } from 'node:fs/promises'
+import { cvTemplates, defaultTemplateId } from '../src/utils/cvTemplates.js'
+import { pdfText } from './helpers/pdfFile.js'
+import { pickTemplate } from './helpers/templateGallery.js'
 
 // Applications (1.7.11, src/utils/applicationLog.js): "Mark as applied"
 // renders the CV (and the cover letter, when it has a body) to PDF the way
@@ -434,5 +438,230 @@ test.describe('Applications tab', () => {
     const status = dialog.locator('[data-application="Acme Oy"]').getByLabel('Tila')
     await expect(status.locator('option')).toHaveText(['Haettu', 'Haastattelu', 'Tarjous', 'Hylätty', 'Ei vastausta'])
     await expect(dialog.locator('[data-application="Acme Oy"]').getByRole('button', { name: 'Näytä lähetetty' })).toBeVisible()
+  })
+})
+
+// View sent and Start new CV from it (ApplicationViewModal.jsx and the
+// builder's handleStartFromApplication).
+const templateName = (id) => cvTemplates.find((template) => template.id === id).label
+const templateLabel = (page) => page.locator('.app-toolbar__template-trigger-label')
+const fullNameField = (page) => page.getByRole('textbox', { name: /Full name/ })
+const viewDialog = (page, company = 'Acme Oy') => page.getByRole('dialog', { name: `Sent to ${company}` })
+
+// Writes a record straight into the applications store, as an older
+// version of the app (or a fallback render) would have left it.
+const putApplication = (page, overrides) => page.evaluate((overrides) => new Promise((resolve, reject) => {
+  const pdf = new Blob(['%PDF-1.4 stored test file'], { type: 'application/pdf' })
+  const now = new Date().toISOString()
+  const record = {
+    id: 'stored-1',
+    company: 'Initech',
+    role: 'Analyst',
+    appliedOn: '2026-01-15',
+    adUrl: '',
+    status: 'applied',
+    note: '',
+    cv: { pdf, fileName: 'Stored_CV.pdf', paper: 'a4', fit: 'auto', pages: [] },
+    letter: null,
+    source: {
+      data: { fullName: 'Retro Person', title: 'Old Title' },
+      templateId: 'classic',
+      look: { atsFriendlyMode: false, cvFontId: 'inter', cvHeadingColor: '', accentColor: '', classicNameAlignment: 'left' },
+    },
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  }
+  if (overrides.sourceOverrides) {
+    record.source = { ...record.source, ...overrides.sourceOverrides }
+    delete record.sourceOverrides
+  }
+  const request = indexedDB.open('portifycv-applications', 1)
+  request.onupgradeneeded = () => {
+    if (!request.result.objectStoreNames.contains('applications')) {
+      request.result.createObjectStore('applications', { keyPath: 'id' })
+    }
+  }
+  request.onsuccess = () => {
+    const transaction = request.result.transaction('applications', 'readwrite')
+    transaction.objectStore('applications').put(record)
+    transaction.oncomplete = () => {
+      request.result.close()
+      resolve()
+    }
+    transaction.onerror = () => reject(transaction.error)
+  }
+  request.onerror = () => reject(request.error)
+}), overrides)
+
+async function openViewSent(page, company = 'Acme Oy') {
+  await openApplications(page)
+  await applicationRow(page, company).getByRole('button', { name: 'View sent' }).click()
+  await expect(viewDialog(page, company)).toBeVisible()
+  return viewDialog(page, company)
+}
+
+async function downloadStored(dialog, testInfo, name) {
+  const page = dialog.page()
+  const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    dialog.getByRole('button', { name: 'Download PDF' }).click(),
+  ])
+  const path = testInfo.outputPath(`${name}.pdf`)
+  await download.saveAs(path)
+  const bytes = await readFile(path)
+  return { fileName: download.suggestedFilename(), bytes, text: pdfText(new TextDecoder('windows-1252').decode(bytes)) }
+}
+
+test.describe('View sent and Start new CV', () => {
+  test('View sent shows the pages that were stored, not today\'s CV', async ({ page }, testInfo) => {
+    await loadDemo(page)
+    await fullNameField(page).fill('Jane Example')
+    await markApplied(page)
+
+    await fullNameField(page).fill('Changed Name')
+    await pickTemplate(page, templateName('developer'))
+
+    const dialog = await openViewSent(page)
+    const date = await page.evaluate(() => new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }))
+    await expect(dialog).toContainText('Frontend Developer')
+    await expect(dialog).toContainText(date)
+    expect(await dialog.locator('img[data-stored-page]').count()).toBeGreaterThanOrEqual(1)
+    await expect(dialog.locator('img[data-stored-page]').first()).toHaveJSProperty('complete', true)
+    expect(await dialog.locator('img[data-stored-page]').first().evaluate((image) => image.naturalWidth)).toBeGreaterThan(0)
+
+    const [record] = await storedApplications(page)
+    const file = await downloadStored(dialog, testInfo, 'stored-cv')
+    expect(file.fileName).toBe(record.cv.fileName)
+    expect(file.bytes.length).toBe(record.cv.pdfSize)
+    expect(file.text).toContain('Jane Example')
+    expect(file.text).not.toContain('Changed Name')
+  })
+
+  test('CV / Cover letter switch appears only with a letter', async ({ page }, testInfo) => {
+    await loadDemo(page)
+    await markApplied(page, { company: 'Acme Oy' })
+    let dialog = await openViewSent(page)
+    await expect(dialog.getByRole('tab')).toHaveCount(0)
+    await dialog.getByRole('button', { name: 'Close' }).click()
+    await myCvsDialog(page).getByRole('button', { name: 'Close' }).click()
+
+    await navRail(page).getByRole('button', { name: 'Cover letter' }).click()
+    const letter = page.getByRole('dialog', { name: 'Cover letter' })
+    await letter.getByRole('button', { name: 'Generate draft' }).click()
+    await letter.getByRole('button', { name: 'Close' }).click()
+    await markApplied(page, { company: 'Globex' })
+
+    dialog = await openViewSent(page, 'Globex')
+    const cvTab = dialog.getByRole('tab', { name: 'CV' })
+    const letterTab = dialog.getByRole('tab', { name: 'Cover letter' })
+    await expect(cvTab).toHaveAttribute('aria-selected', 'true')
+    const cvFile = await downloadStored(dialog, testInfo, 'switch-cv')
+
+    await letterTab.click()
+    await expect(letterTab).toHaveAttribute('aria-selected', 'true')
+    expect(await dialog.locator('img[data-stored-page]').count()).toBeGreaterThanOrEqual(1)
+    const letterFile = await downloadStored(dialog, testInfo, 'switch-letter')
+    expect(letterFile.fileName).not.toBe(cvFile.fileName)
+    const records = await storedApplications(page)
+    const globex = records.find((record) => record.company === 'Globex')
+    expect(letterFile.bytes.length).toBe(globex.letter.pdfSize)
+  })
+
+  test('Start new CV puts the sent CV back and Undo restores the previous one', async ({ page }) => {
+    await loadDemo(page)
+    const sentTemplate = await templateLabel(page).textContent()
+    await markApplied(page)
+
+    await pickTemplate(page, templateName('developer'))
+    await fullNameField(page).fill('Edited Name')
+
+    await openApplications(page)
+    await applicationRow(page, 'Acme Oy').getByRole('button', { name: 'Start new CV from it' }).click()
+    await expect(myCvsDialog(page)).toBeHidden()
+    await expect(page.getByText('Started a new CV from the application to Acme Oy.')).toBeVisible()
+    await expect(fullNameField(page)).toHaveValue('John Doe')
+    await expect(templateLabel(page)).toHaveText(sentTemplate)
+
+    await page.getByRole('button', { name: 'Undo' }).click()
+    await expect(templateLabel(page)).toHaveText(templateName('developer'))
+    await expect(fullNameField(page)).toHaveValue('Edited Name')
+  })
+
+  test('Start new CV from View sent closes it', async ({ page }) => {
+    await loadDemo(page)
+    await markApplied(page)
+    await fullNameField(page).fill('Edited Name')
+
+    const dialog = await openViewSent(page)
+    await dialog.getByRole('button', { name: 'Start new CV from it' }).click()
+    await expect(dialog).toBeHidden()
+    await expect(myCvsDialog(page)).toBeHidden()
+    await expect(fullNameField(page)).toHaveValue('John Doe')
+  })
+
+  test('an application in a retired template opens in its replacement', async ({ page }) => {
+    await page.goto('/cv?template=developer')
+    await expect(templateLabel(page)).toHaveText(templateName('developer'))
+    await putApplication(page, {})
+    await openApplications(page)
+    await applicationRow(page, 'Initech').getByRole('button', { name: 'Start new CV from it' }).click()
+    await expect(fullNameField(page)).toHaveValue('Retro Person')
+    await expect(templateLabel(page)).toHaveText(templateName('classicProfessional'))
+
+    await putApplication(page, { id: 'stored-2', company: 'Umbrella', sourceOverrides: { templateId: 'no-such-template' } })
+    await openApplications(page)
+    await applicationRow(page, 'Umbrella').getByRole('button', { name: 'Start new CV from it' }).click()
+    await expect(page.getByText('Started a new CV from the application to Umbrella.')).toBeVisible()
+    await expect(templateLabel(page)).toHaveText(templateName(defaultTemplateId))
+    await expect(page.locator('[role="alert"]', { hasText: /could not|error/i })).toHaveCount(0)
+  })
+
+  test('an application whose CV data is unreadable changes nothing', async ({ page }) => {
+    await loadDemo(page)
+    await putApplication(page, { id: 'stored-3', company: 'Broken', sourceOverrides: { data: 'not a CV' } })
+    await openApplications(page)
+    await applicationRow(page, 'Broken').getByRole('button', { name: 'Start new CV from it' }).click()
+    await expect(page.getByText("This application's CV could not be opened.")).toBeVisible()
+    await expect(fullNameField(page)).toHaveValue('John Doe')
+  })
+
+  test('a fallback PDF shows a note instead of pages', async ({ page }, testInfo) => {
+    await page.goto('/cv')
+    await putApplication(page, { company: 'Acme Oy' })
+    let dialog = await openViewSent(page)
+    await expect(dialog.getByText("There's no picture of this PDF. Download it to see it.")).toBeVisible()
+    await expect(dialog.locator('img[data-stored-page]')).toHaveCount(0)
+    const file = await downloadStored(dialog, testInfo, 'fallback')
+    expect(file.fileName).toBe('Stored_CV.pdf')
+    expect(file.bytes.toString('latin1')).toBe('%PDF-1.4 stored test file')
+    await dialog.getByRole('button', { name: 'Close' }).click()
+
+    await page.evaluate(() => window.localStorage.setItem('ui-locale', 'fi'))
+    await page.reload()
+    await page.getByRole('banner').getByRole('button', { name: 'Lisää toimintoja' }).click()
+    await page.getByRole('menuitem', { name: /^Omat CV:t/ }).click()
+    const list = page.getByRole('dialog', { name: 'Omat CV:t' })
+    await list.getByRole('tab', { name: /^Haut/ }).click()
+    await list.locator('[data-application="Acme Oy"]').getByRole('button', { name: 'Näytä lähetetty' }).click()
+    dialog = page.getByRole('dialog', { name: 'Lähetetty: Acme Oy' })
+    await expect(dialog.getByText('Tästä PDF:stä ei ole kuvaa. Lataa se nähdäksesi sen.')).toBeVisible()
+  })
+
+  test('the ad link is a link only for a web address', async ({ page }) => {
+    await page.goto('/cv')
+    await putApplication(page, { company: 'Acme Oy', adUrl: 'https://example.com/jobs/7' })
+    let dialog = await openViewSent(page)
+    const link = dialog.getByRole('link', { name: 'https://example.com/jobs/7' })
+    await expect(link).toHaveAttribute('href', 'https://example.com/jobs/7')
+    await expect(link).toHaveAttribute('target', '_blank')
+    await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    await dialog.getByRole('button', { name: 'Close' }).click()
+
+    await putApplication(page, { id: 'stored-4', company: 'Evil Corp', adUrl: 'javascript:alert(1)' })
+    await myCvsDialog(page).getByRole('button', { name: 'Close' }).click()
+    dialog = await openViewSent(page, 'Evil Corp')
+    await expect(dialog.getByText('javascript:alert(1)')).toBeVisible()
+    await expect(dialog.getByRole('link')).toHaveCount(0)
   })
 })
