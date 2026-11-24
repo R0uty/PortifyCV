@@ -182,7 +182,8 @@ path against `ROUTES`/`VIEW_HEAD` (`src/utils/routes.js`,
 `src/utils/pageMeta.js` — the single source of truth for every real path,
 title, and description). Static content pages are keyed into one
 `STATIC_PAGES` map and share one shell (header, footer, consent banner); the
-CV builder (`src/pages/ResumeBuilderPage.jsx`) is the one non-static view.
+CV builder (`src/pages/ResumeBuilderPage.jsx`) and the shared-CV page
+(`SharedCvPage.jsx`, 1.7.12) are the two non-static views (`APP_VIEWS`).
 Every page component is lazy-loaded.
 
 Production is Cloudflare Workers (`wrangler.jsonc`, `main: worker/index.js`,
@@ -409,8 +410,41 @@ existing key, since older generated links decode against the same table.
 Uploaded images are stripped from the payload (too large for a URL) with the
 recipient told they're missing; export JSON instead when images need to
 travel too. The per-template style-variant choice travels under the `va`
-key, and the sender's selected template under `tp` (1.6.8; the link opens
-on it — older links without it open on the default template).
+key, and the sender's selected template under `tp` (1.6.8; the link
+opens on it — older links without it open on the default template). Since
+1.7.12 a link opens the read-only `/view` page (below), not the builder.
+
+**The share page (1.7.12) is `/view#data=…`, read-only, and writes nothing.**
+`shareLinks.js` builds links as `/view#data=…` and also carries the
+sender's look and PDF settings under new keys, each written only when it
+differs from its default (permanent like the others): `ac` accent, `fo` font
+id, `hc` headings colour, `na` name alignment (`'left'` only), `at` ATS mode
+(`1` only), `pp` paper (`'letter'` only), `pf` fit (anything but `'auto'`);
+`ac`/`fo` are written whenever non-empty. A junk value in one of them falls
+back to that one default (accent and headings colour are validated before
+they can reach a style). `readCvStateFromLocation` returns `{ formData,
+templateId, look, pdf, isEdit }`, `resolveSharedCvLook`
+(`sharedCvLook.js`) turns the keys into the CV's look, and
+`resolveTemplateId`/`LEGACY_TEMPLATE_ALIASES` live in `cvTemplates.js`.
+`shareEditUrl` makes `/cv#data=…&edit=1`, the builder address.
+`SharedCvPage.jsx` reads the fragment with `useSyncExternalStore`, shows
+the CV in a `ScaledPreview` with the new `interactive` prop (the preview
+stays selectable and clickable, and `CvIsPageContext` lets the CV's name
+be the page's one `<h1>`; Showcases still render it through `CvHeading`
+with `data-cv-name`), and renders a separate off-screen inert copy for
+Download PDF (`renderCvPdf`/`saveRenderedCvPdf` with the link's paper and
+fit). "Edit a copy" opens the builder in a new tab (`noopener`), where
+`createInitialUiState` applies the link's look. The page follows the CV's
+own language (`cvLanguage`) without writing the visitor's locale, and writes
+no `sessionStorage`, saved CV or other storage. `VIEW_HEAD.shareView` is
+`noindex, nofollow` (the worker rewrites robots from `head.robots`), the
+view is in `AD_FREE_VIEWS` and `APP_VIEWS` (English path only, no Finnish
+twin, never pre-rendered) and not in the sitemap. A link made before 1.7.12
+(`/cv#data=…`) opened fresh is replaced with `/view` by `App.jsx`, but only
+on the first route read and only without `edit=1`, so a reload or
+back/forward of an old `/cv#data=` tab stays in the builder where the
+visitor may have been editing. Covered by `e2e/share-view.spec.js` (one
+`@slow` test) and `e2e/helpers/shareLinks.js`.
 
 **CV data shape and mutations** are centralized in `src/utils/cvForm.js`
 (the `CvData` shape, including `styleVariantByTemplate`, the chosen look per
