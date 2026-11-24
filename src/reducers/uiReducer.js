@@ -135,7 +135,21 @@ export function createInitialUiState(initialSession) {
   }
 
   // A share link or restored session opens in its stored looks.
-  return applyStoredLooks(state, initialSession?.formData, state.selectedTemplate)
+  const stored = applyStoredLooks(state, initialSession?.formData, state.selectedTemplate)
+
+  // A share link's own look (1.7.12) wins over the stored one, field by
+  // field; whatever the link leaves out keeps the stored look.
+  const look = initialSession?.sharedLook
+  if (!look) return stored
+  const next = { ...stored }
+  if (look.accent) {
+    next.templateAccentColors = { ...stored.templateAccentColors, [stored.selectedTemplate]: look.accent }
+  }
+  if (look.fontId) next.cvFontId = look.fontId
+  if (look.headingColor !== undefined) next.cvHeadingColor = look.headingColor
+  if (look.nameAlignment) next.classicNameAlignment = look.nameAlignment
+  if (look.atsFriendlyMode !== undefined) next.atsFriendlyMode = look.atsFriendlyMode
+  return next
 }
 
 export function uiReducer(state, action) {

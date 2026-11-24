@@ -4,7 +4,7 @@ import { getTemplateVariants } from '../src/utils/templateVariants.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { CV_FONT_OPTIONS } from '../src/utils/cvFonts.js'
 import { clearCv, copyShareLink, fontTrigger, styleTrigger } from './helpers/builderToolbar.js'
-import { shareEditUrl } from './helpers/shareLinks.js'
+import { copyLinkFromBuilder, shareEditUrl } from './helpers/shareLinks.js'
 
 // The Style picker (Phase 3) in both builder modes, and how a picked
 // variant persists (share link, JSON, session restore, template switch,
@@ -140,6 +140,13 @@ test('a variant survives a share link', async ({ page, context }) => {
   await fresh.goto(shareEditUrl(url))
   await expect(await styleTrigger(fresh))
     .toHaveAccessibleName(`Select style: ${minimalVariant.label.en}`)
+})
+
+test('Edit a copy keeps a hand-picked font', async ({ page, context }) => {
+  const url = await copyLinkFromBuilder(page, context, { font: 'Arial' })
+  const fresh = await context.newPage()
+  await fresh.goto(shareEditUrl(url))
+  await expect(await fontTrigger(fresh)).toHaveAccessibleName('Select font: Arial')
 })
 
 test('a variant survives a JSON export and import', async ({ page }, testInfo) => {

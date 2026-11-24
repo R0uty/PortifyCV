@@ -35,7 +35,13 @@ function getPrivacyCopy(locale) {
                 '-merkin jälkeiseen osaan), jota selaimet eivät koskaan '
                 + 'lähetä palvelimelle normaalin sivunlatauksen yhteydessä. '
                 + 'Kuka tahansa, jolle lähetät linkin, voi purkaa sen omassa '
-                + 'selaimessaan samalla tavalla kuin sinun selaimesi sen loi.',
+                + 'selaimessaan samalla tavalla kuin sinun selaimesi sen loi. '
+                + 'Linkki avaa CV:n katselusivun, jolta vastaanottaja voi '
+                + 'ladata PDF:n tai avata kopion muokattavaksi omassa '
+                + 'selaimessaan. Linkki kuljettaa CV:n tietojen lisäksi '
+                + 'valitsemasi fontin ja värit, ATS-tilan sekä PDF:n '
+                + 'paperikoon ja sovituksen; kuvat ja hakemuskirje eivät '
+                + 'koskaan kulje mukana.',
               ],
             },
           ],
@@ -232,7 +238,12 @@ function getPrivacyCopy(locale) {
               { code: '#' },
               '), which browsers never send to a server as part of a normal '
               + 'page load. Anyone you send that link to can decode it in '
-              + 'their own browser the same way yours created it.',
+              + 'their own browser the same way yours created it. The link '
+              + 'opens a view-only page where the recipient can download a '
+              + 'PDF or open a copy to edit in their own browser. Besides '
+              + 'your CV data it carries your chosen font and colours, ATS '
+              + 'mode, and the PDF paper size and fit; photos and the cover '
+              + 'letter never travel in it.',
             ],
           },
         ],

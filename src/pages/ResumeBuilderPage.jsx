@@ -320,6 +320,7 @@ function loadInitialCvSession(locale = 'en') {
         // The sender's selected template (1.6.8); createInitialUiState
         // opens on it when it resolves.
         sharedTemplateId: shared.templateId,
+        sharedLook: shared.look,
         isOwnCv: true,
         initialToast: createToast(isFinnish ? 'CV ladattu jakolinkistä.' : 'Loaded CV from share link.', 'success'),
         clearShareParam: false,
@@ -1364,14 +1365,18 @@ function ResumeBuilderPage({
     if (shareLinkOmitsImages(formData)) {
       showToast(
         locale === 'fi'
-          ? 'Jakolinkki kopioitu. Kuvat jäävät linkin ulkopuolelle — jaa JSON, jos ne tarvitaan.'
-          : 'Share link copied. Images are left out of the link — share the JSON export if they are needed.',
+          ? 'Jakolinkki kopioitu. Se avaa CV:n katselusivun, josta voi ladata PDF:n. Kuvat jäävät linkin ulkopuolelle — jaa JSON, jos ne tarvitaan.'
+          : 'Share link copied. It opens a view-only page with a PDF download. Images are left out of the link — share the JSON export if they are needed.',
         'info',
       )
       return
     }
 
-    showToast(locale === 'fi' ? 'Jakolinkki kopioitu leikepöydälle.' : 'Share link copied to clipboard.')
+    showToast(
+      locale === 'fi'
+        ? 'Jakolinkki kopioitu. Se avaa CV:n katselusivun, josta voi ladata PDF:n.'
+        : 'Share link copied. It opens a view-only page with a PDF download.',
+    )
   }, [
     atsFriendlyMode, classicNameAlignment, cvFontId, cvHeadingColor, formData, locale, pdfFit, pdfPaper,
     selectedTemplate, templateAccentColors,

@@ -576,6 +576,18 @@ console.log('\nuiReducer\n')
     createInitialUiState({ sharedTemplateId: 'no-such-template' }).selectedTemplate === fallback)
   check('no shared template falls back as before',
     createInitialUiState({ sharedTemplateId: null }).selectedTemplate === fallback)
+  const { getTemplateVariants: variantsOf } = await importSrc('utils/templateVariants.js')
+  const looked = createInitialUiState({
+    formData: createInitialCvData(), sharedTemplateId: 'developer', sharedLook: { fontId: 'arial', atsFriendlyMode: true, nameAlignment: 'left', accent: '#123456', headingColor: '#654321' },
+  })
+  check('a shared look sets the font', looked.cvFontId === 'arial')
+  check('a shared look sets ATS mode', looked.atsFriendlyMode === true)
+  check('a shared look sets name alignment', looked.classicNameAlignment === 'left')
+  check('a shared look sets the accent', looked.templateAccentColors.developer === '#123456')
+  check('a shared look sets the headings colour', looked.cvHeadingColor === '#654321')
+  const partial = createInitialUiState({ formData: createInitialCvData(), sharedTemplateId: 'developer', sharedLook: { fontId: 'arial' } })
+  check('absent shared look fields keep the stored look',
+    partial.atsFriendlyMode === false && partial.cvHeadingColor === variantsOf('developer')[0].headingColor)
 }
 
 {

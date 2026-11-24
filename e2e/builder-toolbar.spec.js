@@ -65,7 +65,8 @@ test.describe('Builder toolbar', () => {
     await page.goto('/cv')
     await page.getByRole('banner').getByRole('button', { name: 'Export', exact: true }).click()
     await page.getByRole('menuitem', { name: /^Copy share link/ }).click()
-    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain('#data=')
+    await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toMatch(/\/view#data=/)
+    await expect(page.getByText('Share link copied. It opens a view-only page with a PDF download.')).toBeVisible()
   })
 })
 
