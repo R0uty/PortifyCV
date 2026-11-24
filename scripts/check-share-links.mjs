@@ -269,5 +269,43 @@ const junkLink = `https://portifycv.app/cv#data=${Buffer.from(JSON.stringify(jun
 check('a non-string tp reads back templateId null', share.readCvStateFromLocation(junkLink).templateId === null)
 check('a URL without share data reads back null', share.readCvStateFromLocation('https://portifycv.app/cv') === null)
 
+// The sender's look and PDF settings, and the read-only /view page (1.7.12).
+function rawLink(extraKeys) {
+  const payload = rawPayload(share.encodeCvStateForUrl(demo, 'developer'))
+  payload.d = { ...payload.d, ...extraKeys }
+  return share.readCvStateFromLocation(
+    `https://portifycv.app/view#data=${Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url')}`,
+  )
+}
+const look = { accent: '#0f766e', fontId: 'arial', headingColor: '#1f2937', nameAlignment: 'left', atsFriendlyMode: true }
+const pdf = { paper: 'letter', fit: 'one-page' }
+const lookUrl = share.buildShareUrl(demo, { templateId: 'developer', look, pdf, currentHref: 'https://portifycv.app/cv' })
+check('share links open /view', new URL(lookUrl).pathname === '/view')
+const back = share.readCvStateFromLocation(lookUrl)
+check('look round-trips', JSON.stringify(back.look) === JSON.stringify(look))
+check('pdf settings round-trip', back.pdf.paper === 'letter' && back.pdf.fit === 'one-page')
+check('a fresh link is not an edit link', back.isEdit === false)
+const edit = share.shareEditUrl(lookUrl)
+check('edit url is /cv with edit=1', new URL(edit).pathname === '/cv' && share.readCvStateFromLocation(edit).isEdit === true)
+check('edit url keeps the same CV', diff(back.formData, share.readCvStateFromLocation(edit).formData).length === 0)
+const plain = share.encodeCvStateForUrl(demo, 'developer', { look: { nameAlignment: 'center', atsFriendlyMode: false, headingColor: '' }, pdf: { paper: 'a4', fit: 'auto' } })
+check('defaults add no keys', plain === share.encodeCvStateForUrl(demo, 'developer'))
+const old = share.readCvStateFromLocation(`https://portifycv.app/cv#data=${share.encodeCvStateForUrl(demo, 'developer')}`)
+check('old link: empty look, default pdf', Object.keys(old.look).length === 0 && old.pdf.paper === 'a4' && old.pdf.fit === 'auto')
+const junk = rawLink({ ac: 'red;}body{x', fo: 'comic', hc: 'blue', na: 'right', at: 'yes', pp: 'a3', pf: 'huge' })
+check('junk look values are dropped', Object.keys(junk.look).length === 0 && junk.pdf.paper === 'a4' && junk.pdf.fit === 'auto')
+check('junk look values keep the CV', junk.formData.fullName === demo.fullName)
+const { resolveSharedCvLook } = await importUtil('sharedCvLook.js')
+const { defaultTemplateId } = await importUtil('cvTemplates.js')
+const { getTemplateVariant, resolveStyleVariantId } = await importUtil('templateVariants.js')
+const expectedVariantFont = getTemplateVariant('developer', resolveStyleVariantId(demo, 'developer')).fontId
+const resolvedOld = resolveSharedCvLook(demo, 'retired-id', {})
+check('unknown template -> default template', resolvedOld.template === defaultTemplateId)
+check('retired classic id -> classicProfessional', resolveSharedCvLook(demo, 'classic', {}).template === 'classicProfessional')
+check('resolver uses link values first', resolveSharedCvLook(demo, 'developer', look).cvFontId === 'arial')
+check('resolver falls back to the stored look', resolveSharedCvLook(demo, 'developer', {}).cvFontId === expectedVariantFont)
+const resolvedDefaults = resolveSharedCvLook(demo, 'developer', {})
+check('resolver defaults: center, no ATS', resolvedDefaults.classicNameAlignment === 'center' && resolvedDefaults.atsFriendlyMode === false)
+
 console.log(`\n${failures === 0 ? 'All share-link checks passed.' : `${failures} check(s) failed.`}`)
 process.exit(failures === 0 ? 0 : 1)

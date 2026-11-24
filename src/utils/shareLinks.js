@@ -1,4 +1,6 @@
 import { parseImportedCvData } from './cvForm'
+import { isValidCvFontId } from './cvFonts'
+import { isValidCvHeadingColor } from './cvHeadingColors'
 
 export const SHARE_QUERY_PARAM = 'data'
 export const MAX_SHARE_DATA_LENGTH = 16000
@@ -9,7 +11,8 @@ const SHARE_PAYLOAD_VERSION = 3
 // already in use: links generated earlier decode against these exact tables.
 // Root keys written outside these tables are reserved too: s (skills), l (links),
 // so (section order), sv, siv, pv, sc, va, and tp (the sender's selected
-// template, 1.6.8). A new root key must not reuse any of them.
+// template, 1.6.8), cl, and the sender's look and PDF settings (1.7.12): ac, fo,
+// hc, na, at, pp, pf. A new root key must not reuse any of them.
 const ROOT_STRING_KEYS = {
   fullName: 'f',
   title: 't',
@@ -408,14 +411,46 @@ function decodeBase64Url(value) {
   return Uint8Array.from(binary, (character) => character.charCodeAt(0))
 }
 
+const SHARE_PAPERS = ['a4', 'letter']
+const SHARE_FITS = ['auto', 'one-page', 'two-pages', 'actual']
+const SHARE_ACCENT_PATTERN = /^#[0-9a-f]{6}$/i
+
 // `templateId` is the sender's selected template ('tp', 1.6.8) — permanent
 // once shipped, like every other key here. It isn't CV data, so it's added
-// beside the compressed CV rather than in compressCvData.
-export function encodeCvStateForUrl(formData, templateId = null) {
+// beside the compressed CV rather than in compressCvData. So are the look
+// and PDF settings of 1.7.12 (`extras`), each written only when it differs
+// from the default: ac accent, fo font id, hc headings colour, na name
+// alignment ('left'), at ATS mode (1), pp paper ('letter'), pf fit — all
+// permanent once shipped.
+export function encodeCvStateForUrl(formData, templateId = null, extras = {}) {
   const payload = compressCvData(formData)
+  const look = isPlainObject(extras?.look) ? extras.look : {}
+  const pdf = isPlainObject(extras?.pdf) ? extras.pdf : {}
 
   if (typeof templateId === 'string' && templateId) {
     payload.d.tp = templateId
+  }
+
+  if (typeof look.accent === 'string' && SHARE_ACCENT_PATTERN.test(look.accent)) {
+    payload.d.ac = look.accent
+  }
+  if (typeof look.fontId === 'string' && isValidCvFontId(look.fontId)) {
+    payload.d.fo = look.fontId
+  }
+  if (typeof look.headingColor === 'string' && look.headingColor && isValidCvHeadingColor(look.headingColor)) {
+    payload.d.hc = look.headingColor
+  }
+  if (look.nameAlignment === 'left') {
+    payload.d.na = 'left'
+  }
+  if (look.atsFriendlyMode === true) {
+    payload.d.at = 1
+  }
+  if (pdf.paper === 'letter') {
+    payload.d.pp = 'letter'
+  }
+  if (SHARE_FITS.includes(pdf.fit) && pdf.fit !== 'auto') {
+    payload.d.pf = pdf.fit
   }
 
   const json = JSON.stringify(payload)
@@ -479,11 +514,14 @@ export function shareLinkOmitsImages(formData) {
   })
 }
 
-export function buildShareUrl(formData, { templateId = null, currentHref = window.location.href } = {}) {
-  const encodedValue = encodeCvStateForUrl(formData, templateId)
+export function buildShareUrl(
+  formData,
+  { templateId = null, look = {}, pdf = {}, currentHref = window.location.href } = {},
+) {
+  const encodedValue = encodeCvStateForUrl(formData, templateId, { look, pdf })
   const nextUrl = new URL(currentHref)
 
-  nextUrl.pathname = '/cv'
+  nextUrl.pathname = '/view'
   nextUrl.search = ''
   nextUrl.hash = `${SHARE_QUERY_PARAM}=${encodedValue}`
 
@@ -494,6 +532,43 @@ export function buildShareUrl(formData, { templateId = null, currentHref = windo
   }
 
   return shareUrl
+}
+
+// The same CV as a builder link: /cv with edit=1, which tells the builder to
+// open the CV as a copy to edit rather than show it read-only.
+export function shareEditUrl(shareUrl) {
+  const url = new URL(shareUrl)
+  const encodedValue = new URLSearchParams(url.hash.replace(/^#/, '')).get(SHARE_QUERY_PARAM) ?? ''
+
+  url.pathname = '/cv'
+  url.search = ''
+  url.hash = `${SHARE_QUERY_PARAM}=${encodedValue}&edit=1`
+
+  return url.toString()
+}
+
+// Each look key is kept only when it validates; the rest are dropped one by
+// one, so a hand-edited value never costs the recipient the CV.
+function lookFromPayload(payload) {
+  const d = isPlainObject(payload) && isPlainObject(payload.d) ? payload.d : {}
+  const look = {}
+
+  if (typeof d.ac === 'string' && SHARE_ACCENT_PATTERN.test(d.ac)) look.accent = d.ac
+  if (typeof d.fo === 'string' && isValidCvFontId(d.fo)) look.fontId = d.fo
+  if (typeof d.hc === 'string' && d.hc && isValidCvHeadingColor(d.hc)) look.headingColor = d.hc
+  if (d.na === 'left' || d.na === 'center') look.nameAlignment = d.na
+  if (d.at === 1 || d.at === true) look.atsFriendlyMode = true
+
+  return look
+}
+
+function pdfFromPayload(payload) {
+  const d = isPlainObject(payload) && isPlainObject(payload.d) ? payload.d : {}
+
+  return {
+    paper: SHARE_PAPERS.includes(d.pp) ? d.pp : 'a4',
+    fit: SHARE_FITS.includes(d.pf) ? d.pf : 'auto',
+  }
 }
 
 // Reads share data from the URL fragment ONLY. Unlike the fragment, a query
@@ -507,8 +582,10 @@ export function buildShareUrl(formData, { templateId = null, currentHref = windo
 // just opens an empty builder instead of silently leaking its payload again
 // on every subsequent open.
 //
-// Returns the CV and the sender's selected template ('tp'; null for links
-// made before 1.6.8).
+// Returns the CV, the sender's selected template ('tp'; null for links made
+// before 1.6.8), `look` (only the look keys the link carried and that
+// validated; {} for older links), `pdf` (always complete, defaults filled)
+// and `isEdit` (the fragment has edit=1: the builder opens it as a copy).
 export function readCvStateFromLocation(currentHref = window.location.href) {
   const currentUrl = new URL(currentHref)
   const hashParams = new URLSearchParams(currentUrl.hash.replace(/^#/, ''))
@@ -519,7 +596,13 @@ export function readCvStateFromLocation(currentHref = window.location.href) {
   }
 
   const payload = parseSharePayload(encodedValue)
-  return { formData: cvFromPayload(payload), templateId: templateFromPayload(payload) }
+  return {
+    formData: cvFromPayload(payload),
+    templateId: templateFromPayload(payload),
+    look: lookFromPayload(payload),
+    pdf: pdfFromPayload(payload),
+    isEdit: hashParams.get('edit') === '1',
+  }
 }
 
 export function removeShareDataParamFromCurrentUrl() {
