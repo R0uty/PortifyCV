@@ -134,7 +134,8 @@ function SharedCv({ shared, href, locale }) {
   return (
     <div className="shared-cv" lang={cvLocale}>
       <div className="shared-cv__bar">
-        <h1 className="shared-cv__name">{fullName || (isFinnish ? 'Jaettu CV' : 'Shared CV')}</h1>
+        {/* Not a heading: the CV's own name below is the page's one <h1>. */}
+        <p className="shared-cv__name">{fullName || (isFinnish ? 'Jaettu CV' : 'Shared CV')}</p>
         <div className="shared-cv__actions">
           <button
             type="button"
@@ -169,6 +170,7 @@ function SharedCv({ shared, href, locale }) {
           {...previewProps}
           fontId={resolved.cvFontId}
           fontStack={fontStack}
+          interactive
         />
       </div>
 

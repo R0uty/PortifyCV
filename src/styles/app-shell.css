@@ -3977,6 +3977,12 @@ html:lang(fi) .landing-title {
   user-select: none;
 }
 
+/* The share page's CV (1.7.12): readable text and working links. */
+.scaled-preview__page--interactive {
+  pointer-events: auto;
+  user-select: text;
+}
+
 /* The read-only share page (/view, 1.7.12): a bar with the name and the
    two actions, which wraps at phone width, above the CV scaled to the
    page's width with a 16px gutter. */

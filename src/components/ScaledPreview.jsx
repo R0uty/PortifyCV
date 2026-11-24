@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import CVPreview from './CVPreview'
-import { DecorativeHeadingsContext } from './cvHeadingContext'
+import { CvIsPageContext, DecorativeHeadingsContext } from './cvHeadingContext'
 import { loadCvFont } from '../utils/cvFonts'
 
 // Same native width TemplateThumbnail renders at (see its comment): the CV
@@ -21,6 +21,10 @@ function ScaledPreview({
   fontStack,
   headingColor,
   classicNameAlignment,
+  // On the share page (/view, 1.7.12) the CV is the page's content, not a
+  // picture of one: it stays in the accessibility tree with real headings,
+  // and its text can be selected and its links followed.
+  interactive = false,
 }) {
   const frameRef = useRef(null)
   const pageRef = useRef(null)
@@ -53,12 +57,25 @@ function ScaledPreview({
     }
   }, [fontId])
 
+  const preview = (
+    <CVPreview
+      formData={formData}
+      template={template}
+      locale={locale}
+      atsFriendlyMode={atsFriendlyMode}
+      accentColor={accentColor}
+      headingColor={headingColor}
+      styleVariantId={styleVariantId}
+      classicNameAlignment={classicNameAlignment}
+    />
+  )
+
   return (
     <div className="scaled-preview" ref={frameRef} style={height ? { height } : undefined}>
       <div
-        className="scaled-preview__page"
+        className={`scaled-preview__page${interactive ? ' scaled-preview__page--interactive' : ''}`}
         ref={pageRef}
-        aria-hidden="true"
+        aria-hidden={interactive ? undefined : 'true'}
         data-nosnippet
         style={{
           ...(scale ? { transform: `scale(${scale})` } : null),
@@ -66,18 +83,13 @@ function ScaledPreview({
           ...(fontStack ? { '--font-sans': fontStack } : null),
         }}
       >
-        <DecorativeHeadingsContext.Provider value>
-          <CVPreview
-            formData={formData}
-            template={template}
-            locale={locale}
-            atsFriendlyMode={atsFriendlyMode}
-            accentColor={accentColor}
-            headingColor={headingColor}
-            styleVariantId={styleVariantId}
-            classicNameAlignment={classicNameAlignment}
-          />
-        </DecorativeHeadingsContext.Provider>
+        {interactive ? (
+          <CvIsPageContext.Provider value>{preview}</CvIsPageContext.Provider>
+        ) : (
+          <DecorativeHeadingsContext.Provider value>
+            {preview}
+          </DecorativeHeadingsContext.Provider>
+        )}
       </div>
     </div>
   )

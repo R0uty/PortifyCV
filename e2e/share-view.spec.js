@@ -215,3 +215,36 @@ test('at phone width the page has no sideways scroll', async ({ page, context })
   expect(box.x).toBeGreaterThanOrEqual(16)
   expect(box.x + box.width).toBeLessThanOrEqual(375 - 16 + 0.5)
 })
+
+// The CV is the page's content (1.7.12 fix round): in the accessibility
+// tree with real headings, its text selectable and its links working. No
+// template renders the email or phone as a link (they are text in every
+// preview), so the email is checked as selectable text and a project link
+// (Developer's GitHub link) as the link to follow.
+test('the CV on /view is readable and its links work', async ({ page, context }) => {
+  const url = await copyLinkFromBuilder(page, context, { template: developerLabel })
+  const viewer = await context.newPage()
+  await viewer.goto(url)
+  const cv = viewer.locator('.shared-cv__preview')
+  await expect(viewer.getByRole('heading', { level: 1 })).toHaveCount(1)
+  await expect(cv.getByRole('heading', { level: 1 })).toHaveText(DEMO_NAME)
+  await expect(cv.getByRole('heading', { name: /experience/i }).first()).toBeVisible()
+
+  await expect(cv.getByText('john.doe@example.com').first()).toBeVisible()
+  await expect(cv.locator('.scaled-preview__page')).toHaveCSS('user-select', 'text')
+  const selected = await cv.getByText('john.doe@example.com').first().evaluate((el) => {
+    const range = document.createRange()
+    range.selectNodeContents(el)
+    window.getSelection().removeAllRanges()
+    window.getSelection().addRange(range)
+    return window.getSelection().toString()
+  })
+  expect(selected).toContain('john.doe@example.com')
+
+  const link = cv.getByRole('link', { name: /github\.example\.com/ }).first()
+  await expect(link).toBeVisible()
+  await expect(link).toHaveAttribute('href', /^https:\/\/github\.example\.com\//)
+  await context.route('https://github.example.com/**', (route) => route.fulfill({ body: 'ok' }))
+  const [popup] = await Promise.all([context.waitForEvent('page'), link.click()])
+  await expect(popup).toHaveURL(/github\.example\.com/)
+})
