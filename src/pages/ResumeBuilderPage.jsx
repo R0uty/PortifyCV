@@ -1313,13 +1313,16 @@ function ResumeBuilderPage({
 
     try {
       // The link carries what the sender sees (1.7.12): the template, its
-      // look as tweaked, and the PDF preview's paper and fit.
-      shareUrl = buildShareUrl(formData, {
+      // look as tweaked, and the PDF preview's paper and fit. The CV's
+      // language is sent resolved ('cl' always written), so a CV that
+      // follows a Finnish app stays Finnish for an English recipient.
+      shareUrl = buildShareUrl({ ...formData, cvLanguage: cvLocale }, {
         templateId: selectedTemplate,
         look: {
           accent: resolveTemplateAccent(templateAccentColors, selectedTemplate),
           fontId: cvFontId,
           headingColor: cvHeadingColor,
+          variantHeadingColor: getTemplateVariant(selectedTemplate, styleVariantId)?.headingColor ?? '',
           nameAlignment: classicNameAlignment,
           atsFriendlyMode,
         },
@@ -1378,8 +1381,8 @@ function ResumeBuilderPage({
         : 'Share link copied. It opens a view-only page with a PDF download.',
     )
   }, [
-    atsFriendlyMode, classicNameAlignment, cvFontId, cvHeadingColor, formData, locale, pdfFit, pdfPaper,
-    selectedTemplate, templateAccentColors,
+    atsFriendlyMode, classicNameAlignment, cvFontId, cvHeadingColor, cvLocale, formData, locale, pdfFit, pdfPaper,
+    selectedTemplate, styleVariantId, templateAccentColors,
   ])
 
   const handleToggleAtsFriendlyMode = useCallback(() => {

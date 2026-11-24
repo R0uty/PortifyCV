@@ -276,6 +276,7 @@ function compressCvData(formData) {
   }
 
   // 'cl' (1.7.5) — the CV's own language; nothing when it follows the app.
+  // The builder's share link (1.7.12) passes it resolved, so it is always set.
   if (formData.cvLanguage === 'en' || formData.cvLanguage === 'fi') {
     data.cl = formData.cvLanguage
   }
@@ -414,12 +415,15 @@ function decodeBase64Url(value) {
 const SHARE_PAPERS = ['a4', 'letter']
 const SHARE_FITS = ['auto', 'one-page', 'two-pages', 'actual']
 const SHARE_ACCENT_PATTERN = /^#[0-9a-f]{6}$/i
+// 'hc' for Default (no headings colour) on a look that has one of its own.
+const SHARE_DEFAULT_HEADING_COLOR = '-'
 
 // `templateId` is the sender's selected template ('tp', 1.6.8) — permanent
 // once shipped, like every other key here. It isn't CV data, so it's added
 // beside the compressed CV rather than in compressCvData. So are the look
 // and PDF settings of 1.7.12 (`extras`), each written only when it differs
-// from the default: ac accent, fo font id, hc headings colour, na name
+// from the default: ac accent, fo font id, hc headings colour ('-' for
+// Default when the look has a colour of its own), na name
 // alignment ('left'), at ATS mode (1), pp paper ('letter'), pf fit — all
 // permanent once shipped.
 export function encodeCvStateForUrl(formData, templateId = null, extras = {}) {
@@ -437,8 +441,15 @@ export function encodeCvStateForUrl(formData, templateId = null, extras = {}) {
   if (typeof look.fontId === 'string' && isValidCvFontId(look.fontId)) {
     payload.d.fo = look.fontId
   }
-  if (typeof look.headingColor === 'string' && look.headingColor && isValidCvHeadingColor(look.headingColor)) {
-    payload.d.hc = look.headingColor
+  // 'hc' is written only when the sender's headings colour differs from
+  // what the recipient resolves without it: `look.variantHeadingColor`, the
+  // stored look's own colour ('' when the caller doesn't say). Default
+  // (empty) on a look that has a colour travels as the marker '-'.
+  if (typeof look.headingColor === 'string' && isValidCvHeadingColor(look.headingColor)) {
+    const variantHeadingColor = typeof look.variantHeadingColor === 'string' ? look.variantHeadingColor : ''
+    if (look.headingColor.toLowerCase() !== variantHeadingColor.toLowerCase()) {
+      payload.d.hc = look.headingColor || SHARE_DEFAULT_HEADING_COLOR
+    }
   }
   if (look.nameAlignment === 'left') {
     payload.d.na = 'left'
@@ -555,7 +566,8 @@ function lookFromPayload(payload) {
 
   if (typeof d.ac === 'string' && SHARE_ACCENT_PATTERN.test(d.ac)) look.accent = d.ac
   if (typeof d.fo === 'string' && isValidCvFontId(d.fo)) look.fontId = d.fo
-  if (typeof d.hc === 'string' && d.hc && isValidCvHeadingColor(d.hc)) look.headingColor = d.hc
+  if (d.hc === SHARE_DEFAULT_HEADING_COLOR) look.headingColor = ''
+  else if (typeof d.hc === 'string' && d.hc && isValidCvHeadingColor(d.hc)) look.headingColor = d.hc
   if (d.na === 'left' || d.na === 'center') look.nameAlignment = d.na
   if (d.at === 1 || d.at === true) look.atsFriendlyMode = true
 

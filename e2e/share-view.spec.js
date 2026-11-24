@@ -174,6 +174,30 @@ test('a Finnish CV opens in Finnish without changing the visitor\'s language', a
   expect(await viewer.evaluate((key) => localStorage.getItem(key), UI_LOCALE_KEY)).not.toBe('fi')
 })
 
+// A CV that follows a Finnish app (CV language left on "follow the app")
+// is sent as Finnish: the link always carries the CV's resolved language.
+test('a CV following the Finnish app opens in Finnish for an English visitor', async ({ page, context, browser }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'fi'))
+  await page.goto('/cv')
+  await page.getByRole('button', { name: 'Lataa demo-CV' }).first().click()
+  await page.getByRole('banner').getByRole('button', { name: 'Vie', exact: true }).click()
+  await page.getByRole('menuitem', { name: /^Kopioi jakolinkki/ }).click()
+  await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain('#data=')
+  const url = await page.evaluate(() => navigator.clipboard.readText())
+
+  const visitor = await browser.newContext()
+  try {
+    const viewer = await visitor.newPage()
+    await viewer.goto(url)
+    await expect(viewer.getByRole('button', { name: 'Lataa PDF' })).toBeVisible()
+    await expect(viewer.locator('.shared-cv__preview')).toContainText('Kokemus')
+    expect(await viewer.evaluate((key) => localStorage.getItem(key), UI_LOCALE_KEY)).toBeNull()
+  } finally {
+    await visitor.close()
+  }
+})
+
 test('opening a link writes nothing to this browser', async ({ page, context }) => {
   const url = await copyLinkFromBuilder(page, context)
   // Google's ad script (index.html's AdSense snippet) keeps its own

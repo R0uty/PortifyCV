@@ -296,8 +296,30 @@ const junk = rawLink({ ac: 'red;}body{x', fo: 'comic', hc: 'blue', na: 'right', 
 check('junk look values are dropped', Object.keys(junk.look).length === 0 && junk.pdf.paper === 'a4' && junk.pdf.fit === 'auto')
 check('junk look values keep the CV', junk.formData.fullName === demo.fullName)
 const { resolveSharedCvLook } = await importUtil('sharedCvLook.js')
-const { defaultTemplateId } = await importUtil('cvTemplates.js')
 const { getTemplateVariant, resolveStyleVariantId } = await importUtil('templateVariants.js')
+const getVariantHeadingColorFor = (templateId, variantId) => getTemplateVariant(templateId, variantId)?.headingColor ?? ''
+const rawHc = (encoded) => rawPayload(encoded).d.hc
+const navy = getVariantHeadingColorFor('classicProfessional', 'navy')
+check('Classic Professional Navy has a headings colour', /^#[0-9a-f]{6}$/i.test(navy))
+const navyCv = { ...demo, styleVariantByTemplate: { classicProfessional: 'navy' } }
+const resetUrl = share.buildShareUrl(navyCv, {
+  templateId: 'classicProfessional',
+  look: { headingColor: '', variantHeadingColor: navy },
+  currentHref: 'https://portifycv.app/cv',
+})
+check('Default on a look with a colour is sent as hc "-"', rawHc(new URL(resetUrl).hash.slice('#data='.length)) === '-')
+const resetBack = share.readCvStateFromLocation(resetUrl)
+check('hc "-" decodes to an empty headings colour', resetBack.look.headingColor === '')
+check('hc "-" wins over the look\'s colour on /view', resolveSharedCvLook(resetBack.formData, 'classicProfessional', resetBack.look).cvHeadingColor === '')
+check('the look\'s own colour is not sent', rawHc(share.encodeCvStateForUrl(navyCv, 'classicProfessional', { look: { headingColor: navy, variantHeadingColor: navy } })) === undefined)
+check('the look\'s own colour differs only in case: not sent', rawHc(share.encodeCvStateForUrl(navyCv, 'classicProfessional', { look: { headingColor: navy.toUpperCase(), variantHeadingColor: navy } })) === undefined)
+check('another colour on a look with one is sent', rawHc(share.encodeCvStateForUrl(navyCv, 'classicProfessional', { look: { headingColor: '#123456', variantHeadingColor: navy } })) === '#123456')
+check('Default on a look without a colour sends nothing', rawHc(share.encodeCvStateForUrl(demo, 'developer', { look: { headingColor: '', variantHeadingColor: '' } })) === undefined)
+for (const bad of ['--', '-x', '', 'blue', '#12345g', ' #123456', '#123456;}']) {
+  check(`junk hc ${JSON.stringify(bad)} is dropped`, !('headingColor' in rawLink({ hc: bad }).look))
+}
+check('hc "-" with no colour of its own resolves to empty', resolveSharedCvLook(demo, 'developer', { headingColor: '' }).cvHeadingColor === '')
+const { defaultTemplateId } = await importUtil('cvTemplates.js')
 const expectedVariantFont = getTemplateVariant('developer', resolveStyleVariantId(demo, 'developer')).fontId
 const resolvedOld = resolveSharedCvLook(demo, 'retired-id', {})
 check('unknown template -> default template', resolvedOld.template === defaultTemplateId)
