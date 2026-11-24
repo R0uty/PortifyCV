@@ -4,6 +4,7 @@ import { getTemplateVariants } from '../src/utils/templateVariants.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { CV_FONT_OPTIONS } from '../src/utils/cvFonts.js'
 import { clearCv, copyShareLink, fontTrigger, styleTrigger } from './helpers/builderToolbar.js'
+import { shareEditUrl } from './helpers/shareLinks.js'
 
 // The Style picker (Phase 3) in both builder modes, and how a picked
 // variant persists (share link, JSON, session restore, template switch,
@@ -136,7 +137,7 @@ test('a variant survives a share link', async ({ page, context }) => {
   const url = await page.evaluate(() => navigator.clipboard.readText())
 
   const fresh = await context.newPage()
-  await fresh.goto(url)
+  await fresh.goto(shareEditUrl(url))
   await expect(await styleTrigger(fresh))
     .toHaveAccessibleName(`Select style: ${minimalVariant.label.en}`)
 })
@@ -217,7 +218,7 @@ test('a share link opens on the sender\'s template and look', async ({ page, con
   const url = await page.evaluate(() => navigator.clipboard.readText())
 
   const fresh = await context.newPage()
-  await fresh.goto(url)
+  await fresh.goto(shareEditUrl(url))
   await expect(fresh.locator('.app-toolbar__template-trigger-label')).toHaveText(developerLabel)
   await expect(await styleTrigger(fresh))
     .toHaveAccessibleName(`Select style: ${developerVariant.label.en}`)
@@ -243,7 +244,7 @@ test('a share link restores another template\'s look accent', async ({ page, con
   const url = await page.evaluate(() => navigator.clipboard.readText())
 
   const fresh = await context.newPage()
-  await fresh.goto(url)
+  await fresh.goto(shareEditUrl(url))
   await expect(fresh.locator('.app-toolbar__template-trigger-label')).toHaveText('Minimalist')
   await expect(await styleTrigger(fresh)).toHaveAccessibleName('Select style: Original')
   await pickTemplate(fresh, creativeLabel)
@@ -260,7 +261,7 @@ test('a share link\'s template wins over ?template=', async ({ page, context }) 
   await copyShareLink(page)
   await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toContain('#data=')
   const url = await page.evaluate(() => navigator.clipboard.readText())
-  const conflicting = url.replace('/cv#', '/cv?template=creative#')
+  const conflicting = shareEditUrl(url).replace('/cv#', '/cv?template=creative#')
   expect(conflicting).toContain('template=creative')
 
   const fresh = await context.newPage()

@@ -17,9 +17,16 @@ export const DEFAULT_OG_IMAGE = '/PortifyCV.jpg'
 // Views served without the AdSense script (the worker removes it; 404s
 // too, separately). The builder is an app screen, where ads aren't allowed
 // (1.6.48); About and the privacy policy carry no content of their own for
-// ads to sit beside (1.6.67). App.jsx crosses this edge with a full page
-// load, so a script loaded on one side never carries over to the other.
-export const AD_FREE_VIEWS = new Set(['builder', 'about', 'privacy'])
+// ads to sit beside (1.6.67). The read-only share page (1.7.12) is
+// someone's CV, not site content. App.jsx crosses this edge with a full
+// page load, so a script loaded on one side never carries over to the other.
+export const AD_FREE_VIEWS = new Set(['builder', 'shareView', 'about', 'privacy'])
+
+// App screens rather than content pages (1.7.12): no Finnish address (the
+// language comes from the visitor, or the shared CV), no pre-render and no
+// no-JavaScript copy of their own. /view is also noindex and stays out of
+// the sitemap.
+export const APP_VIEWS = new Set(['builder', 'shareView'])
 
 // Read off the template registry instead of a hardcoded number in the
 // freeTemplates description below — this previously drifted out of sync
@@ -46,6 +53,17 @@ const STATIC_VIEW_HEAD = {
       'Muokkaa CV:tä suoraan sivulla, valitse pohja ja vie se PDF- tai Word-tiedostoksi. Ilmainen, ei kirjautumista.',
     description:
       'Build and edit your CV online for free. Live preview, ATS-friendly mode, and PDF/Word/HTML/JSON export — no login required.',
+  },
+  // The read-only page a share link opens (1.7.12). The CV travels in the
+  // #data= fragment, so the page itself is the same for every link: never
+  // indexed.
+  shareView: {
+    title: 'Shared CV - PortifyCV',
+    titleFi: 'Jaettu CV - PortifyCV',
+    description: 'A CV shared with PortifyCV.',
+    descriptionFi: 'PortifyCV:llä jaettu CV.',
+    path: ROUTES.shareView,
+    robots: 'noindex, nofollow',
   },
   privacy: {
     title: 'Privacy Policy - PortifyCV',
@@ -279,11 +297,11 @@ export function localizedHead(head, locale) {
   }
 }
 
-// Every real path in either language → its view and language. The
-// builder's /cv has no language of its own (`locale: null`): it opens in
-// the one the visitor last used.
+// Every real path in either language → its view and language. The app
+// views (the builder's /cv, the share page's /view) have no language of
+// their own (`locale: null`): they open in the one the visitor last used.
 export const PATH_TO_VIEW = new Map(Object.entries(VIEW_HEAD).flatMap(([view, head]) => [
-  [head.path, { view, locale: view === 'builder' ? null : 'en' }],
+  [head.path, { view, locale: APP_VIEWS.has(view) ? null : 'en' }],
   ...(head.pathFi ? [[head.pathFi, { view, locale: 'fi' }]] : []),
 ]))
 

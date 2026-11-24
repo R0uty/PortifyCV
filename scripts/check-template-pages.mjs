@@ -332,8 +332,8 @@ check('fieldSearch writes ?field= for a field and nothing for All',
 // unique across both languages; and the sitemap lists every path with its
 // hreflang alternates.
 {
-  const { VIEW_HEAD, PATH_TO_VIEW } = await importSrc('utils/pageMeta.js')
-  const heads = Object.entries(VIEW_HEAD).filter(([view]) => view !== 'builder')
+  const { VIEW_HEAD, PATH_TO_VIEW, APP_VIEWS, AD_FREE_VIEWS } = await importSrc('utils/pageMeta.js')
+  const heads = Object.entries(VIEW_HEAD).filter(([view]) => !APP_VIEWS.has(view))
   const missing = heads.filter(([, head]) => !head.pathFi || !head.titleFi || !head.descriptionFi).map(([view]) => view)
   check('every content page has a Finnish path, title and description', missing.length === 0, missing.join(', '))
   const allPaths = Object.values(VIEW_HEAD).flatMap((head) => [head.path, head.pathFi].filter(Boolean))
@@ -344,8 +344,20 @@ check('fieldSearch writes ?field= for a field and nothing for All',
 
   const sitemap = readFileSync(resolvePath(rootDir, 'public/sitemap.xml'), 'utf8')
   const locs = new Set([...sitemap.matchAll(/<loc>https:\/\/portifycv\.app([^<]*)<\/loc>/g)].map((m) => m[1] || '/'))
-  const notInSitemap = allPaths.filter((path) => !locs.has(path))
+  // A noindex page (the share page's /view, 1.7.12) stays out of it.
+  const noindexPaths = new Set(Object.values(VIEW_HEAD).filter((head) => head.robots?.startsWith('noindex')).map((head) => head.path))
+  const notInSitemap = allPaths.filter((path) => !noindexPaths.has(path) && !locs.has(path))
   check('the sitemap lists every page in both languages', notInSitemap.length === 0, notInSitemap.join(', '))
+  const noindexInSitemap = [...noindexPaths].filter((path) => locs.has(path))
+  check('the sitemap leaves out noindex pages', noindexInSitemap.length === 0, noindexInSitemap.join(', '))
+
+  // The read-only share page (1.7.12): an app view, ad-free, never indexed,
+  // not in the sitemap.
+  check('the share page is an ad-free app view at /view',
+    APP_VIEWS.has('shareView') && AD_FREE_VIEWS.has('shareView') && VIEW_HEAD.shareView?.path === '/view'
+      && PATH_TO_VIEW.get('/view')?.view === 'shareView' && PATH_TO_VIEW.get('/view')?.locale === null)
+  check('the share page is noindex', Boolean(VIEW_HEAD.shareView?.robots?.startsWith('noindex')))
+  check('the share page is not in the sitemap', !locs.has('/view'))
   const missingAlternates = heads.filter(([, head]) => !sitemap.includes(`hreflang="fi" href="https://portifycv.app${head.pathFi}"`)).map(([view]) => view)
   check('the sitemap gives every bilingual page its hreflang alternates', missingAlternates.length === 0, missingAlternates.join(', '))
 }

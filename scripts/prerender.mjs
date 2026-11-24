@@ -11,11 +11,11 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const { renderRoute } = await import(pathToFileURL(resolve(rootDir, 'dist-ssr/prerender.js')).href)
-const { PATH_TO_VIEW, prerenderedPath } = await import(pathToFileURL(resolve(rootDir, 'src/utils/pageMeta.js')).href)
+const { APP_VIEWS, PATH_TO_VIEW, prerenderedPath } = await import(pathToFileURL(resolve(rootDir, 'src/utils/pageMeta.js')).href)
 
 let count = 0
 for (const { view, locale } of PATH_TO_VIEW.values()) {
-  if (view === 'builder') continue
+  if (APP_VIEWS.has(view)) continue
   const html = await renderRoute(view, locale)
   if (!html.includes('<h1')) {
     throw new Error(`pre-render of ${view} (${locale}) has no <h1>`)

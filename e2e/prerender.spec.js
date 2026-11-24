@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures/base.js'
-import { PATH_TO_VIEW, prerenderedPath } from '../src/utils/pageMeta.js'
+import { APP_VIEWS, PATH_TO_VIEW, prerenderedPath } from '../src/utils/pageMeta.js'
 
 // 1.6.49: `npm run build` pre-renders every content page (scripts/
 // prerender.mjs), and the edge worker serves that markup in index.html's
@@ -14,7 +14,7 @@ const fragment = async (request, view, locale) => {
 
 test('every content page in both languages is pre-rendered, with its own heading and no scripts', async ({ request }) => {
   for (const { view, locale } of PATH_TO_VIEW.values()) {
-    if (view === 'builder') continue
+    if (APP_VIEWS.has(view)) continue
     const html = await fragment(request, view, locale)
     expect((html.match(/<h1[\s>]/g) ?? []).length, `${view} (${locale}) <h1>`).toBe(1)
     expect(html, `${view} (${locale})`).not.toContain('<script')

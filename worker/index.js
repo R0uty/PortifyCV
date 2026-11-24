@@ -17,7 +17,7 @@
 //   4. returns a real 404 (with noindex) for paths that aren't a known
 //      route, instead of the soft-404 the SPA fallback produced (200,
 //      indexable, homepage content, for literally any typo'd URL).
-import { VIEW_HEAD, SITE_ORIGIN, AD_FREE_VIEWS, buildViewSchema, localizedHead, PATH_TO_VIEW, prerenderedPath } from '../src/utils/pageMeta.js'
+import { VIEW_HEAD, SITE_ORIGIN, AD_FREE_VIEWS, APP_VIEWS, buildViewSchema, localizedHead, PATH_TO_VIEW, prerenderedPath } from '../src/utils/pageMeta.js'
 import { LANDING_FAQ, faqAnswerText } from '../src/utils/landingFaq.js'
 import { ADSENSE_SCRIPT } from './adsense.js'
 
@@ -142,6 +142,11 @@ function rewriteForRoute(response, view, locale, body) {
     .on('meta[property="og:image"]', new SetAttr('content', `${SITE_ORIGIN}${head.ogImage}`))
     .on('meta[name="twitter:image"]', new SetAttr('content', `${SITE_ORIGIN}${head.ogImage}`))
 
+  // A page that mustn't be indexed (the share page, 1.7.12) says so.
+  if (head.robots) {
+    rewriter.on('meta[name="robots"]', new SetAttr('content', head.robots))
+  }
+
   if (view !== 'landing') {
     rewriter.on('#ld-faq', new RemoveElement())
   } else if (head.locale === 'fi') {
@@ -181,9 +186,10 @@ function rewriteForRoute(response, view, locale, body) {
   return rewriter.transform(response)
 }
 
-// The builder has no pre-render: it's an app, with nothing to read.
+// The app views (the builder, the share page) have no pre-render: they're
+// apps, with nothing to read.
 async function prerenderedBody(env, request, route) {
-  if (route.view === 'builder') return null
+  if (APP_VIEWS.has(route.view)) return null
   const response = await env.ASSETS.fetch(new Request(new URL(prerenderedPath(route.view, route.locale), request.url)))
   return response.ok ? response.text() : null
 }

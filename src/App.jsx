@@ -33,6 +33,7 @@ const ItCvExamplesPage = lazy(() => import('./pages/ItCvExamplesPage'))
 const CybersecurityCvExamplesPage = lazy(() => import('./pages/CybersecurityCvExamplesPage'))
 const FinnishCvExamplesPage = lazy(() => import('./pages/FinnishCvExamplesPage'))
 const TemplateDetailPage = lazy(() => import('./pages/TemplateDetailPage'))
+const SharedCvPage = lazy(() => import('./pages/SharedCvPage'))
 
 function NotFoundView({ locale, onNavigateToView }) {
   const isFinnish = locale === 'fi'
@@ -82,16 +83,34 @@ const STATIC_PAGES = {
   notFound: NotFoundView,
 }
 
+// A share link made before 1.7.12 (/cv#data=…, no edit=1) opened from
+// outside: it moves to the read-only page a link opens now (/view). A
+// reload or Back/Forward of a builder tab with such an address stays in
+// the builder, where the visitor may have been editing it. The fragment's
+// edit flag is read the way shareLinks.js's readCvStateFromLocation reads
+// it, without decoding the CV twice (the builder decodes it again).
+function isOldShareLinkOpenedFresh(currentUrl) {
+  if (currentUrl.pathname !== ROUTES.builder) return false
+  const hashParams = new URLSearchParams(currentUrl.hash.replace(/^#/, ''))
+  if (!hashParams.get(SHARE_QUERY_PARAM) || hashParams.get('edit') === '1') return false
+  const navigationType = window.performance?.getEntriesByType?.('navigation')?.[0]?.type
+  return navigationType === undefined || navigationType === 'navigate'
+}
+
 // The view and language the address asks for (1.6.35: /fi/… is Finnish,
 // other content addresses English; the builder's /cv has no language of
 // its own, `locale: null`).
-function readRoute() {
+function readRoute({ initial = false } = {}) {
   if (typeof window === 'undefined') {
     return { view: 'landing', locale: 'en' }
   }
   const currentUrl = new URL(window.location.href)
   if (currentUrl.searchParams.has(SHARE_QUERY_PARAM)) {
     return { view: 'builder', locale: null }
+  }
+  if (initial && isOldShareLinkOpenedFresh(currentUrl)) {
+    window.history.replaceState(null, '', `${ROUTES.shareView}${currentUrl.hash}`)
+    return { view: 'shareView', locale: null }
   }
   const matched = PATH_TO_VIEW.get(currentUrl.pathname)
   if (matched) {
@@ -575,7 +594,7 @@ function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
 // `route` is only passed by the build-time pre-render (src/prerender.jsx,
 // 1.6.49), which has no address to read.
 function App({ route = null }) {
-  const [initialRoute] = useState(() => route ?? readRoute())
+  const [initialRoute] = useState(() => route ?? readRoute({ initial: true }))
   // The address decides the language (1.6.35); only the builder's /cv,
   // which has none, falls back to the visitor's last choice.
   const [locale, setLocale] = useState(() => initialRoute.locale ?? readStoredLocale())
@@ -781,6 +800,18 @@ function App({ route = null }) {
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
+
+  // The read-only share page (1.7.12): someone's CV, without the site's
+  // header nav or footer around it (and, being ad-free, no ads).
+  if (view === 'shareView') {
+    return (
+      <LocaleContext.Provider value={locale}>
+        <Suspense fallback={null}>
+          <SharedCvPage locale={locale} />
+        </Suspense>
+      </LocaleContext.Provider>
+    )
+  }
 
   if (view !== 'builder') {
     const templatePageId = view.startsWith(TEMPLATE_VIEW_PREFIX) ? VIEW_HEAD[view]?.templateId : null

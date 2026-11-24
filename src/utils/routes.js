@@ -5,6 +5,8 @@
 export const ROUTES = {
   landing: '/',
   builder: '/cv',
+  // The read-only page a share link opens (1.7.12); English only, like /cv.
+  shareView: '/view',
   privacy: '/privacy',
   about: '/about',
   freeTemplates: '/free-cv-templates',
