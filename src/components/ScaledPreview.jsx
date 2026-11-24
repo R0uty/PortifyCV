@@ -20,6 +20,7 @@ function ScaledPreview({
   fontId,
   fontStack,
   headingColor,
+  classicNameAlignment,
 }) {
   const frameRef = useRef(null)
   const pageRef = useRef(null)
@@ -74,6 +75,7 @@ function ScaledPreview({
             accentColor={accentColor}
             headingColor={headingColor}
             styleVariantId={styleVariantId}
+            classicNameAlignment={classicNameAlignment}
           />
         </DecorativeHeadingsContext.Provider>
       </div>

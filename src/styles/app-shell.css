@@ -3977,6 +3977,106 @@ html:lang(fi) .landing-title {
   user-select: none;
 }
 
+/* The read-only share page (/view, 1.7.12): a bar with the name and the
+   two actions, which wraps at phone width, above the CV scaled to the
+   page's width with a 16px gutter. */
+.shared-cv {
+  min-height: 100vh;
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+.shared-cv__bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-bg-elevated);
+}
+
+.shared-cv__name {
+  min-width: 0;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  overflow-wrap: break-word;
+}
+
+.shared-cv__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.shared-cv__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+
+.shared-cv__button:hover:not(:disabled) {
+  background: var(--app-surface-strong);
+}
+
+.shared-cv__button--primary {
+  border-color: var(--accent-solid);
+  background: var(--accent-solid);
+  color: var(--accent-contrast);
+}
+
+.shared-cv__button--primary:hover:not(:disabled) {
+  background: var(--accent-solid-hover);
+}
+
+.shared-cv__button:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.shared-cv__error {
+  max-width: 60rem;
+  margin: var(--space-3) auto 0;
+  padding: 0 var(--space-4);
+  color: #b42318;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.shared-cv__preview {
+  max-width: 60rem;
+  margin: var(--space-4) auto 0;
+  padding: 0 var(--space-4);
+}
+
+.shared-cv__footer {
+  margin: 0;
+  padding: var(--space-4) var(--space-4) var(--space-6);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--app-text-muted);
+}
+
+.shared-cv__footer a {
+  color: inherit;
+  text-decoration: underline;
+}
+
 @media (max-width: 1023px) {
   .template-page__layout {
     grid-template-columns: minmax(0, 1fr);

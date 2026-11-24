@@ -1311,7 +1311,19 @@ function ResumeBuilderPage({
     let shareUrl
 
     try {
-      shareUrl = buildShareUrl(formData, { templateId: selectedTemplate })
+      // The link carries what the sender sees (1.7.12): the template, its
+      // look as tweaked, and the PDF preview's paper and fit.
+      shareUrl = buildShareUrl(formData, {
+        templateId: selectedTemplate,
+        look: {
+          accent: resolveTemplateAccent(templateAccentColors, selectedTemplate),
+          fontId: cvFontId,
+          headingColor: cvHeadingColor,
+          nameAlignment: classicNameAlignment,
+          atsFriendlyMode,
+        },
+        pdf: { paper: pdfPaper, fit: pdfFit },
+      })
     } catch (error) {
       showToast(
         error instanceof Error
@@ -1360,7 +1372,10 @@ function ResumeBuilderPage({
     }
 
     showToast(locale === 'fi' ? 'Jakolinkki kopioitu leikepöydälle.' : 'Share link copied to clipboard.')
-  }, [formData, locale, selectedTemplate])
+  }, [
+    atsFriendlyMode, classicNameAlignment, cvFontId, cvHeadingColor, formData, locale, pdfFit, pdfPaper,
+    selectedTemplate, templateAccentColors,
+  ])
 
   const handleToggleAtsFriendlyMode = useCallback(() => {
     dispatchUi({ type: UI_ACTION.TOGGLE_ATS_MODE })
