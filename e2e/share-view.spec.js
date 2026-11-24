@@ -17,6 +17,7 @@ test('a share link opens /view, noindex, with no builder', async ({ page, contex
   await viewer.goto(url)
   await expect(viewer).toHaveURL(/\/view#data=/)
   await expect(viewer.getByRole('heading', { level: 1 })).toHaveText('John Doe')
+  await expect(viewer.getByRole('main').getByRole('heading', { level: 1 })).toHaveText('John Doe')
   await expect(viewer.getByRole('tab', { name: 'Direct Edit' })).toHaveCount(0)
   await expect(viewer.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow')
   await expect(viewer.locator('.site-footer')).toHaveCount(0)

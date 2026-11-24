@@ -113,7 +113,8 @@ function SharedCv({ shared, href, locale }) {
       // A page that can't be captured comes back as the text-only fallback,
       // which this writes too.
       await saveRenderedCvPdf(rendered)
-    } catch {
+    } catch (error) {
+      console.error(error)
       setHasError(true)
     } finally {
       isBusyRef.current = false
@@ -164,7 +165,7 @@ function SharedCv({ shared, href, locale }) {
         </p>
       )}
 
-      <div className="shared-cv__preview">
+      <main className="shared-cv__preview">
         <ScaledPreview
           formData={shownCv}
           {...previewProps}
@@ -172,7 +173,7 @@ function SharedCv({ shared, href, locale }) {
           fontStack={fontStack}
           interactive
         />
-      </div>
+      </main>
 
       <p className="shared-cv__footer">
         <a href={localizePath('/', cvLocale)}>{isFinnish ? 'Tehty PortifyCV:llä' : 'Made with PortifyCV'}</a>
