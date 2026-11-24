@@ -575,6 +575,21 @@ export function isValidTemplateId(templateId) {
   return typeof templateId === 'string' && Object.hasOwn(templateMap, templateId)
 }
 
+// Retired template ids that map onto a surviving template, so an old
+// `?template=` deep link or bookmark still opens something sensible.
+// `classic` merged into `classicProfessional` (v1.2.10) — its distinguishing
+// left-aligned name lives on as the `classicNameAlignment` option.
+export const LEGACY_TEMPLATE_ALIASES = { classic: 'classicProfessional' }
+
+// A template id from outside — a `?template=<id>` deep link (e.g. "Use this
+// template" on the Free CV Templates page) or a share link's 'tp' (1.6.8) —
+// trusted only once checked against the real template map, after mapping a
+// retired id onto its successor. Null for anything unrecognized.
+export function resolveTemplateId(raw) {
+  const templateId = LEGACY_TEMPLATE_ALIASES[raw] ?? raw
+  return isValidTemplateId(templateId) ? templateId : null
+}
+
 export function getTemplateSlug(templateId) {
   return templateMap[templateId]?.slug ?? null
 }

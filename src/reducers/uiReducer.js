@@ -1,5 +1,5 @@
 import { CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, safeStorageGet } from '../utils/cvForm'
-import { defaultTemplateId, getAllTemplateAccents, isValidTemplateId } from '../utils/cvTemplates'
+import { defaultTemplateId, getAllTemplateAccents, resolveTemplateId } from '../utils/cvTemplates'
 import { UI_LOCALE_STORAGE_KEY, UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, UI_BUILDER_MODE_STORAGE_KEY } from '../utils/designSystem'
 import { DEFAULT_CV_FONT_ID } from '../utils/cvFonts'
 import { DEFAULT_CV_HEADING_COLOR } from '../utils/cvHeadingColors'
@@ -28,20 +28,9 @@ export const UI_ACTION = {
   RESTORE_TEMPLATE_LOOK: 'RESTORE_TEMPLATE_LOOK',
 }
 
-// Retired template ids that map onto a surviving template, so an old
-// `?template=` deep link or bookmark still opens something sensible.
-// `classic` merged into `classicProfessional` (v1.2.10) — its distinguishing
-// left-aligned name lives on as the `classicNameAlignment` option.
-const LEGACY_TEMPLATE_ALIASES = { classic: 'classicProfessional' }
-
-// A template id from outside — a `?template=<id>` deep link (e.g. "Use this
-// template" on the Free CV Templates page) or a share link's 'tp' (1.6.8) —
-// trusted only once checked against the real template map, after mapping a
-// retired id onto its successor. Null for anything unrecognized.
-export function resolveTemplateId(raw) {
-  const templateId = LEGACY_TEMPLATE_ALIASES[raw] ?? raw
-  return isValidTemplateId(templateId) ? templateId : null
-}
+// resolveTemplateId lives in cvTemplates.js (shared with the read-only
+// share page); re-exported here for the files that import it from the reducer.
+export { resolveTemplateId }
 
 // ?template=<id> opens the builder on that template; an unrecognized or
 // missing id falls back to defaultTemplateId exactly like before.
