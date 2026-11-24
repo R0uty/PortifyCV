@@ -407,9 +407,9 @@ applications" is separate from "Delete all saved CVs". Cases live in
 `src/utils/shareLinks.js` encodes CV state with short single/double-letter
 keys (`ROOT_STRING_KEYS`, etc.) to keep links short — never repurpose an
 existing key, since older generated links decode against the same table.
-Uploaded images are stripped from the payload (too large for a URL) with the
-recipient told they're missing; export JSON instead when images need to
-travel too. The per-template style-variant choice travels under the `va`
+Uploaded images are stripped from the payload (too large for a URL); the
+sender is told so in the toast when copying the link (`/view` doesn't
+mention missing photos), and JSON export is the way to send images. The per-template style-variant choice travels under the `va`
 key, and the sender's selected template under `tp` (1.6.8; the link
 opens on it — older links without it open on the default template). Since
 1.7.12 a link opens the read-only `/view` page (below), not the builder.
@@ -420,7 +420,15 @@ sender's look and PDF settings under new keys, each written only when it
 differs from its default (permanent like the others): `ac` accent, `fo` font
 id, `hc` headings colour, `na` name alignment (`'left'` only), `at` ATS mode
 (`1` only), `pp` paper (`'letter'` only), `pf` fit (anything but `'auto'`);
-`ac`/`fo` are written whenever non-empty. A junk value in one of them falls
+`ac`/`fo` are written whenever non-empty. `hc` is written when the sender's
+headings colour differs from the stored look's own (`variantHeadingColor`,
+passed by `handleCopyShareLink`), and Default on a look that has a colour
+travels as `hc: '-'`, which decodes to `headingColor: ''` (an explicit
+value: `resolveSharedCvLook` and `createInitialUiState` only fall back when
+it is `undefined`). `handleCopyShareLink` sends the resolved CV language
+(`cvLocale`), so `cl` is always written: a CV that follows a Finnish app
+reaches an English recipient in Finnish, and Edit a copy then has its CV
+language pinned. A junk value in one of them falls
 back to that one default (accent and headings colour are validated before
 they can reach a style). `readCvStateFromLocation` returns `{ formData,
 templateId, look, pdf, isEdit }`, `resolveSharedCvLook`
@@ -466,7 +474,8 @@ language of everything drawn on the CV page and of every export.
 `locale` prop, which stays the app's language and still feeds
 `DirectEditProvider` (popups, menus); the builder page passes `cvLocale`
 to the PDF/HTML/Word exports and the parser view. Hints, the ATS panel and
-the importer stay in the app's language. Share links carry it as `cl`.
+the importer stay in the app's language. Share links carry it as `cl`
+(since 1.7.12 always, resolved from the app's language when `''`).
 Since 1.7.7 the builder also provides it as `CvLanguageContext`
 (`src/components/cvLanguageContext.js`): every control the CV is typed
 into (`FloatingField`'s child, `EditableField`, the Direct Edit popup,
