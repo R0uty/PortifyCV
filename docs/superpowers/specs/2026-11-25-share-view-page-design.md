@@ -135,7 +135,8 @@ view-only page and that the link also carries the look and PDF settings.
   `/cv#data=` link lands on `/view`; Edit a copy opens the builder with the
   CV and look; opening a link leaves the visitor's own restored session
   and saved CVs untouched; a corrupt link shows the message; `/view` has
-  `noindex` and no ad script. `@slow`: the downloaded PDF's text layer has
+  `noindex` and no ad script; reloading an old `/cv#data=` tab stays in
+  the builder; Edit a copy opens a new tab. `@slow`: the downloaded PDF's text layer has
   the name and a field's value.
 - Existing share-link e2e tests updated to the new path; everything else
   green unchanged.
