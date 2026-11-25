@@ -4,6 +4,7 @@ import AutoGrowTextarea from '../AutoGrowTextarea'
 import BulletHints from './BulletHints'
 import BulletIdeas from './BulletIdeas'
 import { useCvTextProps } from '../cvLanguageContext'
+import { form } from '../../i18n/form'
 
 function ReorderableListInput({
   items = [],
@@ -18,7 +19,6 @@ function ReorderableListInput({
   ideas = null,
 }) {
   const cvTextProps = useCvTextProps()
-  const isFinnish = locale === 'fi'
   const hintIdBase = useId()
   // The row being typed in shows no hints until the caret leaves it.
   const [focusedIndex, setFocusedIndex] = useState(null)
@@ -115,7 +115,7 @@ function ReorderableListInput({
               className="reorderable-list__icon-button"
               onClick={() => moveBy(index, -1)}
               disabled={index === 0}
-              aria-label={isFinnish ? `Siirrä ylös: ${itemName} ${index + 1}` : `Move ${itemName} ${index + 1} up`}
+              aria-label={form.t(locale, 'list.moveUp', { item: itemName, number: index + 1 })}
             >
               <ChevronUp size={14} strokeWidth={2} aria-hidden="true" />
             </button>
@@ -124,7 +124,7 @@ function ReorderableListInput({
               className="reorderable-list__icon-button"
               onClick={() => moveBy(index, 1)}
               disabled={index === items.length - 1}
-              aria-label={isFinnish ? `Siirrä alas: ${itemName} ${index + 1}` : `Move ${itemName} ${index + 1} down`}
+              aria-label={form.t(locale, 'list.moveDown', { item: itemName, number: index + 1 })}
             >
               <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
             </button>
@@ -132,7 +132,7 @@ function ReorderableListInput({
               type="button"
               className="reorderable-list__icon-button reorderable-list__icon-button--danger"
               onClick={() => removeAt(index)}
-              aria-label={isFinnish ? `Poista: ${itemName} ${index + 1}` : `Remove ${itemName} ${index + 1}`}
+              aria-label={form.t(locale, 'list.remove', { item: itemName, number: index + 1 })}
             >
               <X size={14} strokeWidth={2} aria-hidden="true" />
             </button>

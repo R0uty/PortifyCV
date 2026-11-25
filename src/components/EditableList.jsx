@@ -17,6 +17,7 @@ import { useState } from 'react'
 import { useDirectEdit } from './DirectEditContext'
 import InlineTagEditor from './fields/InlineTagEditor'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
+import { formInline } from '../i18n/formInline'
 
 function EditableListEntry({ id, onRemove, dragLabel, removeLabel, hidden, hiddenLabel, onShow, children }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
@@ -52,11 +53,10 @@ function EditableListEntry({ id, onRemove, dragLabel, removeLabel, hidden, hidde
 
 export default function EditableList({ section, items, addLabel, removeLabel, children }) {
   const { isEditing, dispatchFormData, locale, itemVisibility } = useDirectEdit()
-  const isFinnish = locale === 'fi'
-  const dragLabel = isFinnish ? 'Järjestä vetämällä' : 'Drag to reorder'
-  const hiddenLabel = isFinnish ? 'Piilotettu viennistä · Näytä' : 'Hidden from export · Show'
+  const dragLabel = formInline.t(locale, 'list.drag')
+  const hiddenLabel = formInline.t(locale, 'list.hidden')
   const sectionVisibility = itemVisibility?.[section] ?? {}
-  const resolvedRemoveLabel = removeLabel ?? (isFinnish ? 'Poista kohta' : 'Remove entry')
+  const resolvedRemoveLabel = removeLabel ?? formInline.t(locale, 'list.remove')
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -124,12 +124,11 @@ function isDuplicateSkill(allSkills, text, ownIndex = -1) {
 }
 
 function skillCopy(locale) {
-  const isFinnish = locale === 'fi'
   return {
-    edit: (skill) => (isFinnish ? `Muokkaa taitoa: ${skill}` : `Edit skill: ${skill}`),
-    remove: (skill) => (isFinnish ? `Poista taito: ${skill}` : `Remove skill: ${skill}`),
-    newSkill: isFinnish ? 'Uusi taito' : 'New skill',
-    duplicate: isFinnish ? 'Jo listalla' : 'Already listed',
+    edit: (skill) => formInline.t(locale, 'skill.edit', { skill }),
+    remove: (skill) => formInline.t(locale, 'skill.remove', { skill }),
+    newSkill: formInline.t(locale, 'skill.newSkill'),
+    duplicate: formInline.t(locale, 'skill.duplicate'),
   }
 }
 

@@ -29,8 +29,20 @@ registerHooks({
 const srcDir = resolvePath(dirname(fileURLToPath(import.meta.url)), '../src')
 const importSrc = (relativePath) => import(pathToFileURL(resolvePath(srcDir, relativePath)).href)
 
-const { SECTION_SCHEMA, SECTION_SHAPE } = await importSrc('utils/sectionSchema.js')
+const { SECTION_SCHEMA, SECTION_SHAPE, getSectionLabel } = await importSrc('utils/sectionSchema.js')
 const cvForm = await importSrc('utils/cvForm.js')
+const { form } = await importSrc('i18n/form/index.js')
+const { cvFormText } = await importSrc('i18n/cvForm/index.js')
+
+// The names live in the translation files (1.7.13). A label exists when
+// the key is there in that language itself, not through the English
+// fallback or the key-as-text fallback.
+const LOCALES = ['en', 'fi']
+function messageIn(namespace, locale, key) {
+  const value = key.split('.').reduce((node, part) => (node && typeof node === 'object' ? node[part] : undefined), namespace.messages[locale])
+  return typeof value === 'string' && value.length > 0 ? value : null
+}
+const sectionNameKey = (section) => (section === 'identity' ? [form, 'schema.identity'] : [cvFormText, `sections.${section}`])
 
 const FACTORY_BY_SECTION = {
   experience: cvForm.createEmptyExperience,
@@ -85,8 +97,10 @@ for (const [section, entry] of Object.entries(SECTION_SCHEMA)) {
     Object.values(SECTION_SHAPE).includes(entry.shape),
     `section "${section}" has unknown shape "${entry.shape}"`,
   )
-  check(typeof entry.labelEn === 'string' && entry.labelEn.length > 0, `section "${section}" missing labelEn`)
-  check(typeof entry.labelFi === 'string' && entry.labelFi.length > 0, `section "${section}" missing labelFi`)
+  for (const locale of LOCALES) {
+    const [namespace, key] = sectionNameKey(section)
+    check(messageIn(namespace, locale, key), `section "${section}" has no ${locale} name (${namespace.name}: ${key})`)
+  }
 
   for (const field of entry.fields) {
     check(typeof field.key === 'string' && field.key.length > 0, `section "${section}" has a field with no key`)
@@ -94,18 +108,18 @@ for (const [section, entry] of Object.entries(SECTION_SCHEMA)) {
       ['text', 'textarea', 'month', 'url', 'checkbox', 'list'].includes(field.type),
       `section "${section}" field "${field.key}" has unknown type "${field.type}"`,
     )
-    check(typeof field.labelEn === 'string' && field.labelEn.length > 0, `section "${section}" field "${field.key}" missing labelEn`)
-    check(typeof field.labelFi === 'string' && field.labelFi.length > 0, `section "${section}" field "${field.key}" missing labelFi`)
+    for (const locale of LOCALES) {
+      check(
+        messageIn(form, locale, `schema.fields.${section}.${field.key}`),
+        `section "${section}" field "${field.key}" has no ${locale} label (form: schema.fields.${section}.${field.key})`,
+      )
 
-    if (field.type === 'list') {
-      check(
-        typeof field.itemLabelEn === 'string' && field.itemLabelEn.length > 0,
-        `section "${section}" list field "${field.key}" missing itemLabelEn`,
-      )
-      check(
-        typeof field.itemLabelFi === 'string' && field.itemLabelFi.length > 0,
-        `section "${section}" list field "${field.key}" missing itemLabelFi`,
-      )
+      if (field.type === 'list') {
+        check(
+          messageIn(form, locale, `schema.items.${section}.${field.key}`),
+          `section "${section}" list field "${field.key}" has no ${locale} item label (form: schema.items.${section}.${field.key})`,
+        )
+      }
     }
   }
 }
@@ -151,13 +165,14 @@ for (const key of linkKeys) {
   check(linkSchemaKeys.includes(key), `createEmptyLinks() field "${key}" is missing from the links schema`)
 }
 
-// 6. A section has one name. The Direct Edit popup reads it from the schema;
-// the Sections menu, Classic's "Visible sections" panel and its nav rail
-// read cvForm's table. Five English labels differed in capitals (1.6.85).
+// 6. A section has one name. The Direct Edit popup reads it through
+// sectionSchema.js's getSectionLabel; the Sections menu, Classic's
+// "Visible sections" panel and its nav rail read cvForm's table. Five
+// English labels differed in capitals (1.6.85); since 1.7.13 both read
+// cvForm's sections.* keys, and this keeps them that way.
 for (const locale of ['en', 'fi']) {
   for (const { key, label } of cvForm.getSectionVisibilityFields(locale)) {
-    const schema = SECTION_SCHEMA[key]
-    const schemaLabel = locale === 'fi' ? schema?.labelFi : schema?.labelEn
+    const schemaLabel = SECTION_SCHEMA[key] ? getSectionLabel(key, locale) : undefined
     check(
       schemaLabel === label,
       `section "${key}" is "${label}" in cvForm's ${locale} labels but "${schemaLabel}" in the schema`,

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
 import SectionEditorPopup from './SectionEditorPopup'
-import { getSectionSchema } from '../utils/sectionSchema'
+import { getSectionLabel, getSectionSchema } from '../utils/sectionSchema'
 import { builder } from '../i18n/builder'
 
 // Every Showcase already tags its section wrappers with
@@ -553,8 +553,7 @@ export default function SectionEditOverlay({
       {sections.length ? (
         <div className="direct-edit-keyboard-triggers">
           {sections.map((sectionKey) => {
-            const schema = getSectionSchema(sectionKey)
-            const label = locale === 'fi' ? schema.labelFi : schema.labelEn
+            const label = getSectionLabel(sectionKey, locale)
 
             return (
               <button

@@ -237,9 +237,6 @@ const ALLOWLIST = [
   { file: 'src/components/CvHeadingColorSwitcher.jsx', pattern: /^l\[locale\] \?\? (?:activePreset|preset)\.label\.en\b/, reason: "reads cvHeadingColors.js's preset label map { en, fi }" },
   { file: 'src/components/CvStyleSwitcher.jsx', pattern: /^l\[lang\]/, reason: "reads templateVariants.js's variant label map { en, fi }" },
   { file: 'src/components/StyleSwatchGroup.jsx', pattern: /^l\[lang\]/, reason: "reads templateVariants.js's variant label map { en, fi }" },
-  // sectionSchema.js keeps each section's labelEn/labelFi (it is not moved
-  // in 1.7.13's builder task); the builder and Direct Edit read them.
-  { pattern: /^(?:[!=]==\s*['"]fi['"]\s*\?\s*schema\.)?labelFi\s*:\s*schema\.labelEn\b/, reason: "reads sectionSchema.js's labelEn/labelFi for a section's name" },
   // Logic, not text, in any file: the hit's own ternary (up to its first
   // `?`, so a pattern can't reach a later branch on the line) picks a
   // locale code, a formatting locale or an address.
@@ -261,12 +258,7 @@ const MIGRATION_PENDING = new Set([
   'src/components/ATSScorePanel.jsx',
   'src/components/BadgeModal.jsx',
   'src/components/CoverLetterModal.jsx',
-  'src/components/CVForm.jsx',
   'src/components/CVSuggestionsPanel.jsx',
-  'src/components/EditableList.jsx',
-  'src/components/fields/BulletIdeas.jsx',
-  'src/components/fields/ReorderableListInput.jsx',
-  'src/components/fields/TagsInput.jsx',
   'src/components/GuideLayout.jsx',
   'src/components/ImportCvModal.jsx',
   'src/components/LandingTemplatesByField.jsx',
@@ -275,7 +267,6 @@ const MIGRATION_PENDING = new Set([
   'src/components/PdfPreviewModal.jsx',
   'src/components/pdfPreviewOptions.js',
   'src/components/SavedCvsModal.jsx',
-  'src/components/SectionEditorPopup.jsx',
   'src/components/SettingsModal.jsx',
   'src/components/TemplateFieldFilter.jsx',
   'src/components/TemplateGalleryModal.jsx',
@@ -301,7 +292,6 @@ const MIGRATION_PENDING = new Set([
   'src/utils/cvLibrary.js',
   'src/utils/cvTextImport.js',
   'src/utils/profilePhoto.js',
-  'src/utils/sectionSchema.js',
 ])
 
 const allowlistEntry = (file, hit) => ALLOWLIST.find((candidate) => (!candidate.file || candidate.file === file)
@@ -384,6 +374,15 @@ const pluralCases = [
   { ns: 'builder', key: 'savedCvs.reminder', locale: 'fi', count: 1, expected: 'Sinulla on 1 tallennettu CV. Avaa se kohdasta Lisää toimintoja › Omat CV:t.' },
   { ns: 'builder', key: 'savedCvs.reminder', locale: 'en', count: 2, expected: 'You have 2 saved CVs. Open them from More actions › My CVs.' },
   { ns: 'builder', key: 'savedCvs.reminder', locale: 'fi', count: 2, expected: 'Sinulla on 2 tallennettua CV:tä. Avaa ne kohdasta Lisää toimintoja › Omat CV:t.' },
+  // Task 5 (form): BulletIdeas' status after an Add (count === 1 ? one :
+  // other). The count is items.length + 1, so 0 is never shown; its case
+  // pins the key's own output.
+  { ns: 'form', key: 'ideas.added', locale: 'en', count: 0, expected: 'Added. This job now has 0 achievements.' },
+  { ns: 'form', key: 'ideas.added', locale: 'fi', count: 0, expected: 'Lisätty. Työssä on nyt 0 saavutusta.' },
+  { ns: 'form', key: 'ideas.added', locale: 'en', count: 1, expected: 'Added. This job now has 1 achievement.' },
+  { ns: 'form', key: 'ideas.added', locale: 'fi', count: 1, expected: 'Lisätty. Työssä on nyt 1 saavutus.' },
+  { ns: 'form', key: 'ideas.added', locale: 'en', count: 2, expected: 'Added. This job now has 2 achievements.' },
+  { ns: 'form', key: 'ideas.added', locale: 'fi', count: 2, expected: 'Lisätty. Työssä on nyt 2 saavutusta.' },
 ]
 for (const { ns: name, key, locale, count, expected, vars = {} } of pluralCases) {
   const owner = namespaces.get(name)

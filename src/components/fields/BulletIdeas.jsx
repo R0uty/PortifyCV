@@ -2,6 +2,7 @@ import { useContext, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { ChevronDown, Lightbulb, Plus } from 'lucide-react'
 import { CvLanguageContext } from '../cvLanguageContext'
 import { loadBulletIdeas, rankIdeaRoles } from '../../utils/bulletIdeas'
+import { form } from '../../i18n/form'
 
 const VISIBLE_BULLETS = 6
 
@@ -12,7 +13,7 @@ const VISIBLE_BULLETS = 6
 // bullet is one undoable edit, like typing.
 function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
   const cvLocale = useContext(CvLanguageContext) ?? locale
-  const isFinnish = locale === 'fi'
+  const t = (key, vars) => form.t(locale, key, vars)
   const panelId = useId()
   const pickerId = useId()
   const [open, setOpen] = useState(false)
@@ -63,9 +64,7 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
     // The count changes with every Add, so a screen reader announces each
     // one (a live region repeating the same text is usually not re-read).
     const count = items.length + 1
-    setStatus(isFinnish
-      ? `Lisätty. Työssä on nyt ${count} ${count === 1 ? 'saavutus' : 'saavutusta'}.`
-      : `Added. This job now has ${count} ${count === 1 ? 'achievement' : 'achievements'}.`)
+    setStatus(t('ideas.added', { count }))
     onAdd(bullet)
   }
 
@@ -85,32 +84,32 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
         onClick={handleToggle}
       >
         <Lightbulb size={14} strokeWidth={2} aria-hidden="true" />
-        {isFinnish ? 'Hae ideoita' : 'Get ideas'}
+        {t('ideas.toggle')}
         <ChevronDown size={14} strokeWidth={2} aria-hidden="true" className={open ? 'bullet-ideas__chevron bullet-ideas__chevron--open' : 'bullet-ideas__chevron'} />
       </button>
       {open && (
         <div id={panelId} className="bullet-ideas__panel">
           {failed ? (
             <p className="bullet-ideas__note" role="alert">
-              {isFinnish ? 'Ideoita ei voitu ladata.' : "Couldn't load ideas."}
+              {t('ideas.loadFailed')}
               {' '}
               <button type="button" className="bullet-ideas__link" onClick={() => setAttempt(attempt + 1)}>
-                {isFinnish ? 'Yritä uudelleen' : 'Try again'}
+                {t('ideas.retry')}
               </button>
             </p>
           ) : !roles ? (
-            <p className="bullet-ideas__note" role="status">{isFinnish ? 'Ladataan ideoita…' : 'Loading ideas…'}</p>
+            <p className="bullet-ideas__note" role="status">{t('ideas.loading')}</p>
           ) : (
             <>
               <div className="bullet-ideas__picker">
-                <label htmlFor={pickerId} className="bullet-ideas__label">{isFinnish ? 'Ideat roolista' : 'Ideas from'}</label>
+                <label htmlFor={pickerId} className="bullet-ideas__label">{t('ideas.from')}</label>
                 <select
                   id={pickerId}
                   className="bullet-ideas__select"
                   value={selectedId}
                   onChange={(event) => { setChosen(event.target.value); setExpanded(false); setStatus('') }}
                 >
-                  <option value="">{isFinnish ? 'Valitse rooli' : 'Choose a role'}</option>
+                  <option value="">{t('ideas.chooseRole')}</option>
                   {ranked.map((role) => (
                     <option key={role.roleId} value={role.roleId}>{role.roleLabel}</option>
                   ))}
@@ -118,7 +117,7 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
               </div>
               {selected && remaining.length === 0 && (
                 <p className="bullet-ideas__note">
-                  {isFinnish ? 'Kaikki tämän roolin ideat ovat jo tässä työssä.' : 'All ideas from this role are in this job.'}
+                  {t('ideas.allAdded')}
                 </p>
               )}
               {shown.length > 0 && (
@@ -129,11 +128,11 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
                       <button
                         type="button"
                         className="bullet-ideas__add"
-                        aria-label={isFinnish ? `Lisää: ${bullet}` : `Add: ${bullet}`}
+                        aria-label={t('ideas.addBullet', { bullet })}
                         onClick={() => handleAdd(bullet, index)}
                       >
                         <Plus size={14} strokeWidth={2.5} aria-hidden="true" />
-                        {isFinnish ? 'Lisää' : 'Add'}
+                        {t('ideas.add')}
                       </button>
                     </li>
                   ))}
@@ -141,7 +140,7 @@ function BulletIdeas({ roleText = '', items = [], onAdd, locale = 'en' }) {
               )}
               {!expanded && remaining.length > VISIBLE_BULLETS && (
                 <button type="button" className="bullet-ideas__link" onClick={() => setExpanded(true)}>
-                  {isFinnish ? 'Näytä lisää' : 'Show more'}
+                  {t('ideas.showMore')}
                 </button>
               )}
               <p className={status ? 'bullet-ideas__note' : 'sr-only'} role="status">{status}</p>

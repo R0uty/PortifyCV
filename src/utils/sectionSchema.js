@@ -8,6 +8,16 @@
 // cvForm.js's factories in both directions on every run, so a renamed or
 // removed factory field fails the build rather than silently dropping a
 // user's edit.
+//
+// Names are text, kept in the translation files (1.7.13): a section's
+// name is cvForm's `sections.<key>` (one name per section, the same the
+// Sections menu and Classic's panels show), the header's is
+// `form`'s schema.identity, and a field's is `form`'s
+// `schema.fields.<section>.<field>` (a list field's single item:
+// `schema.items.<section>.<field>`). Read them with the helpers below.
+
+import { cvFormText } from '../i18n/cvForm/index.js'
+import { form } from '../i18n/form/index.js'
 
 export const SECTION_SHAPE = Object.freeze({
   rootGroup: 'rootGroup',
@@ -17,24 +27,17 @@ export const SECTION_SHAPE = Object.freeze({
   recordArray: 'recordArray',
 })
 
-const text = (key, labelEn, labelFi) => ({ key, labelEn, labelFi, type: 'text' })
-const area = (key, labelEn, labelFi) => ({ key, labelEn, labelFi, type: 'textarea' })
-const month = (key, labelEn, labelFi) => ({ key, labelEn, labelFi, type: 'month' })
-const url = (key, labelEn, labelFi) => ({ key, labelEn, labelFi, type: 'url' })
-const check = (key, labelEn, labelFi) => ({ key, labelEn, labelFi, type: 'checkbox' })
+const text = (key) => ({ key, type: 'text' })
+const area = (key) => ({ key, type: 'textarea' })
+const month = (key) => ({ key, type: 'month' })
+const url = (key) => ({ key, type: 'url' })
+const check = (key) => ({ key, type: 'checkbox' })
 // A string[] living INSIDE a record-array entry (only experience has any:
 // achievements and technologies). Rendered as a small add/remove list
 // rather than one input, and written back through UPDATE_ARRAY_ITEM with
 // the whole next array - exactly what Classic's ReorderableListInput and
 // TagsInput already do for these same two fields.
-const list = (key, labelEn, labelFi, itemLabelEn, itemLabelFi) => ({
-  key,
-  labelEn,
-  labelFi,
-  type: 'list',
-  itemLabelEn,
-  itemLabelFi,
-})
+const list = (key) => ({ key, type: 'list' })
 
 export const SECTION_SCHEMA = {
   // Synthetic section: the header block, which has no sectionOrder entry
@@ -44,274 +47,249 @@ export const SECTION_SCHEMA = {
   // it is not listed as a field here.
   identity: {
     shape: SECTION_SHAPE.rootGroup,
-    labelEn: 'Header',
-    labelFi: 'Otsikko',
     fields: [
-      text('fullName', 'Full name', 'Koko nimi'),
-      text('title', 'Professional title', 'Ammattinimike'),
-      text('tagline', 'Tagline', 'Iskulause'),
-      text('email', 'Email', 'Sähköposti'),
-      text('phone', 'Phone', 'Puhelin'),
-      text('location', 'Location', 'Sijainti'),
+      text('fullName'),
+      text('title'),
+      text('tagline'),
+      text('email'),
+      text('phone'),
+      text('location'),
     ],
   },
 
   about: {
     shape: SECTION_SHAPE.rootScalar,
-    labelEn: 'About',
-    labelFi: 'Esittely',
-    fields: [area('about', 'Summary', 'Yhteenveto')],
+    fields: [area('about')],
   },
 
   skills: {
     shape: SECTION_SHAPE.stringArray,
-    labelEn: 'Skills',
-    labelFi: 'Taidot',
-    fields: [text('skill', 'Skill', 'Taito')],
+    fields: [text('skill')],
   },
 
   links: {
     shape: SECTION_SHAPE.linkMap,
-    labelEn: 'Links',
-    labelFi: 'Linkit',
     fields: [
-      url('github', 'GitHub', 'GitHub'),
-      url('linkedin', 'LinkedIn', 'LinkedIn'),
-      url('portfolio', 'Portfolio', 'Portfolio'),
-      url('website', 'Website', 'Verkkosivu'),
-      url('behance', 'Behance', 'Behance'),
-      url('dribbble', 'Dribbble', 'Dribbble'),
-      url('medium', 'Medium', 'Medium'),
-      url('devto', 'dev.to', 'dev.to'),
-      url('scholar', 'Google Scholar', 'Google Scholar'),
-      url('boardProfile', 'Board profile', 'Hallitusprofiili'),
-      url('blog', 'Blog', 'Blogi'),
-      url('researchGate', 'ResearchGate', 'ResearchGate'),
-      url('hackTheBox', 'Hack The Box', 'Hack The Box'),
-      url('tryHackMe', 'TryHackMe', 'TryHackMe'),
-      url('youtube', 'YouTube', 'YouTube'),
+      url('github'),
+      url('linkedin'),
+      url('portfolio'),
+      url('website'),
+      url('behance'),
+      url('dribbble'),
+      url('medium'),
+      url('devto'),
+      url('scholar'),
+      url('boardProfile'),
+      url('blog'),
+      url('researchGate'),
+      url('hackTheBox'),
+      url('tryHackMe'),
+      url('youtube'),
     ],
   },
 
   experience: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Experience',
-    labelFi: 'Kokemus',
     fields: [
-      text('role', 'Role', 'Rooli'),
-      text('company', 'Company', 'Yritys'),
-      text('location', 'Location', 'Sijainti'),
-      text('employmentType', 'Employment type', 'Työsuhteen tyyppi'),
-      month('startDate', 'Start date', 'Aloituspäivä'),
-      month('endDate', 'End date', 'Lopetuspäivä'),
-      check('isCurrent', 'Current role', 'Nykyinen rooli'),
-      area('description', 'Description', 'Kuvaus'),
-      list('achievements', 'Achievements', 'Saavutukset', 'Achievement', 'Saavutus'),
-      list('technologies', 'Technologies', 'Teknologiat', 'Technology', 'Teknologia'),
+      text('role'),
+      text('company'),
+      text('location'),
+      text('employmentType'),
+      month('startDate'),
+      month('endDate'),
+      check('isCurrent'),
+      area('description'),
+      list('achievements'),
+      list('technologies'),
     ],
   },
 
   education: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Education',
-    labelFi: 'Koulutus',
     fields: [
-      text('school', 'School', 'Oppilaitos'),
-      text('degree', 'Degree', 'Tutkinto'),
-      text('location', 'Location', 'Sijainti'),
-      month('startDate', 'Start date', 'Aloituspäivä'),
-      month('endDate', 'End date', 'Lopetuspäivä'),
-      text('honors', 'Honors', 'Kunniamaininnat'),
-      area('coursework', 'Coursework', 'Opinnot'),
-      text('grade', 'Grade', 'Arvosana'),
+      text('school'),
+      text('degree'),
+      text('location'),
+      month('startDate'),
+      month('endDate'),
+      text('honors'),
+      area('coursework'),
+      text('grade'),
     ],
   },
 
   coreStrengths: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Core Strengths',
-    labelFi: 'Vahvuudet',
     fields: [
-      text('title', 'Title', 'Otsikko'),
-      area('description', 'Description', 'Kuvaus'),
+      text('title'),
+      area('description'),
     ],
   },
 
   certificates: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Certificates',
-    labelFi: 'Sertifikaatit',
     fields: [
-      text('name', 'Name', 'Nimi'),
-      text('issuer', 'Issuer', 'Myöntäjä'),
-      text('year', 'Year', 'Vuosi'),
-      url('credentialUrl', 'Credential URL', 'Todistuksen osoite'),
-      text('expiry', 'Expiry', 'Voimassaolo'),
+      text('name'),
+      text('issuer'),
+      text('year'),
+      url('credentialUrl'),
+      text('expiry'),
     ],
   },
 
   projects: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Projects',
-    labelFi: 'Projektit',
     fields: [
-      text('name', 'Name', 'Nimi'),
-      area('description', 'Description', 'Kuvaus'),
-      text('stack', 'Stack', 'Teknologiat'),
-      url('githubUrl', 'GitHub URL', 'GitHub-osoite'),
-      url('demoUrl', 'Demo URL', 'Demo-osoite'),
-      text('organization', 'Organization', 'Organisaatio'),
-      text('impact', 'Impact', 'Vaikutus'),
-      text('date', 'Date', 'Päivämäärä'),
-      text('teamSize', 'Team size', 'Tiimin koko'),
-      area('contribution', 'Contribution', 'Oma panos'),
+      text('name'),
+      area('description'),
+      text('stack'),
+      url('githubUrl'),
+      url('demoUrl'),
+      text('organization'),
+      text('impact'),
+      text('date'),
+      text('teamSize'),
+      area('contribution'),
     ],
   },
 
   languages: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Languages',
-    labelFi: 'Kielet',
     fields: [
-      text('language', 'Language', 'Kieli'),
-      text('level', 'Level', 'Taso'),
+      text('language'),
+      text('level'),
     ],
   },
 
   interests: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Interests',
-    labelFi: 'Kiinnostuksen kohteet',
-    fields: [text('name', 'Name', 'Nimi')],
+    fields: [text('name')],
   },
 
   achievements: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Achievements',
-    labelFi: 'Saavutukset',
     fields: [
-      text('title', 'Title', 'Otsikko'),
-      area('description', 'Description', 'Kuvaus'),
-      text('year', 'Year', 'Vuosi'),
+      text('title'),
+      area('description'),
+      text('year'),
     ],
   },
 
   openSource: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Open Source',
-    labelFi: 'Avoin lähdekoodi',
     fields: [
-      text('name', 'Name', 'Nimi'),
-      area('description', 'Description', 'Kuvaus'),
-      text('language', 'Language', 'Kieli'),
-      text('stars', 'Stars', 'Tähdet'),
-      text('forks', 'Forks', 'Haarat'),
-      url('url', 'URL', 'Osoite'),
+      text('name'),
+      area('description'),
+      text('language'),
+      text('stars'),
+      text('forks'),
+      url('url'),
     ],
   },
 
   publications: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Publications',
-    labelFi: 'Julkaisut',
     fields: [
-      text('title', 'Title', 'Otsikko'),
-      text('publisher', 'Publisher', 'Julkaisija'),
-      text('year', 'Year', 'Vuosi'),
-      url('url', 'URL', 'Osoite'),
+      text('title'),
+      text('publisher'),
+      text('year'),
+      url('url'),
     ],
   },
 
   leadership: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Leadership Experience',
-    labelFi: 'Johtamiskokemus',
     fields: [
-      text('role', 'Role', 'Rooli'),
-      text('organization', 'Organization', 'Organisaatio'),
-      area('description', 'Description', 'Kuvaus'),
-      month('startDate', 'Start date', 'Aloituspäivä'),
-      month('endDate', 'End date', 'Lopetuspäivä'),
+      text('role'),
+      text('organization'),
+      area('description'),
+      month('startDate'),
+      month('endDate'),
     ],
   },
 
   memberships: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Professional Memberships',
-    labelFi: 'Ammattijäsenyydet',
     fields: [
-      text('organization', 'Organization', 'Organisaatio'),
-      text('role', 'Role', 'Rooli'),
-      text('year', 'Year', 'Vuosi'),
+      text('organization'),
+      text('role'),
+      text('year'),
     ],
   },
 
   speaking: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Speaking',
-    labelFi: 'Esiintymiset',
     fields: [
-      text('conference', 'Conference', 'Konferenssi'),
-      text('topic', 'Topic', 'Aihe'),
-      text('audience', 'Audience', 'Yleisö'),
-      text('date', 'Date', 'Päivämäärä'),
+      text('conference'),
+      text('topic'),
+      text('audience'),
+      text('date'),
     ],
   },
 
   volunteering: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Volunteering',
-    labelFi: 'Vapaaehtoistyö',
     fields: [
-      text('organization', 'Organization', 'Organisaatio'),
-      text('role', 'Role', 'Rooli'),
-      area('description', 'Description', 'Kuvaus'),
+      text('organization'),
+      text('role'),
+      area('description'),
     ],
   },
 
   internships: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Internships',
-    labelFi: 'Harjoittelut',
     fields: [
-      text('role', 'Role', 'Rooli'),
-      text('company', 'Company', 'Yritys'),
-      text('location', 'Location', 'Sijainti'),
-      month('startDate', 'Start date', 'Aloituspäivä'),
-      month('endDate', 'End date', 'Lopetuspäivä'),
-      area('description', 'Description', 'Kuvaus'),
-      text('technologies', 'Technologies', 'Teknologiat'),
+      text('role'),
+      text('company'),
+      text('location'),
+      month('startDate'),
+      month('endDate'),
+      area('description'),
+      text('technologies'),
     ],
   },
 
   caseStudies: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Case Studies',
-    labelFi: 'Tapaustutkimukset',
     fields: [
-      text('title', 'Title', 'Otsikko'),
-      area('problem', 'Problem', 'Ongelma'),
-      area('solution', 'Solution', 'Ratkaisu'),
-      text('technologies', 'Technologies', 'Teknologiat'),
-      area('outcome', 'Outcome', 'Lopputulos'),
-      area('lessons', 'Lessons', 'Opit'),
+      text('title'),
+      area('problem'),
+      area('solution'),
+      text('technologies'),
+      area('outcome'),
+      area('lessons'),
     ],
   },
 
   testimonials: {
     shape: SECTION_SHAPE.recordArray,
-    labelEn: 'Testimonials',
-    labelFi: 'Suositukset',
     fields: [
-      area('quote', 'Quote', 'Lainaus'),
-      text('author', 'Author', 'Kirjoittaja'),
-      text('role', 'Role', 'Rooli'),
+      area('quote'),
+      text('author'),
+      text('role'),
     ],
   },
 }
 
 export function getSectionSchema(sectionKey) {
   return SECTION_SCHEMA[sectionKey]
+}
+
+// A section's name in `locale` (the popup's title, the keyboard
+// triggers, the template-switch toast).
+export function getSectionLabel(sectionKey, locale) {
+  return sectionKey === 'identity'
+    ? form.t(locale, 'schema.identity')
+    : cvFormText.t(locale, `sections.${sectionKey}`)
+}
+
+// A field's label in `locale`, and for a list field the name of one item.
+export function getFieldLabel(sectionKey, fieldKey, locale) {
+  return form.t(locale, `schema.fields.${sectionKey}.${fieldKey}`)
+}
+
+export function getFieldItemLabel(sectionKey, fieldKey, locale) {
+  return form.t(locale, `schema.items.${sectionKey}.${fieldKey}`)
 }
 
 // Returns the section key that sits `direction` away from `sectionKey`

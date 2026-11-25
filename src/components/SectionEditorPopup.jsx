@@ -1,5 +1,12 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { SECTION_SHAPE, getSectionSchema, getColumnNeighbourSection } from '../utils/sectionSchema'
+import {
+  SECTION_SHAPE,
+  getSectionSchema,
+  getSectionLabel,
+  getFieldLabel,
+  getFieldItemLabel,
+  getColumnNeighbourSection,
+} from '../utils/sectionSchema'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 import InlineTagEditor from './fields/InlineTagEditor'
 import BulletHints from './fields/BulletHints'
@@ -10,6 +17,7 @@ import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/pr
 import { canMoveSection, getSectionColumn, setSectionColumn } from '../utils/sectionColumns'
 import { getTabStops } from '../utils/focusTrap'
 import { useCvTextProps } from './cvLanguageContext'
+import { form } from '../i18n/form'
 
 // The popup editor for one section. Renders real <input>/<textarea>
 // elements and reads formData directly — never the DOM and never
@@ -18,12 +26,13 @@ import { useCvTextProps } from './cvLanguageContext'
 // any index derived from the DOM would target the wrong record.
 
 
-function FieldInput({ field, value, isFinnish, onChange, ideas = null }) {
+function FieldInput({ sectionKey, field, value, locale, onChange, ideas = null }) {
+  const isFinnish = locale === 'fi'
   const cvTextProps = useCvTextProps({
     type: field.type === 'url' ? 'url' : field.type === 'month' ? 'month' : undefined,
     field: field.key,
   })
-  const label = isFinnish ? field.labelFi : field.labelEn
+  const label = getFieldLabel(sectionKey, field.key, locale)
   // Achievement bullets get writing hints (1.7.3), hidden on the one being typed in.
   const hintIdBase = useId()
   const [focusedIndex, setFocusedIndex] = useState(null)
@@ -45,7 +54,7 @@ function FieldInput({ field, value, isFinnish, onChange, ideas = null }) {
   // for these two fields, so no new reducer action is needed.
   if (field.type === 'list') {
     const items = Array.isArray(value) ? value : []
-    const itemLabel = isFinnish ? field.itemLabelFi : field.itemLabelEn
+    const itemLabel = getFieldItemLabel(sectionKey, field.key, locale)
     const hints = field.key === 'achievements' ? getBulletHints(items, { locale: isFinnish ? 'fi' : 'en' }) : null
 
     return (
@@ -80,7 +89,7 @@ function FieldInput({ field, value, isFinnish, onChange, ideas = null }) {
                 type="button"
                 className="direct-edit-popup__list-remove"
                 onClick={() => onChange(items.filter((_, i) => i !== index))}
-                aria-label={isFinnish ? `Poista: ${itemLabel} ${index + 1}` : `Remove ${itemLabel} ${index + 1}`}
+                aria-label={form.t(locale, 'popup.removeItem', { item: itemLabel, number: index + 1 })}
               >
                 &times;
               </button>
@@ -94,7 +103,7 @@ function FieldInput({ field, value, isFinnish, onChange, ideas = null }) {
             className="direct-edit-popup__list-add"
             onClick={() => onChange([...items, ''])}
           >
-            {isFinnish ? `+ Lisää: ${itemLabel}` : `+ Add ${itemLabel.toLowerCase()}`}
+            {form.t(locale, 'popup.addItem', { item: itemLabel })}
           </button>
           {field.key === 'achievements' && ideas && (
             <BulletIdeas
@@ -145,7 +154,7 @@ function FieldInput({ field, value, isFinnish, onChange, ideas = null }) {
           // (CVForm.jsx's date inputs) instead. Do not "fix" this back to
           // type="month" without also changing how dates are stored.
           type={field.type === 'url' ? 'url' : 'text'}
-          placeholder={field.type === 'month' ? (isFinnish ? 'esim. tammikuu 2022' : 'e.g. Jan 2022') : undefined}
+          placeholder={field.type === 'month' ? form.t(locale, 'popup.datePlaceholder') : undefined}
           value={value ?? ''}
           onChange={(event) => onChange(event.target.value)}
         />
@@ -165,8 +174,9 @@ export default function SectionEditorPopup({
   onClose,
 }) {
   const skillTextProps = useCvTextProps()
-  const isFinnish = locale === 'fi'
+  const t = (key, vars) => form.t(locale, key, vars)
   const schema = getSectionSchema(sectionKey)
+  const sectionLabel = getSectionLabel(sectionKey, locale)
   const [draftSkill, setDraftSkill] = useState('')
   const [notice, setNotice] = useState('')
   const photoInputRef = useRef(null)
@@ -298,7 +308,7 @@ export default function SectionEditorPopup({
                     dispatchFormData({ type: FORM_ACTION.MOVE_ARRAY_ITEM, section: sectionKey, index, direction: -1 })
                   }
                   disabled={index === 0}
-                  aria-label={isFinnish ? 'Siirrä ylös' : 'Move up'}
+                  aria-label={t('popup.moveUp')}
                 >
                   &uarr;
                 </button>
@@ -308,7 +318,7 @@ export default function SectionEditorPopup({
                     dispatchFormData({ type: FORM_ACTION.MOVE_ARRAY_ITEM, section: sectionKey, index, direction: 1 })
                   }
                   disabled={index === items.length - 1}
-                  aria-label={isFinnish ? 'Siirrä alas' : 'Move down'}
+                  aria-label={t('popup.moveDown')}
                 >
                   &darr;
                 </button>
@@ -323,7 +333,7 @@ export default function SectionEditorPopup({
                     })
                   }
                 >
-                  {isHidden ? (isFinnish ? 'Näytä' : 'Show') : (isFinnish ? 'Piilota' : 'Hide')}
+                  {isHidden ? t('common.show') : t('common.hide')}
                 </button>
                 <button
                   type="button"
@@ -331,7 +341,7 @@ export default function SectionEditorPopup({
                     dispatchFormData({ type: FORM_ACTION.DUPLICATE_ARRAY_ITEM, section: sectionKey, index })
                   }
                 >
-                  {isFinnish ? 'Kopioi' : 'Duplicate'}
+                  {t('popup.duplicate')}
                 </button>
                 <button
                   type="button"
@@ -339,15 +349,16 @@ export default function SectionEditorPopup({
                     dispatchFormData({ type: FORM_ACTION.REMOVE_ARRAY_ITEM, section: sectionKey, index })
                   }
                 >
-                  {isFinnish ? 'Poista' : 'Remove'}
+                  {t('common.remove')}
                 </button>
               </div>
               {schema.fields.map((field) => (
                 <FieldInput
+                  sectionKey={sectionKey}
                   key={field.key}
                   field={field}
                   value={item[field.key]}
-                  isFinnish={isFinnish}
+                  locale={locale}
                   ideas={sectionKey === 'experience' ? { roleText: item.role || formData.title } : null}
                   onChange={(value) =>
                     dispatchFormData({
@@ -368,7 +379,7 @@ export default function SectionEditorPopup({
           className="direct-edit-popup__add"
           onClick={() => dispatchFormData({ type: FORM_ACTION.ADD_ARRAY_ITEM, section: sectionKey })}
         >
-          {isFinnish ? '+ Lisää' : '+ Add'}
+          {t('popup.add')}
         </button>
       </>
     )
@@ -395,7 +406,7 @@ export default function SectionEditorPopup({
       setNotice(
         error instanceof Error
           ? localizePhotoErrorMessage(error.message, locale)
-          : isFinnish ? 'Profiilikuvan lataus epäonnistui.' : 'Could not upload profile image.',
+          : t('common.photoUploadFailed'),
       )
     }
   }
@@ -404,10 +415,11 @@ export default function SectionEditorPopup({
     <>
       {schema.fields.map((field) => (
         <FieldInput
+          sectionKey={sectionKey}
           key={field.key}
           field={field}
           value={formData[field.key]}
-          isFinnish={isFinnish}
+          locale={locale}
           onChange={(value) =>
             dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: field.key, value })
           }
@@ -420,14 +432,14 @@ export default function SectionEditorPopup({
           control here at all, forcing a trip to Classic mode. */}
       <div className="direct-edit-popup__photo">
         <span className="direct-edit-popup__label">
-          {isFinnish ? 'Profiilikuva' : 'Profile image'}
+          {t('popup.profileImage')}
         </span>
         <input
           ref={photoInputRef}
           type="file"
           className="direct-edit-popup__photo-input"
           accept="image/png,image/jpeg,image/jpg"
-          aria-label={isFinnish ? 'Profiilikuva' : 'Profile image'}
+          aria-label={t('popup.profileImage')}
           onChange={handlePhotoUpload}
         />
         <button
@@ -435,18 +447,16 @@ export default function SectionEditorPopup({
           className="direct-edit-popup__photo-choose"
           onClick={() => photoInputRef.current?.click()}
         >
-          {isFinnish ? 'Valitse kuva' : 'Choose image'}
+          {t('common.chooseImage')}
         </button>
         <p className="direct-edit-popup__photo-hint">
-          {isFinnish
-            ? 'JPG tai PNG, enintään 2 Mt.'
-            : 'JPG or PNG, up to 2MB.'}
+          {t('popup.imageHint')}
         </p>
         {formData.photo ? (
           <div className="direct-edit-popup__photo-row">
             <img
               src={formData.photo}
-              alt={isFinnish ? 'Profiilin esikatselu' : 'Profile preview'}
+              alt={t('common.profilePreview')}
               className="direct-edit-popup__photo-preview"
             />
             <button
@@ -457,7 +467,7 @@ export default function SectionEditorPopup({
                 dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'photo', value: '' })
               }}
             >
-              {isFinnish ? 'Poista kuva' : 'Remove image'}
+              {t('common.removeImage')}
             </button>
           </div>
         ) : null}
@@ -477,7 +487,7 @@ export default function SectionEditorPopup({
               }
             />
             <span className="direct-edit-popup__label">
-              {isFinnish ? 'Näytä valokuva' : 'Show photo'}
+              {t('popup.showPhoto')}
             </span>
           </label>
         ) : null}
@@ -491,9 +501,10 @@ export default function SectionEditorPopup({
 
     return (
       <FieldInput
+        sectionKey={sectionKey}
         field={field}
         value={formData[field.key]}
-        isFinnish={isFinnish}
+        locale={locale}
         onChange={(value) =>
           dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: field.key, value })
         }
@@ -533,13 +544,14 @@ export default function SectionEditorPopup({
                     })
                   }
                 >
-                  {isHidden ? (isFinnish ? 'Näytä' : 'Show') : (isFinnish ? 'Piilota' : 'Hide')}
+                  {isHidden ? t('common.show') : t('common.hide')}
                 </button>
               </div>
               <FieldInput
+                sectionKey={sectionKey}
                 field={field}
                 value={formData.links?.[field.key]}
-                isFinnish={isFinnish}
+                locale={locale}
                 onChange={(value) =>
                   dispatchFormData({ type: FORM_ACTION.SET_LINK_FIELD, field: field.key, value })
                 }
@@ -564,7 +576,7 @@ export default function SectionEditorPopup({
       const isDuplicate = items.some((skill) => skill.toLowerCase() === candidate.toLowerCase())
 
       if (isDuplicate) {
-        setNotice(isFinnish ? 'Tämä taito on jo listalla.' : 'That skill is already listed.')
+        setNotice(t('popup.skillDuplicate'))
         return
       }
 
@@ -589,8 +601,8 @@ export default function SectionEditorPopup({
               persistent
               autoFocus={false}
               className="direct-edit-popup__skill-text"
-              ariaLabel={isFinnish ? `Taito ${index + 1}` : `Skill ${index + 1}`}
-              duplicateMessage={isFinnish ? 'Tämä taito on jo listalla.' : 'That skill is already listed.'}
+              ariaLabel={t('popup.skillNumber', { number: index + 1 })}
+              duplicateMessage={t('popup.skillDuplicate')}
               onCommit={(text) => {
                 if (text && items.some((other, otherIndex) => otherIndex !== index && other.toLowerCase() === text.toLowerCase())) {
                   return false
@@ -603,7 +615,7 @@ export default function SectionEditorPopup({
               type="button"
               onClick={() => dispatchFormData({ type: FORM_ACTION.MOVE_SKILL, index, direction: -1 })}
               disabled={index === 0}
-              aria-label={isFinnish ? 'Siirrä ylös' : 'Move up'}
+              aria-label={t('popup.moveUp')}
             >
               &uarr;
             </button>
@@ -611,14 +623,14 @@ export default function SectionEditorPopup({
               type="button"
               onClick={() => dispatchFormData({ type: FORM_ACTION.MOVE_SKILL, index, direction: 1 })}
               disabled={index === items.length - 1}
-              aria-label={isFinnish ? 'Siirrä alas' : 'Move down'}
+              aria-label={t('popup.moveDown')}
             >
               &darr;
             </button>
             <button
               type="button"
               onClick={() => dispatchFormData({ type: FORM_ACTION.REMOVE_SKILL, index })}
-              aria-label={isFinnish ? 'Poista' : 'Remove'}
+              aria-label={t('common.remove')}
             >
               &times;
             </button>
@@ -630,7 +642,7 @@ export default function SectionEditorPopup({
             type="text"
             className="direct-edit-popup__input direct-edit-popup__skill-input"
             value={draftSkill}
-            placeholder={isFinnish ? 'Uusi taito' : 'New skill'}
+            placeholder={t('popup.newSkill')}
             onChange={(event) => {
               setDraftSkill(event.target.value)
               setNotice('')
@@ -648,7 +660,7 @@ export default function SectionEditorPopup({
             onClick={handleAdd}
             disabled={!draftSkill.trim()}
           >
-            {isFinnish ? 'Lisää' : 'Add'}
+            {t('popup.addSkill')}
           </button>
         </div>
         {notice ? <p className="direct-edit-popup__notice">{notice}</p> : null}
@@ -716,7 +728,7 @@ export default function SectionEditorPopup({
       default:
         return (
           <p className="direct-edit-popup__empty">
-            {isFinnish ? 'Ei vielä muokattavia kenttiä.' : 'No editable fields yet.'}
+            {t('popup.noFields')}
           </p>
         )
     }
@@ -729,13 +741,13 @@ export default function SectionEditorPopup({
       role="dialog"
       aria-modal="true"
       tabIndex={-1}
-      aria-label={isFinnish ? schema.labelFi : schema.labelEn}
+      aria-label={sectionLabel}
       onPointerDown={(event) => event.stopPropagation()}
       onKeyDown={handleDialogKeyDown}
     >
       <div className="direct-edit-popup__header">
         <span className="direct-edit-popup__title">
-          {isFinnish ? schema.labelFi : schema.labelEn}
+          {sectionLabel}
         </span>
         {isOrderableSection ? (
           <div className="direct-edit-popup__section-controls">
@@ -744,7 +756,7 @@ export default function SectionEditorPopup({
               className="direct-edit-popup__move-up"
               onClick={() => moveSection(-1)}
               disabled={!canMoveUp}
-              aria-label={isFinnish ? 'Siirrä osiota ylös' : 'Move section up'}
+              aria-label={t('popup.moveSectionUp')}
             >
               &uarr;
             </button>
@@ -753,7 +765,7 @@ export default function SectionEditorPopup({
               className="direct-edit-popup__move-down"
               onClick={() => moveSection(1)}
               disabled={!canMoveDown}
-              aria-label={isFinnish ? 'Siirrä osiota alas' : 'Move section down'}
+              aria-label={t('popup.moveSectionDown')}
             >
               &darr;
             </button>
@@ -765,7 +777,7 @@ export default function SectionEditorPopup({
                 onClose()
               }}
             >
-              {isFinnish ? 'Piilota' : 'Hide'}
+              {t('common.hide')}
             </button>
           </div>
         ) : null}
@@ -773,7 +785,7 @@ export default function SectionEditorPopup({
           type="button"
           className="direct-edit-popup__close"
           onClick={onClose}
-          aria-label={isFinnish ? 'Sulje' : 'Close'}
+          aria-label={t('popup.close')}
         >
           &times;
         </button>
@@ -786,15 +798,12 @@ export default function SectionEditorPopup({
         <div
           className="direct-edit-popup__columns"
           role="group"
-          aria-label={isFinnish ? 'Sarake' : 'Column'}
+          aria-label={t('popup.column')}
         >
           <span className="direct-edit-popup__columns-label" aria-hidden="true">
-            {isFinnish ? 'Sarake' : 'Column'}
+            {t('popup.column')}
           </span>
-          {[
-            ['main', 'Main', 'Pääsarake'],
-            ['sidebar', 'Sidebar', 'Sivupalkki'],
-          ].map(([column, labelEn, labelFi]) => (
+          {['main', 'sidebar'].map((column) => (
             <button
               key={column}
               type="button"
@@ -803,7 +812,7 @@ export default function SectionEditorPopup({
               aria-pressed={currentColumn === column}
               onClick={() => moveToColumn(column)}
             >
-              {isFinnish ? labelFi : labelEn}
+              {t(column === 'main' ? 'popup.columns.main' : 'popup.columns.sidebar')}
             </button>
           ))}
         </div>

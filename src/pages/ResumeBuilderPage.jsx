@@ -88,7 +88,7 @@ import { getEffectiveCvTemplate } from '../utils/sectionColumns'
 import { prefetchTemplateShowcases } from '../components/templates'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
 import { getSectionsHiddenByTemplate, hasSectionContent, hideEmptySections } from '../utils/sectionContent'
-import { getSectionSchema } from '../utils/sectionSchema'
+import { getSectionLabel } from '../utils/sectionSchema'
 import { DEFAULT_STYLE_VARIANT_ID, getTemplateVariant, getTemplateVariants, getVariantSwatches, isStyleVariantModified, parseStyleVariantParam, resolveStyleVariantId } from '../utils/templateVariants'
 import { APP_VERSION_RAW } from '../utils/appVersion'
 import { cvFormReducer, FORM_ACTION } from '../reducers/cvFormReducer'
@@ -454,10 +454,7 @@ function loadInitialCvSession(locale = 'en') {
 // The names of the sections `templateId` would leave out of this CV.
 function listSectionsHiddenByTemplate(formData, templateId, locale) {
   return getSectionsHiddenByTemplate(formData, getEffectiveCvTemplate(templateId, locale, formData))
-    .map((key) => {
-      const schema = getSectionSchema(key)
-      return locale === 'fi' ? schema.labelFi : schema.labelEn
-    })
+    .map((key) => getSectionLabel(key, locale))
     .join(', ')
 }
 

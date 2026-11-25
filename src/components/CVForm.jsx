@@ -40,6 +40,7 @@ import {
 import { FORM_ACTION } from '../reducers/cvFormReducer'
 import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/profilePhoto'
 import { useCvTextProps } from './cvLanguageContext'
+import { form } from '../i18n/form'
 
 function isSectionItemVisible(sectionItemVisibility, section, itemKey) {
   return sectionItemVisibility?.[section]?.[String(itemKey)] !== false
@@ -92,6 +93,7 @@ function CVForm({
   )
   const ui = getUiTheme(theme)
   const isFinnish = locale === 'fi'
+  const t = (key, vars) => form.t(locale, key, vars)
   const sectionVisibilityFields = getSectionVisibilityFields(locale)
   const templateConfig = getEffectiveCvTemplate(selectedTemplate, locale, formData)
   const templateSectionOrder = [
@@ -134,17 +136,15 @@ function CVForm({
   const itemHeadingClasses = `${ui.textPrimary} uppercase tracking-[0.04em] text-xs font-bold`
   const helperTextClasses = ui.textMuted
   const copy = {
-    hide: isFinnish ? 'Piilota' : 'Hide',
-    show: isFinnish ? 'Näytä' : 'Show',
-    up: isFinnish ? 'Ylös' : 'Up',
-    down: isFinnish ? 'Alas' : 'Down',
-    duplicate: isFinnish ? 'Monista' : 'Duplicate',
-    duplicateShort: isFinnish ? 'Kopioi' : 'Dup',
-    remove: isFinnish ? 'Poista' : 'Remove',
-    move: isFinnish ? 'Siirrä' : 'Move',
-    drag: isFinnish ? 'Raahaa' : 'Drag',
-    on: isFinnish ? 'Päällä' : 'On',
-    off: isFinnish ? 'Pois' : 'Off',
+    hide: t('common.hide'),
+    show: t('common.show'),
+    up: t('common.up'),
+    down: t('common.down'),
+    duplicate: t('common.duplicate'),
+    remove: t('common.remove'),
+    drag: t('common.drag'),
+    on: t('common.on'),
+    off: t('common.off'),
   }
 
   const updateRootField = (field, value) => {
@@ -167,7 +167,7 @@ function CVForm({
         onPhotoError(
           error instanceof Error
             ? localizePhotoErrorMessage(error.message, locale)
-            : isFinnish ? 'Profiilikuvan lataus epäonnistui.' : 'Could not upload profile image.',
+            : t('common.photoUploadFailed'),
         )
       }
     }
@@ -182,7 +182,7 @@ function CVForm({
         onPhotoError(
           error instanceof Error
             ? localizePhotoErrorMessage(error.message, locale)
-            : isFinnish ? 'Kuvan lataus epäonnistui.' : 'Could not upload image.',
+            : t('common.imageUploadFailed'),
         )
       }
     }
@@ -380,22 +380,16 @@ function CVForm({
     <form className="mt-8 space-y-4 sm:space-y-5">
       <PanelSection
         id="section-settings"
-        title={isFinnish ? 'Näkyvät osiot' : 'Visible sections'}
-        badge={{ label: `${visibleSectionCount}/${orderedSectionFields.length} ${isFinnish ? 'näkyvissä' : 'visible'}` }}
+        title={t('settings.heading')}
+        badge={{ label: t('settings.visibleCount', { visible: visibleSectionCount, total: orderedSectionFields.length }) }}
         defaultCollapsed
         expandSignal={sectionSettingsExpandSignal}
-        description={
-          isFinnish
-            ? 'Kytke osioita tai yksittäisiä kohtia pois ilman tietojen poistamista.'
-            : 'Toggle whole sections or specific section items without deleting your data.'
-        }
+        description={t('settings.intro')}
         theme={theme}
       >
         <div className="space-y-3">
           <p className={`text-xs ${helperTextClasses}`}>
-            {isFinnish
-              ? 'Raahaa osioita muuttaaksesi niiden järjestystä.'
-              : 'Drag sections to change their order.'}
+            {t('settings.dragHint')}
           </p>
           <div className="space-y-2">
             {orderedSectionFields.map((field, index) => {
@@ -434,7 +428,7 @@ function CVForm({
                       className={sectionMoveButtonClasses}
                       onClick={() => moveSectionByDirection(field.key, -1)}
                       disabled={index === 0}
-                      aria-label={`${copy.move} ${field.label} ${copy.up.toLowerCase()}`}
+                      aria-label={t('settings.moveUp', { section: field.label })}
                     >
                       <ChevronUp size={15} strokeWidth={2.5} aria-hidden="true" />
                     </button>
@@ -443,7 +437,7 @@ function CVForm({
                       className={sectionMoveButtonClasses}
                       onClick={() => moveSectionByDirection(field.key, 1)}
                       disabled={index === orderedSectionFields.length - 1}
-                      aria-label={`${copy.move} ${field.label} ${copy.down.toLowerCase()}`}
+                      aria-label={t('settings.moveDown', { section: field.label })}
                     >
                       <ChevronDown size={15} strokeWidth={2.5} aria-hidden="true" />
                     </button>
@@ -459,13 +453,13 @@ function CVForm({
           </div>
           <div className={`flex items-center justify-between gap-3 border px-3 py-2 ${ui.surfaceMuted}`}>
             <span className={`truncate text-sm font-semibold ${ui.textPrimary}`}>
-              {isFinnish ? 'Kuva' : 'Photo'} ({selectedTemplateLabel})
+              {t('settings.photoForTemplate', { template: selectedTemplateLabel })}
             </span>
             <ToggleSwitch
               checked={isPhotoVisibleInSelectedTemplate}
               onChange={togglePhotoVisibilityForSelectedTemplate}
               disabled={!selectedTemplate}
-              ariaLabel={`${isFinnish ? 'Kuva' : 'Photo'}: ${isPhotoVisibleInSelectedTemplate ? copy.on : copy.off}`}
+              ariaLabel={`${t('settings.photo')}: ${isPhotoVisibleInSelectedTemplate ? copy.on : copy.off}`}
             />
           </div>
         </div>
@@ -473,18 +467,14 @@ function CVForm({
 
       <PanelSection
         id="section-personal"
-        title={isFinnish ? 'Profiili' : 'Profile'}
-        description={
-          isFinnish
-            ? 'Lisää CV:n yläosassa näkyvät perustiedot.'
-            : 'Add the core information that appears at the top of the CV.'
-        }
+        title={t('personal.heading')}
+        description={t('personal.intro')}
         theme={theme}
         badge={feedback.sectionBadges.profile}
       >
         <div className="space-y-4">
           <FloatingField
-            label={isFinnish ? 'Koko nimi' : 'Full name'}
+            label={t('personal.fullName')}
             error={identityTouched.fullName ? errors.fullName : ''}
             required
           >
@@ -500,7 +490,7 @@ function CVForm({
           </FloatingField>
 
           <FloatingField
-            label={isFinnish ? 'Ammattinimike' : 'Professional title'}
+            label={t('personal.professionalTitle')}
             error={identityTouched.title ? errors.title : ''}
             required
           >
@@ -513,7 +503,7 @@ function CVForm({
             />
           </FloatingField>
 
-          <FloatingField label={isFinnish ? 'Iskulause (valinnainen)' : 'Tagline (optional)'}>
+          <FloatingField label={t('personal.tagline')}>
             <input
               type="text"
               value={formData.tagline}
@@ -522,7 +512,7 @@ function CVForm({
           </FloatingField>
 
           <div className="grid gap-4 sm:grid-cols-3">
-            <FloatingField label={isFinnish ? 'Sähköposti' : 'Email'}>
+            <FloatingField label={t('personal.email')}>
               <input
                 type="email"
                 autoComplete="email"
@@ -531,7 +521,7 @@ function CVForm({
                 onChange={(event) => updateRootField('email', event.target.value)}
               />
             </FloatingField>
-            <FloatingField label={isFinnish ? 'Puhelin' : 'Phone'}>
+            <FloatingField label={t('personal.phone')}>
               <input
                 type="tel"
                 autoComplete="tel"
@@ -540,7 +530,7 @@ function CVForm({
                 onChange={(event) => updateRootField('phone', event.target.value)}
               />
             </FloatingField>
-            <FloatingField label={isFinnish ? 'Sijainti' : 'Location'}>
+            <FloatingField label={t('personal.location')}>
               <input
                 type="text"
                 autoComplete="address-level2"
@@ -550,7 +540,7 @@ function CVForm({
             </FloatingField>
           </div>
           <div id="section-summary">
-            <FloatingField label={isFinnish ? 'Esittely' : 'About'}>
+            <FloatingField label={t('summary.about')}>
               <AutoGrowTextarea
                 value={formData.about}
                 onChange={(event) => updateRootField('about', event.target.value)}
@@ -562,14 +552,14 @@ function CVForm({
               hint text or the preview image into a file-picker dialog. */}
           <div className="block">
             <span className={`text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}>
-              {isFinnish ? 'Profiilikuva (valinnainen)' : 'Profile image (optional)'}
+              {t('summary.profileImage')}
             </span>
             <input
               ref={photoInputRef}
               className="hidden"
               type="file"
               accept="image/png,image/jpeg,image/jpg"
-              aria-label={isFinnish ? 'Profiilikuva (valinnainen)' : 'Profile image (optional)'}
+              aria-label={t('summary.profileImage')}
               onChange={handlePhotoUpload}
             />
             <button
@@ -577,18 +567,16 @@ function CVForm({
               className={`mt-2 ui-button ${ui.button}`}
               onClick={() => photoInputRef.current?.click()}
             >
-              {isFinnish ? 'Valitse kuva' : 'Choose image'}
+              {t('common.chooseImage')}
             </button>
             <p className={`mt-2 text-xs ${helperTextClasses}`}>
-              {isFinnish
-                ? 'JPG tai PNG, enintään 2 Mt. Kuva skaalataan vientiä varten.'
-                : 'JPG or PNG, up to 2MB. Image is resized for exports.'}
+              {t('summary.imageHint')}
             </p>
             {formData.photo ? (
               <div className="mt-3 flex items-center gap-3">
                 <img
                   src={formData.photo}
-                  alt={isFinnish ? 'Profiilin esikatselu' : 'Profile preview'}
+                  alt={t('common.profilePreview')}
                   className="border border-gray-300"
                   style={{ width: '5.75rem', height: '5.75rem', objectFit: 'cover' }}
                 />
@@ -597,7 +585,7 @@ function CVForm({
                   className={removeButtonClasses}
                   onClick={() => updateRootField('photo', '')}
                 >
-                  {isFinnish ? 'Poista kuva' : 'Remove image'}
+                  {t('common.removeImage')}
                 </button>
               </div>
             ) : null}
@@ -613,27 +601,25 @@ function CVForm({
       {templateSectionKeySet.has('skills') ? (
       <PanelSection
         id="section-skills"
-        title={isFinnish ? 'Taidot' : 'Skills'}
-        description={isFinnish ? 'Paina Enter tai pilkku muuttaaksesi taidon tagiksi.' : 'Press Enter or comma to turn each skill into a tag.'}
+        title={t('skills.heading')}
+        description={t('skills.intro')}
         theme={theme}
         badge={feedback.sectionBadges.skills}
       >
         <div className="space-y-3">
           <p className={`mb-2 text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}>
-            {isFinnish ? 'Taitotagit' : 'Skill tags'}
+            {t('skills.skillTags')}
           </p>
           <TagsInput
             value={formData.skills}
             onChange={(nextSkills) =>
               dispatchFormData({ type: FORM_ACTION.SET_ROOT_FIELD, field: 'skills', value: nextSkills })
             }
-            ariaLabel={isFinnish ? 'Taitotagit' : 'Skill tags'}
+            ariaLabel={t('skills.skillTags')}
             locale={locale}
           />
           <p className={`text-xs ${helperTextClasses}`}>
-            {isFinnish
-              ? 'Vinkki: Backspace poistaa viimeisen tagin, kun kenttä on tyhjä.'
-              : 'Tip: Backspace removes the last tag when the input is empty.'}
+            {t('skills.backspaceTip')}
           </p>
           <InlineTipList items={feedback.inlineTips.skills} theme={theme} locale={locale} />
         </div>
@@ -643,12 +629,8 @@ function CVForm({
       {templateSectionKeySet.has('experience') ? (
       <PanelSection
         id="section-experience"
-        title={isFinnish ? 'Kokemus' : 'Experience'}
-        description={
-          isFinnish
-            ? 'Kuvaa roolit, ajanjaksot ja vastuut jokaisesta työkokemuksesta.'
-            : 'Capture roles, timelines, and responsibilities for each work experience.'
-        }
+        title={t('experience.heading')}
+        description={t('experience.intro')}
         theme={theme}
         badge={feedback.sectionBadges.experience}
       >
@@ -656,11 +638,9 @@ function CVForm({
           <InlineTipList items={feedback.inlineTips.experience} theme={theme} locale={locale} />
           {formData.experience.length === 0 ? (
             <SectionEmptyState
-              title={isFinnish ? 'Lisää ensimmäinen kokemuksesi' : 'Add your first experience'}
-              body={isFinnish
-                ? 'Yksikin vahva rooli tulosfokusoidulla kuvauksella tekee CV:stä uskottavamman.'
-                : 'Even one strong role with a result-focused description makes the CV more credible.'}
-              actionLabel={isFinnish ? 'Lisää kokemus' : 'Add experience'}
+              title={t('experience.emptyTitle')}
+              body={t('experience.emptyBody')}
+              actionLabel={t('experience.addExperience')}
               onAction={() => addArrayItem('experience')}
             />
           ) : (
@@ -681,7 +661,7 @@ function CVForm({
                       <SortableItemCard
                         key={itemKey}
                         id={itemKey}
-                        title={`${isFinnish ? 'Kokemus' : 'Experience'} #${index + 1}${item.role ? ` — ${item.role}` : ''}`}
+                        title={`${t('experience.heading')} #${index + 1}${item.role ? ` — ${item.role}` : ''}`}
                         badge={(
                           <EntryBadge
                             count={feedback.inlineTips.experienceItems[index]?.length ?? 0}
@@ -703,7 +683,7 @@ function CVForm({
                         dragLabel={copy.drag}
                       >
                         <div className="grid gap-4 sm:grid-cols-2">
-                          <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
+                          <FloatingField label={t('experience.role')}>
                             <input
                               type="text"
                               value={item.role}
@@ -712,7 +692,7 @@ function CVForm({
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Yritys' : 'Company'}>
+                          <FloatingField label={t('experience.company')}>
                             <input
                               type="text"
                               spellCheck={false}
@@ -722,7 +702,7 @@ function CVForm({
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Sijainti' : 'Location'}>
+                          <FloatingField label={t('experience.location')}>
                             <input
                               type="text"
                               value={item.location}
@@ -731,31 +711,31 @@ function CVForm({
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Työsuhteen tyyppi' : 'Employment type'} alwaysFloat>
+                          <FloatingField label={t('experience.employmentType')} alwaysFloat>
                             <select
                               value={item.employmentType}
                               onChange={(event) =>
                                 updateArrayItem('experience', index, 'employmentType', event.target.value)
                               }
                             >
-                              <option value="">{isFinnish ? 'Valitse...' : 'Select...'}</option>
+                              <option value="">{t('experience.select')}</option>
                               {EMPLOYMENT_TYPE_OPTIONS.map((option) => (
                                 <option key={option} value={option}>{option}</option>
                               ))}
                             </select>
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Aloituspäivä' : 'Start date'}>
+                          <FloatingField label={t('experience.startDate')}>
                             <input
                               type="text"
                               spellCheck={false}
                               value={item.startDate}
-                              placeholder={isFinnish ? 'esim. tammikuu 2022' : 'e.g. Jan 2022'}
+                              placeholder={t('experience.startDatePlaceholder')}
                               onChange={(event) =>
                                 updateArrayItem('experience', index, 'startDate', event.target.value)
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Lopetuspäivä' : 'End date'}>
+                          <FloatingField label={t('experience.endDate')}>
                             <input
                               type="text"
                               spellCheck={false}
@@ -763,8 +743,8 @@ function CVForm({
                               disabled={item.isCurrent}
                               placeholder={
                                 item.isCurrent
-                                  ? (isFinnish ? 'Nykyinen' : 'Present')
-                                  : (isFinnish ? 'esim. kesäkuu 2023' : 'e.g. Jun 2023')
+                                  ? t('experience.present')
+                                  : (t('experience.endDatePlaceholder'))
                               }
                               onChange={(event) =>
                                 updateArrayItem('experience', index, 'endDate', event.target.value)
@@ -775,7 +755,7 @@ function CVForm({
                         <div className="mt-4">
                           <ToggleSwitch
                             checked={item.isCurrent}
-                            label={isFinnish ? 'Työskentelen täällä tällä hetkellä' : 'I currently work here'}
+                            label={t('experience.isCurrent')}
                             onChange={(checked) => {
                               updateArrayItem('experience', index, 'isCurrent', checked)
                               if (checked) {
@@ -785,7 +765,7 @@ function CVForm({
                           />
                         </div>
                         <div className="mt-4">
-                          <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
+                          <FloatingField label={t('experience.description')}>
                             <AutoGrowTextarea
                               value={item.description}
                               minHeight={160}
@@ -797,14 +777,14 @@ function CVForm({
                         </div>
                         <div className="mt-4">
                           <p className={`mb-2 text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}>
-                            {isFinnish ? 'Saavutukset' : 'Achievements'}
+                            {t('experience.achievements')}
                           </p>
                           <ReorderableListInput
                             items={item.achievements}
                             onChange={(next) => updateArrayItem('experience', index, 'achievements', next)}
-                            placeholder={isFinnish ? 'Kuvaile mitattava tulos' : 'Describe a measurable result'}
-                            addLabel={isFinnish ? 'Lisää saavutus' : 'Add achievement'}
-                            itemAriaLabel={isFinnish ? 'Saavutus' : 'Achievement'}
+                            placeholder={t('experience.achievementPlaceholder')}
+                            addLabel={t('experience.addAchievement')}
+                            itemAriaLabel={t('experience.achievement')}
                             locale={isFinnish ? 'fi' : 'en'}
                             hints={getBulletHints(item.achievements, { locale: isFinnish ? 'fi' : 'en' })}
                             ideas={{ roleText: item.role || formData.title }}
@@ -812,22 +792,20 @@ function CVForm({
                         </div>
                         <div className="mt-4">
                           <p className={`mb-2 text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}>
-                            {isFinnish ? 'Teknologiat' : 'Technologies'}
+                            {t('experience.technologies')}
                           </p>
                           <TagsInput
                             spellCheck={false}
                             value={item.technologies}
                             onChange={(next) => updateArrayItem('experience', index, 'technologies', next)}
-                            placeholder={isFinnish ? 'Lisää teknologia' : 'Add a technology'}
-                            ariaLabel={isFinnish ? 'Teknologiat' : 'Technologies'}
+                            placeholder={t('experience.technologyPlaceholder')}
+                            ariaLabel={t('experience.technologies')}
                             locale={locale}
                           />
                         </div>
                         <div className="mt-4">
                           <p className={`text-xs ${helperTextClasses}`}>
-                            {isFinnish
-                              ? 'Pidä jokainen kohta lyhyenä, toimintakeskeisenä ja helposti silmäiltävänä.'
-                              : 'Keep each entry short, action-oriented, and easy to scan.'}
+                            {t('experience.achievementsHint')}
                           </p>
                         </div>
                         <InlineTipList
@@ -847,7 +825,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('experience')}
           >
-            {isFinnish ? 'Lisää kokemus' : 'Add experience'}
+            {t('experience.addExperience')}
           </button>
         </div>
       </PanelSection>
@@ -856,22 +834,16 @@ function CVForm({
       {templateSectionKeySet.has('education') ? (
       <PanelSection
         id="section-education"
-        title={isFinnish ? 'Koulutus' : 'Education'}
-        description={
-          isFinnish
-            ? 'Lisää tutkinto, oppilaitos ja ajanjakso koulutustaustastasi.'
-            : 'Include degrees, institutions, and timelines for your academic background.'
-        }
+        title={t('education.heading')}
+        description={t('education.intro')}
         theme={theme}
       >
         <div className="space-y-4">
           {formData.education.length === 0 ? (
             <SectionEmptyState
-              title={isFinnish ? 'Lisää ensimmäinen koulutuksesi' : 'Add your first education'}
-              body={isFinnish
-                ? 'Tutkinto, oppilaitos ja ajanjakso riittävät hyvään alkuun.'
-                : 'A degree, institution, and timeline is a great place to start.'}
-              actionLabel={isFinnish ? 'Lisää koulutus' : 'Add education'}
+              title={t('education.emptyTitle')}
+              body={t('education.emptyBody')}
+              actionLabel={t('education.addEducation')}
               onAction={() => addArrayItem('education')}
             />
           ) : (
@@ -892,7 +864,7 @@ function CVForm({
                       <SortableItemCard
                         key={itemKey}
                         id={itemKey}
-                        title={`${isFinnish ? 'Koulutus' : 'Education'} #${index + 1}${item.school ? ` — ${item.school}` : ''}`}
+                        title={`${t('education.heading')} #${index + 1}${item.school ? ` — ${item.school}` : ''}`}
                         isCollapsed={collapsedItems.has(itemKey)}
                         onToggleCollapse={() => toggleItemCollapsed(itemKey)}
                         isHidden={!isSectionItemVisible(sectionItemVisibility, 'education', index)}
@@ -907,7 +879,7 @@ function CVForm({
                         dragLabel={copy.drag}
                       >
                         <div className="grid gap-4 sm:grid-cols-2">
-                          <FloatingField label={isFinnish ? 'Oppilaitos' : 'School'}>
+                          <FloatingField label={t('education.school')}>
                             <input
                               type="text"
                               spellCheck={false}
@@ -917,7 +889,7 @@ function CVForm({
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Tutkinto' : 'Degree'}>
+                          <FloatingField label={t('education.degree')}>
                             <input
                               type="text"
                               value={item.degree}
@@ -926,7 +898,7 @@ function CVForm({
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Sijainti' : 'Location'}>
+                          <FloatingField label={t('education.location')}>
                             <input
                               type="text"
                               value={item.location}
@@ -935,7 +907,7 @@ function CVForm({
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Arvosana (valinnainen)' : 'Grade (optional)'}>
+                          <FloatingField label={t('education.grade')}>
                             <input
                               type="text"
                               spellCheck={false}
@@ -945,30 +917,30 @@ function CVForm({
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Aloituspäivä' : 'Start date'}>
+                          <FloatingField label={t('education.startDate')}>
                             <input
                               type="text"
                               spellCheck={false}
                               value={item.startDate}
-                              placeholder={isFinnish ? 'esim. syyskuu 2018' : 'e.g. Sep 2018'}
+                              placeholder={t('education.startDatePlaceholder')}
                               onChange={(event) =>
                                 updateArrayItem('education', index, 'startDate', event.target.value)
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Lopetuspäivä' : 'End date'}>
+                          <FloatingField label={t('education.endDate')}>
                             <input
                               type="text"
                               spellCheck={false}
                               value={item.endDate}
-                              placeholder={isFinnish ? 'esim. kesäkuu 2022' : 'e.g. Jun 2022'}
+                              placeholder={t('education.endDatePlaceholder')}
                               onChange={(event) =>
                                 updateArrayItem('education', index, 'endDate', event.target.value)
                               }
                             />
                           </FloatingField>
                           <div className="sm:col-span-2">
-                            <FloatingField label={isFinnish ? 'Kunniamaininta (valinnainen)' : 'Honors (optional)'}>
+                            <FloatingField label={t('education.honors')}>
                               <input
                                 type="text"
                                 value={item.honors}
@@ -979,7 +951,7 @@ function CVForm({
                             </FloatingField>
                           </div>
                           <div className="sm:col-span-2">
-                            <FloatingField label={isFinnish ? 'Kurssit (valinnainen)' : 'Relevant coursework (optional)'}>
+                            <FloatingField label={t('education.coursework')}>
                               <input
                                 type="text"
                                 value={item.coursework}
@@ -1002,7 +974,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('education')}
           >
-            {isFinnish ? 'Lisää koulutus' : 'Add education'}
+            {t('education.addEducation')}
           </button>
         </div>
       </PanelSection>
@@ -1011,12 +983,8 @@ function CVForm({
       {templateSectionKeySet.has('coreStrengths') ? (
       <PanelSection
         id="section-coreStrengths"
-        title={isFinnish ? 'Vahvuudet' : 'Core Strengths'}
-        description={
-          isFinnish
-            ? 'Nosta esiin 2-4 ydinvahvuutta lyhyellä kuvauksella.'
-            : 'Highlight 2-4 core strengths with a short supporting line.'
-        }
+        title={t('coreStrengths.heading')}
+        description={t('coreStrengths.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -1025,7 +993,7 @@ function CVForm({
             <div key={`core-strength-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Vahvuus' : 'Strength'} #{index + 1}
+                  {t('coreStrengths.strength')} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -1068,7 +1036,7 @@ function CVForm({
                 </div>
               </div>
               <div className="space-y-4">
-                <FloatingField label={isFinnish ? 'Otsikko' : 'Title'}>
+                <FloatingField label={t('coreStrengths.title')}>
                   <input
                     type="text"
                     value={item.title}
@@ -1077,7 +1045,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
+                <FloatingField label={t('coreStrengths.description')}>
                   <AutoGrowTextarea
                     value={item.description}
                     onChange={(event) =>
@@ -1094,7 +1062,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('coreStrengths')}
           >
-            {isFinnish ? 'Lisää vahvuus' : 'Add strength'}
+            {t('coreStrengths.addStrength')}
           </button>
         </div>
       </PanelSection>
@@ -1103,22 +1071,16 @@ function CVForm({
       {templateSectionKeySet.has('certificates') ? (
       <PanelSection
         id="section-certificates"
-        title={isFinnish ? 'Sertifikaatit' : 'Certificates'}
-        description={
-          isFinnish
-            ? 'Lisää alan sertifikaatit yksinkertaisena listana.'
-            : 'List your professional certifications as a simple bullet list.'
-        }
+        title={t('certificates.heading')}
+        description={t('certificates.intro')}
         theme={theme}
       >
         <div className="space-y-4">
           {formData.certificates.length === 0 ? (
             <SectionEmptyState
-              title={isFinnish ? 'Lisää ensimmäinen sertifikaattisi' : 'Add your first certificate'}
-              body={isFinnish
-                ? 'Ammattisertifikaatit lisäävät uskottavuutta erikoisosaamiseesi.'
-                : 'Professional certifications add credibility to your specialization.'}
-              actionLabel={isFinnish ? 'Lisää sertifikaatti' : 'Add certificate'}
+              title={t('certificates.emptyTitle')}
+              body={t('certificates.emptyBody')}
+              actionLabel={t('certificates.addCertificate')}
               onAction={() => addArrayItem('certificates')}
             />
           ) : (
@@ -1139,7 +1101,7 @@ function CVForm({
                       <SortableItemCard
                         key={itemKey}
                         id={itemKey}
-                        title={`${isFinnish ? 'Sertifikaatti' : 'Certificate'} #${index + 1}${item.name ? ` — ${item.name}` : ''}`}
+                        title={`${t('certificates.certificate')} #${index + 1}${item.name ? ` — ${item.name}` : ''}`}
                         isCollapsed={collapsedItems.has(itemKey)}
                         onToggleCollapse={() => toggleItemCollapsed(itemKey)}
                         isHidden={!isSectionItemVisible(sectionItemVisibility, 'certificates', index)}
@@ -1153,7 +1115,7 @@ function CVForm({
                       >
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div className="sm:col-span-2">
-                            <FloatingField label={isFinnish ? 'Nimi' : 'Name'}>
+                            <FloatingField label={t('certificates.name')}>
                               <input
                                 type="text"
                                 value={item.name}
@@ -1163,7 +1125,7 @@ function CVForm({
                               />
                             </FloatingField>
                           </div>
-                          <FloatingField label={isFinnish ? 'Myöntäjä' : 'Issuer'}>
+                          <FloatingField label={t('certificates.issuer')}>
                             <input
                               type="text"
                               spellCheck={false}
@@ -1173,7 +1135,7 @@ function CVForm({
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Vuosi' : 'Year'}>
+                          <FloatingField label={t('certificates.year')}>
                             <input
                               type="text"
                               spellCheck={false}
@@ -1183,7 +1145,7 @@ function CVForm({
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Vanhenee (valinnainen)' : 'Expiry (optional)'}>
+                          <FloatingField label={t('certificates.expiry')}>
                             <input
                               type="text"
                               spellCheck={false}
@@ -1194,7 +1156,7 @@ function CVForm({
                             />
                           </FloatingField>
                           <div className="sm:col-span-2">
-                            <FloatingField label={isFinnish ? 'Todennuslinkki (valinnainen)' : 'Credential URL (optional)'}>
+                            <FloatingField label={t('certificates.credentialUrl')}>
                               <input
                                 type="url"
                                 spellCheck={false}
@@ -1218,7 +1180,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('certificates')}
           >
-            {isFinnish ? 'Lisää sertifikaatti' : 'Add certificate'}
+            {t('certificates.addCertificate')}
           </button>
         </div>
       </PanelSection>
@@ -1227,22 +1189,16 @@ function CVForm({
       {templateSectionKeySet.has('projects') ? (
       <PanelSection
         id="section-projects"
-        title={isFinnish ? 'Projektit' : 'Projects'}
-        description={
-          isFinnish
-            ? 'Esittele projekteja yhden lauseen kuvauksella ja valinnaisella teknologiapinolla.'
-            : 'Showcase projects with a one-sentence description and an optional tech stack.'
-        }
+        title={t('projects.heading')}
+        description={t('projects.intro')}
         theme={theme}
       >
         <div className="space-y-4">
           {formData.projects.length === 0 ? (
             <SectionEmptyState
-              title={isFinnish ? 'Lisää ensimmäinen projektisi' : 'Add your first project'}
-              body={isFinnish
-                ? 'Yksi hyvin kuvattu projekti riittää näyttämään osaamisesi käytännössä.'
-                : 'One well-described project is enough to show your skills in practice.'}
-              actionLabel={isFinnish ? 'Lisää projekti' : 'Add project'}
+              title={t('projects.emptyTitle')}
+              body={t('projects.emptyBody')}
+              actionLabel={t('projects.addProject')}
               onAction={() => addArrayItem('projects')}
             />
           ) : (
@@ -1263,7 +1219,7 @@ function CVForm({
                       <SortableItemCard
                         key={itemKey}
                         id={itemKey}
-                        title={`${isFinnish ? 'Projekti' : 'Project'} #${index + 1}${item.name ? ` — ${item.name}` : ''}`}
+                        title={`${t('projects.project')} #${index + 1}${item.name ? ` — ${item.name}` : ''}`}
                         isCollapsed={collapsedItems.has(itemKey)}
                         onToggleCollapse={() => toggleItemCollapsed(itemKey)}
                         isHidden={!isSectionItemVisible(sectionItemVisibility, 'projects', index)}
@@ -1280,17 +1236,17 @@ function CVForm({
                         <div className="space-y-4">
                           <div>
                             <p className={`mb-2 text-xs font-semibold uppercase tracking-[0.06em] ${fieldLabelClassName}`}>
-                              {isFinnish ? 'Kuva (valinnainen)' : 'Image (optional)'}
+                              {t('projects.image')}
                             </p>
                             <DragDropUpload
-                              label={isFinnish ? 'Lisää projektikuva' : 'Add a project image'}
-                              hint={isFinnish ? 'JPG tai PNG, enintään 2 Mt' : 'JPG or PNG, up to 2MB'}
+                              label={t('projects.imageUpload')}
+                              hint={t('projects.imageHint')}
                               previewUrl={item.image}
                               onFileSelected={(file) => handleProjectImageUpload(index, file)}
                               onRemove={() => updateArrayItem('projects', index, 'image', '')}
                             />
                           </div>
-                          <FloatingField label={isFinnish ? 'Nimi' : 'Name'}>
+                          <FloatingField label={t('projects.name')}>
                             <input
                               type="text"
                               value={item.name}
@@ -1299,7 +1255,7 @@ function CVForm({
                               }
                             />
                           </FloatingField>
-                          <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
+                          <FloatingField label={t('projects.description')}>
                             <AutoGrowTextarea
                               value={item.description}
                               onChange={(event) =>
@@ -1308,7 +1264,7 @@ function CVForm({
                             />
                           </FloatingField>
                           <div className="grid gap-4 sm:grid-cols-2">
-                            <FloatingField label={isFinnish ? 'Teknologiat (valinnainen)' : 'Tech stack (optional)'}>
+                            <FloatingField label={t('projects.stack')}>
                               <input
                                 type="text"
                                 spellCheck={false}
@@ -1318,7 +1274,7 @@ function CVForm({
                                 }
                               />
                             </FloatingField>
-                            <FloatingField label={isFinnish ? 'Päivämäärä (valinnainen)' : 'Date (optional)'}>
+                            <FloatingField label={t('projects.date')}>
                               <input
                                 type="text"
                                 spellCheck={false}
@@ -1330,7 +1286,7 @@ function CVForm({
                             </FloatingField>
                           </div>
                           <div className="grid gap-4 sm:grid-cols-2">
-                            <FloatingField label={isFinnish ? 'Organisaatio (valinnainen)' : 'Organization (optional)'}>
+                            <FloatingField label={t('projects.organization')}>
                               <input
                                 type="text"
                                 spellCheck={false}
@@ -1340,7 +1296,7 @@ function CVForm({
                                 }
                               />
                             </FloatingField>
-                            <FloatingField label={isFinnish ? 'Liiketoiminnallinen vaikutus (valinnainen)' : 'Business impact (optional)'}>
+                            <FloatingField label={t('projects.impact')}>
                               <input
                                 type="text"
                                 value={item.impact}
@@ -1351,7 +1307,7 @@ function CVForm({
                             </FloatingField>
                           </div>
                           <div className="grid gap-4 sm:grid-cols-2">
-                            <FloatingField label={isFinnish ? 'Tiimin koko (valinnainen)' : 'Team size (optional)'}>
+                            <FloatingField label={t('projects.teamSize')}>
                               <input
                                 type="text"
                                 spellCheck={false}
@@ -1361,7 +1317,7 @@ function CVForm({
                                 }
                               />
                             </FloatingField>
-                            <FloatingField label={isFinnish ? 'Oma panos (valinnainen)' : 'Personal contribution (optional)'}>
+                            <FloatingField label={t('projects.contribution')}>
                               <input
                                 type="text"
                                 value={item.contribution}
@@ -1372,7 +1328,7 @@ function CVForm({
                             </FloatingField>
                           </div>
                           <div className="grid gap-4 sm:grid-cols-2">
-                            <FloatingField label={isFinnish ? 'GitHub-linkki (valinnainen)' : 'GitHub URL (optional)'}>
+                            <FloatingField label={t('projects.githubUrl')}>
                               <input
                                 type="url"
                                 spellCheck={false}
@@ -1382,7 +1338,7 @@ function CVForm({
                                 }
                               />
                             </FloatingField>
-                            <FloatingField label={isFinnish ? 'Demo-linkki (valinnainen)' : 'Demo URL (optional)'}>
+                            <FloatingField label={t('projects.demoUrl')}>
                               <input
                                 type="url"
                                 spellCheck={false}
@@ -1406,7 +1362,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('projects')}
           >
-            {isFinnish ? 'Lisää projekti' : 'Add project'}
+            {t('projects.addProject')}
           </button>
         </div>
       </PanelSection>
@@ -1415,19 +1371,15 @@ function CVForm({
       {templateSectionKeySet.has('languages') ? (
       <PanelSection
         id="section-languages"
-        title={isFinnish ? 'Kielet' : 'Languages'}
-        description={
-          isFinnish
-            ? 'Lisää kielitaitosi ja niiden taso.'
-            : 'List the languages you speak and your fluency level.'
-        }
+        title={t('languages.heading')}
+        description={t('languages.intro')}
         theme={theme}
       >
         <div className="space-y-4">
           <div className="space-y-3">
           {formData.languages.map((item, index) => (
             <div key={`language-${index}`} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
-              <FloatingField label={isFinnish ? 'Kieli' : 'Language'}>
+              <FloatingField label={t('languages.language')}>
                 <input
                   type="text"
                   value={item.language}
@@ -1436,7 +1388,7 @@ function CVForm({
                   }
                 />
               </FloatingField>
-              <FloatingField label={isFinnish ? 'Taso' : 'Level'}>
+              <FloatingField label={t('languages.level')}>
                 <input
                   type="text"
                   value={item.level}
@@ -1467,7 +1419,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('languages')}
           >
-            {isFinnish ? 'Lisää kieli' : 'Add language'}
+            {t('languages.addLanguage')}
           </button>
         </div>
       </PanelSection>
@@ -1476,12 +1428,8 @@ function CVForm({
       {templateSectionKeySet.has('interests') ? (
       <PanelSection
         id="section-interests"
-        title={isFinnish ? 'Kiinnostuksen kohteet' : 'Interests'}
-        description={
-          isFinnish
-            ? 'Muutama lyhyt kiinnostuksen kohde riittää.'
-            : 'A handful of short interests is enough to add personality.'
-        }
+        title={t('interests.heading')}
+        description={t('interests.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -1496,8 +1444,8 @@ function CVForm({
                 onChange={(event) =>
                   updateArrayItem('interests', index, 'name', event.target.value)
                 }
-                aria-label={`${isFinnish ? 'Kiinnostuksen kohde' : 'Interest'} ${index + 1}`}
-                placeholder={isFinnish ? 'Valokuvaus' : 'Photography'}
+                aria-label={`${t('interests.interest')} ${index + 1}`}
+                placeholder={t('interests.placeholder')}
               />
               <button
                 type="button"
@@ -1521,7 +1469,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('interests')}
           >
-            {isFinnish ? 'Lisää kiinnostuksen kohde' : 'Add interest'}
+            {t('interests.addInterest')}
           </button>
         </div>
       </PanelSection>
@@ -1530,12 +1478,8 @@ function CVForm({
       {templateSectionKeySet.has('achievements') ? (
       <PanelSection
         id="section-achievements"
-        title={isFinnish ? 'Saavutukset' : 'Achievements'}
-        description={
-          isFinnish
-            ? 'Hackathonit, palkinnot, patentit ja puheenvuorot.'
-            : 'Hackathons, awards, patents, and speaking engagements.'
-        }
+        title={t('achievements.heading')}
+        description={t('achievements.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -1544,7 +1488,7 @@ function CVForm({
             <div key={`achievement-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Saavutus' : 'Achievement'} #{index + 1}
+                  {t('achievements.achievement')} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -1580,7 +1524,7 @@ function CVForm({
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <FloatingField label={isFinnish ? 'Otsikko' : 'Title'}>
+                <FloatingField label={t('achievements.title')}>
                   <input
                     type="text"
                     value={item.title}
@@ -1589,7 +1533,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Vuosi' : 'Year'}>
+                <FloatingField label={t('achievements.year')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -1600,7 +1544,7 @@ function CVForm({
                   />
                 </FloatingField>
                 <div className="sm:col-span-2">
-                  <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
+                  <FloatingField label={t('achievements.description')}>
                     <AutoGrowTextarea
                       value={item.description}
                       onChange={(event) =>
@@ -1618,7 +1562,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('achievements')}
           >
-            {isFinnish ? 'Lisää saavutus' : 'Add achievement'}
+            {t('achievements.addAchievement')}
           </button>
         </div>
       </PanelSection>
@@ -1627,12 +1571,8 @@ function CVForm({
       {templateSectionKeySet.has('openSource') ? (
       <PanelSection
         id="section-openSource"
-        title={isFinnish ? 'Avoin lähdekoodi' : 'Open Source'}
-        description={
-          isFinnish
-            ? 'Nosta esiin omat avoimen lähdekoodin projektisi.'
-            : 'Highlight your open-source repositories and contributions.'
-        }
+        title={t('openSource.heading')}
+        description={t('openSource.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -1641,7 +1581,7 @@ function CVForm({
             <div key={`open-source-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Repositorio' : 'Repository'} #{index + 1}
+                  {t('openSource.repository')} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -1678,7 +1618,7 @@ function CVForm({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <FloatingField label={isFinnish ? 'Nimi' : 'Repository name'}>
+                  <FloatingField label={t('openSource.repositoryName')}>
                     <input
                       type="text"
                       value={item.name}
@@ -1689,7 +1629,7 @@ function CVForm({
                   </FloatingField>
                 </div>
                 <div className="sm:col-span-2">
-                  <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
+                  <FloatingField label={t('openSource.description')}>
                     <AutoGrowTextarea
                       value={item.description}
                       onChange={(event) =>
@@ -1698,7 +1638,7 @@ function CVForm({
                     />
                   </FloatingField>
                 </div>
-                <FloatingField label={isFinnish ? 'Kieli' : 'Language'}>
+                <FloatingField label={t('openSource.language')}>
                   <input
                     type="text"
                     value={item.language}
@@ -1707,7 +1647,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Linkki' : 'URL'}>
+                <FloatingField label={t('openSource.url')}>
                   <input
                     type="url"
                     spellCheck={false}
@@ -1717,7 +1657,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Tähdet' : 'Stars'}>
+                <FloatingField label={t('openSource.stars')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -1727,7 +1667,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Haarautumat' : 'Forks'}>
+                <FloatingField label={t('openSource.forks')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -1746,7 +1686,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('openSource')}
           >
-            {isFinnish ? 'Lisää repositorio' : 'Add repository'}
+            {t('openSource.addRepository')}
           </button>
         </div>
       </PanelSection>
@@ -1755,12 +1695,8 @@ function CVForm({
       {templateSectionKeySet.has('publications') ? (
       <PanelSection
         id="section-publications"
-        title={isFinnish ? 'Julkaisut' : 'Publications'}
-        description={
-          isFinnish
-            ? 'Artikkelit, blogikirjoitukset tai akateemiset julkaisut.'
-            : 'Articles, blog posts, or academic publications.'
-        }
+        title={t('publications.heading')}
+        description={t('publications.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -1769,7 +1705,7 @@ function CVForm({
             <div key={`publication-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Julkaisu' : 'Publication'} #{index + 1}
+                  {t('publications.publication')} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -1806,7 +1742,7 @@ function CVForm({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <FloatingField label={isFinnish ? 'Otsikko' : 'Title'}>
+                  <FloatingField label={t('publications.title')}>
                     <input
                       type="text"
                       value={item.title}
@@ -1816,7 +1752,7 @@ function CVForm({
                     />
                   </FloatingField>
                 </div>
-                <FloatingField label={isFinnish ? 'Julkaisija' : 'Publisher'}>
+                <FloatingField label={t('publications.publisher')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -1826,7 +1762,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Vuosi' : 'Year'}>
+                <FloatingField label={t('publications.year')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -1837,7 +1773,7 @@ function CVForm({
                   />
                 </FloatingField>
                 <div className="sm:col-span-2">
-                  <FloatingField label={isFinnish ? 'Linkki (valinnainen)' : 'URL (optional)'}>
+                  <FloatingField label={t('publications.url')}>
                     <input
                       type="url"
                       spellCheck={false}
@@ -1857,7 +1793,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('publications')}
           >
-            {isFinnish ? 'Lisää julkaisu' : 'Add publication'}
+            {t('publications.addPublication')}
           </button>
         </div>
       </PanelSection>
@@ -1866,12 +1802,8 @@ function CVForm({
       {templateSectionKeySet.has('links') ? (
       <PanelSection
         id="section-links"
-        title={isFinnish ? 'Linkit' : 'Links'}
-        description={
-          isFinnish
-            ? 'Lisää alustat ja portfolio-linkit, jotka tukevat CV:täsi.'
-            : 'Add the platforms and portfolio links that support your CV.'
-        }
+        title={t('links.heading')}
+        description={t('links.intro')}
         theme={theme}
       >
         {(() => {
@@ -1928,10 +1860,8 @@ function CVForm({
                   onClick={() => setShowAllLinks((value) => !value)}
                 >
                   {showAllLinks
-                    ? isFinnish ? 'Näytä vähemmän alustoja' : 'Show fewer platforms'
-                    : isFinnish
-                      ? `Näytä lisää alustoja (${hiddenCount})`
-                      : `Show more platforms (${hiddenCount})`}
+                    ? t('links.showFewerPlatforms')
+                    : t('links.showMorePlatforms', { count: hiddenCount })}
                 </button>
               ) : null}
             </>
@@ -1943,12 +1873,8 @@ function CVForm({
       {templateSectionKeySet.has('leadership') ? (
       <PanelSection
         id="section-leadership"
-        title={isFinnish ? 'Johtamiskokemus' : 'Leadership Experience'}
-        description={
-          isFinnish
-            ? 'Hallitusjäsenyydet, valiokunnat, mentorointi ja strategiset aloitteet.'
-            : 'Board memberships, committee participation, mentoring, and strategic initiatives.'
-        }
+        title={t('leadership.heading')}
+        description={t('leadership.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -1957,7 +1883,7 @@ function CVForm({
             <div key={`leadership-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Rooli' : 'Role'} #{index + 1}
+                  {t('leadership.role')} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -1994,7 +1920,7 @@ function CVForm({
               </div>
               <div className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
+                  <FloatingField label={t('leadership.role')}>
                     <input
                       type="text"
                       value={item.role}
@@ -2003,7 +1929,7 @@ function CVForm({
                       }
                     />
                   </FloatingField>
-                  <FloatingField label={isFinnish ? 'Organisaatio' : 'Organization'}>
+                  <FloatingField label={t('leadership.organization')}>
                     <input
                       type="text"
                       spellCheck={false}
@@ -2014,7 +1940,7 @@ function CVForm({
                     />
                   </FloatingField>
                 </div>
-                <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
+                <FloatingField label={t('leadership.description')}>
                   <AutoGrowTextarea
                     value={item.description}
                     onChange={(event) =>
@@ -2023,7 +1949,7 @@ function CVForm({
                   />
                 </FloatingField>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <FloatingField label={isFinnish ? 'Alkoi' : 'Start date'}>
+                  <FloatingField label={t('leadership.startDate')}>
                     <input
                       type="text"
                       spellCheck={false}
@@ -2033,7 +1959,7 @@ function CVForm({
                       }
                     />
                   </FloatingField>
-                  <FloatingField label={isFinnish ? 'Päättyi' : 'End date'}>
+                  <FloatingField label={t('leadership.endDate')}>
                     <input
                       type="text"
                       spellCheck={false}
@@ -2053,7 +1979,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('leadership')}
           >
-            {isFinnish ? 'Lisää johtamiskokemus' : 'Add leadership role'}
+            {t('leadership.addLeadershipRole')}
           </button>
         </div>
       </PanelSection>
@@ -2062,12 +1988,8 @@ function CVForm({
       {templateSectionKeySet.has('memberships') ? (
       <PanelSection
         id="section-memberships"
-        title={isFinnish ? 'Ammattijäsenyydet' : 'Professional Memberships'}
-        description={
-          isFinnish
-            ? 'Esimerkiksi ISACA, ISC², IEEE, ACM tai OWASP.'
-            : 'For example ISACA, ISC², IEEE, ACM, or OWASP.'
-        }
+        title={t('memberships.heading')}
+        description={t('memberships.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -2076,7 +1998,7 @@ function CVForm({
             <div key={`membership-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Jäsenyys' : 'Membership'} #{index + 1}
+                  {t('memberships.membership')} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -2113,7 +2035,7 @@ function CVForm({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <FloatingField label={isFinnish ? 'Organisaatio' : 'Organization'}>
+                  <FloatingField label={t('memberships.organization')}>
                     <input
                       type="text"
                       spellCheck={false}
@@ -2124,7 +2046,7 @@ function CVForm({
                     />
                   </FloatingField>
                 </div>
-                <FloatingField label={isFinnish ? 'Rooli (valinnainen)' : 'Role (optional)'}>
+                <FloatingField label={t('memberships.role')}>
                   <input
                     type="text"
                     value={item.role}
@@ -2133,7 +2055,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Vuosi (valinnainen)' : 'Year (optional)'}>
+                <FloatingField label={t('memberships.year')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -2152,7 +2074,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('memberships')}
           >
-            {isFinnish ? 'Lisää jäsenyys' : 'Add membership'}
+            {t('memberships.addMembership')}
           </button>
         </div>
       </PanelSection>
@@ -2161,12 +2083,8 @@ function CVForm({
       {templateSectionKeySet.has('speaking') ? (
       <PanelSection
         id="section-speaking"
-        title={isFinnish ? 'Esiintymiset' : 'Speaking'}
-        description={
-          isFinnish
-            ? 'Konferenssit, puhetilaisuudet ja esitykset.'
-            : 'Conferences, talks, and speaking engagements.'
-        }
+        title={t('speaking.heading')}
+        description={t('speaking.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -2175,7 +2093,7 @@ function CVForm({
             <div key={`speaking-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Esiintyminen' : 'Speaking engagement'} #{index + 1}
+                  {t('speaking.speakingEngagement')} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -2211,7 +2129,7 @@ function CVForm({
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <FloatingField label={isFinnish ? 'Konferenssi' : 'Conference'}>
+                <FloatingField label={t('speaking.conference')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -2221,7 +2139,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Päivämäärä' : 'Date'}>
+                <FloatingField label={t('speaking.date')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -2232,7 +2150,7 @@ function CVForm({
                   />
                 </FloatingField>
                 <div className="sm:col-span-2">
-                  <FloatingField label={isFinnish ? 'Aihe' : 'Topic'}>
+                  <FloatingField label={t('speaking.topic')}>
                     <input
                       type="text"
                       value={item.topic}
@@ -2243,7 +2161,7 @@ function CVForm({
                   </FloatingField>
                 </div>
                 <div className="sm:col-span-2">
-                  <FloatingField label={isFinnish ? 'Yleisö (valinnainen)' : 'Audience (optional)'}>
+                  <FloatingField label={t('speaking.audience')}>
                     <input
                       type="text"
                       value={item.audience}
@@ -2262,7 +2180,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('speaking')}
           >
-            {isFinnish ? 'Lisää esiintyminen' : 'Add speaking engagement'}
+            {t('speaking.addSpeakingEngagement')}
           </button>
         </div>
       </PanelSection>
@@ -2271,12 +2189,8 @@ function CVForm({
       {templateSectionKeySet.has('volunteering') ? (
       <PanelSection
         id="section-volunteering"
-        title={isFinnish ? 'Vapaaehtoistyö' : 'Volunteering'}
-        description={
-          isFinnish
-            ? 'Organisaatiot, roolit ja saavutukset vapaaehtoistyössä.'
-            : 'Organizations, roles, and achievements from volunteer work.'
-        }
+        title={t('volunteering.heading')}
+        description={t('volunteering.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -2285,7 +2199,7 @@ function CVForm({
             <div key={`volunteering-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Vapaaehtoistyö' : 'Volunteer role'} #{index + 1}
+                  {t('volunteering.volunteerRole')} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -2321,7 +2235,7 @@ function CVForm({
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <FloatingField label={isFinnish ? 'Organisaatio' : 'Organization'}>
+                <FloatingField label={t('volunteering.organization')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -2331,7 +2245,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
+                <FloatingField label={t('volunteering.role')}>
                   <input
                     type="text"
                     value={item.role}
@@ -2341,7 +2255,7 @@ function CVForm({
                   />
                 </FloatingField>
                 <div className="sm:col-span-2">
-                  <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
+                  <FloatingField label={t('volunteering.description')}>
                     <AutoGrowTextarea
                       value={item.description}
                       onChange={(event) =>
@@ -2359,7 +2273,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('volunteering')}
           >
-            {isFinnish ? 'Lisää vapaaehtoistyö' : 'Add volunteer role'}
+            {t('volunteering.addVolunteerRole')}
           </button>
         </div>
       </PanelSection>
@@ -2368,12 +2282,8 @@ function CVForm({
       {templateSectionKeySet.has('internships') ? (
       <PanelSection
         id="section-internships"
-        title={isFinnish ? 'Harjoittelut' : 'Internships'}
-        description={
-          isFinnish
-            ? 'Yritys, rooli, kesto, saavutukset ja käytetyt teknologiat.'
-            : 'Company, role, duration, achievements, and technologies used.'
-        }
+        title={t('internships.heading')}
+        description={t('internships.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -2382,7 +2292,7 @@ function CVForm({
             <div key={`internship-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Harjoittelu' : 'Internship'} #{index + 1}
+                  {t('internships.internship')} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -2418,7 +2328,7 @@ function CVForm({
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
+                <FloatingField label={t('internships.role')}>
                   <input
                     type="text"
                     value={item.role}
@@ -2427,7 +2337,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Yritys' : 'Company'}>
+                <FloatingField label={t('internships.company')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -2437,7 +2347,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Sijainti' : 'Location'}>
+                <FloatingField label={t('internships.location')}>
                   <input
                     type="text"
                     value={item.location}
@@ -2446,7 +2356,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'}>
+                <FloatingField label={t('internships.technologies')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -2456,7 +2366,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Alkoi' : 'Start date'}>
+                <FloatingField label={t('internships.startDate')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -2466,7 +2376,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Päättyi' : 'End date'}>
+                <FloatingField label={t('internships.endDate')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -2477,7 +2387,7 @@ function CVForm({
                   />
                 </FloatingField>
                 <div className="sm:col-span-2">
-                  <FloatingField label={isFinnish ? 'Kuvaus' : 'Description'}>
+                  <FloatingField label={t('internships.description')}>
                     <AutoGrowTextarea
                       value={item.description}
                       onChange={(event) =>
@@ -2495,7 +2405,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('internships')}
           >
-            {isFinnish ? 'Lisää harjoittelu' : 'Add internship'}
+            {t('internships.addInternship')}
           </button>
         </div>
       </PanelSection>
@@ -2504,12 +2414,8 @@ function CVForm({
       {templateSectionKeySet.has('caseStudies') ? (
       <PanelSection
         id="section-caseStudies"
-        title={isFinnish ? 'Tapaustutkimukset' : 'Case Studies'}
-        description={
-          isFinnish
-            ? 'Ongelma, ratkaisu, teknologiat, tulos ja opitut asiat yhdestä projektista.'
-            : 'Problem, solution, technologies, outcome, and lessons learned from one project.'
-        }
+        title={t('caseStudies.heading')}
+        description={t('caseStudies.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -2518,7 +2424,7 @@ function CVForm({
             <div key={`case-study-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Tapaustutkimus' : 'Case Study'} #{index + 1}
+                  {t('caseStudies.caseStudy')} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -2554,7 +2460,7 @@ function CVForm({
                 </div>
               </div>
               <div className="space-y-4">
-                <FloatingField label={isFinnish ? 'Otsikko' : 'Title'}>
+                <FloatingField label={t('caseStudies.title')}>
                   <input
                     type="text"
                     value={item.title}
@@ -2563,7 +2469,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Ongelma' : 'Problem'}>
+                <FloatingField label={t('caseStudies.problem')}>
                   <AutoGrowTextarea
                     value={item.problem}
                     onChange={(event) =>
@@ -2571,7 +2477,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Ratkaisu' : 'Solution'}>
+                <FloatingField label={t('caseStudies.solution')}>
                   <AutoGrowTextarea
                     value={item.solution}
                     onChange={(event) =>
@@ -2579,7 +2485,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Teknologiat (valinnainen)' : 'Technologies (optional)'}>
+                <FloatingField label={t('caseStudies.technologies')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -2589,7 +2495,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Tulos' : 'Outcome'}>
+                <FloatingField label={t('caseStudies.outcome')}>
                   <AutoGrowTextarea
                     value={item.outcome}
                     onChange={(event) =>
@@ -2597,7 +2503,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Opitut asiat (valinnainen)' : 'Lessons learned (optional)'}>
+                <FloatingField label={t('caseStudies.lessons')}>
                   <AutoGrowTextarea
                     value={item.lessons}
                     onChange={(event) =>
@@ -2614,7 +2520,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('caseStudies')}
           >
-            {isFinnish ? 'Lisää tapaustutkimus' : 'Add case study'}
+            {t('caseStudies.addCaseStudy')}
           </button>
         </div>
       </PanelSection>
@@ -2623,12 +2529,8 @@ function CVForm({
       {templateSectionKeySet.has('testimonials') ? (
       <PanelSection
         id="section-testimonials"
-        title={isFinnish ? 'Suositukset' : 'Testimonials'}
-        description={
-          isFinnish
-            ? 'Yksi tai kaksi lyhyttä suositusta asiakkaalta, esimieheltä tai mentorilta.'
-            : 'One or two short recommendations from a client, manager, or mentor.'
-        }
+        title={t('testimonials.heading')}
+        description={t('testimonials.intro')}
         theme={theme}
       >
         <div className="space-y-4">
@@ -2637,7 +2539,7 @@ function CVForm({
             <div key={`testimonial-${index}`} className={itemCardClasses}>
               <div className="mb-4 flex items-center justify-between gap-4">
                 <p className={`text-sm font-medium ${itemHeadingClasses}`}>
-                  {isFinnish ? 'Suositus' : 'Testimonial'} #{index + 1}
+                  {t('testimonials.testimonial')} #{index + 1}
                 </p>
                 <div className="flex flex-wrap justify-end gap-2">
                   <button
@@ -2674,7 +2576,7 @@ function CVForm({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <FloatingField label={isFinnish ? 'Lainaus' : 'Quote'}>
+                  <FloatingField label={t('testimonials.quote')}>
                     <AutoGrowTextarea
                       value={item.quote}
                       onChange={(event) =>
@@ -2683,7 +2585,7 @@ function CVForm({
                     />
                   </FloatingField>
                 </div>
-                <FloatingField label={isFinnish ? 'Nimi' : 'Author'}>
+                <FloatingField label={t('testimonials.author')}>
                   <input
                     type="text"
                     spellCheck={false}
@@ -2693,7 +2595,7 @@ function CVForm({
                     }
                   />
                 </FloatingField>
-                <FloatingField label={isFinnish ? 'Rooli' : 'Role'}>
+                <FloatingField label={t('testimonials.role')}>
                   <input
                     type="text"
                     value={item.role}
@@ -2711,7 +2613,7 @@ function CVForm({
             className={actionButtonClasses}
             onClick={() => addArrayItem('testimonials')}
           >
-            {isFinnish ? 'Lisää suositus' : 'Add testimonial'}
+            {t('testimonials.addTestimonial')}
           </button>
         </div>
       </PanelSection>

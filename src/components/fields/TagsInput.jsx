@@ -3,6 +3,7 @@ import { useCvTextProps } from '../cvLanguageContext'
 import { X } from 'lucide-react'
 
 import InlineTagEditor from './InlineTagEditor'
+import { form } from '../../i18n/form'
 
 function TagsInput({
   value = [],
@@ -14,7 +15,7 @@ function TagsInput({
   spellCheck,
 }) {
   const cvTextProps = useCvTextProps({ spellCheck })
-  const isFinnish = locale === 'fi'
+  const t = (key, vars) => form.t(locale, key, vars)
   const [draft, setDraft] = useState('')
   const [editingIndex, setEditingIndex] = useState(null)
 
@@ -108,16 +109,16 @@ function TagsInput({
               value={tag}
               onCommit={(text) => renameAt(index, text)}
               onDone={() => setEditingIndex(null)}
-              ariaLabel={isFinnish ? `Muokkaa: ${tag}` : `Edit ${tag}`}
-              duplicateMessage={isFinnish ? 'Tämä on jo listalla.' : 'Already listed.'}
+              ariaLabel={t('tags.edit', { tag })}
+              duplicateMessage={t('tags.duplicate')}
             />
           ) : (
             <button
               type="button"
               className="tags-input__label"
               onClick={() => setEditingIndex(index)}
-              aria-label={isFinnish ? `Muokkaa: ${tag}` : `Edit ${tag}`}
-              title={isFinnish ? 'Muokkaa' : 'Edit'}
+              aria-label={t('tags.edit', { tag })}
+              title={t('tags.editTitle')}
             >
               {tag}
             </button>
@@ -126,7 +127,7 @@ function TagsInput({
             type="button"
             className="tags-input__remove"
             onClick={() => removeAt(index)}
-            aria-label={isFinnish ? `Poista: ${tag}` : `Remove ${tag}`}
+            aria-label={t('tags.remove', { tag })}
           >
             <X size={12} strokeWidth={2.5} aria-hidden="true" />
           </button>
