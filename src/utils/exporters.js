@@ -11,6 +11,7 @@ import { splitCoverLetterParagraphs } from './coverLetter'
 import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shared'
 import { collectPdfTextLayer, drawPdfTextLayer, placePdfTextLayer } from './pdfTextLayer'
 import { findLastPageStretchRow, isSliceBlank, measureQuietRows, paintFullBleedPage, quietRunLength, snapCutToQuietRow } from './pdfPageCanvas'
+import { exportsText } from '../i18n/exports/index.js'
 
 const PDF_MODES = {
   designer: {
@@ -229,41 +230,41 @@ async function waitForPreviewVariant(previewElement, expectedVariant, maxWaitMs 
 }
 
 export function createExportCopy(locale = 'en') {
-  const isFinnish = locale === 'fi'
+  const t = (key) => exportsText.t(locale, key)
 
   return {
-    lang: isFinnish ? 'fi' : 'en',
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    educationEntry: isFinnish ? 'Koulutusmerkintä' : 'Education entry',
-    about: isFinnish ? 'Esittely' : 'About',
-    experience: isFinnish ? 'Kokemus' : 'Experience',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    skills: isFinnish ? 'Taidot' : 'Skills',
-    links: isFinnish ? 'Linkit' : 'Links',
-    coreStrengths: isFinnish ? 'Vahvuudet' : 'Core Strengths',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
-    projects: isFinnish ? 'Projektit' : 'Projects',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
-    achievements: isFinnish ? 'Saavutukset' : 'Achievements',
-    openSource: isFinnish ? 'Avoin lähdekoodi' : 'Open Source',
-    publications: isFinnish ? 'Julkaisut' : 'Publications',
-    leadership: isFinnish ? 'Johtamiskokemus' : 'Leadership Experience',
-    memberships: isFinnish ? 'Ammattijäsenyydet' : 'Professional Memberships',
-    speaking: isFinnish ? 'Esiintymiset' : 'Speaking',
-    volunteering: isFinnish ? 'Vapaaehtoistyö' : 'Volunteering',
-    internships: isFinnish ? 'Harjoittelut' : 'Internships',
-    caseStudies: isFinnish ? 'Tapaustutkimukset' : 'Case Studies',
-    testimonials: isFinnish ? 'Suositukset' : 'Testimonials',
-    problem: isFinnish ? 'Ongelma' : 'Problem',
-    solution: isFinnish ? 'Ratkaisu' : 'Solution',
-    technologies: isFinnish ? 'Teknologiat' : 'Technologies',
-    outcome: isFinnish ? 'Tulos' : 'Outcome',
-    lessonsLearned: isFinnish ? 'Opitut asiat' : 'Lessons Learned',
+    lang: locale === 'fi' ? 'fi' : 'en',
+    untitledRole: t('placeholders.untitledRole'),
+    educationEntry: t('placeholders.educationEntry'),
+    about: t('sections.about'),
+    experience: t('sections.experience'),
+    education: t('sections.education'),
+    skills: t('sections.skills'),
+    links: t('sections.links'),
+    coreStrengths: t('sections.coreStrengths'),
+    certificates: t('sections.certificates'),
+    projects: t('sections.projects'),
+    languages: t('sections.languages'),
+    interests: t('sections.interests'),
+    achievements: t('sections.achievements'),
+    openSource: t('sections.openSource'),
+    publications: t('sections.publications'),
+    leadership: t('sections.leadership'),
+    memberships: t('sections.memberships'),
+    speaking: t('sections.speaking'),
+    volunteering: t('sections.volunteering'),
+    internships: t('sections.internships'),
+    caseStudies: t('sections.caseStudies'),
+    testimonials: t('sections.testimonials'),
+    problem: t('caseStudy.problem'),
+    solution: t('caseStudy.solution'),
+    technologies: t('caseStudy.technologies'),
+    outcome: t('caseStudy.outcome'),
+    lessonsLearned: t('caseStudy.lessonsLearned'),
     // As the templates word them (CVPreview.jsx, GraduateShowcase.jsx).
-    present: isFinnish ? 'Nykyinen' : 'Present',
-    expires: isFinnish ? 'Vanhenee' : 'Expires',
-    cv: isFinnish ? 'CV' : 'CV',
+    present: t('dates.present'),
+    expires: t('certificate.expires'),
+    cv: t('documentTitle'),
   }
 }
 

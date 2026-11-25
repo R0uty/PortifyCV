@@ -304,11 +304,9 @@ const MIGRATION_PENDING = new Set([
   'src/pages/TemplateDetailPage.jsx',
   'src/utils/atsScore.js',
   'src/utils/badge.js',
-  'src/utils/coverLetter.js',
   'src/utils/cvFeedback.js',
   'src/utils/cvLibrary.js',
   'src/utils/cvTextImport.js',
-  'src/utils/exporters.js',
   'src/utils/profilePhoto.js',
   'src/utils/sectionSchema.js',
 ])

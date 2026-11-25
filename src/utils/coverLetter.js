@@ -3,6 +3,7 @@ import { createEmptyLinks } from './cvForm'
 import { createCvSnapshot } from './cvSnapshot'
 import { matchJobAd } from './jobMatch'
 import { formatLinkDisplayValue } from './shared'
+import { letterText } from '../i18n/letter/index.js'
 
 /** @typedef {import('../types/cv').CvData} CvData */
 
@@ -16,13 +17,13 @@ function joinWithAnd(items, locale) {
   }
 
   if (items.length === 2) {
-    return locale === 'fi' ? `${items[0]} ja ${items[1]}` : `${items[0]} and ${items[1]}`
+    return letterText.t(locale, 'join.pair', { first: items[0], second: items[1] })
   }
 
   const head = items.slice(0, -1).join(', ')
   const last = items[items.length - 1]
 
-  return locale === 'fi' ? `${head} ja ${last}` : `${head}, and ${last}`
+  return letterText.t(locale, 'join.series', { head, last })
 }
 
 /**
@@ -33,50 +34,34 @@ function joinWithAnd(items, locale) {
  * @param {{ locale: 'en' | 'fi', companyName: string, roleTitle: string, hiringManagerName: string, jobAd?: string }} options
  */
 function buildParagraphs(snapshot, options, snapshotSource) {
-  const isFinnish = options.locale === 'fi'
+  const { locale } = options
+  const t = (key, vars) => letterText.t(locale, key, vars)
   const companyName = trimValue(options.companyName)
   const roleTitle = trimValue(options.roleTitle) || snapshot.title
   const hiringManagerName = trimValue(options.hiringManagerName)
   const latestExperience = snapshot.experience[0]
   const topSkills = snapshot.skills.slice(0, 6)
 
-  const greeting = isFinnish
-    ? `Hyvä ${hiringManagerName || 'rekrytoija'},`
-    : `Dear ${hiringManagerName || 'Hiring Manager'},`
+  const greeting = hiringManagerName
+    ? t('greeting.named', { name: hiringManagerName })
+    : t('greeting.unnamed')
 
-  const openingRole = isFinnish
-    ? roleTitle
-      ? `avoinna olevaa ${roleTitle} -tehtävää`
-      : 'avoinna olevaa tehtävää'
-    : roleTitle
-      ? `the ${roleTitle} position`
-      : 'this position'
-  const openingCompany = companyName
-    ? isFinnish
-      ? ` yrityksessä ${companyName}`
-      : ` at ${companyName}`
-    : ''
-  const openingIntro = isFinnish
-    ? `Haen ${openingRole}${openingCompany}.`
-    : `I'm writing to apply for ${openingRole}${openingCompany}.`
+  const openingVars = { role: roleTitle, company: companyName }
+  const openingIntro = roleTitle
+    ? t(companyName ? 'opening.roleAtCompany' : 'opening.role', openingVars)
+    : t(companyName ? 'opening.company' : 'opening.plain', openingVars)
   const opening = [openingIntro, snapshot.about].filter(Boolean).join(' ')
 
   let experienceParagraph = ''
 
   if (latestExperience && (latestExperience.role || latestExperience.company)) {
-    const roleCompany = [latestExperience.role, latestExperience.company].filter(Boolean).join(isFinnish ? ' yrityksessä ' : ' at ')
+    const roleCompany = latestExperience.role && latestExperience.company
+      ? t('experience.roleAtCompany', { role: latestExperience.role, company: latestExperience.company })
+      : latestExperience.role || latestExperience.company
     const detail = latestExperience.achievements[0] || latestExperience.description
 
     if (roleCompany && detail) {
-      const lead = isFinnish
-        ? latestExperience.isCurrent
-          ? `Nykyisessä roolissani ${roleCompany}`
-          : `Edellisessä roolissani ${roleCompany}`
-        : latestExperience.isCurrent
-          ? `In my current role as ${roleCompany}`
-          : `In my most recent role as ${roleCompany}`
-
-      experienceParagraph = `${lead}: ${detail}`
+      experienceParagraph = t(latestExperience.isCurrent ? 'experience.current' : 'experience.previous', { roleCompany, detail })
     }
   }
 
@@ -86,29 +71,16 @@ function buildParagraphs(snapshot, options, snapshotSource) {
     : []
 
   if (adTerms.length > 0) {
-    skillsParagraph = isFinnish
-      ? `Kokemukseni kattaa sen, mitä tehtävässä haetaan: ${joinWithAnd(adTerms, 'fi')}.`
-      : `My experience covers what this role asks for: ${joinWithAnd(adTerms, 'en')}.`
+    skillsParagraph = t('skills.fromAd', { terms: joinWithAnd(adTerms, locale) })
   } else if (topSkills.length > 0) {
-    skillsParagraph = isFinnish
-      ? `Osaamiseeni kuuluu muun muassa ${joinWithAnd(topSkills, 'fi')}.`
-      : `My background includes ${joinWithAnd(topSkills, 'en')}.`
+    skillsParagraph = t('skills.fromCv', { skills: joinWithAnd(topSkills, locale) })
   }
 
-  const closingCompany = companyName
-    ? isFinnish
-      ? `yritystänne ${companyName}`
-      : companyName
-    : isFinnish
-      ? 'tiimiänne'
-      : 'your team'
-  const closing = isFinnish
-    ? `Keskustelen mielelläni siitä, miten kokemukseni voisi hyödyttää ${closingCompany}. Kiitos ajastanne ja harkinnastanne.`
-    : `I'd welcome the opportunity to discuss how my experience could contribute to ${closingCompany}. Thank you for your time and consideration.`
+  const closing = companyName
+    ? t('closing.company', { company: companyName })
+    : t('closing.team')
 
-  const signOff = isFinnish
-    ? `Ystävällisin terveisin,\n${snapshot.fullName}`
-    : `Sincerely,\n${snapshot.fullName}`
+  const signOff = t('signOff', { name: snapshot.fullName })
 
   return [greeting, ...[opening, experienceParagraph, skillsParagraph, closing].filter(Boolean), signOff]
 }
