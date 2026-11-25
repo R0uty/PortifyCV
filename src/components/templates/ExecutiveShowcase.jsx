@@ -41,6 +41,7 @@ import {
   createSectionRouter,
 } from './shared'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -209,8 +210,8 @@ export default function ExecutiveShowcase({
   const showExecutiveTagline = showcaseConfig.showExecutiveTagline !== false
   const showMetrics = showcaseConfig.showMetrics !== false
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Toimitusjohtaja' : 'Chief Executive')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
+  const title = snapshot.title || cv.t(locale, 'titleFallbacks.chiefExecutive')
   const tagline = showExecutiveTagline ? snapshot.tagline : ''
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
@@ -218,9 +219,7 @@ export default function ExecutiveShowcase({
     templateConfig.id,
   )
   const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi tulee tähän.'
-      : 'Your executive summary goes here.')
+    || cv.t(locale, 'placeholders.executiveSummary')
 
   const personalContactItems = [
     ['email', snapshot.email],
@@ -228,9 +227,9 @@ export default function ExecutiveShowcase({
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const directEditContactFields = [
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
 
   const linkEntries = Object.entries(snapshot.links)
@@ -262,23 +261,23 @@ export default function ExecutiveShowcase({
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
-    profile: isFinnish ? 'Johtajaprofiili' : 'Executive Profile',
-    experience: isFinnish ? 'Työkokemus' : 'Professional Experience',
-    leadership: isFinnish ? 'Johtamiskokemus' : 'Leadership Experience',
-    projects: isFinnish ? 'Strategiset hankkeet' : 'Major Projects',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    coreStrengths: isFinnish ? 'Ydinosaaminen' : 'Core Competencies',
-    skills: isFinnish ? 'Johtamistaidot' : 'Executive Skills',
-    certificates: isFinnish ? 'Sertifioinnit' : 'Certifications',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    memberships: isFinnish ? 'Ammattijäsenyydet' : 'Professional Memberships',
-    achievements: isFinnish ? 'Tunnustukset' : 'Awards',
-    links: isFinnish ? 'Linkit' : 'Links',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    viewCredential: cv.t(locale, 'certificate.viewCredential'),
+    profile: cv.t(locale, 'templates.executive.profile'),
+    experience: cv.t(locale, 'templates.executive.experience'),
+    leadership: cv.t(locale, 'sections.leadership'),
+    projects: cv.t(locale, 'templates.executive.projects'),
+    education: cv.t(locale, 'sections.education'),
+    coreStrengths: cv.t(locale, 'templates.executive.coreStrengths'),
+    skills: cv.t(locale, 'templates.executive.skills'),
+    certificates: cv.t(locale, 'sections.execCertifications'),
+    languages: cv.t(locale, 'sections.languages'),
+    memberships: cv.t(locale, 'sections.memberships'),
+    achievements: cv.t(locale, 'templates.executive.achievements'),
+    links: cv.t(locale, 'sections.links'),
   }
 
   const renderMainSection = (key, placement = 'main', movedFrom = null) => {
@@ -291,11 +290,7 @@ export default function ExecutiveShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'about' }}
                 value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                    : 'Your executive summary goes here.'
-                }
+                placeholder={cv.t(locale, 'placeholders.executiveSummary')}
                 multiline
               />
             ) : about}
@@ -312,7 +307,7 @@ export default function ExecutiveShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   directEditDispatch,
@@ -333,7 +328,7 @@ export default function ExecutiveShowcase({
               }))
             ) : (
               <p className="executive-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -390,7 +385,7 @@ export default function ExecutiveShowcase({
               ))
             ) : (
               <p className="executive-showcase__empty">
-                {isFinnish ? 'Hankkeet näkyvät tässä.' : 'Major projects will appear here.'}
+                {cv.t(locale, 'templates.executive.projectsEmpty')}
               </p>
             )}
           </div>
@@ -417,7 +412,7 @@ export default function ExecutiveShowcase({
               ))
             ) : (
               <p className="executive-showcase__empty">
-                {isFinnish ? 'Tunnustukset näkyvät tässä.' : 'Awards will appear here.'}
+                {cv.t(locale, 'templates.executive.achievementsEmpty')}
               </p>
             )}
           </ul>
@@ -447,7 +442,7 @@ export default function ExecutiveShowcase({
               ))
             ) : (
               <p className="executive-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -472,7 +467,7 @@ export default function ExecutiveShowcase({
               ))
             ) : (
               <p className="executive-showcase__empty">
-                {isFinnish ? 'Ydinosaaminen näkyy tässä.' : 'Core competencies will appear here.'}
+                {cv.t(locale, 'templates.executive.coreStrengthsEmpty')}
               </p>
             )}
           </div>
@@ -496,14 +491,14 @@ export default function ExecutiveShowcase({
             ))
           ) : (
             <p className="executive-showcase__empty">
-              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              {cv.t(locale, 'empty.skills')}
             </p>
           )}
           {directEditDispatch ? (
             <div className="executive-showcase__skill-group">
               <EditableCategorizedChip
                 categories={editableSkillCategories}
-                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+                addLabel={cv.t(locale, 'add.item')}
               />
             </div>
           ) : null}
@@ -533,7 +528,7 @@ export default function ExecutiveShowcase({
               ))
             ) : (
               <p className="executive-showcase__empty">
-                {isFinnish ? 'Sertifioinnit näkyvät tässä.' : 'Certifications will appear here.'}
+                {cv.t(locale, 'empty.execCertifications')}
               </p>
             )}
           </div>
@@ -554,7 +549,7 @@ export default function ExecutiveShowcase({
               ))
             ) : (
               <p className="executive-showcase__empty">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             )}
           </div>
@@ -579,7 +574,7 @@ export default function ExecutiveShowcase({
               ))
             ) : (
               <p className="executive-showcase__empty">
-                {isFinnish ? 'Jäsenyydet näkyvät tässä.' : 'Memberships will appear here.'}
+                {cv.t(locale, 'empty.memberships')}
               </p>
             )}
           </div>
@@ -603,7 +598,7 @@ export default function ExecutiveShowcase({
               ))
             ) : (
               <p className="executive-showcase__empty">
-                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+                {cv.t(locale, 'empty.links')}
               </p>
             )}
           </div>
@@ -656,7 +651,7 @@ export default function ExecutiveShowcase({
             </div>
           ) : null}
           <p className="executive-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className="executive-showcase__name" data-cv-name>
             {directEditDispatch ? (
@@ -664,7 +659,7 @@ export default function ExecutiveShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : fullName}
           </CvHeading>
@@ -674,7 +669,7 @@ export default function ExecutiveShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             ) : title}
           </p>

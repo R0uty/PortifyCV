@@ -1,6 +1,9 @@
 /** @typedef {import('../types/cv').CvData} CvData */
 /** @typedef {import('../types/cv').Locale} Locale */
 
+import { normalizeLocale } from '../i18n/index.js'
+import { cvFormText } from '../i18n/cvForm/index.js'
+
 export const CV_ONBOARDING_SEEN_STORAGE_KEY = 'portifycv-onboarding-seen'
 // 'false' only when the visitor turned session restore off; on otherwise
 // (1.6.82). A new key: the old one ('portifycv-session-restore-enabled')
@@ -252,54 +255,41 @@ export function isPhotoVisibleForTemplate(photoVisibilityByTemplate, templateId)
   return photoVisibilityByTemplate[templateId] !== false
 }
 
-const sectionVisibilityFieldsEn = [
-  { key: 'about', label: 'About' },
-  { key: 'skills', label: 'Skills' },
-  { key: 'experience', label: 'Experience' },
-  { key: 'education', label: 'Education' },
-  { key: 'links', label: 'Links' },
-  { key: 'coreStrengths', label: 'Core Strengths' },
-  { key: 'certificates', label: 'Certificates' },
-  { key: 'projects', label: 'Projects' },
-  { key: 'languages', label: 'Languages' },
-  { key: 'interests', label: 'Interests' },
-  { key: 'achievements', label: 'Achievements' },
-  { key: 'openSource', label: 'Open Source' },
-  { key: 'publications', label: 'Publications' },
-  { key: 'leadership', label: 'Leadership Experience' },
-  { key: 'memberships', label: 'Professional Memberships' },
-  { key: 'speaking', label: 'Speaking' },
-  { key: 'volunteering', label: 'Volunteering' },
-  { key: 'internships', label: 'Internships' },
-  { key: 'caseStudies', label: 'Case Studies' },
-  { key: 'testimonials', label: 'Testimonials' },
+// The order the Sections lists show them in; labels in src/i18n/cvForm/.
+const sectionVisibilityFieldKeys = [
+  'about',
+  'skills',
+  'experience',
+  'education',
+  'links',
+  'coreStrengths',
+  'certificates',
+  'projects',
+  'languages',
+  'interests',
+  'achievements',
+  'openSource',
+  'publications',
+  'leadership',
+  'memberships',
+  'speaking',
+  'volunteering',
+  'internships',
+  'caseStudies',
+  'testimonials',
 ]
 
-const sectionVisibilityFieldsFi = [
-  { key: 'about', label: 'Esittely' },
-  { key: 'skills', label: 'Taidot' },
-  { key: 'experience', label: 'Kokemus' },
-  { key: 'education', label: 'Koulutus' },
-  { key: 'links', label: 'Linkit' },
-  { key: 'coreStrengths', label: 'Vahvuudet' },
-  { key: 'certificates', label: 'Sertifikaatit' },
-  { key: 'projects', label: 'Projektit' },
-  { key: 'languages', label: 'Kielet' },
-  { key: 'interests', label: 'Kiinnostuksen kohteet' },
-  { key: 'achievements', label: 'Saavutukset' },
-  { key: 'openSource', label: 'Avoin lähdekoodi' },
-  { key: 'publications', label: 'Julkaisut' },
-  { key: 'leadership', label: 'Johtamiskokemus' },
-  { key: 'memberships', label: 'Ammattijäsenyydet' },
-  { key: 'speaking', label: 'Esiintymiset' },
-  { key: 'volunteering', label: 'Vapaaehtoistyö' },
-  { key: 'internships', label: 'Harjoittelut' },
-  { key: 'caseStudies', label: 'Tapaustutkimukset' },
-  { key: 'testimonials', label: 'Suositukset' },
-]
+const sectionVisibilityFieldsByLocale = new Map()
 
 export function getSectionVisibilityFields(locale = 'en') {
-  return locale === 'fi' ? sectionVisibilityFieldsFi : sectionVisibilityFieldsEn
+  const language = normalizeLocale(locale)
+  if (!sectionVisibilityFieldsByLocale.has(language)) {
+    sectionVisibilityFieldsByLocale.set(language, sectionVisibilityFieldKeys.map((key) => ({
+      key,
+      label: cvFormText.t(language, `sections.${key}`),
+    })))
+  }
+  return sectionVisibilityFieldsByLocale.get(language)
 }
 
 export const sectionVisibilityFields = getSectionVisibilityFields('en')
@@ -590,167 +580,22 @@ export const demoCvData = {
   ],
 }
 
-const linkFieldsEn = [
-  {
-    key: 'github',
-    label: 'GitHub',
-    placeholder: 'https://github.com/username',
-  },
-  {
-    key: 'linkedin',
-    label: 'LinkedIn',
-    placeholder: 'https://linkedin.com/in/username',
-  },
-  {
-    key: 'portfolio',
-    label: 'Portfolio',
-    placeholder: 'https://portfolio.dev',
-  },
-  {
-    key: 'website',
-    label: 'Website',
-    placeholder: 'https://yourwebsite.com',
-  },
-  {
-    key: 'behance',
-    label: 'Behance',
-    placeholder: 'https://behance.net/username',
-  },
-  {
-    key: 'dribbble',
-    label: 'Dribbble',
-    placeholder: 'https://dribbble.com/username',
-  },
-  {
-    key: 'medium',
-    label: 'Medium',
-    placeholder: 'https://medium.com/@username',
-  },
-  {
-    key: 'devto',
-    label: 'Dev.to',
-    placeholder: 'https://dev.to/username',
-  },
-  {
-    key: 'scholar',
-    label: 'Google Scholar',
-    placeholder: 'https://scholar.google.com/citations?user=...',
-  },
-  {
-    key: 'boardProfile',
-    label: 'Board Profile',
-    placeholder: 'https://boardprospects.com/profile/username',
-  },
-  {
-    key: 'blog',
-    label: 'Blog',
-    placeholder: 'https://blog.yourname.dev',
-  },
-  {
-    key: 'researchGate',
-    label: 'ResearchGate',
-    placeholder: 'https://researchgate.net/profile/username',
-  },
-  {
-    key: 'hackTheBox',
-    label: 'Hack The Box',
-    placeholder: 'https://app.hackthebox.com/profile/username',
-  },
-  {
-    key: 'tryHackMe',
-    label: 'TryHackMe',
-    placeholder: 'https://tryhackme.com/p/username',
-  },
-  {
-    key: 'youtube',
-    label: 'YouTube',
-    placeholder: 'https://youtube.com/@username',
-  },
-]
-
-const linkFieldsFi = [
-  {
-    key: 'github',
-    label: 'GitHub',
-    placeholder: 'https://github.com/kayttajatunnus',
-  },
-  {
-    key: 'linkedin',
-    label: 'LinkedIn',
-    placeholder: 'https://linkedin.com/in/kayttajatunnus',
-  },
-  {
-    key: 'portfolio',
-    label: 'Portfolio',
-    placeholder: 'https://portfolio.dev',
-  },
-  {
-    key: 'website',
-    label: 'Verkkosivu',
-    placeholder: 'https://omatkotisivut.fi',
-  },
-  {
-    key: 'behance',
-    label: 'Behance',
-    placeholder: 'https://behance.net/kayttajatunnus',
-  },
-  {
-    key: 'dribbble',
-    label: 'Dribbble',
-    placeholder: 'https://dribbble.com/kayttajatunnus',
-  },
-  {
-    key: 'medium',
-    label: 'Medium',
-    placeholder: 'https://medium.com/@kayttajatunnus',
-  },
-  {
-    key: 'devto',
-    label: 'Dev.to',
-    placeholder: 'https://dev.to/kayttajatunnus',
-  },
-  {
-    key: 'scholar',
-    label: 'Google Scholar',
-    placeholder: 'https://scholar.google.com/citations?user=...',
-  },
-  {
-    key: 'boardProfile',
-    label: 'Hallitusprofiili',
-    placeholder: 'https://boardprospects.com/profile/kayttajatunnus',
-  },
-  {
-    key: 'blog',
-    label: 'Blogi',
-    placeholder: 'https://blog.nimesi.dev',
-  },
-  {
-    key: 'researchGate',
-    label: 'ResearchGate',
-    placeholder: 'https://researchgate.net/profile/kayttajatunnus',
-  },
-  {
-    key: 'hackTheBox',
-    label: 'Hack The Box',
-    placeholder: 'https://app.hackthebox.com/profile/kayttajatunnus',
-  },
-  {
-    key: 'tryHackMe',
-    label: 'TryHackMe',
-    placeholder: 'https://tryhackme.com/p/kayttajatunnus',
-  },
-  {
-    key: 'youtube',
-    label: 'YouTube',
-    placeholder: 'https://youtube.com/@kayttajatunnus',
-  },
-]
+const linkFieldsByLocale = new Map()
 
 /**
  * @param {Locale} [locale='en']
  */
 export function getLinkFields(locale = 'en') {
-  return locale === 'fi' ? linkFieldsFi : linkFieldsEn
+  const language = normalizeLocale(locale)
+  if (!linkFieldsByLocale.has(language)) {
+    // One field per key of createEmptyLinks(), in that order.
+    linkFieldsByLocale.set(language, Object.keys(createEmptyLinks()).map((key) => ({
+      key,
+      label: cvFormText.t(language, `linkLabels.${key}`),
+      placeholder: cvFormText.t(language, `linkPlaceholders.${key}`),
+    })))
+  }
+  return linkFieldsByLocale.get(language)
 }
 
 export const linkFields = getLinkFields('en')
@@ -1753,12 +1598,8 @@ function extractSkillTokens(value) {
  */
 export function parsePastedCvText(value, options = {}) {
   const locale = options.locale === 'fi' ? 'fi' : 'en'
-  const missingPasteMessage = locale === 'fi'
-    ? 'Liitä CV-teksti ennen tuontia.'
-    : 'Paste CV text before importing it.'
-  const detectFailMessage = locale === 'fi'
-    ? 'Liitetystä CV-tekstistä ei löytynyt nimeä, titteliä tai taitoja.'
-    : 'Could not detect a name, title, or skills from the pasted CV text.'
+  const missingPasteMessage = cvFormText.t(locale, 'paste.missingText')
+  const detectFailMessage = cvFormText.t(locale, 'paste.nothingDetected')
 
   if (typeof value !== 'string' || !value.trim()) {
     throw new Error(missingPasteMessage)

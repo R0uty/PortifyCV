@@ -41,6 +41,7 @@ import {
   formatLinkDisplayValue,
 } from './shared'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 const DENSITY_STEPS = ['cozy', 'snug', 'tight']
 
@@ -159,8 +160,8 @@ export default function CompactShowcase({
   const [stillOverflowing, setStillOverflowing] = useState(false)
   const [lastDeps, setLastDeps] = useState([null, null, null])
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Vanhempi ohjelmistokehittäjä' : 'Senior Software Engineer')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
+  const title = snapshot.title || cv.t(locale, 'titleFallbacks.seniorEngineer')
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
@@ -174,9 +175,9 @@ export default function CompactShowcase({
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const directEditContactFields = [
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
 
   const linkEntries = Object.entries(snapshot.links)
@@ -209,19 +210,19 @@ export default function CompactShowcase({
   const sectionKeys = orderedSections.filter((key) => visibleSet.has(key) && sectionVisibility[key] && key !== 'about')
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    datesPending: isFinnish ? 'Pvm puuttuu' : 'Dates pending',
-    summary: isFinnish ? 'Yhteenveto' : 'Summary',
-    skills: isFinnish ? 'Taidot' : 'Skills',
-    experience: isFinnish ? 'Kokemus' : 'Experience',
-    projects: isFinnish ? 'Projektit' : 'Projects',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    links: isFinnish ? 'Linkit' : 'Links',
-    interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    datesPending: cv.t(locale, 'templates.compact.datesPending'),
+    summary: cv.t(locale, 'sections.summary'),
+    skills: cv.t(locale, 'sections.skills'),
+    experience: cv.t(locale, 'sections.experience'),
+    projects: cv.t(locale, 'sections.projects'),
+    education: cv.t(locale, 'sections.education'),
+    certificates: cv.t(locale, 'sections.certificates'),
+    languages: cv.t(locale, 'sections.languages'),
+    links: cv.t(locale, 'sections.links'),
+    interests: cv.t(locale, 'sections.interests'),
   }
 
   // ── Smart space optimisation ────────────────────────────────────────
@@ -278,14 +279,14 @@ export default function CompactShowcase({
             </div>
           ) : (
             <p className="compact-showcase__empty">
-              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              {cv.t(locale, 'empty.skills')}
             </p>
           )}
           {directEditDispatch ? (
             <div className="compact-showcase__skill-groups compact-showcase__skill-groups--editing">
               <EditableCategorizedChip
                 categories={editableSkillCategories}
-                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+                addLabel={cv.t(locale, 'add.item')}
               />
             </div>
           ) : null}
@@ -302,7 +303,7 @@ export default function CompactShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
               </EditableList>
@@ -316,7 +317,7 @@ export default function CompactShowcase({
               )
             ) : (
               <p className="compact-showcase__empty">
-                {isFinnish ? 'Kokemus näkyy tässä.' : 'Experience will appear here.'}
+                {cv.t(locale, 'templates.compact.experienceEmpty')}
               </p>
             )}
           </div>
@@ -347,7 +348,7 @@ export default function CompactShowcase({
               })
             ) : (
               <p className="compact-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -376,7 +377,7 @@ export default function CompactShowcase({
               })
             ) : (
               <p className="compact-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -400,7 +401,7 @@ export default function CompactShowcase({
               ))
             ) : (
               <p className="compact-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+                {cv.t(locale, 'empty.certificates')}
               </p>
             )}
           </div>
@@ -423,7 +424,7 @@ export default function CompactShowcase({
             </p>
           ) : (
             <p className="compact-showcase__empty">
-              {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+              {cv.t(locale, 'empty.languages')}
             </p>
           )}
         </section>
@@ -446,7 +447,7 @@ export default function CompactShowcase({
             </div>
           ) : (
             <p className="compact-showcase__empty">
-              {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+              {cv.t(locale, 'empty.links')}
             </p>
           )}
         </section>
@@ -465,7 +466,7 @@ export default function CompactShowcase({
             </p>
           ) : (
             <p className="compact-showcase__empty">
-              {isFinnish ? 'Kiinnostuksen kohteet näkyvät tässä.' : 'Interests will appear here.'}
+              {cv.t(locale, 'empty.interests')}
             </p>
           )}
         </section>
@@ -500,7 +501,7 @@ export default function CompactShowcase({
       <header data-export-header="true" className="compact-showcase__header">
         <div className="min-w-0">
           <p className="compact-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className="compact-showcase__name" data-cv-name>
             {directEditDispatch ? (
@@ -508,7 +509,7 @@ export default function CompactShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : fullName}
           </CvHeading>
@@ -518,7 +519,7 @@ export default function CompactShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             ) : title}
           </p>
@@ -563,11 +564,7 @@ export default function CompactShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'about' }}
                 value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                    : 'Your professional summary goes here.'
-                }
+                placeholder={cv.t(locale, 'placeholders.summary')}
                 multiline
               />
             ) : about}
@@ -581,9 +578,7 @@ export default function CompactShowcase({
 
       {stillOverflowing ? (
         <p className="compact-showcase__overflow-warning" data-export-ignore="true">
-          {isFinnish
-            ? 'Sisältö saattaa ylittää yhden sivun edes tiiveimmällä asettelulla. Harkitse kohtien lyhentämistä.'
-            : 'Content may not fit one page even at the tightest density. Consider trimming a section.'}
+          {cv.t(locale, 'fitWarning')}
         </p>
       ) : null}
     </article>

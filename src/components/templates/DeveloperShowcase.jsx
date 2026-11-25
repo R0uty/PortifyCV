@@ -36,6 +36,7 @@ import {
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 // The fixed cool-spectrum gradient — Developer's one accent form. Used for
 // the name text, photo ring, section-icon badges and timeline marker.
@@ -196,17 +197,15 @@ export default function DeveloperShowcase({
   const gradientEnabled = showcaseConfig.gradientEnabled !== false
   const configShowPhoto = showcaseConfig.showPhoto !== false
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Full Stack -kehittäjä' : 'Full Stack Developer')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
+  const title = snapshot.title || cv.t(locale, 'titleFallbacks.fullStack')
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
   const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi tulee tähän.'
-      : 'Your professional summary goes here.')
+    || cv.t(locale, 'placeholders.summary')
 
   const personalContactItems = [
     ['email', snapshot.email],
@@ -214,9 +213,9 @@ export default function DeveloperShowcase({
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const directEditContactFields = [
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
 
   const linkEntries = Object.entries(snapshot.links)
@@ -247,25 +246,25 @@ export default function DeveloperShowcase({
   const hasSidebar = showSidebar && sidebarSectionKeys.length > 0
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    viewCredential: cv.t(locale, 'certificate.viewCredential'),
   }
 
   const renderSidebarSection = (key, placement = 'side', movedFrom = null) => {
     if (key === 'skills') {
       return (
         <Section key={key} id="skills" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="skills" label={isFinnish ? 'Taidot' : 'Skills'} placement={placement} />
+          <SectionHeading icon="skills" label={cv.t(locale, 'sections.skills')} placement={placement} />
           {directEditDispatch ? (
             // Chips replace the read-only tags outright (never both, or
             // every skill renders twice).
             <div className="dev-showcase__skill-group">
               <EditableCategorizedChip
                 categories={editableSkillCategories}
-                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+                addLabel={cv.t(locale, 'add.item')}
               />
             </div>
           ) : skillCategories.length > 0 ? (
@@ -283,7 +282,7 @@ export default function DeveloperShowcase({
             ))
           ) : (
             <p className="dev-showcase__empty">
-              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              {cv.t(locale, 'empty.skills')}
             </p>
           )}
         </Section>
@@ -293,7 +292,7 @@ export default function DeveloperShowcase({
     if (key === 'links') {
       return (
         <Section key={key} id="links" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="links" label={isFinnish ? 'Linkit' : 'Links'} placement={placement} />
+          <SectionHeading icon="links" label={cv.t(locale, 'sections.links')} placement={placement} />
           {linkEntries.length > 0 ? (
             linkEntries.map(([linkKey, value]) => (
               <div key={linkKey} data-export-card="true" className="dev-showcase__link-card">
@@ -306,7 +305,7 @@ export default function DeveloperShowcase({
             ))
           ) : (
             <p className="dev-showcase__empty">
-              {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+              {cv.t(locale, 'empty.links')}
             </p>
           )}
         </Section>
@@ -316,7 +315,7 @@ export default function DeveloperShowcase({
     if (key === 'certificates') {
       return (
         <Section key={key} id="certificates" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="certificates" label={isFinnish ? 'Sertifikaatit' : 'Certificates'} placement={placement} />
+          <SectionHeading icon="certificates" label={cv.t(locale, 'sections.certificates')} placement={placement} />
           {snapshot.certificates.length > 0 ? (
             snapshot.certificates.map((item, index) => (
               <div key={`${item.name}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.certificates[index]} className="dev-showcase__cert-card">
@@ -340,7 +339,7 @@ export default function DeveloperShowcase({
             ))
           ) : (
             <p className="dev-showcase__empty">
-              {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+              {cv.t(locale, 'empty.certificates')}
             </p>
           )}
         </Section>
@@ -350,7 +349,7 @@ export default function DeveloperShowcase({
     if (key === 'education') {
       return (
         <Section key={key} id="education" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="education" label={isFinnish ? 'Koulutus' : 'Education'} placement={placement} />
+          <SectionHeading icon="education" label={cv.t(locale, 'sections.education')} placement={placement} />
           {snapshot.education.length > 0 ? (
             snapshot.education.map((item, index) => (
               <div key={`${item.school}-${index}`} data-export-card="true" data-direct-edit-index={snapshot.sourceIndices.education[index]} className="dev-showcase__edu-item">
@@ -367,7 +366,7 @@ export default function DeveloperShowcase({
             ))
           ) : (
             <p className="dev-showcase__empty">
-              {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+              {cv.t(locale, 'empty.education')}
             </p>
           )}
         </Section>
@@ -377,7 +376,7 @@ export default function DeveloperShowcase({
     if (key === 'languages') {
       return (
         <Section key={key} id="languages" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="languages" label={isFinnish ? 'Kielet' : 'Languages'} placement={placement} />
+          <SectionHeading icon="languages" label={cv.t(locale, 'sections.languages')} placement={placement} />
           {snapshot.languages.length > 0 ? (
             snapshot.languages.map((item, index) => (
               <div key={`${item.language}-${index}`} className="dev-showcase__lang-item" data-direct-edit-index={snapshot.sourceIndices.languages[index]}>
@@ -388,7 +387,7 @@ export default function DeveloperShowcase({
             ))
           ) : (
             <p className="dev-showcase__empty">
-              {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+              {cv.t(locale, 'empty.languages')}
             </p>
           )}
         </Section>
@@ -402,18 +401,14 @@ export default function DeveloperShowcase({
     if (key === 'about') {
       return (
         <Section key={key} id="about" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="about" label={isFinnish ? 'Yhteenveto' : 'Summary'} placement={placement} />
+          <SectionHeading icon="about" label={cv.t(locale, 'sections.summary')} placement={placement} />
           <p className="dev-showcase__summary">
             {directEditDispatch ? (
               <EditableField
                 as="span"
                 path={{ kind: 'root', field: 'about' }}
                 value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                    : 'Your professional summary goes here.'
-                }
+                placeholder={cv.t(locale, 'placeholders.summary')}
                 multiline
               />
             ) : about}
@@ -425,13 +420,13 @@ export default function DeveloperShowcase({
     if (key === 'experience') {
       return (
         <Section key={key} id="experience" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="experience" label={isFinnish ? 'Kokemus' : 'Experience'} placement={placement} />
+          <SectionHeading icon="experience" label={cv.t(locale, 'sections.experience')} placement={placement} />
           <div className="dev-showcase__timeline">
             {directEditDispatch ? (
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   directEditDispatch,
@@ -452,7 +447,7 @@ export default function DeveloperShowcase({
               )
             ) : (
               <p className="dev-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -463,7 +458,7 @@ export default function DeveloperShowcase({
     if (key === 'projects') {
       return (
         <Section key={key} id="projects" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="projects" label={isFinnish ? 'Projektit' : 'Projects'} placement={placement} />
+          <SectionHeading icon="projects" label={cv.t(locale, 'sections.projects')} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.projects.length > 0 ? (
               snapshot.projects.map((item, index) => {
@@ -513,7 +508,7 @@ export default function DeveloperShowcase({
               })
             ) : (
               <p className="dev-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -524,7 +519,7 @@ export default function DeveloperShowcase({
     if (key === 'achievements') {
       return (
         <Section key={key} id="achievements" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="achievements" label={isFinnish ? 'Saavutukset' : 'Achievements'} placement={placement} />
+          <SectionHeading icon="achievements" label={cv.t(locale, 'sections.achievements')} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.achievements.length > 0 ? (
               snapshot.achievements.map((item, index) => (
@@ -543,7 +538,7 @@ export default function DeveloperShowcase({
               ))
             ) : (
               <p className="dev-showcase__empty">
-                {isFinnish ? 'Saavutukset näkyvät tässä.' : 'Achievements will appear here.'}
+                {cv.t(locale, 'empty.achievements')}
               </p>
             )}
           </div>
@@ -554,7 +549,7 @@ export default function DeveloperShowcase({
     if (key === 'openSource') {
       return (
         <Section key={key} id="openSource" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="openSource" label={isFinnish ? 'Avoin lähdekoodi' : 'Open Source'} placement={placement} />
+          <SectionHeading icon="openSource" label={cv.t(locale, 'sections.openSource')} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.openSource.length > 0 ? (
               snapshot.openSource.map((item, index) => (
@@ -583,9 +578,7 @@ export default function DeveloperShowcase({
               ))
             ) : (
               <p className="dev-showcase__empty">
-                {isFinnish
-                  ? 'Avoimen lähdekoodin projektit näkyvät tässä.'
-                  : 'Open-source repositories will appear here.'}
+                {cv.t(locale, 'empty.openSource')}
               </p>
             )}
           </div>
@@ -596,7 +589,7 @@ export default function DeveloperShowcase({
     if (key === 'publications') {
       return (
         <Section key={key} id="publications" placement={placement} movedFrom={movedFrom}>
-          <SectionHeading icon="publications" label={isFinnish ? 'Julkaisut' : 'Publications'} placement={placement} />
+          <SectionHeading icon="publications" label={cv.t(locale, 'sections.publications')} placement={placement} />
           <div className="dev-showcase__card-grid">
             {snapshot.publications.length > 0 ? (
               snapshot.publications.map((item, index) => (
@@ -611,7 +604,7 @@ export default function DeveloperShowcase({
               ))
             ) : (
               <p className="dev-showcase__empty">
-                {isFinnish ? 'Julkaisut näkyvät tässä.' : 'Publications will appear here.'}
+                {cv.t(locale, 'empty.publications')}
               </p>
             )}
           </div>
@@ -653,7 +646,7 @@ export default function DeveloperShowcase({
       <header data-export-header="true" className="dev-showcase__header">
         <div className="min-w-0">
           <p className="dev-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`} data-cv-name>
             {directEditDispatch ? (
@@ -661,7 +654,7 @@ export default function DeveloperShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : fullName}
           </CvHeading>
@@ -671,7 +664,7 @@ export default function DeveloperShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             ) : title}
           </p>

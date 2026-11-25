@@ -2,6 +2,7 @@
 // Re-exports formatDateRange and formatLinkLabel from the project-wide shared utils.
 
 import { formatDateRange, formatLinkLabel, formatLinkDisplayValue, getSafeHref } from '../../utils/shared'
+import { cv } from '../../i18n/cv'
 
 // Base CSS classes for section title text — tiny, uppercase, wide letter-spacing.
 // Individual templates override the color via their sectionTitle() config method.
@@ -296,9 +297,16 @@ function parseSkillCategories(skills, isFinnish) {
   }
 
   // Human-readable labels for each category key, with Finnish translations
-  const categoryLabels = isFinnish
-    ? { languages: 'Kielet', frameworks: 'Kehykset', databases: 'Tietokannat', cloud: 'Pilvi', devops: 'DevOps', security: 'Turvallisuus', other: 'Muut' }
-    : { languages: 'Languages', frameworks: 'Frameworks', databases: 'Databases', cloud: 'Cloud', devops: 'DevOps', security: 'Security', other: 'Other' }
+  const locale = isFinnish ? 'fi' : 'en'
+  const categoryLabels = {
+    languages: cv.t(locale, 'skillCategories.languages'),
+    frameworks: cv.t(locale, 'skillCategories.frameworks'),
+    databases: cv.t(locale, 'skillCategories.databases'),
+    cloud: cv.t(locale, 'skillCategories.cloud'),
+    devops: cv.t(locale, 'skillCategories.devops'),
+    security: cv.t(locale, 'skillCategories.security'),
+    other: cv.t(locale, 'skillCategories.other'),
+  }
 
   // Convert the categories object into a sorted array of { key, label, items } pairs
   return Object.entries(categories).map(([key, items]) => ({

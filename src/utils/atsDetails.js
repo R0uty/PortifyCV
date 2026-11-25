@@ -4,15 +4,17 @@
 // add these lines there, in ATS mode only, leaving their designer pages as
 // they are. One line per value, as plain text an ATS can read.
 
+import { cv } from '../i18n/cv/index.js'
+
 const joinFilled = (values, separator = ' · ') => values.filter(Boolean).join(separator)
 
 export function getEducationDetails(item) {
   return [item.honors, joinFilled([item.grade, item.coursework])].filter(Boolean)
 }
 
-export function getCertificateDetails(item, isFinnish) {
+export function getCertificateDetails(item, locale) {
   return [
-    item.expiry ? `${isFinnish ? 'Vanhenee' : 'Expires'} ${item.expiry}` : '',
+    item.expiry ? cv.t(locale, 'certificate.expires', { date: item.expiry }) : '',
     item.credentialUrl,
   ].filter(Boolean)
 }

@@ -36,6 +36,7 @@ import { TIMELINE_DEFAULT_ACCENT_COLOR } from './timeline'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 import { AtsDetails } from './AtsDetails'
 import { getCertificateDetails, getEducationDetails, getProjectDetails } from '../../utils/atsDetails'
+import { cv } from '../../i18n/cv'
 
 // ATS mode is monochrome for every template in this app (see
 // CVPreview.jsx's generic-path comments) — this template is no exception,
@@ -180,7 +181,6 @@ export default function TimelineShowcase({
   headingColor = null,
   directEditDispatch = null,
 }) {
-  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
   const configShowPhoto = showcaseConfig.showPhoto !== false
@@ -191,7 +191,7 @@ export default function TimelineShowcase({
   // stays exactly as-is.
   const effectiveAccentColor = atsFriendlyMode ? TIMELINE_ATS_ACCENT_COLOR : accentColor
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
   const spaceIndex = fullName.indexOf(' ')
   const nameFirst = spaceIndex === -1 ? fullName : fullName.slice(0, spaceIndex)
   const nameRest = spaceIndex === -1 ? '' : fullName.slice(spaceIndex)
@@ -206,9 +206,9 @@ export default function TimelineShowcase({
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const directEditContactFields = [
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
   const linkContactItems = [
     ['linkedin', snapshot.links.linkedin],
@@ -229,19 +229,19 @@ export default function TimelineShowcase({
   const sectionKeys = orderedSections.filter((key) => primarySet.has(key) && sectionVisibility[key])
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    profile: isFinnish ? 'Profiili' : 'Profile',
-    experience: isFinnish ? 'Kokemus' : 'Experience',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    projects: isFinnish ? 'Projektit' : 'Projects',
-    skills: isFinnish ? 'Taidot' : 'Skills',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certifications',
-    viewProject: isFinnish ? 'Näytä projekti' : 'View project',
-    viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    profile: cv.t(locale, 'sections.profile'),
+    experience: cv.t(locale, 'sections.experience'),
+    education: cv.t(locale, 'sections.education'),
+    projects: cv.t(locale, 'sections.projects'),
+    skills: cv.t(locale, 'sections.skills'),
+    languages: cv.t(locale, 'sections.languages'),
+    certificates: cv.t(locale, 'sections.certifications'),
+    viewProject: cv.t(locale, 'project.view'),
+    viewCredential: cv.t(locale, 'certificate.viewCredential'),
   }
 
   const renderSection = (key) => {
@@ -253,11 +253,7 @@ export default function TimelineShowcase({
               as="span"
               path={{ kind: 'root', field: 'about' }}
               value={formData.about}
-              placeholder={
-                isFinnish
-                  ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                  : 'Your professional summary goes here.'
-              }
+              placeholder={cv.t(locale, 'placeholders.summary')}
               multiline
             />
           </p>
@@ -273,7 +269,7 @@ export default function TimelineShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   atsFriendlyMode,
@@ -292,7 +288,7 @@ export default function TimelineShowcase({
               }))
             ) : (
               <p className="timeline-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -323,7 +319,7 @@ export default function TimelineShowcase({
               })
             ) : (
               <p className="timeline-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -367,7 +363,7 @@ export default function TimelineShowcase({
               })
             ) : (
               <p className="timeline-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -388,7 +384,7 @@ export default function TimelineShowcase({
               branch), same pattern Round 2/3 used for Editorial/Portrait. */}
           {directEditDispatch ? (
             <div className="timeline-showcase__tag-row">
-              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+              <EditableChip skills={formData.skills} addLabel={cv.t(locale, 'add.item')} />
             </div>
           ) : snapshot.skills.length > 0 ? (
             <div className="timeline-showcase__tag-row">
@@ -398,7 +394,7 @@ export default function TimelineShowcase({
             </div>
           ) : (
             <p className="timeline-showcase__empty">
-              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              {cv.t(locale, 'empty.skills')}
             </p>
           )}
         </Section>
@@ -430,7 +426,7 @@ export default function TimelineShowcase({
               })
             ) : (
               <p className="timeline-showcase__empty">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             )}
           </div>
@@ -449,7 +445,7 @@ export default function TimelineShowcase({
                     <div className="min-w-0">
                       {item.name ? <p className="timeline-showcase__cert-name">{item.name}</p> : null}
                       {item.issuer ? <p className="timeline-showcase__cert-issuer">{item.issuer}</p> : null}
-                      {atsFriendlyMode ? <AtsDetails lines={getCertificateDetails(item, isFinnish)} /> : null}
+                      {atsFriendlyMode ? <AtsDetails lines={getCertificateDetails(item, locale)} /> : null}
                     </div>
                     {item.year ? <p className="timeline-showcase__cert-year">{item.year}</p> : null}
                   </div>
@@ -462,7 +458,7 @@ export default function TimelineShowcase({
               ))
             ) : (
               <p className="timeline-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certifications will appear here.'}
+                {cv.t(locale, 'empty.certifications')}
               </p>
             )}
           </div>
@@ -508,7 +504,7 @@ export default function TimelineShowcase({
 
         <div className="min-w-0">
           <p className="timeline-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className="timeline-showcase__name" data-cv-name>
             {directEditDispatch ? (
@@ -516,7 +512,7 @@ export default function TimelineShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : (
               <>{nameFirst}<span className="timeline-showcase__name-accent">{nameRest}</span></>
@@ -527,7 +523,7 @@ export default function TimelineShowcase({
               as="span"
               path={{ kind: 'root', field: 'title' }}
               value={formData.title}
-              placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              placeholder={cv.t(locale, 'placeholders.title')}
             />
           </p>
           {atsFriendlyMode && snapshot.tagline ? <AtsDetails lines={[snapshot.tagline]} /> : null}

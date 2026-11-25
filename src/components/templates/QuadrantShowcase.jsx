@@ -44,6 +44,7 @@ import {
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 // Quadrant's own Experience-entry renderer: role and company/location nest
 // in one `min-w-0` div with the dates as its sibling. Only role and company
@@ -170,8 +171,8 @@ export default function QuadrantShowcase({
 
   const configShowPhoto = showcaseConfig.showPhoto !== false
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
+  const title = snapshot.title || cv.t(locale, 'placeholders.title')
   const tagline = snapshot.tagline
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
@@ -179,9 +180,7 @@ export default function QuadrantShowcase({
     templateConfig.id,
   )
   const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi tulee tähän.'
-      : 'Your professional summary goes here.')
+    || cv.t(locale, 'placeholders.summary')
 
   const personalContactItems = [
     ['email', snapshot.email],
@@ -189,9 +188,9 @@ export default function QuadrantShowcase({
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const directEditContactFields = [
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
 
   const linkEntries = Object.entries(snapshot.links)
@@ -237,19 +236,19 @@ export default function QuadrantShowcase({
   const showLanguages = sectionVisibility.languages !== false
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
-    summary: isFinnish ? 'Yhteenveto' : 'Profile',
-    experience: isFinnish ? 'Kokemus' : 'Experience',
-    projects: isFinnish ? 'Projektit' : 'Projects',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    skills: isFinnish ? 'Taidot' : 'Skills',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    links: isFinnish ? 'Linkit' : 'Links',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    viewCredential: cv.t(locale, 'certificate.viewCredential'),
+    summary: cv.t(locale, 'templates.quadrant.summary'),
+    experience: cv.t(locale, 'sections.experience'),
+    projects: cv.t(locale, 'sections.projects'),
+    education: cv.t(locale, 'sections.education'),
+    skills: cv.t(locale, 'sections.skills'),
+    certificates: cv.t(locale, 'sections.certificates'),
+    languages: cv.t(locale, 'sections.languages'),
+    links: cv.t(locale, 'sections.links'),
   }
 
   const renderNarrativeSection = (key) => {
@@ -261,7 +260,7 @@ export default function QuadrantShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   directEditDispatch,
@@ -282,7 +281,7 @@ export default function QuadrantShowcase({
               )
             ) : (
               <p className="quadrant-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -316,7 +315,7 @@ export default function QuadrantShowcase({
               })
             ) : (
               <p className="quadrant-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -346,7 +345,7 @@ export default function QuadrantShowcase({
               ))
             ) : (
               <p className="quadrant-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -376,7 +375,7 @@ export default function QuadrantShowcase({
               ))
             ) : (
               <p className="quadrant-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+                {cv.t(locale, 'empty.certificates')}
               </p>
             )}
           </div>
@@ -397,7 +396,7 @@ export default function QuadrantShowcase({
               ))
             ) : (
               <p className="quadrant-showcase__empty">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             )}
           </div>
@@ -421,7 +420,7 @@ export default function QuadrantShowcase({
               ))
             ) : (
               <p className="quadrant-showcase__empty">
-                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+                {cv.t(locale, 'empty.links')}
               </p>
             )}
           </div>
@@ -464,7 +463,7 @@ export default function QuadrantShowcase({
           </div>
         ) : null}
         <p className="quadrant-showcase__kicker" data-export-ignore="true">
-          {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+          {templateConfig.label} {cv.t(locale, 'kicker.template')}
         </p>
         <CvHeading as="h1" className="quadrant-showcase__name" data-cv-name>
           {directEditDispatch ? (
@@ -472,7 +471,7 @@ export default function QuadrantShowcase({
               as="span"
               path={{ kind: 'root', field: 'fullName' }}
               value={formData.fullName}
-              placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              placeholder={cv.t(locale, 'placeholders.name')}
             />
           ) : fullName}
         </CvHeading>
@@ -482,7 +481,7 @@ export default function QuadrantShowcase({
               as="span"
               path={{ kind: 'root', field: 'title' }}
               value={formData.title}
-              placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              placeholder={cv.t(locale, 'placeholders.title')}
             />
           ) : title}
         </p>
@@ -515,11 +514,7 @@ export default function QuadrantShowcase({
                   as="span"
                   path={{ kind: 'root', field: 'about' }}
                   value={formData.about}
-                  placeholder={
-                    isFinnish
-                      ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                      : 'Your professional summary goes here.'
-                  }
+                  placeholder={cv.t(locale, 'placeholders.summary')}
                   multiline
                 />
               ) : about}
@@ -534,7 +529,7 @@ export default function QuadrantShowcase({
               <div className="quadrant-showcase__skill-group">
                 <EditableCategorizedChip
                   categories={editableSkillCategories}
-                  addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+                  addLabel={cv.t(locale, 'add.item')}
                 />
               </div>
             ) : skillCategories.length > 0 ? (
@@ -550,7 +545,7 @@ export default function QuadrantShowcase({
               ))
             ) : (
               <p className="quadrant-showcase__empty">
-                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+                {cv.t(locale, 'empty.skills')}
               </p>
             )}
           </Section>

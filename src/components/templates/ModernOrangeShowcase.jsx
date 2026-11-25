@@ -38,6 +38,7 @@ import { MODERN_ORANGE_DEFAULT_ACCENT_COLOR } from './modernOrange'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 import { AtsDetails } from './AtsDetails'
 import { getCertificateDetails, getEducationDetails, getProjectDetails } from '../../utils/atsDetails'
+import { cv } from '../../i18n/cv'
 
 // ATS mode is monochrome for every template in this app (see
 // CVPreview.jsx's generic-path comments) — this template is no exception,
@@ -252,7 +253,6 @@ export default function ModernOrangeShowcase({
   headingColor = null,
   directEditDispatch = null,
 }) {
-  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
   const configShowPhoto = showcaseConfig.showPhoto !== false
@@ -261,20 +261,18 @@ export default function ModernOrangeShowcase({
   // CVPreview.jsx's generic-path comments).
   const effectiveAccentColor = atsFriendlyMode ? MODERN_ORANGE_ATS_ACCENT_COLOR : accentColor
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
   const spaceIndex = fullName.indexOf(' ')
   const nameFirst = spaceIndex === -1 ? fullName : fullName.slice(0, spaceIndex)
   const nameRest = spaceIndex === -1 ? '' : fullName.slice(spaceIndex + 1)
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
+  const title = snapshot.title || cv.t(locale, 'placeholders.title')
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
   const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi tulee tähän.'
-      : 'Your professional summary goes here.')
+    || cv.t(locale, 'placeholders.summary')
 
   // Personal info: location, email, phone, website, LinkedIn — deliberately
   // no date-of-birth row, since CvData has no such field anywhere in the
@@ -285,9 +283,9 @@ export default function ModernOrangeShowcase({
     ['phone', snapshot.phone],
   ].filter(([, value]) => value)
   const directEditContactFields = [
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
   ]
   const websiteUrl = snapshot.links.website
   const linkedinUrl = snapshot.links.linkedin
@@ -307,19 +305,19 @@ export default function ModernOrangeShowcase({
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    personalInfo: isFinnish ? 'Henkilötiedot' : 'Personal Info',
-    profile: isFinnish ? 'Profiili' : 'Profile',
-    experience: isFinnish ? 'Kokemus' : 'Experience',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    projects: isFinnish ? 'Projektit' : 'Projects',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certifications',
-    skills: isFinnish ? 'Taidot' : 'Skills',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    viewProject: isFinnish ? 'Näytä projekti' : 'View project',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    personalInfo: cv.t(locale, 'templates.modernOrange.personalInfo'),
+    profile: cv.t(locale, 'sections.profile'),
+    experience: cv.t(locale, 'sections.experience'),
+    education: cv.t(locale, 'sections.education'),
+    projects: cv.t(locale, 'sections.projects'),
+    certificates: cv.t(locale, 'sections.certifications'),
+    skills: cv.t(locale, 'sections.skills'),
+    languages: cv.t(locale, 'sections.languages'),
+    viewProject: cv.t(locale, 'project.view'),
   }
 
   const renderMainSection = (key, placement = 'main', movedFrom = null) => {
@@ -332,11 +330,7 @@ export default function ModernOrangeShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'about' }}
                 value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                    : 'Your professional summary goes here.'
-                }
+                placeholder={cv.t(locale, 'placeholders.summary')}
                 multiline
               />
             ) : about}
@@ -353,7 +347,7 @@ export default function ModernOrangeShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   atsFriendlyMode,
@@ -372,7 +366,7 @@ export default function ModernOrangeShowcase({
               }))
             ) : (
               <p className="modern-orange-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -416,7 +410,7 @@ export default function ModernOrangeShowcase({
               })
             ) : (
               <p className="modern-orange-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -435,7 +429,7 @@ export default function ModernOrangeShowcase({
                     <div className="modern-orange-showcase__cert-text">
                       {item.name ? <p className="modern-orange-showcase__cert-name">{item.name}</p> : null}
                       {item.issuer ? <p className="modern-orange-showcase__cert-issuer">{item.issuer}</p> : null}
-                      {atsFriendlyMode ? <AtsDetails lines={getCertificateDetails(item, isFinnish)} /> : null}
+                      {atsFriendlyMode ? <AtsDetails lines={getCertificateDetails(item, locale)} /> : null}
                     </div>
                     {item.year ? <p className="modern-orange-showcase__cert-year">{item.year}</p> : null}
                   </div>
@@ -443,7 +437,7 @@ export default function ModernOrangeShowcase({
               ))
             ) : (
               <p className="modern-orange-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certifications will appear here.'}
+                {cv.t(locale, 'empty.certifications')}
               </p>
             )}
           </ul>
@@ -468,11 +462,11 @@ export default function ModernOrangeShowcase({
               ))
             ) : (
               <p className="modern-orange-showcase__empty modern-orange-showcase__empty--sidebar">
-                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+                {cv.t(locale, 'empty.skills')}
               </p>
             )}
             {directEditDispatch ? (
-              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+              <EditableChip skills={formData.skills} addLabel={cv.t(locale, 'add.item')} />
             ) : null}
           </div>
         </SidebarBlock>
@@ -495,7 +489,7 @@ export default function ModernOrangeShowcase({
               ))
             ) : (
               <p className="modern-orange-showcase__empty modern-orange-showcase__empty--sidebar">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             )}
           </div>
@@ -526,7 +520,7 @@ export default function ModernOrangeShowcase({
               })
             ) : (
               <p className="modern-orange-showcase__empty modern-orange-showcase__empty--sidebar">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -569,7 +563,7 @@ export default function ModernOrangeShowcase({
     >
       <header data-export-header="true" className="modern-orange-showcase__header">
         <p className="modern-orange-showcase__kicker" data-export-ignore="true">
-          {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+          {templateConfig.label} {cv.t(locale, 'kicker.template')}
         </p>
         <CvHeading as="h1" className="modern-orange-showcase__name" data-cv-name>
           {directEditDispatch ? (
@@ -577,7 +571,7 @@ export default function ModernOrangeShowcase({
               as="span"
               path={{ kind: 'root', field: 'fullName' }}
               value={formData.fullName}
-              placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              placeholder={cv.t(locale, 'placeholders.name')}
             />
           ) : (
             <>
@@ -604,7 +598,7 @@ export default function ModernOrangeShowcase({
               as="span"
               path={{ kind: 'root', field: 'title' }}
               value={formData.title}
-              placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              placeholder={cv.t(locale, 'placeholders.title')}
             />
           ) : title}
         </span>

@@ -33,6 +33,7 @@ import { formatDateRange, formatLinkDisplayValue, createSectionRouter } from './
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 // The capped, named palette (design-system §3). Assigned by running section
 // position (main sections first, then sidebar), wrapping after six. Order
@@ -169,14 +170,13 @@ export default function ColorfulCompactShowcase({
   templateConfig,
   directEditDispatch = null,
 }) {
-  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
   const spaceIndex = fullName.indexOf(' ')
   const nameFirst = spaceIndex === -1 ? fullName : fullName.slice(0, spaceIndex)
   const nameRest = spaceIndex === -1 ? '' : fullName.slice(spaceIndex + 1)
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
+  const title = snapshot.title || cv.t(locale, 'placeholders.title')
   const tagline = snapshot.tagline
   const photo = snapshot.photo
   const showPhoto = Boolean(photo) && isPhotoVisibleForTemplate(
@@ -184,9 +184,7 @@ export default function ColorfulCompactShowcase({
     templateConfig.id,
   )
   const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi tulee tähän.'
-      : 'Your professional summary goes here.')
+    || cv.t(locale, 'placeholders.summary')
 
   const websiteUrl = snapshot.links.website
   const contactItems = [
@@ -198,10 +196,10 @@ export default function ColorfulCompactShowcase({
   // Direct Edit shows every contact slot, empty or not, in the read-only
   // order. The website is a link field (links.website), not a root one.
   const directEditContactFields = [
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email', 'root'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location', 'root'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone', 'root'],
-    ['website', formData.links.website, isFinnish ? 'Verkkosivusto' : 'Website', 'link'],
+    ['email', formData.email, cv.t(locale, 'contact.email'), 'root'],
+    ['location', formData.location, cv.t(locale, 'contact.location'), 'root'],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone'), 'root'],
+    ['website', formData.links.website, cv.t(locale, 'contact.website'), 'link'],
   ]
 
   const linkEntries = Object.entries(snapshot.links)
@@ -221,18 +219,18 @@ export default function ColorfulCompactShowcase({
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    about: isFinnish ? 'Tietoa minusta' : 'About',
-    experience: isFinnish ? 'Kokemus' : 'Experience',
-    projects: isFinnish ? 'Projektit' : 'Projects',
-    skills: isFinnish ? 'Taidot' : 'Skills',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    links: isFinnish ? 'Linkit' : 'Links',
-    achievements: isFinnish ? 'Lisätiedot' : 'Extras',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    about: cv.t(locale, 'templates.colorfulCompact.about'),
+    experience: cv.t(locale, 'sections.experience'),
+    projects: cv.t(locale, 'sections.projects'),
+    skills: cv.t(locale, 'sections.skills'),
+    education: cv.t(locale, 'sections.education'),
+    languages: cv.t(locale, 'sections.languages'),
+    links: cv.t(locale, 'sections.links'),
+    achievements: cv.t(locale, 'templates.colorfulCompact.extras'),
   }
 
   const renderMainSection = (key, placement, movedFrom, color) => {
@@ -245,11 +243,7 @@ export default function ColorfulCompactShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'about' }}
                 value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                    : 'Your professional summary goes here.'
-                }
+                placeholder={cv.t(locale, 'placeholders.summary')}
                 multiline
               />
             ) : about}
@@ -266,7 +260,7 @@ export default function ColorfulCompactShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   directEditDispatch,
@@ -289,7 +283,7 @@ export default function ColorfulCompactShowcase({
               )
             ) : (
               <p className="colorful-compact-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -328,7 +322,7 @@ export default function ColorfulCompactShowcase({
               })
             ) : (
               <p className="colorful-compact-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -348,7 +342,7 @@ export default function ColorfulCompactShowcase({
             // every skill renders twice); the empty-state <p> stays out of
             // the chip row, matching Executive.
             <div className="colorful-compact-showcase__skill-row">
-              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+              <EditableChip skills={formData.skills} addLabel={cv.t(locale, 'add.item')} />
             </div>
           ) : snapshot.skills.length > 0 ? (
             <div className="colorful-compact-showcase__skill-row">
@@ -364,7 +358,7 @@ export default function ColorfulCompactShowcase({
             </div>
           ) : (
             <p className="colorful-compact-showcase__empty">
-              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              {cv.t(locale, 'empty.skills')}
             </p>
           )}
         </Section>
@@ -393,7 +387,7 @@ export default function ColorfulCompactShowcase({
               })
             ) : (
               <p className="colorful-compact-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -420,7 +414,7 @@ export default function ColorfulCompactShowcase({
               ))
             ) : (
               <p className="colorful-compact-showcase__empty">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             )}
           </div>
@@ -440,7 +434,7 @@ export default function ColorfulCompactShowcase({
               ))
             ) : (
               <p className="colorful-compact-showcase__empty">
-                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+                {cv.t(locale, 'empty.links')}
               </p>
             )}
           </div>
@@ -460,7 +454,7 @@ export default function ColorfulCompactShowcase({
               ))
             ) : (
               <p className="colorful-compact-showcase__empty">
-                {isFinnish ? 'Lisätiedot näkyvät tässä.' : 'Extras will appear here.'}
+                {cv.t(locale, 'templates.colorfulCompact.extrasEmpty')}
               </p>
             )}
           </div>
@@ -489,7 +483,7 @@ export default function ColorfulCompactShowcase({
       <header className="colorful-compact-showcase__header" data-export-header="true">
         <div className="min-w-0">
           <p className="colorful-compact-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           {/* The two-tone split can't live inside one contentEditable field,
               so Direct Edit shows the whole name as one field (in the lead
@@ -500,7 +494,7 @@ export default function ColorfulCompactShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : (
               <>
@@ -515,7 +509,7 @@ export default function ColorfulCompactShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             ) : title}
             {tagline ? ` · ${tagline}` : ''}

@@ -5,4 +5,13 @@
 // key fails the check.
 //
 //   { namespace: 'cv', prefix: 'sections', ids: SECTION_IDS }
-export const DYNAMIC_KEYS = []
+import { CV_SECTION_ORDER_KEYS, createEmptyLinks } from '../utils/cvForm.js'
+
+const LINK_KEYS = Object.keys(createEmptyLinks())
+
+export const DYNAMIC_KEYS = [
+  // cvForm.js's getSectionVisibilityFields and getLinkFields.
+  { namespace: 'cvForm', prefix: 'sections', ids: CV_SECTION_ORDER_KEYS },
+  { namespace: 'cvForm', prefix: 'linkLabels', ids: LINK_KEYS },
+  { namespace: 'cvForm', prefix: 'linkPlaceholders', ids: LINK_KEYS },
+]

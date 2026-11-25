@@ -42,6 +42,7 @@ import EditableList, { EditableCategorizedChip } from '../EditableList'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { EUROPEAN_DEFAULT_ACCENT_COLOR } from './european'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 const DENSITY_STEPS = ['standard', 'compact']
 
@@ -162,12 +163,10 @@ export default function EuropeanShowcase({
   const [lastContentKey, setLastContentKey] = useState(null)
   const [resizeTick, setResizeTick] = useState(0)
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
+  const title = snapshot.title || cv.t(locale, 'placeholders.title')
   const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi tulee tähän.'
-      : 'Your professional summary goes here.')
+    || cv.t(locale, 'placeholders.summary')
   const photo = snapshot.photo
   const showPhoto = Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
@@ -184,9 +183,9 @@ export default function EuropeanShowcase({
   // Direct Edit shows every contact slot, empty or not, in the read-only
   // order. LinkedIn is a link field (links.linkedin), not a root one.
   const directEditMetaFields = [
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location', 'root'],
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email', 'root'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone', 'root'],
+    ['location', formData.location, cv.t(locale, 'contact.location'), 'root'],
+    ['email', formData.email, cv.t(locale, 'contact.email'), 'root'],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone'), 'root'],
     ['linkedin', formData.links.linkedin, 'LinkedIn', 'link'],
   ]
 
@@ -214,18 +213,18 @@ export default function EuropeanShowcase({
   const sectionKeys = orderedSections.filter((key) => primarySet.has(key) && sectionVisibility[key])
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    about: isFinnish ? 'Esittely' : 'About',
-    experience: isFinnish ? 'Kokemus' : 'Experience',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    skills: isFinnish ? 'Taidot' : 'Skills',
-    projects: isFinnish ? 'Projektit' : 'Projects',
-    links: isFinnish ? 'Linkit' : 'Links',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    about: cv.t(locale, 'sections.about'),
+    experience: cv.t(locale, 'sections.experience'),
+    education: cv.t(locale, 'sections.education'),
+    skills: cv.t(locale, 'sections.skills'),
+    projects: cv.t(locale, 'sections.projects'),
+    links: cv.t(locale, 'sections.links'),
+    languages: cv.t(locale, 'sections.languages'),
+    certificates: cv.t(locale, 'sections.certificates'),
   }
 
   // ── One-page auto-fit ────────────────────────────────────────────────
@@ -296,11 +295,7 @@ export default function EuropeanShowcase({
                   as="span"
                   path={{ kind: 'root', field: 'about' }}
                   value={formData.about}
-                  placeholder={
-                    isFinnish
-                      ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                      : 'Your professional summary goes here.'
-                  }
+                  placeholder={cv.t(locale, 'placeholders.summary')}
                   multiline
                 />
               ) : about}
@@ -318,7 +313,7 @@ export default function EuropeanShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
               </EditableList>
@@ -333,7 +328,7 @@ export default function EuropeanShowcase({
             ) : (
               <Row label="">
                 <p className="european-showcase__empty">
-                  {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                  {cv.t(locale, 'empty.experience')}
                 </p>
               </Row>
             )}
@@ -362,7 +357,7 @@ export default function EuropeanShowcase({
             ) : (
               <Row label="">
                 <p className="european-showcase__empty">
-                  {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                  {cv.t(locale, 'empty.education')}
                 </p>
               </Row>
             )}
@@ -383,7 +378,7 @@ export default function EuropeanShowcase({
             <Row label="">
               <EditableCategorizedChip
                 categories={editableSkillCategories}
-                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+                addLabel={cv.t(locale, 'add.item')}
               />
             </Row>
           ) : skillCategories.length > 0 ? (
@@ -395,7 +390,7 @@ export default function EuropeanShowcase({
           ) : (
             <Row label="">
               <p className="european-showcase__empty">
-                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+                {cv.t(locale, 'empty.skills')}
               </p>
             </Row>
           )}
@@ -428,7 +423,7 @@ export default function EuropeanShowcase({
             ) : (
               <Row label="">
                 <p className="european-showcase__empty">
-                  {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                  {cv.t(locale, 'empty.projects')}
                 </p>
               </Row>
             )}
@@ -453,7 +448,7 @@ export default function EuropeanShowcase({
           ) : (
             <Row label="">
               <p className="european-showcase__empty">
-                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+                {cv.t(locale, 'empty.links')}
               </p>
             </Row>
           )}
@@ -473,7 +468,7 @@ export default function EuropeanShowcase({
           ) : (
             <Row label="">
               <p className="european-showcase__empty">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             </Row>
           )}
@@ -495,7 +490,7 @@ export default function EuropeanShowcase({
           ) : (
             <Row label="">
               <p className="european-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+                {cv.t(locale, 'empty.certificates')}
               </p>
             </Row>
           )}
@@ -532,7 +527,7 @@ export default function EuropeanShowcase({
       <header className="european-showcase__header" data-export-header="true">
         <div className="min-w-0">
           <p className="european-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className="european-showcase__name" data-cv-name>
             {directEditDispatch ? (
@@ -540,7 +535,7 @@ export default function EuropeanShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : fullName}
           </CvHeading>
@@ -550,7 +545,7 @@ export default function EuropeanShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             ) : title}
           </p>
@@ -600,9 +595,7 @@ export default function EuropeanShowcase({
 
       {stillOverflowing ? (
         <p className="european-showcase__overflow-warning" data-export-ignore="true">
-          {isFinnish
-            ? 'Sisältö saattaa ylittää yhden sivun edes tiiveimmällä asettelulla. Harkitse kohtien lyhentämistä.'
-            : 'Content may not fit one page even at the tightest density. Consider trimming a section.'}
+          {cv.t(locale, 'fitWarning')}
         </p>
       ) : null}
     </article>

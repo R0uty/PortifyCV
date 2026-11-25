@@ -34,6 +34,7 @@ import { CREATIVE_DEFAULT_ACCENT_COLOR } from './creative'
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 // Creative's own Experience-entry renderer — deliberately NOT
 // directEditExperienceEntry.jsx (the shared module for Classic
@@ -160,17 +161,15 @@ export default function CreativeShowcase({
   const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Creative Problem Solver')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
+  const title = snapshot.title || cv.t(locale, 'titleFallbacks.creative')
   const tagline = snapshot.tagline
   const photo = snapshot.photo
   const showPhoto = Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
-  const aboutPlaceholder = isFinnish
-    ? 'Ammatillinen yhteenvetosi tulee tähän.'
-    : 'Your professional summary goes here.'
+  const aboutPlaceholder = cv.t(locale, 'placeholders.summary')
   // In the read-only export/preview render (no directEditDispatch), never
   // fall back to the "will appear here" placeholder when About's own text
   // is blank but coreStrengths pills are present — those pills render
@@ -185,9 +184,9 @@ export default function CreativeShowcase({
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const directEditContactFields = [
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
 
   const linkEntries = Object.entries(snapshot.links)
@@ -219,19 +218,19 @@ export default function CreativeShowcase({
   const sectionNumber = (key) => numberedKeys.indexOf(key) + 1
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    about: isFinnish ? 'Hei' : 'Hello',
-    experience: isFinnish ? 'Työ' : 'Work',
-    projects: isFinnish ? 'Projektit' : 'Projects',
-    education: isFinnish ? 'Koulutus' : 'School',
-    skills: isFinnish ? 'Työkalut' : 'Toolkit',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
-    links: isFinnish ? 'Löydä minut' : 'Find me',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    about: cv.t(locale, 'templates.creative.about'),
+    experience: cv.t(locale, 'templates.creative.experience'),
+    projects: cv.t(locale, 'sections.projects'),
+    education: cv.t(locale, 'templates.creative.education'),
+    skills: cv.t(locale, 'templates.creative.skills'),
+    certificates: cv.t(locale, 'sections.certificates'),
+    links: cv.t(locale, 'templates.creative.links'),
+    languages: cv.t(locale, 'sections.languages'),
+    interests: cv.t(locale, 'sections.interests'),
   }
 
   const renderMainSection = (key, placement = 'main', movedFrom = null) => {
@@ -274,7 +273,7 @@ export default function CreativeShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
               </EditableList>
@@ -288,7 +287,7 @@ export default function CreativeShowcase({
               )
             ) : (
               <p className="creative-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -322,7 +321,7 @@ export default function CreativeShowcase({
               })
             ) : (
               <p className="creative-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -346,11 +345,11 @@ export default function CreativeShowcase({
               ))
             ) : (
               <p className="creative-showcase__empty">
-                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+                {cv.t(locale, 'empty.skills')}
               </p>
             )}
             {directEditDispatch ? (
-              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+              <EditableChip skills={formData.skills} addLabel={cv.t(locale, 'add.item')} />
             ) : null}
           </div>
         </Section>
@@ -375,7 +374,7 @@ export default function CreativeShowcase({
               ))
             ) : (
               <p className="creative-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -400,7 +399,7 @@ export default function CreativeShowcase({
               ))
             ) : (
               <p className="creative-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+                {cv.t(locale, 'empty.certificates')}
               </p>
             )}
           </div>
@@ -421,7 +420,7 @@ export default function CreativeShowcase({
               ))
             ) : (
               <p className="creative-showcase__empty">
-                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+                {cv.t(locale, 'empty.links')}
               </p>
             )}
           </div>
@@ -442,7 +441,7 @@ export default function CreativeShowcase({
               ))
             ) : (
               <p className="creative-showcase__empty">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             )}
           </div>
@@ -462,7 +461,7 @@ export default function CreativeShowcase({
               ))
             ) : (
               <p className="creative-showcase__empty">
-                {isFinnish ? 'Kiinnostuksen kohteet näkyvät tässä.' : 'Interests will appear here.'}
+                {cv.t(locale, 'empty.interests')}
               </p>
             )}
           </div>
@@ -502,7 +501,7 @@ export default function CreativeShowcase({
       <header className="creative-showcase__header" data-export-header="true">
         <div className="min-w-0">
           <p className="creative-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className="creative-showcase__name" data-cv-name>
             {directEditDispatch ? (
@@ -510,7 +509,7 @@ export default function CreativeShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : fullName}
           </CvHeading>
@@ -520,7 +519,7 @@ export default function CreativeShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             ) : title}
           </p>

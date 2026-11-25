@@ -35,6 +35,7 @@ import {
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 // Experience and Education share the `entry` class, whose spacing and
 // divider depend on position. Both pass isFirst/isLast from their own
@@ -156,8 +157,8 @@ export default function TechExecShowcase({
 
   const configShowPhoto = showcaseConfig.showPhoto !== false
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
+  const title = snapshot.title || cv.t(locale, 'placeholders.title')
   const tagline = snapshot.tagline
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
@@ -165,9 +166,7 @@ export default function TechExecShowcase({
     templateConfig.id,
   )
   const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi tulee tähän.'
-      : 'Your executive summary goes here.')
+    || cv.t(locale, 'placeholders.executiveSummary')
 
   const personalContactItems = [
     ['email', snapshot.email],
@@ -175,9 +174,9 @@ export default function TechExecShowcase({
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const directEditContactFields = [
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
 
   const linkEntries = Object.entries(snapshot.links)
@@ -207,21 +206,21 @@ export default function TechExecShowcase({
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
-    profile: isFinnish ? 'Profiili' : 'Profile',
-    experience: isFinnish ? 'Työkokemus' : 'Experience',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    skills: isFinnish ? 'Tekniset taidot' : 'Technical Skills',
-    coreStrengths: isFinnish ? 'Ydinvahvuudet' : 'Core Strengths',
-    certificates: isFinnish ? 'Sertifioinnit' : 'Certifications',
-    projects: isFinnish ? 'Projektit' : 'Projects',
-    links: isFinnish ? 'Linkit' : 'Links',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    viewCredential: cv.t(locale, 'certificate.viewCredential'),
+    profile: cv.t(locale, 'sections.profile'),
+    experience: cv.t(locale, 'templates.techExec.experience'),
+    education: cv.t(locale, 'sections.education'),
+    skills: cv.t(locale, 'sections.technicalSkills'),
+    coreStrengths: cv.t(locale, 'templates.techExec.coreStrengths'),
+    certificates: cv.t(locale, 'sections.execCertifications'),
+    projects: cv.t(locale, 'sections.projects'),
+    links: cv.t(locale, 'sections.links'),
+    languages: cv.t(locale, 'sections.languages'),
+    interests: cv.t(locale, 'sections.interests'),
   }
 
   const renderMainSection = (key, placement = 'main', movedFrom = null) => {
@@ -234,11 +233,7 @@ export default function TechExecShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'about' }}
                 value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                    : 'Your executive summary goes here.'
-                }
+                placeholder={cv.t(locale, 'placeholders.executiveSummary')}
                 multiline
               />
             ) : about}
@@ -255,7 +250,7 @@ export default function TechExecShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   directEditDispatch,
@@ -276,7 +271,7 @@ export default function TechExecShowcase({
               )
             ) : (
               <p className="tech-exec-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -309,7 +304,7 @@ export default function TechExecShowcase({
               ))
             ) : (
               <p className="tech-exec-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -328,7 +323,7 @@ export default function TechExecShowcase({
             <div className="tech-exec-showcase__skill-groups">
               <EditableCategorizedChip
                 categories={editableSkillCategories}
-                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+                addLabel={cv.t(locale, 'add.item')}
               />
             </div>
           ) : skillCategories.length > 0 ? (
@@ -342,7 +337,7 @@ export default function TechExecShowcase({
             </div>
           ) : (
             <p className="tech-exec-showcase__empty">
-              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              {cv.t(locale, 'empty.skills')}
             </p>
           )}
         </Section>
@@ -366,7 +361,7 @@ export default function TechExecShowcase({
               ))
             ) : (
               <p className="tech-exec-showcase__empty">
-                {isFinnish ? 'Ydinvahvuudet näkyvät tässä.' : 'Core strengths will appear here.'}
+                {cv.t(locale, 'templates.techExec.coreStrengthsEmpty')}
               </p>
             )}
           </div>
@@ -399,7 +394,7 @@ export default function TechExecShowcase({
               ))
             ) : (
               <p className="tech-exec-showcase__empty">
-                {isFinnish ? 'Sertifioinnit näkyvät tässä.' : 'Certifications will appear here.'}
+                {cv.t(locale, 'empty.execCertifications')}
               </p>
             )}
           </ul>
@@ -429,7 +424,7 @@ export default function TechExecShowcase({
               })
             ) : (
               <p className="tech-exec-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -453,7 +448,7 @@ export default function TechExecShowcase({
               ))
             ) : (
               <p className="tech-exec-showcase__empty">
-                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+                {cv.t(locale, 'empty.links')}
               </p>
             )}
           </div>
@@ -474,7 +469,7 @@ export default function TechExecShowcase({
               ))
             ) : (
               <p className="tech-exec-showcase__empty">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             )}
           </ul>
@@ -491,7 +486,7 @@ export default function TechExecShowcase({
             </p>
           ) : (
             <p className="tech-exec-showcase__empty">
-              {isFinnish ? 'Kiinnostuksen kohteet näkyvät tässä.' : 'Interests will appear here.'}
+              {cv.t(locale, 'empty.interests')}
             </p>
           )}
         </Section>
@@ -527,7 +522,7 @@ export default function TechExecShowcase({
       <header className="tech-exec-showcase__masthead" data-export-header="true">
         <div className="min-w-0">
           <p className="tech-exec-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className="tech-exec-showcase__name" data-cv-name>
             {directEditDispatch ? (
@@ -535,7 +530,7 @@ export default function TechExecShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : fullName}
           </CvHeading>
@@ -545,7 +540,7 @@ export default function TechExecShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             ) : title}
           </p>

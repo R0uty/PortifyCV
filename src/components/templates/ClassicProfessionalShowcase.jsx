@@ -31,6 +31,7 @@ import {
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
 import { renderExperienceEntry } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 function Section({ id, children }) {
   return (
@@ -50,7 +51,6 @@ export default function ClassicProfessionalShowcase({
   nameAlignment = 'center',
   directEditDispatch = null,
 }) {
-  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
   const contactItems = [
@@ -60,9 +60,9 @@ export default function ClassicProfessionalShowcase({
   ].filter(([, value]) => value)
   const linkedinUrl = snapshot.links.linkedin
   const directEditContactFields = [
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
 
   const sectionVisibility = {
@@ -78,16 +78,16 @@ export default function ClassicProfessionalShowcase({
   const sectionKeys = orderedSections.filter((key) => primarySet.has(key) && sectionVisibility[key])
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    summary: isFinnish ? 'Yhteenveto' : 'Professional Summary',
-    experience: isFinnish ? 'Kokemus' : 'Experience',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    skills: isFinnish ? 'Taidot' : 'Skills',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certifications',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    summary: cv.t(locale, 'sections.professionalSummary'),
+    experience: cv.t(locale, 'sections.experience'),
+    education: cv.t(locale, 'sections.education'),
+    skills: cv.t(locale, 'sections.skills'),
+    languages: cv.t(locale, 'sections.languages'),
+    certificates: cv.t(locale, 'sections.certifications'),
   }
 
   const renderSection = (key) => {
@@ -100,11 +100,7 @@ export default function ClassicProfessionalShowcase({
               as="span"
               path={{ kind: 'root', field: 'about' }}
               value={formData.about}
-              placeholder={
-                isFinnish
-                  ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                  : 'Your professional summary goes here.'
-              }
+              placeholder={cv.t(locale, 'placeholders.summary')}
               multiline
             />
           </p>
@@ -121,7 +117,7 @@ export default function ClassicProfessionalShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   directEditDispatch,
@@ -140,7 +136,7 @@ export default function ClassicProfessionalShowcase({
               }))
             ) : (
               <p className="classic-professional-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -169,7 +165,7 @@ export default function ClassicProfessionalShowcase({
               })
             ) : (
               <p className="classic-professional-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -188,11 +184,11 @@ export default function ClassicProfessionalShowcase({
               ))
             ) : (
               <p className="classic-professional-showcase__empty">
-                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+                {cv.t(locale, 'empty.skills')}
               </p>
             )}
             {directEditDispatch ? (
-              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+              <EditableChip skills={formData.skills} addLabel={cv.t(locale, 'add.item')} />
             ) : null}
           </div>
         </Section>
@@ -215,7 +211,7 @@ export default function ClassicProfessionalShowcase({
             </p>
           ) : (
             <p className="classic-professional-showcase__empty">
-              {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+              {cv.t(locale, 'empty.languages')}
             </p>
           )}
         </Section>
@@ -235,7 +231,7 @@ export default function ClassicProfessionalShowcase({
               ))
             ) : (
               <p className="classic-professional-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certifications will appear here.'}
+                {cv.t(locale, 'empty.certifications')}
               </p>
             )}
           </div>
@@ -264,14 +260,14 @@ export default function ClassicProfessionalShowcase({
     >
       <header data-export-header="true" className="classic-professional-showcase__header">
         <p className="classic-professional-showcase__kicker" data-export-ignore="true">
-          {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+          {templateConfig.label} {cv.t(locale, 'kicker.template')}
         </p>
         <CvHeading as="h1" className="classic-professional-showcase__name" data-cv-name>
           <EditableField
             as="span"
             path={{ kind: 'root', field: 'fullName' }}
             value={formData.fullName}
-            placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+            placeholder={cv.t(locale, 'placeholders.name')}
           />
         </CvHeading>
         <p className="classic-professional-showcase__role">
@@ -279,7 +275,7 @@ export default function ClassicProfessionalShowcase({
             as="span"
             path={{ kind: 'root', field: 'title' }}
             value={formData.title}
-            placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+            placeholder={cv.t(locale, 'placeholders.title')}
           />
         </p>
         {directEditDispatch || contactItems.length > 0 || linkedinUrl ? (

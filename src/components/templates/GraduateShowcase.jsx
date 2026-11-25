@@ -35,6 +35,7 @@ import {
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 function splitToBullets(text) {
   return text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
@@ -164,8 +165,8 @@ export default function GraduateShowcase({
   const showSidebar = showcaseConfig.showSidebar !== false
   const configShowPhoto = showcaseConfig.showPhoto !== false
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Vastavalmistunut kehittäjä' : 'Graduate Software Engineer')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
+  const title = snapshot.title || cv.t(locale, 'titleFallbacks.graduate')
   const tagline = snapshot.tagline
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
@@ -180,9 +181,9 @@ export default function GraduateShowcase({
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const directEditContactFields = [
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
 
   const linkEntries = Object.entries(snapshot.links)
@@ -212,26 +213,26 @@ export default function GraduateShowcase({
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
 
   const copy = {
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    role: isFinnish ? 'Rooli' : 'Role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    inProgress: isFinnish ? 'Opiskelee parhaillaan' : 'Currently studying',
-    viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
-    about: isFinnish ? 'Uratavoite' : 'Career Objective',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    projects: isFinnish ? 'Akateemiset projektit' : 'Academic Projects',
-    internships: isFinnish ? 'Harjoittelut' : 'Internships',
-    experience: isFinnish ? 'Työkokemus' : 'Work Experience',
-    publications: isFinnish ? 'Tutkimus' : 'Research',
-    volunteering: isFinnish ? 'Vapaaehtoistyö' : 'Volunteer Work',
-    skills: isFinnish ? 'Tekniset taidot' : 'Technical Skills',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
-    links: isFinnish ? 'Linkit' : 'Links',
-    achievements: isFinnish ? 'Saavutukset' : 'Achievements',
-    interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
-    memberships: isFinnish ? 'Ylimääräinen toiminta' : 'Extracurricular Activities',
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    role: cv.t(locale, 'templates.graduate.role'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    inProgress: cv.t(locale, 'templates.graduate.inProgress'),
+    viewCredential: cv.t(locale, 'certificate.viewCredential'),
+    about: cv.t(locale, 'templates.graduate.about'),
+    education: cv.t(locale, 'sections.education'),
+    projects: cv.t(locale, 'templates.graduate.projects'),
+    internships: cv.t(locale, 'sections.internships'),
+    experience: cv.t(locale, 'templates.graduate.experience'),
+    publications: cv.t(locale, 'templates.graduate.publications'),
+    volunteering: cv.t(locale, 'templates.graduate.volunteering'),
+    skills: cv.t(locale, 'sections.technicalSkills'),
+    languages: cv.t(locale, 'sections.languages'),
+    certificates: cv.t(locale, 'sections.certificates'),
+    links: cv.t(locale, 'sections.links'),
+    achievements: cv.t(locale, 'sections.achievements'),
+    interests: cv.t(locale, 'sections.interests'),
+    memberships: cv.t(locale, 'templates.graduate.memberships'),
   }
 
   const renderMainSection = (key, placement = 'main', movedFrom = null) => {
@@ -248,11 +249,7 @@ export default function GraduateShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'about' }}
                 value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Kerro lyhyesti, millaista roolia tavoittelet.'
-                    : 'Say briefly what kind of role you are aiming for.'
-                }
+                placeholder={cv.t(locale, 'templates.graduate.aboutPlaceholder')}
                 multiline
               />
             ) : about}
@@ -294,7 +291,7 @@ export default function GraduateShowcase({
               })
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -357,7 +354,7 @@ export default function GraduateShowcase({
               })
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -406,7 +403,7 @@ export default function GraduateShowcase({
               })
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Harjoittelut näkyvät tässä.' : 'Internships will appear here.'}
+                {cv.t(locale, 'empty.internships')}
               </p>
             )}
           </div>
@@ -422,7 +419,7 @@ export default function GraduateShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, { directEditDispatch, copy })}
               </EditableList>
@@ -436,7 +433,7 @@ export default function GraduateShowcase({
               )
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Työkokemus näkyy tässä.' : 'Work experience will appear here.'}
+                {cv.t(locale, 'templates.graduate.experienceEmpty')}
               </p>
             )}
           </div>
@@ -461,7 +458,7 @@ export default function GraduateShowcase({
               ))
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Tutkimus näkyy tässä.' : 'Research will appear here.'}
+                {cv.t(locale, 'templates.graduate.publicationsEmpty')}
               </p>
             )}
           </div>
@@ -485,7 +482,7 @@ export default function GraduateShowcase({
               })
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Vapaaehtoistyö näkyy tässä.' : 'Volunteer work will appear here.'}
+                {cv.t(locale, 'empty.volunteering')}
               </p>
             )}
           </div>
@@ -506,7 +503,7 @@ export default function GraduateShowcase({
             <div className="graduate-showcase__skill-group">
               <EditableCategorizedChip
                 categories={editableSkillCategories}
-                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+                addLabel={cv.t(locale, 'add.item')}
               />
             </div>
           ) : skillCategories.length > 0 ? (
@@ -522,7 +519,7 @@ export default function GraduateShowcase({
             ))
           ) : (
             <p className="graduate-showcase__empty">
-              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              {cv.t(locale, 'empty.skills')}
             </p>
           )}
         </Section>
@@ -542,7 +539,7 @@ export default function GraduateShowcase({
               ))
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             )}
           </div>
@@ -565,7 +562,7 @@ export default function GraduateShowcase({
                   ) : null}
                   {item.expiry ? (
                     <p className="graduate-showcase__list-meta">
-                      {isFinnish ? `Vanhenee ${item.expiry}` : `Expires ${item.expiry}`}
+                      {cv.t(locale, 'certificate.expires', { date: item.expiry })}
                     </p>
                   ) : null}
                   {item.credentialUrl ? (
@@ -577,7 +574,7 @@ export default function GraduateShowcase({
               ))
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+                {cv.t(locale, 'empty.certificates')}
               </p>
             )}
           </div>
@@ -601,7 +598,7 @@ export default function GraduateShowcase({
               ))
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+                {cv.t(locale, 'empty.links')}
               </p>
             )}
           </div>
@@ -625,7 +622,7 @@ export default function GraduateShowcase({
               ))
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Saavutukset näkyvät tässä.' : 'Achievements will appear here.'}
+                {cv.t(locale, 'empty.achievements')}
               </p>
             )}
           </div>
@@ -650,7 +647,7 @@ export default function GraduateShowcase({
               ))
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Toiminta näkyy tässä.' : 'Activities will appear here.'}
+                {cv.t(locale, 'templates.graduate.membershipsEmpty')}
               </p>
             )}
           </div>
@@ -668,7 +665,7 @@ export default function GraduateShowcase({
               ))
             ) : (
               <p className="graduate-showcase__empty">
-                {isFinnish ? 'Kiinnostuksen kohteet näkyvät tässä.' : 'Interests will appear here.'}
+                {cv.t(locale, 'empty.interests')}
               </p>
             )}
           </div>
@@ -706,7 +703,7 @@ export default function GraduateShowcase({
       <header data-export-header="true" className="graduate-showcase__header">
         <div className="min-w-0">
           <p className="graduate-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className="graduate-showcase__name" data-cv-name>
             {directEditDispatch ? (
@@ -714,7 +711,7 @@ export default function GraduateShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : fullName}
           </CvHeading>
@@ -724,7 +721,7 @@ export default function GraduateShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             ) : title}
           </p>

@@ -33,6 +33,7 @@ import EditableList, { EditableChip } from '../EditableList'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 import { AtsDetails } from './AtsDetails'
 import { getCertificateDetails, getEducationDetails } from '../../utils/atsDetails'
+import { cv } from '../../i18n/cv'
 
 // Experience and Education share the `entry` class, whose spacing and
 // divider depend on position. Both pass isFirst/isLast from their own
@@ -171,22 +172,19 @@ export default function NavyProfessionalShowcase({
   headingColor = null,
   directEditDispatch = null,
 }) {
-  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
   const configShowPhoto = showcaseConfig.showPhoto !== false
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Professional Title')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
+  const title = snapshot.title || cv.t(locale, 'placeholders.title')
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
   const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi tulee tähän.'
-      : 'Your professional summary goes here.')
+    || cv.t(locale, 'placeholders.summary')
 
   const contactItems = [
     ['phone', snapshot.phone],
@@ -197,9 +195,9 @@ export default function NavyProfessionalShowcase({
   // Direct Edit shows every contact slot, empty or not, in the read-only
   // order. LinkedIn is a link field (links.linkedin), not a root one.
   const directEditContactFields = [
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone', 'root', contactIcons.phone],
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email', 'root', contactIcons.email],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location', 'root', contactIcons.location],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone'), 'root', contactIcons.phone],
+    ['email', formData.email, cv.t(locale, 'contact.email'), 'root', contactIcons.email],
+    ['location', formData.location, cv.t(locale, 'contact.location'), 'root', contactIcons.location],
     ['linkedin', formData.links.linkedin, 'LinkedIn', 'link', devIcons.linkedin],
   ]
 
@@ -218,17 +216,17 @@ export default function NavyProfessionalShowcase({
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    profile: isFinnish ? 'Profiili' : 'Profile',
-    experience: isFinnish ? 'Kokemus' : 'Experience',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certifications',
-    contact: isFinnish ? 'Yhteystiedot' : 'Contact',
-    skills: isFinnish ? 'Taidot' : 'Skills',
-    languages: isFinnish ? 'Kielet' : 'Languages',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    profile: cv.t(locale, 'sections.profile'),
+    experience: cv.t(locale, 'sections.experience'),
+    education: cv.t(locale, 'sections.education'),
+    certificates: cv.t(locale, 'sections.certifications'),
+    contact: cv.t(locale, 'templates.navyProfessional.contact'),
+    skills: cv.t(locale, 'sections.skills'),
+    languages: cv.t(locale, 'sections.languages'),
   }
 
   const renderMainSection = (key, placement = 'main', movedFrom = null) => {
@@ -241,11 +239,7 @@ export default function NavyProfessionalShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'about' }}
                 value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                    : 'Your professional summary goes here.'
-                }
+                placeholder={cv.t(locale, 'placeholders.summary')}
                 multiline
               />
             ) : about}
@@ -262,7 +256,7 @@ export default function NavyProfessionalShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   atsFriendlyMode,
@@ -285,7 +279,7 @@ export default function NavyProfessionalShowcase({
               )
             ) : (
               <p className="navy-professional-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -319,7 +313,7 @@ export default function NavyProfessionalShowcase({
               })
             ) : (
               <p className="navy-professional-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -337,13 +331,13 @@ export default function NavyProfessionalShowcase({
                   <span className="navy-professional-showcase__cert-dot" aria-hidden="true" />
                   <span>
                     {[item.name, item.issuer, atsFriendlyMode ? item.year : ''].filter(Boolean).join(' – ')}
-                    {atsFriendlyMode ? <AtsDetails lines={getCertificateDetails(item, isFinnish)} /> : null}
+                    {atsFriendlyMode ? <AtsDetails lines={getCertificateDetails(item, locale)} /> : null}
                   </span>
                 </li>
               ))
             ) : (
               <p className="navy-professional-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certifications will appear here.'}
+                {cv.t(locale, 'empty.certifications')}
               </p>
             )}
           </ul>
@@ -362,14 +356,14 @@ export default function NavyProfessionalShowcase({
             {directEditDispatch ? (
               // Chips replace the read-only tags outright (never both, or
               // every skill renders twice).
-              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+              <EditableChip skills={formData.skills} addLabel={cv.t(locale, 'add.item')} />
             ) : snapshot.skills.length > 0 ? (
               snapshot.skills.map((skill) => (
                 <span key={skill} data-export-skill="true" className="navy-professional-showcase__tag">{skill}</span>
               ))
             ) : (
               <p className="navy-professional-showcase__empty navy-professional-showcase__empty--sidebar">
-                {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+                {cv.t(locale, 'empty.skills')}
               </p>
             )}
           </div>
@@ -390,7 +384,7 @@ export default function NavyProfessionalShowcase({
               ))
             ) : (
               <p className="navy-professional-showcase__empty navy-professional-showcase__empty--sidebar">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             )}
           </ul>
@@ -443,7 +437,7 @@ export default function NavyProfessionalShowcase({
             </div>
           ) : null}
           <p className="navy-professional-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className="navy-professional-showcase__name" data-cv-name>
             {directEditDispatch ? (
@@ -451,7 +445,7 @@ export default function NavyProfessionalShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : fullName}
           </CvHeading>
@@ -461,7 +455,7 @@ export default function NavyProfessionalShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             ) : title}
           </p>

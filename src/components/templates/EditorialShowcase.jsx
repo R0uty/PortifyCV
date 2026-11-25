@@ -30,6 +30,7 @@ import { formatDateRange, formatLinkDisplayValue } from './shared'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { EDITORIAL_DEFAULT_ACCENT_COLOR } from './editorial'
 import { renderExperienceEntry } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 function SectionHead({ number, title }) {
   return (
@@ -61,10 +62,9 @@ export default function EditorialShowcase({
   accentColor = EDITORIAL_DEFAULT_ACCENT_COLOR,
   directEditDispatch = null,
 }) {
-  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
   const photo = snapshot.photo
   const showPhoto = Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
@@ -80,9 +80,9 @@ export default function EditorialShowcase({
   ].filter(([, value]) => value)
 
   const directEditMetaFields = [
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
   ]
 
   const sectionVisibility = {
@@ -99,18 +99,18 @@ export default function EditorialShowcase({
   const sectionNumber = (key) => sectionKeys.indexOf(key) + 1
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    about: isFinnish ? 'Esittely' : 'About',
-    experience: isFinnish ? 'Kokemus' : 'Experience',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    skills: isFinnish ? 'Taidot' : 'Skills',
-    projects: isFinnish ? 'Projektit' : 'Projects',
-    links: isFinnish ? 'Linkit' : 'Links',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    about: cv.t(locale, 'sections.about'),
+    experience: cv.t(locale, 'sections.experience'),
+    education: cv.t(locale, 'sections.education'),
+    skills: cv.t(locale, 'sections.skills'),
+    projects: cv.t(locale, 'sections.projects'),
+    links: cv.t(locale, 'sections.links'),
+    languages: cv.t(locale, 'sections.languages'),
+    certificates: cv.t(locale, 'sections.certificates'),
   }
 
   const renderSection = (key) => {
@@ -122,11 +122,7 @@ export default function EditorialShowcase({
               as="span"
               path={{ kind: 'root', field: 'about' }}
               value={formData.about}
-              placeholder={
-                isFinnish
-                  ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                  : 'Your professional summary goes here.'
-              }
+              placeholder={cv.t(locale, 'placeholders.summary')}
               multiline
             />
           </p>
@@ -142,7 +138,7 @@ export default function EditorialShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   directEditDispatch,
@@ -159,7 +155,7 @@ export default function EditorialShowcase({
               }))
             ) : (
               <p className="editorial-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -187,7 +183,7 @@ export default function EditorialShowcase({
               })
             ) : (
               <p className="editorial-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -207,7 +203,7 @@ export default function EditorialShowcase({
               (a single chained ternary can only ever select one branch). */}
           {directEditDispatch ? (
             <div className="editorial-showcase__tag-row">
-              <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+              <EditableChip skills={formData.skills} addLabel={cv.t(locale, 'add.item')} />
             </div>
           ) : snapshot.skills.length > 0 ? (
             <div className="editorial-showcase__tag-row">
@@ -217,7 +213,7 @@ export default function EditorialShowcase({
             </div>
           ) : (
             <p className="editorial-showcase__empty">
-              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              {cv.t(locale, 'empty.skills')}
             </p>
           )}
         </Section>
@@ -250,7 +246,7 @@ export default function EditorialShowcase({
               })
             ) : (
               <p className="editorial-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -272,7 +268,7 @@ export default function EditorialShowcase({
               ))
             ) : (
               <p className="editorial-showcase__empty">
-                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+                {cv.t(locale, 'empty.links')}
               </p>
             )}
           </div>
@@ -295,7 +291,7 @@ export default function EditorialShowcase({
             </p>
           ) : (
             <p className="editorial-showcase__empty">
-              {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+              {cv.t(locale, 'empty.languages')}
             </p>
           )}
         </Section>
@@ -314,7 +310,7 @@ export default function EditorialShowcase({
               ))
             ) : (
               <p className="editorial-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+                {cv.t(locale, 'empty.certificates')}
               </p>
             )}
           </div>
@@ -341,14 +337,14 @@ export default function EditorialShowcase({
       <header className="editorial-showcase__header" data-export-header="true">
         <div className="min-w-0">
           <p className="editorial-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className="editorial-showcase__name" data-cv-name>
             <EditableField
               as="span"
               path={{ kind: 'root', field: 'fullName' }}
               value={formData.fullName}
-              placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+              placeholder={cv.t(locale, 'placeholders.name')}
             />
           </CvHeading>
           <p className="editorial-showcase__role">
@@ -356,7 +352,7 @@ export default function EditorialShowcase({
               as="span"
               path={{ kind: 'root', field: 'title' }}
               value={formData.title}
-              placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+              placeholder={cv.t(locale, 'placeholders.title')}
             />
           </p>
           {directEditDispatch || metaItems.length > 0 ? (

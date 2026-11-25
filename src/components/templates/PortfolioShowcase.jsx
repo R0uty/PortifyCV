@@ -58,6 +58,7 @@ import {
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 // Bolds metric-shaped tokens so quantified impact stands out, consistent
 // with every other Showcase's "metrics should be emphasised" treatment.
@@ -209,8 +210,8 @@ export default function PortfolioShowcase({
   const showSidebar = showcaseConfig.showSidebar !== false
   const configShowPhoto = showcaseConfig.showPhoto !== false
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Full Stack -kehittäjä' : 'Full Stack Developer')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
+  const title = snapshot.title || cv.t(locale, 'titleFallbacks.fullStack')
   const tagline = snapshot.tagline
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
@@ -225,9 +226,9 @@ export default function PortfolioShowcase({
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const directEditContactFields = [
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
 
   const linkEntries = Object.entries(snapshot.links)
@@ -257,31 +258,31 @@ export default function PortfolioShowcase({
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
-    about: isFinnish ? 'Minusta' : 'About Me',
-    aboutSub: isFinnish ? 'Vähän minusta' : 'A little about me',
-    projects: isFinnish ? 'Esitellyt projektit' : 'Featured Projects',
-    projectsSub: isFinnish ? 'Valikoituja töitä' : 'Selected work',
-    experience: isFinnish ? 'Kokemus' : 'Professional Experience',
-    caseStudies: isFinnish ? 'Tapaustutkimukset' : 'Case Studies',
-    openSource: isFinnish ? 'Avoin lähdekoodi' : 'Open Source',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    testimonials: isFinnish ? 'Suositukset' : 'Testimonials',
-    skills: isFinnish ? 'Teknologiat' : 'Tech Stack',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
-    links: isFinnish ? 'Linkit' : 'Links',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    achievements: isFinnish ? 'Saavutukset' : 'Achievements',
-    interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
-    problem: isFinnish ? 'Ongelma' : 'Problem',
-    solution: isFinnish ? 'Ratkaisu' : 'Solution',
-    technologies: isFinnish ? 'Teknologiat' : 'Technologies',
-    outcome: isFinnish ? 'Tulos' : 'Outcome',
-    lessons: isFinnish ? 'Opitut asiat' : 'Lessons Learned',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    viewCredential: cv.t(locale, 'certificate.viewCredential'),
+    about: cv.t(locale, 'templates.portfolio.about'),
+    aboutSub: cv.t(locale, 'templates.portfolio.aboutSub'),
+    projects: cv.t(locale, 'templates.portfolio.projects'),
+    projectsSub: cv.t(locale, 'templates.portfolio.projectsSub'),
+    experience: cv.t(locale, 'templates.portfolio.experience'),
+    caseStudies: cv.t(locale, 'sections.caseStudies'),
+    openSource: cv.t(locale, 'sections.openSource'),
+    education: cv.t(locale, 'sections.education'),
+    testimonials: cv.t(locale, 'sections.testimonials'),
+    skills: cv.t(locale, 'templates.portfolio.skills'),
+    certificates: cv.t(locale, 'sections.certificates'),
+    links: cv.t(locale, 'sections.links'),
+    languages: cv.t(locale, 'sections.languages'),
+    achievements: cv.t(locale, 'sections.achievements'),
+    interests: cv.t(locale, 'sections.interests'),
+    problem: cv.t(locale, 'caseStudy.problem'),
+    solution: cv.t(locale, 'caseStudy.solution'),
+    technologies: cv.t(locale, 'caseStudy.technologies'),
+    outcome: cv.t(locale, 'caseStudy.outcome'),
+    lessons: cv.t(locale, 'caseStudy.lessons'),
   }
 
   const renderMainSection = (key, placement = 'main', movedFrom = null) => {
@@ -294,11 +295,7 @@ export default function PortfolioShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'about' }}
                 value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                    : 'Your professional summary goes here.'
-                }
+                placeholder={cv.t(locale, 'placeholders.summary')}
                 multiline
               />
             ) : about}
@@ -347,7 +344,7 @@ export default function PortfolioShowcase({
                             rel="noreferrer"
                             className="portfolio-showcase__link-btn"
                           >
-                            {isFinnish ? 'Demo' : 'Live Demo'}
+                            {cv.t(locale, 'project.liveDemo')}
                           </a>
                         ) : null}
                       </div>
@@ -357,7 +354,7 @@ export default function PortfolioShowcase({
               })
             ) : (
               <p className="portfolio-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -373,7 +370,7 @@ export default function PortfolioShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   directEditDispatch,
@@ -392,7 +389,7 @@ export default function PortfolioShowcase({
               )
             ) : (
               <p className="portfolio-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -430,7 +427,7 @@ export default function PortfolioShowcase({
               })
             ) : (
               <p className="portfolio-showcase__empty">
-                {isFinnish ? 'Tapaustutkimukset näkyvät tässä.' : 'Case studies will appear here.'}
+                {cv.t(locale, 'empty.caseStudies')}
               </p>
             )}
           </div>
@@ -463,9 +460,7 @@ export default function PortfolioShowcase({
               })
             ) : (
               <p className="portfolio-showcase__empty">
-                {isFinnish
-                  ? 'Avoimen lähdekoodin projektit näkyvät tässä.'
-                  : 'Open-source repositories will appear here.'}
+                {cv.t(locale, 'empty.openSource')}
               </p>
             )}
           </div>
@@ -493,7 +488,7 @@ export default function PortfolioShowcase({
               ))
             ) : (
               <p className="portfolio-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -535,7 +530,7 @@ export default function PortfolioShowcase({
             <div className="portfolio-showcase__skill-group">
               <EditableCategorizedChip
                 categories={editableSkillCategories}
-                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+                addLabel={cv.t(locale, 'add.item')}
               />
             </div>
           ) : skillCategories.length > 0 ? (
@@ -557,7 +552,7 @@ export default function PortfolioShowcase({
             ))
           ) : (
             <p className="portfolio-showcase__empty">
-              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              {cv.t(locale, 'empty.skills')}
             </p>
           )}
         </Section>
@@ -586,7 +581,7 @@ export default function PortfolioShowcase({
               ))
             ) : (
               <p className="portfolio-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+                {cv.t(locale, 'empty.certificates')}
               </p>
             )}
           </div>
@@ -610,7 +605,7 @@ export default function PortfolioShowcase({
               ))
             ) : (
               <p className="portfolio-showcase__empty">
-                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+                {cv.t(locale, 'empty.links')}
               </p>
             )}
           </div>
@@ -631,7 +626,7 @@ export default function PortfolioShowcase({
               ))
             ) : (
               <p className="portfolio-showcase__empty">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             )}
           </div>
@@ -655,7 +650,7 @@ export default function PortfolioShowcase({
               ))
             ) : (
               <p className="portfolio-showcase__empty">
-                {isFinnish ? 'Saavutukset näkyvät tässä.' : 'Achievements will appear here.'}
+                {cv.t(locale, 'empty.achievements')}
               </p>
             )}
           </div>
@@ -673,7 +668,7 @@ export default function PortfolioShowcase({
               ))
             ) : (
               <p className="portfolio-showcase__empty">
-                {isFinnish ? 'Kiinnostuksen kohteet näkyvät tässä.' : 'Interests will appear here.'}
+                {cv.t(locale, 'empty.interests')}
               </p>
             )}
           </div>
@@ -711,7 +706,7 @@ export default function PortfolioShowcase({
       <header data-export-header="true" className="portfolio-showcase__header">
         <div className="min-w-0">
           <p className="portfolio-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className="portfolio-showcase__name" data-cv-name>
             {directEditDispatch ? (
@@ -719,7 +714,7 @@ export default function PortfolioShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : fullName}
           </CvHeading>
@@ -729,7 +724,7 @@ export default function PortfolioShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             ) : title}
           </p>

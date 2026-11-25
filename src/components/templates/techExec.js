@@ -6,6 +6,8 @@
 // `bg-[#2563EB]` classes are stocked in utilities.css.
 // Palette: Deep Navy #163D7A, Royal Blue #2563EB, Slate Gray #64748B.
 
+import { cv } from '../../i18n/cv'
+
 // Registry default accent — must match `accent.default` for `techExec` in
 // cvTemplates.js exactly (lowercase hex). See docs/template-design-system.md §6.
 export const TECHEXEC_DEFAULT_ACCENT_COLOR = '#2563eb'
@@ -133,8 +135,5 @@ export default {
   // Thin navy footer strip with an optional inspirational quote
   hasFooter: true,
   footerClasses: 'bg-[#163D7A] text-white',
-  footerQuote: (isFinnish) =>
-    isFinnish
-      ? '"Turvallisuus ei ole tuote, vaan prosessi."'
-      : '"Security is not a product, but a process."',
+  footerQuote: (locale) => cv.t(locale, 'templates.techExec.footerQuote'),
 }

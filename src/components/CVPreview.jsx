@@ -26,6 +26,7 @@ import {
   formatLinkDisplayValue,
 } from './templates/shared'
 import { getTemplateConfig } from './templates'
+import { cv } from '../i18n/cv'
 
 // Only one of these renders at a time (CVPreview picks by `variant`), but
 // the gallery thumbnails render all 14 templates at once, so lazy-loading
@@ -541,7 +542,7 @@ function CVPreview({
     )
   }
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
   const photo = snapshot.photo
   const showPhoto = Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
@@ -556,9 +557,9 @@ function CVPreview({
   // (personalContactItems above filters those out for the read-only
   // render, which is correct there and wrong here).
   const directEditContactFields = [
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
   const skills = snapshot.skills
   const experience = snapshot.experience
@@ -776,7 +777,7 @@ function CVPreview({
                 atsFriendlyMode ? 'border-gray-200' : t.aboutBorder(isDark)
               }`}
             >
-              {renderSectionHeading('about', isFinnish ? 'Esittely' : 'About')}
+              {renderSectionHeading('about', cv.t(locale, 'sections.about'))}
               {!atsFriendlyMode ? (
                 <div
                   data-export-summary-chip="true"
@@ -791,11 +792,7 @@ function CVPreview({
                 as="span"
                 path={{ kind: 'root', field: 'about' }}
                 value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                    : 'Your professional summary goes here.'
-                }
+                placeholder={cv.t(locale, 'placeholders.summary')}
                 multiline
               />
             </p>
@@ -820,7 +817,7 @@ function CVPreview({
                     item.startDate,
                     item.endDate,
                     item.isCurrent,
-                    isFinnish ? 'Nykyinen' : 'Present',
+                    cv.t(locale, 'dates.present'),
                   )
                   const heading = [item.role.trim(), item.company.trim()]
                     .filter(Boolean)
@@ -888,7 +885,7 @@ function CVPreview({
                                     : 'text-gray-900'
                               }`}
                             >
-                              {item.role.trim() || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')}
+                              {item.role.trim() || cv.t(locale, 'placeholders.untitledRole')}
                             </p>
                             {item.company.trim() || placeAndType ? (
                               <p className={`text-sm font-medium ${resolvedExperienceCompanyColor}`}>
@@ -906,7 +903,7 @@ function CVPreview({
                               the description into a cramped single column. Wrapping the date
                               onto two lines instead gives the description most of the row. */}
                           <p className={`shrink-0 sm:ml-4 sm:max-w-[5.5rem] sm:text-right ${experienceDateSize} font-medium uppercase tracking-[0.06em] ${metaTextClasses}`}>
-                            {dateRange || (isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending')}
+                            {dateRange || cv.t(locale, 'placeholders.datesPending')}
                           </p>
                         </div>
                       </div>
@@ -932,10 +929,10 @@ function CVPreview({
                                   as="span"
                                   path={{ kind: 'arrayItem', section: 'experience', index, field: 'role' }}
                                   value={item.role}
-                                  placeholder={isFinnish ? 'Nimeämätön rooli' : 'Untitled role'}
+                                  placeholder={cv.t(locale, 'placeholders.untitledRole')}
                                 />
                               ) : (
-                                item.role.trim() || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')
+                                item.role.trim() || cv.t(locale, 'placeholders.untitledRole')
                               )}
                             </p>
                             {directEditDispatch || item.company.trim() || placeAndType ? (
@@ -945,7 +942,7 @@ function CVPreview({
                                     as="span"
                                     path={{ kind: 'arrayItem', section: 'experience', index, field: 'company' }}
                                     value={item.company}
-                                    placeholder={isFinnish ? 'Yritys' : 'Company'}
+                                    placeholder={cv.t(locale, 'placeholders.company')}
                                   />
                                 ) : (
                                   item.company
@@ -961,7 +958,7 @@ function CVPreview({
                                     as="span"
                                     path={{ kind: 'arrayItem', section: 'experience', index, field: 'description' }}
                                     value={item.description}
-                                    placeholder={isFinnish ? 'Kuvaus' : 'Description'}
+                                    placeholder={cv.t(locale, 'placeholders.description')}
                                     multiline
                                   />
                                 ) : (
@@ -973,7 +970,7 @@ function CVPreview({
                           </div>
 
                           <p className={`shrink-0 sm:ml-4 ${experienceDateSize} font-medium uppercase tracking-[0.16em] ${metaTextClasses}`}>
-                            {dateRange || (isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending')}
+                            {dateRange || cv.t(locale, 'placeholders.datesPending')}
                           </p>
                         </div>
                       </div>
@@ -1002,7 +999,7 @@ function CVPreview({
                                   : 'text-gray-900'
                             }`}
                           >
-                            {heading || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')}
+                            {heading || cv.t(locale, 'placeholders.untitledRole')}
                           </p>
                           {placeAndType ? (
                             <p className="text-sm text-gray-500">{placeAndType}</p>
@@ -1016,7 +1013,7 @@ function CVPreview({
                         </div>
 
                         <p className={`shrink-0 ${experienceDateSize} font-medium uppercase tracking-[0.16em] ${metaTextClasses}`}>
-                          {dateRange || (isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending')}
+                          {dateRange || cv.t(locale, 'placeholders.datesPending')}
                         </p>
                       </div>
                     </div>
@@ -1029,19 +1026,17 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('experience', isFinnish ? 'Kokemus' : 'Experience')}
+            {renderSectionHeading('experience', cv.t(locale, 'sections.experience'))}
             <div className={`mt-5 ${experienceItemGap}`}>
               {directEditDispatch ? (
-                <EditableList section="experience" items={formData.experience} addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}>
+                <EditableList section="experience" items={formData.experience} addLabel={cv.t(locale, 'add.experience')}>
                   {(item, index) => renderExperienceEntry(item, index)}
                 </EditableList>
               ) : experience.length > 0 ? (
                 experience.map((item, index) => renderExperienceEntry(item, index, snapshot.sourceIndices.experience[index]))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish
-                    ? 'Kokemuskohdat näkyvät tässä aikajanamuodossa.'
-                    : 'Experience entries will render here in a timeline layout.'}
+                  {cv.t(locale, 'empty.experienceTimeline')}
                 </p>
               )}
             </div>
@@ -1060,7 +1055,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('education', isFinnish ? 'Koulutus' : 'Education')}
+            {renderSectionHeading('education', cv.t(locale, 'sections.education'))}
             <div className={`mt-5 ${educationItemGap}`}>
               {education.length > 0 ? (
                 education.map((item, index) => (
@@ -1075,7 +1070,7 @@ function CVPreview({
                         <p
                           className={`${educationTitleSize} font-semibold tracking-tight text-gray-900`}
                         >
-                          {item.degree.trim() || (isFinnish ? 'Koulutusmerkintä' : 'Education entry')}
+                          {item.degree.trim() || cv.t(locale, 'placeholders.educationEntry')}
                         </p>
                         {item.school.trim() || item.location.trim() ? (
                           <p className="text-sm text-gray-500">
@@ -1085,7 +1080,7 @@ function CVPreview({
                       </div>
                       <p className={`shrink-0 text-xs font-medium uppercase tracking-[0.16em] ${metaTextClasses}`}>
                         {formatDateRange(item.startDate, item.endDate)
-                          || (isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending')}
+                          || cv.t(locale, 'placeholders.datesPending')}
                       </p>
                     </div>
                     {item.honors ? (
@@ -1100,9 +1095,7 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish
-                    ? 'Koulutuskohdat näkyvät tässä, kun lisäät niitä.'
-                    : 'Education items will appear here once you add them.'}
+                  {cv.t(locale, 'empty.educationItems')}
                 </p>
               )}
             </div>
@@ -1125,7 +1118,7 @@ function CVPreview({
           classes: sectionClasses,
           children: (
             <>
-              {renderSectionHeading('skills', isFinnish ? 'Taidot' : 'Skills')}
+              {renderSectionHeading('skills', cv.t(locale, 'sections.skills'))}
               <div className="mt-4 space-y-3">
                 {skills.length > 0 ? (
                   categories.map((cat) => (
@@ -1142,7 +1135,7 @@ function CVPreview({
                   ))
                 ) : (
                   <p className="text-sm text-gray-500">
-                    {isFinnish ? 'Lisää taitoja näyttääksesi ne tageina.' : 'Add skills to display them as tags.'}
+                    {cv.t(locale, 'empty.skillTags')}
                   </p>
                 )}
               </div>
@@ -1158,7 +1151,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('skills', isFinnish ? 'Taidot' : 'Skills')}
+            {renderSectionHeading('skills', cv.t(locale, 'sections.skills'))}
             <div className="mt-4 flex flex-wrap gap-2">
               {directEditDispatch ? null : skills.length > 0 ? (
                 skills.map((skill) => (
@@ -1172,11 +1165,11 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Lisää taitoja näyttääksesi ne tageina.' : 'Add skills to display them as tags.'}
+                  {cv.t(locale, 'empty.skillTags')}
                 </p>
               )}
               {directEditDispatch ? (
-                <EditableChip skills={formData.skills} addLabel={isFinnish ? '+ Lisää' : '+ Add'} />
+                <EditableChip skills={formData.skills} addLabel={cv.t(locale, 'add.item')} />
               ) : null}
             </div>
           </>
@@ -1199,7 +1192,7 @@ function CVPreview({
           classes: sectionClasses,
           children: (
             <>
-              {renderSectionHeading('links', isFinnish ? 'Linkit' : 'Links')}
+              {renderSectionHeading('links', cv.t(locale, 'sections.links'))}
               <div className="mt-3 space-y-1.5">
                 {links.length > 0 ? (
                   links.map(([key, value]) => (
@@ -1213,9 +1206,7 @@ function CVPreview({
                   ))
                 ) : (
                   <p className="text-sm text-gray-500">
-                    {isFinnish
-                      ? 'Portfolio- ja some-linkit näkyvät tässä.'
-                      : 'Portfolio and social links will appear here.'}
+                    {cv.t(locale, 'empty.socialLinks')}
                   </p>
                 )}
               </div>
@@ -1232,7 +1223,7 @@ function CVPreview({
           classes: sectionClasses,
           children: (
             <>
-              {renderSectionHeading('links', isFinnish ? 'Linkit' : 'Links')}
+              {renderSectionHeading('links', cv.t(locale, 'sections.links'))}
               <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
                 {links.length > 0 ? (
                   links.map(([key, value]) => (
@@ -1243,9 +1234,7 @@ function CVPreview({
                   ))
                 ) : (
                   <p className="text-sm text-gray-500">
-                    {isFinnish
-                      ? 'Portfolio- ja some-linkit näkyvät tässä.'
-                      : 'Portfolio and social links will appear here.'}
+                    {cv.t(locale, 'empty.socialLinks')}
                   </p>
                 )}
               </div>
@@ -1261,7 +1250,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('links', isFinnish ? 'Linkit' : 'Links')}
+            {renderSectionHeading('links', cv.t(locale, 'sections.links'))}
             <div className={`mt-4 ${linkItemGap}`}>
               {links.length > 0 ? (
                 links.map(([key, value]) => (
@@ -1280,9 +1269,7 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish
-                    ? 'Portfolio- ja some-linkit näkyvät tässä.'
-                    : 'Portfolio and social links will appear here.'}
+                  {cv.t(locale, 'empty.socialLinks')}
                 </p>
               )}
             </div>
@@ -1300,7 +1287,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('coreStrengths', isFinnish ? 'Vahvuudet' : 'Core Strengths')}
+            {renderSectionHeading('coreStrengths', cv.t(locale, 'sections.coreStrengths'))}
             <div className="mt-4 space-y-4">
               {coreStrengths.length > 0 ? (
                 coreStrengths.map((item, index) => (
@@ -1323,7 +1310,7 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Vahvuudet näkyvät tässä.' : 'Core strengths will appear here.'}
+                  {cv.t(locale, 'empty.coreStrengths')}
                 </p>
               )}
             </div>
@@ -1341,7 +1328,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('certificates', isFinnish ? 'Sertifikaatit' : 'Certificates')}
+            {renderSectionHeading('certificates', cv.t(locale, 'sections.certificates'))}
             {certificates.length > 0 ? (
               <ul className="mt-4 space-y-2">
                 {certificates.map((item, index) => (
@@ -1363,7 +1350,7 @@ function CVPreview({
                       {item.expiry ? (
                         <span className={metaTextClasses}>
                           {' · '}
-                          {isFinnish ? `Vanhenee ${item.expiry}` : `Expires ${item.expiry}`}
+                          {cv.t(locale, 'certificate.expires', { date: item.expiry })}
                         </span>
                       ) : null}
                       {item.credentialUrl ? (
@@ -1378,7 +1365,7 @@ function CVPreview({
               </ul>
             ) : (
               <p className="mt-4 text-sm text-gray-500">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+                {cv.t(locale, 'empty.certificates')}
               </p>
             )}
           </>
@@ -1395,7 +1382,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('projects', isFinnish ? 'Projektit' : 'Projects')}
+            {renderSectionHeading('projects', cv.t(locale, 'sections.projects'))}
             <div className="mt-4 space-y-4">
               {projects.length > 0 ? (
                 projects.map((item, index) => (
@@ -1439,7 +1426,7 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                  {cv.t(locale, 'empty.projects')}
                 </p>
               )}
             </div>
@@ -1457,7 +1444,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('languages', isFinnish ? 'Kielet' : 'Languages')}
+            {renderSectionHeading('languages', cv.t(locale, 'sections.languages'))}
             <div className="mt-4 space-y-1.5">
               {languages.length > 0 ? (
                 languages.map((item, index) => (
@@ -1473,7 +1460,7 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                  {cv.t(locale, 'empty.languages')}
                 </p>
               )}
             </div>
@@ -1491,7 +1478,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('interests', isFinnish ? 'Kiinnostuksen kohteet' : 'Interests')}
+            {renderSectionHeading('interests', cv.t(locale, 'sections.interests'))}
             <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
               {interests.length > 0 ? (
                 interests.map((item, index) => (
@@ -1509,7 +1496,7 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Kiinnostuksen kohteet näkyvät tässä.' : 'Interests will appear here.'}
+                  {cv.t(locale, 'empty.interests')}
                 </p>
               )}
             </div>
@@ -1527,7 +1514,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('achievements', isFinnish ? 'Saavutukset' : 'Achievements')}
+            {renderSectionHeading('achievements', cv.t(locale, 'sections.achievements'))}
             <div className="mt-4 space-y-4">
               {achievements.length > 0 ? (
                 achievements.map((item, index) => (
@@ -1547,7 +1534,7 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Saavutukset näkyvät tässä.' : 'Achievements will appear here.'}
+                  {cv.t(locale, 'empty.achievements')}
                 </p>
               )}
             </div>
@@ -1565,7 +1552,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('openSource', isFinnish ? 'Avoin lähdekoodi' : 'Open Source')}
+            {renderSectionHeading('openSource', cv.t(locale, 'sections.openSource'))}
             <div className="mt-4 space-y-4">
               {openSource.length > 0 ? (
                 openSource.map((item, index) => {
@@ -1596,7 +1583,7 @@ function CVPreview({
                 })
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Avoimen lähdekoodin projektit näkyvät tässä.' : 'Open-source repositories will appear here.'}
+                  {cv.t(locale, 'empty.openSource')}
                 </p>
               )}
             </div>
@@ -1614,7 +1601,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('publications', isFinnish ? 'Julkaisut' : 'Publications')}
+            {renderSectionHeading('publications', cv.t(locale, 'sections.publications'))}
             <div className="mt-4 space-y-4">
               {publications.length > 0 ? (
                 publications.map((item, index) => (
@@ -1634,7 +1621,7 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Julkaisut näkyvät tässä.' : 'Publications will appear here.'}
+                  {cv.t(locale, 'empty.publications')}
                 </p>
               )}
             </div>
@@ -1652,7 +1639,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('leadership', isFinnish ? 'Johtamiskokemus' : 'Leadership Experience')}
+            {renderSectionHeading('leadership', cv.t(locale, 'sections.leadership'))}
             <div className="mt-4 space-y-4">
               {leadership.length > 0 ? (
                 leadership.map((item, index) => {
@@ -1677,7 +1664,7 @@ function CVPreview({
                 })
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Johtamiskokemus näkyy tässä.' : 'Leadership experience will appear here.'}
+                  {cv.t(locale, 'empty.leadership')}
                 </p>
               )}
             </div>
@@ -1695,7 +1682,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('memberships', isFinnish ? 'Ammattijäsenyydet' : 'Professional Memberships')}
+            {renderSectionHeading('memberships', cv.t(locale, 'sections.memberships'))}
             <div className="mt-4 space-y-3">
               {memberships.length > 0 ? (
                 memberships.map((item, index) => (
@@ -1712,7 +1699,7 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Jäsenyydet näkyvät tässä.' : 'Memberships will appear here.'}
+                  {cv.t(locale, 'empty.memberships')}
                 </p>
               )}
             </div>
@@ -1730,7 +1717,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('speaking', isFinnish ? 'Esiintymiset' : 'Speaking')}
+            {renderSectionHeading('speaking', cv.t(locale, 'sections.speaking'))}
             <div className="mt-4 space-y-4">
               {speaking.length > 0 ? (
                 speaking.map((item, index) => (
@@ -1750,7 +1737,7 @@ function CVPreview({
                 ))
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Esiintymiset näkyvät tässä.' : 'Speaking engagements will appear here.'}
+                  {cv.t(locale, 'empty.speaking')}
                 </p>
               )}
             </div>
@@ -1768,7 +1755,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('volunteering', isFinnish ? 'Vapaaehtoistyö' : 'Volunteering')}
+            {renderSectionHeading('volunteering', cv.t(locale, 'sections.volunteering'))}
             <div className="mt-4 space-y-4">
               {volunteering.length > 0 ? (
                 volunteering.map((item, index) => {
@@ -1787,7 +1774,7 @@ function CVPreview({
                 })
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Vapaaehtoistyö näkyy tässä.' : 'Volunteer work will appear here.'}
+                  {cv.t(locale, 'empty.volunteering')}
                 </p>
               )}
             </div>
@@ -1805,12 +1792,12 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('internships', isFinnish ? 'Harjoittelut' : 'Internships')}
+            {renderSectionHeading('internships', cv.t(locale, 'sections.internships'))}
             <div className="mt-4 space-y-4">
               {internships.length > 0 ? (
                 internships.map((item, index) => {
                   const heading = [item.role, item.company].filter(Boolean).join(' @ ')
-                    || (isFinnish ? 'Nimeämätön rooli' : 'Untitled role')
+                    || cv.t(locale, 'placeholders.untitledRole')
                   const dateRange = formatDateRange(item.startDate, item.endDate)
 
                   return (
@@ -1837,7 +1824,7 @@ function CVPreview({
                 })
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Harjoittelut näkyvät tässä.' : 'Internships will appear here.'}
+                  {cv.t(locale, 'empty.internships')}
                 </p>
               )}
             </div>
@@ -1856,16 +1843,16 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('caseStudies', isFinnish ? 'Tapaustutkimukset' : 'Case Studies')}
+            {renderSectionHeading('caseStudies', cv.t(locale, 'sections.caseStudies'))}
             <div className="mt-4 space-y-5">
               {caseStudies.length > 0 ? (
                 caseStudies.map((item, index) => {
                   const rows = [
-                    [isFinnish ? 'Ongelma' : 'Problem', item.problem],
-                    [isFinnish ? 'Ratkaisu' : 'Solution', item.solution],
-                    [isFinnish ? 'Teknologiat' : 'Technologies', item.technologies],
-                    [isFinnish ? 'Tulos' : 'Outcome', item.outcome],
-                    [isFinnish ? 'Opitut asiat' : 'Lessons Learned', item.lessons],
+                    [cv.t(locale, 'caseStudy.problem'), item.problem],
+                    [cv.t(locale, 'caseStudy.solution'), item.solution],
+                    [cv.t(locale, 'caseStudy.technologies'), item.technologies],
+                    [cv.t(locale, 'caseStudy.outcome'), item.outcome],
+                    [cv.t(locale, 'caseStudy.lessons'), item.lessons],
                   ].filter(([, value]) => value)
 
                   return (
@@ -1886,7 +1873,7 @@ function CVPreview({
                 })
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Tapaustutkimukset näkyvät tässä.' : 'Case studies will appear here.'}
+                  {cv.t(locale, 'empty.caseStudies')}
                 </p>
               )}
             </div>
@@ -1904,7 +1891,7 @@ function CVPreview({
         classes: sectionClasses,
         children: (
           <>
-            {renderSectionHeading('testimonials', isFinnish ? 'Suositukset' : 'Testimonials')}
+            {renderSectionHeading('testimonials', cv.t(locale, 'sections.testimonials'))}
             <div className="mt-4 space-y-4">
               {testimonials.length > 0 ? (
                 testimonials.map((item, index) => {
@@ -1923,7 +1910,7 @@ function CVPreview({
                 })
               ) : (
                 <p className="text-sm text-gray-500">
-                  {isFinnish ? 'Suositukset näkyvät tässä.' : 'Testimonials will appear here.'}
+                  {cv.t(locale, 'empty.testimonials')}
                 </p>
               )}
             </div>
@@ -1970,8 +1957,8 @@ function CVPreview({
               className={`ds-kicker print:hidden ${atsFriendlyMode ? 'text-gray-500' : 'text-current/80'}`}
             >
               {atsFriendlyMode
-                ? isFinnish ? 'ATS-ystävällinen tila' : 'ATS-friendly mode'
-                : `${templateConfig.label} ${isFinnish ? 'pohja' : 'Template'}`}
+                ? cv.t(locale, 'atsMode')
+                : `${templateConfig.label} ${cv.t(locale, 'kicker.template')}`}
             </p>
 
             {/* Full name heading — uses template-specific font size and weight */}
@@ -1986,7 +1973,7 @@ function CVPreview({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             </CvHeading>
 
@@ -1996,7 +1983,7 @@ function CVPreview({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             </p>
 
@@ -2165,7 +2152,7 @@ function CVPreview({
           className={`px-5 py-3 text-center sm:px-8 print:px-0 ${t.footerClasses || 'bg-gray-900 text-white'}`}
         >
           <p className="text-[0.68rem] italic tracking-[0.02em] opacity-80">
-            {t.footerQuote(isFinnish)}
+            {t.footerQuote(locale)}
           </p>
         </footer>
       ) : null}

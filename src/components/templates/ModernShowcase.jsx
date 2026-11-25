@@ -38,6 +38,7 @@ import {
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
+import { cv } from '../../i18n/cv'
 
 // Small outline glyph for interest chips — a single shared glyph rather than
 // per-interest icon matching, consistent with the Creative template's choice.
@@ -197,17 +198,15 @@ export default function ModernShowcase({
   const showSidebar = showcaseConfig.showSidebar !== false
   const configShowPhoto = showcaseConfig.showPhoto !== false
 
-  const fullName = snapshot.fullName || (isFinnish ? 'Nimesi' : 'Your Name')
-  const title = snapshot.title || (isFinnish ? 'Ammattinimike' : 'Senior Professional')
+  const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
+  const title = snapshot.title || cv.t(locale, 'titleFallbacks.senior')
   const photo = snapshot.photo
   const showPhoto = configShowPhoto && Boolean(photo) && isPhotoVisibleForTemplate(
     formData.photoVisibilityByTemplate,
     templateConfig.id,
   )
   const about = snapshot.about
-    || (isFinnish
-      ? 'Ammatillinen yhteenvetosi tulee tähän.'
-      : 'Your professional summary goes here.')
+    || cv.t(locale, 'placeholders.summary')
 
   const personalContactItems = [
     ['email', snapshot.email],
@@ -215,9 +214,9 @@ export default function ModernShowcase({
     ['location', snapshot.location],
   ].filter(([, value]) => value)
   const directEditContactFields = [
-    ['email', formData.email, isFinnish ? 'Sähköposti' : 'Email'],
-    ['phone', formData.phone, isFinnish ? 'Puhelin' : 'Phone'],
-    ['location', formData.location, isFinnish ? 'Sijainti' : 'Location'],
+    ['email', formData.email, cv.t(locale, 'contact.email')],
+    ['phone', formData.phone, cv.t(locale, 'contact.phone')],
+    ['location', formData.location, cv.t(locale, 'contact.location')],
   ]
 
   const linkEntries = Object.entries(snapshot.links)
@@ -247,21 +246,21 @@ export default function ModernShowcase({
   const sidebarSectionKeys = orderedSections.filter((key) => secondarySet.has(key) && sectionVisibility[key])
 
   const copy = {
-    untitledRole: isFinnish ? 'Nimeämätön rooli' : 'Untitled role',
-    company: isFinnish ? 'Yritys' : 'Company',
-    descriptionPlaceholder: isFinnish ? 'Kuvaus' : 'Description',
-    datesPending: isFinnish ? 'Päivämäärät puuttuvat' : 'Dates pending',
-    viewCredential: isFinnish ? 'Näytä todennus' : 'View credential',
-    summary: isFinnish ? 'Yhteenveto' : 'Professional Summary',
-    experience: isFinnish ? 'Kokemus' : 'Experience',
-    education: isFinnish ? 'Koulutus' : 'Education',
-    projects: isFinnish ? 'Projektit' : 'Projects',
-    achievements: isFinnish ? 'Saavutukset' : 'Achievements',
-    skills: isFinnish ? 'Taidot' : 'Skills',
-    languages: isFinnish ? 'Kielet' : 'Languages',
-    certificates: isFinnish ? 'Sertifikaatit' : 'Certificates',
-    links: isFinnish ? 'Linkit' : 'Links',
-    interests: isFinnish ? 'Kiinnostuksen kohteet' : 'Interests',
+    untitledRole: cv.t(locale, 'placeholders.untitledRole'),
+    company: cv.t(locale, 'placeholders.company'),
+    descriptionPlaceholder: cv.t(locale, 'placeholders.description'),
+    datesPending: cv.t(locale, 'placeholders.datesPending'),
+    viewCredential: cv.t(locale, 'certificate.viewCredential'),
+    summary: cv.t(locale, 'sections.professionalSummary'),
+    experience: cv.t(locale, 'sections.experience'),
+    education: cv.t(locale, 'sections.education'),
+    projects: cv.t(locale, 'sections.projects'),
+    achievements: cv.t(locale, 'sections.achievements'),
+    skills: cv.t(locale, 'sections.skills'),
+    languages: cv.t(locale, 'sections.languages'),
+    certificates: cv.t(locale, 'sections.certificates'),
+    links: cv.t(locale, 'sections.links'),
+    interests: cv.t(locale, 'sections.interests'),
   }
 
   const renderMainSection = (key, placement = 'main', movedFrom = null) => {
@@ -274,11 +273,7 @@ export default function ModernShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'about' }}
                 value={formData.about}
-                placeholder={
-                  isFinnish
-                    ? 'Ammatillinen yhteenvetosi tulee tähän.'
-                    : 'Your professional summary goes here.'
-                }
+                placeholder={cv.t(locale, 'placeholders.summary')}
                 multiline
               />
             ) : about}
@@ -295,7 +290,7 @@ export default function ModernShowcase({
               <EditableList
                 section="experience"
                 items={formData.experience}
-                addLabel={isFinnish ? '+ Lisää työkokemus' : '+ Add experience'}
+                addLabel={cv.t(locale, 'add.experience')}
               >
                 {(item, index) => renderExperienceEntry(item, index, {
                   directEditDispatch,
@@ -316,7 +311,7 @@ export default function ModernShowcase({
               )
             ) : (
               <p className="modern-showcase__empty">
-                {isFinnish ? 'Kokemuskohdat näkyvät tässä.' : 'Experience entries will appear here.'}
+                {cv.t(locale, 'empty.experience')}
               </p>
             )}
           </div>
@@ -344,7 +339,7 @@ export default function ModernShowcase({
               ))
             ) : (
               <p className="modern-showcase__empty">
-                {isFinnish ? 'Koulutus näkyy tässä.' : 'Education will appear here.'}
+                {cv.t(locale, 'empty.education')}
               </p>
             )}
           </div>
@@ -381,7 +376,7 @@ export default function ModernShowcase({
               })
             ) : (
               <p className="modern-showcase__empty">
-                {isFinnish ? 'Projektit näkyvät tässä.' : 'Projects will appear here.'}
+                {cv.t(locale, 'empty.projects')}
               </p>
             )}
           </div>
@@ -408,7 +403,7 @@ export default function ModernShowcase({
               ))
             ) : (
               <p className="modern-showcase__empty">
-                {isFinnish ? 'Saavutukset näkyvät tässä.' : 'Achievements will appear here.'}
+                {cv.t(locale, 'empty.achievements')}
               </p>
             )}
           </ul>
@@ -429,7 +424,7 @@ export default function ModernShowcase({
             <div className="modern-showcase__skill-group">
               <EditableCategorizedChip
                 categories={editableSkillCategories}
-                addLabel={isFinnish ? '+ Lisää' : '+ Add'}
+                addLabel={cv.t(locale, 'add.item')}
               />
             </div>
           ) : skillCategories.length > 0 ? (
@@ -445,7 +440,7 @@ export default function ModernShowcase({
             ))
           ) : (
             <p className="modern-showcase__empty">
-              {isFinnish ? 'Taidot näkyvät tässä.' : 'Skills will appear here.'}
+              {cv.t(locale, 'empty.skills')}
             </p>
           )}
         </Section>
@@ -465,7 +460,7 @@ export default function ModernShowcase({
               ))
             ) : (
               <p className="modern-showcase__empty">
-                {isFinnish ? 'Kielet näkyvät tässä.' : 'Languages will appear here.'}
+                {cv.t(locale, 'empty.languages')}
               </p>
             )}
           </div>
@@ -495,7 +490,7 @@ export default function ModernShowcase({
               ))
             ) : (
               <p className="modern-showcase__empty">
-                {isFinnish ? 'Sertifikaatit näkyvät tässä.' : 'Certificates will appear here.'}
+                {cv.t(locale, 'empty.certificates')}
               </p>
             )}
           </div>
@@ -519,7 +514,7 @@ export default function ModernShowcase({
               ))
             ) : (
               <p className="modern-showcase__empty">
-                {isFinnish ? 'Linkit näkyvät tässä.' : 'Links will appear here.'}
+                {cv.t(locale, 'empty.links')}
               </p>
             )}
           </div>
@@ -540,7 +535,7 @@ export default function ModernShowcase({
               ))
             ) : (
               <p className="modern-showcase__empty">
-                {isFinnish ? 'Kiinnostuksen kohteet näkyvät tässä.' : 'Interests will appear here.'}
+                {cv.t(locale, 'empty.interests')}
               </p>
             )}
           </div>
@@ -573,7 +568,7 @@ export default function ModernShowcase({
       <header data-export-header="true" className="modern-showcase__header">
         <div className="min-w-0">
           <p className="modern-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {isFinnish ? 'pohja' : 'Template'}
+            {templateConfig.label} {cv.t(locale, 'kicker.template')}
           </p>
           <CvHeading as="h1" className="modern-showcase__name" data-cv-name>
             {directEditDispatch ? (
@@ -581,7 +576,7 @@ export default function ModernShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'fullName' }}
                 value={formData.fullName}
-                placeholder={isFinnish ? 'Nimesi' : 'Your Name'}
+                placeholder={cv.t(locale, 'placeholders.name')}
               />
             ) : fullName}
           </CvHeading>
@@ -591,7 +586,7 @@ export default function ModernShowcase({
                 as="span"
                 path={{ kind: 'root', field: 'title' }}
                 value={formData.title}
-                placeholder={isFinnish ? 'Ammattinimike' : 'Professional Title'}
+                placeholder={cv.t(locale, 'placeholders.title')}
               />
             ) : title}
           </p>
