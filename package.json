@@ -20,6 +20,7 @@
     "check:applications": "node scripts/check-applications.mjs",
     "check:job-match": "node scripts/check-job-match.mjs",
     "check:bullet-ideas": "node scripts/check-bullet-ideas.mjs",
+    "check:i18n": "node scripts/check-i18n.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "test:e2e:fast": "playwright test --grep-invert @slow",

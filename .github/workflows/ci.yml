@@ -71,6 +71,9 @@ jobs:
       - name: Bullet ideas checks
         run: npm run check:bullet-ideas
 
+      - name: Translation file checks
+        run: npm run check:i18n
+
   e2e:
     name: End-to-end smoke tests
     runs-on: ubuntu-latest
