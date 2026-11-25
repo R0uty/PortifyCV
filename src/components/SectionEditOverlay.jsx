@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
 import SectionEditorPopup from './SectionEditorPopup'
 import { getSectionSchema } from '../utils/sectionSchema'
+import { builder } from '../i18n/builder'
 
 // Every Showcase already tags its section wrappers with
 // data-export-section (and its header with data-export-header) for the
@@ -570,7 +571,7 @@ export default function SectionEditOverlay({
                 onFocus={() => focusSection(sectionKey)}
                 onClick={() => openSection(sectionKey)}
               >
-                {locale === 'fi' ? `Muokkaa osiota ${label}` : `Edit ${label} section`}
+                {builder.t(locale, 'directEdit.editSectionNamed', { section: label })}
               </button>
             )
           })}
@@ -591,7 +592,7 @@ export default function SectionEditOverlay({
             style={{ top: `${pencil.top}px`, left: `${pencil.right}px` }}
             onPointerDown={(event) => event.stopPropagation()}
             onClick={() => openSection(pencil.sectionKey)}
-            aria-label={locale === 'fi' ? 'Muokkaa osiota' : 'Edit section'}
+            aria-label={builder.t(locale, 'directEdit.editSection')}
           >
             &#9998;
           </button>
@@ -612,9 +613,7 @@ export default function SectionEditOverlay({
             setOpenSectionKey(hoveredEntry.sectionKey)
           }}
           aria-label={
-            locale === 'fi'
-              ? `Muokkaa kohdetta ${hoveredEntry.index + 1}`
-              : `Edit entry ${hoveredEntry.index + 1}`
+            builder.t(locale, 'directEdit.editEntry', { number: hoveredEntry.index + 1 })
           }
         >
           &#9998;

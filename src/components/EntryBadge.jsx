@@ -1,6 +1,6 @@
-export default function EntryBadge({ count = 0, locale = 'en' }) {
-  const isFinnish = locale === 'fi'
+import { builder } from '../i18n/builder'
 
+export default function EntryBadge({ count = 0, locale = 'en' }) {
   if (count === 0) {
     return null
   }
@@ -14,9 +14,7 @@ export default function EntryBadge({ count = 0, locale = 'en' }) {
         border: '1px solid var(--app-border)',
       }}
     >
-      {isFinnish
-        ? `${count} vinkkiä`
-        : `${count} tip${count === 1 ? '' : 's'}`}
+      {builder.t(locale, 'entryBadge.tips', { count })}
     </span>
   )
 }

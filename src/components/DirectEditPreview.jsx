@@ -3,6 +3,7 @@ import SectionsMenu from './SectionsMenu'
 import SectionEditOverlay from './SectionEditOverlay'
 import { getCvFontStack } from '../utils/cvFonts'
 import { hideEmptySections } from '../utils/sectionContent'
+import { builder } from '../i18n/builder'
 
 export default function DirectEditPreview({
   formData,
@@ -70,7 +71,7 @@ export default function DirectEditPreview({
           />
           {onOpenAtsCheck ? (
             <button type="button" className="direct-edit-sections__trigger" onClick={onOpenAtsCheck}>
-              {locale === 'fi' ? 'ATS-pisteet' : 'ATS score'}
+              {builder.t(locale, 'directEdit.atsScore')}
               {atsScore ? <strong className="direct-edit-ats-score">{atsScore.score}</strong> : null}
             </button>
           ) : null}
@@ -81,12 +82,12 @@ export default function DirectEditPreview({
               aria-pressed={atsFriendlyMode}
               onClick={onToggleAtsFriendlyMode}
             >
-              {locale === 'fi' ? 'ATS-näkymä' : 'ATS view'}
+              {builder.t(locale, 'directEdit.atsView')}
             </button>
           ) : null}
           {onLoadDemo ? (
             <button type="button" className="direct-edit-sections__trigger" onClick={onLoadDemo}>
-              {locale === 'fi' ? 'Lataa demo-CV' : 'Load demo CV'}
+              {builder.t(locale, 'directEdit.loadDemo')}
             </button>
           ) : null}
         </div>

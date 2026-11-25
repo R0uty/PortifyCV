@@ -3,6 +3,7 @@ import { Check, ChevronDown } from 'lucide-react'
 
 import { CV_FONT_OPTIONS, loadAllCvFonts } from '../utils/cvFonts'
 import { useAnchoredPanelPosition } from '../hooks/useAnchoredPanelPosition'
+import { builderShell } from '../i18n/builderShell'
 
 // Toolbar's font picker, next to the template quick switcher — a plain
 // vertical dropdown list: every font on one screen, its name set in its own
@@ -15,7 +16,6 @@ function CvFontSwitcher({
   onSelectFont = () => {},
   locale = 'en',
 }) {
-  const isFinnish = locale === 'fi'
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
   const panelRef = useRef(null)
@@ -82,12 +82,12 @@ function CvFontSwitcher({
       >
         {/* Visually hidden so sighted users just see the font name, but
             screen readers get "Select font: X" instead of only "X". */}
-        <span className="sr-only">{isFinnish ? 'Valitse fontti: ' : 'Select font: '}</span>
+        <span className="sr-only">{builderShell.t(locale, 'fontSwitcher.selectPrefix')}</span>
         <span
           className="cv-font-switcher__trigger-label"
           style={{ fontFamily: selectedFont?.stack }}
         >
-          {selectedFont?.label || (isFinnish ? 'Fontti' : 'Font')}
+          {selectedFont?.label || builderShell.t(locale, 'fontSwitcher.font')}
         </span>
         <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
       </button>
@@ -96,7 +96,7 @@ function CvFontSwitcher({
         <div
           className="cv-font-switcher__panel"
           role="listbox"
-          aria-label={isFinnish ? 'Valitse fontti' : 'Select font'}
+          aria-label={builderShell.t(locale, 'fontSwitcher.select')}
           ref={panelRef}
           style={{ ...panelPosition, visibility: panelReady ? 'visible' : 'hidden' }}
         >

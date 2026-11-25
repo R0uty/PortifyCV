@@ -6,6 +6,7 @@ import {
   safeSessionStorageSet,
 } from '../utils/cvForm'
 import { registerUnsavedChangesCheck } from '../utils/leaveGuard'
+import { builder } from '../i18n/builder'
 
 // What keeps a CV from being lost by accident, moved out of
 // ResumeBuilderPage.jsx (1.6.86): session restore's copy in this tab, and
@@ -82,9 +83,7 @@ export default function useCvSafekeeping({
       if (!result.ok && !warningShownRef.current) {
         warningShownRef.current = true
         showToastRef.current(
-          locale === 'fi'
-            ? 'Istunnon palautusta ei voitu tallentaa (tila on täynnä tai estetty). CV on silti tallella tässä välilehdessä.'
-            : 'Could not save a session-restore copy (storage full or blocked). Your CV is still fine in this tab.',
+          builder.t(locale, 'storage.sessionCopyFailed'),
           'error',
         )
       }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { parseImportedCvData, safeSessionStorageGet, safeSessionStorageRemove, safeSessionStorageSet } from '../utils/cvForm'
+import { builder } from '../i18n/builder'
 import {
   ACTIVE_CV_SESSION_KEY,
   clearSavedCvs,
@@ -56,8 +57,9 @@ export default function useCvLibrary({
     latestRef.current = { formData, selectedTemplate, locale, showToast, markCvSaved, onReattach }
   })
 
-  const say = useCallback((english, finnish, type = 'success') => {
-    latestRef.current.showToast(latestRef.current.locale === 'fi' ? finnish : english, type)
+  // A toast in the app's language: `key` in the builder namespace.
+  const say = useCallback((key, type = 'success', vars) => {
+    latestRef.current.showToast(builder.t(latestRef.current.locale, key, vars), type)
   }, [])
 
   const setActive = useCallback((next) => {
@@ -69,13 +71,9 @@ export default function useCvLibrary({
 
   const reportFailure = useCallback((error) => {
     if (error?.code === 'full') {
-      say('Could not save: this browser\'s storage is full.', 'Tallennus epäonnistui: selaimen tallennustila on täynnä.', 'error')
+      say('savedCvs.storageFull', 'error')
     } else {
-      say(
-        'Could not save on this device. Your CV is still open here; export JSON to keep a copy.',
-        'Tallennus tälle laitteelle epäonnistui. CV on yhä auki tässä; vie JSON, jos haluat kopion talteen.',
-        'error',
-      )
+      say('savedCvs.saveFailed', 'error')
     }
   }, [say])
 
@@ -133,18 +131,10 @@ export default function useCvLibrary({
 
         if (error?.code === 'conflict') {
           setSaveState('conflict')
-          say(
-            `"${active.name}" was changed in another tab, so saving is paused here. Press Save to keep this tab's version instead.`,
-            `"${active.name}" muuttui toisessa välilehdessä, joten tallennus on tauolla tässä. Paina Tallenna, jos haluat säilyttää tämän välilehden version.`,
-            'error',
-          )
+          say('savedCvs.conflict', 'error', { name: active.name })
         } else if (error?.code === 'missing') {
           detach()
-          say(
-            `"${active.name}" is no longer saved on this device. It is still open here; save it again to keep it.`,
-            `"${active.name}" ei ole enää tallessa tällä laitteella. Se on yhä auki tässä; tallenna se uudelleen, jos haluat säilyttää sen.`,
-            'error',
-          )
+          say('savedCvs.removedElsewhere', 'error', { name: active.name })
         } else {
           setSaveState('error')
           reportFailure(error)
@@ -181,11 +171,7 @@ export default function useCvLibrary({
       safeSessionStorageRemove(ACTIVE_CV_SESSION_KEY)
 
       if (list.length > 0) {
-        say(
-          `You have ${list.length} saved ${list.length === 1 ? 'CV' : 'CVs'}. Open ${list.length === 1 ? 'it' : 'them'} from More actions › My CVs.`,
-          `Sinulla on ${list.length} tallennettu${list.length === 1 ? '' : 'a'} CV${list.length === 1 ? '' : ':tä'}. Avaa ${list.length === 1 ? 'se' : 'ne'} kohdasta Lisää toimintoja › Omat CV:t.`,
-          'info',
-        )
+        say('savedCvs.reminder', 'info', { count: list.length })
       }
     })()
 
@@ -228,7 +214,7 @@ export default function useCvLibrary({
       await refreshSavedCvs()
       // Ask the browser not to evict it under storage pressure. Best effort.
       navigator.storage?.persist?.().catch(() => {})
-      say(`Saved on this device as "${stored.name}".`, `Tallennettu tälle laitteelle nimellä "${stored.name}".`)
+      say('savedCvs.savedAs', 'success', { name: stored.name })
       return true
     } catch (error) {
       reportFailure(error)
@@ -240,7 +226,7 @@ export default function useCvLibrary({
   // over whatever another tab stored.
   const saveNow = useCallback(async () => {
     const saved = await write({ force: true })
-    if (saved && activeRef.current) say('Saved on this device.', 'Tallennettu tälle laitteelle.')
+    if (saved && activeRef.current) say('savedCvs.saved')
     return saved
   }, [say, write])
 
@@ -253,7 +239,7 @@ export default function useCvLibrary({
 
       if (!record) {
         await refreshSavedCvs()
-        say('That CV is no longer saved on this device.', 'Tätä CV:tä ei ole enää tallessa tällä laitteella.', 'error')
+        say('savedCvs.gone', 'error')
         return false
       }
 
@@ -266,7 +252,7 @@ export default function useCvLibrary({
       return true
     } catch (error) {
       if (error?.code) reportFailure(error)
-      else say('That saved CV could not be opened.', 'Tallennettua CV:tä ei voitu avata.', 'error')
+      else say('savedCvs.openFailed', 'error')
       return false
     }
   }, [refreshSavedCvs, reportFailure, say, setActive])
@@ -324,7 +310,7 @@ export default function useCvLibrary({
       await clearSavedCvs()
       detach()
       setSavedCvs([])
-      say('All saved CVs were deleted from this device.', 'Kaikki tallennetut CV:t poistettiin tältä laitteelta.')
+      say('savedCvs.allDeleted')
       return true
     } catch (error) {
       reportFailure(error)

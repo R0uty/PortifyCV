@@ -7,6 +7,7 @@ import {
   isValidCvHeadingColor,
 } from '../utils/cvHeadingColors'
 import { useAnchoredPanelPosition } from '../hooks/useAnchoredPanelPosition'
+import { builderShell } from '../i18n/builderShell'
 
 // Toolbar's heading-color picker, next to the font switcher — same
 // trigger-button + panel shape as CvFontSwitcher.jsx, except the panel holds
@@ -18,7 +19,6 @@ function CvHeadingColorSwitcher({
   onSelectColor = () => {},
   locale = 'en',
 }) {
-  const isFinnish = locale === 'fi'
   const [isOpen, setIsOpen] = useState(false)
   const [hexDraft, setHexDraft] = useState(color)
   // Keeps the hex field in sync when `color` changes from outside typing —
@@ -39,7 +39,7 @@ function CvHeadingColorSwitcher({
   )
   const triggerLabel = activePreset
     ? activePreset.label[locale] ?? activePreset.label.en
-    : color || (isFinnish ? 'Oletus' : 'Default')
+    : color || builderShell.t(locale, 'headingColor.default')
   const { style: panelPosition, ready: panelReady } = useAnchoredPanelPosition(isOpen, triggerRef, panelRef)
 
   useEffect(() => {
@@ -115,7 +115,7 @@ function CvHeadingColorSwitcher({
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
       >
-        <span className="sr-only">{isFinnish ? 'Valitse otsikoiden väri: ' : 'Select heading color: '}</span>
+        <span className="sr-only">{builderShell.t(locale, 'headingColor.selectPrefix')}</span>
         <span
           className="cv-heading-color-switcher__swatch"
           style={{ background: color || 'var(--app-surface-strong)' }}
@@ -131,14 +131,14 @@ function CvHeadingColorSwitcher({
         <div
           className="cv-heading-color-switcher__panel"
           role="dialog"
-          aria-label={isFinnish ? 'Valitse otsikoiden väri' : 'Select heading color'}
+          aria-label={builderShell.t(locale, 'headingColor.select')}
           ref={panelRef}
           style={{ ...panelPosition, visibility: panelReady ? 'visible' : 'hidden' }}
         >
           <div
             className="cv-heading-color-switcher__presets"
             role="group"
-            aria-label={isFinnish ? 'Valmiit värit' : 'Preset colors'}
+            aria-label={builderShell.t(locale, 'headingColor.presets')}
           >
             {CV_HEADING_COLOR_PRESETS.map((preset) => (
               <button
@@ -162,7 +162,7 @@ function CvHeadingColorSwitcher({
               className="cv-heading-color-switcher__native-input"
               value={colorInputValue}
               onChange={(event) => onSelectColor(event.target.value)}
-              aria-label={isFinnish ? 'Väripyörä' : 'Color wheel'}
+              aria-label={builderShell.t(locale, 'headingColor.colorWheel')}
             />
             <input
               type="text"
@@ -173,7 +173,7 @@ function CvHeadingColorSwitcher({
               onKeyDown={handleHexKeyDown}
               placeholder="#1f2937"
               spellCheck={false}
-              aria-label={isFinnish ? 'Väri heksana' : 'Hex color'}
+              aria-label={builderShell.t(locale, 'headingColor.hex')}
             />
           </label>
 
@@ -184,7 +184,7 @@ function CvHeadingColorSwitcher({
             disabled={!color}
           >
             <RotateCcw size={13} strokeWidth={2} aria-hidden="true" />
-            {isFinnish ? 'Käytä pohjan oletusta' : 'Use template default'}
+            {builderShell.t(locale, 'headingColor.useTemplateDefault')}
           </button>
         </div>
       ) : null}

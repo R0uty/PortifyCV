@@ -3,6 +3,7 @@ import { Check, ChevronDown } from 'lucide-react'
 
 import { CV_FONT_OPTIONS } from '../utils/cvFonts'
 import { useAnchoredPanelPosition } from '../hooks/useAnchoredPanelPosition'
+import { builderShell } from '../i18n/builderShell'
 
 // Toolbar's style-variant picker (Phase 3), right after Template — the
 // same popover pattern as CvFontSwitcher.jsx, but a radio group: one row
@@ -25,9 +26,11 @@ function CvStyleSwitcher({
   const triggerRef = useRef(null)
   const activeVariant = variants.find((variant) => variant.id === variantId) ?? variants[0]
   const { style: panelPosition, ready: panelReady } = useAnchoredPanelPosition(isOpen, triggerRef, panelRef)
-  const modifiedText = isFinnish ? 'Muokattu' : 'Modified'
-  const groupLabel = isFinnish ? 'Valitse tyyli' : 'Select style'
-  const triggerLabel = `${groupLabel}: ${activeVariant?.label[lang] ?? ''}${isModified ? `, ${modifiedText}` : ''}`
+  const modifiedText = builderShell.t(locale, 'styleSwitcher.modified')
+  const groupLabel = builderShell.t(locale, 'styleSwitcher.select')
+  const triggerLabel = builderShell.t(locale, isModified ? 'styleSwitcher.triggerModified' : 'styleSwitcher.trigger', {
+    variant: activeVariant?.label[lang] ?? '',
+  })
 
   useEffect(() => {
     if (!isOpen) {

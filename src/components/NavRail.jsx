@@ -1,8 +1,10 @@
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 
+import { builder } from '../i18n/builder'
+
 function NavItem({ item, isActive, locale, isCollapsed, onNavigate }) {
   const Icon = item.icon
-  const label = item.label[locale] ?? item.label.en
+  const label = builder.t(locale, item.labelKey)
 
   return (
     <li>
@@ -35,15 +37,14 @@ function NavRail({
   isCollapsed = false,
   onToggleCollapsed = () => {},
 }) {
-  const isFinnish = locale === 'fi'
   const toggleLabel = isCollapsed
-    ? (isFinnish ? 'Laajenna navigointi' : 'Expand navigation')
-    : (isFinnish ? 'Tiivistä navigointi' : 'Collapse navigation')
+    ? builder.t(locale, 'navRail.expand')
+    : builder.t(locale, 'navRail.collapse')
 
   return (
     <nav
       className={`nav-rail${isCollapsed ? ' nav-rail--collapsed' : ''}`}
-      aria-label={isFinnish ? 'Osionavigointi' : 'Section navigation'}
+      aria-label={builder.t(locale, 'navRail.label')}
     >
       <button
         type="button"
@@ -60,7 +61,7 @@ function NavRail({
       </button>
 
       {sections.length && !isCollapsed ? (
-        <p className="nav-rail__group-label">{isFinnish ? 'Osiot' : 'Sections'}</p>
+        <p className="nav-rail__group-label">{builder.t(locale, 'navRail.sections')}</p>
       ) : null}
       <ul className="nav-rail__list" role="list">
         {sections.map((item) => (
@@ -78,7 +79,7 @@ function NavRail({
       <div className="nav-rail__divider" role="separator" />
 
       {utilityItems.length && !isCollapsed ? (
-        <p className="nav-rail__group-label">{isFinnish ? 'Työkalut' : 'Tools'}</p>
+        <p className="nav-rail__group-label">{builder.t(locale, 'navRail.tools')}</p>
       ) : null}
       <ul className="nav-rail__list" role="list">
         {utilityItems.map((item) => (

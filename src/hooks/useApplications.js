@@ -6,6 +6,7 @@ import {
   listApplications,
   updateApplication,
 } from '../utils/applicationLog'
+import { builder } from '../i18n/builder'
 
 // The applications logged on this device (1.7.11), for My CVs' Applications
 // tab and the Settings row that deletes them all.
@@ -26,8 +27,8 @@ export default function useApplications({ version = 0, locale = 'en', showToast 
     latestRef.current = { locale, showToast }
   })
 
-  const say = useCallback((english, finnish, type = 'success') => {
-    latestRef.current.showToast?.(latestRef.current.locale === 'fi' ? finnish : english, type)
+  const say = useCallback((key, type = 'success') => {
+    latestRef.current.showToast?.(builder.t(latestRef.current.locale, key), type)
   }, [])
 
   const enqueue = useCallback((task) => {
@@ -39,9 +40,9 @@ export default function useApplications({ version = 0, locale = 'en', showToast 
   const reportFailure = useCallback((error) => {
     if (error?.code === 'unavailable') setIsAvailable(false)
     if (error?.code === 'full') {
-      say('Could not save: this browser\'s storage is full.', 'Tallennus epäonnistui: selaimen tallennustila on täynnä.', 'error')
+      say('applications.storageFull', 'error')
     } else {
-      say('Could not change the applications on this device.', 'Hakujen muuttaminen tällä laitteella epäonnistui.', 'error')
+      say('applications.changeFailed', 'error')
     }
   }, [say])
 
@@ -107,7 +108,7 @@ export default function useApplications({ version = 0, locale = 'en', showToast 
     try {
       await clearApplications()
       setApplications([])
-      say('All applications were deleted from this device.', 'Kaikki haut poistettiin tältä laitteelta.')
+      say('applications.allDeleted')
       return true
     } catch (error) {
       reportFailure(error)

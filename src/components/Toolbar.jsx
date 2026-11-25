@@ -23,6 +23,7 @@ import LocaleFlagIcon from './LocaleFlagIcon'
 import CvFontSwitcher from './CvFontSwitcher'
 import CvStyleSwitcher from './CvStyleSwitcher'
 import CvHeadingColorSwitcher from './CvHeadingColorSwitcher'
+import { builderShell } from '../i18n/builderShell'
 
 // Open/close plumbing shared by the toolbar's three popovers (Design,
 // More, Export): an outside click, Escape or tabbing out closes one, and
@@ -236,8 +237,8 @@ function Toolbar({
             type="button"
             className="app-toolbar__icon-button"
             onClick={onReturn}
-            aria-label={isFinnish ? 'Takaisin' : 'Return to landing'}
-            title={isFinnish ? 'Takaisin' : 'Return'}
+            aria-label={builderShell.t(locale, 'toolbar.returnLabel')}
+            title={builderShell.t(locale, 'toolbar.returnTitle')}
           >
             <ArrowLeft size={16} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -253,8 +254,8 @@ function Toolbar({
             className="app-toolbar__icon-button"
             onClick={onUndo}
             disabled={!canUndo}
-            aria-label={isFinnish ? 'Kumoa' : 'Undo'}
-            title={isFinnish ? 'Kumoa' : 'Undo'}
+            aria-label={builderShell.t(locale, 'toolbar.undo')}
+            title={builderShell.t(locale, 'toolbar.undo')}
           >
             <Undo2 size={16} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -263,8 +264,8 @@ function Toolbar({
             className="app-toolbar__icon-button"
             onClick={onRedo}
             disabled={!canRedo}
-            aria-label={isFinnish ? 'Tee uudelleen' : 'Redo'}
-            title={isFinnish ? 'Tee uudelleen' : 'Redo'}
+            aria-label={builderShell.t(locale, 'toolbar.redo')}
+            title={builderShell.t(locale, 'toolbar.redo')}
           >
             <Redo2 size={16} strokeWidth={2} aria-hidden="true" />
           </button>
@@ -281,8 +282,8 @@ function Toolbar({
                 type="search"
                 value={searchQuery}
                 onChange={(event) => onSearchChange(event.target.value)}
-                placeholder={isFinnish ? 'Etsi osioita...' : 'Search sections...'}
-                aria-label={isFinnish ? 'Etsi osioita' : 'Search sections'}
+                placeholder={builderShell.t(locale, 'toolbar.searchPlaceholder')}
+                aria-label={builderShell.t(locale, 'toolbar.searchLabel')}
               />
             </label>
           </div>
@@ -298,7 +299,7 @@ function Toolbar({
             <div
               className="app-toolbar__mode-switch"
               role="tablist"
-              aria-label={locale === 'fi' ? 'Muokkaustila' : 'Builder mode'}
+              aria-label={builderShell.t(locale, 'mode.label')}
               onKeyDown={(event) => {
                 const next = {
                   ArrowLeft: builderMode === 'direct' ? 'classic' : 'direct',
@@ -321,7 +322,7 @@ function Toolbar({
                 className={`app-toolbar__mode-switch-btn${builderMode === 'direct' ? ' app-toolbar__mode-switch-btn--active' : ''}`}
                 onClick={() => onSetBuilderMode('direct')}
               >
-                {locale === 'fi' ? 'Suora muokkaus' : 'Direct Edit'}
+                {builderShell.t(locale, 'mode.directEdit')}
               </button>
               <button
                 type="button"
@@ -332,7 +333,7 @@ function Toolbar({
                 className={`app-toolbar__mode-switch-btn${builderMode === 'classic' ? ' app-toolbar__mode-switch-btn--active' : ''}`}
                 onClick={() => onSetBuilderMode('classic')}
               >
-                {locale === 'fi' ? 'Klassinen' : 'Classic'}
+                {builderShell.t(locale, 'mode.classic')}
               </button>
             </div>
 
@@ -343,8 +344,8 @@ function Toolbar({
             >
               {/* Visually hidden so sighted users see "Template" and the
                   name, while screen readers get "Select template: X". */}
-              <span className="sr-only">{isFinnish ? 'Valitse pohja: ' : 'Select template: '}</span>
-              <span className="app-toolbar__trigger-caption" aria-hidden="true">{isFinnish ? 'Pohja' : 'Template'}</span>
+              <span className="sr-only">{builderShell.t(locale, 'template.select')}</span>
+              <span className="app-toolbar__trigger-caption" aria-hidden="true">{builderShell.t(locale, 'template.caption')}</span>
               <span className="app-toolbar__template-trigger-label">
                 {templates.find((template) => template.id === selectedTemplateId)?.label}
               </span>
@@ -365,10 +366,10 @@ function Toolbar({
                 aria-expanded={isDesignOpen}
                 onClick={designToggle}
               >
-                {isFinnish ? 'Ulkoasu' : 'Design'}
+                {builderShell.t(locale, 'design.label')}
                 {isStyleVariantModified ? (
-                  <span className="app-toolbar__modified-dot" title={isFinnish ? 'Muokattu' : 'Modified'}>
-                    <span className="sr-only">{isFinnish ? ', muokattu' : ', modified'}</span>
+                  <span className="app-toolbar__modified-dot" title={builderShell.t(locale, 'design.modified')}>
+                    <span className="sr-only">{builderShell.t(locale, 'design.modifiedSr')}</span>
                   </span>
                 ) : null}
                 <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
@@ -378,11 +379,11 @@ function Toolbar({
                 <div
                   className="app-toolbar__menu app-toolbar__design-panel"
                   role="group"
-                  aria-label={isFinnish ? 'Ulkoasu' : 'Design'}
+                  aria-label={builderShell.t(locale, 'design.label')}
                   ref={designPanelRef}
                 >
                   <div className="app-toolbar__design-row">
-                    <span className="app-toolbar__design-label">{isFinnish ? 'Tyyli' : 'Style'}</span>
+                    <span className="app-toolbar__design-label">{builderShell.t(locale, 'design.style')}</span>
                     <CvStyleSwitcher
                       variants={styleVariants}
                       variantId={styleVariantId}
@@ -392,7 +393,7 @@ function Toolbar({
                     />
                   </div>
                   <div className="app-toolbar__design-row">
-                    <span className="app-toolbar__design-label">{isFinnish ? 'Fontti' : 'Font'}</span>
+                    <span className="app-toolbar__design-label">{builderShell.t(locale, 'design.font')}</span>
                     <CvFontSwitcher
                       fontId={cvFontId}
                       onSelectFont={onCvFontChange}
@@ -400,7 +401,7 @@ function Toolbar({
                     />
                   </div>
                   <div className="app-toolbar__design-row">
-                    <span className="app-toolbar__design-label">{isFinnish ? 'Otsikot' : 'Headings'}</span>
+                    <span className="app-toolbar__design-label">{builderShell.t(locale, 'design.headings')}</span>
                     <CvHeadingColorSwitcher
                       color={cvHeadingColor}
                       onSelectColor={onCvHeadingColorChange}
@@ -416,11 +417,11 @@ function Toolbar({
             type="button"
             className="app-toolbar__icon-button app-toolbar__icon-button--text"
             onClick={() => onLocaleChange(isFinnish ? 'en' : 'fi')}
-            aria-label={isFinnish ? 'Vaihda kieli' : 'Switch language'}
-            title={isFinnish ? 'Vaihda kieli' : 'Switch language'}
+            aria-label={builderShell.t(locale, 'language.switch')}
+            title={builderShell.t(locale, 'language.switch')}
           >
             <LocaleFlagIcon locale={isFinnish ? 'fi' : 'en'} className="app-toolbar__locale-flag" />
-            {isFinnish ? 'FI' : 'EN'}
+            {builderShell.t(locale, 'language.code')}
           </button>
 
           {/* Save on this device (1.7.1). Nothing is stored until this is
@@ -431,23 +432,23 @@ function Toolbar({
               className={`app-toolbar__save${savedCvStatus.needsAttention ? ' app-toolbar__save--attention' : savedCvStatus.isSaved ? ' app-toolbar__save--saved' : ''}`}
               onClick={onSaveCv}
               aria-label={savedCvStatus.needsAttention
-                ? isFinnish ? `Tallennus tauolla: ${savedCvStatus.name}. Tallenna nyt` : `Saving paused: ${savedCvStatus.name}. Save now`
+                ? builderShell.t(locale, 'save.pausedLabel', { name: savedCvStatus.name })
                 : savedCvStatus.isSaved
-                  ? isFinnish ? `Tallennettu tälle laitteelle: ${savedCvStatus.name}` : `Saved on this device: ${savedCvStatus.name}`
-                  : isFinnish ? 'Tallenna tälle laitteelle' : 'Save on this device'}
+                  ? builderShell.t(locale, 'save.savedLabel', { name: savedCvStatus.name })
+                  : builderShell.t(locale, 'save.saveOnDevice')}
               title={savedCvStatus.needsAttention
-                ? isFinnish ? 'Tallennus on tauolla. Tallenna nyt' : 'Saving is paused. Save now'
+                ? builderShell.t(locale, 'save.pausedTitle')
                 : savedCvStatus.isSaved
-                  ? isFinnish ? `Tallennettu tälle laitteelle: ${savedCvStatus.name}` : `Saved on this device: ${savedCvStatus.name}`
-                  : isFinnish ? 'Tallenna tälle laitteelle' : 'Save on this device'}
+                  ? builderShell.t(locale, 'save.savedLabel', { name: savedCvStatus.name })
+                  : builderShell.t(locale, 'save.saveOnDevice')}
             >
               {savedCvStatus.isSaved && !savedCvStatus.needsAttention
                 ? <Check size={15} strokeWidth={2.4} aria-hidden="true" />
                 : <Save size={15} strokeWidth={2} aria-hidden="true" />}
               <span className="app-toolbar__save-label" aria-hidden="true">
                 {savedCvStatus.isSaved && !savedCvStatus.needsAttention
-                  ? isFinnish ? 'Tallennettu' : 'Saved'
-                  : isFinnish ? 'Tallenna' : 'Save'}
+                  ? builderShell.t(locale, 'save.saved')
+                  : builderShell.t(locale, 'save.save')}
               </span>
             </button>
           ) : null}
@@ -459,8 +460,8 @@ function Toolbar({
               className="app-toolbar__icon-button"
               aria-haspopup="menu"
               aria-expanded={isMoreOpen}
-              aria-label={isFinnish ? 'Lisää toimintoja' : 'More actions'}
-              title={isFinnish ? 'Lisää toimintoja' : 'More actions'}
+              aria-label={builderShell.t(locale, 'more.label')}
+              title={builderShell.t(locale, 'more.label')}
               onClick={moreToggle}
             >
               <MoreHorizontal size={16} strokeWidth={2} aria-hidden="true" />
@@ -470,7 +471,7 @@ function Toolbar({
               <div
                 className="app-toolbar__menu"
                 role="menu"
-                aria-label={isFinnish ? 'Lisää toimintoja' : 'More actions'}
+                aria-label={builderShell.t(locale, 'more.label')}
                 ref={morePanelRef}
                 onKeyDown={moreHandleMenuKeyDown}
               >
@@ -480,12 +481,10 @@ function Toolbar({
                   aria-checked={isResponsivePreview}
                   className="app-toolbar__menu-item"
                   onClick={() => handleMoreSelect(onToggleResponsivePreview)}
-                  title={isFinnish
-                    ? 'Näytä pohja kapealla leveydellä (kuten HTML-vienti puhelimessa)'
-                    : 'Show the template at a narrow width (like the HTML export on a phone)'}
+                  title={builderShell.t(locale, 'more.narrowPreviewTitle')}
                 >
                   <Smartphone size={15} strokeWidth={2} aria-hidden="true" />
-                  {isFinnish ? 'Kapea esikatselu' : 'Narrow preview'}
+                  {builderShell.t(locale, 'more.narrowPreview')}
                 </button>
                 <button
                   type="button"
@@ -495,7 +494,7 @@ function Toolbar({
                   onClick={() => handleMoreSelect(onToggleFullscreenPreview)}
                 >
                   <Maximize2 size={15} strokeWidth={2} aria-hidden="true" />
-                  {isFinnish ? 'Koko näytön esikatselu' : 'Fullscreen preview'}
+                  {builderShell.t(locale, 'more.fullscreenPreview')}
                 </button>
                 {/* The nav rail has Cover letter and Settings from lg up;
                     below that this menu is the way in. */}
@@ -506,7 +505,7 @@ function Toolbar({
                   onClick={() => handleMoreSelect(onOpenCoverLetter)}
                 >
                   <Mail size={15} strokeWidth={2} aria-hidden="true" />
-                  {isFinnish ? 'Hakemuskirje' : 'Cover letter'}
+                  {builderShell.t(locale, 'more.coverLetter')}
                 </button>
                 <button
                   type="button"
@@ -515,7 +514,7 @@ function Toolbar({
                   onClick={() => handleMoreSelect(onOpenSettings)}
                 >
                   <Settings size={15} strokeWidth={2} aria-hidden="true" />
-                  {isFinnish ? 'Asetukset' : 'Settings'}
+                  {builderShell.t(locale, 'more.settings')}
                 </button>
                 {/* Direct Edit only: Classic has Import CV in its form
                     column (1.6.80). */}
@@ -527,7 +526,7 @@ function Toolbar({
                     onClick={() => handleMoreSelect(onOpenImport)}
                   >
                     <Upload size={15} strokeWidth={2} aria-hidden="true" />
-                    {isFinnish ? 'Tuo CV' : 'Import CV'}
+                    {builderShell.t(locale, 'more.importCv')}
                   </button>
                 ) : null}
                 {/* Phones only (CSS): the toolbar's Save button has no
@@ -543,10 +542,10 @@ function Toolbar({
                       ? <Check size={15} strokeWidth={2.4} aria-hidden="true" />
                       : <Save size={15} strokeWidth={2} aria-hidden="true" />}
                     {savedCvStatus.needsAttention
-                      ? isFinnish ? 'Tallennus tauolla. Tallenna nyt' : 'Saving paused. Save now'
+                      ? builderShell.t(locale, 'save.pausedMenu')
                       : savedCvStatus.isSaved
-                        ? isFinnish ? `Tallennettu: ${savedCvStatus.name}` : `Saved: ${savedCvStatus.name}`
-                        : isFinnish ? 'Tallenna tälle laitteelle' : 'Save on this device'}
+                        ? builderShell.t(locale, 'save.savedMenu', { name: savedCvStatus.name })
+                        : builderShell.t(locale, 'save.saveOnDevice')}
                   </button>
                 ) : null}
                 <button
@@ -556,7 +555,7 @@ function Toolbar({
                   onClick={() => handleMoreSelect(onOpenSavedCvs)}
                 >
                   <FolderOpen size={15} strokeWidth={2} aria-hidden="true" />
-                  {isFinnish ? 'Omat CV:t' : 'My CVs'}
+                  {builderShell.t(locale, 'more.myCvs')}
                   {savedCvStatus?.count ? ` (${savedCvStatus.count})` : ''}
                 </button>
                 <button
@@ -566,7 +565,7 @@ function Toolbar({
                   onClick={() => handleMoreSelect(onMarkApplied)}
                 >
                   <Send size={15} strokeWidth={2} aria-hidden="true" />
-                  {isFinnish ? 'Merkitse haetuksi' : 'Mark as applied'}
+                  {builderShell.t(locale, 'more.markApplied')}
                 </button>
                 <div className="app-toolbar__menu-separator" role="separator" />
                 <button
@@ -579,8 +578,8 @@ function Toolbar({
                 >
                   <Trash2 size={15} strokeWidth={2} aria-hidden="true" />
                   {isClearArmed
-                    ? isFinnish ? 'Vahvista tyhjennys' : 'Confirm clear'
-                    : isFinnish ? 'Tyhjennä CV' : 'Clear CV'}
+                    ? builderShell.t(locale, 'more.confirmClear')
+                    : builderShell.t(locale, 'more.clearCv')}
                 </button>
               </div>
             ) : null}
@@ -597,8 +596,8 @@ function Toolbar({
               onClick={exportToggle}
             >
               {activeExport
-                ? isFinnish ? 'Viedään...' : 'Exporting...'
-                : isFinnish ? 'Vie' : 'Export'}
+                ? builderShell.t(locale, 'export.exporting')
+                : builderShell.t(locale, 'export.export')}
               <ChevronDown size={14} strokeWidth={2} aria-hidden="true" />
             </button>
 
@@ -619,8 +618,8 @@ function Toolbar({
                   PDF
                   <span className="app-toolbar__export-item-hint">
                     {atsFriendlyMode
-                      ? isFinnish ? 'ATS-asettelu: pelkistetty ja helposti luettava' : 'ATS layout: plain and easy to parse'
-                      : isFinnish ? 'Oma ulkoasusi, valmis lähetettäväksi' : 'Your design, ready to send'}
+                      ? builderShell.t(locale, 'export.pdfAtsHint')
+                      : builderShell.t(locale, 'export.pdfDesignHint')}
                   </span>
                 </button>
                 <button
@@ -632,7 +631,7 @@ function Toolbar({
                 >
                   HTML
                   <span className="app-toolbar__export-item-hint">
-                    {isFinnish ? 'Yksi verkkosivutiedosto, avautuu selaimessa' : 'One web-page file, opens in any browser'}
+                    {builderShell.t(locale, 'export.htmlHint')}
                   </span>
                 </button>
                 <button
@@ -644,7 +643,7 @@ function Toolbar({
                 >
                   JSON
                   <span className="app-toolbar__export-item-hint">
-                    {isFinnish ? 'Varmuuskopio, jonka voi tuoda takaisin' : 'Backup you can import again later'}
+                    {builderShell.t(locale, 'export.jsonHint')}
                   </span>
                 </button>
                 <button
@@ -656,9 +655,7 @@ function Toolbar({
                 >
                   Word
                   <span className="app-toolbar__export-item-hint">
-                    {isFinnish
-                      ? 'Muokattava .docx, toimii kaikkien ATS-järjestelmien kanssa'
-                      : 'Editable .docx, works with any ATS'}
+                    {builderShell.t(locale, 'export.docxHint')}
                   </span>
                 </button>
                 <div className="app-toolbar__menu-separator" role="separator" />
@@ -669,9 +666,9 @@ function Toolbar({
                   disabled={isActionBusy}
                   onClick={handleCopyShareLink}
                 >
-                  {isFinnish ? 'Kopioi jakolinkki' : 'Copy share link'}
+                  {builderShell.t(locale, 'export.shareLink')}
                   <span className="app-toolbar__export-item-hint">
-                    {isFinnish ? 'CV kulkee linkissä, kuvat jäävät pois' : 'The CV travels in the link, without photos'}
+                    {builderShell.t(locale, 'export.shareLinkHint')}
                   </span>
                 </button>
               </div>

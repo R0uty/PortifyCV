@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CV_SECTION_ORDER_KEYS, getSectionVisibilityFields, normalizeSectionOrder } from '../utils/cvForm'
 import { FORM_ACTION } from '../reducers/cvFormReducer'
+import { builder } from '../i18n/builder'
 
 // Sections a template leaves out, most often missed first. The panel names
 // the first few and counts the rest.
@@ -50,7 +51,6 @@ export default function SectionsMenu({
       document.removeEventListener('keydown', handleKeyDown)
     }
   }, [isOpen])
-  const isFinnish = locale === 'fi'
   // The same table Classic's "Visible sections" panel and nav rail read
   // (1.6.85). This menu kept its own copy, to be kept in sync by hand.
   const labels = Object.fromEntries(getSectionVisibilityFields(locale).map((field) => [field.key, field.label]))
@@ -75,9 +75,10 @@ export default function SectionsMenu({
   ].filter((section) => !templateSectionKeySet.has(section))
   const namedMissing = missingSections.slice(0, MISSING_SECTIONS_NAMED).map((section) => labels[section] || section)
   const unnamedMissingCount = missingSections.length - namedMissing.length
-  const missingText = isFinnish
-    ? `Tässä pohjassa ei ole: ${namedMissing.join(', ')}${unnamedMissingCount > 0 ? ` ja ${unnamedMissingCount} muuta` : ''}.`
-    : `Not in this template: ${namedMissing.join(', ')}${unnamedMissingCount > 0 ? ` and ${unnamedMissingCount} more` : ''}.`
+  const missingText = builder.t(locale, unnamedMissingCount > 0 ? 'sectionsMenu.missingMore' : 'sectionsMenu.missing', {
+    sections: namedMissing.join(', '),
+    count: unnamedMissingCount,
+  })
 
   return (
     <div className="direct-edit-sections" ref={rootRef}>
@@ -88,7 +89,7 @@ export default function SectionsMenu({
         onClick={() => setIsOpen((open) => !open)}
         aria-expanded={isOpen}
       >
-        {isFinnish ? 'Osiot' : 'Sections'}
+        {builder.t(locale, 'sectionsMenu.sections')}
       </button>
       {isOpen ? (
         <div className="direct-edit-sections__panel">
@@ -114,7 +115,7 @@ export default function SectionsMenu({
                     onOpenTemplateGallery()
                   }}
                 >
-                  {isFinnish ? 'Katso muut pohjat' : 'See other templates'}
+                  {builder.t(locale, 'sectionsMenu.otherTemplates')}
                 </button>
               ) : null}
             </div>

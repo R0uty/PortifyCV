@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, Download, FileWarning } from 'lucide-react'
 
 import { getTabStops } from '../utils/focusTrap'
+import { builderShell } from '../i18n/builderShell'
 
 // Asks before an in-app link or back/forward leaves a CV with unsaved edits
 // (1.6.68), in place of the browser's plain "Leave site?" prompt, which
@@ -14,7 +15,6 @@ function LeaveConfirmDialog({ locale, onStay, onLeave, onSaveAndLeave }) {
   const previouslyFocusedRef = useRef(null)
   const onStayRef = useRef(onStay)
   const [isSaving, setIsSaving] = useState(false)
-  const isFinnish = locale === 'fi'
 
   useEffect(() => {
     onStayRef.current = onStay
@@ -80,18 +80,14 @@ function LeaveConfirmDialog({ locale, onStay, onLeave, onSaveAndLeave }) {
           <FileWarning size={26} strokeWidth={1.8} />
         </div>
         <h2 id="leave-dialog-title" className="leave-dialog__title">
-          {isFinnish ? 'Poistutaanko tallentamatta?' : 'Leave without saving?'}
+          {builderShell.t(locale, 'leaveDialog.title')}
         </h2>
         <div id="leave-dialog-body" className="leave-dialog__body">
           <p>
-            {isFinnish
-              ? 'PortifyCV ei tallenna CV:täsi mihinkään. Jos poistut nyt, viimeisimmät muutoksesi katoavat.'
-              : "PortifyCV doesn't store your CV anywhere. If you leave now, your latest changes are gone."}
+            {builderShell.t(locale, 'leaveDialog.body')}
           </p>
           <p className="leave-dialog__hint">
-            {isFinnish
-              ? 'Lataa JSON-kopio, niin voit tuoda sen myöhemmin ja jatkaa siitä, mihin jäit.'
-              : 'Download a JSON copy to import later and pick up where you left off.'}
+            {builderShell.t(locale, 'leaveDialog.hint')}
           </p>
         </div>
         <div className="leave-dialog__actions">
@@ -102,7 +98,7 @@ function LeaveConfirmDialog({ locale, onStay, onLeave, onSaveAndLeave }) {
             onClick={onStay}
           >
             <ArrowLeft size={16} strokeWidth={2} aria-hidden="true" />
-            {isFinnish ? 'Jatka muokkausta' : 'Keep editing'}
+            {builderShell.t(locale, 'leaveDialog.keepEditing')}
           </button>
           <button
             type="button"
@@ -111,7 +107,7 @@ function LeaveConfirmDialog({ locale, onStay, onLeave, onSaveAndLeave }) {
             disabled={isSaving}
           >
             <Download size={16} strokeWidth={2} aria-hidden="true" />
-            {isFinnish ? 'Lataa JSON ja poistu' : 'Download JSON & leave'}
+            {builderShell.t(locale, 'leaveDialog.downloadAndLeave')}
           </button>
           <button
             type="button"
@@ -119,7 +115,7 @@ function LeaveConfirmDialog({ locale, onStay, onLeave, onSaveAndLeave }) {
             onClick={onLeave}
             disabled={isSaving}
           >
-            {isFinnish ? 'Poistu tallentamatta' : 'Leave without saving'}
+            {builderShell.t(locale, 'leaveDialog.leave')}
           </button>
         </div>
       </div>

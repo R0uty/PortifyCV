@@ -117,6 +117,7 @@ import { generateCoverLetterDraft, getCoverLetterHeader } from '../utils/coverLe
 import { resolveCoverLetterLook } from '../utils/coverLetterLook'
 import { EXAMPLES, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
 import { CvLanguageContext } from '../components/cvLanguageContext'
+import { builder } from '../i18n/builder'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
@@ -138,27 +139,27 @@ const RESET_CONFIRM_WINDOW_MS = 4000
 // had) is reachable only by scrolling past everything else with no shortcut
 // and no search hit, on templates where it's a primary section.
 const NAV_SECTIONS = [
-  { id: 'personal', anchor: 'section-personal', icon: User, kind: 'scroll', sectionKey: null, label: { en: 'Personal Information', fi: 'Henkilötiedot' } },
-  { id: 'summary', anchor: 'section-summary', icon: FileText, kind: 'scroll', sectionKey: 'about', label: { en: 'Summary', fi: 'Yhteenveto' } },
-  { id: 'skills', anchor: 'section-skills', icon: Sparkles, kind: 'scroll', sectionKey: 'skills', label: { en: 'Skills', fi: 'Taidot' } },
-  { id: 'experience', anchor: 'section-experience', icon: Briefcase, kind: 'scroll', sectionKey: 'experience', label: { en: 'Experience', fi: 'Kokemus' } },
-  { id: 'education', anchor: 'section-education', icon: GraduationCap, kind: 'scroll', sectionKey: 'education', label: { en: 'Education', fi: 'Koulutus' } },
-  { id: 'coreStrengths', anchor: 'section-coreStrengths', icon: Target, kind: 'scroll', sectionKey: 'coreStrengths', label: { en: 'Core Strengths', fi: 'Vahvuudet' } },
-  { id: 'certificates', anchor: 'section-certificates', icon: Award, kind: 'scroll', sectionKey: 'certificates', label: { en: 'Certificates', fi: 'Sertifikaatit' } },
-  { id: 'projects', anchor: 'section-projects', icon: FolderKanban, kind: 'scroll', sectionKey: 'projects', label: { en: 'Projects', fi: 'Projektit' } },
-  { id: 'languages', anchor: 'section-languages', icon: LanguagesIcon, kind: 'scroll', sectionKey: 'languages', label: { en: 'Languages', fi: 'Kielet' } },
-  { id: 'interests', anchor: 'section-interests', icon: Heart, kind: 'scroll', sectionKey: 'interests', label: { en: 'Interests', fi: 'Kiinnostuksen kohteet' } },
-  { id: 'achievements', anchor: 'section-achievements', icon: Trophy, kind: 'scroll', sectionKey: 'achievements', label: { en: 'Achievements', fi: 'Saavutukset' } },
-  { id: 'openSource', anchor: 'section-openSource', icon: GitBranch, kind: 'scroll', sectionKey: 'openSource', label: { en: 'Open Source', fi: 'Avoin lähdekoodi' } },
-  { id: 'publications', anchor: 'section-publications', icon: BookOpen, kind: 'scroll', sectionKey: 'publications', label: { en: 'Publications', fi: 'Julkaisut' } },
-  { id: 'links', anchor: 'section-links', icon: Link2, kind: 'scroll', sectionKey: 'links', label: { en: 'Links', fi: 'Linkit' } },
-  { id: 'leadership', anchor: 'section-leadership', icon: Users, kind: 'scroll', sectionKey: 'leadership', label: { en: 'Leadership', fi: 'Johtaminen' } },
-  { id: 'memberships', anchor: 'section-memberships', icon: IdCard, kind: 'scroll', sectionKey: 'memberships', label: { en: 'Memberships', fi: 'Jäsenyydet' } },
-  { id: 'speaking', anchor: 'section-speaking', icon: Mic, kind: 'scroll', sectionKey: 'speaking', label: { en: 'Speaking', fi: 'Esiintymiset' } },
-  { id: 'volunteering', anchor: 'section-volunteering', icon: HandHeart, kind: 'scroll', sectionKey: 'volunteering', label: { en: 'Volunteering', fi: 'Vapaaehtoistyö' } },
-  { id: 'internships', anchor: 'section-internships', icon: Building2, kind: 'scroll', sectionKey: 'internships', label: { en: 'Internships', fi: 'Harjoittelut' } },
-  { id: 'caseStudies', anchor: 'section-caseStudies', icon: FileSearch, kind: 'scroll', sectionKey: 'caseStudies', label: { en: 'Case Studies', fi: 'Tapaustutkimukset' } },
-  { id: 'testimonials', anchor: 'section-testimonials', icon: Quote, kind: 'scroll', sectionKey: 'testimonials', label: { en: 'Testimonials', fi: 'Suositukset' } },
+  { id: 'personal', anchor: 'section-personal', icon: User, kind: 'scroll', sectionKey: null, labelKey: 'nav.personal' },
+  { id: 'summary', anchor: 'section-summary', icon: FileText, kind: 'scroll', sectionKey: 'about', labelKey: 'nav.summary' },
+  { id: 'skills', anchor: 'section-skills', icon: Sparkles, kind: 'scroll', sectionKey: 'skills', labelKey: 'nav.skills' },
+  { id: 'experience', anchor: 'section-experience', icon: Briefcase, kind: 'scroll', sectionKey: 'experience', labelKey: 'nav.experience' },
+  { id: 'education', anchor: 'section-education', icon: GraduationCap, kind: 'scroll', sectionKey: 'education', labelKey: 'nav.education' },
+  { id: 'coreStrengths', anchor: 'section-coreStrengths', icon: Target, kind: 'scroll', sectionKey: 'coreStrengths', labelKey: 'nav.coreStrengths' },
+  { id: 'certificates', anchor: 'section-certificates', icon: Award, kind: 'scroll', sectionKey: 'certificates', labelKey: 'nav.certificates' },
+  { id: 'projects', anchor: 'section-projects', icon: FolderKanban, kind: 'scroll', sectionKey: 'projects', labelKey: 'nav.projects' },
+  { id: 'languages', anchor: 'section-languages', icon: LanguagesIcon, kind: 'scroll', sectionKey: 'languages', labelKey: 'nav.languages' },
+  { id: 'interests', anchor: 'section-interests', icon: Heart, kind: 'scroll', sectionKey: 'interests', labelKey: 'nav.interests' },
+  { id: 'achievements', anchor: 'section-achievements', icon: Trophy, kind: 'scroll', sectionKey: 'achievements', labelKey: 'nav.achievements' },
+  { id: 'openSource', anchor: 'section-openSource', icon: GitBranch, kind: 'scroll', sectionKey: 'openSource', labelKey: 'nav.openSource' },
+  { id: 'publications', anchor: 'section-publications', icon: BookOpen, kind: 'scroll', sectionKey: 'publications', labelKey: 'nav.publications' },
+  { id: 'links', anchor: 'section-links', icon: Link2, kind: 'scroll', sectionKey: 'links', labelKey: 'nav.links' },
+  { id: 'leadership', anchor: 'section-leadership', icon: Users, kind: 'scroll', sectionKey: 'leadership', labelKey: 'nav.leadership' },
+  { id: 'memberships', anchor: 'section-memberships', icon: IdCard, kind: 'scroll', sectionKey: 'memberships', labelKey: 'nav.memberships' },
+  { id: 'speaking', anchor: 'section-speaking', icon: Mic, kind: 'scroll', sectionKey: 'speaking', labelKey: 'nav.speaking' },
+  { id: 'volunteering', anchor: 'section-volunteering', icon: HandHeart, kind: 'scroll', sectionKey: 'volunteering', labelKey: 'nav.volunteering' },
+  { id: 'internships', anchor: 'section-internships', icon: Building2, kind: 'scroll', sectionKey: 'internships', labelKey: 'nav.internships' },
+  { id: 'caseStudies', anchor: 'section-caseStudies', icon: FileSearch, kind: 'scroll', sectionKey: 'caseStudies', labelKey: 'nav.caseStudies' },
+  { id: 'testimonials', anchor: 'section-testimonials', icon: Quote, kind: 'scroll', sectionKey: 'testimonials', labelKey: 'nav.testimonials' },
 ]
 
 // Export deliberately has no entry here: the toolbar's Export control offers
@@ -166,9 +167,9 @@ const NAV_SECTIONS = [
 // choice and always triggered PDF-only, which looked like a second, buggier
 // export button next to the real one instead of a shortcut to it.
 const NAV_UTILITY_ITEMS = [
-  { id: 'settings', icon: SettingsIcon, kind: 'action', label: { en: 'Settings', fi: 'Asetukset' } },
-  { id: 'templates', icon: LayoutTemplate, kind: 'action', label: { en: 'Templates', fi: 'Pohjat' } },
-  { id: 'coverLetter', icon: Mail, kind: 'action', label: { en: 'Cover letter', fi: 'Hakemuskirje' } },
+  { id: 'settings', icon: SettingsIcon, kind: 'action', labelKey: 'nav.settings' },
+  { id: 'templates', icon: LayoutTemplate, kind: 'action', labelKey: 'nav.templates' },
+  { id: 'coverLetter', icon: Mail, kind: 'action', labelKey: 'nav.coverLetter' },
 ]
 
 const ALL_SCROLL_NAV_ITEMS = [...NAV_SECTIONS, ...NAV_UTILITY_ITEMS].filter((item) => item.kind === 'scroll')
@@ -182,11 +183,17 @@ function createToast(message, type = 'success') {
 }
 
 // Appended to a download toast when a bullet still holds a [__] blank.
-function blankBulletsNote(count, isFinnish) {
+function blankBulletsNote(count, locale) {
   if (!count) return ''
-  return isFinnish
-    ? ` ${count} saavutuskohdassa on vielä ${BULLET_BLANK}.`
-    : ` ${count} ${count === 1 ? 'bullet still holds' : 'bullets still hold'} ${BULLET_BLANK}.`
+  return builder.t(locale, 'export.blankBullets', { count, blank: BULLET_BLANK })
+}
+
+// The toast after a download: the file, then the sections this template
+// leaves out and the bullets still holding a blank, when there are any.
+function downloadedToast(label, hiddenSections, blanks, locale) {
+  return builder.t(locale, 'export.downloaded', { label })
+    + (hiddenSections ? builder.t(locale, 'export.hiddenSections', { sections: hiddenSections }) : '')
+    + blankBulletsNote(blanks, locale)
 }
 
 function getScrollBehavior() {
@@ -291,8 +298,6 @@ function withStyleVariant(formData, templateId, variantId) {
 // `locale` is only for the opening toast's wording, which used to be
 // English on a Finnish page.
 function loadInitialCvSession(locale = 'en') {
-  const isFinnish = locale === 'fi'
-
   if (typeof window === 'undefined') {
     return {
       formData: initialCvData,
@@ -322,7 +327,7 @@ function loadInitialCvSession(locale = 'en') {
         sharedTemplateId: shared.templateId,
         sharedLook: shared.look,
         isOwnCv: true,
-        initialToast: createToast(isFinnish ? 'CV ladattu jakolinkistä.' : 'Loaded CV from share link.', 'success'),
+        initialToast: createToast(builder.t(locale, 'start.sharedLink'), 'success'),
         clearShareParam: false,
         storageIssue: hasStorageIssue,
         pendingExampleId: null,
@@ -376,10 +381,8 @@ function loadInitialCvSession(locale = 'en') {
           restoredFromSession: true,
           initialToast: createToast(
             hasPendingExample || hasPendingStyle
-              ? isFinnish
-                ? 'Palautettu CV säilytettiin. Aloita alusta valitsemalla Lataa demo-CV.'
-                : "Kept your restored CV. Use 'Load demo CV' to start over."
-              : isFinnish ? 'Edellinen istunto palautettu.' : 'Restored your last session.',
+              ? builder.t(locale, 'start.restoredKept')
+              : builder.t(locale, 'start.restored'),
             'success',
           ),
           clearShareParam: false,
@@ -432,7 +435,7 @@ function loadInitialCvSession(locale = 'en') {
   if (!hasSeenOnboarding) {
     return {
       formData: withStyleVariant(structuredClone(demoCvData), requestedTemplateId, requestedStyleId),
-      initialToast: createToast(isFinnish ? 'Esimerkki-CV ladattu avuksi alkuun.' : 'Loaded a sample CV to help you get started.', 'success'),
+      initialToast: createToast(builder.t(locale, 'start.sample'), 'success'),
       clearShareParam: false,
       storageIssue: hasStorageIssue,
       pendingExampleId: null,
@@ -597,8 +600,8 @@ function ResumeBuilderPage({
 
   const errors = useMemo(
     () => ({
-      fullName: formData.fullName.trim() ? '' : locale === 'fi' ? 'Koko nimi on pakollinen.' : 'Full name is required.',
-      title: formData.title.trim() ? '' : locale === 'fi' ? 'Ammattinimike on pakollinen.' : 'Professional title is required.',
+      fullName: formData.fullName.trim() ? '' : builder.t(locale, 'validation.fullName'),
+      title: formData.title.trim() ? '' : builder.t(locale, 'validation.title'),
     }),
     [formData.fullName, formData.title, locale],
   )
@@ -644,9 +647,7 @@ function ResumeBuilderPage({
 
     storageWarningShownRef.current = true
     showToast(
-      locale === 'fi'
-        ? 'Tallennustila on rajoitettu. Muutokset eivät välttämättä säily päivityksen jälkeen.'
-        : 'Storage access is limited. Your changes may not persist after refresh.',
+      builder.t(locale, 'storage.limited'),
       'error',
     )
   }, [locale])
@@ -777,7 +778,7 @@ function ResumeBuilderPage({
         // comment. The builder stays on the blank CV it already showed;
         // this toast is just so the visitor knows the link didn't work,
         // rather than silently getting a blank CV with no explanation.
-        showToast(locale === 'fi' ? 'Esimerkkiä ei voitu ladata.' : "Couldn't load that example.", 'error')
+        showToast(builder.t(locale, 'start.exampleFailed'), 'error')
         return
       }
       // ?style= wins over any look the example stores for this template.
@@ -787,7 +788,7 @@ function ResumeBuilderPage({
       markCvPristine(startCv)
       applyStoredStyleVariantLook(startCv, selectedTemplate)
       const roleLabel = EXAMPLES[exampleId].role[locale === 'fi' ? 'fi' : 'en']
-      showToast(locale === 'fi' ? `Esimerkki ladattu: ${roleLabel}.` : `Loaded the ${roleLabel} example.`)
+      showToast(builder.t(locale, 'start.exampleLoaded', { role: roleLabel }))
     })
     return () => { cancelled = true }
     // Mount-only: the session decision is made once, like initialSession itself.
@@ -901,9 +902,7 @@ function ResumeBuilderPage({
 
       if (!didSyncPreviewMode) {
         throw new Error(
-          locale === 'fi'
-            ? `Esikatselutila ei ole synkronoitu (${exportPdfMode.toUpperCase()}). Yritä hetken kuluttua uudelleen.`
-            : `Preview mode is not synced (${exportPdfMode.toUpperCase()}). Try exporting again in a moment.`,
+          builder.t(locale, 'export.previewModeNotSynced', { mode: exportPdfMode.toUpperCase() }),
         )
       }
 
@@ -919,9 +918,7 @@ function ResumeBuilderPage({
           || 'unknown'
 
         throw new Error(
-          locale === 'fi'
-            ? `Pohjan esikatselu ei ole vielä synkronoitu (odotettu ${expectedVariant}, saatu ${activeVariant}). Yritä uudelleen.`
-            : `Template preview is not synced yet (expected ${expectedVariant}, got ${activeVariant}). Try again.`,
+          builder.t(locale, 'export.previewVariantNotSynced', { expected: String(expectedVariant), actual: activeVariant }),
         )
       }
 
@@ -973,18 +970,14 @@ function ResumeBuilderPage({
       const blanks = countBlankBullets(formData)
 
       showToast(
-        locale === 'fi'
-          ? `${exportLabel} on ladattu.${hiddenSections ? ` Tämä pohja ei näytä osioita: ${hiddenSections}.` : ''}${blankBulletsNote(blanks, true)}`
-          : `${exportLabel} export downloaded.${hiddenSections ? ` This template doesn't show: ${hiddenSections}.` : ''}${blankBulletsNote(blanks, false)}`,
+        downloadedToast(exportLabel, hiddenSections, blanks, locale),
         blanks ? 'info' : 'success',
       )
     } catch (error) {
       showToast(
         error instanceof Error && error.message
           ? error.message
-          : locale === 'fi'
-            ? `${exportLabel}-vienti epäonnistui.`
-            : `Failed to export ${exportLabel}.`,
+          : builder.t(locale, 'export.failed', { label: exportLabel }),
         'error',
       )
     } finally {
@@ -1008,12 +1001,12 @@ function ResumeBuilderPage({
 
     const toastLabel =
       type === 'pdf-designer'
-        ? locale === 'fi' ? 'Valmistellaan PDF-vientiä...' : 'Preparing PDF export...'
+        ? builder.t(locale, 'export.preparingPdf')
         : type === 'html'
-          ? locale === 'fi' ? 'Valmistellaan HTML-vientiä...' : 'Preparing HTML export...'
+          ? builder.t(locale, 'export.preparingHtml')
           : type === 'docx'
-            ? locale === 'fi' ? 'Valmistellaan Word-vientiä...' : 'Preparing Word export...'
-            : locale === 'fi' ? 'Valmistellaan JSON-vientiä...' : 'Preparing JSON export...'
+            ? builder.t(locale, 'export.preparingWord')
+            : builder.t(locale, 'export.preparingJson')
 
     if (type !== 'pdf-designer') {
       showToast(toastLabel, 'info')
@@ -1029,9 +1022,7 @@ function ResumeBuilderPage({
       if (type === 'pdf-designer') {
         if (isCvBlank(formData)) {
           showToast(
-            locale === 'fi'
-              ? 'CV on vielä tyhjä. Lisää tietosi ja vie PDF sitten.'
-              : 'Your CV is still empty. Add your details, then export the PDF.',
+            builder.t(locale, 'export.emptyCv'),
             'error',
           )
           return
@@ -1071,18 +1062,14 @@ function ResumeBuilderPage({
       const blanks = countBlankBullets(formData)
 
       showToast(
-        locale === 'fi'
-          ? `${exportLabel} on ladattu.${hiddenSections ? ` Tämä pohja ei näytä osioita: ${hiddenSections}.` : ''}${blankBulletsNote(blanks, true)}`
-          : `${exportLabel} export downloaded.${hiddenSections ? ` This template doesn't show: ${hiddenSections}.` : ''}${blankBulletsNote(blanks, false)}`,
+        downloadedToast(exportLabel, hiddenSections, blanks, locale),
         blanks ? 'info' : 'success',
       )
     } catch (error) {
       showToast(
         error instanceof Error
           ? error.message
-          : locale === 'fi'
-            ? `${exportLabel}-vienti epäonnistui.`
-            : `Failed to export ${exportLabel}.`,
+          : builder.t(locale, 'export.failed', { label: exportLabel }),
         'error',
       )
     } finally {
@@ -1106,15 +1093,13 @@ function ResumeBuilderPage({
     try {
       if (file.size > MAX_IMPORT_FILE_SIZE_BYTES) {
         showToast(
-          locale === 'fi'
-            ? 'Tiedosto on liian suuri. Tuetun koko on enintään 5 Mt.'
-            : 'File is too large. Maximum supported size is 5MB.',
+          builder.t(locale, 'import.tooLarge'),
           'error',
         )
         return
       }
 
-      showToast(locale === 'fi' ? `Tuodaan ${file.name}...` : `Importing ${file.name}...`, 'info')
+      showToast(builder.t(locale, 'import.importingJson', { name: file.name }), 'info')
       const fileText = await file.text()
       const parsedValue = JSON.parse(fileText)
       const importedData = parseImportedCvData(parsedValue)
@@ -1126,20 +1111,18 @@ function ResumeBuilderPage({
       applyStoredStyleVariantLook(importedData, selectedTemplate)
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
       setIsImportOpen(false)
-      showToast(locale === 'fi' ? `CV-tiedot tuotu tiedostosta ${file.name}.` : `Imported CV data from ${file.name}.`)
+      showToast(builder.t(locale, 'import.importedJson', { name: file.name }))
     } catch (error) {
       if (error instanceof SyntaxError) {
         showToast(
-          locale === 'fi'
-            ? 'Virheellinen JSON-tiedosto. Lataa kelvollinen PortifyCV-vienti, jossa on fullName, title, skills, experience, education ja links.'
-            : 'Invalid JSON file. Upload a valid PortifyCV export with fullName, title, skills, experience, education, and links.',
+          builder.t(locale, 'import.invalidJson'),
           'error',
         )
       } else {
         showToast(
           error instanceof Error
             ? error.message
-            : locale === 'fi' ? 'Valitun tiedoston tuonti epäonnistui.' : 'Failed to import the selected file.',
+            : builder.t(locale, 'import.failed'),
           'error',
         )
       }
@@ -1162,21 +1145,18 @@ function ResumeBuilderPage({
       return
     }
 
-    const isFinnish = locale === 'fi'
     dispatchUi({ type: UI_ACTION.SET_IMPORTING, value: true })
 
     try {
       if (file.size > MAX_IMPORT_FILE_SIZE_BYTES) {
         showToast(
-          isFinnish
-            ? 'Tiedosto on liian suuri. Tuetun koko on enintään 5 Mt.'
-            : 'File is too large. Maximum supported size is 5MB.',
+          builder.t(locale, 'import.tooLarge'),
           'error',
         )
         return
       }
 
-      showToast(isFinnish ? `Luetaan ${file.name}...` : `Reading ${file.name}...`, 'info')
+      showToast(builder.t(locale, 'import.reading', { name: file.name }), 'info')
       const [{ extractCvFileText }, { parseCvText }, { isLinkedInPdf, parseLinkedInText }] = await Promise.all([
         import('../utils/cvFileText'),
         import('../utils/cvTextImport'),
@@ -1197,37 +1177,28 @@ function ResumeBuilderPage({
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
       setIsImportOpen(false)
 
-      const count = (value, one, many) => `${value} ${value === 1 ? one : many}`
-      const found = isFinnish
-        ? [count(summary.experience, 'työpaikka', 'työpaikkaa'), count(summary.education, 'tutkinto', 'tutkintoa'), count(summary.skills, 'taito', 'taitoa')]
-        : [count(summary.experience, 'job', 'jobs'), count(summary.education, 'degree', 'degrees'), count(summary.skills, 'skill', 'skills')]
+      const found = [
+        builder.t(locale, 'import.counts.jobs', { count: summary.experience }),
+        builder.t(locale, 'import.counts.degrees', { count: summary.education }),
+        builder.t(locale, 'import.counts.skills', { count: summary.skills }),
+      ].join(', ')
       showToast(
         summary.source === 'linkedin'
-          ? isFinnish
-            ? `LinkedIn-profiilisi tuotiin: ${found.join(', ')}. LinkedInin PDF:ssä on vain kolme kärkitaitoasi; lisää muut Taidot-osioon.`
-            : `Imported your LinkedIn profile: ${found.join(', ')}. LinkedIn's PDF lists only your top 3 skills; add the rest under Skills.`
-          : isFinnish
-            ? `Tuotu tiedostosta ${file.name}: ${found.join(', ')}. Tarkista tiedot.`
-            : `Imported from ${file.name}: ${found.join(', ')}. Check the details.`,
+          ? builder.t(locale, 'import.linkedIn', { found })
+          : builder.t(locale, 'import.file', { name: file.name, found }),
       )
     } catch (error) {
       const messages = {
-        unsupported: isFinnish
-          ? 'Tiedostotyyppiä ei tueta. Valitse PDF- tai Word-tiedosto (.docx).'
-          : 'That file type is not supported. Choose a PDF or a Word (.docx) file.',
-        'no-text': isFinnish
-          ? 'Tiedostosta ei löytynyt tekstiä. Se näyttää skannatulta kuvalta.'
-          : 'No text found. The file looks like a scanned image.',
-        unreadable: isFinnish
-          ? 'Tiedostoa ei voitu lukea. Se voi olla vioittunut tai salasanalla suojattu.'
-          : 'Could not read the file. It may be damaged or password-protected.',
+        unsupported: builder.t(locale, 'import.unsupported'),
+        'no-text': builder.t(locale, 'import.noText'),
+        unreadable: builder.t(locale, 'import.unreadable'),
       }
 
       showToast(
         messages[error?.code]
           ?? (error instanceof Error && error.message
             ? error.message
-            : isFinnish ? 'Valitun tiedoston tuonti epäonnistui.' : 'Failed to import the selected file.'),
+            : builder.t(locale, 'import.failed')),
         'error',
       )
     } finally {
@@ -1256,9 +1227,7 @@ function ResumeBuilderPage({
     // original look (accent, plus the selected template's font/headings).
     applyStoredStyleVariantLook(null, selectedTemplate)
     showToast(
-      locale === 'fi'
-        ? 'CV tyhjennetty. Palauta työkalupalkin kumoa-nuolella.'
-        : 'CV cleared. Restore it with the toolbar undo arrow.',
+      builder.t(locale, 'clear.done'),
     )
   }, [applyStoredStyleVariantLook, detachSavedCv, dispatchFormData, locale, markCvPristine, resetConfirmArmed, selectedTemplate])
 
@@ -1280,12 +1249,10 @@ function ResumeBuilderPage({
     setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
     if (replacesOwnCv) {
       showToast(
-        locale === 'fi'
-          ? 'Demo-CV ladattu. Palauta oma CV:si työkalupalkin kumoa-nuolella.'
-          : 'Demo CV loaded. Get your own CV back with the toolbar undo arrow.',
+        builder.t(locale, 'demo.replaced'),
       )
     } else {
-      showToast(locale === 'fi' ? 'Demo-CV ladattu.' : 'Demo CV loaded.')
+      showToast(builder.t(locale, 'demo.loaded'))
     }
   }, [applyStoredStyleVariantLook, detachSavedCv, dispatchFormData, formDataRef, locale, markCvPristine, markCvSaved, selectedTemplate, setStorageValue])
 
@@ -1297,12 +1264,12 @@ function ResumeBuilderPage({
       dispatchUi({ type: UI_ACTION.SET_PASTED_CV_TEXT, value: '' })
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
       setIsImportOpen(false)
-      showToast(locale === 'fi' ? 'Liitetty CV-teksti tuotu.' : 'Pasted CV text imported.')
+      showToast(builder.t(locale, 'import.pasted'))
     } catch (error) {
       showToast(
         error instanceof Error
           ? error.message
-          : locale === 'fi' ? 'Liitetyn CV-tekstin jäsentäminen epäonnistui.' : 'Failed to parse pasted CV text.',
+          : builder.t(locale, 'import.pasteFailed'),
         'error',
       )
     }
@@ -1332,9 +1299,7 @@ function ResumeBuilderPage({
       showToast(
         error instanceof Error
           ? error.message
-          : locale === 'fi'
-            ? 'Tälle CV:lle ei voitu luoda jaettavaa linkkiä.'
-            : 'Failed to create a shareable link for this CV.',
+          : builder.t(locale, 'share.failed'),
         'error',
       )
       return
@@ -1347,9 +1312,7 @@ function ResumeBuilderPage({
       await window.navigator.clipboard.writeText(shareUrl)
     } catch {
       showToast(
-        locale === 'fi'
-          ? 'Leikepöydälle kopiointi epäonnistui. Kopioi linkki selaimen osoiterivilta.'
-          : 'Could not copy to the clipboard. Copy the link from your browser address bar instead.',
+        builder.t(locale, 'share.copyFailed'),
         'error',
       )
       return
@@ -1358,27 +1321,21 @@ function ResumeBuilderPage({
     if (!shareWarningShownRef.current) {
       shareWarningShownRef.current = true
       showToast(
-        locale === 'fi'
-          ? 'Huom: jakolinkki sisältää CV-tietosi URL:ssa. Jaa vain luotetuille vastaanottajille.'
-          : 'Note: the share link embeds your CV data in the URL. Share it only with trusted recipients.',
+        builder.t(locale, 'share.warning'),
         'info',
       )
     }
 
     if (shareLinkOmitsImages(formData)) {
       showToast(
-        locale === 'fi'
-          ? 'Jakolinkki kopioitu. Se avaa CV:n katselusivun, josta voi ladata PDF:n. Kuvat jäävät linkin ulkopuolelle — jaa JSON, jos ne tarvitaan.'
-          : 'Share link copied. It opens a view-only page with a PDF download. Images are left out of the link — share the JSON export if they are needed.',
+        builder.t(locale, 'share.copiedNoImages'),
         'info',
       )
       return
     }
 
     showToast(
-      locale === 'fi'
-        ? 'Jakolinkki kopioitu. Se avaa CV:n katselusivun, josta voi ladata PDF:n.'
-        : 'Share link copied. It opens a view-only page with a PDF download.',
+      builder.t(locale, 'share.copied'),
     )
   }, [
     atsFriendlyMode, classicNameAlignment, cvFontId, cvHeadingColor, cvLocale, formData, locale, pdfFit, pdfPaper,
@@ -1460,9 +1417,7 @@ function ResumeBuilderPage({
 
       if (hiddenSections) {
         showToast(
-          locale === 'fi'
-            ? `Tämä pohja ei näytä osioita: ${hiddenSections}. Tietosi säilyvät.`
-            : `This template doesn't show: ${hiddenSections}. Your data is kept.`,
+          builder.t(locale, 'template.hiddenSections', { sections: hiddenSections }),
           'info',
         )
       }
@@ -1566,11 +1521,11 @@ function ResumeBuilderPage({
       if (record) return record
       refreshApplications()
       showToast(
-        locale === 'fi' ? 'Tätä hakua ei enää ole tällä laitteella.' : 'This application is no longer on this device.',
+        builder.t(locale, 'applications.gone'),
         'error',
       )
     } catch {
-      showToast(locale === 'fi' ? 'Hakua ei voitu avata.' : 'Could not open the application.', 'error')
+      showToast(builder.t(locale, 'applications.openFailed'), 'error')
     }
     return null
   }, [locale, refreshApplications])
@@ -1600,7 +1555,7 @@ function ResumeBuilderPage({
       data = parseImportedCvData(record.source?.data)
     } catch {
       showToast(
-        locale === 'fi' ? 'Tämän haun CV:tä ei voitu avata.' : 'This application\'s CV could not be opened.',
+        builder.t(locale, 'applications.cvFailed'),
         'error',
       )
       return
@@ -1631,9 +1586,7 @@ function ResumeBuilderPage({
 
     setViewedApplication(null)
     setSavedCvsView(null)
-    showToast(locale === 'fi'
-      ? `Uusi CV aloitettu hausta yritykseen ${record.company}.`
-      : `Started a new CV from the application to ${record.company}.`)
+    showToast(builder.t(locale, 'applications.startedFrom', { company: record.company }))
   }, [atsFriendlyMode, detachSavedCv, dispatchFormData, formData, locale, readApplication, recordTemplateLookStep, uiState, viewedApplication])
   const handleCloseSavedCvs = useCallback(() => setSavedCvsView(null), [])
   // Opens the dialog once the database has answered, so a browser that
@@ -1686,7 +1639,9 @@ function ResumeBuilderPage({
       setStorageValue(CV_ONBOARDING_SEEN_STORAGE_KEY, 'true')
       setSavedCvsView(null)
       const opened = cvLibrary.savedCvs.find((cv) => cv.id === id)
-      showToast(locale === 'fi' ? `Avattu: ${opened?.name ?? 'CV'}.` : `Opened ${opened?.name ?? 'the CV'}.`)
+      showToast(opened?.name == null
+        ? builder.t(locale, 'savedCvs.openedUnnamed')
+        : builder.t(locale, 'savedCvs.opened', { name: opened.name }))
     }
   }, [applySavedCv, cvLibrary, locale, setStorageValue])
   const handleDuplicateSavedCv = useCallback(async (id) => {
@@ -1694,7 +1649,7 @@ function ResumeBuilderPage({
 
     if (copyId && await cvLibrary.openCv(copyId, applySavedCv)) {
       setSavedCvsView(null)
-      showToast(locale === 'fi' ? 'Kopio tehty ja avattu.' : 'Copy made and opened.')
+      showToast(builder.t(locale, 'savedCvs.copyOpened'))
     }
   }, [applySavedCv, cvLibrary, locale])
   const handleNewCv = useCallback(() => {
@@ -1707,7 +1662,7 @@ function ResumeBuilderPage({
     markCvPristine(blank)
     markCvSaved(blank)
     setSavedCvsView(null)
-    showToast(locale === 'fi' ? 'Uusi tyhjä CV aloitettu.' : 'Started a new, empty CV.')
+    showToast(builder.t(locale, 'savedCvs.newCv'))
   }, [applyStoredStyleVariantLook, detachSavedCv, dispatchFormData, locale, markCvPristine, markCvSaved, resetHistory, selectedTemplate])
   const savedCvTemplateLabels = useMemo(
     () => Object.fromEntries(templates.map((template) => [template.id, template.label])),
@@ -1727,7 +1682,7 @@ function ResumeBuilderPage({
     const base = cvLibrary.activeCv?.name ?? defaultCvName(formData, locale)
     const suffix = jobTitle
       ? jobTitle
-      : locale === 'fi' ? 'räätälöity' : 'tailored'
+      : builder.t(locale, 'savedCvs.tailored')
 
     setIsAtsCheckOpen(false)
     openSavedCvs('save', `${base} – ${suffix}`.slice(0, MAX_CV_NAME_LENGTH))
@@ -1803,12 +1758,10 @@ function ResumeBuilderPage({
   const handleCopyBadgeSnippet = useCallback(async (snippet) => {
     try {
       await window.navigator.clipboard.writeText(snippet)
-      showToast(locale === 'fi' ? 'Tunnuksen HTML kopioitu leikepöydälle.' : 'Badge HTML copied to clipboard.')
+      showToast(builder.t(locale, 'badge.copied'))
     } catch {
       showToast(
-        locale === 'fi'
-          ? 'Kopiointi epäonnistui. Kopioi HTML manuaalisesti.'
-          : 'Could not copy to the clipboard. Copy the HTML manually instead.',
+        builder.t(locale, 'badge.copyFailed'),
         'error',
       )
     }
@@ -2099,9 +2052,7 @@ function ResumeBuilderPage({
   const handleAddMissingKeyword = useCallback((keyword) => {
     if (formData.skills.some((skill) => skill.toLowerCase() === keyword.toLowerCase())) {
       showToast(
-        locale === 'fi'
-          ? `"${keyword}" löytyy jo taidoista.`
-          : `"${keyword}" is already in your skills.`,
+        builder.t(locale, 'keywords.alreadyThere', { keyword }),
         'info',
       )
       return
@@ -2109,9 +2060,7 @@ function ResumeBuilderPage({
 
     dispatchFormData({ type: FORM_ACTION.ADD_SKILL, skill: keyword })
     showToast(
-      locale === 'fi'
-        ? `"${keyword}" lisätty taitoihin.`
-        : `Added "${keyword}" to skills.`,
+      builder.t(locale, 'keywords.added', { keyword }),
     )
   }, [dispatchFormData, formData.skills, locale])
 
@@ -2123,15 +2072,11 @@ function ResumeBuilderPage({
     try {
       await window.navigator.clipboard.writeText(jobDescriptionAnalysis.missing.join(', '))
       showToast(
-        locale === 'fi'
-          ? 'Puuttuvat avainsanat kopioitu.'
-          : 'Missing keywords copied.',
+        builder.t(locale, 'keywords.copied'),
       )
     } catch {
       showToast(
-        locale === 'fi'
-          ? 'Avainsanojen kopiointi epäonnistui.'
-          : 'Failed to copy missing keywords.',
+        builder.t(locale, 'keywords.copyFailed'),
         'error',
       )
     }
@@ -2163,9 +2108,7 @@ function ResumeBuilderPage({
       hiringManagerName: letter.hiringManager,
     })
     if (letter.body.trim() && letter.body !== draft) {
-      const message = locale === 'fi'
-        ? 'Korvataanko muokattu kirje uudella luonnoksella?'
-        : 'Replace your edited letter with a new draft?'
+      const message = builder.t(locale, 'coverLetter.replaceDraft')
       if (!window.confirm(message)) return
     }
     updateCoverLetter({ body: draft })
@@ -2178,19 +2121,17 @@ function ResumeBuilderPage({
 
     try {
       await window.navigator.clipboard.writeText(coverLetterBody)
-      showToast(locale === 'fi' ? 'Hakemuskirje kopioitu leikepöydälle.' : 'Cover letter copied to clipboard.')
+      showToast(builder.t(locale, 'coverLetter.copied'))
     } catch {
       showToast(
-        locale === 'fi'
-          ? 'Kopiointi epäonnistui. Kopioi teksti manuaalisesti.'
-          : 'Could not copy to the clipboard. Copy the text manually instead.',
+        builder.t(locale, 'coverLetter.copyFailed'),
         'error',
       )
     }
   }, [coverLetterBody, locale])
 
   // The letter's file name (.txt and PDF), in the CV's language.
-  const letterFileName = `${exportFileName}-${cvLocale === 'fi' ? 'hakemuskirje' : 'cover-letter'}`
+  const letterFileName = `${exportFileName}-${builder.t(cvLocale, 'coverLetter.fileName')}`
 
   const handleDownloadCoverLetterText = useCallback(async () => {
     if (!coverLetterBody.trim()) {
@@ -2246,9 +2187,7 @@ function ResumeBuilderPage({
   const markAppliedBusyRef = useRef(false)
   const handleMarkApplied = useCallback(async ({ company, role, appliedOn, adUrl, paper, fit }) => {
     if (markAppliedBusyRef.current) {
-      throw Object.assign(new Error(locale === 'fi'
-        ? 'Edellistä hakua tallennetaan vielä.'
-        : 'Still saving the previous application.'), { code: 'busy' })
+      throw Object.assign(new Error(builder.t(locale, 'applications.busy')), { code: 'busy' })
     }
     markAppliedBusyRef.current = true
 
@@ -2289,7 +2228,7 @@ function ResumeBuilderPage({
 
       setIsMarkAppliedOpen(false)
       setApplicationsVersion((version) => version + 1)
-      showToast(locale === 'fi' ? 'Tallennettu kohtaan Omat CV:t › Haut.' : 'Saved to Applications in My CVs.')
+      showToast(builder.t(locale, 'applications.saved'))
     } finally {
       markAppliedBusyRef.current = false
     }
@@ -2305,16 +2244,14 @@ function ResumeBuilderPage({
       setIsPdfPreviewOpen(false)
       setIsCoverLetterOpen(true)
       showToast(
-        locale === 'fi' ? 'Hakemuskirjeen PDF on ladattu.' : 'Cover letter PDF downloaded.',
+        builder.t(locale, 'coverLetter.pdfDownloaded'),
         'success',
       )
     } catch (error) {
       showToast(
         error instanceof Error && error.message
           ? error.message
-          : locale === 'fi'
-            ? 'PDF-vienti epäonnistui.'
-            : 'PDF export failed.',
+          : builder.t(locale, 'coverLetter.pdfFailed'),
         'error',
       )
     }
@@ -2339,7 +2276,7 @@ function ResumeBuilderPage({
             disabled={isActionBusy}
             onClick={handleLoadDemo}
           >
-            {locale === 'fi' ? 'Lataa demo-CV' : 'Load demo CV'}
+            {builder.t(locale, 'sidebar.loadDemo')}
           </button>
           {/* No "Show preview" button here: below lg the bottom tab bar's
               Preview tab does the same thing (1.6.83). */}
@@ -2348,10 +2285,10 @@ function ResumeBuilderPage({
             role="status"
           >
             {cvLibrary.activeCv
-              ? locale === 'fi' ? 'Tallennettu tälle laitteelle' : 'Saved on this device'
+              ? builder.t(locale, 'sidebar.statusSaved')
               : sessionRestoreEnabled
-              ? locale === 'fi' ? 'Säilyy vain tässä välilehdessä' : 'Kept in this tab only'
-              : locale === 'fi' ? 'Ei tallenneta minnekään' : 'Nothing saved anywhere'}
+              ? builder.t(locale, 'sidebar.statusTab')
+              : builder.t(locale, 'sidebar.statusNowhere')}
           </div>
         </div>
 
@@ -2361,17 +2298,15 @@ function ResumeBuilderPage({
         <details className="editor-tools">
           <summary className="editor-tools__summary">
             <span className="editor-tools__label">
-              {locale === 'fi' ? 'Tuo CV' : 'Import CV'}
+              {builder.t(locale, 'sidebar.importCv')}
             </span>
           </summary>
 
           <div className="editor-tools__body stack-5">
             <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
-              <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Lataa oma CV' : 'Upload your CV'}</p>
+              <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{builder.t(locale, 'sidebar.uploadKicker')}</p>
               <p className={`mt-3 text-sm ${ui.textSecondary}`}>
-                {locale === 'fi'
-                  ? 'PDF- tai Word-tiedosto (.docx). Korvaa nykyisen CV:n; kumoa-nuoli palauttaa sen. Tarkista tulos: palstoitettu asettelu voi siirtyä vain osittain.'
-                  : 'A PDF or Word (.docx) file. It replaces the current CV; the undo arrow brings that back. Check the result: a layout with columns may import only partly.'}
+                {builder.t(locale, 'sidebar.uploadBody')}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
@@ -2380,27 +2315,23 @@ function ResumeBuilderPage({
                   disabled={isActionBusy}
                   onClick={handleImportCvFileClick}
                 >
-                  {locale === 'fi' ? 'Valitse PDF tai Word' : 'Choose PDF or Word'}
+                  {builder.t(locale, 'sidebar.chooseFile')}
                 </button>
               </div>
             </section>
 
             <section className={`p-4 sm:p-5 ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
-              <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{locale === 'fi' ? 'Pikatuonti' : 'Quick import'}</p>
+              <p className={`ds-kicker uppercase tracking-[0.14em] ${ui.textMuted}`}>{builder.t(locale, 'sidebar.quickKicker')}</p>
               <p className={`mt-3 text-sm ${ui.textSecondary}`}>
-                {locale === 'fi'
-                  ? 'Liitä CV-katkelma nimen, tittelin, taitojen ja lyhyen yhteenvedon tunnistamiseksi.'
-                  : 'Paste a resume snippet to detect a name, title, skills, and a short summary.'}
+                {builder.t(locale, 'sidebar.quickBody')}
               </p>
               <textarea
                 className={`mt-4 min-h-32 w-full border px-4 py-3 text-sm transition ${ui.input}`}
                 value={pastedCvText}
                 disabled={isActionBusy}
                 onChange={handlePastedCvTextChange}
-                aria-label={locale === 'fi' ? 'Liitetty CV-teksti' : 'Pasted CV text'}
-                placeholder={locale === 'fi'
-                  ? `Matti Meikäläinen\nSenior Product Designer\nTaidot: Figma, käyttäjätutkimus, design systemit`
-                  : `John Doe\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
+                aria-label={builder.t(locale, 'sidebar.pasteLabel')}
+                placeholder={builder.t(locale, 'sidebar.pastePlaceholder')}
               />
               <div className="mt-4 flex flex-wrap gap-2">
                 <button
@@ -2409,7 +2340,7 @@ function ResumeBuilderPage({
                   disabled={isActionBusy}
                   onClick={handlePasteCvImport}
                 >
-                  {locale === 'fi' ? 'Tuo liitetty teksti' : 'Paste CV text'}
+                  {builder.t(locale, 'sidebar.pasteImport')}
                 </button>
                 <button
                   type="button"
@@ -2418,8 +2349,8 @@ function ResumeBuilderPage({
                   onClick={handleImportClick}
                 >
                   {isImporting
-                    ? locale === 'fi' ? 'Tuodaan JSON...' : 'Importing JSON...'
-                    : locale === 'fi' ? 'Tuo JSON' : 'Import JSON'}
+                    ? builder.t(locale, 'sidebar.importingJson')
+                    : builder.t(locale, 'sidebar.importJson')}
                 </button>
               </div>
             </section>
@@ -2433,7 +2364,7 @@ function ResumeBuilderPage({
         <details className="editor-tools">
           <summary className="editor-tools__summary">
             <span className="editor-tools__label">
-              {locale === 'fi' ? 'ATS-pisteet ja ehdotukset' : 'ATS score & suggestions'}
+              {builder.t(locale, 'sidebar.atsTools')}
             </span>
             <span className="editor-tools__stats">
               {atsScore ? (
@@ -2443,7 +2374,7 @@ function ResumeBuilderPage({
               ) : null}
               {feedback?.length ? (
                 <span className="editor-tools__stat">
-                  {feedback.length} {locale === 'fi' ? 'ehdotusta' : 'suggestions'}
+                  {builder.t(locale, 'sidebar.suggestionCount', { count: feedback.length })}
                 </span>
               ) : null}
             </span>
@@ -2475,7 +2406,7 @@ function ResumeBuilderPage({
       </div>
 
       <AppErrorBoundary
-        panelTitle={locale === 'fi' ? 'CV-lomake' : 'CV form'}
+        panelTitle={builder.t(locale, 'page.formPanel')}
         locale={locale}
       >
         <CVForm
@@ -2545,7 +2476,7 @@ function ResumeBuilderPage({
       return supportedByTemplate
     }
 
-    return supportedByTemplate.filter((item) => (item.label[locale] ?? item.label.en).toLowerCase().includes(query))
+    return supportedByTemplate.filter((item) => builder.t(locale, item.labelKey).toLowerCase().includes(query))
   }, [searchQuery, locale, templateSectionKeySet])
 
   const filteredNavUtilityItems = useMemo(() => {
@@ -2555,7 +2486,7 @@ function ResumeBuilderPage({
       return NAV_UTILITY_ITEMS
     }
 
-    return NAV_UTILITY_ITEMS.filter((item) => (item.label[locale] ?? item.label.en).toLowerCase().includes(query))
+    return NAV_UTILITY_ITEMS.filter((item) => builder.t(locale, item.labelKey).toLowerCase().includes(query))
   }, [searchQuery, locale])
 
   // Direct Edit renders only the sections the template supports AND the
@@ -2639,21 +2570,21 @@ function ResumeBuilderPage({
               className={`preview-zoom-bar__button${isFitWidthZoom ? ' preview-zoom-bar__button--active' : ''}`}
               onClick={handleFitWidth}
               aria-pressed={isFitWidthZoom}
-              aria-label={locale === 'fi' ? 'Sovita leveyteen' : 'Fit width'}
-              title={locale === 'fi' ? 'Sovita leveyteen' : 'Fit width'}
+              aria-label={builder.t(locale, 'zoom.fitWidth')}
+              title={builder.t(locale, 'zoom.fitWidth')}
             >
               <StretchHorizontal size={13} strokeWidth={2} aria-hidden="true" style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: '-2px' }} />
-              {locale === 'fi' ? 'Leveys' : 'Fit Width'}
+              {builder.t(locale, 'zoom.fitWidthButton')}
             </button>
             <button
               type="button"
               className="preview-zoom-bar__button"
               onClick={handleFitPage}
-              aria-label={locale === 'fi' ? 'Sovita sivuun' : 'Fit page'}
-              title={locale === 'fi' ? 'Sovita sivuun' : 'Fit page'}
+              aria-label={builder.t(locale, 'zoom.fitPage')}
+              title={builder.t(locale, 'zoom.fitPage')}
             >
               <StretchVertical size={13} strokeWidth={2} aria-hidden="true" style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: '-2px' }} />
-              {locale === 'fi' ? 'Sivu' : 'Fit Page'}
+              {builder.t(locale, 'zoom.fitPageButton')}
             </button>
           </div>
 
@@ -2682,7 +2613,7 @@ function ResumeBuilderPage({
               type="button"
               className="preview-zoom-bar__button"
               onClick={() => handleZoomBy(-10)}
-              aria-label={locale === 'fi' ? 'Loitonna' : 'Zoom out'}
+              aria-label={builder.t(locale, 'zoom.zoomOut')}
             >
               <Minus size={13} strokeWidth={2.5} aria-hidden="true" />
             </button>
@@ -2691,7 +2622,7 @@ function ResumeBuilderPage({
               type="button"
               className="preview-zoom-bar__button"
               onClick={() => handleZoomBy(10)}
-              aria-label={locale === 'fi' ? 'Lähennä' : 'Zoom in'}
+              aria-label={builder.t(locale, 'zoom.zoomIn')}
             >
               <Plus size={13} strokeWidth={2.5} aria-hidden="true" />
             </button>
@@ -2708,10 +2639,10 @@ function ResumeBuilderPage({
               background: 'var(--app-surface)', boxShadow: 'var(--shadow-md)',
             }}
             onClick={handleToggleFullscreenPreview}
-            aria-label={locale === 'fi' ? 'Poistu koko näytöstä' : 'Exit fullscreen'}
+            aria-label={builder.t(locale, 'zoom.exitFullscreen')}
           >
             <X size={14} strokeWidth={2} aria-hidden="true" style={{ display: 'inline', marginRight: '0.3rem', verticalAlign: '-2px' }} />
-            {locale === 'fi' ? 'Poistu' : 'Exit fullscreen'}
+            {builder.t(locale, 'zoom.exitFullscreenButton')}
           </button>
         ) : null}
 
@@ -2729,7 +2660,7 @@ function ResumeBuilderPage({
             }}
           >
             <AppErrorBoundary
-              panelTitle={locale === 'fi' ? 'CV-esikatselu' : 'CV preview'}
+              panelTitle={builder.t(locale, 'page.previewPanel')}
               locale={locale}
             >
               <CVPreview
@@ -2783,7 +2714,7 @@ function ResumeBuilderPage({
       <div
         className="mx-auto grid max-w-[110rem] grid-cols-3 gap-1.5"
         role="tablist"
-        aria-label={locale === 'fi' ? 'Näkymän valinta' : 'View selector'}
+        aria-label={builder.t(locale, 'views.label')}
       >
         <button
           type="button"
@@ -2796,7 +2727,7 @@ function ResumeBuilderPage({
             if (mobilePreviewVisible) handleToggleMobilePreview()
           }}
         >
-          {locale === 'fi' ? 'Editori' : 'Editor'}
+          {builder.t(locale, 'views.editor')}
         </button>
         <button
           type="button"
@@ -2809,7 +2740,7 @@ function ResumeBuilderPage({
             if (!mobilePreviewVisible) handleToggleMobilePreview()
           }}
         >
-          {locale === 'fi' ? 'Esikatselu' : 'Preview'}
+          {builder.t(locale, 'views.preview')}
         </button>
         <button
           type="button"
@@ -2818,7 +2749,7 @@ function ResumeBuilderPage({
           className={`ui-button ${ui.button}`}
           onClick={() => setIsTemplateGalleryOpen(true)}
         >
-          {locale === 'fi' ? 'Pohjat' : 'Templates'}
+          {builder.t(locale, 'views.templates')}
         </button>
       </div>
     </div>
@@ -2836,7 +2767,7 @@ function ResumeBuilderPage({
     // spell check and screen readers follow it, the builder's own text
     // stays in `locale`.
     <CvLanguageContext value={cvLocale}>
-      <h1 className="sr-only">{locale === 'fi' ? 'Rakenna CV:si' : 'Build Your CV'}</h1>
+      <h1 className="sr-only">{builder.t(locale, 'page.heading')}</h1>
       {/* One picker for both modes: Classic's Import CV panel and Direct
           Edit's Import CV dialog both open it (1.6.80). */}
       <input
@@ -2863,7 +2794,7 @@ function ResumeBuilderPage({
           </div>
           <div className="direct-edit-layout__main">
             <AppErrorBoundary
-              panelTitle={locale === 'fi' ? 'Suoran muokkauksen esikatselu' : 'Direct Edit preview'}
+              panelTitle={builder.t(locale, 'page.directEditPanel')}
               locale={locale}
             >
               <DirectEditPreview
