@@ -145,12 +145,20 @@ for (const { namespace } of namespaces.values()) {
 }
 
 // --- 4. Source scan ---------------------------------------------------------------
-// A hit is an inline language branch for text. Comment lines are skipped.
+// A hit is an inline language branch for text, or text kept per language in
+// code (a `labelFi` field, a `.fi` read, a map indexed by the locale, an
+// English-to-Finnish string map). Comment lines are skipped. The patterns
+// marked `code` run on the line with the insides of its string literals
+// blanked, so a domain such as 'example.fi' in a string is not a hit.
 const SCAN_PATTERNS = [
   { name: 'isFinnish ?', re: /\bisFinnish\s*\?(?![.?])/g },
   { name: "=== 'fi' ?", re: /[!=]==\s*['"]fi['"]\s*\)?\s*\?(?![.?])/g },
   { name: "if (x === 'fi')", re: /\bif\s*\(\s*[\w.]+\s*[!=]==\s*['"]fi['"]\s*\)/g },
   { name: 'fi: map', re: /(?:^|[\s{,])fi\s*:\s*['"`[{]/g },
+  { name: 'xFi field', re: /\b[a-z][\w$]*Fi\b/g, code: true },
+  { name: '.fi read', re: /[\w$]+(?:\??\.[\w$]+)*\??\.fi\b/g, code: true },
+  { name: '[locale] index', re: /(?:[\w$\])]|\?\.)\[\s*(?:[\w$]+\.)*(?:locale|cvLocale|uiLocale|lang|language|resolvedLocale|appLocale)\s*\]/g, code: true },
+  { name: "'English': 'Finnish' map", re: /^\s*(['"])[^'"]*\s[^'"]*\1\s*:\s*['"]/g },
 ]
 // The condition at the end of a line, the `?` starting the next one.
 const LINE_END_PATTERNS = [
@@ -158,19 +166,33 @@ const LINE_END_PATTERNS = [
   { name: "=== 'fi' ⏎ ?", re: /[!=]==\s*['"]fi['"]\s*\)?\s*$/ },
 ]
 
+// The line with every character inside a '…', "…" or `…` literal turned
+// into a space, so indexes still line up with the original line.
+function blankStrings(line) {
+  return line.replace(/(['"`])((?:\\.|(?!\1)[^\\])*)\1/g, (match, quote, inner) => `${quote}${' '.repeat(inner.length)}${quote}`)
+}
+
+// Each hit carries `window`: the line from the start of the match onward
+// (for a line-end hit, plus the next line), which is what a pattern entry
+// in ALLOWLIST is tested against, anchored at the hit. A logic branch on
+// the same line as a text branch then can't absorb the text one's hit.
 function scanSource(text) {
   const hits = []
   const lines = text.split('\n')
   lines.forEach((line, index) => {
     const trimmed = line.trim()
     if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) return
-    for (const { name, re } of SCAN_PATTERNS) {
-      for (const _match of line.matchAll(re)) hits.push({ line: index + 1, text: trimmed, pattern: name })
+    const code = blankStrings(line)
+    for (const { name, re, code: onCode } of SCAN_PATTERNS) {
+      for (const match of (onCode ? code : line).matchAll(re)) {
+        hits.push({ line: index + 1, text: trimmed, pattern: name, window: line.slice(match.index) })
+      }
     }
     const next = lines.slice(index + 1).find((candidate) => candidate.trim() !== '')
     if (next && /^\?(?![.?])/.test(next.trim())) {
       for (const { name, re } of LINE_END_PATTERNS) {
-        if (re.test(line)) hits.push({ line: index + 1, text: trimmed, pattern: name })
+        const match = line.match(re)
+        if (match) hits.push({ line: index + 1, text: trimmed, pattern: name, window: `${line.slice(match.index)} ${next.trim()}` })
       }
     }
   })
@@ -185,7 +207,12 @@ same('scan: other locale names', ["cvLocale === 'fi' ? 1 : 2", "uiLocale === 'fi
 same('scan: === fi at line end', scanSource("const a = cvLocale === 'fi'\n  ? 'x'\n  : 'y'").length, 1)
 same('scan: if returning copy', scanSource("if (locale === 'fi') {\n  return { a: 'x' }\n}").length, 1)
 same('scan: fi maps', ["{ en: 'Yes', fi: 'Kyllä' }", 'fi: `x`', 'fi: [', '  fi: {'].map((s) => scanSource(s).length), [1, 1, 1, 1])
-same('scan: not a hit', ["const isFinnish = locale === 'fi'", 'a ?? isFinnish', 'x?.fi', "// isFinnish ? 'a' : 'b'", 'isFinnish && x', "wifi: 'x'"].map((s) => scanSource(s).length), [0, 0, 0, 0, 0, 0])
+same('scan: Fi fields', ["  labelFi: 'Nimi',", 'const t = field.titleFi', "hintFi ? a : b"].map((s) => scanSource(s).length), [1, 1, 1])
+same('scan: .fi reads', ['const c = COPY.fi', 'x(copy?.fi.title)', 'map.fi[id]'].map((s) => scanSource(s).length), [1, 1, 1])
+same('scan: locale-indexed maps', ['label[lang]', 'COPY[locale].title', 'x[ cvLocale ]', 'EXAMPLES[id].role[uiLocale]', 'a[options.locale]', 'PAGE_COPY[id]?.[resolvedLocale]'].map((s) => scanSource(s).length), [1, 1, 1, 1, 1, 1])
+same('scan: English-to-Finnish map', scanSource("    'Could not read the file.': 'Tiedostoa ei voitu lukea.',").length, 1)
+same('scan: not a hit', ["const isFinnish = locale === 'fi'", 'a ?? isFinnish', "// isFinnish ? 'a' : 'b'", 'isFinnish && x', "wifi: 'x'", "url: 'https://example.fi/x'", "const ROUTES_FI = {}", "x[localeIndex]", "{ id: 'a', label: 'b' }", "const Fi = 1", '}, [locale])', 'useMemo(() => f(lang), [lang])', 'return [locale]'].map((s) => scanSource(s).length), [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+same('scan: window starts at the hit', scanSource("f(lang === 'fi' ? 'fi' : 'en', isFinnish ? 'Kyllä' : 'Yes')").map((hit) => hit.window.slice(0, 9)).sort(), ["=== 'fi' ", 'isFinnish'])
 
 // Branches that stay (out of scope, or logic rather than text):
 // { file, reason } covers every hit in that file; { pattern, reason } the
@@ -194,6 +221,7 @@ same('scan: not a hit', ["const isFinnish = locale === 'fi'", 'a ?? isFinnish', 
 // entry must still match a hit, so a stale one fails.
 const ALLOWLIST = [
   // Out of scope for 1.7.13 (route metadata, content data, registry labels).
+  { file: 'src/utils/pageMeta.js', reason: 'route metadata: titleFi/descriptionFi/pathFi/ogImageFi per route (out of scope)' },
   { file: 'src/utils/routes.js', reason: 'route table: per-language paths (ROUTES_FI), route metadata stays per language' },
   { file: 'src/utils/templatePageCopy.js', reason: 'per-template page copy, content data kept as { en, fi } (out of scope)' },
   { file: 'src/utils/landingFaq.js', reason: 'landing FAQ data, also feeds JSON-LD (out of scope)' },
@@ -204,12 +232,13 @@ const ALLOWLIST = [
   { file: 'src/utils/cvHeadingColors.js', reason: 'registry label maps { en, fi }, read as .label.en by checks and e2e' },
   { file: 'src/utils/cvTemplates.js', reason: 'template registry: labels/descriptions per language (templateLocalization) and the gate that applies them' },
   { file: 'src/components/LocaleFlagIcon.jsx', reason: 'logic: draws the Finnish or British flag SVG, no text' },
-  // Logic, not text, in any file: the branch picks a locale code, a
-  // formatting locale or an address.
-  { pattern: /\?\s*['"]fi['"]\s*:\s*['"]en['"]/, reason: "logic: normalises a locale to the code 'fi' or 'en'" },
-  { pattern: /['"]fi-FI['"]\s*:\s*['"]en-(GB|US)['"]/, reason: 'logic: date/number formatting locale for Intl' },
-  { pattern: /['"]fi_FI['"]\s*:\s*['"]en_US['"]/, reason: 'logic: og:locale value' },
-  { pattern: /ROUTES_FI\.|alternates\.fi\b|\?\s*['"]\/fi['"]|localizePath\(ROUTES\.\w+,\s*['"]fi['"]\)/, reason: 'logic: picks the Finnish or English address' },
+  // Logic, not text, in any file: the hit's own ternary (up to its first
+  // `?`, so a pattern can't reach a later branch on the line) picks a
+  // locale code, a formatting locale or an address.
+  { pattern: /^[^?]*\?\s*['"]fi['"]\s*:\s*['"]en['"]/, reason: "logic: normalises a locale to the code 'fi' or 'en'" },
+  { pattern: /^[^?]*\?\s*['"]fi-FI['"]\s*:\s*['"]en-(GB|US)['"]/, reason: 'logic: date/number formatting locale for Intl' },
+  { pattern: /^[^?]*\?\s*['"]fi_FI['"]\s*:\s*['"]en_US['"]/, reason: 'logic: og:locale value' },
+  { pattern: /^[^?]*\?\s*(?:ROUTES_FI\.|alternates\.fi\b|['"]\/fi['"]|localizePath\(ROUTES\.\w+,\s*['"]fi['"]\))/, reason: 'logic: picks the Finnish or English address' },
 ]
 
 // Files whose text is still inline and will move in a later task of the
@@ -248,6 +277,7 @@ const MIGRATION_PENDING = new Set([
   'src/components/SectionEditorPopup.jsx',
   'src/components/SectionEditOverlay.jsx',
   'src/components/SectionsMenu.jsx',
+  'src/components/StyleSwatchGroup.jsx',
   'src/components/SettingsModal.jsx',
   'src/components/TemplateFieldFilter.jsx',
   'src/components/TemplateGalleryModal.jsx',
@@ -301,7 +331,15 @@ const MIGRATION_PENDING = new Set([
   'src/utils/cvTextImport.js',
   'src/utils/exporters.js',
   'src/utils/profilePhoto.js',
+  'src/utils/sectionSchema.js',
 ])
+
+const allowlistEntry = (file, hit) => ALLOWLIST.find((candidate) => (!candidate.file || candidate.file === file)
+  && (!candidate.pattern || candidate.pattern.test(hit.window)))
+same('allowlist: a logic branch does not absorb a text branch on its line',
+  scanSource("f(lang === 'fi' ? 'fi' : 'en', isFinnish ? 'Kyllä' : 'Yes')").map((hit) => Boolean(allowlistEntry('src/x.js', hit))).sort(), [false, true])
+same('allowlist: nor one before it',
+  scanSource("f(isFinnish ? 'Kyllä' : 'Yes', lang === 'fi' ? 'fi' : 'en')").map((hit) => Boolean(allowlistEntry('src/x.js', hit))).sort(), [false, true])
 
 const allowlistUse = new Map(ALLOWLIST.map((entry) => [entry, 0]))
 const pendingHits = new Map()
@@ -309,8 +347,7 @@ const unexpected = []
 let allowlistedHits = 0
 for (const [file, text] of sources) {
   for (const hit of scanSource(text)) {
-    const entry = ALLOWLIST.find((candidate) => (!candidate.file || candidate.file === file)
-      && (!candidate.pattern || candidate.pattern.test(hit.text)))
+    const entry = allowlistEntry(file, hit)
     if (entry) {
       allowlistUse.set(entry, allowlistUse.get(entry) + 1)
       allowlistedHits += 1
