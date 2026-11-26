@@ -108,3 +108,33 @@ language.
 - `src/i18n/pages/templateDetail/index.js` has an overlong comment line;
   `SharedCvPage.jsx`'s comment on its moved title block could name the lint
   rule (`react-hooks/preserve-manual-memoization`).
+
+## Follow-ups for the gate
+
+Found in the final review and left for later; the ones that matter before a
+third language (Swedish) come first.
+
+- Section names are kept five times: `cvForm:sections`, `cv:sections`,
+  `exports:sections`, `builder:nav` and `form:*.heading` (about 20 names).
+  Values match today, but a translator would translate each copy. `cvForm`
+  is already in the entry, so the others can read it at no chunk cost. Also
+  "New skill" (`form`/`formInline`), "Settings"/"Cover letter"/"Import CV"
+  (`builderShell`/`builder`), and `share:documentTitle` vs `pageMeta.js`.
+- `check-section-schema.mjs` hard-codes `LOCALES = ['en', 'fi']`; import it
+  from `src/i18n/index.js`.
+- About 40 `? 'fi' : 'en'` normalisations in `src/` send any third locale to
+  English; point at `normalizeLocale` when Swedish starts.
+- The cvForm section labels' key list (`sectionVisibilityFieldKeys`,
+  `CV_SECTION_ORDER_KEYS`, `SECTION_SCHEMA`) are equal today; assert that
+  in `check:i18n` or add a DYNAMIC_KEYS entry.
+- Scan blind spots: `isFinnish && '…'`, other boolean names (`isEnglish`,
+  `isFinnishCv`), `locale.startsWith('fi')`, `case 'fi':`.
+- Whole-file ALLOWLIST entries (`cvTemplates.js`, `routes.js`,
+  `exampleCvs.js`, `LocaleFlagIcon.jsx`) take any new hit in their file;
+  scope them to patterns.
+- The usage check counts any string literal equal to the key; tighten it.
+- `useT`/`<T>` are unused and untested; add a case when a sentence first
+  uses a tag, or delete `react.jsx`.
+- `compare-prerender.mjs` and the thumbnails' translation-file inputs
+  (`cv/*`, `cvForm/*`, `formInline/*`) are not described in CLAUDE.md.
+

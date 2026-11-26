@@ -186,7 +186,9 @@ title, and description). Static content pages are keyed into one
 `STATIC_PAGES` map and share one shell (header, footer, consent banner); the
 CV builder (`src/pages/ResumeBuilderPage.jsx`) and the shared-CV page
 (`SharedCvPage.jsx`, 1.7.12) are the two non-static views (`APP_VIEWS`).
-Every page component is lazy-loaded.
+Every page component except the landing page and the privacy policy
+(`LandingPage`, `PrivacyPolicyPage`, imported eagerly by `App.jsx`) is
+lazy-loaded.
 
 Production is Cloudflare Workers (`wrangler.jsonc`, `main: worker/index.js`,
 serving `dist/` as static assets). `worker/index.js` re-matches the same
@@ -477,11 +479,12 @@ by `Intl.PluralRules` on `vars.count`; a function value called with
 no `window`, so it runs in the Node pre-render and in the check scripts.
 Each namespace is a folder, `src/i18n/<namespace>/en.js`, `fi.js` and an
 `index.js` that calls `createNamespace`, and only the modules that show
-its text import it, so a page's text stays in that page's chunk. The
+its text import it, so a lazy page's text stays in that page's chunk. The
 lazy ones are `cv` (CVPreview, the Showcases, `atsDetails.js`), `exports`
 (`createExportCopy`), `letter` (`coverLetter.js`), `builder`, `form`,
 `dialogs`, `feedback`, `share` and one `pages/<page>` per content page
-(`kind: 'page'`, read whole with `copy(locale)`, its shape kept: nested
+except `pages/landing` and `pages/privacy`, which are in the entry because
+`App.jsx` imports those two pages eagerly (`kind: 'page'`, read whole with `copy(locale)`, its shape kept: nested
 arrays, functions such as `minRead`). A few small ones exist only so the
 lazy text stays out of the entry or a shared chunk: `common` (App.jsx's
 shell), `builderShell` (Toolbar, its switchers, the leave dialog) and

@@ -97,8 +97,13 @@ check('a plural value is recognised', isPluralValue({ one: 'a', other: 'b' }) &&
 // and nested page namespaces such as src/i18n/pages/<page>/index.js).
 const namespaceFiles = walkFiles(i18nDir, (path) => path.endsWith(`${sep}index.js`) && path !== resolvePath(i18nDir, 'index.js'))
 const namespaces = new Map()
+const namespaceByExport = new Map() // `${repo path}#${export name}` -> namespace
 for (const file of namespaceFiles) {
-  const exported = Object.values(await importFile(file)).filter((value) => value && typeof value.t === 'function' && value.messages)
+  const moduleExports = await importFile(file)
+  for (const [exportName, value] of Object.entries(moduleExports)) {
+    if (value && typeof value.t === 'function' && value.messages) namespaceByExport.set(`${toRepoPath(file)}#${exportName}`, value)
+  }
+  const exported = Object.values(moduleExports).filter((value) => value && typeof value.t === 'function' && value.messages)
   check(`${toRepoPath(file)} exports a namespace`, exported.length > 0)
   for (const namespace of exported) {
     check(`namespace "${namespace.name}" is defined once`, !namespaces.has(namespace.name), `also in ${namespaces.get(namespace.name)?.file}`)
@@ -143,6 +148,86 @@ for (const { namespace } of namespaces.values()) {
   check(`usage: every key of ${namespace.name} is used`, unused.length === 0, `unused: ${unused.join(', ')}`)
 }
 
+// --- 3b. Missing keys --------------------------------------------------------------
+// The reverse of the usage check: `translate()` returns the key itself when no
+// language has it, so a mistyped key would show as "toolbar.svae" on screen.
+// For each file, the namespaces it imports are found from its import lines;
+// every literal key passed to `ns.t(locale, 'key')`, or to a local `t('key')`
+// / `tx('key')` wrapper, must resolve in the en messages of one of them (as a
+// leaf, or as a prefix of one, for a key naming a group). Keys built at run
+// time are not literals and stay covered by DYNAMIC_KEYS.
+function keyPaths(namespace) {
+  const paths = new Set()
+  for (const leaf of leafKeys(namespace.messages[DEFAULT_LOCALE])) {
+    const parts = leaf.split('.')
+    for (let i = 1; i <= parts.length; i += 1) paths.add(parts.slice(0, i).join('.'))
+  }
+  return paths
+}
+const keyPathCache = new Map()
+const pathsOf = (namespace) => {
+  if (!keyPathCache.has(namespace)) keyPathCache.set(namespace, keyPaths(namespace))
+  return keyPathCache.get(namespace)
+}
+
+// Resolve an i18n import specifier written in `fromFile` (a repo path) to
+// the namespace file's repo path.
+function resolveNamespaceFile(fromFile, specifier) {
+  const target = toRepoPath(resolvePath(dirname(resolvePath(rootDir, fromFile)), specifier))
+  return [target, `${target}.js`, `${target}/index.js`].find((candidate) => namespaceFiles.some((file) => toRepoPath(file) === candidate)) ?? null
+}
+
+// Returns the missing literal keys of one source file, as { line, key, via }.
+function missingKeysIn(file, text, lookupNamespaceByExport, resolveFile = resolveNamespaceFile) {
+  const bound = new Map() // local name -> namespace
+  for (const match of text.matchAll(/import\s*\{([^}]+)\}\s*from\s*['"]([^'"]*\bi18n\/[^'"]*)['"]/g)) {
+    const target = resolveFile(file, match[2])
+    if (!target) continue
+    for (const part of match[1].split(',')) {
+      const [exportName, localName = exportName] = part.trim().split(/\s+as\s+/)
+      const namespace = lookupNamespaceByExport(target, exportName)
+      if (namespace) bound.set(localName, namespace)
+    }
+  }
+  if (bound.size === 0) return []
+  const all = [...bound.values()]
+  const missing = []
+  const lines = text.split('\n')
+  lines.forEach((line, index) => {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('//') || trimmed.startsWith('*') || trimmed.startsWith('/*')) return
+    for (const match of line.matchAll(/\b([A-Za-z_$][\w$]*)\.t\(\s*[\w$.?]+\s*,\s*(['"`])([\w.-]+)\2/g)) {
+      const namespace = bound.get(match[1])
+      if (namespace && !pathsOf(namespace).has(match[3])) missing.push({ line: index + 1, key: match[3], via: namespace.name })
+    }
+    for (const match of line.matchAll(/(?<![\w$.])(?:t|tx)\(\s*(['"`])([\w.-]+)\1/g)) {
+      if (!all.some((namespace) => pathsOf(namespace).has(match[2]))) missing.push({ line: index + 1, key: match[2], via: all.map((namespace) => namespace.name).join('/') })
+    }
+  })
+  return missing
+}
+
+// Self-test on a fake namespace and file.
+{
+  const fake = createNamespace('fake', { en: { toolbar: { save: 'Save' } }, fi: { toolbar: { save: 'Tallenna' } } })
+  const lookup = (target, exportName) => (target === 'src/i18n/fake/index.js' && exportName === 'fake' ? fake : null)
+  const probe = (code) => missingKeysIn('src/components/X.jsx', `import { fake } from '../i18n/fake/index.js'\n${code}`, lookup, () => 'src/i18n/fake/index.js').map((m) => m.key)
+  const okSource = "const a = fake.t(locale, 'toolbar.save')\nconst t = (key) => fake.t(locale, key)\nt('toolbar.save')\nt('toolbar')"
+  same('missing keys: a present key passes', probe(okSource), [])
+  same('missing keys: ns.t with a mistyped key', probe("fake.t(locale, 'toolbar.svae')"), ['toolbar.svae'])
+  same('missing keys: local t with a mistyped key', probe("t('toolbar.svae')"), ['toolbar.svae'])
+  same('missing keys: tx wrapper', probe("tx('nope')"), ['nope'])
+  same('missing keys: a runtime key is not a literal', probe('fake.t(locale, `toolbar.${id}`)'), [])
+  same('missing keys: a file without an i18n import is skipped', missingKeysIn('src/x.js', "t('nope')", lookup, () => 'src/i18n/fake/index.js'), [])
+}
+
+const missingKeys = []
+for (const [file, text] of sources) {
+  const lookup = (target, exportName) => namespaceByExport.get(`${target}#${exportName}`) ?? null
+  for (const miss of missingKeysIn(file, text, lookup)) missingKeys.push(`${file}:${miss.line}  '${miss.key}' not in ${miss.via}`)
+}
+check('missing keys: every literal key exists in its namespace', missingKeys.length === 0, `${missingKeys.length} key(s):\n        ${missingKeys.join('\n        ')}`)
+
 // --- 4. Source scan ---------------------------------------------------------------
 // A hit is an inline language branch for text, or text kept per language in
 // code (a `labelFi` field, a `.fi` read, a map indexed by the locale, an
@@ -152,6 +237,7 @@ for (const { namespace } of namespaces.values()) {
 const SCAN_PATTERNS = [
   { name: 'isFinnish ?', re: /\bisFinnish\s*\?(?![.?])/g },
   { name: "=== 'fi' ?", re: /[!=]==\s*['"]fi['"]\s*\)?\s*\?(?![.?])/g },
+  { name: "=== 'en' ?", re: /[!=]==\s*['"]en['"]\s*\)?\s*\?(?![.?])/g },
   { name: "if (x === 'fi')", re: /\bif\s*\(\s*[\w.]+\s*[!=]==\s*['"]fi['"]\s*\)/g },
   { name: 'fi: map', re: /(?:^|[\s{,])fi\s*:\s*['"`[{]/g },
   { name: 'xFi field', re: /\b[a-z][\w$]*Fi\b/g, code: true },
@@ -163,6 +249,7 @@ const SCAN_PATTERNS = [
 const LINE_END_PATTERNS = [
   { name: 'isFinnish ⏎ ?', re: /\bisFinnish\s*\)?\s*$/ },
   { name: "=== 'fi' ⏎ ?", re: /[!=]==\s*['"]fi['"]\s*\)?\s*$/ },
+  { name: "=== 'en' ⏎ ?", re: /[!=]==\s*['"]en['"]\s*\)?\s*$/ },
 ]
 
 // The line with every character inside a '…', "…" or `…` literal turned
@@ -204,6 +291,8 @@ same('scan: isFinnish at line end', scanSource("const a = isFinnish\n  ? 'Kyllä
 same('scan: (isFinnish at line end', scanSource("{(isFinnish\n  ? 'Kyllä'\n  : 'Yes')}").length, 1)
 same('scan: other locale names', ["cvLocale === 'fi' ? 1 : 2", "uiLocale === 'fi' ? 1 : 2", "lang === \"fi\" ? 1 : 2", "(locale === 'fi') ? 1 : 2"].map((s) => scanSource(s).length), [1, 1, 1, 1])
 same('scan: === fi at line end', scanSource("const a = cvLocale === 'fi'\n  ? 'x'\n  : 'y'").length, 1)
+same('scan: === en ?', ["locale === 'en' ? 'Yes' : 'Kyllä'", "locale !== 'en' ? 'Kyllä' : 'Yes'", "(cvLocale === 'en') ? 1 : 2"].map((s) => scanSource(s).length), [1, 1, 1])
+same('scan: === en at line end', scanSource("const a = locale === 'en'\n  ? 'Yes'\n  : 'Kyllä'").length, 1)
 same('scan: if returning copy', scanSource("if (locale === 'fi') {\n  return { a: 'x' }\n}").length, 1)
 same('scan: fi maps', ["{ en: 'Yes', fi: 'Kyllä' }", 'fi: `x`', 'fi: [', '  fi: {'].map((s) => scanSource(s).length), [1, 1, 1, 1])
 same('scan: Fi fields', ["  labelFi: 'Nimi',", 'const t = field.titleFi', "hintFi ? a : b"].map((s) => scanSource(s).length), [1, 1, 1])
