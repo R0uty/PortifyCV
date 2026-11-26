@@ -16,6 +16,7 @@ import { LocaleContext } from './components/localeContext'
 import { APP_VERSION } from './utils/appVersion'
 import { allowUnload, hasUnsavedChanges, leaveBack, leavePage } from './utils/leaveGuard'
 import LeaveConfirmDialog from './components/LeaveConfirmDialog'
+import { common } from './i18n/common'
 
 const CONTACT_MAILTO = 'mailto:portifycv@gmail.com'
 
@@ -37,16 +38,15 @@ const SharedCvPage = lazy(() => import('./pages/SharedCvPage'))
 
 function NotFoundView({ locale, onNavigateToView }) {
   const isFinnish = locale === 'fi'
+  const t = (key) => common.t(locale, key)
 
   return (
     <div className="landing-section" style={{ textAlign: 'center' }}>
       <h1 className="landing-section__title">
-        {isFinnish ? 'Sivua ei löytynyt' : 'Page not found'}
+        {t('notFound.title')}
       </h1>
       <p className="landing-section__subtitle">
-        {isFinnish
-          ? 'Etsimääsi sivua ei ole olemassa tai se on siirretty.'
-          : "The page you're looking for doesn't exist or has moved."}
+        {t('notFound.body')}
       </p>
       <a
         href={isFinnish ? localizePath(ROUTES.landing, 'fi') : ROUTES.landing}
@@ -55,7 +55,7 @@ function NotFoundView({ locale, onNavigateToView }) {
           onNavigateToView('landing')
         }}
       >
-        {isFinnish ? 'Takaisin etusivulle' : 'Back to the homepage'}
+        {t('notFound.back')}
       </a>
     </div>
   )
@@ -265,16 +265,16 @@ function scrollToTop() {
 // guides in one menu, and FAQ (the landing page's #faq section), 1.6.31.
 // Template pages count as Templates, the field example pages as Examples.
 const PRIMARY_LINKS = [
-  { view: 'freeTemplates', en: 'Templates', fi: 'CV-pohjat', activeFor: (view) => view === 'freeTemplates' || view.startsWith(TEMPLATE_VIEW_PREFIX) },
-  { view: 'cvExamples', en: 'Examples', fi: 'Esimerkit', activeFor: (view) => ['cvExamples', 'developerCv', 'itCv', 'cybersecurityCv', 'finnishCv'].includes(view) },
+  { view: 'freeTemplates', label: 'links.templates', activeFor: (view) => view === 'freeTemplates' || view.startsWith(TEMPLATE_VIEW_PREFIX) },
+  { view: 'cvExamples', label: 'links.examples', activeFor: (view) => ['cvExamples', 'developerCv', 'itCv', 'cybersecurityCv', 'finnishCv'].includes(view) },
 ]
 
 const GUIDE_LINKS = [
-  { view: 'howToUse', en: 'How to use the builder', fi: 'Näin käytät CV-editoria' },
-  { view: 'howToWrite', en: 'How to write a CV', fi: 'Näin kirjoitat CV:n' },
-  { view: 'atsGuide', en: 'ATS-friendly CV guide', fi: 'ATS-ystävällinen CV-opas' },
-  { view: 'cvSkills', en: 'CV skills examples', fi: 'Taito-osion esimerkkejä' },
-  { view: 'coverLetterExamples', en: 'Cover letter examples', fi: 'Saatekirje-esimerkkejä' },
+  { view: 'howToUse', label: 'links.howToUse' },
+  { view: 'howToWrite', label: 'links.howToWrite' },
+  { view: 'atsGuide', label: 'links.atsGuide' },
+  { view: 'cvSkills', label: 'links.cvSkills' },
+  { view: 'coverLetterExamples', label: 'links.coverLetterExamples' },
 ]
 
 // The landing page's FAQ: scroll there, from the landing page or after
@@ -311,7 +311,7 @@ function handleInAppLinkClick(event, view, onNavigate) {
 // The Guides menu: a disclosure button and a short list of links. Closes
 // on a link, Escape (focus back to the button), or a click outside.
 function GuidesMenu({ locale, activeView, onNavigate }) {
-  const isFinnish = locale === 'fi'
+  const t = (key) => common.t(locale, key)
   const [isOpen, setIsOpen] = useState(false)
   const rootRef = useRef(null)
   const buttonRef = useRef(null)
@@ -348,7 +348,7 @@ function GuidesMenu({ locale, activeView, onNavigate }) {
         aria-controls="header-guides-menu"
         onClick={() => setIsOpen((open) => !open)}
       >
-        {isFinnish ? 'Oppaat' : 'Guides'}
+        {t('header.guides')}
         <ChevronDown size={12} strokeWidth={2.5} aria-hidden="true" />
       </button>
       <div id="header-guides-menu" className="project-header__menu-panel" hidden={!isOpen}>
@@ -363,7 +363,7 @@ function GuidesMenu({ locale, activeView, onNavigate }) {
               handleInAppLinkClick(event, link.view, onNavigate)
             }}
           >
-            {isFinnish ? link.fi : link.en}
+            {t(link.label)}
           </a>
         ))}
       </div>
@@ -375,10 +375,10 @@ function GuidesMenu({ locale, activeView, onNavigate }) {
 // place, opening the same links as a plain vertical list in the shared
 // Modal component instead of building a bespoke drawer.
 function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStarted = () => {} }) {
-  const isFinnish = locale === 'fi'
+  const t = (key) => common.t(locale, key)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
-  const navLabel = isFinnish ? 'Sivuston valikko' : 'Site menu'
-  const faqLabel = isFinnish ? 'UKK' : 'FAQ'
+  const navLabel = t('header.siteMenu')
+  const faqLabel = t('header.faq')
 
   function handleMobileNavigate(event, view) {
     handleInAppLinkClick(event, view, onNavigate)
@@ -396,7 +396,7 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
             aria-current={link.view === activeView ? 'page' : undefined}
             onClick={(event) => handleInAppLinkClick(event, link.view, onNavigate)}
           >
-            {isFinnish ? link.fi : link.en}
+            {t(link.label)}
           </a>
         ))}
         <GuidesMenu locale={locale} activeView={activeView} onNavigate={onNavigate} />
@@ -415,7 +415,7 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
         <Menu size={18} strokeWidth={2} aria-hidden="true" />
       </button>
 
-      <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'} isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} title={navLabel}>
+      <Modal closeLabel={t('header.close')} isOpen={isMobileNavOpen} onClose={() => setIsMobileNavOpen(false)} title={navLabel}>
         <nav className="project-header__mobile-nav" aria-label={navLabel}>
           <button
             type="button"
@@ -425,7 +425,7 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
               onGetStarted()
             }}
           >
-            {isFinnish ? 'Tee CV' : 'Build my CV'}
+            {t('header.buildCv')}
           </button>
           {PRIMARY_LINKS.map((link) => (
             <a
@@ -435,7 +435,7 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
               aria-current={link.view === activeView ? 'page' : undefined}
               onClick={(event) => handleMobileNavigate(event, link.view)}
             >
-              {isFinnish ? link.fi : link.en}
+              {t(link.label)}
             </a>
           ))}
           <a
@@ -448,7 +448,7 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
           >
             {faqLabel}
           </a>
-          <p className="project-header__mobile-nav-group">{isFinnish ? 'Oppaat' : 'Guides'}</p>
+          <p className="project-header__mobile-nav-group">{t('header.guides')}</p>
           {GUIDE_LINKS.map((link) => (
             <a
               key={link.view}
@@ -457,7 +457,7 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
               aria-current={link.view === activeView ? 'page' : undefined}
               onClick={(event) => handleMobileNavigate(event, link.view)}
             >
-              {isFinnish ? link.fi : link.en}
+              {t(link.label)}
             </a>
           ))}
         </nav>
@@ -471,39 +471,39 @@ function HeaderNav({ locale = 'en', activeView, onNavigate = () => {}, onGetStar
 // phones the guides were otherwise reachable only through the menu.
 const SITE_MAP_COLUMNS = [
   {
-    title: { en: 'Build', fi: 'Rakenna' },
+    title: 'siteMap.build',
     links: [
-      { view: 'builder', en: 'Start building', fi: 'Aloita rakentaminen' },
-      { view: 'howToUse', en: 'How to use the builder', fi: 'Näin käytät CV-editoria' },
-      { view: 'freeTemplates', en: 'Free CV templates', fi: 'Ilmaiset CV-pohjat' },
+      { view: 'builder', label: 'links.builder' },
+      { view: 'howToUse', label: 'links.howToUse' },
+      { view: 'freeTemplates', label: 'links.freeTemplates' },
     ],
   },
-  { title: { en: 'CV templates', fi: 'CV-pohjat' }, templates: true },
+  { title: 'siteMap.templates', templates: true },
   {
-    title: { en: 'Guides', fi: 'Oppaat' },
+    title: 'header.guides',
     links: [
-      { view: 'howToWrite', en: 'How to write a CV', fi: 'Näin kirjoitat CV:n' },
-      { view: 'atsGuide', en: 'ATS-friendly CV guide', fi: 'ATS-ystävällinen CV-opas' },
-      { view: 'cvSkills', en: 'CV skills examples', fi: 'Taito-osion esimerkkejä' },
-      { view: 'coverLetterExamples', en: 'Cover letter examples', fi: 'Saatekirje-esimerkkejä' },
-    ],
-  },
-  {
-    title: { en: 'Examples', fi: 'Esimerkit' },
-    links: [
-      { view: 'cvExamples', en: 'CV examples by field', fi: 'CV-esimerkkejä aloittain' },
-      { view: 'developerCv', en: 'Developer CV examples', fi: 'Kehittäjän CV-esimerkkejä' },
-      { view: 'itCv', en: 'IT CV examples', fi: 'IT-alan CV-esimerkkejä' },
-      { view: 'cybersecurityCv', en: 'Cybersecurity CV examples', fi: 'Tietoturva-alan CV-esimerkkejä' },
-      { view: 'finnishCv', en: 'Finnish CV examples', fi: 'Suomalaisen CV:n esimerkkejä' },
+      { view: 'howToWrite', label: 'links.howToWrite' },
+      { view: 'atsGuide', label: 'links.atsGuide' },
+      { view: 'cvSkills', label: 'links.cvSkills' },
+      { view: 'coverLetterExamples', label: 'links.coverLetterExamples' },
     ],
   },
   {
-    title: { en: 'PortifyCV', fi: 'PortifyCV' },
+    title: 'links.examples',
     links: [
-      { view: 'about', en: 'About', fi: 'Tietoa' },
-      { view: 'privacy', en: 'Privacy policy', fi: 'Tietosuojaseloste' },
-      { href: CONTACT_MAILTO, en: 'Contact', fi: 'Yhteystiedot' },
+      { view: 'cvExamples', label: 'links.cvExamples' },
+      { view: 'developerCv', label: 'links.developerCv' },
+      { view: 'itCv', label: 'links.itCv' },
+      { view: 'cybersecurityCv', label: 'links.cybersecurityCv' },
+      { view: 'finnishCv', label: 'links.finnishCv' },
+    ],
+  },
+  {
+    title: 'siteMap.portifycv',
+    links: [
+      { view: 'about', label: 'links.about' },
+      { view: 'privacy', label: 'links.privacy' },
+      { href: CONTACT_MAILTO, label: 'links.contact' },
     ],
   },
 ]
@@ -513,11 +513,11 @@ function SiteMap({ locale = 'en', onNavigate = () => {}, onGetStarted = () => {}
   const templates = getCvTemplates(lang)
 
   return (
-    <nav className="site-map print:hidden" aria-label={lang === 'fi' ? 'Sivukartta' : 'Site map'}>
+    <nav className="site-map print:hidden" aria-label={common.t(lang, 'siteMap.label')}>
       <div className="site-map__inner">
         {SITE_MAP_COLUMNS.map((column) => (
-          <div key={column.title.en} className={`site-map__column${column.templates ? ' site-map__column--templates' : ''}`}>
-            <p className="site-map__title">{column.title[lang]}</p>
+          <div key={column.title} className={`site-map__column${column.templates ? ' site-map__column--templates' : ''}`}>
+            <p className="site-map__title">{common.t(lang, column.title)}</p>
             <ul className="site-map__list">
               {column.templates
                 ? templates.map((template) => (
@@ -533,7 +533,7 @@ function SiteMap({ locale = 'en', onNavigate = () => {}, onGetStarted = () => {}
                 : column.links.map((link) => (
                   <li key={link.view ?? link.href}>
                     {link.href ? (
-                      <a href={link.href}>{link[lang]}</a>
+                      <a href={link.href}>{common.t(lang, link.label)}</a>
                     ) : (
                       <a
                         href={localizePath(VIEW_HEAD[link.view].path, locale)}
@@ -541,7 +541,7 @@ function SiteMap({ locale = 'en', onNavigate = () => {}, onGetStarted = () => {}
                           ? handleInAppLinkClick(event, link.view, () => onGetStarted())
                           : handleInAppLinkClick(event, link.view, onNavigate))}
                       >
-                        {link[lang]}
+                        {common.t(lang, link.label)}
                       </a>
                     )}
                   </li>
@@ -555,35 +555,35 @@ function SiteMap({ locale = 'en', onNavigate = () => {}, onGetStarted = () => {}
 }
 
 function SiteFooter({ locale = 'en', onNavigate = () => {} }) {
-  const isFinnish = locale === 'fi'
+  const t = (key) => common.t(locale, key)
 
   return (
     <footer className="site-footer print:hidden">
       <div className="site-footer__inner">
         <span>
-          {isFinnish ? 'Ei kirjautumista. Mitään ei tallenneta, ellet itse tallenna.' : 'No login. Nothing saved unless you choose to.'}
+          {t('footer.tagline')}
           {' '}
           <span className="site-footer__version">{APP_VERSION}</span>
         </span>
-        <nav className="site-footer__links" aria-label={isFinnish ? 'Tietoa ja yhteystiedot' : 'About and contact'}>
+        <nav className="site-footer__links" aria-label={t('footer.navLabel')}>
           <a
             href={localizePath(VIEW_HEAD.about.path, locale)}
             className="site-footer__link"
             onClick={(event) => handleInAppLinkClick(event, 'about', onNavigate)}
           >
-            {isFinnish ? 'Tietoa' : 'About'}
+            {t('links.about')}
           </a>
           <a
             href={localizePath(VIEW_HEAD.privacy.path, locale)}
             className="site-footer__link"
             onClick={(event) => handleInAppLinkClick(event, 'privacy', onNavigate)}
           >
-            {isFinnish ? 'Tietosuojaseloste' : 'Privacy policy'}
+            {t('links.privacy')}
           </a>
           {/* 1.6.56: the contact address, on every page, rather than only
               at the bottom of About and the privacy policy. */}
           <a href={CONTACT_MAILTO} className="site-footer__link">
-            {isFinnish ? 'Yhteystiedot' : 'Contact'}
+            {t('links.contact')}
           </a>
         </nav>
       </div>
@@ -850,14 +850,14 @@ function App({ route = null }) {
                   type="button"
                   className="action-button action-button--secondary flex items-center gap-1.5 border px-3 py-2 text-xs font-semibold uppercase tracking-[0.06em] transition"
                   onClick={handleToggleLocale}
-                  aria-label={locale === 'fi' ? 'Vaihda kieli' : 'Switch language'}
-                  title={locale === 'fi' ? 'Vaihda kieli' : 'Switch language'}
+                  aria-label={common.t(locale, 'header.switchLanguage')}
+                  title={common.t(locale, 'header.switchLanguage')}
                 >
                   <LocaleFlagIcon locale={locale} />
-                  {locale === 'fi' ? 'FI' : 'EN'}
+                  {common.t(locale, 'header.localeCode')}
                 </button>
                 <button type="button" className="project-header__cta" onClick={() => goToBuilder()}>
-                  {locale === 'fi' ? 'Tee CV' : 'Build my CV'}
+                  {common.t(locale, 'header.buildCv')}
                 </button>
               </div>
             </div>

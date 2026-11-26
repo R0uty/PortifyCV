@@ -12,55 +12,12 @@ import { TEMPLATE_VIEW_PREFIX } from '../utils/pageMeta'
 import { demoCvData } from '../utils/cvForm'
 import { withPlaceholderPhoto } from '../utils/thumbnailCv'
 import { hideEmptySections } from '../utils/sectionContent'
+import { templateDetailPage } from '../i18n/pages/templateDetail'
 
 // CVPreview is the heaviest import here; lazy so the page's own chunk
 // stays small. It shares the CVPreview chunk with the landing page and
 // the builder.
 const ScaledPreview = lazy(() => import('../components/ScaledPreview'))
-
-function getCopy(locale) {
-  if (locale === 'fi') {
-    return {
-      breadcrumb: 'Pohjat',
-      heading: (label) => `${label} – CV-pohja`,
-      bestFor: 'Sopii:',
-      examples: 'Esimerkit',
-      style: 'Tyyli',
-      atsView: 'ATS-näkymä',
-      useExample: 'Käytä tätä esimerkkiä',
-      useTemplate: 'Aloita tyhjästä tällä pohjalla',
-      tipsTitle: 'Vinkkejä tähän pohjaan',
-      aboutTitle: 'Tietoa pohjasta',
-      faqTitle: 'Kysymyksiä pohjasta',
-      previous: 'Edellinen pohja',
-      next: 'Seuraava pohja',
-      all: 'Kaikki pohjat',
-      pagerNav: 'Pohjien selaus',
-      previewCaption: (role, label) => `Esikatselu: ${role}-esimerkki ${label}-pohjassa`,
-      facts: { split: '2 palstaa', single: '1 palsta', sections: (n) => `${n} osiota` },
-    }
-  }
-
-  return {
-    breadcrumb: 'Templates',
-    heading: (label) => `${label} CV template`,
-    bestFor: 'Best for:',
-    examples: 'Examples',
-    style: 'Style',
-    atsView: 'ATS view',
-    useExample: 'Use this example',
-    useTemplate: 'Start blank with this template',
-    tipsTitle: 'Tips for this template',
-    aboutTitle: 'About this template',
-    faqTitle: 'Questions about this template',
-    previous: 'Previous template',
-    next: 'Next template',
-    all: 'All templates',
-    pagerNav: 'Template navigation',
-    previewCaption: (role, label) => `Preview: ${role} example in the ${label} template`,
-    facts: { split: '2 columns', single: '1 column', sections: (n) => `${n} sections` },
-  }
-}
 
 function readExampleParam() {
   if (typeof window === 'undefined') return null
@@ -86,7 +43,7 @@ function readFieldParam() {
 
 function TemplateDetailPage({ templateId, locale = 'en', onGetStarted = () => {}, onNavigateToView = () => {} }) {
   const resolvedLocale = locale === 'fi' ? 'fi' : 'en'
-  const copy = getCopy(resolvedLocale)
+  const copy = templateDetailPage.copy(resolvedLocale)
   const template = getCvTemplate(templateId, resolvedLocale)
   const pageCopy = TEMPLATE_PAGE_COPY[templateId]?.[resolvedLocale]
   const examples = useMemo(() => getTemplateExamples(templateId, resolvedLocale), [templateId, resolvedLocale])

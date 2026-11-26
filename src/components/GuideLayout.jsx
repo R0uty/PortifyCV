@@ -2,6 +2,7 @@ import { isValidElement } from 'react'
 import InternalNavLink from './InternalNavLink'
 import { localizedHead, PATH_TO_VIEW, VIEW_HEAD } from '../utils/pageMeta'
 import { localizePath, ROUTES } from '../utils/routes'
+import { guideLayout } from '../i18n/pages/guideLayout'
 
 // The shared layout of the guide and example pages (1.6.38): breadcrumb,
 // updated date and reading time, a link to the page in the other language,
@@ -9,31 +10,6 @@ import { localizePath, ROUTES } from '../utils/routes'
 // phones), weak/strong examples as side-by-side cards, a "try it" box
 // half-way down, the page's own call to action, and related pages as
 // cards. Pages keep their copy as data (`sections`); this renders it.
-
-const COPY = {
-  en: {
-    home: 'Home',
-    onThisPage: 'On this page',
-    updated: 'Updated',
-    minRead: (minutes) => `${minutes} min read`,
-    otherLanguage: 'Suomeksi',
-    tryTitle: 'Try it on your own CV',
-    tryBody: 'Open the builder and put this into practice. No account needed.',
-    tryButton: 'Start building',
-    related: 'Related',
-  },
-  fi: {
-    home: 'Etusivu',
-    onThisPage: 'Tällä sivulla',
-    updated: 'Päivitetty',
-    minRead: (minutes) => `${minutes} min lukuaika`,
-    otherLanguage: 'In English',
-    tryTitle: 'Kokeile omaan CV:hesi',
-    tryBody: 'Avaa editori ja kokeile tätä käytännössä. Tiliä ei tarvita.',
-    tryButton: 'Aloita rakentaminen',
-    related: 'Katso myös',
-  },
-}
 
 const WORDS_PER_MINUTE = 200
 const WEAK_LABEL = /^(weak|heikko)/i
@@ -132,7 +108,7 @@ function GuideLayout({
   onNavigateToView = () => {},
 }) {
   const lang = locale === 'fi' ? 'fi' : 'en'
-  const copy = COPY[lang]
+  const copy = guideLayout.copy(lang)
   const head = localizedHead(VIEW_HEAD[view], lang)
   const date = VIEW_HEAD[view]?.dateModified ?? VIEW_HEAD[view]?.datePublished
   const parentView = VIEW_HEAD[view]?.parent

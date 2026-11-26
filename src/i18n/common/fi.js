@@ -1,0 +1,46 @@
+// The site shell (App.jsx) in Finnish.
+export default {
+  notFound: {
+    title: 'Sivua ei löytynyt',
+    body: 'Etsimääsi sivua ei ole olemassa tai se on siirretty.',
+    back: 'Takaisin etusivulle',
+  },
+  header: {
+    switchLanguage: 'Vaihda kieli',
+    localeCode: 'FI',
+    buildCv: 'Tee CV',
+    siteMenu: 'Sivuston valikko',
+    faq: 'UKK',
+    guides: 'Oppaat',
+    close: 'Sulje',
+  },
+  links: {
+    templates: 'CV-pohjat',
+    examples: 'Esimerkit',
+    howToUse: 'Näin käytät CV-editoria',
+    howToWrite: 'Näin kirjoitat CV:n',
+    atsGuide: 'ATS-ystävällinen CV-opas',
+    cvSkills: 'Taito-osion esimerkkejä',
+    coverLetterExamples: 'Saatekirje-esimerkkejä',
+    builder: 'Aloita rakentaminen',
+    freeTemplates: 'Ilmaiset CV-pohjat',
+    cvExamples: 'CV-esimerkkejä aloittain',
+    developerCv: 'Kehittäjän CV-esimerkkejä',
+    itCv: 'IT-alan CV-esimerkkejä',
+    cybersecurityCv: 'Tietoturva-alan CV-esimerkkejä',
+    finnishCv: 'Suomalaisen CV:n esimerkkejä',
+    about: 'Tietoa',
+    privacy: 'Tietosuojaseloste',
+    contact: 'Yhteystiedot',
+  },
+  siteMap: {
+    label: 'Sivukartta',
+    build: 'Rakenna',
+    templates: 'CV-pohjat',
+    portifycv: 'PortifyCV',
+  },
+  footer: {
+    tagline: 'Ei kirjautumista. Mitään ei tallenneta, ellet itse tallenna.',
+    navLabel: 'Tietoa ja yhteystiedot',
+  },
+}

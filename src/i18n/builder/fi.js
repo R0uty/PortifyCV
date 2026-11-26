@@ -206,4 +206,9 @@ export default {
     pdfFailed: 'PDF-vienti epäonnistui.',
     fileName: 'hakemuskirje',
   },
+  errorBoundary: {
+    title: 'Tämän osion renderöinti epäonnistui.',
+    body: 'Yritä ladata osio uudelleen. CV-tietosi ovat edelleen tallessa.',
+    retry: 'Yritä uudelleen',
+  },
 }

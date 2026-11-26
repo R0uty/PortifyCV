@@ -1,0 +1,20 @@
+// A template page's own UI in English.
+export default {
+  breadcrumb: 'Templates',
+  heading: (label) => `${label} CV template`,
+  bestFor: 'Best for:',
+  examples: 'Examples',
+  style: 'Style',
+  atsView: 'ATS view',
+  useExample: 'Use this example',
+  useTemplate: 'Start blank with this template',
+  tipsTitle: 'Tips for this template',
+  aboutTitle: 'About this template',
+  faqTitle: 'Questions about this template',
+  previous: 'Previous template',
+  next: 'Next template',
+  all: 'All templates',
+  pagerNav: 'Template navigation',
+  previewCaption: (role, label) => `Preview: ${role} example in the ${label} template`,
+  facts: { split: '2 columns', single: '1 column', sections: (n) => `${n} sections` },
+}

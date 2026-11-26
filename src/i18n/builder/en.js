@@ -220,4 +220,10 @@ export default {
     // The letter's file name after the CV's, in the CV's language.
     fileName: 'cover-letter',
   },
+  // AppErrorBoundary.jsx, around the builder's panels.
+  errorBoundary: {
+    title: 'This section failed to render.',
+    body: 'Try loading it again. Your CV data is still available.',
+    retry: 'Retry panel',
+  },
 }

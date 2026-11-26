@@ -1,10 +1,10 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import BuilderWalkthroughFigure from '../components/BuilderWalkthroughFigure'
 import InternalNavLink from '../components/InternalNavLink'
-import { cvTemplates } from '../utils/cvTemplates'
 import { LANDING_FAQ } from '../utils/landingFaq'
 import { VIEW_HEAD } from '../utils/pageMeta'
 import { ROUTES } from '../utils/routes'
+import { landingPage } from '../i18n/pages/landing'
 
 // The hero's picture (1.6.32): the builder itself, in Direct Edit with a
 // section's popup open, captured by `npm run thumbnails`. Its intrinsic
@@ -17,122 +17,12 @@ const PRODUCT_SHOT_HEIGHT = 800
 const LandingTemplatesByField = lazy(() => import('../components/LandingTemplatesByField'))
 
 
-// Read off the template registry instead of a hardcoded number — this
-// count previously drifted out of sync with cvTemplates.js (copy said 13,
-// the registry had grown to 14) after a template was added without the
-// landing page being updated to match.
-const TEMPLATE_COUNT = cvTemplates.length
-
-function getLandingCopy(locale) {
-  if (locale === 'fi') {
-    return {
-      kicker: 'Ei kirjautumista. Mitään ei tallenneta, ellet itse tallenna.',
-      startButton: 'Aloita rakentaminen',
-      viewTemplatesButton: 'Katso pohjat',
-      howItWorksLink: 'Katso miten se toimii',
-      title: 'Ilmainen CV-työkalu. Tee CV, ota se mukaan, valmis.',
-      subtitle: 'Napsauta CV:tä ja kirjoita. Valitse pohja ja ota CV mukaan PDF- tai Word-tiedostona tai jakolinkkinä.',
-      previewAlt: 'PortifyCV-editori: CV, jonka Esittely-osio on auki muokattavaksi sen vieressä.',
-      chipsLabel: 'Mukana',
-      chips: [
-        { label: `${TEMPLATE_COUNT} pohjaa × 3 tyyliä`, view: 'freeTemplates' },
-        { label: 'ATS-näkymä', view: 'atsGuide' },
-        { label: 'Suomi ja englanti', view: 'finnishCv' },
-        { label: 'Hakemuskirje mukana', view: 'coverLetterExamples' },
-      ],
-      whyTitle: 'Miksi PortifyCV',
-      why: [
-        {
-          heading: 'Ei tiliä. Ei kirjautumista. Siinä koko juttu.',
-          body: 'Ei rekisteröitymistä, ei sähköpostivahvistusta, ei tiliä ylläpidettäväksi. Avaa sivu, ala kirjoittaa ja vie CV kun olet valmis — muuta ei tarvita.',
-        },
-        {
-          heading: 'Mikään ei koskaan päädy palvelimelle',
-          body: 'Jokainen vienti (PDF, Word, HTML, JSON) ja jakolinkki muodostetaan kokonaan selaimessasi. Toisin kuin tiliä vaativat CV-työkalut, tietojasi ei koskaan ladata, tallenneta tai näe kukaan muu — koska ne eivät koskaan poistu laitteeltasi.',
-        },
-        {
-          heading: 'Rakennettu rekrytointijärjestelmiä varten',
-          body: 'ATS-tila muotoilee CV:n järjestelmien luettavaksi ilman sarakkeita tai grafiikkaa, ja avainsanapisteytys näyttää mitä puuttuu.',
-        },
-      ],
-      howTitle: 'Näin se toimii',
-      steps: [
-        { step: 'template', title: 'Valitse pohja', body: `${TEMPLATE_COUNT} asettelua, kolme tyyliä kussakin. Vaihda milloin vain, tekstisi säilyy.`, figureLabel: 'Pohjagalleria: alasuodattimet pohjakorttien yllä, kullakin kortilla kolme tyyliä.' },
-        { step: 'edit', title: 'Muokkaa suoraan CV:ssä', body: 'Napsauta mitä tahansa tekstiä ja kirjoita, tai avaa osion kynä nähdäksesi kaikki sen kentät.', figureLabel: 'Editori Suora muokkaus -tilassa: demo-CV, jonka yhteenvedon kentät ovat auki ponnahdusikkunassa sen vieressä.' },
-        { step: 'export', title: 'Vie tai jaa', body: 'Lataa PDF- tai Word-tiedosto tai kopioi jakolinkki. Mitään ei ladata palvelimelle.', figureLabel: 'Avattu Vie-valikko: PDF, HTML, JSON, Word ja jakolinkki.' },
-      ],
-      howLink: 'Lue koko käyttöopas',
-      templatesTitle: 'Katso pohjat',
-      templatesSubtitle: 'Valitse alasi nähdäksesi siihen sopivat pohjat, kukin yhdessä kolmesta tyylistään.',
-      templatesCta: `Selaa kaikkia ${TEMPLATE_COUNT} pohjaa`,
-      guidesTitle: 'Oppaat ja esimerkit',
-      guides: [
-        { view: 'howToWrite', path: ROUTES.howToWrite, title: 'Näin kirjoitat CV:n', body: 'Osiot, yhteenveto joka sanoo jotain, ja kohdat jotka näyttävät tuloksia.' },
-        { view: 'atsGuide', path: ROUTES.atsGuide, title: 'ATS-ystävällinen CV-opas', body: 'Mitä hakijaseurantajärjestelmät lukevat, mikä ne rikkoo ja mikä vientimuoto valita.' },
-        { view: 'cvExamples', path: ROUTES.cvExamples, title: 'CV-esimerkkejä aloittain', body: 'Kehittäjän, IT-alan, tietoturva-alan ja suomalaisen CV:n esimerkit sekä kokonaiset CV:t.' },
-        { view: 'coverLetterExamples', path: ROUTES.coverLetterExamples, title: 'Saatekirje-esimerkkejä', body: 'Heikot ja vahvat aloitukset, keskiosat ja lopetukset sekä luonnos CV:si pohjalta.' },
-      ],
-      faqTitle: 'Usein kysytyt kysymykset',
-    }
-  }
-
-  return {
-    kicker: 'No login. Nothing saved unless you choose to.',
-    startButton: 'Start building',
-    viewTemplatesButton: 'View templates',
-    howItWorksLink: 'See how it works',
-    title: 'Free CV builder. Build it, take it, done.',
-    subtitle: 'Click your CV and type. Pick a template, then take it with you as a PDF, a Word file or a share link.',
-    previewAlt: 'The PortifyCV editor: a CV with its About section open for editing beside it.',
-    chipsLabel: 'Included',
-    chips: [
-      { label: `${TEMPLATE_COUNT} templates × 3 looks`, view: 'freeTemplates' },
-      { label: 'ATS view', view: 'atsGuide' },
-      { label: 'English & Finnish', view: 'finnishCv' },
-      { label: 'Cover letter included', view: 'coverLetterExamples' },
-    ],
-    whyTitle: 'Why use PortifyCV',
-    why: [
-      {
-        heading: 'No account. No login. That’s the whole point.',
-        body: 'Skip the sign-up, the email confirmation, the account to manage. Open the page, start typing, and export when you’re done — there is nothing else to it.',
-      },
-      {
-        heading: 'Nothing ever touches a server',
-        body: 'Every export (PDF, Word, HTML, JSON) and every share link is generated entirely in your browser. Unlike CV builders that require an account, your data is never uploaded, stored, or seen by anyone — because it never leaves your device.',
-      },
-      {
-        heading: 'Built for applicant tracking systems',
-        body: 'Toggle ATS mode for a layout that parsers can actually read — no columns, icons, or tables to trip them up — plus keyword scoring that shows what your CV is missing.',
-      },
-    ],
-    howTitle: 'How it works',
-    steps: [
-      { step: 'template', title: 'Pick a template', body: `${TEMPLATE_COUNT} layouts, three looks each. Switch any time; your text stays.`, figureLabel: 'The template gallery: field filters above the template cards, each with its three looks.' },
-      { step: 'edit', title: 'Edit right on the CV', body: 'Click any text and type, or open a section’s pencil for all its fields.', figureLabel: 'The builder in Direct Edit: the demo CV, with its summary\'s fields open in a popup beside it.' },
-      { step: 'export', title: 'Export or share', body: 'Download a PDF or Word file, or copy a share link. Nothing is uploaded.', figureLabel: 'The open Export menu: PDF, HTML, JSON, Word and a share link.' },
-    ],
-    howLink: 'Read the full walkthrough',
-    templatesTitle: 'See the templates',
-    templatesSubtitle: 'Pick your field to see the templates that suit it, each in one of its three looks.',
-    templatesCta: `Browse all ${TEMPLATE_COUNT} templates`,
-    guidesTitle: 'Guides and examples',
-    guides: [
-      { view: 'howToWrite', path: ROUTES.howToWrite, title: 'How to write a CV', body: 'Sections, a summary that says something, and bullets that show impact.' },
-      { view: 'atsGuide', path: ROUTES.atsGuide, title: 'ATS-friendly CV guide', body: 'What applicant tracking systems read, what breaks them, and which export to use.' },
-      { view: 'cvExamples', path: ROUTES.cvExamples, title: 'CV examples by field', body: 'Developer, IT, cybersecurity and Finnish CVs, with full example CVs.' },
-      { view: 'coverLetterExamples', path: ROUTES.coverLetterExamples, title: 'Cover letter examples', body: 'Weak and strong openings, middles and closings, and a draft from your CV.' },
-    ],
-    faqTitle: 'Frequently asked questions',
-  }
-}
-
 function LandingPage({
   locale = 'en',
   onGetStarted = () => {},
   onNavigateToView = () => {},
 }) {
-  const copy = getLandingCopy(locale)
+  const copy = landingPage.copy(locale)
   const actionsRef = useRef(null)
   // Phones only (CSS): once the hero's buttons have scrolled up out of
   // view, a slim bar at the bottom offers "Start building" again.

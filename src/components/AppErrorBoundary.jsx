@@ -1,6 +1,7 @@
 import { Component } from 'react'
 
 import { getUiTheme } from '../utils/designSystem'
+import { builder } from '../i18n/builder'
 
 class ErrorBoundaryInner extends Component {
   constructor(props) {
@@ -33,7 +34,7 @@ class ErrorBoundaryInner extends Component {
 
 function AppErrorBoundary({ children, theme = 'dark', panelTitle = 'Panel', locale = 'en' }) {
   const ui = getUiTheme(theme)
-  const isFinnish = locale === 'fi'
+  const t = (key) => builder.t(locale, key)
 
   return (
     <ErrorBoundaryInner
@@ -45,19 +46,17 @@ function AppErrorBoundary({ children, theme = 'dark', panelTitle = 'Panel', loca
         >
           <p className="ds-kicker uppercase tracking-[0.14em] accent-text">{panelTitle}</p>
           <h3 className={`ds-section-title mt-2 font-bold uppercase tracking-[-0.02em] ${ui.textPrimary}`}>
-            {isFinnish ? 'Tämän osion renderöinti epäonnistui.' : 'This section failed to render.'}
+            {t('errorBoundary.title')}
           </h3>
           <p className={`ds-body-sm mt-3 ${ui.textSecondary}`}>
-            {isFinnish
-              ? 'Yritä ladata osio uudelleen. CV-tietosi ovat edelleen tallessa.'
-              : 'Try loading it again. Your CV data is still available.'}
+            {t('errorBoundary.body')}
           </p>
           <button
             type="button"
             className={`mt-4 ui-button ${ui.button}`}
             onClick={onRetry}
           >
-            {isFinnish ? 'Yritä uudelleen' : 'Retry panel'}
+            {t('errorBoundary.retry')}
           </button>
         </section>
       )}

@@ -8,6 +8,7 @@ import { TEMPLATE_VIEW_PREFIX } from '../utils/pageMeta'
 import { templatePath } from '../utils/routes'
 import { fieldSearch, filterTemplatesByField } from '../utils/templateFields'
 import { getTemplateVariants, styleVariantSearch } from '../utils/templateVariants'
+import { landingPage } from '../i18n/pages/landing'
 
 // The front page's templates section (1.6.33): the same field chips as the
 // Free CV Templates page over up to six matching templates, each a link to
@@ -50,7 +51,7 @@ function LandingTemplatesByField({ locale = 'en', browseLabel, onNavigateToView 
                   templateId={template.id}
                   styleVariantId={look.id}
                   locale={lang}
-                  alt={lang === 'fi' ? `${template.label} -CV-pohja, ${lookLabel}` : `${template.label} CV template, ${lookLabel}`}
+                  alt={landingPage.t(lang, 'templateCardAlt', { label: template.label, look: lookLabel })}
                 />
                 <span className="landing-templates__name">{template.label}</span>
                 <span className="landing-templates__look">{lookLabel}</span>

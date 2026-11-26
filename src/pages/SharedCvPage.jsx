@@ -9,6 +9,7 @@ import { resolveCvLocale } from '../utils/cvForm'
 import { createExportFileName } from '../utils/cvSnapshot'
 import { getCvFontStack, loadCvFont } from '../utils/cvFonts'
 import { localizePath } from '../utils/routes'
+import { share } from '../i18n/share'
 
 // The read-only page a share link opens (/view#data=…, 1.7.12). The CV
 // lives in the address's fragment, which only the browser has: the address
@@ -17,19 +18,17 @@ import { localizePath } from '../utils/routes'
 // A link with no data, or one that doesn't decode, shows a short message
 // instead of a CV.
 function BadLinkMessage({ locale }) {
-  const isFinnish = locale === 'fi'
+  const t = (key) => share.t(locale, key)
   return (
     <div className="landing-section" style={{ textAlign: 'center' }}>
       <h1 className="landing-section__title">
-        {isFinnish ? 'Tätä CV-linkkiä ei voi avata' : "This CV link can't be opened"}
+        {t('badLink.title')}
       </h1>
       <p className="landing-section__subtitle">
-        {isFinnish
-          ? 'Linkki on voinut katketa tai muuttua. Pyydä lähettäjältä uusi linkki.'
-          : 'The link may have been cut short or changed. Ask the sender for a new one.'}
+        {t('badLink.body')}
       </p>
       <a href={localizePath('/', locale)}>
-        {isFinnish ? 'Siirry PortifyCV:hen' : 'Go to PortifyCV'}
+        {t('badLink.home')}
       </a>
     </div>
   )
@@ -61,7 +60,6 @@ const nextFrame = () => new Promise((resolve) => window.requestAnimationFrame(re
 function SharedCv({ shared, href, locale }) {
   const { formData, templateId, look, pdf } = shared
   const cvLocale = resolveCvLocale(formData, locale)
-  const isFinnish = cvLocale === 'fi'
   const resolved = useMemo(
     () => resolveSharedCvLook(formData, templateId, look),
     [formData, templateId, look],
@@ -73,14 +71,6 @@ function SharedCv({ shared, href, locale }) {
   const isBusyRef = useRef(false)
   const [isBusy, setIsBusy] = useState(false)
   const [hasError, setHasError] = useState(false)
-
-  const documentTitle = fullName
-    ? `${fullName} — CV`
-    : isFinnish ? 'Jaettu CV - PortifyCV' : 'Shared CV - PortifyCV'
-
-  useEffect(() => {
-    document.title = documentTitle
-  }, [documentTitle])
 
   const handleDownload = useCallback(async () => {
     // A ref as well as the state: a second click in the same frame sees the
@@ -122,6 +112,16 @@ function SharedCv({ shared, href, locale }) {
     }
   }, [cvLocale, formData, pdf.fit, pdf.paper, resolved])
 
+  // After the callback above: the React compiler loses track of its
+  // dependencies when a translation is read before it.
+  const documentTitle = fullName
+    ? `${fullName} — CV`
+    : share.t(cvLocale, 'documentTitle')
+
+  useEffect(() => {
+    document.title = documentTitle
+  }, [documentTitle])
+
   const previewProps = {
     template: resolved.template,
     locale,
@@ -136,7 +136,7 @@ function SharedCv({ shared, href, locale }) {
     <div className="shared-cv" lang={cvLocale}>
       <div className="shared-cv__bar">
         {/* Not a heading: the CV's own name below is the page's one <h1>. */}
-        <p className="shared-cv__name">{fullName || (isFinnish ? 'Jaettu CV' : 'Shared CV')}</p>
+        <p className="shared-cv__name">{fullName || share.t(cvLocale, 'fallbackName')}</p>
         <div className="shared-cv__actions">
           <button
             type="button"
@@ -144,24 +144,22 @@ function SharedCv({ shared, href, locale }) {
             onClick={handleDownload}
             disabled={isBusy}
           >
-            {isBusy
-              ? (isFinnish ? 'Valmistellaan PDF:ää…' : 'Preparing PDF…')
-              : (isFinnish ? 'Lataa PDF' : 'Download PDF')}
+            {isBusy ? share.t(cvLocale, 'preparingPdf') : share.t(cvLocale, 'downloadPdf')}
           </button>
           <a
             className="shared-cv__button"
             href={shareEditUrl(href)}
             target="_blank"
             rel="noopener"
-            title={isFinnish ? 'Avaa CV:n muokattavaksi uuteen välilehteen' : 'Opens the CV in the builder in a new tab'}
+            title={share.t(cvLocale, 'editCopyTitle')}
           >
-            {isFinnish ? 'Muokkaa kopiota' : 'Edit a copy'}
+            {share.t(cvLocale, 'editCopy')}
           </a>
         </div>
       </div>
       {hasError && (
         <p className="shared-cv__error" role="alert">
-          {isFinnish ? 'PDF:ää ei voitu tehdä. Yritä uudelleen.' : 'The PDF could not be made. Try again.'}
+          {share.t(cvLocale, 'pdfFailed')}
         </p>
       )}
 
@@ -176,7 +174,7 @@ function SharedCv({ shared, href, locale }) {
       </main>
 
       <p className="shared-cv__footer">
-        <a href={localizePath('/', cvLocale)}>{isFinnish ? 'Tehty PortifyCV:llä' : 'Made with PortifyCV'}</a>
+        <a href={localizePath('/', cvLocale)}>{share.t(cvLocale, 'madeWith')}</a>
       </p>
 
       {/* What Download PDF captures: the builder's off-screen, inert,

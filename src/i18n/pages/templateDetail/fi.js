@@ -1,0 +1,20 @@
+// A template page's own UI in Finnish.
+export default {
+  breadcrumb: 'Pohjat',
+  heading: (label) => `${label} – CV-pohja`,
+  bestFor: 'Sopii:',
+  examples: 'Esimerkit',
+  style: 'Tyyli',
+  atsView: 'ATS-näkymä',
+  useExample: 'Käytä tätä esimerkkiä',
+  useTemplate: 'Aloita tyhjästä tällä pohjalla',
+  tipsTitle: 'Vinkkejä tähän pohjaan',
+  aboutTitle: 'Tietoa pohjasta',
+  faqTitle: 'Kysymyksiä pohjasta',
+  previous: 'Edellinen pohja',
+  next: 'Seuraava pohja',
+  all: 'Kaikki pohjat',
+  pagerNav: 'Pohjien selaus',
+  previewCaption: (role, label) => `Esikatselu: ${role}-esimerkki ${label}-pohjassa`,
+  facts: { split: '2 palstaa', single: '1 palsta', sections: (n) => `${n} osiota` },
+}

@@ -239,6 +239,11 @@ const ALLOWLIST = [
   { file: 'src/components/StyleSwatchGroup.jsx', pattern: /^l\[lang\]/, reason: "reads templateVariants.js's variant label map { en, fi }" },
   { file: 'src/components/SettingsModal.jsx', pattern: /^l\[locale\] \?\? swatch\.label\.en\b/, reason: "reads templateAccents.js's swatch label map { en, fi }" },
   { file: 'src/components/TemplateFieldFilter.jsx', pattern: /^l\[lang\]/, reason: "reads templateFields.js's field label map { en, fi } (ALL_FIELDS_LABEL included)" },
+  { file: 'src/components/LandingTemplatesByField.jsx', pattern: /^l\[lang\]$/, reason: "reads templateVariants.js's variant label map { en, fi } (the card's look name)" },
+  { file: 'src/pages/TemplateDetailPage.jsx', pattern: /^\?\.\[resolvedLocale\]$/, reason: "reads templatePageCopy.js's per-template copy { en, fi } (out of scope)" },
+  // Logic in one file: the guide pages' updated date, a different Intl
+  // locale and date style per language.
+  { file: 'src/components/GuideLayout.jsx', pattern: /^=== 'fi' \? parsed\.toLocaleDateString\('fi-FI', /, reason: 'logic: date formatting locale and options for Intl' },
   // Logic, not text, in any file: the hit's own ternary (up to its first
   // `?`, so a pattern can't reach a later branch on the line) picks a
   // locale code, a formatting locale or an address.
@@ -253,26 +258,6 @@ const ALLOWLIST = [
 // 1.7.13 migration. Each task removes its files; the last one empties and
 // deletes this list.
 const MIGRATION_PENDING = new Set([
-  'src/App.jsx',
-  'src/components/AppErrorBoundary.jsx',
-  'src/components/GuideLayout.jsx',
-  'src/components/LandingTemplatesByField.jsx',
-  'src/pages/AboutPage.jsx',
-  'src/pages/AtsFriendlyCvGuidePage.jsx',
-  'src/pages/CoverLetterExamplesPage.jsx',
-  'src/pages/CvExamplesHubPage.jsx',
-  'src/pages/CvSkillsExamplesPage.jsx',
-  'src/pages/CybersecurityCvExamplesPage.jsx',
-  'src/pages/DeveloperCvExamplesPage.jsx',
-  'src/pages/FinnishCvExamplesPage.jsx',
-  'src/pages/FreeCvTemplatesPage.jsx',
-  'src/pages/HowToUseTheBuilderPage.jsx',
-  'src/pages/HowToWriteACvPage.jsx',
-  'src/pages/ItCvExamplesPage.jsx',
-  'src/pages/LandingPage.jsx',
-  'src/pages/PrivacyPolicyPage.jsx',
-  'src/pages/SharedCvPage.jsx',
-  'src/pages/TemplateDetailPage.jsx',
 ])
 
 const allowlistEntry = (file, hit) => ALLOWLIST.find((candidate) => (!candidate.file || candidate.file === file)
