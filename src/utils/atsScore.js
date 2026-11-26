@@ -1,5 +1,6 @@
 // @ts-check
 import { createCvSnapshot } from './cvSnapshot'
+import { feedback } from '../i18n/feedback/index.js'
 
 /** @typedef {import('../types/cv').CvData} CvData */
 
@@ -39,64 +40,34 @@ function extractKeywords(snapshot) {
 }
 
 function createAtsCopy(locale = 'en') {
-  const isFinnish = locale === 'fi'
+  const t = (key, vars) => feedback.t(locale, key, vars)
 
   return {
-    keywordDensityLabel: isFinnish ? 'Avainsanatiheys' : 'Keyword density',
-    sectionCompletenessLabel: isFinnish ? 'Osioiden kattavuus' : 'Section completeness',
-    lengthLabel: isFinnish ? 'Pituuspisteytys' : 'Length scoring',
-    formattingLabel: isFinnish ? 'Muotoilun yksinkertaisuus' : 'Formatting simplicity',
-    strong: isFinnish ? 'Vahva' : 'Strong',
-    solid: isFinnish ? 'Hyvä' : 'Solid',
-    needsPolish: isFinnish ? 'Kaipaa hiomista' : 'Needs polish',
-    needsWork: isFinnish ? 'Kaipaa työtä' : 'Needs work',
-    keywordMissing: isFinnish
-      ? 'Lisää roolikohtaisia avainsanoja otsikkoon, taitoihin ja kokemukseen.'
-      : 'Add more role-specific keywords in your title, skills, and experience.',
-    keywordGood: isFinnish
-      ? 'Avainsanojen kattavuus on hyvä yhteenvedossa ja kokemuksessa.'
-      : 'Good keyword coverage across your summary and experience.',
-    keywordImprove: isFinnish
-      ? 'Toista kohderoolin tärkeät avainsanat yhteenvedossa ja kokemuskohdissa.'
-      : 'Repeat important keywords from your target role inside your summary and experience bullets.',
-    sectionsReady: isFinnish
-      ? 'Keskeiset ATS-osiot ovat mukana.'
-      : 'Core ATS sections are present.',
-    sectionsMissingPrefix: isFinnish ? 'Lisää tai laajenna: ' : 'Add or expand: ',
+    keywordDensityLabel: t('ats.keywordDensityLabel'),
+    sectionCompletenessLabel: t('ats.sectionCompletenessLabel'),
+    lengthLabel: t('ats.lengthLabel'),
+    formattingLabel: t('ats.formattingLabel'),
+    strong: t('ats.strong'),
+    solid: t('ats.solid'),
+    needsPolish: t('ats.needsPolish'),
+    needsWork: t('ats.needsWork'),
+    keywordMissing: t('ats.keywordMissing'),
+    keywordGood: t('ats.keywordGood'),
+    keywordImprove: t('ats.keywordImprove'),
+    sectionsReady: t('ats.sectionsReady'),
+    sectionsMissing: (sections) => t('ats.sectionsMissing', { sections }),
     // The names the hint above lists (1.6.89: they used to stay English).
-    sectionNames: isFinnish
-      ? { 'full name': 'nimi', title: 'titteli', about: 'yhteenveto', skills: 'taidot', experience: 'kokemus', education: 'koulutus', links: 'linkit' }
-      : {},
-    lengthGood: isFinnish
-      ? 'Osioiden pituus on riittävän tiivis ATS:lle ja rekrytoijan silmäilyyn.'
-      : 'Section lengths are concise enough for fast ATS and recruiter scanning.',
-    lengthImprove: isFinnish
-      ? 'Lyhennä pitkiä kappaleita ja pidä jokainen kokemuskohde yhteen tulokseen fokusoituna.'
-      : 'Shorten long paragraphs and keep each experience entry focused on one result.',
-    atsModeOn: isFinnish
-      ? 'ATS-tila käyttää yksinkertaista ja jäsentäjäystävällistä asettelua.'
-      : 'ATS-friendly mode is using a simplified, parser-safe layout.',
-    atsModeOff: isFinnish
-      ? 'Kaikki pohjat ovat minimalistisia. Ota ATS-tila käyttöön maksimaalista yhteensopivuutta varten.'
-      : 'All templates use a minimal styling system. Enable ATS-friendly mode for maximum parser compatibility.',
-    tipKeyword: isFinnish
-      ? 'Peilaa työpaikkailmoitusta toistamalla ydintermit yhteenvedossa ja kokemuskohdissa.'
-      : 'Mirror the job description by repeating core role keywords in your About section and experience bullets.',
-    tipSections: isFinnish
-      ? 'Täydennä kaikki pääosiot: titteli, yhteenveto, taidot, kokemus, koulutus ja vähintään yksi linkki.'
-      : 'Complete every major section: title, summary, skills, experience, education, and at least one link.',
-    tipLength: isFinnish
-      ? 'Pidä yhteenveto noin 70-80 sanassa ja tiivistä kokemuskohdat yhteen saavutukseen.'
-      : 'Keep summaries under 70-80 words and trim each experience description into a focused accomplishment statement.',
-    tipAtsOn: isFinnish
-      ? 'Pidä nykyinen yksinkertainen asettelu hakuihin, joissa ATS-jäsennys on kriittinen.'
-      : 'Keep the current simplified layout for applications that rely heavily on ATS parsing.',
-    tipAtsOff: isFinnish
-      ? 'Ota ATS-tila käyttöön, jotta koristeelliset elementit vähenevät ja jäsennys paranee.'
-      : 'Enable ATS-friendly mode to remove decorative layout choices and improve parser compatibility.',
-    tipStrong: isFinnish
-      ? 'CV on ATS-näkökulmasta vahva. Räätälöi avainsanat jokaiseen hakemukseen.'
-      : 'Your CV is in strong ATS shape. Tailor keywords to each application for even better alignment.',
+    sectionName: (key) => t(key),
+    lengthGood: t('ats.lengthGood'),
+    lengthImprove: t('ats.lengthImprove'),
+    atsModeOn: t('ats.atsModeOn'),
+    atsModeOff: t('ats.atsModeOff'),
+    tipKeyword: t('ats.tipKeyword'),
+    tipSections: t('ats.tipSections'),
+    tipLength: t('ats.tipLength'),
+    tipAtsOn: t('ats.tipAtsOn'),
+    tipAtsOff: t('ats.tipAtsOff'),
+    tipStrong: t('ats.tipStrong'),
   }
 }
 
@@ -136,32 +107,32 @@ function scoreSectionCompleteness(snapshot, copy) {
   const missingSections = []
 
   if (snapshot.fullName) score += 4
-  else missingSections.push('full name')
+  else missingSections.push('ats.sectionNames.fullName')
 
   if (snapshot.title) score += 4
-  else missingSections.push('title')
+  else missingSections.push('ats.sectionNames.title')
 
   if (snapshot.about) score += 5
-  else missingSections.push('about')
+  else missingSections.push('ats.sectionNames.about')
 
   if (snapshot.skills.length > 0) score += 5
-  else missingSections.push('skills')
+  else missingSections.push('ats.sectionNames.skills')
 
   if (snapshot.experience.length > 0) score += 7
-  else missingSections.push('experience')
+  else missingSections.push('ats.sectionNames.experience')
 
   if (snapshot.education.length > 0) score += 3
-  else missingSections.push('education')
+  else missingSections.push('ats.sectionNames.education')
 
   if (Object.keys(snapshot.links).length > 0) score += 2
-  else missingSections.push('links')
+  else missingSections.push('ats.sectionNames.links')
 
   return {
     score,
     summary:
       missingSections.length === 0
         ? copy.sectionsReady
-        : `${copy.sectionsMissingPrefix}${missingSections.slice(0, 3).map((name) => copy.sectionNames[name] ?? name).join(', ')}.`,
+        : copy.sectionsMissing(missingSections.slice(0, 3).map(copy.sectionName).join(', ')),
   }
 }
 

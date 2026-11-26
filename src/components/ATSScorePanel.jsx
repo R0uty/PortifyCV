@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react'
 
 import { getUiTheme } from '../utils/designSystem'
+import { feedback } from '../i18n/feedback/index.js'
 
 function scoreTone(ui, score) {
   if (score >= 85) {
@@ -44,7 +45,7 @@ function ATSScorePanel({
   savedCvName = '',
 }) {
   const ui = useMemo(() => getUiTheme(theme), [theme])
-  const isFinnish = locale === 'fi'
+  const t = (key, vars) => feedback.t(locale, key, vars)
   const breakdownItems = Object.values(atsScore.breakdown)
 
   return (
@@ -54,20 +55,18 @@ function ATSScorePanel({
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="ds-kicker uppercase tracking-[0.14em] accent-text">{isFinnish ? 'ATS-pisteet' : 'ATS score'}</p>
+          <p className="ds-kicker uppercase tracking-[0.14em] accent-text">{t('atsPanel.kicker')}</p>
           <h3 className={`ds-section-title mt-2 font-bold uppercase tracking-[-0.02em] ${ui.textPrimary}`}>
-            {isFinnish ? 'Yhteenveto jäsennysvalmiudesta' : 'Parser-readiness overview'}
+            {t('atsPanel.title')}
           </h3>
           <p className={`ds-body-sm mt-3 ${ui.textSecondary}`}>
-            {isFinnish
-              ? 'Piste kertoo, kuinka helposti rekrytointijärjestelmät pystyvät jäsentämään ja arvioimaan CV:n.'
-              : 'This score estimates how easily applicant tracking systems can parse and rank the CV.'}
+            {t('atsPanel.intro')}
           </p>
         </div>
 
         <div className="px-5 py-4 text-center" style={{ ...scoreTone(ui, atsScore.score), border: '1px solid var(--app-border-strong)' }}>
           <p className="text-xs font-bold uppercase tracking-[0.14em]">
-            {isFinnish ? 'ATS-pisteet' : 'ATS score'}
+            {t('atsPanel.kicker')}
           </p>
           <p className="mt-2 text-4xl font-bold leading-none">{atsScore.score}</p>
           <p className="mt-2 text-sm font-semibold">{atsScore.rating}</p>
@@ -79,9 +78,7 @@ function ATSScorePanel({
           <div>
             <p className={`text-sm font-bold uppercase tracking-[0.04em] ${ui.textPrimary}`}>ATS-friendly mode</p>
             <p className={`mt-1 text-sm ${ui.textSecondary}`}>
-                {isFinnish
-                  ? 'Vaihda esikatselu yksinkertaiseen ATS-yhteensopivaan asetteluun. Jätä pois päältä täysin tyyliteltyä vientiä varten. Sama valinta löytyy myös Asetuksista.'
-                  : 'Switch the preview to a simplified, parser-safe layout with reduced styling. Leave it off for fully styled template exports. Also in Settings.'}
+                {t('atsPanel.modeHint')}
             </p>
           </div>
           <button
@@ -91,9 +88,7 @@ function ATSScorePanel({
             }`}
             onClick={onToggleAtsFriendlyMode}
           >
-            {atsFriendlyMode
-              ? isFinnish ? 'ATS-PÄÄLLÄ' : 'ATS ON'
-              : isFinnish ? 'Ota ATS käyttöön' : 'Enable ATS'}
+            {atsFriendlyMode ? t('atsPanel.atsOn') : t('atsPanel.enableAts')}
           </button>
         </div>
       </div>
@@ -119,7 +114,7 @@ function ATSScorePanel({
                   {matchedKeywords.length > 0 ? (
                     <div>
                       <p className={`text-xs font-bold uppercase tracking-[0.14em] ${ui.textMuted}`}>
-                        {isFinnish ? 'Osuneet avainsanat' : 'Matched keywords'}
+                        {t('atsPanel.matchedKeywords')}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {matchedKeywords.slice(0, 12).map((keyword) => (
@@ -138,9 +133,7 @@ function ATSScorePanel({
                   {missingKeywords.length > 0 ? (
                     <div>
                       <p className={`text-xs font-bold uppercase tracking-[0.14em] ${ui.textMuted}`}>
-                        {isFinnish
-                          ? 'Ei toistu yhteenvedossa tai kokemuksessa'
-                          : 'Not repeated in your summary or experience'}
+                        {t('atsPanel.notRepeated')}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {missingKeywords.slice(0, 12).map((keyword) => (
@@ -164,7 +157,7 @@ function ATSScorePanel({
 
       <div className="mt-5">
         <p className={`text-sm font-bold uppercase tracking-[0.04em] ${ui.textPrimary}`}>
-          {isFinnish ? 'Parannusvinkit' : 'Score improvement tips'}
+          {t('atsPanel.tipsTitle')}
         </p>
         <ul className={`mt-3 space-y-2 ${ui.textSecondary}`}>
           {atsScore.improvementTips.map((tip) => (
@@ -177,21 +170,17 @@ function ATSScorePanel({
 
       <div className={`mt-5 p-4 ${ui.surfaceMuted}`} style={{ border: '1px solid var(--app-border)' }}>
         <p className={`text-sm font-bold uppercase tracking-[0.04em] ${ui.textPrimary}`}>
-          {isFinnish ? 'Työpaikkailmoituksen avainsanat' : 'Job description keyword match'}
+          {t('atsPanel.jobTitle')}
         </p>
         <p className={`mt-1 text-sm ${ui.textSecondary}`}>
-          {isFinnish
-            ? 'Liitä työpaikkailmoitus: näet, mitä taitoja ja vaatimuksia siinä mainitaan ja mitkä niistä CV:stäsi jo löytyvät.'
-            : 'Paste a job ad to see the skills and requirements it names, and which of them your CV already mentions.'}
+          {t('atsPanel.jobIntro')}
         </p>
         <textarea
           className={`mt-3 min-h-28 w-full border px-4 py-3 text-sm transition ${ui.input}`}
           value={jobDescription}
           onChange={(event) => onJobDescriptionChange(event.target.value)}
-          aria-label={isFinnish ? 'Työpaikkailmoituksen kuvaus' : 'Job description'}
-          placeholder={isFinnish
-            ? 'Liitä tähän työpaikkakuvaus avainsanojen kattavuuden analysointia varten.'
-            : 'Paste a job description here to analyze keyword coverage.'}
+          aria-label={t('atsPanel.jobAria')}
+          placeholder={t('atsPanel.jobPlaceholder')}
         />
 
         <div className="mt-3 flex flex-wrap gap-2">
@@ -201,7 +190,7 @@ function ATSScorePanel({
             onClick={onCopyMissingKeywords}
             disabled={jobDescriptionAnalysis.missing.length === 0}
           >
-            {isFinnish ? 'Kopioi puuttuvat' : 'Copy missing'}
+            {t('atsPanel.copyMissing')}
           </button>
           <button
             type="button"
@@ -209,7 +198,7 @@ function ATSScorePanel({
             onClick={onClearJobDescription}
             disabled={!jobDescription.trim()}
           >
-            {isFinnish ? 'Tyhjennä JD' : 'Clear JD'}
+            {t('atsPanel.clear')}
           </button>
         </div>
 
@@ -217,32 +206,26 @@ function ATSScorePanel({
           <div className="mt-4 space-y-3" data-job-match>
             <div className="flex flex-wrap items-center gap-2">
               <span className="px-3 py-1 text-xs font-bold" style={{ ...scoreTone(ui, jobDescriptionAnalysis.coverageScore), border: '1px solid var(--app-border)' }}>
-                {isFinnish ? 'Kattavuus' : 'Coverage'} {jobDescriptionAnalysis.coverageScore}%
+                {t('atsPanel.coverage', { score: jobDescriptionAnalysis.coverageScore })}
               </span>
               <span className={`px-3 py-1 text-xs font-bold ${ui.surface}`} style={{ border: '1px solid var(--app-border)' }}>
-                {isFinnish
-                  ? `${jobDescriptionAnalysis.found.length}/${jobDescriptionAnalysis.total} vaatimusta löytyy CV:stä`
-                  : `${jobDescriptionAnalysis.found.length} of ${jobDescriptionAnalysis.total} requirements in your CV`}
+                {t('atsPanel.foundCount', { found: jobDescriptionAnalysis.found.length, total: jobDescriptionAnalysis.total })}
               </span>
             </div>
 
             {jobDescriptionAnalysis.total === 0 ? (
               <p className={`text-sm ${ui.textSecondary}`}>
-                {isFinnish
-                  ? 'Ilmoituksesta ei löytynyt tunnistettavia taitoja tai työkaluja.'
-                  : 'No skills or tools recognised in this ad.'}
+                {t('atsPanel.nothingRecognised')}
               </p>
             ) : null}
 
             {jobDescriptionAnalysis.missing.length > 0 ? (
               <div>
                 <p className={`text-xs font-bold uppercase tracking-[0.14em] ${ui.textMuted}`}>
-                  {isFinnish ? 'Puuttuvat avainsanat' : 'Missing keywords'}
+                  {t('atsPanel.missingTitle')}
                 </p>
                 <p className={`mt-1 text-xs ${ui.textSecondary}`}>
-                  {isFinnish
-                    ? 'Lisää vain se, minkä oikeasti osaat. Napautus lisää taitoihin.'
-                    : 'Add only what you can honestly claim. Tap one to add it to your skills.'}
+                  {t('atsPanel.missingHint')}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {jobDescriptionAnalysis.missing.map((keyword) => (
@@ -260,16 +243,14 @@ function ATSScorePanel({
               </div>
             ) : jobDescriptionAnalysis.total > 0 ? (
               <p className={`text-sm ${ui.textSecondary}`}>
-                {isFinnish
-                  ? 'Vahva osuma. CV:si mainitsee kaiken, mitä ilmoituksesta tunnistettiin.'
-                  : 'Strong match. Your CV mentions everything recognised in the ad.'}
+                {t('atsPanel.strongMatch')}
               </p>
             ) : null}
 
             {jobDescriptionAnalysis.found.length > 0 ? (
               <div>
                 <p className={`text-xs font-bold uppercase tracking-[0.14em] ${ui.textMuted}`}>
-                  {isFinnish ? 'Löytyy CV:stä' : 'In your CV'}
+                  {t('atsPanel.inCv')}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {jobDescriptionAnalysis.found.map(({ label }) => (
@@ -287,25 +268,19 @@ function ATSScorePanel({
 
             {jobDescriptionAnalysis.skillsOnly.length > 0 ? (
               <p className={`text-sm ${ui.textSecondary}`} data-job-match-skills-only>
-                {isFinnish
-                  ? `Vain taitolistassa: ${jobDescriptionAnalysis.skillsOnly.join(', ')}. Kerro työkokemuksessa, missä käytit niitä, niin lukija näkee ne käytössä.`
-                  : `Only in your skills list: ${jobDescriptionAnalysis.skillsOnly.join(', ')}. Say where you used them in your experience, so a reader sees them in use.`}
+                {t('atsPanel.skillsOnly', { skills: jobDescriptionAnalysis.skillsOnly.join(', ') })}
               </p>
             ) : null}
 
             {onSaveCopyForJob ? (
               <div className="pt-1">
                 <button type="button" className={`ui-button ${ui.button}`} onClick={onSaveCopyForJob}>
-                  {isFinnish ? 'Tallenna kopio tätä työpaikkaa varten' : 'Save a copy for this job'}
+                  {t('atsPanel.saveCopy')}
                 </button>
                 <p className={`mt-1 text-xs ${ui.textSecondary}`}>
                   {savedCvName
-                    ? isFinnish
-                      ? `Muokkaat kopiota; "${savedCvName}" pysyy sellaisena kuin se tallennettiin.`
-                      : `You edit the copy; "${savedCvName}" stays as it was saved.`
-                    : isFinnish
-                      ? 'Tallentaa tämän CV:n tälle laitteelle tämän työpaikan nimellä.'
-                      : 'Saves this CV on this device under a name for this job.'}
+                    ? t('atsPanel.saveCopyOpen', { name: savedCvName })
+                    : t('atsPanel.saveCopyNew')}
                 </p>
               </div>
             ) : null}

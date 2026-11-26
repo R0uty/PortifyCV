@@ -1,4 +1,5 @@
 import { ALL_FIELDS_LABEL, TEMPLATE_FIELDS } from '../utils/templateFields'
+import { fieldFilter } from '../i18n/fieldFilter/index.js'
 
 // The field chips (1.6.12) above the Free CV Templates grid and the
 // builder's template gallery. Native radios styled as chips, the same
@@ -9,20 +10,19 @@ import { ALL_FIELDS_LABEL, TEMPLATE_FIELDS } from '../utils/templateFields'
 // each change.
 function TemplateFieldFilter({ value, onChange, locale = 'en', shownCount, totalCount, name }) {
   const lang = locale === 'fi' ? 'fi' : 'en'
+  const t = (key, vars) => fieldFilter.t(lang, key, vars)
   const options = [{ id: null, label: ALL_FIELDS_LABEL }, ...TEMPLATE_FIELDS]
 
   let statusText
   if (value === null) {
-    statusText = lang === 'fi' ? `Kaikki ${totalCount} pohjaa` : `All ${totalCount} templates`
+    statusText = t('all', { total: totalCount })
   } else {
-    statusText = lang === 'fi'
-      ? `Näytetään ${shownCount}/${totalCount} pohjaa`
-      : `Showing ${shownCount} of ${totalCount} templates`
+    statusText = t('showing', { shown: shownCount, total: totalCount })
   }
 
   return (
     <div className="template-fields">
-      <div role="radiogroup" aria-label={lang === 'fi' ? 'Ala' : 'Field'} className="template-fields__chips">
+      <div role="radiogroup" aria-label={t('label')} className="template-fields__chips">
         {options.map((option) => (
           <label key={option.id ?? 'all'} className="template-fields__chip">
             <input

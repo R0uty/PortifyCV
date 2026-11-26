@@ -3,6 +3,7 @@ import Modal from './Modal'
 import ToggleSwitch from './fields/ToggleSwitch'
 import { getTemplateAccent, resolveTemplateAccent } from '../utils/cvTemplates'
 import { getAccentSwatches } from '../utils/templateAccents'
+import { dialogs } from '../i18n/dialogs/index.js'
 
 function SettingsModal({
   isOpen,
@@ -25,26 +26,22 @@ function SettingsModal({
   applicationCount = 0,
   onDeleteAllApplications,
 }) {
-  const isFinnish = locale === 'fi'
+  const t = (key, vars) => dialogs.t(locale, key, vars)
   const [isDeleteAllArmed, setIsDeleteAllArmed] = useState(false)
   const [isDeleteApplicationsArmed, setIsDeleteApplicationsArmed] = useState(false)
 
   return (
-    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
+    <Modal closeLabel={t('common.close')}
       isOpen={isOpen}
       onClose={onClose}
-      title={isFinnish ? 'Asetukset' : 'Settings'}
-      description={isFinnish
-        ? 'Muutokset päivittyvät esikatseluun välittömästi.'
-        : 'Changes apply to the live preview instantly.'}
+      title={t('settings.title')}
+      description={t('settings.description')}
     >
       <div className="settings-row">
         <div>
-          <p className="settings-row__label">{isFinnish ? 'ATS-ystävällinen tila' : 'ATS-friendly mode'}</p>
+          <p className="settings-row__label">{t('settings.atsLabel')}</p>
           <p className="settings-row__hint">
-            {isFinnish
-              ? 'Yksinkertaistaa esikatselun muotoilun jäsentelyohjelmia varten.'
-              : 'Simplifies the preview formatting for applicant-tracking parsers.'}
+            {t('settings.atsHint')}
           </p>
         </div>
         <ToggleSwitch checked={atsFriendlyMode} onChange={onToggleAtsFriendlyMode} />
@@ -52,25 +49,21 @@ function SettingsModal({
 
       <div className="settings-row">
         <div>
-          <p className="settings-row__label">{isFinnish ? 'Osioiden järjestys ja näkyvyys' : 'Section order & visibility'}</p>
+          <p className="settings-row__label">{t('settings.sectionsLabel')}</p>
           <p className="settings-row__hint">
-            {isFinnish
-              ? 'Raahaa osioita, piilota tai näytä niitä poistamatta tietoja.'
-              : 'Drag sections to reorder, or hide/show them without deleting data.'}
+            {t('settings.sectionsHint')}
           </p>
         </div>
         <button type="button" className="settings-link" onClick={onManageSections}>
-          {isFinnish ? 'Hallinnoi' : 'Manage'}
+          {t('settings.manage')}
         </button>
       </div>
 
       <div className="settings-row">
         <div>
-          <p className="settings-row__label">{isFinnish ? 'Palauta viimeisin istunto' : 'Restore last session'}</p>
+          <p className="settings-row__label">{t('settings.restoreLabel')}</p>
           <p className="settings-row__hint">
-            {isFinnish
-              ? 'Päällä oletuksena. Muokkaamastasi CV:stä pidetään työkopiota vain tässä selainvälilehdessä, jotta vahinkopäivitys ei tuhoa työtäsi. Kopio poistuu heti, kun suljet välilehden, eikä sitä koskaan lähetetä minnekään. Pois kytkeminen poistaa kopion heti.'
-              : "On by default. Keeps a working copy of the CV you've edited in this browser tab only, so an accidental refresh doesn't lose your work. It's cleared the moment you close the tab and is never sent anywhere. Turning this off deletes the copy at once."}
+            {t('settings.restoreHint')}
           </p>
         </div>
         <ToggleSwitch checked={sessionRestoreEnabled} onChange={onToggleSessionRestore} />
@@ -79,16 +72,14 @@ function SettingsModal({
       {onCvLanguageChange ? (
         <div className="settings-row">
           <div>
-            <p className="settings-row__label" id="settings-cv-language">{isFinnish ? 'CV:n kieli' : 'CV language'}</p>
+            <p className="settings-row__label" id="settings-cv-language">{t('settings.cvLanguageLabel')}</p>
             <p className="settings-row__hint">
-              {isFinnish
-                ? 'Otsikoiden, päivämäärien ja vientien kieli. Sovellus pysyy omalla kielellään. Kirjoittamasi teksti ei käänny.'
-                : 'The language of the headings, dates and exports. The app stays in its own language. Your own text is not translated.'}
+              {t('settings.cvLanguageHint')}
             </p>
           </div>
           <div className="settings-swatch-row" role="group" aria-labelledby="settings-cv-language">
             {[
-              ['', isFinnish ? 'Sama kuin sovellus' : 'Same as the app'],
+              ['', t('settings.cvLanguageApp')],
               ['en', 'English'],
               ['fi', 'Suomi'],
             ].map(([value, label]) => {
@@ -117,14 +108,12 @@ function SettingsModal({
         return (
           <div className="settings-row">
             <div>
-              <p className="settings-row__label">{isFinnish ? 'Aksenttiväri' : 'Accent color'}</p>
+              <p className="settings-row__label">{t('settings.accentLabel')}</p>
               <p className="settings-row__hint">
-                {isFinnish
-                  ? 'Väri näkyy nimessä, otsikoissa ja aksenteissa.'
-                  : 'Colors the name, headings, and accents.'}
+                {t('settings.accentHint')}
               </p>
             </div>
-            <div className="settings-swatch-row" role="group" aria-label={isFinnish ? 'Aksenttiväri' : 'Accent color'}>
+            <div className="settings-swatch-row" role="group" aria-label={t('settings.accentLabel')}>
               {getAccentSwatches(accentConfig.swatchSet).map((swatch) => {
                 // Compare case-insensitively as a belt-and-suspenders guard
                 // against a future hex-case typo. The cvTemplates.js registry
@@ -153,17 +142,15 @@ function SettingsModal({
       {selectedTemplate === 'classicProfessional' ? (
         <div className="settings-row">
           <div>
-            <p className="settings-row__label">{isFinnish ? 'Nimen tasaus' : 'Name alignment'}</p>
+            <p className="settings-row__label">{t('settings.nameAlignmentLabel')}</p>
             <p className="settings-row__hint">
-              {isFinnish
-                ? 'Keskitä otsikkonimi tai tasaa se vasemmalle kirjelomaketyyliin.'
-                : 'Centre the header name, or left-align it letterhead-style.'}
+              {t('settings.nameAlignmentHint')}
             </p>
           </div>
-          <div className="settings-swatch-row" role="group" aria-label={isFinnish ? 'Nimen tasaus' : 'Name alignment'}>
+          <div className="settings-swatch-row" role="group" aria-label={t('settings.nameAlignmentLabel')}>
             {[
-              ['center', isFinnish ? 'Keskitä' : 'Centre'],
-              ['left', isFinnish ? 'Vasen' : 'Left'],
+              ['center', t('settings.alignCenter')],
+              ['left', t('settings.alignLeft')],
             ].map(([value, label]) => {
               const isActive = classicNameAlignment === value
               return (
@@ -185,12 +172,10 @@ function SettingsModal({
         <div className="settings-row">
           <div>
             <p className="settings-row__label">
-              {isFinnish ? `Tälle laitteelle tallennetut CV:t (${savedCvCount})` : `CVs saved on this device (${savedCvCount})`}
+              {t('settings.savedCvsLabel', { count: savedCvCount })}
             </p>
             <p className="settings-row__hint">
-              {isFinnish
-                ? 'Poistaa kaikki tähän selaimeen tallentamasi CV:t. Tätä ei voi kumota. Näytöllä oleva CV pysyy auki.'
-                : 'Removes every CV you saved in this browser. This cannot be undone. The CV on screen stays open.'}
+              {t('settings.savedCvsHint')}
             </p>
           </div>
           <button
@@ -205,9 +190,7 @@ function SettingsModal({
               onDeleteAllSavedCvs()
             }}
           >
-            {isDeleteAllArmed
-              ? isFinnish ? 'Vahvista kaikkien poisto' : 'Confirm delete all'
-              : isFinnish ? 'Poista kaikki' : 'Delete all saved CVs'}
+            {isDeleteAllArmed ? t('settings.confirmDeleteAll') : t('settings.deleteAllSavedCvs')}
           </button>
         </div>
       ) : null}
@@ -215,12 +198,10 @@ function SettingsModal({
         <div className="settings-row">
           <div>
             <p className="settings-row__label">
-              {isFinnish ? `Tälle laitteelle tallennetut haut (${applicationCount})` : `Applications on this device (${applicationCount})`}
+              {t('settings.applicationsLabel', { count: applicationCount })}
             </p>
             <p className="settings-row__hint">
-              {isFinnish
-                ? 'Poistaa kaikki Merkitse haetuksi -toiminnolla tallennetut haut ja niiden PDF:t tästä selaimesta. Tätä ei voi kumota. Tallennetut CV:t pysyvät.'
-                : 'Removes every application you marked as applied, and its PDFs, from this browser. This cannot be undone. Your saved CVs stay.'}
+              {t('settings.applicationsHint')}
             </p>
           </div>
           <button
@@ -235,9 +216,7 @@ function SettingsModal({
               onDeleteAllApplications()
             }}
           >
-            {isDeleteApplicationsArmed
-              ? isFinnish ? 'Vahvista kaikkien hakujen poisto' : 'Confirm delete all applications'
-              : isFinnish ? 'Poista kaikki haut' : 'Delete all applications'}
+            {isDeleteApplicationsArmed ? t('settings.confirmDeleteAllApplications') : t('settings.deleteAllApplications')}
           </button>
         </div>
       ) : null}

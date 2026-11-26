@@ -9,6 +9,8 @@
 // IndexedDB rather than localStorage because a CV with a photo and project
 // images can exceed localStorage's ~5 MB by itself.
 
+import { dialogs } from '../i18n/dialogs/index.js'
+
 /** @typedef {import('../types/cv').CvData} CvData */
 /**
  * @typedef {object} CvRecord
@@ -37,20 +39,21 @@ export function normalizeCvName(name) {
 export function defaultCvName(data, locale = 'en') {
   const fullName = normalizeCvName(data?.fullName)
 
-  if (!fullName) return locale === 'fi' ? 'Oma CV' : 'My CV'
+  if (!fullName) return dialogs.t(locale, 'library.defaultName')
   return normalizeCvName(`${fullName.slice(0, MAX_CV_NAME_LENGTH - 3)} CV`)
 }
 
 /** "Name (copy)", then "Name (copy 2)", … — whichever is not taken yet. */
 export function nextCopyName(name, existingNames = [], locale = 'en') {
-  const word = locale === 'fi' ? 'kopio' : 'copy'
   // Copying a copy numbers on from the original instead of nesting
   // "(copy) (copy)".
   const base = normalizeCvName(name).replace(/\s*\((?:copy|kopio)(?: \d+)?\)$/i, '') || normalizeCvName(name)
   const taken = new Set(existingNames.map((existing) => normalizeCvName(existing).toLowerCase()))
 
   for (let number = 1; ; number += 1) {
-    const suffix = number === 1 ? ` (${word})` : ` (${word} ${number})`
+    const suffix = number === 1
+      ? dialogs.t(locale, 'library.copySuffix')
+      : dialogs.t(locale, 'library.copySuffixNumbered', { number })
     const candidate = `${base.slice(0, MAX_CV_NAME_LENGTH - suffix.length).trim()}${suffix}`
     if (!taken.has(candidate.toLowerCase())) return candidate
   }

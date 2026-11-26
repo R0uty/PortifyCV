@@ -4,6 +4,7 @@ import Modal from './Modal'
 import { FIT_OPTIONS, PAPER_OPTIONS } from './pdfPreviewOptions'
 import { getUiTheme } from '../utils/designSystem'
 import { MAX_APPLICATION_NAME_LENGTH } from '../utils/applicationLog'
+import { dialogs } from '../i18n/dialogs/index.js'
 
 // "Mark as applied" (1.7.11): the CV on screen was sent to a company. Asks
 // for the company, role, date, the ad's link and the PDF's paper and fit;
@@ -20,35 +21,23 @@ function localToday() {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
 }
 
-function failureMessage(error, isFinnish) {
+function failureMessage(error, locale) {
   // The builder's own guard against a second save: its message says it.
   if (error?.code === 'busy') return error.message
 
   if (error?.code === 'full') {
-    return isFinnish
-      ? 'Tallennus epäonnistui: selaimen tallennustila on täynnä. Mitään ei tallennettu.'
-      : 'Could not save: this browser\'s storage is full. Nothing was stored.'
+    return dialogs.t(locale, 'markApplied.storageFull')
   }
 
   if (error?.code === 'unavailable') {
-    return unavailableMessage(isFinnish)
+    return dialogs.t(locale, 'common.storageUnavailable')
   }
 
   // A render error (the preview not ready yet, a page that couldn't be
   // read) says what happened in its own message; storage errors don't.
   const detail = !error?.code && error instanceof Error && error.message ? ` ${error.message}` : ''
 
-  return isFinnish
-    ? `Haun tallennus epäonnistui, eikä mitään tallennettu.${detail}`
-    : `Could not save the application, so nothing was stored.${detail}`
-}
-
-// The saved-CV dialog's own wording (SavedCvsModal.jsx): the same browser
-// refuses both databases for the same reason.
-function unavailableMessage(isFinnish) {
-  return isFinnish
-    ? 'Tämä selain ei salli tallennusta laitteelle (esimerkiksi yksityisessä ikkunassa). Vie CV JSON-tiedostona, jos haluat säilyttää sen.'
-    : 'This browser does not allow saving on the device (a private window, for example). Export the CV as JSON to keep it.'
+  return dialogs.t(locale, 'markApplied.saveFailed', { detail })
 }
 
 function MarkAppliedView({
@@ -62,7 +51,7 @@ function MarkAppliedView({
   isAvailable = true,
   hasLetter = false,
 }) {
-  const isFinnish = locale === 'fi'
+  const t = (key, vars) => dialogs.t(locale, key, vars)
   const ui = getUiTheme()
   const id = useId()
   const [company, setCompany] = useState(initialCompany)
@@ -99,7 +88,7 @@ function MarkAppliedView({
     try {
       await onSubmit({ company, role, appliedOn, adUrl, paper, fit })
     } catch (submitError) {
-      setError(failureMessage(submitError, isFinnish))
+      setError(failureMessage(submitError, locale))
     } finally {
       savingRef.current = false
       setIsSaving(false)
@@ -115,24 +104,18 @@ function MarkAppliedView({
 
   return (
     <Modal
-      closeLabel={isFinnish ? 'Sulje' : 'Close'}
+      closeLabel={t('common.close')}
       isOpen
       onClose={handleClose}
       isCloseDisabled={isSaving}
-      title={isFinnish ? 'Merkitse haetuksi' : 'Mark as applied'}
-      description={hasLetter
-        ? isFinnish
-          ? 'Tämän CV:n ja sen hakemuskirjeen PDF, sellaisina kuin ne nyt näyttävät, säilytetään haun mukana tässä selaimessa.'
-          : 'A PDF of this CV and its cover letter, as they look now, is kept with the application in this browser.'
-        : isFinnish
-          ? 'Tämän CV:n PDF, sellaisena kuin se nyt näyttää, säilytetään haun mukana tässä selaimessa.'
-          : 'A PDF of this CV, as it looks now, is kept with the application in this browser.'}
+      title={t('markApplied.title')}
+      description={hasLetter ? t('markApplied.descriptionWithLetter') : t('markApplied.description')}
     >
       {isAvailable ? (
         <form className="mark-applied" noValidate onSubmit={handleSubmit}>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1">
-              <label htmlFor={`${id}-company`} className={labelClassName}>{isFinnish ? 'Yritys' : 'Company'}</label>
+              <label htmlFor={`${id}-company`} className={labelClassName}>{t('common.company')}</label>
               <input
                 id={`${id}-company`}
                 type="text"
@@ -146,13 +129,13 @@ function MarkAppliedView({
               />
               {showRequired && companyMissing ? (
                 <span id={`${id}-company-error`} className="mark-applied__error text-xs">
-                  {isFinnish ? 'Kirjoita yritys.' : 'Enter the company.'}
+                  {t('markApplied.companyMissing')}
                 </span>
               ) : null}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label htmlFor={`${id}-role`} className={labelClassName}>{isFinnish ? 'Tehtävä' : 'Role'}</label>
+              <label htmlFor={`${id}-role`} className={labelClassName}>{t('markApplied.role')}</label>
               <input
                 id={`${id}-role`}
                 type="text"
@@ -166,13 +149,13 @@ function MarkAppliedView({
               />
               {showRequired && roleMissing ? (
                 <span id={`${id}-role-error`} className="mark-applied__error text-xs">
-                  {isFinnish ? 'Kirjoita tehtävä.' : 'Enter the role.'}
+                  {t('markApplied.roleMissing')}
                 </span>
               ) : null}
             </div>
 
             <div className="flex flex-col gap-1">
-              <label htmlFor={`${id}-date`} className={labelClassName}>{isFinnish ? 'Hakupäivä' : 'Date applied'}</label>
+              <label htmlFor={`${id}-date`} className={labelClassName}>{t('markApplied.dateApplied')}</label>
               <input
                 id={`${id}-date`}
                 type="date"
@@ -185,14 +168,14 @@ function MarkAppliedView({
               />
               {showRequired && dateMissing ? (
                 <span id={`${id}-date-error`} className="mark-applied__error text-xs">
-                  {isFinnish ? 'Valitse päivämäärä.' : 'Choose a date.'}
+                  {t('markApplied.dateMissing')}
                 </span>
               ) : null}
             </div>
 
             <label className="flex flex-col gap-1">
               <span className={labelClassName}>
-                {isFinnish ? 'Linkki työpaikkailmoitukseen (valinnainen)' : 'Link to the job ad (optional)'}
+                {t('markApplied.adUrl')}
               </span>
               <input
                 type="url"
@@ -205,7 +188,7 @@ function MarkAppliedView({
             </label>
 
             <fieldset className="flex flex-col gap-1">
-              <legend className={labelClassName}>{isFinnish ? 'Paperikoko' : 'Paper size'}</legend>
+              <legend className={labelClassName}>{t('common.paperSize')}</legend>
               <div className="mark-applied__radios">
                 {PAPER_OPTIONS.map((option) => (
                   <label key={option.value} className="mark-applied__radio text-sm">
@@ -216,14 +199,14 @@ function MarkAppliedView({
                       checked={paper === option.value}
                       onChange={() => setPaper(option.value)}
                     />
-                    {isFinnish ? option.fi : option.en}
+                    {t(option.label)}
                   </label>
                 ))}
               </div>
             </fieldset>
 
             <div className="flex flex-col gap-1">
-              <label htmlFor={`${id}-fit`} className={labelClassName}>{isFinnish ? 'Sovitus' : 'Fit'}</label>
+              <label htmlFor={`${id}-fit`} className={labelClassName}>{t('common.fit')}</label>
               <select
                 id={`${id}-fit`}
                 className={inputClassName}
@@ -233,12 +216,12 @@ function MarkAppliedView({
               >
                 {FIT_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
-                    {isFinnish ? option.fi : option.en}
+                    {t(option.label)}
                   </option>
                 ))}
               </select>
               <span id={`${id}-fit-hint`} className={`text-xs ${ui.textMuted}`}>
-                {fitOption ? (isFinnish ? fitOption.hintFi : fitOption.hintEn) : ''}
+                {fitOption ? t(fitOption.hint) : ''}
               </span>
             </div>
           </div>
@@ -249,14 +232,12 @@ function MarkAppliedView({
 
           <div className="saved-cvs__actions">
             <button type="submit" className={`ui-button ${ui.buttonActive}`} disabled={isSaving}>
-              {isSaving
-                ? isFinnish ? 'Tallennetaan PDF:ää…' : 'Saving the PDF…'
-                : isFinnish ? 'Tallenna' : 'Save'}
+              {isSaving ? t('markApplied.saving') : t('common.save')}
             </button>
           </div>
         </form>
       ) : (
-        <p className="settings-row__hint" role="alert">{unavailableMessage(isFinnish)}</p>
+        <p className="settings-row__hint" role="alert">{t('common.storageUnavailable')}</p>
       )}
     </Modal>
   )

@@ -10,6 +10,7 @@ import { resolveTemplateAccent } from '../utils/cvTemplates'
 import { templatePath } from '../utils/routes'
 import { getVariantLook, resolveStyleVariantId, styleVariantSearch } from '../utils/templateVariants'
 import { filterTemplatesByField } from '../utils/templateFields'
+import { dialogs } from '../i18n/dialogs/index.js'
 
 function TemplateGalleryModal({
   isOpen,
@@ -25,7 +26,7 @@ function TemplateGalleryModal({
   locale = 'en',
   onOpenBadge = null,
 }) {
-  const isFinnish = locale === 'fi'
+  const t = (key, vars) => dialogs.t(locale, key, vars)
   const thumbnailCv = useMemo(() => buildThumbnailCv(formData), [formData])
   // Looks previewed on a card since the modal opened (Phase 4). A card
   // without one shows the look this CV stores for its template. Reset on
@@ -46,22 +47,18 @@ function TemplateGalleryModal({
   const shownTemplates = filterTemplatesByField(templates, field)
 
   return (
-    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
+    <Modal closeLabel={t('common.close')}
       isOpen={isOpen}
       onClose={onClose}
       size="lg"
-      title={isFinnish ? 'Pohjagalleria' : 'Template gallery'}
-      description={isFinnish
-        ? 'Vaihda asettelua milloin tahansa ilman että jo syöttämäsi sisältö muuttuu.'
-        : 'Switch layouts any time without changing the CV content you already entered.'}
+      title={t('gallery.title')}
+      description={t('gallery.description')}
     >
       {atsScore ? (
         <div className="template-gallery__ats-banner">
           <span className="template-gallery__ats-score">{atsScore.score}</span>
           <p className="template-gallery__ats-copy">
-            {isFinnish
-              ? 'Nykyisen sisältösi ATS-pisteet. Pisteet perustuvat sisältöön ja ATS-tilaan, ei valittuun pohjaan — voit vaihtaa pohjaa vapaasti tämän vaikuttamatta pisteisiin.'
-              : "Your current content's ATS score. Scoring is based on content and ATS mode, not the visual template — switch freely without affecting it."}
+            {t('gallery.atsBanner')}
           </p>
         </div>
       ) : null}
@@ -103,11 +100,11 @@ function TemplateGalleryModal({
             onClose()
           }
 
-          let useLabel = isFinnish ? 'Käytä pohjaa' : 'Use template'
+          let useLabel = t('gallery.useTemplate')
           if (showsLivePreview) {
-            useLabel = isFinnish ? 'Käytössä' : 'In use'
+            useLabel = t('gallery.inUse')
           } else if (isActive) {
-            useLabel = isFinnish ? 'Käytä tyyliä' : 'Use this style'
+            useLabel = t('gallery.useStyle')
           }
 
           // The card is a container, not one big button: a <button> can't
@@ -136,7 +133,7 @@ function TemplateGalleryModal({
                   onChange={(variantId) => setPreviewedLooks((current) => ({ ...current, [template.id]: variantId }))}
                   locale={locale}
                   name={`gallery-look-${template.id}`}
-                  label={`${isFinnish ? 'Tyyli' : 'Style'}: ${template.label}`}
+                  label={t('gallery.styleLabel', { template: template.label })}
                 />
               </div>
               <button
@@ -147,7 +144,7 @@ function TemplateGalleryModal({
                 <div className="template-gallery__meta">
                   {isActive ? (
                     <span className="template-gallery__active-badge">
-                      {isFinnish ? 'Käytössä' : 'Active'}
+                      {t('gallery.active')}
                     </span>
                   ) : null}
                   <p className="template-gallery__name">{template.label}</p>
@@ -163,9 +160,9 @@ function TemplateGalleryModal({
                 href={`${templatePath(template.slug)}${styleVariantSearch(look)}`}
                 target="_blank"
                 rel="noopener"
-                aria-label={`${isFinnish ? 'Katso esimerkit' : 'View examples'}: ${template.label}`}
+                aria-label={t('gallery.viewExamplesLabel', { template: template.label })}
               >
-                {isFinnish ? 'Katso esimerkit' : 'View examples'}
+                {t('gallery.viewExamples')}
               </a>
             </div>
           )
@@ -175,12 +172,10 @@ function TemplateGalleryModal({
       {onOpenBadge ? (
         <div className="template-gallery__badge-cta">
           <p>
-            {isFinnish
-              ? 'Jaatko CV:si muualla? Nappaa "Tehty PortifyCV:llä" -tunnus omalle sivustollesi.'
-              : 'Sharing your CV elsewhere? Grab a "Made with PortifyCV" badge for your own site.'}
+            {t('gallery.badgeCta')}
           </p>
           <button type="button" className="template-gallery__badge-link" onClick={onOpenBadge}>
-            {isFinnish ? 'Hae tunnus' : 'Get the badge'}
+            {t('gallery.getBadge')}
           </button>
         </div>
       ) : null}

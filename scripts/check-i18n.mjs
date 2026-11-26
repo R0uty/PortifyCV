@@ -237,6 +237,8 @@ const ALLOWLIST = [
   { file: 'src/components/CvHeadingColorSwitcher.jsx', pattern: /^l\[locale\] \?\? (?:activePreset|preset)\.label\.en\b/, reason: "reads cvHeadingColors.js's preset label map { en, fi }" },
   { file: 'src/components/CvStyleSwitcher.jsx', pattern: /^l\[lang\]/, reason: "reads templateVariants.js's variant label map { en, fi }" },
   { file: 'src/components/StyleSwatchGroup.jsx', pattern: /^l\[lang\]/, reason: "reads templateVariants.js's variant label map { en, fi }" },
+  { file: 'src/components/SettingsModal.jsx', pattern: /^l\[locale\] \?\? swatch\.label\.en\b/, reason: "reads templateAccents.js's swatch label map { en, fi }" },
+  { file: 'src/components/TemplateFieldFilter.jsx', pattern: /^l\[lang\]/, reason: "reads templateFields.js's field label map { en, fi } (ALL_FIELDS_LABEL included)" },
   // Logic, not text, in any file: the hit's own ternary (up to its first
   // `?`, so a pattern can't reach a later branch on the line) picks a
   // locale code, a formatting locale or an address.
@@ -253,23 +255,8 @@ const ALLOWLIST = [
 const MIGRATION_PENDING = new Set([
   'src/App.jsx',
   'src/components/AppErrorBoundary.jsx',
-  'src/components/ApplicationViewModal.jsx',
-  'src/components/AtsCheckModal.jsx',
-  'src/components/ATSScorePanel.jsx',
-  'src/components/BadgeModal.jsx',
-  'src/components/CoverLetterModal.jsx',
-  'src/components/CVSuggestionsPanel.jsx',
   'src/components/GuideLayout.jsx',
-  'src/components/ImportCvModal.jsx',
   'src/components/LandingTemplatesByField.jsx',
-  'src/components/MarkAppliedModal.jsx',
-  'src/components/PdfParserView.jsx',
-  'src/components/PdfPreviewModal.jsx',
-  'src/components/pdfPreviewOptions.js',
-  'src/components/SavedCvsModal.jsx',
-  'src/components/SettingsModal.jsx',
-  'src/components/TemplateFieldFilter.jsx',
-  'src/components/TemplateGalleryModal.jsx',
   'src/pages/AboutPage.jsx',
   'src/pages/AtsFriendlyCvGuidePage.jsx',
   'src/pages/CoverLetterExamplesPage.jsx',
@@ -286,12 +273,6 @@ const MIGRATION_PENDING = new Set([
   'src/pages/PrivacyPolicyPage.jsx',
   'src/pages/SharedCvPage.jsx',
   'src/pages/TemplateDetailPage.jsx',
-  'src/utils/atsScore.js',
-  'src/utils/badge.js',
-  'src/utils/cvFeedback.js',
-  'src/utils/cvLibrary.js',
-  'src/utils/cvTextImport.js',
-  'src/utils/profilePhoto.js',
 ])
 
 const allowlistEntry = (file, hit) => ALLOWLIST.find((candidate) => (!candidate.file || candidate.file === file)
@@ -383,6 +364,50 @@ const pluralCases = [
   { ns: 'form', key: 'ideas.added', locale: 'fi', count: 1, expected: 'Lisätty. Työssä on nyt 1 saavutus.' },
   { ns: 'form', key: 'ideas.added', locale: 'en', count: 2, expected: 'Added. This job now has 2 achievements.' },
   { ns: 'form', key: 'ideas.added', locale: 'fi', count: 2, expected: 'Lisätty. Työssä on nyt 2 saavutusta.' },
+  // Task 6 (dialogs, feedback). The page summaries (PDF preview, View
+  // sent) used count === 1, and are shown only for 1+ pages; their 0 case
+  // pins the key's own output. CVSuggestionsPanel's badges used
+  // count === 1 and do show 0: exact former output. cvFeedback.js's section
+  // badges used count > 1, which for 0 gave '0 warning' / '0 tip', but a
+  // badge with 0 items is never made (createSectionBadge returns null and
+  // the warning form needs warningCount > 0); their 0 case pins the key's
+  // own output ('0 warnings' / '0 tips'). 1 and 2 are the exact former text.
+  { ns: 'dialogs', key: 'common.pageSummary', locale: 'en', count: 0, expected: '0 pages · A4', vars: { paper: 'A4' } },
+  { ns: 'dialogs', key: 'common.pageSummary', locale: 'fi', count: 0, expected: '0 sivua · A4', vars: { paper: 'A4' } },
+  { ns: 'dialogs', key: 'common.pageSummary', locale: 'en', count: 1, expected: '1 page · A4', vars: { paper: 'A4' } },
+  { ns: 'dialogs', key: 'common.pageSummary', locale: 'fi', count: 1, expected: '1 sivu · A4', vars: { paper: 'A4' } },
+  { ns: 'dialogs', key: 'common.pageSummary', locale: 'en', count: 2, expected: '2 pages · A4', vars: { paper: 'A4' } },
+  { ns: 'dialogs', key: 'common.pageSummary', locale: 'fi', count: 2, expected: '2 sivua · A4', vars: { paper: 'A4' } },
+  { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'en', count: 0, expected: '0 pages · A4 · text at 100%', vars: { paper: 'A4', scale: 100 } },
+  { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'fi', count: 0, expected: '0 sivua · A4 · tekstin koko 100 %', vars: { paper: 'A4', scale: 100 } },
+  { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'en', count: 1, expected: '1 page · A4 · text at 100%', vars: { paper: 'A4', scale: 100 } },
+  { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'fi', count: 1, expected: '1 sivu · A4 · tekstin koko 100 %', vars: { paper: 'A4', scale: 100 } },
+  { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'en', count: 2, expected: '2 pages · A4 · text at 100%', vars: { paper: 'A4', scale: 100 } },
+  { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'fi', count: 2, expected: '2 sivua · A4 · tekstin koko 100 %', vars: { paper: 'A4', scale: 100 } },
+  { ns: 'feedback', key: 'sectionBadge.warnings', locale: 'en', count: 0, expected: '0 warnings' },
+  { ns: 'feedback', key: 'sectionBadge.warnings', locale: 'fi', count: 0, expected: '0 varoitusta' },
+  { ns: 'feedback', key: 'sectionBadge.warnings', locale: 'en', count: 1, expected: '1 warning' },
+  { ns: 'feedback', key: 'sectionBadge.warnings', locale: 'fi', count: 1, expected: '1 varoitus' },
+  { ns: 'feedback', key: 'sectionBadge.warnings', locale: 'en', count: 2, expected: '2 warnings' },
+  { ns: 'feedback', key: 'sectionBadge.warnings', locale: 'fi', count: 2, expected: '2 varoitusta' },
+  { ns: 'feedback', key: 'sectionBadge.tips', locale: 'en', count: 0, expected: '0 tips' },
+  { ns: 'feedback', key: 'sectionBadge.tips', locale: 'fi', count: 0, expected: '0 vinkkiä' },
+  { ns: 'feedback', key: 'sectionBadge.tips', locale: 'en', count: 1, expected: '1 tip' },
+  { ns: 'feedback', key: 'sectionBadge.tips', locale: 'fi', count: 1, expected: '1 vinkkiä' },
+  { ns: 'feedback', key: 'sectionBadge.tips', locale: 'en', count: 2, expected: '2 tips' },
+  { ns: 'feedback', key: 'sectionBadge.tips', locale: 'fi', count: 2, expected: '2 vinkkiä' },
+  { ns: 'feedback', key: 'suggestions.warnings', locale: 'en', count: 0, expected: '0 warnings' },
+  { ns: 'feedback', key: 'suggestions.warnings', locale: 'fi', count: 0, expected: '0 varoitusta' },
+  { ns: 'feedback', key: 'suggestions.warnings', locale: 'en', count: 1, expected: '1 warning' },
+  { ns: 'feedback', key: 'suggestions.warnings', locale: 'fi', count: 1, expected: '1 varoitus' },
+  { ns: 'feedback', key: 'suggestions.warnings', locale: 'en', count: 2, expected: '2 warnings' },
+  { ns: 'feedback', key: 'suggestions.warnings', locale: 'fi', count: 2, expected: '2 varoitusta' },
+  { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'en', count: 0, expected: '0 metrics hints' },
+  { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'fi', count: 0, expected: '0 mittarivinkkiä' },
+  { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'en', count: 1, expected: '1 metrics hint' },
+  { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'fi', count: 1, expected: '1 mittarivinkki' },
+  { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'en', count: 2, expected: '2 metrics hints' },
+  { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'fi', count: 2, expected: '2 mittarivinkkiä' },
 ]
 for (const { ns: name, key, locale, count, expected, vars = {} } of pluralCases) {
   const owner = namespaces.get(name)

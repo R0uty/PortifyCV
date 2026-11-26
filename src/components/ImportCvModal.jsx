@@ -1,5 +1,6 @@
 import Modal from './Modal'
 import { getUiTheme } from '../utils/designSystem'
+import { dialogs } from '../i18n/dialogs/index.js'
 
 // Import for Direct Edit (1.6.80). Classic has the same imports in its
 // form column, which Direct Edit doesn't render, so a JSON backup made
@@ -17,60 +18,48 @@ function ImportCvModal({
   isImporting = false,
   isBusy = false,
 }) {
-  const isFinnish = locale === 'fi'
+  const t = (key, vars) => dialogs.t(locale, key, vars)
   const ui = getUiTheme()
 
   return (
-    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
+    <Modal closeLabel={t('common.close')}
       isOpen={isOpen}
       onClose={onClose}
-      title={isFinnish ? 'Tuo CV' : 'Import CV'}
-      description={isFinnish
-        ? 'Tiedosto ja teksti käsitellään selaimessasi. Mitään ei lähetetä minnekään.'
-        : 'The file and the text are read in your browser. Nothing is sent anywhere.'}
+      title={t('importCv.title')}
+      description={t('importCv.description')}
     >
       <div className="settings-row">
         <div>
-          <p className="settings-row__label">{isFinnish ? 'Lataa oma CV' : 'Upload your CV'}</p>
+          <p className="settings-row__label">{t('importCv.uploadLabel')}</p>
           <p className="settings-row__hint">
-            {isFinnish
-              ? 'PDF- tai Word-tiedosto (.docx). Korvaa nykyisen CV:n; kumoa-nuoli palauttaa sen. Tarkista tulos: palstoitettu asettelu voi siirtyä vain osittain.'
-              : 'A PDF or Word (.docx) file. It replaces the current CV; the undo arrow brings that back. Check the result: a layout with columns may import only partly.'}
+            {t('importCv.uploadHint')}
           </p>
           <p className="settings-row__hint">
-            {isFinnish
-              ? 'LinkedInistä: avaa profiilisi, valitse Lisää › Tallenna PDF-muodossa ja valitse se tiedosto tästä.'
-              : 'From LinkedIn: open your profile, choose More › Save to PDF, then pick that file here.'}
+            {t('importCv.linkedInHint')}
           </p>
         </div>
         <button type="button" className="settings-link" disabled={isBusy} onClick={onImportCvFile}>
-          {isFinnish ? 'Valitse PDF tai Word' : 'Choose PDF or Word'}
+          {t('importCv.choose')}
         </button>
       </div>
 
       <div className="settings-row">
         <div>
-          <p className="settings-row__label">{isFinnish ? 'PortifyCV:n JSON-tiedosto' : 'PortifyCV JSON file'}</p>
+          <p className="settings-row__label">{t('importCv.jsonLabel')}</p>
           <p className="settings-row__hint">
-            {isFinnish
-              ? 'Vie-valikosta tallennettu varmuuskopio. Korvaa nykyisen CV:n; kumoa-nuoli palauttaa sen.'
-              : 'A backup saved from the Export menu. It replaces the current CV; the undo arrow brings that back.'}
+            {t('importCv.jsonHint')}
           </p>
         </div>
         <button type="button" className="settings-link" disabled={isBusy} onClick={onImportJson}>
-          {isImporting
-            ? isFinnish ? 'Tuodaan JSON...' : 'Importing JSON...'
-            : isFinnish ? 'Tuo JSON' : 'Import JSON'}
+          {isImporting ? t('importCv.importingJson') : t('importCv.importJson')}
         </button>
       </div>
 
       <div className="settings-row settings-row--stacked">
         <div>
-          <p className="settings-row__label">{isFinnish ? 'Liitä CV-teksti' : 'Paste CV text'}</p>
+          <p className="settings-row__label">{t('importCv.pasteLabel')}</p>
           <p className="settings-row__hint">
-            {isFinnish
-              ? 'Liitä CV-katkelma nimen, tittelin, taitojen ja lyhyen yhteenvedon tunnistamiseksi.'
-              : 'Paste a resume snippet to detect a name, title, skills, and a short summary.'}
+            {t('importCv.pasteHint')}
           </p>
         </div>
         <textarea
@@ -78,10 +67,8 @@ function ImportCvModal({
           value={pastedCvText}
           disabled={isBusy}
           onChange={onPastedCvTextChange}
-          aria-label={isFinnish ? 'Liitetty CV-teksti' : 'Pasted CV text'}
-          placeholder={isFinnish
-            ? `Matti Meikäläinen\nSenior Product Designer\nTaidot: Figma, käyttäjätutkimus, design systemit`
-            : `John Doe\nSenior Product Designer\nSkills: Figma, User Research, Design Systems`}
+          aria-label={t('importCv.pastedAria')}
+          placeholder={t('importCv.pastePlaceholder')}
         />
         <div>
           <button
@@ -90,7 +77,7 @@ function ImportCvModal({
             disabled={isBusy || !pastedCvText.trim()}
             onClick={onPasteImport}
           >
-            {isFinnish ? 'Tuo liitetty teksti' : 'Import pasted text'}
+            {t('importCv.importPasted')}
           </button>
         </div>
       </div>

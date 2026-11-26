@@ -3,21 +3,19 @@ import Modal from './Modal'
 import { getUiTheme } from '../utils/designSystem'
 import { MAX_CV_NAME_LENGTH } from '../utils/cvLibrary'
 import { APPLICATION_STATUSES, MAX_APPLICATION_NOTE_LENGTH, formatAppliedOn } from '../utils/applicationLog'
+import { dialogs } from '../i18n/dialogs/index.js'
 
 // How long a note waits after the last key before it is stored.
 const NOTE_SAVE_DELAY_MS = 600
 
+// Keys in the dialogs namespace, by applicationLog.js's status ids.
 const STATUS_LABELS = {
-  applied: ['Applied', 'Haettu'],
-  interview: ['Interview', 'Haastattelu'],
-  offer: ['Offer', 'Tarjous'],
-  rejected: ['Rejected', 'Hylätty'],
-  'no-reply': ['No reply', 'Ei vastausta'],
+  applied: 'applications.statuses.applied',
+  interview: 'applications.statuses.interview',
+  offer: 'applications.statuses.offer',
+  rejected: 'applications.statuses.rejected',
+  'no-reply': 'applications.statuses.noReply',
 }
-
-const unavailableText = (isFinnish) => (isFinnish
-  ? 'Tämä selain ei salli tallennusta laitteelle (esimerkiksi yksityisessä ikkunassa). Vie CV JSON-tiedostona, jos haluat säilyttää sen.'
-  : 'This browser does not allow saving on the device (a private window, for example). Export the CV as JSON to keep it.')
 
 // One application. The note is the row's own until stored: after a pause in
 // typing, on blur, and when the row goes away (the dialog closing, a tab
@@ -26,7 +24,9 @@ const unavailableText = (isFinnish) => (isFinnish
 // Delete keeps the keyboard in place: the confirm step takes focus, Cancel
 // gives it back to Delete, and the list (told by `onDeleting` before the
 // delete starts) hands it to a neighbour once the row is gone.
-function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onDeleting, onView, onStartFrom }) {
+function ApplicationRow({ application, locale, onUpdate, onDelete, onDeleting, onView, onStartFrom }) {
+  const isFinnish = locale === 'fi'
+  const t = (key, vars) => dialogs.t(locale, key, vars)
   const ui = getUiTheme()
   const labelClassName = `text-xs font-bold uppercase tracking-[0.1em] ${ui.textMuted}`
   const inputClassName = `border px-3 py-2 text-sm transition ${ui.input}`
@@ -91,19 +91,19 @@ function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onDeleting
       </div>
       <div className="applications__fields">
         <label className="applications__field">
-          <span className={labelClassName}>{isFinnish ? 'Tila' : 'Status'}</span>
+          <span className={labelClassName}>{t('applications.status')}</span>
           <select
             className={inputClassName}
             value={application.status}
             onChange={(event) => onUpdate(application.id, { status: event.target.value })}
           >
             {APPLICATION_STATUSES.map((status) => (
-              <option key={status} value={status}>{STATUS_LABELS[status][isFinnish ? 1 : 0]}</option>
+              <option key={status} value={status}>{t(STATUS_LABELS[status])}</option>
             ))}
           </select>
         </label>
         <label className="applications__field applications__field--note">
-          <span className={labelClassName}>{isFinnish ? 'Muistiinpano' : 'Note'}</span>
+          <span className={labelClassName}>{t('applications.note')}</span>
           <textarea
             className={`${inputClassName} applications__note`}
             rows={2}
@@ -117,9 +117,7 @@ function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onDeleting
       {isConfirmingDelete ? (
         <div className="applications__confirm">
           <p className="settings-row__hint">
-            {isFinnish
-              ? `Poistetaanko haku yritykseen ${application.company}? Lähetetty PDF poistuu sen mukana.`
-              : `Delete the application to ${application.company}? The PDF that was sent goes with it.`}
+            {t('applications.confirmText', { company: application.company })}
           </p>
           <div className="saved-cvs__row-actions">
             <button
@@ -141,10 +139,10 @@ function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onDeleting
                 }
               }}
             >
-              {isFinnish ? 'Vahvista poisto' : 'Confirm delete'}
+              {t('common.confirmDelete')}
             </button>
             <button type="button" className="settings-link" onClick={() => setConfirming(false)}>
-              {isFinnish ? 'Peruuta' : 'Cancel'}
+              {t('common.cancel')}
             </button>
           </div>
         </div>
@@ -155,29 +153,27 @@ function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onDeleting
             type="button"
             className="settings-link"
             data-application-view
-            aria-label={isFinnish ? `Näytä lähetetty: ${application.company}` : `View sent to ${application.company}`}
+            aria-label={t('applications.viewSentLabel', { company: application.company })}
             onClick={() => onView(application.id)}
           >
-            {isFinnish ? 'Näytä lähetetty' : 'View sent'}
+            {t('applications.viewSent')}
           </button>
           <button
             type="button"
             className="settings-link"
-            aria-label={isFinnish
-              ? `Aloita uusi CV hausta: ${application.company}`
-              : `Start new CV from the application to ${application.company}`}
+            aria-label={t('applications.startFromLabel', { company: application.company })}
             onClick={() => onStartFrom(application.id)}
           >
-            {isFinnish ? 'Aloita uusi CV tästä' : 'Start new CV from it'}
+            {t('common.startNewCvFromIt')}
           </button>
           <button
             ref={deleteButtonRef}
             type="button"
             className="settings-link saved-cvs__delete"
-            aria-label={isFinnish ? `Poista haku: ${application.company}` : `Delete the application to ${application.company}`}
+            aria-label={t('applications.deleteLabel', { company: application.company })}
             onClick={() => setConfirming(true)}
           >
-            {isFinnish ? 'Poista' : 'Delete'}
+            {t('common.delete')}
           </button>
         </div>
       )}
@@ -185,7 +181,7 @@ function ApplicationRow({ application, isFinnish, onUpdate, onDelete, onDeleting
   )
 }
 
-function ApplicationsList({ isFinnish, isAvailable, applications, tabId, ...handlers }) {
+function ApplicationsList({ locale, isAvailable, applications, tabId, ...handlers }) {
   const listRef = useRef(null)
   // A delete under way: the row going, and the id of the row whose View
   // sent takes focus once it has gone (null: the tab).
@@ -216,16 +212,14 @@ function ApplicationsList({ isFinnish, isAvailable, applications, tabId, ...hand
 
   if (!isAvailable) {
     return (
-      <p className="settings-row__hint saved-cvs__empty" role="alert">{unavailableText(isFinnish)}</p>
+      <p className="settings-row__hint saved-cvs__empty" role="alert">{dialogs.t(locale, 'common.storageUnavailable')}</p>
     )
   }
 
   if (applications.length === 0) {
     return (
       <p className="settings-row__hint saved-cvs__empty">
-        {isFinnish
-          ? 'Merkitse CV haetuksi valikosta, niin lähettämäsi PDF säilyy täällä.'
-          : 'Mark a CV as applied from the menu to keep the PDF you sent here.'}
+        {dialogs.t(locale, 'applications.empty')}
       </p>
     )
   }
@@ -236,7 +230,7 @@ function ApplicationsList({ isFinnish, isAvailable, applications, tabId, ...hand
         <ApplicationRow
           key={application.id}
           application={application}
-          isFinnish={isFinnish}
+          locale={locale}
           onDeleting={handleDeleting}
           {...handlers}
         />
@@ -278,6 +272,7 @@ function SavedCvsView({
   onStartFromApplication,
 }) {
   const isFinnish = locale === 'fi'
+  const t = (key, vars) => dialogs.t(locale, key, vars)
   const ui = getUiTheme()
   const [name, setName] = useState(suggestedName)
   const [renaming, setRenaming] = useState(null)
@@ -309,13 +304,11 @@ function SavedCvsView({
     run(action)
   }
 
-  const storageNote = isFinnish
-    ? 'Tallennetaan vain tähän selaimeen, ei minnekään muualle. Sivuston tietojen tyhjentäminen poistaa ne; vie JSON, jos haluat varmuuskopion.'
-    : 'Saved in this browser only, nowhere else. Clearing site data removes them; export JSON if you want a backup.'
+  const storageNote = t('savedCvs.storageNote')
 
   const tabs = [
-    ['list', isFinnish ? 'Omat CV:t' : 'My CVs'],
-    ['applications', isFinnish ? `Haut (${applications.length})` : `Applications (${applications.length})`],
+    ['list', t('savedCvs.title')],
+    ['applications', t('savedCvs.applicationsTab', { count: applications.length })],
   ]
   const activeTab = view === 'applications' ? 'applications' : 'list'
   const selectTab = (next) => {
@@ -326,10 +319,10 @@ function SavedCvsView({
 
   if (view === 'save') {
     return (
-      <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
+      <Modal closeLabel={t('common.close')}
         isOpen={isOpen}
         onClose={onClose}
-        title={isFinnish ? 'Tallenna tälle laitteelle' : 'Save on this device'}
+        title={t('savedCvs.saveTitle')}
         description={storageNote}
       >
         {isAvailable ? (
@@ -341,16 +334,12 @@ function SavedCvsView({
             }}
           >
             <label className="settings-row__label" htmlFor="saved-cv-name">
-              {isFinnish ? 'CV:n nimi' : 'Name for this CV'}
+              {t('savedCvs.nameLabel')}
             </label>
             <p className="settings-row__hint">
               {activeCv
-                ? isFinnish
-                  ? `Tallentaa uuden kopion, ja muutokset tallentuvat siihen itsestään. "${activeCv.name}" pysyy sellaisena kuin se tallennettiin.`
-                  : `Saves a new copy, and your edits save to it by themselves. "${activeCv.name}" stays as it was saved.`
-                : isFinnish
-                  ? 'Vain sinulle, esim. työpaikan tai yrityksen mukaan. Tämän jälkeen muutokset tallentuvat itsestään.'
-                  : 'Only for you, e.g. the job or the company. After this, your edits to it save themselves.'}
+                ? t('savedCvs.saveHintCopy', { name: activeCv.name })
+                : t('savedCvs.saveHintNew')}
             </p>
             <input
               id="saved-cv-name"
@@ -363,30 +352,30 @@ function SavedCvsView({
             />
             <div className="saved-cvs__actions">
               <button type="submit" className={`ui-button ${ui.button}`} disabled={isWorking || !name.trim()}>
-                {isFinnish ? 'Tallenna' : 'Save'}
+                {t('common.save')}
               </button>
               {savedCvs.length > 0 ? (
                 <button type="button" className="settings-link" onClick={() => onViewChange('list')}>
-                  {isFinnish ? `Omat CV:t (${savedCvs.length})` : `My CVs (${savedCvs.length})`}
+                  {t('savedCvs.titleCount', { count: savedCvs.length })}
                 </button>
               ) : null}
             </div>
           </form>
         ) : (
-          <p className="settings-row__hint" role="alert">{unavailableText(isFinnish)}</p>
+          <p className="settings-row__hint" role="alert">{t('common.storageUnavailable')}</p>
         )}
       </Modal>
     )
   }
 
   return (
-    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
+    <Modal closeLabel={t('common.close')}
       isOpen={isOpen}
       onClose={onClose}
-      title={isFinnish ? 'Omat CV:t' : 'My CVs'}
+      title={t('savedCvs.title')}
       description={storageNote}
     >
-      <div className="pdf-preview__tabs saved-cvs__tabs" role="tablist" aria-label={isFinnish ? 'Näkymä' : 'View'}>
+      <div className="pdf-preview__tabs saved-cvs__tabs" role="tablist" aria-label={t('common.view')}>
         {tabs.map(([value, label], index) => (
           <button
             key={value}
@@ -415,7 +404,7 @@ function SavedCvsView({
       <div role="tabpanel" id={`${tabsId}-panel`} aria-labelledby={`${tabsId}-${activeTab}-tab`}>
       {activeTab === 'applications' ? (
         <ApplicationsList
-          isFinnish={isFinnish}
+          locale={locale}
           isAvailable={isApplicationLogAvailable}
           applications={applications}
           tabId={`${tabsId}-applications-tab`}
@@ -429,7 +418,7 @@ function SavedCvsView({
       <div className="saved-cvs__actions saved-cvs__actions--top">
         {!activeCv && isAvailable ? (
           <button type="button" className={`ui-button ${ui.button}`} onClick={() => onViewChange('save')}>
-            {isFinnish ? 'Tallenna nykyinen CV' : 'Save the current CV'}
+            {t('savedCvs.saveCurrent')}
           </button>
         ) : null}
         <button
@@ -438,15 +427,13 @@ function SavedCvsView({
           disabled={isWorking}
           onClick={() => confirmThen('new', hasUnsavedChanges, onNewCv)}
         >
-          {armed === 'new'
-            ? isFinnish ? 'Hylkää muutokset ja aloita uusi' : 'Discard changes and start new'
-            : isFinnish ? 'Uusi CV' : 'New CV'}
+          {armed === 'new' ? t('savedCvs.discardAndNew') : t('savedCvs.newCv')}
         </button>
       </div>
 
       {savedCvs.length === 0 ? (
         <p className="settings-row__hint saved-cvs__empty">
-          {isFinnish ? 'Et ole vielä tallentanut yhtään CV:tä tälle laitteelle.' : 'You have not saved a CV on this device yet.'}
+          {t('savedCvs.empty')}
         </p>
       ) : (
         <ul className="saved-cvs__list">
@@ -473,16 +460,16 @@ function SavedCvsView({
                       value={renaming.name}
                       maxLength={MAX_CV_NAME_LENGTH}
                       autoComplete="off"
-                      aria-label={isFinnish ? `Uusi nimi: ${cv.name}` : `New name for ${cv.name}`}
+                      aria-label={t('savedCvs.renameLabel', { name: cv.name })}
                       // The visitor just pressed Rename on this row.
                       autoFocus
                       onChange={(event) => setRenaming({ id: cv.id, name: event.target.value })}
                     />
                     <button type="submit" className="settings-link" disabled={isWorking || !renaming.name.trim()}>
-                      {isFinnish ? 'Tallenna nimi' : 'Save name'}
+                      {t('savedCvs.saveName')}
                     </button>
                     <button type="button" className="settings-link" onClick={() => setRenaming(null)}>
-                      {isFinnish ? 'Peruuta' : 'Cancel'}
+                      {t('common.cancel')}
                     </button>
                   </form>
                 ) : (
@@ -490,10 +477,10 @@ function SavedCvsView({
                     <div className="saved-cvs__text">
                       <p className="settings-row__label">
                         {cv.name}
-                        {isActive ? <span className="saved-cvs__badge">{isFinnish ? 'Auki nyt' : 'Open now'}</span> : null}
+                        {isActive ? <span className="saved-cvs__badge">{t('savedCvs.openNow')}</span> : null}
                       </p>
                       <p className="settings-row__hint">
-                        {[templateLabels[cv.templateId], `${isFinnish ? 'muokattu' : 'edited'} ${formatDate(cv.updatedAt)}`]
+                        {[templateLabels[cv.templateId], t('savedCvs.edited', { date: formatDate(cv.updatedAt) })]
                           .filter(Boolean)
                           .join(' · ')}
                       </p>
@@ -507,8 +494,8 @@ function SavedCvsView({
                           onClick={() => confirmThen(`open:${cv.id}`, hasUnsavedChanges, () => onOpen(cv.id))}
                         >
                           {armed === `open:${cv.id}`
-                            ? isFinnish ? 'Hylkää muutokset ja avaa' : 'Discard changes and open'
-                            : isFinnish ? 'Avaa' : 'Open'}
+                            ? t('savedCvs.discardAndOpen')
+                            : t('savedCvs.open')}
                         </button>
                       )}
                       <button
@@ -518,8 +505,8 @@ function SavedCvsView({
                         onClick={() => confirmThen(`duplicate:${cv.id}`, hasUnsavedChanges && !isActive, () => onDuplicate(cv.id))}
                       >
                         {armed === `duplicate:${cv.id}`
-                          ? isFinnish ? 'Hylkää muutokset ja monista' : 'Discard changes and duplicate'
-                          : isFinnish ? 'Monista' : 'Duplicate'}
+                          ? t('savedCvs.discardAndDuplicate')
+                          : t('savedCvs.duplicate')}
                       </button>
                       <button
                         type="button"
@@ -527,7 +514,7 @@ function SavedCvsView({
                         disabled={isWorking}
                         onClick={() => setRenaming({ id: cv.id, name: cv.name })}
                       >
-                        {isFinnish ? 'Nimeä uudelleen' : 'Rename'}
+                        {t('savedCvs.rename')}
                       </button>
                       <button
                         type="button"
@@ -536,8 +523,8 @@ function SavedCvsView({
                         onClick={() => confirmThen(`delete:${cv.id}`, true, () => onDelete(cv.id))}
                       >
                         {armed === `delete:${cv.id}`
-                          ? isFinnish ? 'Vahvista poisto' : 'Confirm delete'
-                          : isFinnish ? 'Poista' : 'Delete'}
+                          ? t('common.confirmDelete')
+                          : t('common.delete')}
                       </button>
                     </div>
                   </>

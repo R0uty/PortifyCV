@@ -5,6 +5,19 @@
 // 480px, a JPEG re-encode and a post-encode 450KB ceiling, and a second
 // copy would drift until one surface accepted images the other rejects.
 
+import { dialogs } from '../i18n/dialogs/index.js'
+
+// The upload's errors are thrown in English (the Error's message) and
+// shown through localizePhotoErrorMessage.
+const PHOTO_ERROR_KEYS = [
+  'photoErrors.readFailed',
+  'photoErrors.processFailed',
+  'photoErrors.invalid',
+  'photoErrors.tooBig',
+  'photoErrors.tooLarge',
+]
+const photoError = (key) => new Error(dialogs.t('en', key))
+
 export const MAX_PROFILE_PHOTO_SIZE_BYTES = 2 * 1024 * 1024
 export const MAX_PROFILE_PHOTO_EDGE_PX = 480
 export const MAX_PROFILE_PHOTO_DATA_URL_LENGTH = 450_000
@@ -13,7 +26,7 @@ function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(String(reader.result ?? ''))
-    reader.onerror = () => reject(new Error('Could not read the selected image file.'))
+    reader.onerror = () => reject(photoError('photoErrors.readFailed'))
     reader.readAsDataURL(file)
   })
 }
@@ -22,18 +35,18 @@ function loadImageElement(dataUrl) {
   return new Promise((resolve, reject) => {
     const image = new Image()
     image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error('Could not process the selected image file.'))
+    image.onerror = () => reject(photoError('photoErrors.processFailed'))
     image.src = dataUrl
   })
 }
 
 export async function buildProfilePhotoDataUrl(file) {
   if (!file || !file.type.startsWith('image/')) {
-    throw new Error('Select a valid image file.')
+    throw photoError('photoErrors.invalid')
   }
 
   if (file.size > MAX_PROFILE_PHOTO_SIZE_BYTES) {
-    throw new Error('Image must be 2MB or smaller.')
+    throw photoError('photoErrors.tooBig')
   }
 
   const sourceDataUrl = await readFileAsDataUrl(file)
@@ -46,7 +59,7 @@ export async function buildProfilePhotoDataUrl(file) {
   const context = canvas.getContext('2d')
 
   if (!context) {
-    throw new Error('Could not process the selected image file.')
+    throw photoError('photoErrors.processFailed')
   }
 
   canvas.width = width
@@ -56,24 +69,16 @@ export async function buildProfilePhotoDataUrl(file) {
   const normalizedDataUrl = canvas.toDataURL('image/jpeg', 0.86)
 
   if (normalizedDataUrl.length > MAX_PROFILE_PHOTO_DATA_URL_LENGTH) {
-    throw new Error('Image is too large after processing. Try a smaller image.')
+    throw photoError('photoErrors.tooLarge')
   }
 
   return normalizedDataUrl
 }
 
+// In English (or any other locale, which falls back to it) the key's text
+// is the message itself, so it comes back unchanged.
 export function localizePhotoErrorMessage(message, locale = 'en') {
-  if (locale !== 'fi') {
-    return message
-  }
+  const key = PHOTO_ERROR_KEYS.find((candidate) => dialogs.t('en', candidate) === message)
 
-  const map = {
-    'Could not read the selected image file.': 'Valittua kuvatiedostoa ei voitu lukea.',
-    'Could not process the selected image file.': 'Valittua kuvatiedostoa ei voitu käsitellä.',
-    'Select a valid image file.': 'Valitse kelvollinen kuvatiedosto.',
-    'Image must be 2MB or smaller.': 'Kuvan on oltava enintään 2 Mt.',
-    'Image is too large after processing. Try a smaller image.': 'Kuva on käsittelyn jälkeen liian suuri. Kokeile pienempää kuvaa.',
-  }
-
-  return map[message] ?? message
+  return key ? dialogs.t(locale, key) : message
 }

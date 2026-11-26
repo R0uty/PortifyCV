@@ -4,6 +4,7 @@ import { Download, FilePlus2, LoaderCircle } from 'lucide-react'
 import Modal from './Modal'
 import { PAPER_OPTIONS } from './pdfPreviewOptions'
 import { formatAppliedOn } from '../utils/applicationLog'
+import { dialogs } from '../i18n/dialogs/index.js'
 
 // View sent (1.7.11): the PDF an application keeps, exactly as it was
 // sent. It shows the page images stored with it and downloads the stored
@@ -30,9 +31,9 @@ const PAGE_INSET_MM = {
 const isWebAddress = (value) => /^https?:\/\//i.test(String(value ?? ''))
 
 // One stored page. The image's object URL lives as long as the page does.
-function StoredPage({ image, paper, inset, index, total, isFinnish }) {
+function StoredPage({ image, paper, inset, index, total, locale }) {
   const imageRef = useRef(null)
-  const label = isFinnish ? `Sivu ${index + 1} / ${total}` : `Page ${index + 1} of ${total}`
+  const label = dialogs.t(locale, 'common.pageOf', { page: index + 1, total })
 
   useEffect(() => {
     const url = URL.createObjectURL(image)
@@ -65,6 +66,7 @@ function StoredPage({ image, paper, inset, index, total, isFinnish }) {
 
 function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewCv }) {
   const isFinnish = locale === 'fi'
+  const t = (key, vars) => dialogs.t(locale, key, vars)
   const tabsId = useId()
   // 'cv' or 'letter'; the switch shows only when a letter is stored.
   const [documentKind, setDocumentKind] = useState('cv')
@@ -81,7 +83,9 @@ function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewC
   const inset = kind === 'letter'
     ? PAGE_INSET_MM.letter
     : application.source?.look?.atsFriendlyMode ? PAGE_INSET_MM.ats : PAGE_INSET_MM.designer
-  const paperLabel = PAPER_OPTIONS.find((option) => option.value === file?.paper)?.en ?? 'A4'
+  const paperOption = PAPER_OPTIONS.find((option) => option.value === file?.paper)
+  // The paper's English name, as before (A4 and US Letter read the same in both).
+  const paperLabel = paperOption ? dialogs.t('en', paperOption.label) : 'A4'
   const adUrl = String(application.adUrl ?? '').trim()
 
   const handleDownload = async () => {
@@ -103,22 +107,22 @@ function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewC
 
   const tabs = [
     ['cv', 'CV'],
-    ['letter', isFinnish ? 'Hakemuskirje' : 'Cover letter'],
+    ['letter', t('common.coverLetter')],
   ]
 
   return (
-    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
+    <Modal closeLabel={t('common.close')}
       isOpen
       onClose={onClose}
       size="xl"
-      title={isFinnish ? `Lähetetty: ${application.company}` : `Sent to ${application.company}`}
+      title={t('applicationView.title', { company: application.company })}
       description={`${application.role} · ${formatAppliedOn(application.appliedOn, isFinnish)}`}
     >
       <div className="pdf-preview">
         <div className="pdf-preview__controls">
           {adUrl ? (
             <p className="application-view__ad">
-              <span className="pdf-preview__legend">{isFinnish ? 'Työpaikkailmoitus' : 'Job ad'}</span>
+              <span className="pdf-preview__legend">{t('applicationView.jobAd')}</span>
               {isWebAddress(adUrl) ? (
                 <a href={adUrl} target="_blank" rel="noopener noreferrer" className="settings-link application-view__ad-value">
                   {adUrl}
@@ -130,11 +134,7 @@ function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewC
           ) : null}
 
           <div className="pdf-preview__summary">
-            {pages.length > 0
-              ? isFinnish
-                ? `${pages.length} ${pages.length === 1 ? 'sivu' : 'sivua'} · ${paperLabel}`
-                : `${pages.length} ${pages.length === 1 ? 'page' : 'pages'} · ${paperLabel}`
-              : ''}
+            {pages.length > 0 ? t('common.pageSummary', { count: pages.length, paper: paperLabel }) : ''}
           </div>
 
           <div className="pdf-preview__actions">
@@ -144,7 +144,7 @@ function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewC
               onClick={() => onStartNewCv(application.id)}
             >
               <FilePlus2 size={15} strokeWidth={2} aria-hidden="true" />
-              {isFinnish ? 'Aloita uusi CV tästä' : 'Start new CV from it'}
+              {t('common.startNewCvFromIt')}
             </button>
             <button
               type="button"
@@ -155,20 +155,20 @@ function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewC
               {isDownloading
                 ? <LoaderCircle size={15} strokeWidth={2} className="pdf-preview__spinner" aria-hidden="true" />
                 : <Download size={15} strokeWidth={2} aria-hidden="true" />}
-              {isFinnish ? 'Lataa PDF' : 'Download PDF'}
+              {t('common.downloadPdf')}
             </button>
           </div>
 
           {downloadFailed ? (
             <p className="mark-applied__error text-sm" role="alert">
-              {isFinnish ? 'PDF:ää ei voitu ladata. Yritä uudelleen.' : 'The PDF couldn\'t be downloaded. Try again.'}
+              {t('applicationView.downloadFailed')}
             </p>
           ) : null}
         </div>
 
         <div className="pdf-preview__main">
           {hasLetter ? (
-            <div className="pdf-preview__tabs" role="tablist" aria-label={isFinnish ? 'Tiedosto' : 'File'}>
+            <div className="pdf-preview__tabs" role="tablist" aria-label={t('applicationView.file')}>
               {tabs.map(([value, label]) => (
                 <button
                   key={value}
@@ -210,15 +210,13 @@ function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewC
                     inset={inset}
                     index={index}
                     total={pages.length}
-                    isFinnish={isFinnish}
+                    locale={locale}
                   />
                 ))}
               </div>
             ) : (
               <p className="pdf-preview__message">
-                {isFinnish
-                  ? 'Tästä PDF:stä ei ole kuvaa. Lataa se nähdäksesi sen.'
-                  : 'There\'s no picture of this PDF. Download it to see it.'}
+                {t('applicationView.noPicture')}
               </p>
             )}
           </div>

@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import Modal from './Modal'
 import { getUiTheme } from '../utils/designSystem'
 import { useCvTextProps } from './cvLanguageContext'
+import { dialogs } from '../i18n/dialogs/index.js'
 
 function CoverLetterModal({
   isOpen,
@@ -24,31 +25,29 @@ function CoverLetterModal({
   onDownloadPdf,
 }) {
   const ui = useMemo(() => getUiTheme(), [])
-  const isFinnish = locale === 'fi'
+  const t = (key, vars) => dialogs.t(locale, key, vars)
   const textProps = useCvTextProps()
   const companyProps = useCvTextProps({ field: 'company' })
   const managerProps = useCvTextProps({ field: 'organization' })
   const hasBody = letterBody.trim().length > 0
 
   return (
-    <Modal closeLabel={isFinnish ? 'Sulje' : 'Close'}
+    <Modal closeLabel={t('common.close')}
       isOpen={isOpen}
       onClose={onClose}
       size="lg"
-      title={isFinnish ? 'Hakemuskirje' : 'Cover letter'}
-      description={isFinnish
-        ? 'Luo hakemuskirjeen luonnos CV:si tiedoista. Kaikki pysyy selaimessasi, aivan kuten muukin sovellus.'
-        : 'Draft a cover letter from your CV data. Everything stays in your browser, same as the rest of the app.'}
+      title={t('common.coverLetter')}
+      description={t('coverLetter.description')}
     >
       {hasJobAd ? (
         <p className={`mb-3 text-xs ${ui.textMuted}`}>
-          {isFinnish ? 'Käytössä ATS-tarkistuksen työpaikkailmoitus.' : 'Using the job ad from the ATS check.'}
+          {t('coverLetter.usingJobAd')}
         </p>
       ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
           <span className={`text-xs font-bold uppercase tracking-[0.1em] ${ui.textMuted}`}>
-            {isFinnish ? 'Yritys' : 'Company'}
+            {t('common.company')}
           </span>
           <input
             type="text"
@@ -56,13 +55,13 @@ function CoverLetterModal({
             {...companyProps}
             value={companyName}
             onChange={(event) => onCompanyNameChange(event.target.value)}
-            placeholder={isFinnish ? 'esim. Acme Oy' : 'e.g. Acme Inc'}
+            placeholder={t('coverLetter.companyPlaceholder')}
           />
         </label>
 
         <label className="flex flex-col gap-1">
           <span className={`text-xs font-bold uppercase tracking-[0.1em] ${ui.textMuted}`}>
-            {isFinnish ? 'Haettava tehtävä' : 'Role you\'re applying for'}
+            {t('coverLetter.role')}
           </span>
           <input
             type="text"
@@ -70,13 +69,13 @@ function CoverLetterModal({
             {...textProps}
             value={roleTitle}
             onChange={(event) => onRoleTitleChange(event.target.value)}
-            placeholder={isFinnish ? 'Oletuksena CV:n ammattinimike' : 'Defaults to your CV title'}
+            placeholder={t('coverLetter.rolePlaceholder')}
           />
         </label>
 
         <label className="flex flex-col gap-1 sm:col-span-2">
           <span className={`text-xs font-bold uppercase tracking-[0.1em] ${ui.textMuted}`}>
-            {isFinnish ? 'Rekrytoijan nimi (valinnainen)' : 'Hiring manager name (optional)'}
+            {t('coverLetter.manager')}
           </span>
           <input
             type="text"
@@ -84,7 +83,7 @@ function CoverLetterModal({
             {...managerProps}
             value={hiringManagerName}
             onChange={(event) => onHiringManagerNameChange(event.target.value)}
-            placeholder={isFinnish ? 'esim. Jane Doe' : 'e.g. Jane Doe'}
+            placeholder={t('coverLetter.managerPlaceholder')}
           />
         </label>
       </div>
@@ -95,30 +94,24 @@ function CoverLetterModal({
         onClick={onGenerate}
         disabled={!fullName.trim()}
       >
-        {hasBody
-          ? isFinnish ? 'Luo luonnos uudelleen' : 'Regenerate draft'
-          : isFinnish ? 'Luo luonnos' : 'Generate draft'}
+        {hasBody ? t('coverLetter.regenerate') : t('coverLetter.generate')}
       </button>
       {!fullName.trim() ? (
         <p className={`mt-2 text-xs ${ui.textMuted}`}>
-          {isFinnish
-            ? 'Lisää koko nimesi Henkilötiedot-osioon ennen luonnoksen luomista.'
-            : 'Add your full name in Personal Information before generating a draft.'}
+          {t('coverLetter.needName')}
         </p>
       ) : null}
 
       <label className="mt-4 flex flex-col gap-1">
         <span className={`text-xs font-bold uppercase tracking-[0.1em] ${ui.textMuted}`}>
-          {isFinnish ? 'Luonnos (muokattavissa)' : 'Draft (editable)'}
+          {t('coverLetter.draft')}
         </span>
         <textarea
           className={`min-h-72 w-full border px-4 py-3 text-sm leading-6 transition ${ui.input}`}
           {...textProps}
           value={letterBody}
           onChange={(event) => onLetterBodyChange(event.target.value)}
-          placeholder={isFinnish
-            ? 'Paina "Luo luonnos" aloittaaksesi, tai kirjoita oma kirjeesi tähän.'
-            : 'Press "Generate draft" to start, or write your own letter here.'}
+          placeholder={t('coverLetter.draftPlaceholder')}
         />
       </label>
 
@@ -129,7 +122,7 @@ function CoverLetterModal({
           onClick={onCopy}
           disabled={!hasBody}
         >
-          {isFinnish ? 'Kopioi leikepöydälle' : 'Copy to clipboard'}
+          {t('coverLetter.copy')}
         </button>
         <button
           type="button"
@@ -137,7 +130,7 @@ function CoverLetterModal({
           onClick={onDownloadText}
           disabled={!hasBody}
         >
-          {isFinnish ? 'Lataa .txt' : 'Download .txt'}
+          {t('coverLetter.downloadText')}
         </button>
         <button
           type="button"
@@ -145,7 +138,7 @@ function CoverLetterModal({
           onClick={onDownloadPdf}
           disabled={!hasBody}
         >
-          {isFinnish ? 'Lataa PDF' : 'Download PDF'}
+          {t('common.downloadPdf')}
         </button>
       </div>
     </Modal>

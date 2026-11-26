@@ -6,6 +6,7 @@ import {
   createInitialCvData,
   parseImportedCvData,
 } from './cvForm'
+import { feedback } from '../i18n/feedback/index.js'
 
 // Turns the text lines of someone's existing CV (read out of a PDF or Word
 // file by cvFileText.js) into CV data. Rule-based on purpose: it runs in the
@@ -583,9 +584,7 @@ function parseTopBlock(lines, contact, hasHeadings, { loneLocation = false } = {
  * @returns {{ data: CvData, summary: { hasName: boolean, experience: number, education: number, skills: number, languages: number } }}
  */
 export function parseCvText(lines, options = {}) {
-  const nothingFound = options.locale === 'fi'
-    ? 'CV:stä ei löytynyt tunnistettavia tietoja.'
-    : 'Could not find any CV details in this file.'
+  const nothingFound = feedback.t(options.locale, 'import.nothingFound')
 
   const cleaned = (Array.isArray(lines) ? lines : [])
     .map((line) => (line === COLUMN_BREAK ? line : typeof line === 'string' ? squashKeepingGaps(line) : ''))

@@ -1,5 +1,6 @@
 // @ts-check
 import { createCvSnapshot } from './cvSnapshot'
+import { feedback } from '../i18n/feedback/index.js'
 
 /** @typedef {import('../types/cv').CvData} CvData */
 
@@ -126,12 +127,8 @@ function createSectionBadge(items, locale = 'en') {
   return {
     label:
       warningCount > 0
-        ? locale === 'fi'
-          ? `${warningCount} varoitus${warningCount > 1 ? 'ta' : ''}`
-          : `${warningCount} warning${warningCount > 1 ? 's' : ''}`
-        : locale === 'fi'
-          ? `${items.length} vinkkiä`
-          : `${items.length} tip${items.length > 1 ? 's' : ''}`,
+        ? feedback.t(locale, 'sectionBadge.warnings', { count: warningCount })
+        : feedback.t(locale, 'sectionBadge.tips', { count: items.length }),
     tone: warningCount > 0 ? 'warning' : 'tip',
   }
 }
@@ -142,7 +139,7 @@ function createSectionBadge(items, locale = 'en') {
  */
 export function evaluateCvFeedback(formData, options = {}) {
   const locale = options.locale === 'fi' ? 'fi' : 'en'
-  const isFinnish = locale === 'fi'
+  const t = (key, vars) => feedback.t(locale, key, vars)
   const snapshot = createCvSnapshot(formData)
   const profileItems = []
   const skillsItems = []
@@ -156,10 +153,8 @@ export function evaluateCvFeedback(formData, options = {}) {
         id: 'about-missing',
         type: 'tip',
         section: 'profile',
-        title: isFinnish ? 'Lisää vahvempi yhteenveto' : 'Add a stronger summary',
-        message: isFinnish
-          ? 'Kirjoita 2-3 riviä vahvuuksistasi, painotuksestasi ja tuottamastasi arvosta.'
-          : 'Write 2-3 lines about your strengths, focus, and the kind of value you deliver.',
+        title: t('tips.aboutMissingTitle'),
+        message: t('tips.aboutMissing'),
       }),
     )
   }
@@ -170,10 +165,8 @@ export function evaluateCvFeedback(formData, options = {}) {
         id: 'about-too-long',
         type: 'warning',
         section: 'profile',
-        title: isFinnish ? 'Tiivistä yhteenvetoa' : 'Tighten your summary',
-        message: isFinnish
-          ? 'Pidä esittelyosio tiiviinä, jotta rekrytoija pystyy silmäilemään sen nopeasti.'
-          : 'Keep the About section concise so recruiters can scan it quickly.',
+        title: t('tips.aboutTooLongTitle'),
+        message: t('tips.aboutTooLong'),
       }),
     )
   }
@@ -184,10 +177,8 @@ export function evaluateCvFeedback(formData, options = {}) {
         id: 'about-metrics',
         type: 'tip',
         section: 'profile',
-        title: isFinnish ? 'Lisää mitattava tulos' : 'Add a quantified outcome',
-        message: isFinnish
-          ? 'Mainitse esimerkiksi kasvu, säästetty aika tai konversioparannus vahvistaaksesi yhteenvetoa.'
-          : 'Mention a result such as growth, time saved, or conversion lift to make the summary stronger.',
+        title: t('tips.aboutMetricsTitle'),
+        message: t('tips.aboutMetrics'),
         category: 'metrics',
       }),
     )
@@ -199,10 +190,8 @@ export function evaluateCvFeedback(formData, options = {}) {
         id: 'skills-missing',
         type: 'warning',
         section: 'skills',
-        title: isFinnish ? 'Lisää ydintaidot' : 'Add core skills',
-        message: isFinnish
-          ? 'CV tarvitsee näkyvän taito-osion, jotta rekrytointi voi kohdistaa sinut rooleihin nopeammin.'
-          : 'Your CV needs a visible skills section so hiring teams can match you to roles faster.',
+        title: t('tips.skillsMissingTitle'),
+        message: t('tips.skillsMissing'),
       }),
     )
   } else if (snapshot.skills.length < MIN_SKILL_COUNT) {
@@ -211,10 +200,8 @@ export function evaluateCvFeedback(formData, options = {}) {
         id: 'skills-thin',
         type: 'warning',
         section: 'skills',
-        title: isFinnish ? 'Laajenna taitolistaa' : 'Expand your skills list',
-        message: isFinnish
-          ? `Pyri vähintään ${MIN_SKILL_COUNT} relevanttiin taitoon osaamisen laajuuden ja avainsanojen kattavuuden parantamiseksi.`
-          : `Aim for at least ${MIN_SKILL_COUNT} relevant skills to show range and improve keyword coverage.`,
+        title: t('tips.skillsThinTitle'),
+        message: t('tips.skillsThin', { min: MIN_SKILL_COUNT }),
       }),
     )
   }
@@ -225,10 +212,8 @@ export function evaluateCvFeedback(formData, options = {}) {
         id: 'experience-empty',
         type: 'warning',
         section: 'experience',
-        title: isFinnish ? 'Lisää työkokemusta' : 'Add work experience',
-        message: isFinnish
-          ? 'Jo yksi vahva rooli tuloskeskeisellä kuvauksella tekee CV:stä uskottavamman.'
-          : 'Even one strong role with a result-focused description makes the CV more credible.',
+        title: t('tips.experienceEmptyTitle'),
+        message: t('tips.experienceEmpty'),
       }),
     )
   }
@@ -254,10 +239,8 @@ export function evaluateCvFeedback(formData, options = {}) {
           id: `experience-description-${index}`,
           type: 'warning',
           section: 'experience',
-          title: isFinnish ? `Lisää vaikutus rooliin ${index + 1}` : `Add impact for role ${index + 1}`,
-          message: isFinnish
-            ? 'Kuvaa mitä toimitit, paransit tai omistit, jotta rooli näkyy aidosti kokemuksena.'
-            : 'Describe what you shipped, improved, or owned so this role reads as real experience.',
+          title: t('tips.descriptionTitle', { number: index + 1 }),
+          message: t('tips.description'),
         }),
       )
 
@@ -270,10 +253,8 @@ export function evaluateCvFeedback(formData, options = {}) {
           id: `experience-too-long-${index}`,
           type: 'warning',
           section: 'experience',
-          title: isFinnish ? `Tiivistä kokemus ${index + 1}` : `Trim experience ${index + 1}`,
-          message: isFinnish
-            ? 'Lyhyet saavutuksia kuvaavat lauseet ovat helpommin silmäiltäviä kuin pitkät kappaleet.'
-            : 'Shorter accomplishment statements are easier to scan than long paragraphs.',
+          title: t('tips.tooLongTitle', { number: index + 1 }),
+          message: t('tips.tooLong'),
         }),
       )
     }
@@ -284,10 +265,8 @@ export function evaluateCvFeedback(formData, options = {}) {
           id: `experience-metrics-${index}`,
           type: 'tip',
           section: 'experience',
-          title: isFinnish ? `Lisää lukuja kokemukseen ${index + 1}` : `Add numbers to experience ${index + 1}`,
-          message: isFinnish
-            ? 'Lisää mittari, kuten käyttöönotto, liikevaihto, säästetty aika tai kasvu, osoittamaan mitattava vaikutus.'
-            : 'Include a metric like adoption, revenue, time saved, or growth to show measurable impact.',
+          title: t('tips.metricsTitle', { number: index + 1 }),
+          message: t('tips.metrics'),
           category: 'metrics',
         }),
       )
@@ -302,10 +281,8 @@ export function evaluateCvFeedback(formData, options = {}) {
           id: `experience-weak-phrase-${index}`,
           type: 'tip',
           section: 'experience',
-          title: isFinnish ? `Vahvista sanamuotoa roolissa ${index + 1}` : `Strengthen the wording in role ${index + 1}`,
-          message: isFinnish
-            ? `Korvaa passiivinen ilmaisu kuten "${weakPhrase}" konkreettisella tuloksella, esim. "Paransin..." tai "Toteutin...".`
-            : `Swap passive phrasing like "${weakPhrase}" for a specific outcome, e.g. "Reduced...", "Led...", or "Built...".`,
+          title: t('tips.weakPhraseTitle', { number: index + 1 }),
+          message: t('tips.weakPhrase', { phrase: weakPhrase }),
           category: 'phrasing',
         }),
       )
@@ -317,10 +294,8 @@ export function evaluateCvFeedback(formData, options = {}) {
           id: `experience-action-verb-${index}`,
           type: 'tip',
           section: 'experience',
-          title: isFinnish ? `Aloita toimintaverbillä roolissa ${index + 1}` : `Open with an action verb in role ${index + 1}`,
-          message: isFinnish
-            ? 'Aloita kuvaus tai luetelmakohta vahvalla verbillä, kuten "Johdin", "Rakensin" tai "Paransin", passiivisen kielen sijaan.'
-            : 'Start the description or bullet with a strong verb like "Led," "Built," or "Improved" instead of a passive opener.',
+          title: t('tips.actionVerbTitle', { number: index + 1 }),
+          message: t('tips.actionVerb'),
           category: 'phrasing',
         }),
       )
@@ -396,7 +371,7 @@ function findFiller(text) {
  * @returns {{ id: string, message: string }[][]}
  */
 export function getBulletHints(bullets, options = {}) {
-  const isFinnish = options.locale === 'fi'
+  const t = (key, vars) => feedback.t(options.locale, key, vars)
   const openers = (Array.isArray(bullets) ? bullets : []).map((bullet) => firstWordOf(String(bullet ?? '')))
 
   return (Array.isArray(bullets) ? bullets : []).map((bullet, index) => {
@@ -411,9 +386,7 @@ export function getBulletHints(bullets, options = {}) {
     if (hasBlank) {
       hints.push({
         id: 'blank',
-        message: isFinnish
-          ? `Täytä aukko: kohdassa on vielä ${BULLET_BLANK}.`
-          : `Fill in the blank: ${BULLET_BLANK} is still in this bullet.`,
+        message: t('hints.blank', { blank: BULLET_BLANK }),
       })
     }
     const weakPhrase = findWeakPhrase(text)
@@ -421,16 +394,12 @@ export function getBulletHints(bullets, options = {}) {
     if (weakPhrase) {
       hints.push({
         id: 'weak-phrase',
-        message: isFinnish
-          ? `"${weakPhrase}" kuulostaa tehtävälistalta. Kerro, mitä teit ja mitä siitä seurasi.`
-          : `"${weakPhrase}" reads like a duty list. Say what you did and what came of it.`,
+        message: t('hints.weakPhrase', { phrase: weakPhrase }),
       })
     } else if (WEAK_OPENERS.has(opener)) {
       hints.push({
         id: 'weak-opener',
-        message: isFinnish
-          ? 'Aloita sillä, mitä teit, esim. "Johdin", "Rakensin" tai "Lyhensin".'
-          : 'Start with what you did, e.g. "Led", "Built" or "Cut".',
+        message: t('hints.weakOpener'),
       })
     }
 
@@ -438,18 +407,14 @@ export function getBulletHints(bullets, options = {}) {
     if (filler) {
       hints.push({
         id: 'filler',
-        message: isFinnish
-          ? `"${filler}" ei kerro lukijalle mitään. Poista se tai nimeä asia.`
-          : `"${filler}" tells the reader nothing. Cut it or name the thing.`,
+        message: t('hints.filler', { filler }),
       })
     }
 
     if (words > BULLET_WORD_LIMIT) {
       hints.push({
         id: 'too-long',
-        message: isFinnish
-          ? `${words} sanaa yhdessä kohdassa. Yksi tulos per kohta, noin ${BULLET_WORD_LIMIT} sanaa.`
-          : `${words} words in one bullet. One result per bullet, about ${BULLET_WORD_LIMIT} words.`,
+        message: t('hints.tooLong', { words, limit: BULLET_WORD_LIMIT }),
       })
     }
 
@@ -457,18 +422,14 @@ export function getBulletHints(bullets, options = {}) {
     if (earlier !== -1 && !WEAK_OPENERS.has(opener)) {
       hints.push({
         id: 'repeated-opener',
-        message: isFinnish
-          ? `Alkaa samalla sanalla kuin kohta ${earlier + 1}. Vaihtele verbiä.`
-          : `Starts with the same word as bullet ${earlier + 1}. Vary the verb.`,
+        message: t('hints.repeatedOpener', { number: earlier + 1 }),
       })
     }
 
     if (!hasBlank && words >= NUMBER_HINT_MIN_WORDS && !/\d/.test(text)) {
       hints.push({
         id: 'no-number',
-        message: isFinnish
-          ? 'Lisää luku, jos sinulla on: kuinka moni, kuinka paljon tai kuinka nopeasti.'
-          : 'Add a number if you have one: how many, how much, or how fast.',
+        message: t('hints.noNumber'),
       })
     }
 

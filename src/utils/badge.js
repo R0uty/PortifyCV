@@ -1,3 +1,5 @@
+import { dialogs } from '../i18n/dialogs/index.js'
+
 export const PORTIFYCV_SITE_URL = 'https://portifycv.app'
 
 /**
@@ -13,7 +15,7 @@ export const PORTIFYCV_SITE_URL = 'https://portifycv.app'
  * @returns {string}
  */
 export function buildPortifyCvBadgeSnippet(locale = 'en') {
-  const label = locale === 'fi' ? 'Tehty PortifyCV:llä' : 'Made with PortifyCV'
+  const label = dialogs.t(locale, 'badge.label')
 
   return `<a href="${PORTIFYCV_SITE_URL}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:6px 12px;background:#111111;color:#ffffff;border-radius:6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.02em;">${label}</a>`
 }
