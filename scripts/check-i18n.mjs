@@ -9,8 +9,7 @@
 // 3. Usage: every key of a `kind: 'strings'` namespace is used somewhere in
 //    src/ (as a string literal) or sits under a DYNAMIC_KEYS prefix.
 // 4. Source scan: no inline language branch (`isFinnish ? … : …`,
-//    `locale === 'fi' ? …`, `{ en: …, fi: … }`) outside ALLOWLIST and
-//    MIGRATION_PENDING.
+//    `locale === 'fi' ? …`, `{ en: …, fi: … }`) outside ALLOWLIST.
 // 5. Plural regression cases (pluralCases), the exact former output.
 //
 // Exits non-zero if any check fails.
@@ -254,12 +253,6 @@ const ALLOWLIST = [
   { pattern: /^[^?]*\?\s*(?:ROUTES_FI\.|alternates\.fi\b|['"]\/fi['"]|localizePath\(ROUTES\.\w+,\s*['"]fi['"]\))/, reason: 'logic: picks the Finnish or English address' },
 ]
 
-// Files whose text is still inline and will move in a later task of the
-// 1.7.13 migration. Each task removes its files; the last one empties and
-// deletes this list.
-const MIGRATION_PENDING = new Set([
-])
-
 const allowlistEntry = (file, hit) => ALLOWLIST.find((candidate) => (!candidate.file || candidate.file === file)
   && (!candidate.pattern || candidate.pattern.test(hit.window)))
 same('allowlist: a logic branch does not absorb a text branch on its line',
@@ -268,7 +261,6 @@ same('allowlist: nor one before it',
   scanSource("f(isFinnish ? 'Kyllä' : 'Yes', lang === 'fi' ? 'fi' : 'en')").map((hit) => Boolean(allowlistEntry('src/x.js', hit))).sort(), [false, true])
 
 const allowlistUse = new Map(ALLOWLIST.map((entry) => [entry, 0]))
-const pendingHits = new Map()
 const unexpected = []
 let allowlistedHits = 0
 for (const [file, text] of sources) {
@@ -277,24 +269,16 @@ for (const [file, text] of sources) {
     if (entry) {
       allowlistUse.set(entry, allowlistUse.get(entry) + 1)
       allowlistedHits += 1
-    } else if (MIGRATION_PENDING.has(file)) {
-      pendingHits.set(file, (pendingHits.get(file) ?? 0) + 1)
     } else {
       unexpected.push(`${file}:${hit.line}  [${hit.pattern}]  ${hit.text.slice(0, 120)}`)
     }
   }
 }
-check('scan: no inline language branch outside the allowlist and pending files', unexpected.length === 0,
+check('scan: no inline language branch outside the allowlist', unexpected.length === 0,
   `${unexpected.length} hit(s):\n        ${unexpected.join('\n        ')}`)
 const staleAllowlist = [...allowlistUse].filter(([, count]) => count === 0).map(([entry]) => `${entry.file}${entry.pattern ? ` ${entry.pattern}` : ''}`)
 check('scan: every ALLOWLIST entry still matches a hit', staleAllowlist.length === 0, `stale: ${staleAllowlist.join(', ')}`)
-const clearedPending = [...MIGRATION_PENDING].filter((file) => !pendingHits.has(file))
-check('scan: every MIGRATION_PENDING file still has a hit (remove the cleared ones)', clearedPending.length === 0, `cleared: ${clearedPending.join(', ')}`)
-if (process.argv.includes('--list')) {
-  for (const [file, count] of [...pendingHits].sort()) console.log(`      ${String(count).padStart(4)}  ${file}`)
-}
-const pendingTotal = [...pendingHits.values()].reduce((sum, count) => sum + count, 0)
-console.log(`      scan: ${MIGRATION_PENDING.size} file(s) pending migration with ${pendingTotal} hit(s); ${allowlistedHits} allowlisted hit(s) (--list for per-file counts)`)
+console.log(`      scan: ${allowlistedHits} allowlisted hit(s)`)
 
 // --- 5. Plural cases -------------------------------------------------------------
 // { ns, key, locale, count, expected, vars? }: the exact text the inline pair

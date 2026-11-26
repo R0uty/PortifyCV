@@ -24,6 +24,7 @@ npm run check:applications  # exercises the application log's records, validatio
 npm run check:job-match    # exercises the ATS panel's job-ad matcher in English and Finnish (src/utils/jobMatch.js, src/utils/jobTerms.js)
 npm run check:bullet-ideas  # exercises the example-bullet blanking, role ranking and loading (src/utils/bulletIdeas.js)
 npm run check:cv-import    # exercises the PDF/Word import's text parser and column detection (src/utils/cvTextImport.js, src/utils/cvFileText.js)
+npm run check:i18n         # translation files: parity, unused keys, plural cases, and no inline language branch outside the allowlist (src/i18n/, scripts/check-i18n.mjs)
 npm run check:thumbnails   # the pre-rendered thumbnails in public/thumbnails/ exist, match their manifest, and are up to date with the template code
 npm run thumbnails         # regenerate public/thumbnails/ (Vite dev server + Playwright Chromium, ~20s); commit the result
 
@@ -51,10 +52,11 @@ CV file import's parser or PDF column detection (`check:cv-import`), or the
 saved-CV library (`check:cv-library`), or the application log
 (`check:applications`), or the job-ad matcher and its term
 list (`check:job-match`), or the example bullets' number blanking and
-role ranking (`check:bullet-ideas`). A
+role ranking (`check:bullet-ideas`), or any interface text or a
+translation file (`check:i18n`). A
 mistyped short key in `shareLinks.js` silently drops a field from every
 link the app generates, so `check:share` in particular is cheap insurance.
-CI (`.github/workflows/ci.yml`) runs all fourteen on every push to `main` and
+CI (`.github/workflows/ci.yml`) runs all fifteen on every push to `main` and
 `v1.7.0` (the current long-lived branch) and on every pull request.
 
 `test:e2e` (and its `:fast`/`:slow` variants) build and serve the app first
@@ -463,9 +465,67 @@ TypeScript build). All form/UI state changes go through
 CV array-item type to `ARRAY_ITEM_FACTORIES` there, not ad hoc in a
 component.
 
-**Bilingual throughout (`en`/`fi`).** Locale is threaded as a prop from
-`App.jsx` down; most user-facing strings are inline `isFinnish ? '...' :
-'...'` pairs rather than a translation-file/i18n library.
+**Bilingual throughout (`en`/`fi`), from translation files (1.7.13).**
+Locale is threaded as a prop from `App.jsx` down, and interface text lives
+in `src/i18n/`, our own small module, no library. `src/i18n/index.js` has
+`LOCALES`, `DEFAULT_LOCALE`, `normalizeLocale` and
+`createNamespace(name, { en, fi }, { kind })`, which returns
+`ns.t(locale, key, vars)` (a dotted key; the locale's text, else English,
+else the key; `{name}` filled from `vars`; a `{ one, other }` value picked
+by `Intl.PluralRules` on `vars.count`; a function value called with
+`vars`) and `ns.copy(locale)` (a whole copy object). It is plain JS with
+no `window`, so it runs in the Node pre-render and in the check scripts.
+Each namespace is a folder, `src/i18n/<namespace>/en.js`, `fi.js` and an
+`index.js` that calls `createNamespace`, and only the modules that show
+its text import it, so a page's text stays in that page's chunk. The
+lazy ones are `cv` (CVPreview, the Showcases, `atsDetails.js`), `exports`
+(`createExportCopy`), `letter` (`coverLetter.js`), `builder`, `form`,
+`dialogs`, `feedback`, `share` and one `pages/<page>` per content page
+(`kind: 'page'`, read whole with `copy(locale)`, its shape kept: nested
+arrays, functions such as `minRead`). A few small ones exist only so the
+lazy text stays out of the entry or a shared chunk: `common` (App.jsx's
+shell), `builderShell` (Toolbar, its switchers, the leave dialog) and
+`cvForm` (`cvForm.js`) are in the entry; `formInline` (`EditableList.jsx`,
+in the CV preview's shared chunk) and `fieldFilter`
+(`TemplateFieldFilter.jsx`, also on the marketing pages) are separate for
+the same reason; don't import a lazy namespace from those modules. Text
+drawn on the CV or in an export uses the CV's language (a Showcase's
+`locale`, `cvLocale`), everything else the app's; the code calls
+`ns.t(locale, …)` with the locale it already has. `src/i18n/react.jsx`
+also has `useT(ns)` (the page's `LocaleContext`) and `<T ns k parts>`
+for a sentence with a link or `<strong>` in it (numbered tags,
+`'Read the <0>guide</0>.'`, no nesting); nothing uses them yet. A key
+built at runtime (`` `sections.${id}` ``) must sit under a prefix in
+`src/i18n/dynamicKeys.js`'s `DYNAMIC_KEYS`, whose `ids` come from the
+module that owns them, so a new section without a label fails the check.
+`check:i18n` (`scripts/check-i18n.mjs`) checks parity (every language has
+English's keys, array lengths, functions, plurals with `one`/`other`,
+`{placeholders}` and `<n>` tags), that every key of a `kind: 'strings'`
+namespace appears as a literal in `src/`, the plural cases
+(`pluralCases`: the exact text for counts 0, 1 and 2 in each language),
+and scans `src/` for an inline language branch (`isFinnish ? …`,
+`locale === 'fi' ? …`, `{ en: …, fi: … }`, `labelFi`, `x[locale]`).
+Its `ALLOWLIST` names the branches that stay, each with a reason (a stale
+entry fails): logic (locale codes, Intl formatting locales, Finnish or
+English addresses, the flag icon, the skill-category regexes, the date
+format in `GuideLayout.jsx`) and the per-language data the scan sees:
+route metadata (`pageMeta.js`, `routes.js`), `templatePageCopy.js`,
+`landingFaq.js`, `exampleCvs.js`, and the `{ en, fi }` label maps in
+`templateVariants.js`, `templateAccents.js`, `templateFields.js`,
+`cvHeadingColors.js` and `cvTemplates.js` (checks and e2e read
+`.label.en`) with their readers. Also per-language data on purpose,
+though the scan doesn't see them: the example CVs in
+`src/utils/examples/`, `templateMetaDescriptionsFi.js`, the sitemap, the
+import tables in `cvTextImport.js`/`linkedInImport.js`,
+`jobTerms.js`/`jobMatch.js` and `bulletIdeas.js`; `worker/` and
+`index.html` are outside `src/` and keep their own copy. To add a string, put the key (dotted by place, `toolbar.save`)
+in `en.js` and `fi.js` of the namespace that chunk already imports, call
+`ns.t`, keep a sentence whole with `{placeholders}` (never Finnish built
+from fragments), give a plural a `pluralCases` entry, and run
+`check:i18n`. To add a language, add its file to every namespace folder
+and to that `index.js`'s `createNamespace` call, add it to `LOCALES`
+(parity then fails on any namespace that lacks it), and extend the
+allowlisted places above, which are still two-way.
 
 **The CV has its own language (1.7.5).** `formData.cvLanguage` (`''` =
 follow the app, `'en'`, `'fi'`; Settings › CV language) decides the
