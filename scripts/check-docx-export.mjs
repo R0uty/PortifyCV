@@ -712,11 +712,14 @@ console.log('\ndocxExport: gridTable never renders an empty bordered cell for a 
 // The ATS-Friendly CV Guide tells readers how many templates export to Word
 // as a table and names the one-column ones. It can't import this map (that
 // would pull the docx library into the page's chunk), so check its source
-// text against the map here instead.
+// text (the page's language files, since 1.7.13) against the map here
+// instead.
 {
   const { readFileSync } = await import('node:fs')
   const { getCvTemplates } = await importSrc('utils/cvTemplates.js')
-  const guide = readFileSync(resolvePath(srcDir, 'pages/AtsFriendlyCvGuidePage.jsx'), 'utf8')
+  const guide = ['en', 'fi']
+    .map((locale) => readFileSync(resolvePath(srcDir, `i18n/pages/atsGuide/${locale}.js`), 'utf8'))
+    .join('\n')
   const oneColumnIds = cvTemplates.map((t) => t.id).filter((id) => DOCX_ARCHETYPES[id]?.archetype === 'oneColumn')
   const total = cvTemplates.length
   const tables = total - oneColumnIds.length
