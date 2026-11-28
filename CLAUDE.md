@@ -539,8 +539,8 @@ built from fragments), give a plural a `pluralCases` entry, and run
 `check:i18n`. To add a language, add its file to every namespace folder
 and to that `index.js`'s `createNamespace` call (or leave it out of a
 content namespace's `locales` and list that in `CONTENT_ONLY_NAMESPACES`),
-add it to `LOCALES`, `CV_LANGUAGES` and `INTL_LOCALES` (all in
-`src/i18n/index.js`; parity then fails on any namespace that lacks it),
+add it to `LOCALES` and `INTL_LOCALES` (`src/i18n/index.js`; parity then
+fails on any namespace that lacks it), `CV_LANGUAGES` (`src/utils/cvForm.js`),
 to `LANGUAGE_CHOICES` in `Toolbar.jsx`, the CV-language list in
 `SettingsModal.jsx`, `OG_LOCALES` in `App.jsx` and `LocaleFlagIcon`,
 give every registry label map its key,
