@@ -86,3 +86,16 @@ test.describe('CV language', () => {
     await expect(page.getByRole('navigation').getByRole('button', { name: 'Kokemus' }).first()).toBeVisible()
   })
 })
+
+test('a stored Swedish locale leaves content pages English', async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'sv'))
+  await page.goto('/')
+  expect(await page.evaluate(() => document.documentElement.lang)).toBe('en')
+  await expect(page.locator('h1')).toHaveCount(1)
+  await page.getByRole('button', { name: 'Switch language' }).click()
+  await expect(page).toHaveURL(/\/fi$/)
+  expect(await page.evaluate(() => document.documentElement.lang)).toBe('fi')
+  await page.getByRole('button', { name: 'Vaihda kieli' }).click()
+  await expect(page).toHaveURL(/\/$/)
+  expect(await page.evaluate(() => document.documentElement.lang)).toBe('en')
+})

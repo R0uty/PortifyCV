@@ -9,8 +9,9 @@ import { fieldFilter } from '../i18n/fieldFilter/index.js'
 // local state); `null` is All. The status line is announced politely after
 // each change.
 function TemplateFieldFilter({ value, onChange, locale = 'en', shownCount, totalCount, name }) {
+  // `lang` picks the label maps ({ en, fi }, English for Swedish); the text follows the app.
   const lang = locale === 'fi' ? 'fi' : 'en'
-  const t = (key, vars) => fieldFilter.t(lang, key, vars)
+  const t = (key, vars) => fieldFilter.t(locale, key, vars)
   const options = [{ id: null, label: ALL_FIELDS_LABEL }, ...TEMPLATE_FIELDS]
 
   let statusText

@@ -4,6 +4,7 @@ import { getUiTheme } from '../utils/designSystem'
 import { MAX_CV_NAME_LENGTH } from '../utils/cvLibrary'
 import { APPLICATION_STATUSES, MAX_APPLICATION_NOTE_LENGTH, formatAppliedOn } from '../utils/applicationLog'
 import { dialogs } from '../i18n/dialogs/index.js'
+import { INTL_LOCALES, normalizeLocale } from '../i18n/index.js'
 
 // How long a note waits after the last key before it is stored.
 const NOTE_SAVE_DELAY_MS = 600
@@ -25,7 +26,6 @@ const STATUS_LABELS = {
 // gives it back to Delete, and the list (told by `onDeleting` before the
 // delete starts) hands it to a neighbour once the row is gone.
 function ApplicationRow({ application, locale, onUpdate, onDelete, onDeleting, onView, onStartFrom }) {
-  const isFinnish = locale === 'fi'
   const t = (key, vars) => dialogs.t(locale, key, vars)
   const ui = getUiTheme()
   const labelClassName = `text-xs font-bold uppercase tracking-[0.1em] ${ui.textMuted}`
@@ -86,7 +86,7 @@ function ApplicationRow({ application, locale, onUpdate, onDelete, onDeleting, o
       <div className="saved-cvs__text">
         <p className="settings-row__label">{application.company}</p>
         <p className="settings-row__hint">
-          {application.role} · {formatAppliedOn(application.appliedOn, isFinnish)}
+          {application.role} · {formatAppliedOn(application.appliedOn, locale)}
         </p>
       </div>
       <div className="applications__fields">
@@ -271,7 +271,6 @@ function SavedCvsView({
   onViewApplication,
   onStartFromApplication,
 }) {
-  const isFinnish = locale === 'fi'
   const t = (key, vars) => dialogs.t(locale, key, vars)
   const ui = getUiTheme()
   const [name, setName] = useState(suggestedName)
@@ -281,7 +280,7 @@ function SavedCvsView({
   const tabsId = useId()
 
   const formatDate = (time) =>
-    new Intl.DateTimeFormat(isFinnish ? 'fi-FI' : 'en-GB', {
+    new Intl.DateTimeFormat(INTL_LOCALES[normalizeLocale(locale)], {
       day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
     }).format(new Date(time))
 

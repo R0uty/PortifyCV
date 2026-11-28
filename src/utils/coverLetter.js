@@ -4,6 +4,7 @@ import { createCvSnapshot } from './cvSnapshot'
 import { matchJobAd } from './jobMatch'
 import { formatLinkDisplayValue } from './shared'
 import { letterText } from '../i18n/letter/index.js'
+import { normalizeLocale } from '../i18n/index.js'
 
 /** @typedef {import('../types/cv').CvData} CvData */
 
@@ -97,7 +98,7 @@ function buildParagraphs(snapshot, options, snapshotSource) {
  */
 export function generateCoverLetterDraft(formData, options = {}) {
   const snapshot = createCvSnapshot(formData)
-  const locale = options.locale === 'fi' ? 'fi' : 'en'
+  const locale = normalizeLocale(options.locale)
   const paragraphs = buildParagraphs(snapshot, {
     locale,
     companyName: options.companyName ?? '',
@@ -159,5 +160,5 @@ export function splitCoverLetterParagraphs(body) {
  * @param {Date} [date]
  */
 export function formatCoverLetterDate(locale, date = new Date()) {
-  return new Intl.DateTimeFormat(locale === 'fi' ? 'fi' : 'en', { dateStyle: 'long' }).format(date)
+  return new Intl.DateTimeFormat(normalizeLocale(locale), { dateStyle: 'long' }).format(date)
 }

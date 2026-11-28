@@ -118,6 +118,7 @@ import { resolveCoverLetterLook } from '../utils/coverLetterLook'
 import { EXAMPLES, isTemplateExample, loadExampleCv } from '../utils/exampleCvs'
 import { CvLanguageContext } from '../components/cvLanguageContext'
 import { builder } from '../i18n/builder'
+import { normalizeLocale } from '../i18n/index.js'
 
 const MAX_IMPORT_FILE_SIZE_BYTES = 5 * 1024 * 1024
 const HISTORY_COMMIT_DELAY_MS = 600
@@ -473,7 +474,7 @@ function ResumeBuilderPage({
     (session) => {
       const nextState = createInitialUiState(session)
 
-      if (initialLocale === 'fi' || initialLocale === 'en') {
+      if (normalizeLocale(initialLocale) === initialLocale) {
         return { ...nextState, locale: initialLocale }
       }
 
@@ -1689,7 +1690,7 @@ function ResumeBuilderPage({
   const handleCloseAtsCheck = useCallback(() => setIsAtsCheckOpen(false), [])
 
   const handleLocaleChange = useCallback((nextLocale) => {
-    dispatchUi({ type: UI_ACTION.SET_LOCALE, locale: nextLocale === 'fi' ? 'fi' : 'en' })
+    dispatchUi({ type: UI_ACTION.SET_LOCALE, locale: normalizeLocale(nextLocale) })
   }, [])
 
   const handleNavigate = useCallback((item) => {

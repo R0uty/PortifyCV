@@ -1,4 +1,4 @@
-import { parseImportedCvData } from './cvForm'
+import { CV_LANGUAGES, parseImportedCvData } from './cvForm'
 import { isValidCvFontId } from './cvFonts'
 import { isValidCvHeadingColor } from './cvHeadingColors'
 
@@ -277,7 +277,7 @@ function compressCvData(formData) {
 
   // 'cl' (1.7.5) — the CV's own language; nothing when it follows the app.
   // The builder's share link (1.7.12) passes it resolved, so it is always set.
-  if (formData.cvLanguage === 'en' || formData.cvLanguage === 'fi') {
+  if (CV_LANGUAGES.includes(formData.cvLanguage)) {
     data.cl = formData.cvLanguage
   }
 

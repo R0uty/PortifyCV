@@ -349,13 +349,13 @@ export const initialCvData = createInitialCvData()
 // The language the CV itself is written in (1.7.5): its headings, dates and
 // export labels. '' follows the app's language, so a CV that never chose
 // one (every CV before 1.7.5, every example) reads as before.
-export const CV_LANGUAGES = ['en', 'fi']
+export const CV_LANGUAGES = ['en', 'fi', 'sv']
 
-/** @returns {'en' | 'fi'} */
+/** @returns {'en' | 'fi' | 'sv'} */
 export function resolveCvLocale(formData, uiLocale = 'en') {
   const chosen = formData?.cvLanguage
   if (CV_LANGUAGES.includes(chosen)) return chosen
-  return uiLocale === 'fi' ? 'fi' : 'en'
+  return normalizeLocale(uiLocale)
 }
 
 export const demoCvData = {
@@ -1597,7 +1597,7 @@ function extractSkillTokens(value) {
  * @returns {Partial<CvData>}
  */
 export function parsePastedCvText(value, options = {}) {
-  const locale = options.locale === 'fi' ? 'fi' : 'en'
+  const locale = normalizeLocale(options.locale)
   const missingPasteMessage = cvFormText.t(locale, 'paste.missingText')
   const detectFailMessage = cvFormText.t(locale, 'paste.nothingDetected')
 

@@ -1,3 +1,4 @@
+import { INTL_LOCALES, normalizeLocale } from '../i18n/index.js'
 // Job applications the visitor chose to log on this device (1.7.11): one
 // IndexedDB record per application, holding the exact PDF (and cover letter)
 // that was sent, page images for viewing, and the CV data it was made from.
@@ -232,10 +233,10 @@ export function countApplications() {
 
 // How the dialogs show `appliedOn`. 'YYYY-MM-DD' is a calendar day, not
 // an instant: read it in local time.
-export function formatAppliedOn(appliedOn, isFinnish) {
+export function formatAppliedOn(appliedOn, locale) {
   const [year, month, day] = String(appliedOn).split('-').map(Number)
   if (!year || !month || !day) return appliedOn
-  return new Date(year, month - 1, day).toLocaleDateString(isFinnish ? 'fi-FI' : 'en-GB', {
+  return new Date(year, month - 1, day).toLocaleDateString(INTL_LOCALES[normalizeLocale(locale)], {
     day: 'numeric', month: 'short', year: 'numeric',
   })
 }

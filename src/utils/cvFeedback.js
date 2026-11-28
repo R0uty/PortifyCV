@@ -1,6 +1,7 @@
 // @ts-check
 import { createCvSnapshot } from './cvSnapshot'
 import { feedback } from '../i18n/feedback/index.js'
+import { normalizeLocale } from '../i18n/index.js'
 
 /** @typedef {import('../types/cv').CvData} CvData */
 
@@ -138,7 +139,7 @@ function createSectionBadge(items, locale = 'en') {
  * @param {{ locale?: 'en' | 'fi' }} [options]
  */
 export function evaluateCvFeedback(formData, options = {}) {
-  const locale = options.locale === 'fi' ? 'fi' : 'en'
+  const locale = normalizeLocale(options.locale)
   const t = (key, vars) => feedback.t(locale, key, vars)
   const snapshot = createCvSnapshot(formData)
   const profileItems = []

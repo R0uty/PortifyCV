@@ -201,7 +201,12 @@ check('cvLanguage travels as cl', rawPayload(finnishEncoded).d.cl === 'fi')
 check('a CV that follows the app language encodes no cl key', !('cl' in rawPayload(demoEncoded).d))
 check('a link without cl follows the app language', share.decodeCvStateFromUrl(demoEncoded).cvLanguage === '')
 check('an unknown cvLanguage imports as following the app',
-  parseImportedCvData({ ...structuredClone(demoCvData), cvLanguage: 'sv' }).cvLanguage === '')
+  parseImportedCvData({ ...structuredClone(demoCvData), cvLanguage: 'de' }).cvLanguage === '')
+const swedishCv = parseImportedCvData({ ...structuredClone(demoCvData), cvLanguage: 'sv' })
+const swedishEncoded = share.encodeCvStateForUrl(swedishCv)
+check('Swedish cvLanguage survives the round trip', share.decodeCvStateFromUrl(swedishEncoded).cvLanguage === 'sv')
+check('Swedish cvLanguage travels as cl', rawPayload(swedishEncoded).d.cl === 'sv')
+check('a Swedish cvLanguage imports as Swedish', swedishCv.cvLanguage === 'sv')
 {
   let threw = false
   try {

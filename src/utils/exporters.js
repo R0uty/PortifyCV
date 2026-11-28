@@ -12,6 +12,7 @@ import { formatDateRange, formatLinkLabel, formatLinkDisplayValue } from './shar
 import { collectPdfTextLayer, drawPdfTextLayer, placePdfTextLayer } from './pdfTextLayer'
 import { findLastPageStretchRow, isSliceBlank, measureQuietRows, paintFullBleedPage, quietRunLength, snapCutToQuietRow } from './pdfPageCanvas'
 import { exportsText } from '../i18n/exports/index.js'
+import { normalizeLocale } from '../i18n/index.js'
 
 const PDF_MODES = {
   designer: {
@@ -233,7 +234,7 @@ export function createExportCopy(locale = 'en') {
   const t = (key) => exportsText.t(locale, key)
 
   return {
-    lang: locale === 'fi' ? 'fi' : 'en',
+    lang: normalizeLocale(locale),
     untitledRole: t('placeholders.untitledRole'),
     educationEntry: t('placeholders.educationEntry'),
     about: t('sections.about'),
@@ -500,7 +501,7 @@ async function buildCoverLetterPdfBlob(letterText, { header = null } = {}) {
 }
 
 export function exportCvAsHtml(formData, fileName, options = {}) {
-  const locale = options.locale === 'fi' ? 'fi' : 'en'
+  const locale = normalizeLocale(options.locale)
   const copy = createExportCopy(locale)
   const snapshot = createCvSnapshot(formData)
   // The photo shows when the chosen template shows it, as in the Word file.
@@ -2926,7 +2927,7 @@ export async function renderedCvPdfToStoredFiles(rendered) {
       fileName,
       mode,
       options.template,
-      options.locale === 'fi' ? 'fi' : 'en',
+      normalizeLocale(options.locale),
     )
 
     return { pdf: blob, fileName: `${exportName}.pdf`, paper: 'a4', fit: resolvePdfFit(options.fit), pages: [] }
@@ -2955,7 +2956,7 @@ export async function saveRenderedCvPdf(rendered) {
       fileName,
       mode,
       options.template,
-      options.locale === 'fi' ? 'fi' : 'en',
+      normalizeLocale(options.locale),
     )
     return
   }

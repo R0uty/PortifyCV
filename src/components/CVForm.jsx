@@ -41,6 +41,7 @@ import { FORM_ACTION } from '../reducers/cvFormReducer'
 import { buildProfilePhotoDataUrl, localizePhotoErrorMessage } from '../utils/profilePhoto'
 import { useCvTextProps } from './cvLanguageContext'
 import { form } from '../i18n/form'
+import { normalizeLocale } from '../i18n/index.js'
 
 function isSectionItemVisible(sectionItemVisibility, section, itemKey) {
   return sectionItemVisibility?.[section]?.[String(itemKey)] !== false
@@ -92,7 +93,6 @@ function CVForm({
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
   const ui = getUiTheme(theme)
-  const isFinnish = locale === 'fi'
   const t = (key, vars) => form.t(locale, key, vars)
   const sectionVisibilityFields = getSectionVisibilityFields(locale)
   const templateConfig = getEffectiveCvTemplate(selectedTemplate, locale, formData)
@@ -785,8 +785,8 @@ function CVForm({
                             placeholder={t('experience.achievementPlaceholder')}
                             addLabel={t('experience.addAchievement')}
                             itemAriaLabel={t('experience.achievement')}
-                            locale={isFinnish ? 'fi' : 'en'}
-                            hints={getBulletHints(item.achievements, { locale: isFinnish ? 'fi' : 'en' })}
+                            locale={normalizeLocale(locale)}
+                            hints={getBulletHints(item.achievements, { locale: normalizeLocale(locale) })}
                             ideas={{ roleText: item.role || formData.title }}
                           />
                         </div>

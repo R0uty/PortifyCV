@@ -8,6 +8,10 @@
 export const LOCALES = ['en', 'fi', 'sv']
 export const DEFAULT_LOCALE = 'en'
 
+// The language tag Intl formats dates in, per language ('sv-FI' reads
+// Swedish dates the way Finland-Swedish readers expect them).
+export const INTL_LOCALES = { en: 'en-GB', fi: 'fi-FI', sv: 'sv-FI' }
+
 export function normalizeLocale(locale) {
   return LOCALES.includes(locale) ? locale : DEFAULT_LOCALE
 }

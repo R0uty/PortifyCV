@@ -83,6 +83,7 @@ export function rankIdeaRoles(roleText, roles, locale) {
 const cache = new Map()
 
 export function loadBulletIdeas(locale) {
+  // Example CVs exist in English and Finnish only; Swedish reads the English ones.
   const key = locale === 'fi' ? 'fi' : 'en'
   if (!cache.has(key)) {
     const promise = Promise.all(

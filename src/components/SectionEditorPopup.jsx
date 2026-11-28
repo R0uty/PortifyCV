@@ -18,6 +18,7 @@ import { canMoveSection, getSectionColumn, setSectionColumn } from '../utils/sec
 import { getTabStops } from '../utils/focusTrap'
 import { useCvTextProps } from './cvLanguageContext'
 import { form } from '../i18n/form'
+import { normalizeLocale } from '../i18n/index.js'
 
 // The popup editor for one section. Renders real <input>/<textarea>
 // elements and reads formData directly — never the DOM and never
@@ -27,7 +28,6 @@ import { form } from '../i18n/form'
 
 
 function FieldInput({ sectionKey, field, value, locale, onChange, ideas = null }) {
-  const isFinnish = locale === 'fi'
   const cvTextProps = useCvTextProps({
     type: field.type === 'url' ? 'url' : field.type === 'month' ? 'month' : undefined,
     field: field.key,
@@ -55,7 +55,7 @@ function FieldInput({ sectionKey, field, value, locale, onChange, ideas = null }
   if (field.type === 'list') {
     const items = Array.isArray(value) ? value : []
     const itemLabel = getFieldItemLabel(sectionKey, field.key, locale)
-    const hints = field.key === 'achievements' ? getBulletHints(items, { locale: isFinnish ? 'fi' : 'en' }) : null
+    const hints = field.key === 'achievements' ? getBulletHints(items, { locale: normalizeLocale(locale) }) : null
 
     return (
       <div className="direct-edit-popup__field">
@@ -109,7 +109,7 @@ function FieldInput({ sectionKey, field, value, locale, onChange, ideas = null }
             <BulletIdeas
               roleText={ideas.roleText}
               items={items}
-              locale={isFinnish ? 'fi' : 'en'}
+              locale={normalizeLocale(locale)}
               onAdd={(text) => onChange([...items, text])}
             />
           )}

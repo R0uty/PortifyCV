@@ -1,4 +1,4 @@
-// Small inline-SVG flag icons for the locale toggle (App.jsx's header button
+// Small inline-SVG flag icons (English, Finnish, Swedish) for the locale controls (App.jsx's header button
 // and Toolbar.jsx's builder toolbar button). Hand-drawn rather than the
 // flag emoji (🇫🇮/🇬🇧) — those render as a generic "flag" placeholder glyph
 // on a lot of Linux desktop environments (confirmed on this project's own
@@ -16,6 +16,16 @@ export default function LocaleFlagIcon({ locale, className = '' }) {
         <rect width="18" height="11" fill="#ffffff" />
         <rect x="5" width="3" height="11" fill="#002f6c" />
         <rect y="4" width="18" height="3" fill="#002f6c" />
+      </svg>
+    )
+  }
+
+  if (locale === 'sv') {
+    return (
+      <svg viewBox="0 0 16 10" width="1.1em" height="0.69em" className={classes} aria-hidden="true">
+        <rect width="16" height="10" fill="#006AA7" />
+        <rect x="5" width="2" height="10" fill="#FECC02" />
+        <rect y="4" width="16" height="2" fill="#FECC02" />
       </svg>
     )
   }

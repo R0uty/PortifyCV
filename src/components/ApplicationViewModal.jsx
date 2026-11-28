@@ -65,7 +65,6 @@ function StoredPage({ image, paper, inset, index, total, locale }) {
 }
 
 function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewCv }) {
-  const isFinnish = locale === 'fi'
   const t = (key, vars) => dialogs.t(locale, key, vars)
   const tabsId = useId()
   // 'cv' or 'letter'; the switch shows only when a letter is stored.
@@ -116,7 +115,7 @@ function ApplicationViewModal({ application, locale = 'en', onClose, onStartNewC
       onClose={onClose}
       size="xl"
       title={t('applicationView.title', { company: application.company })}
-      description={`${application.role} · ${formatAppliedOn(application.appliedOn, isFinnish)}`}
+      description={`${application.role} · ${formatAppliedOn(application.appliedOn, locale)}`}
     >
       <div className="pdf-preview">
         <div className="pdf-preview__controls">

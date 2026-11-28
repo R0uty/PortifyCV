@@ -354,7 +354,7 @@ const ALLOWLIST = [
   { file: 'src/utils/templateFields.js', reason: 'registry label maps { en, fi }, read as .label.en by checks and e2e' },
   { file: 'src/utils/cvHeadingColors.js', reason: 'registry label maps { en, fi }, read as .label.en by checks and e2e' },
   { file: 'src/utils/cvTemplates.js', reason: 'template registry: labels/descriptions per language (templateLocalization) and the gate that applies them' },
-  { file: 'src/components/LocaleFlagIcon.jsx', reason: 'logic: draws the Finnish or British flag SVG, no text' },
+  { file: 'src/components/LocaleFlagIcon.jsx', reason: 'logic: draws the Finnish, Swedish or British flag SVG, no text' },
   { file: 'src/components/templates/shared.jsx', pattern: /^isFinnish\s*\?\s*\{\s*languages:\s*\//, reason: 'logic: parseSkillCategories matches skills with per-language regexes (its labels are in the cv namespace)' },
   // Registry label maps read in the builder (the registries stay, see above).
   { file: 'src/components/CvHeadingColorSwitcher.jsx', pattern: /^l\[locale\] \?\? (?:activePreset|preset)\.label\.en\b/, reason: "reads cvHeadingColors.js's preset label map { en, fi }" },
@@ -372,8 +372,7 @@ const ALLOWLIST = [
   // locale code, a formatting locale or an address.
   { pattern: /^[^?]*\?\s*['"]fi['"]\s*:\s*['"]en['"]/, reason: "logic: normalises a locale to the code 'fi' or 'en'" },
   { pattern: /^[^?]*\?\s*['"]en['"]\s*:\s*['"]fi['"]/, reason: 'logic: the other locale, for a language switch' },
-  { pattern: /^[^?]*\?\s*['"]fi-FI['"]\s*:\s*['"]en-(GB|US)['"]/, reason: 'logic: date/number formatting locale for Intl' },
-  { pattern: /^[^?]*\?\s*['"]fi_FI['"]\s*:\s*['"]en_US['"]/, reason: 'logic: og:locale value' },
+  { file: 'src/App.jsx', pattern: /^\W?\s*(?:fi|sv): '(?:fi_FI|sv_SE)'/, reason: 'logic: og:locale value per language (OG_LOCALES)' },
   { pattern: /^[^?]*\?\s*(?:ROUTES_FI\.|alternates\.fi\b|['"]\/fi['"]|localizePath\(ROUTES\.\w+,\s*['"]fi['"]\))/, reason: 'logic: picks the Finnish or English address' },
 ]
 

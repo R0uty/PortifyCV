@@ -397,6 +397,24 @@ console.log('\nuiReducer\n')
   const state = createInitialUiState({})
   const next = uiReducer(state, { type: UI_ACTION.SET_LOCALE, locale: 'fi' })
   check('SET_LOCALE stores the chosen locale', next.locale === 'fi')
+  check('SET_LOCALE stores Swedish', uiReducer(state, { type: UI_ACTION.SET_LOCALE, locale: 'sv' }).locale === 'sv')
+  check('SET_LOCALE stores an unknown language as English',
+    uiReducer({ ...state, locale: 'fi' }, { type: UI_ACTION.SET_LOCALE, locale: 'de' }).locale === 'en')
+}
+
+{
+  globalThis.window = { location: { search: '' }, localStorage: { getItem: (key) => (key === 'ui-locale' ? 'sv' : null), setItem() {} } }
+  const stored = createInitialUiState({}).locale
+  delete globalThis.window
+  check('createInitialUiState reads a stored Swedish locale', stored === 'sv')
+}
+
+{
+  const { resolveCvLocale, CV_LANGUAGES } = await importSrc('utils/cvForm.js')
+  check('CV_LANGUAGES has Swedish', CV_LANGUAGES.join() === 'en,fi,sv')
+  check('a CV following the app reads as Swedish in a Swedish app', resolveCvLocale({ cvLanguage: '' }, 'sv') === 'sv')
+  check('a Swedish CV stays Swedish in a Finnish app', resolveCvLocale({ cvLanguage: 'sv' }, 'fi') === 'sv')
+  check('an unknown app language resolves to English', resolveCvLocale({ cvLanguage: '' }, 'de') === 'en')
 }
 
 {

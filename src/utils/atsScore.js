@@ -1,6 +1,7 @@
 // @ts-check
 import { createCvSnapshot } from './cvSnapshot'
 import { feedback } from '../i18n/feedback/index.js'
+import { normalizeLocale } from '../i18n/index.js'
 
 /** @typedef {import('../types/cv').CvData} CvData */
 
@@ -221,7 +222,7 @@ function createImprovementTips(breakdown, options, copy) {
  */
 export function evaluateAtsScore(formData, options = {}) {
   const snapshot = createCvSnapshot(formData)
-  const locale = options.locale === 'fi' ? 'fi' : 'en'
+  const locale = normalizeLocale(options.locale)
   const copy = createAtsCopy(locale)
   const keywordDensity = scoreKeywordDensity(snapshot, copy)
   const sectionCompleteness = scoreSectionCompleteness(snapshot, copy)

@@ -1,3 +1,4 @@
+import { normalizeLocale } from '../i18n/index.js'
 import { CV_SESSION_RESTORE_ENABLED_STORAGE_KEY, safeStorageGet } from '../utils/cvForm'
 import { defaultTemplateId, getAllTemplateAccents, resolveTemplateId } from '../utils/cvTemplates'
 import { UI_LOCALE_STORAGE_KEY, UI_NAV_RAIL_COLLAPSED_STORAGE_KEY, UI_BUILDER_MODE_STORAGE_KEY } from '../utils/designSystem'
@@ -118,7 +119,7 @@ export function createInitialUiState(initialSession) {
     // ?template= in the same URL; otherwise ?template=, then the default.
     selectedTemplate: resolveTemplateId(initialSession?.sharedTemplateId) ?? readInitialTemplateId(),
     atsFriendlyMode: false,
-    locale: storedLocale === 'fi' ? 'fi' : 'en',
+    locale: normalizeLocale(storedLocale),
     mobilePreviewVisible: false,
     activeExport: '',
     isImporting: false,
@@ -185,7 +186,7 @@ export function uiReducer(state, action) {
       return { ...state, selectedTemplate: action.templateId }
 
     case UI_ACTION.SET_LOCALE:
-      return { ...state, locale: action.locale }
+      return { ...state, locale: normalizeLocale(action.locale) }
 
     case UI_ACTION.SET_PASTED_CV_TEXT:
       return { ...state, pastedCvText: action.value }

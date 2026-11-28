@@ -17,6 +17,7 @@ import { APP_VERSION } from './utils/appVersion'
 import { allowUnload, hasUnsavedChanges, leaveBack, leavePage } from './utils/leaveGuard'
 import LeaveConfirmDialog from './components/LeaveConfirmDialog'
 import { common } from './i18n/common'
+import { normalizeLocale } from './i18n/index.js'
 
 const CONTACT_MAILTO = 'mailto:portifycv@gmail.com'
 
@@ -179,6 +180,9 @@ function setLanguageAlternates(alternates) {
   }
 }
 
+// og:locale per language ('sv' only in the builder, which has no head of its own).
+const OG_LOCALES = { en: 'en_US', fi: 'fi_FI', sv: 'sv_SE' }
+
 function useDocumentHead(view, locale) {
   useEffect(() => {
     const head = view === 'notFound' ? NOT_FOUND_HEAD : localizedHead(VIEW_HEAD[view] ?? VIEW_HEAD.landing, locale)
@@ -186,7 +190,7 @@ function useDocumentHead(view, locale) {
 
     document.title = head.title
     setLanguageAlternates(head.alternates ?? null)
-    setMetaContent('meta[property="og:locale"]', locale === 'fi' ? 'fi_FI' : 'en_US')
+    setMetaContent('meta[property="og:locale"]', OG_LOCALES[normalizeLocale(locale)])
 
     const canonicalLink = document.querySelector('link[rel="canonical"]')
     if (canonicalLink) {
@@ -253,7 +257,7 @@ function pushViewUrl(nextView, search = '', locale = 'en') {
 
 function readStoredLocale() {
   const storedLocale = safeStorageGet(UI_LOCALE_STORAGE_KEY).value
-  return storedLocale === 'fi' ? 'fi' : 'en'
+  return normalizeLocale(storedLocale)
 }
 
 function scrollToTop() {
@@ -509,7 +513,7 @@ const SITE_MAP_COLUMNS = [
 ]
 
 function SiteMap({ locale = 'en', onNavigate = () => {}, onGetStarted = () => {} }) {
-  const lang = locale === 'fi' ? 'fi' : 'en'
+  const lang = normalizeLocale(locale)
   const templates = getCvTemplates(lang)
 
   return (

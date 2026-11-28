@@ -114,6 +114,8 @@ for (const id of ids) {
     check(`${id} #${index + 1}: en and fi blank the same figures`, blankCount(bullet) === blankCount(twin), `en ${blankCount(bullet)}: ${bullet}\n        fi ${blankCount(twin)}: ${twin}`)
   })
 }
+check('loadBulletIdeas(sv) is the English ideas', JSON.stringify(await loadBulletIdeas('sv')) === JSON.stringify(await loadBulletIdeas('en')))
+
 for (const locale of ['en', 'fi']) {
   for (const role of ideas[locale]) {
     for (const bullet of role.bullets) {
