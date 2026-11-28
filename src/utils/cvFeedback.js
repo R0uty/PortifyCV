@@ -34,6 +34,14 @@ const WEAK_PHRASES = [
   'tehtäviini kuului',
   'olin mukana',
   'osallistuin',
+  // Swedish (1.7.14): the same duty-list phrasing. "Ansvarar för" (present
+  // tense) is not on it: like Finnish "Vastaan", it's the usual active way
+  // to describe a current role.
+  'ansvarade för',
+  'ansvarig för',
+  'arbetade med',
+  'deltog i',
+  'var med och',
 ]
 
 // Common strong resume action verbs, past tense. Used to check the opening
@@ -70,6 +78,19 @@ const STRONG_ACTION_VERBS = new Set([
   'organisoin', 'myin', 'hankin', 'säästin', 'hallinnoin', 'sijoituin', 'avustin',
   'johdan', 'vastaan', 'rakennan', 'kehitän', 'suunnittelen', 'ohjaan', 'opetan',
   'koulutan', 'valvon', 'hoidan', 'seuraan', 'annan',
+  // Swedish (1.7.14): past tense, as a Swedish CV writes its bullets, plus
+  // the present for a current role ("Leder", "Utvecklar"). None is an
+  // English or Finnish word, so en/fi results don't change.
+  'ledde', 'byggde', 'lanserade', 'minskade', 'ökade', 'förbättrade', 'utvecklade',
+  'införde', 'skapade', 'designade', 'implementerade', 'automatiserade',
+  'effektiviserade', 'optimerade', 'planerade', 'genomförde', 'samordnade',
+  'koordinerade', 'etablerade', 'grundade', 'startade', 'levererade', 'förhandlade',
+  'handledde', 'utbildade', 'rekryterade', 'analyserade', 'migrerade', 'moderniserade',
+  'standardiserade', 'förenklade', 'omarbetade', 'skrev', 'sänkte', 'höjde', 'halverade',
+  'fördubblade', 'säkrade', 'vann', 'drev', 'styrde', 'hanterade', 'tog', 'sålde',
+  'expanderade', 'strukturerade', 'digitaliserade', 'producerade', 'publicerade',
+  'leder', 'bygger', 'utvecklar', 'driver', 'planerar', 'samordnar', 'utbildar',
+  'hanterar', 'skapar', 'designar', 'styr',
 ])
 
 function trimValue(value) {
@@ -136,7 +157,7 @@ function createSectionBadge(items, locale = 'en') {
 
 /**
  * @param {CvData} formData
- * @param {{ locale?: 'en' | 'fi' }} [options]
+ * @param {{ locale?: 'en' | 'fi' | 'sv' }} [options]
  */
 export function evaluateCvFeedback(formData, options = {}) {
   const locale = normalizeLocale(options.locale)
@@ -347,12 +368,18 @@ const WEAK_OPENERS = new Set([
   'participated', 'involved', 'tasked', 'took',
   // Not "tein": "Tein 90+ asiakashaastattelua" is how Finnish says "Ran".
   'minä', 'me', 'olin', 'olen', 'työskentelin', 'autoin', 'osallistuin',
+  // Swedish (1.7.14). "Var" is also English ("var" in code) but no English
+  // bullet opens with it.
+  'jag', 'vi', 'var', 'arbetade', 'hjälpte', 'deltog', 'assisterade',
 ])
 
 // Words that take space without saying anything a reader can check.
 const FILLER_WORDS = [
   'successfully', 'various', 'a variety of', 'etc', 'and more', 'and so on',
   'menestyksekkäästi', 'onnistuneesti', 'erilaisia', 'erilaisten', 'yms', 'jne',
+  // Swedish (1.7.14). Not "diverse": it is also an English word with a
+  // meaning ("a diverse team"), and these lists serve every language.
+  'framgångsrikt', 'olika', 'm.m.', 'osv', 'med mera',
 ]
 
 function firstWordOf(text) {
@@ -360,15 +387,19 @@ function firstWordOf(text) {
   return word.toLowerCase().replace(/[^a-zäöå]/g, '')
 }
 
+// Punctuation becomes a space on both sides, so "etc." matches "etc" and
+// "m.m." matches "m.m." (as "m m"); the hint quotes the list's own spelling.
+const stripPunctuation = (text) => text.replace(/[.,;:!?()]/g, ' ')
+
 function findFiller(text) {
-  const lowerText = ` ${text.toLowerCase().replace(/[.,;:!?()]/g, ' ')} `
-  return FILLER_WORDS.find((word) => lowerText.includes(` ${word} `)) ?? null
+  const lowerText = ` ${stripPunctuation(text.toLowerCase())} `
+  return FILLER_WORDS.find((word) => lowerText.includes(` ${stripPunctuation(word).trim()} `)) ?? null
 }
 
 /**
  * Hints for each bullet of one experience entry, in the bullets' order.
  * @param {string[]} bullets the entry's achievements
- * @param {{ locale?: 'en' | 'fi' }} [options] the UI language of the hints
+ * @param {{ locale?: 'en' | 'fi' | 'sv' }} [options] the UI language of the hints
  * @returns {{ id: string, message: string }[][]}
  */
 export function getBulletHints(bullets, options = {}) {

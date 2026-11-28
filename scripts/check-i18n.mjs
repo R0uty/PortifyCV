@@ -122,7 +122,7 @@ console.log(`      ${namespaces.size} namespace(s)`)
 // --- 2. Parity ------------------------------------------------------------------
 // Namespaces whose sv.js is not written yet (1.7.14). Tasks 4-6 remove each
 // one as it gets Swedish; Task 7 deletes this list.
-const SWEDISH_PENDING = ['feedback']
+const SWEDISH_PENDING = []
 // Content pages have no Swedish address, so their namespaces stay en/fi.
 const CONTENT_ONLY_NAMESPACES = [
   'pages/about', 'pages/atsGuide', 'pages/coverLetterExamples', 'pages/cvExamples', 'pages/cvSkills',
@@ -529,6 +529,18 @@ const pluralCases = [
   { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'sv', count: 0, expected: '0 sidor · A4 · textstorlek 100 %', vars: { paper: 'A4', scale: 100 } },
   { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'sv', count: 1, expected: '1 sida · A4 · textstorlek 100 %', vars: { paper: 'A4', scale: 100 } },
   { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'sv', count: 2, expected: '2 sidor · A4 · textstorlek 100 %', vars: { paper: 'A4', scale: 100 } },
+  { ns: 'feedback', key: 'sectionBadge.warnings', locale: 'sv', count: 0, expected: '0 varningar' },
+  { ns: 'feedback', key: 'sectionBadge.warnings', locale: 'sv', count: 1, expected: '1 varning' },
+  { ns: 'feedback', key: 'sectionBadge.warnings', locale: 'sv', count: 2, expected: '2 varningar' },
+  { ns: 'feedback', key: 'sectionBadge.tips', locale: 'sv', count: 0, expected: '0 tips' },
+  { ns: 'feedback', key: 'sectionBadge.tips', locale: 'sv', count: 1, expected: '1 tips' },
+  { ns: 'feedback', key: 'sectionBadge.tips', locale: 'sv', count: 2, expected: '2 tips' },
+  { ns: 'feedback', key: 'suggestions.warnings', locale: 'sv', count: 0, expected: '0 varningar' },
+  { ns: 'feedback', key: 'suggestions.warnings', locale: 'sv', count: 1, expected: '1 varning' },
+  { ns: 'feedback', key: 'suggestions.warnings', locale: 'sv', count: 2, expected: '2 varningar' },
+  { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'sv', count: 0, expected: '0 tips om siffror' },
+  { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'sv', count: 1, expected: '1 tips om siffror' },
+  { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'sv', count: 2, expected: '2 tips om siffror' },
 ]
 // Swedish cases are added with each namespace's sv.js, as { ns, key, locale: 'sv', count, expected }.
 for (const { ns: name, key, locale, count, expected, vars = {} } of pluralCases) {

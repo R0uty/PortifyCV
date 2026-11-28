@@ -173,6 +173,22 @@ console.log('\nevaluateCvFeedback — Finnish phrasing (1.6.51)\n')
   check('"Vastasin", the usual active opener of a Finnish role, is not a weak phrase', !tipIdsForFirstExperience(feedback).includes('experience-weak-phrase-0'))
 }
 
+{
+  const feedback = evaluateCvFeedback(withExperience({ description: 'Minskade svarstiden med 40 % genom att införa en ny ärendekö.' }), { locale: 'sv' })
+  check('Swedish: a past-tense action verb opens the role, no action-verb tip', !tipIdsForFirstExperience(feedback).includes('experience-action-verb-0'))
+}
+
+{
+  const feedback = evaluateCvFeedback(withExperience({ description: 'Ansvarade för kundsupporten i Norden för 3 länder.' }), { locale: 'sv' })
+  const tip = feedback.inlineTips.experienceItems[0].find((item) => item.id === 'experience-weak-phrase-0')
+  check('Swedish: duty phrasing gets the role-level tip, in Swedish', tip?.title === 'Stärk formuleringarna i roll 1', `got ${JSON.stringify(tip?.title)}`)
+}
+
+{
+  const feedback = evaluateCvFeedback(withExperience({ description: 'Leder ett team på 6 sjuksköterskor.' }), { locale: 'sv' })
+  check('Swedish: a present-tense verb for a current role is an action verb', !tipIdsForFirstExperience(feedback).includes('experience-action-verb-0'))
+}
+
 console.log('\nevaluateCvFeedback — the example CVs model good phrasing (1.6.51)\n')
 
 {
@@ -231,6 +247,24 @@ console.log('\ngetBulletHints — one bullet at a time (1.7.3)\n')
   same('Finnish: "Olen" opener', ids(['Olen tehnyt asiakkaille 40 kotikäyntiä viikossa.'], 'fi'), [['weak-opener']])
   same('Finnish: "Tein" is a fine opener', ids(['Tein 90+ asiakashaastattelua kolmessa segmentissä.'], 'fi'), [[]])
   check('hints follow the UI language', getBulletHints(['I led 3 teams.'], { locale: 'fi' })[0][0].message.startsWith('Aloita'))
+
+  // Swedish (1.7.14): the same rules, Swedish word lists, Swedish copy.
+  same('Swedish: duty phrasing', ids(['Ansvarade för kundsupporten i Norden'], 'sv'), [['weak-phrase']])
+  same('Swedish: a weak opener', ids(['Jag ledde ett team på 5 personer'], 'sv'), [['weak-opener']])
+  same('Swedish: filler', ids(['Framgångsrikt lanserade 3 nya tjänster'], 'sv'), [['filler']])
+  same('Swedish: a strong bullet gets no phrasing hint', ids(['Minskade svarstiden med 40 % genom att införa en ny ärendekö'], 'sv'), [[]])
+  same('Swedish: the duty-phrase copy', getBulletHints(['Ansvarade för kundsupporten i Norden'], { locale: 'sv' })[0][0].message, '"ansvarade för" låter som en arbetsbeskrivning. Skriv vad du gjorde och vad det ledde till.')
+  same('Swedish: the weak-opener copy', getBulletHints(['Jag ledde ett team på 5 personer'], { locale: 'sv' })[0][0].message, 'Börja med vad du gjorde, t.ex. "Ledde", "Byggde" eller "Minskade".')
+  same('Swedish: the filler copy', getBulletHints(['Framgångsrikt lanserade 3 nya tjänster'], { locale: 'sv' })[0][0].message, '"framgångsrikt" säger ingenting om vad du gjorde. Stryk det eller skriv vad det gällde.')
+  same('Swedish: the blank hint copy', getBulletHints(['Minskade bokslutet från [__] dagar till [__].'], { locale: 'sv' })[0][0].message, 'Fyll i luckan: [__] står kvar i den här punkten.')
+  same('Swedish: the other duty phrases', ids(['Ansvarig för 3 butiker', 'Arbetade med 12 kunder', 'Deltog i 4 mässor', 'Var med och startade 2 klubbar'], 'sv'), [['weak-phrase'], ['weak-phrase'], ['weak-phrase'], ['weak-phrase']])
+  same('Swedish: the other weak openers', ids(['Vi sålde 40 licenser', 'Var projektledare för 3 projekt', 'Hjälpte 20 kunder', 'Assisterade 2 chefer'], 'sv'), [['weak-opener'], ['weak-opener'], ['weak-opener'], ['weak-opener']])
+  same('Swedish: filler words and abbreviations', ids(['Byggde olika rapporter för 5 team', 'Skrev rapporter, analyser m.m. för 5 team', 'Tog fram rapporter, analyser osv. för 5 team', 'Sammanställde rapporter, analyser med mera för 5 team'], 'sv'), [['filler'], ['filler'], ['filler'], ['filler']])
+  same('Swedish: the abbreviation is quoted as written', getBulletHints(['Skrev rapporter, analyser m.m. för 5 team'], { locale: 'sv' })[0][0].message.startsWith('"m.m."'), true)
+  same('Swedish: the same opening verb as an earlier bullet', ids(['Ledde ett team på 5.', 'Ledde migreringen 2024.', 'Byggde ett verktyg för 40 utvecklare.'], 'sv'), [[], ['repeated-opener'], []])
+  same('Swedish: å, ä and ö stay in the opener', ids(['Ökade försäljningen med 20 %.', 'Ökade antalet kunder till 300.'], 'sv'), [[], ['repeated-opener']])
+  same('Swedish: no number in a full sentence', ids(['Ledde migreringen av betalplattformen till TypeScript.'], 'sv'), [['no-number']])
+  same('English: "diverse" is not filler', ids(['Built a diverse team of 8 engineers.']), [[]])
 
   // The example CVs are what visitors copy from: their bullets should
   // model the advice, so none gets a phrasing hint.
