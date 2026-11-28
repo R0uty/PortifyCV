@@ -126,4 +126,7 @@ test('the language menu switches the builder to Swedish', async ({ page }) => {
   await expect(page.getByRole('banner').locator('.app-toolbar__locale-flag').first()).toBeVisible()
   await page.reload()
   await expect(page.locator('html')).toHaveAttribute('lang', 'sv')
+  // The toolbar now speaks Swedish (builderShell's sv.js).
+  await expect(page.getByRole('banner').getByRole('button', { name: 'Fler åtgärder' })).toBeVisible()
+  await expect(page.getByRole('banner').getByRole('button', { name: 'Språk' })).toBeVisible()
 })

@@ -122,7 +122,7 @@ console.log(`      ${namespaces.size} namespace(s)`)
 // --- 2. Parity ------------------------------------------------------------------
 // Namespaces whose sv.js is not written yet (1.7.14). Tasks 4-6 remove each
 // one as it gets Swedish; Task 7 deletes this list.
-const SWEDISH_PENDING = ['common', 'builderShell', 'fieldFilter', 'builder', 'form', 'dialogs', 'feedback', 'share']
+const SWEDISH_PENDING = ['feedback']
 // Content pages have no Swedish address, so their namespaces stay en/fi.
 const CONTENT_ONLY_NAMESPACES = [
   'pages/about', 'pages/atsGuide', 'pages/coverLetterExamples', 'pages/cvExamples', 'pages/cvSkills',
@@ -500,6 +500,35 @@ const pluralCases = [
   { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'fi', count: 1, expected: '1 mittarivinkki' },
   { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'en', count: 2, expected: '2 metrics hints' },
   { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'fi', count: 2, expected: '2 mittarivinkkiä' },
+  // Task 5 (1.7.14, Swedish builder): the sv text for counts 0, 1 and 2.
+  // Swedish uses the plural form for 0, as English does.
+  { ns: 'builder', key: 'export.blankBullets', locale: 'sv', count: 0, expected: ' 0 punkter innehåller fortfarande [__].', vars: { blank: '[__]' } },
+  { ns: 'builder', key: 'export.blankBullets', locale: 'sv', count: 1, expected: ' 1 punkt innehåller fortfarande [__].', vars: { blank: '[__]' } },
+  { ns: 'builder', key: 'export.blankBullets', locale: 'sv', count: 2, expected: ' 2 punkter innehåller fortfarande [__].', vars: { blank: '[__]' } },
+  { ns: 'builder', key: 'import.counts.jobs', locale: 'sv', count: 0, expected: '0 jobb' },
+  { ns: 'builder', key: 'import.counts.jobs', locale: 'sv', count: 1, expected: '1 jobb' },
+  { ns: 'builder', key: 'import.counts.jobs', locale: 'sv', count: 2, expected: '2 jobb' },
+  { ns: 'builder', key: 'import.counts.degrees', locale: 'sv', count: 0, expected: '0 examina' },
+  { ns: 'builder', key: 'import.counts.degrees', locale: 'sv', count: 1, expected: '1 examen' },
+  { ns: 'builder', key: 'import.counts.degrees', locale: 'sv', count: 2, expected: '2 examina' },
+  { ns: 'builder', key: 'import.counts.skills', locale: 'sv', count: 0, expected: '0 kompetenser' },
+  { ns: 'builder', key: 'import.counts.skills', locale: 'sv', count: 1, expected: '1 kompetens' },
+  { ns: 'builder', key: 'import.counts.skills', locale: 'sv', count: 2, expected: '2 kompetenser' },
+  { ns: 'builder', key: 'entryBadge.tips', locale: 'sv', count: 0, expected: '0 tips' },
+  { ns: 'builder', key: 'entryBadge.tips', locale: 'sv', count: 1, expected: '1 tips' },
+  { ns: 'builder', key: 'entryBadge.tips', locale: 'sv', count: 2, expected: '2 tips' },
+  { ns: 'builder', key: 'savedCvs.reminder', locale: 'sv', count: 0, expected: 'Du har 0 sparade CV. Öppna dem via Fler åtgärder › Mina CV.' },
+  { ns: 'builder', key: 'savedCvs.reminder', locale: 'sv', count: 1, expected: 'Du har 1 sparat CV. Öppna det via Fler åtgärder › Mina CV.' },
+  { ns: 'builder', key: 'savedCvs.reminder', locale: 'sv', count: 2, expected: 'Du har 2 sparade CV. Öppna dem via Fler åtgärder › Mina CV.' },
+  { ns: 'form', key: 'ideas.added', locale: 'sv', count: 0, expected: 'Tillagt. Jobbet har nu 0 prestationer.' },
+  { ns: 'form', key: 'ideas.added', locale: 'sv', count: 1, expected: 'Tillagt. Jobbet har nu 1 prestation.' },
+  { ns: 'form', key: 'ideas.added', locale: 'sv', count: 2, expected: 'Tillagt. Jobbet har nu 2 prestationer.' },
+  { ns: 'dialogs', key: 'common.pageSummary', locale: 'sv', count: 0, expected: '0 sidor · A4', vars: { paper: 'A4' } },
+  { ns: 'dialogs', key: 'common.pageSummary', locale: 'sv', count: 1, expected: '1 sida · A4', vars: { paper: 'A4' } },
+  { ns: 'dialogs', key: 'common.pageSummary', locale: 'sv', count: 2, expected: '2 sidor · A4', vars: { paper: 'A4' } },
+  { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'sv', count: 0, expected: '0 sidor · A4 · textstorlek 100 %', vars: { paper: 'A4', scale: 100 } },
+  { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'sv', count: 1, expected: '1 sida · A4 · textstorlek 100 %', vars: { paper: 'A4', scale: 100 } },
+  { ns: 'dialogs', key: 'pdfPreview.summaryScaled', locale: 'sv', count: 2, expected: '2 sidor · A4 · textstorlek 100 %', vars: { paper: 'A4', scale: 100 } },
 ]
 // Swedish cases are added with each namespace's sv.js, as { ns, key, locale: 'sv', count, expected }.
 for (const { ns: name, key, locale, count, expected, vars = {} } of pluralCases) {

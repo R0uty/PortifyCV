@@ -45,6 +45,6 @@ export async function copyShareLink(page) {
 // Opens the toolbar's language menu (1.7.14) and picks a builder language
 // by its own name: 'English', 'Suomi' or 'Svenska'.
 export async function chooseBuilderLanguage(page, name) {
-  await banner(page).getByRole('button', { name: /^(Language|Kieli)\b/ }).click()
+  await banner(page).getByRole('button', { name: /^(Language|Kieli|Språk)\b/ }).click()
   await page.getByRole('menuitemradio', { name: new RegExp(`^${name}\\b`) }).click()
 }
