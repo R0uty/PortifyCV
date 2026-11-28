@@ -682,7 +682,11 @@ function App({ route = null }) {
       // would otherwise have loaded already (ads aren't allowed on an app
       // screen like the builder). The language goes with it.
       if (viewRef.current !== 'builder') {
-        safeStorageSet(UI_LOCALE_STORAGE_KEY, localeRef.current)
+        // Content pages are English or Finnish only, so a stored Swedish
+        // survives the move from an English page; a /fi/ page still
+        // stores Finnish.
+        const keepSwedish = localeRef.current === 'en' && readStoredLocale() === 'sv'
+        if (!keepSwedish) safeStorageSet(UI_LOCALE_STORAGE_KEY, localeRef.current)
         window.location.assign(nextPath)
         return
       }

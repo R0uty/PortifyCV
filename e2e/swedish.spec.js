@@ -70,3 +70,21 @@ test.describe('Swedish', () => {
     await expect(dialog.getByRole('button', { name: 'Svenska', exact: true })).toHaveAttribute('aria-pressed', 'true')
   })
 })
+
+test.describe('Entering the builder from a content page', () => {
+  test('an English page keeps a stored Swedish', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'sv'))
+    await page.goto('/')
+    await page.getByRole('banner').getByRole('button', { name: 'Build my CV' }).click()
+    await expect(page).toHaveURL(/\/cv$/)
+    await expect(page.locator('html')).toHaveAttribute('lang', 'sv')
+  })
+
+  test('a Finnish page opens the builder in Finnish', async ({ page }) => {
+    await page.addInitScript(() => window.localStorage.setItem('ui-locale', 'sv'))
+    await page.goto('/fi')
+    await page.getByRole('banner').getByRole('button', { name: 'Tee CV' }).click()
+    await expect(page).toHaveURL(/\/cv$/)
+    await expect(page.locator('html')).toHaveAttribute('lang', 'fi')
+  })
+})
