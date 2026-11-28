@@ -202,7 +202,7 @@ export default {
     pasteLabel: 'Klistra in CV-text',
     pasteHint: 'Klistra in en bit av ett CV för att hitta namn, titel, kompetenser och en kort sammanfattning.',
     pastedAria: 'Inklistrad CV-text',
-    pastePlaceholder: 'Sven Svensson\nSenior Product Designer\nKompetenser: Figma, användarundersökningar, designsystem',
+    pastePlaceholder: 'Sven Svensson\nSenior Product Designer\nSkills: Figma, användarundersökningar, designsystem',
     importPasted: 'Importera inklistrad text',
   },
   atsCheck: {

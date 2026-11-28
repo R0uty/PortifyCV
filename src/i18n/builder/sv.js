@@ -58,7 +58,7 @@ export default {
     quickKicker: 'Snabbimport',
     quickBody: 'Klistra in en bit av ett CV för att hitta namn, titel, kompetenser och en kort sammanfattning.',
     pasteLabel: 'Inklistrad CV-text',
-    pastePlaceholder: 'Sven Svensson\nSenior Product Designer\nKompetenser: Figma, användarundersökningar, designsystem',
+    pastePlaceholder: 'Sven Svensson\nSenior Product Designer\nSkills: Figma, användarundersökningar, designsystem',
     pasteImport: 'Klistra in CV-text',
     importingJson: 'Importerar JSON...',
     importJson: 'Importera JSON',
