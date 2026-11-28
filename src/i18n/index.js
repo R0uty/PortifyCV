@@ -5,7 +5,7 @@
 // the Node pre-render and in scripts/check-i18n.mjs, so no React and no
 // window here (React helpers are in react.jsx).
 
-export const LOCALES = ['en', 'fi']
+export const LOCALES = ['en', 'fi', 'sv']
 export const DEFAULT_LOCALE = 'en'
 
 export function normalizeLocale(locale) {
@@ -48,8 +48,9 @@ function fill(text, vars) {
 // vars.count; a function value is called with vars; `{name}` is filled from
 // vars and left as is when vars has no `name`. Rich-text tags (`<0>…</0>`)
 // are returned untouched for <T> to render.
-function translate(messages, locale, key, vars) {
+function translate(messages, locales, locale, key, vars) {
   let used = normalizeLocale(locale)
+  if (!locales.includes(used)) used = DEFAULT_LOCALE
   let value = lookup(messages[used], key)
   if (value === undefined && used !== DEFAULT_LOCALE) {
     used = DEFAULT_LOCALE
@@ -65,13 +66,21 @@ function translate(messages, locale, key, vars) {
 
 // kind 'strings': keys read one at a time with t(), each checked for use in
 // src/. kind 'page': a page's whole copy object, read with copy(locale).
-export function createNamespace(name, messages, { kind = 'strings' } = {}) {
+// `locales` are the languages the namespace has files for (default: all of
+// LOCALES); t/copy for any other language use English. Content pages are
+// English and Finnish only (1.7.14).
+export function createNamespace(name, messages, { kind = 'strings', locales = LOCALES } = {}) {
+  const resolve = (locale) => {
+    const used = normalizeLocale(locale)
+    return locales.includes(used) ? used : DEFAULT_LOCALE
+  }
   return {
     name,
     kind,
+    locales,
     messages,
-    t: (locale, key, vars) => translate(messages, locale, key, vars),
-    copy: (locale) => messages[normalizeLocale(locale)] ?? messages[DEFAULT_LOCALE],
+    t: (locale, key, vars) => translate(messages, locales, locale, key, vars),
+    copy: (locale) => messages[resolve(locale)] ?? messages[DEFAULT_LOCALE],
   }
 }
 
@@ -141,7 +150,7 @@ function compareShapes(base, other, path, locale, errors) {
 export function parityErrors(namespace) {
   const errors = []
   const base = namespace.messages[DEFAULT_LOCALE]
-  for (const locale of LOCALES) {
+  for (const locale of namespace.locales) {
     if (!namespace.messages[locale]) {
       errors.push(`${namespace.name}: no ${locale} messages`)
       continue

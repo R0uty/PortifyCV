@@ -62,15 +62,19 @@ const { LOCALES, DEFAULT_LOCALE, normalizeLocale, createNamespace, parityErrors,
 const { DYNAMIC_KEYS } = await importFile(resolvePath(i18nDir, 'dynamicKeys.js'))
 
 // --- 1. The module's own cases ----------------------------------------------
-same('locales', [LOCALES, DEFAULT_LOCALE], [['en', 'fi'], 'en'])
-same('normalizeLocale', ['en', 'fi', 'sv', undefined, 'fi-FI'].map(normalizeLocale), ['en', 'fi', 'en', 'en', 'en'])
+same('locales', [LOCALES, DEFAULT_LOCALE], [['en', 'fi', 'sv'], 'en'])
+same('normalizeLocale', ['en', 'fi', 'sv', 'de', undefined, 'fi-FI'].map(normalizeLocale), ['en', 'fi', 'sv', 'en', 'en', 'en'])
+
+// Namespaces below that only have English and Finnish say so.
+const EN_FI = { locales: ['en', 'fi'] }
 
 const ns = createNamespace('test', {
   en: { a: 'Save', g: 'Hi {name}', p: { one: '{count} page', other: '{count} pages' }, f: (v) => `${v.n} min`, r: 'Read the <0>guide</0>.' },
   fi: { a: 'Tallenna', g: 'Hei {name}', p: { one: '{count} sivu', other: '{count} sivua' }, f: (v) => `${v.n} min`, r: 'Lue <0>opas</0>.' },
-})
+}, EN_FI)
 same('plain', ns.t('fi', 'a'), 'Tallenna')
-same('unknown locale falls back to en', ns.t('sv', 'a'), 'Save')
+same('a language the namespace lacks falls back to en', ns.t('sv', 'a'), 'Save')
+same('unknown locale falls back to en', ns.t('de', 'a'), 'Save')
 same('placeholder', ns.t('en', 'g', { name: 'Ada' }), 'Hi Ada')
 same('missing var stays', ns.t('en', 'g'), 'Hi {name}')
 same('plural 0/1/2 en', [0, 1, 2].map((count) => ns.t('en', 'p', { count })), ['0 pages', '1 page', '2 pages'])
@@ -78,18 +82,21 @@ same('plural 0/1/2 fi', [0, 1, 2].map((count) => ns.t('fi', 'p', { count })), ['
 same('function value', ns.t('en', 'f', { n: 5 }), '5 min')
 same('missing key returns the key', ns.t('en', 'nope'), 'nope')
 same('copy', ns.copy('fi').a, 'Tallenna')
+same('copy of a missing language is the English object', ns.copy('sv'), ns.messages.en)
 same('rich tags are left for <T>', ns.t('fi', 'r'), 'Lue <0>opas</0>.')
-same('a key missing in fi falls back to en', createNamespace('fb', { en: { x: { y: 'Yes' } }, fi: { x: {} } }).t('fi', 'x.y'), 'Yes')
-same('namespace shape', [ns.name, ns.kind, createNamespace('pg', { en: {}, fi: {} }, { kind: 'page' }).kind], ['test', 'strings', 'page'])
+same('a key missing in fi falls back to en', createNamespace('fb', { en: { x: { y: 'Yes' } }, fi: { x: {} } }, EN_FI).t('fi', 'x.y'), 'Yes')
+same('namespace shape', [ns.name, ns.kind, createNamespace('pg', { en: {}, fi: {} }, { kind: 'page', locales: ['en', 'fi'] }).kind], ['test', 'strings', 'page'])
 // parity detector on a broken pair
 check('parity passes a good pair', parityErrors(ns).length === 0, parityErrors(ns).join('; '))
-check('parity flags a missing key', parityErrors(createNamespace('bad', { en: { a: 'x', b: 'y' }, fi: { a: 'x' } })).length === 1)
-check('parity flags a placeholder mismatch', parityErrors(createNamespace('bad2', { en: { a: '{n} x' }, fi: { a: 'x' } })).length === 1)
-check('parity flags a tag mismatch', parityErrors(createNamespace('bad3', { en: { a: '<0>x</0>' }, fi: { a: 'x' } })).length === 1)
-check('parity flags an array length', parityErrors(createNamespace('bad4', { en: { a: ['x', 'y'] }, fi: { a: ['x'] } })).length === 1)
-check('parity flags a function on one side', parityErrors(createNamespace('bad5', { en: { a: () => 'x' }, fi: { a: 'x' } })).length === 1)
-check('parity flags a plural without other', parityErrors(createNamespace('bad6', { en: { a: { one: 'x', other: 'y' } }, fi: { a: { one: 'x' } } })).length === 1)
-check('parity flags a missing language', parityErrors(createNamespace('bad7', { en: { a: 'x' } })).length === 1)
+check('parity flags a missing key', parityErrors(createNamespace('bad', { en: { a: 'x', b: 'y' }, fi: { a: 'x' } }, EN_FI)).length === 1)
+check('parity flags a placeholder mismatch', parityErrors(createNamespace('bad2', { en: { a: '{n} x' }, fi: { a: 'x' } }, EN_FI)).length === 1)
+check('parity flags a tag mismatch', parityErrors(createNamespace('bad3', { en: { a: '<0>x</0>' }, fi: { a: 'x' } }, EN_FI)).length === 1)
+check('parity flags an array length', parityErrors(createNamespace('bad4', { en: { a: ['x', 'y'] }, fi: { a: ['x'] } }, EN_FI)).length === 1)
+check('parity flags a function on one side', parityErrors(createNamespace('bad5', { en: { a: () => 'x' }, fi: { a: 'x' } }, EN_FI)).length === 1)
+check('parity flags a plural without other', parityErrors(createNamespace('bad6', { en: { a: { one: 'x', other: 'y' } }, fi: { a: { one: 'x' } } }, EN_FI)).length === 1)
+check('parity flags a missing language', parityErrors(createNamespace('bad7', { en: { a: 'x' } }, EN_FI)).length === 1)
+same('a namespace without sv: parity is clean, t and copy use English', [parityErrors(createNamespace('two', { en: { a: 'x' }, fi: { a: 'y' } }, EN_FI)).length, createNamespace('two', { en: { a: 'x' }, fi: { a: 'y' } }, EN_FI).t('sv', 'a')], [0, 'x'])
+check('parity flags a missing sv', parityErrors(createNamespace('bad8', { en: { a: 'x' }, fi: { a: 'y' } })).join() === 'bad8: no sv messages')
 check('a plural value is recognised', isPluralValue({ one: 'a', other: 'b' }) && !isPluralValue({ title: 'a' }) && !isPluralValue({}))
 
 // --- Namespaces -----------------------------------------------------------------
@@ -113,8 +120,28 @@ for (const file of namespaceFiles) {
 console.log(`      ${namespaces.size} namespace(s)`)
 
 // --- 2. Parity ------------------------------------------------------------------
+// Namespaces whose sv.js is not written yet (1.7.14). Tasks 4-6 remove each
+// one as it gets Swedish; Task 7 deletes this list.
+const SWEDISH_PENDING = ['common', 'builderShell', 'cvForm', 'formInline', 'fieldFilter', 'cv', 'exports', 'letter', 'builder', 'form', 'dialogs', 'feedback', 'share']
+// Content pages have no Swedish address, so their namespaces stay en/fi.
+const CONTENT_ONLY_NAMESPACES = [
+  'pages/about', 'pages/atsGuide', 'pages/coverLetterExamples', 'pages/cvExamples', 'pages/cvSkills',
+  'pages/cybersecurityCv', 'pages/developerCv', 'pages/finnishCv', 'pages/freeTemplates', 'pages/guideLayout',
+  'pages/howToUse', 'pages/howToWrite', 'pages/itCv', 'pages/landing', 'pages/privacy', 'pages/templateDetail',
+] // reason: content pages have no Swedish address yet (1.7.14)
+const partial = [...namespaces.values()].filter(({ namespace }) => namespace.locales.length < LOCALES.length).map(({ namespace }) => namespace.name)
+const notListed = partial.filter((name) => !CONTENT_ONLY_NAMESPACES.includes(name))
+check('namespaces lacking a language are in CONTENT_ONLY_NAMESPACES', notListed.length === 0, `not listed: ${notListed.join(', ')}`)
+const staleContentOnly = CONTENT_ONLY_NAMESPACES.filter((name) => !partial.includes(name))
+check('every CONTENT_ONLY_NAMESPACES entry still lacks a language', staleContentOnly.length === 0, `stale: ${staleContentOnly.join(', ')}`)
+const stalePending = SWEDISH_PENDING.filter((name) => !namespaces.has(name) || namespaces.get(name).namespace.locales.includes('sv') === false)
+check('every SWEDISH_PENDING entry is a namespace that takes sv', stalePending.length === 0, `stale: ${stalePending.join(', ')}`)
+console.log(`      Swedish pending: ${SWEDISH_PENDING.join(', ') || '(none)'}`)
 for (const { namespace } of namespaces.values()) {
-  const errors = parityErrors(namespace)
+  const checked = SWEDISH_PENDING.includes(namespace.name)
+    ? { ...namespace, locales: namespace.locales.filter((locale) => locale !== 'sv') }
+    : namespace
+  const errors = parityErrors(checked)
   check(`parity: ${namespace.name}`, errors.length === 0, errors.join('\n        '))
 }
 
@@ -239,6 +266,10 @@ const SCAN_PATTERNS = [
   { name: "=== 'fi' ?", re: /[!=]==\s*['"]fi['"]\s*\)?\s*\?(?![.?])/g },
   { name: "=== 'en' ?", re: /[!=]==\s*['"]en['"]\s*\)?\s*\?(?![.?])/g },
   { name: "if (x === 'fi')", re: /\bif\s*\(\s*[\w.]+\s*[!=]==\s*['"]fi['"]\s*\)/g },
+  { name: 'isSwedish ?', re: /\bisSwedish\s*\?(?![.?])/g },
+  { name: "=== 'sv' ?", re: /[!=]==\s*['"]sv['"]\s*\)?\s*\?(?![.?])/g },
+  { name: "if (x === 'sv')", re: /\bif\s*\(\s*[\w.]+\s*[!=]==\s*['"]sv['"]\s*\)/g },
+  { name: 'sv: map', re: /(?:^|[\s{,])sv\s*:\s*['"`[{]/g },
   { name: 'fi: map', re: /(?:^|[\s{,])fi\s*:\s*['"`[{]/g },
   { name: 'xFi field', re: /\b[a-z][\w$]*Fi\b/g, code: true },
   { name: '.fi read', re: /[\w$]+(?:\??\.[\w$]+)*\??\.fi\b/g, code: true },
@@ -249,6 +280,8 @@ const SCAN_PATTERNS = [
 const LINE_END_PATTERNS = [
   { name: 'isFinnish ⏎ ?', re: /\bisFinnish\s*\)?\s*$/ },
   { name: "=== 'fi' ⏎ ?", re: /[!=]==\s*['"]fi['"]\s*\)?\s*$/ },
+  { name: 'isSwedish ⏎ ?', re: /\bisSwedish\s*\)?\s*$/ },
+  { name: "=== 'sv' ⏎ ?", re: /[!=]==\s*['"]sv['"]\s*\)?\s*$/ },
   { name: "=== 'en' ⏎ ?", re: /[!=]==\s*['"]en['"]\s*\)?\s*$/ },
 ]
 
@@ -285,6 +318,8 @@ function scanSource(text) {
   return hits
 }
 
+same('scan: sv branches', ["locale === 'sv' ? 'Ja' : 'Yes'", "isSwedish ? 'Ja' : 'Yes'", "{ en: 'Yes', sv: 'Ja' }"].map((s) => scanSource(s).length), [1, 1, 1])
+same('scan: sv at line end and if', [scanSource("const a = locale === 'sv'\n  ? 'Ja'\n  : 'Yes'").length, scanSource("if (locale === 'sv') {\n  x()\n}").length], [1, 1])
 same('scan: isFinnish ?', scanSource("const a = isFinnish ? 'Kyllä' : 'Yes'").length, 1)
 same('scan: two on a line', scanSource("x(isFinnish ? 'a' : 'b', isFinnish ? 'c' : 'd')").length, 2)
 same('scan: isFinnish at line end', scanSource("const a = isFinnish\n  ? 'Kyllä'\n  : 'Yes'").length, 1)
@@ -467,7 +502,9 @@ const pluralCases = [
   { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'en', count: 2, expected: '2 metrics hints' },
   { ns: 'feedback', key: 'suggestions.metricsHints', locale: 'fi', count: 2, expected: '2 mittarivinkkiä' },
 ]
+// Swedish cases are added with each namespace's sv.js, as { ns, key, locale: 'sv', count, expected }.
 for (const { ns: name, key, locale, count, expected, vars = {} } of pluralCases) {
+  if (locale === 'sv' && SWEDISH_PENDING.includes(name)) continue
   const owner = namespaces.get(name)
   same(`plural ${name}:${key} ${locale} ${count}`, owner ? owner.namespace.t(locale, key, { ...vars, count }) : `(no namespace ${name})`, expected)
 }

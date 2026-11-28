@@ -6,4 +6,4 @@ import fi from './fi.js'
 // LandingPage.jsx and its templates section (LandingTemplatesByField.jsx,
 // which reads templateCardAlt with t()). LandingPage is in the entry chunk,
 // so this is too, as its text was before.
-export const landingPage = createNamespace('pages/landing', { en, fi }, { kind: 'page' })
+export const landingPage = createNamespace('pages/landing', { en, fi }, { kind: 'page', locales: ['en', 'fi'] })
