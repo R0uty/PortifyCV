@@ -29,7 +29,7 @@ import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
-import { formatDateRange, formatLinkDisplayValue } from './shared'
+import { formatDateRange, formatLinkDisplayValue, kickerText } from './shared'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { PORTRAIT_DEFAULT_ACCENT_COLOR } from './portrait'
 import { renderExperienceEntry } from './directEditExperienceEntry'
@@ -358,7 +358,7 @@ export default function PortraitShowcase({
       <main className="portrait-showcase__main" data-export-primary="true">
         <header className="portrait-showcase__header" data-export-header="true">
           <p className="portrait-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className="portrait-showcase__name" data-cv-name>
             <EditableField

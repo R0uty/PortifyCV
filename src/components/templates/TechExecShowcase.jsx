@@ -31,6 +31,7 @@ import {
   formatLinkDisplayValue,
   getSafeHref,
   createSectionRouter,
+  kickerText,
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
@@ -521,7 +522,7 @@ export default function TechExecShowcase({
       <header className="tech-exec-showcase__masthead" data-export-header="true">
         <div className="min-w-0">
           <p className="tech-exec-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className="tech-exec-showcase__name" data-cv-name>
             {directEditDispatch ? (

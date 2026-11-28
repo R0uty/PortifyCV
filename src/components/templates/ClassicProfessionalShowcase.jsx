@@ -27,6 +27,7 @@ import {
   devIcons,
   formatDateRange,
   formatLinkDisplayValue,
+  kickerText,
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
@@ -260,7 +261,7 @@ export default function ClassicProfessionalShowcase({
     >
       <header data-export-header="true" className="classic-professional-showcase__header">
         <p className="classic-professional-showcase__kicker" data-export-ignore="true">
-          {templateConfig.label} {cv.t(locale, 'kicker.template')}
+          {kickerText(locale, templateConfig.label)}
         </p>
         <CvHeading as="h1" className="classic-professional-showcase__name" data-cv-name>
           <EditableField

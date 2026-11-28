@@ -39,6 +39,7 @@ import {
   formatLinkDisplayValue,
   getSafeHref,
   createSectionRouter,
+  kickerText,
 } from './shared'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 import { cv } from '../../i18n/cv'
@@ -650,7 +651,7 @@ export default function ExecutiveShowcase({
             </div>
           ) : null}
           <p className="executive-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className="executive-showcase__name" data-cv-name>
             {directEditDispatch ? (

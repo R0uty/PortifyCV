@@ -5,10 +5,12 @@
 // a template words its own way lives under templates.<templateId>.
 export default {
   kicker: {
-    // Follows the template's name in the kicker above the CV's name
-    // ("Developer Template"), as its own text node so the kicker renders
-    // exactly as before 1.7.13 (a merged string shapes a hair differently).
-    template: 'Template',
+    // The kicker above the CV's name ("Developer Template"), one sentence
+    // with the template's name as {template}. The Showcases draw it with
+    // kickerText() (templates/shared.jsx), which keeps each word and space
+    // its own text node, exactly as before 1.7.13 (a merged string shapes a
+    // hair differently).
+    template: '{template} Template',
   },
   atsMode: 'ATS-friendly mode',
   contact: {

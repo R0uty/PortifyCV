@@ -36,7 +36,7 @@ import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
-import { formatDateRange, formatLinkLabel, formatLinkDisplayValue, parseSkillCategories, buildEditableSkillCategories } from './shared'
+import { formatDateRange, formatLinkLabel, formatLinkDisplayValue, parseSkillCategories, buildEditableSkillCategories, kickerText } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
 import { accentSoftFill } from '../../utils/templateAccents'
@@ -526,7 +526,7 @@ export default function EuropeanShowcase({
       <header className="european-showcase__header" data-export-header="true">
         <div className="min-w-0">
           <p className="european-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className="european-showcase__name" data-cv-name>
             {directEditDispatch ? (

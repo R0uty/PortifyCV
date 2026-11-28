@@ -1,7 +1,7 @@
 // Text drawn on the CV page, in Finnish (keys as in en.js).
 export default {
   kicker: {
-    template: 'pohja',
+    template: '{template} pohja',
   },
   atsMode: 'ATS-ystävällinen tila',
   contact: {

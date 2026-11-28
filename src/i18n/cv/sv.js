@@ -4,7 +4,7 @@
 // ("2021 – nu"), lower case as Swedish writes it.
 export default {
   kicker: {
-    template: 'mall',
+    template: 'Mall: {template}',
   },
   atsMode: 'ATS-anpassat läge',
   contact: {
@@ -180,8 +180,8 @@ export default {
     },
     techExec: {
       experience: 'Arbetserfarenhet',
-      coreStrengths: 'Kärnstyrkor',
-      coreStrengthsEmpty: 'Kärnstyrkor visas här.',
+      coreStrengths: 'Kärnkompetenser',
+      coreStrengthsEmpty: 'Kärnkompetenser visas här.',
       footerQuote: '"Säkerhet är inte en produkt, utan en process."',
     },
   },

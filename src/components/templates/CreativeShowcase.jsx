@@ -28,7 +28,7 @@ import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
-import { parseSkillCategories, formatDateRange, formatLinkDisplayValue, createSectionRouter } from './shared'
+import { parseSkillCategories, formatDateRange, formatLinkDisplayValue, createSectionRouter, kickerText } from './shared'
 import { accentSoftFill, accentInkMix } from '../../utils/templateAccents'
 import { CREATIVE_DEFAULT_ACCENT_COLOR } from './creative'
 import EditableField from '../EditableField'
@@ -500,7 +500,7 @@ export default function CreativeShowcase({
       <header className="creative-showcase__header" data-export-header="true">
         <div className="min-w-0">
           <p className="creative-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className="creative-showcase__name" data-cv-name>
             {directEditDispatch ? (

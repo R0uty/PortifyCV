@@ -31,6 +31,7 @@ import {
   formatDateRange,
   formatLinkDisplayValue,
   getSafeHref,
+  kickerText,
 } from './shared'
 import { TIMELINE_DEFAULT_ACCENT_COLOR } from './timeline'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
@@ -504,7 +505,7 @@ export default function TimelineShowcase({
 
         <div className="min-w-0">
           <p className="timeline-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className="timeline-showcase__name" data-cv-name>
             {directEditDispatch ? (

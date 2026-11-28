@@ -34,6 +34,7 @@ import {
   formatLinkDisplayValue,
   getSafeHref,
   createSectionRouter,
+  kickerText,
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
@@ -567,7 +568,7 @@ export default function ModernShowcase({
       <header data-export-header="true" className="modern-showcase__header">
         <div className="min-w-0">
           <p className="modern-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className="modern-showcase__name" data-cv-name>
             {directEditDispatch ? (

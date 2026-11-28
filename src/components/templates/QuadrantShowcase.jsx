@@ -40,6 +40,7 @@ import {
   formatLinkLabel,
   formatLinkDisplayValue,
   getSafeHref,
+  kickerText,
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
@@ -462,7 +463,7 @@ export default function QuadrantShowcase({
           </div>
         ) : null}
         <p className="quadrant-showcase__kicker" data-export-ignore="true">
-          {templateConfig.label} {cv.t(locale, 'kicker.template')}
+          {kickerText(locale, templateConfig.label)}
         </p>
         <CvHeading as="h1" className="quadrant-showcase__name" data-cv-name>
           {directEditDispatch ? (

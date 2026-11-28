@@ -1957,7 +1957,7 @@ function CVPreview({
             >
               {atsFriendlyMode
                 ? cv.t(locale, 'atsMode')
-                : `${templateConfig.label} ${cv.t(locale, 'kicker.template')}`}
+                : cv.t(locale, 'kicker.template', { template: templateConfig.label })}
             </p>
 
             {/* Full name heading — uses template-specific font size and weight */}

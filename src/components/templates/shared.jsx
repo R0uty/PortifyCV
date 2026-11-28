@@ -382,6 +382,21 @@ function createSectionRouter(templateConfig, renderMainSection, renderSidebarSec
   }
 }
 
+// The kicker above the CV's name ("Developer Template", "Mall: Utvecklare"):
+// the cv namespace's one sentence with the template's name in place of
+// {template}, returned as text pieces, one per word and per space. React
+// renders each as its own text node, the way the kicker was drawn before
+// 1.7.14 (`{label} {word}`), so English and Finnish render exactly as
+// before (a merged string shapes a hair differently in the thumbnails).
+function kickerText(locale, templateLabel) {
+  const pieces = []
+  cv.t(locale, 'kicker.template').split('{template}').forEach((literal, index) => {
+    if (index > 0) pieces.push(templateLabel)
+    pieces.push(...literal.split(/(\s+)/).filter((piece) => piece !== ''))
+  })
+  return pieces
+}
+
 // Export all shared utilities for use by CVPreview.jsx and template configs
 export {
   devIcons,            // SVG icon components for link types
@@ -396,4 +411,5 @@ export {
   formatLinkDisplayValue, // Re-exported from utils/shared
   getSafeHref,         // Re-exported from utils/shared
   createSectionRouter, // Home-renderer routing for section column moves
+  kickerText,          // The kicker sentence with the template's name, as text pieces
 }

@@ -54,6 +54,7 @@ import {
   formatLinkDisplayValue,
   getSafeHref,
   createSectionRouter,
+  kickerText,
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
@@ -705,7 +706,7 @@ export default function PortfolioShowcase({
       <header data-export-header="true" className="portfolio-showcase__header">
         <div className="min-w-0">
           <p className="portfolio-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className="portfolio-showcase__name" data-cv-name>
             {directEditDispatch ? (

@@ -27,6 +27,7 @@ import {
   formatDateRange,
   formatLinkDisplayValue,
   createSectionRouter,
+  kickerText,
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
@@ -437,7 +438,7 @@ export default function NavyProfessionalShowcase({
             </div>
           ) : null}
           <p className="navy-professional-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className="navy-professional-showcase__name" data-cv-name>
             {directEditDispatch ? (

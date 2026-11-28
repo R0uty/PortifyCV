@@ -26,7 +26,7 @@ import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
-import { formatDateRange, formatLinkDisplayValue } from './shared'
+import { formatDateRange, formatLinkDisplayValue, kickerText } from './shared'
 import { accentSoftFill } from '../../utils/templateAccents'
 import { EDITORIAL_DEFAULT_ACCENT_COLOR } from './editorial'
 import { renderExperienceEntry } from './directEditExperienceEntry'
@@ -337,7 +337,7 @@ export default function EditorialShowcase({
       <header className="editorial-showcase__header" data-export-header="true">
         <div className="min-w-0">
           <p className="editorial-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className="editorial-showcase__name" data-cv-name>
             <EditableField

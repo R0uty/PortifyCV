@@ -39,6 +39,7 @@ import {
   formatDateRange,
   formatLinkLabel,
   formatLinkDisplayValue,
+  kickerText,
 } from './shared'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
 import { cv } from '../../i18n/cv'
@@ -500,7 +501,7 @@ export default function CompactShowcase({
       <header data-export-header="true" className="compact-showcase__header">
         <div className="min-w-0">
           <p className="compact-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className="compact-showcase__name" data-cv-name>
             {directEditDispatch ? (

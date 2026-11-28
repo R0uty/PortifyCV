@@ -33,6 +33,7 @@ import {
   formatLinkDisplayValue,
   getSafeHref,
   createSectionRouter,
+  kickerText,
 } from './shared'
 import { MODERN_ORANGE_DEFAULT_ACCENT_COLOR } from './modernOrange'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
@@ -563,7 +564,7 @@ export default function ModernOrangeShowcase({
     >
       <header data-export-header="true" className="modern-orange-showcase__header">
         <p className="modern-orange-showcase__kicker" data-export-ignore="true">
-          {templateConfig.label} {cv.t(locale, 'kicker.template')}
+          {kickerText(locale, templateConfig.label)}
         </p>
         <CvHeading as="h1" className="modern-orange-showcase__name" data-cv-name>
           {directEditDispatch ? (

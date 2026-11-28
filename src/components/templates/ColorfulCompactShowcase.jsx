@@ -29,7 +29,7 @@ import CvHeading from '../CvHeading'
 
 import { createCvSnapshot } from '../../utils/cvSnapshot'
 import { createSectionVisibility, normalizeSectionOrder, isPhotoVisibleForTemplate } from '../../utils/cvForm'
-import { formatDateRange, formatLinkDisplayValue, createSectionRouter } from './shared'
+import { formatDateRange, formatLinkDisplayValue, createSectionRouter, kickerText } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableChip } from '../EditableList'
 import { getExperienceBullets, getExperienceAchievements, getExperienceTechnologies } from './directEditExperienceEntry'
@@ -483,7 +483,7 @@ export default function ColorfulCompactShowcase({
       <header className="colorful-compact-showcase__header" data-export-header="true">
         <div className="min-w-0">
           <p className="colorful-compact-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           {/* The two-tone split can't live inside one contentEditable field,
               so Direct Edit shows the whole name as one field (in the lead

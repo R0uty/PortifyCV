@@ -32,6 +32,7 @@ import {
   formatLinkDisplayValue,
   getSafeHref,
   createSectionRouter,
+  kickerText,
 } from './shared'
 import EditableField from '../EditableField'
 import EditableList, { EditableCategorizedChip } from '../EditableList'
@@ -645,7 +646,7 @@ export default function DeveloperShowcase({
       <header data-export-header="true" className="dev-showcase__header">
         <div className="min-w-0">
           <p className="dev-showcase__kicker" data-export-ignore="true">
-            {templateConfig.label} {cv.t(locale, 'kicker.template')}
+            {kickerText(locale, templateConfig.label)}
           </p>
           <CvHeading as="h1" className={`dev-showcase__name ${gradientEnabled ? '' : 'dev-showcase__name--solid'}`} data-cv-name>
             {directEditDispatch ? (
