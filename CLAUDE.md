@@ -478,8 +478,8 @@ by `Intl.PluralRules` on `vars.count`; a function value called with
 `vars`) and `ns.copy(locale)` (a whole copy object). `locales` (default: all of
 `LOCALES`) names the languages a namespace has files for; any other
 language reads English. The module is plain JS with no `window`, so it
-runs in the Node pre-render and in the check scripts (`INTL_LOCALES` there
-maps each language to its `Intl` tag). Each namespace is a folder,
+runs in the Node pre-render and in the check scripts (`src/i18n/index.js` also exports
+`INTL_LOCALES`, which maps each language to its `Intl` tag). Each namespace is a folder,
 `src/i18n/<namespace>/en.js`, `fi.js`, `sv.js` and an
 `index.js` that calls `createNamespace`, and only the modules that show
 its text import it, so a lazy page's text stays in that page's chunk. The
@@ -514,7 +514,8 @@ English's keys, array lengths, functions, plurals with `one`/`other`,
 namespace appears as a literal in `src/`, the plural cases
 (`pluralCases`: the exact text for counts 0, 1 and 2 in each language),
 and scans `src/` for an inline language branch (`isFinnish ? …`,
-`locale === 'fi' ? …`, `{ en: …, fi: … }`, `labelFi`, `x[locale]`).
+`isSwedish`, `locale === 'fi' ? …`, `=== 'sv'`, `{ en: …, fi: … }`,
+`sv:` maps, `labelFi`, `x[locale]`).
 Its `ALLOWLIST` names the branches that stay, each with a reason (a stale
 entry fails): logic (locale codes, Intl formatting locales, Finnish or
 English addresses, the flag icon, the skill-category regexes, the date
@@ -538,14 +539,22 @@ built from fragments), give a plural a `pluralCases` entry, and run
 `check:i18n`. To add a language, add its file to every namespace folder
 and to that `index.js`'s `createNamespace` call (or leave it out of a
 content namespace's `locales` and list that in `CONTENT_ONLY_NAMESPACES`),
-add it to `LOCALES`, `CV_LANGUAGES` and `INTL_LOCALES` (parity then fails
-on any namespace that lacks it), give every registry label map its key,
+add it to `LOCALES`, `CV_LANGUAGES` and `INTL_LOCALES` (all in
+`src/i18n/index.js`; parity then fails on any namespace that lacks it),
+to `LANGUAGE_CHOICES` in `Toolbar.jsx`, the CV-language list in
+`SettingsModal.jsx`, `OG_LOCALES` in `App.jsx` and `LocaleFlagIcon`,
+give every registry label map its key,
 add the language's lists in `cvFeedback.js` (`WHOLE_WORD_WEAK_PHRASES`
 and the other closed phrase lists) and the skill patterns in `shared.jsx`,
 and extend the allowlisted places above. Swedish was written without a
 native reviewer; `docs/superpowers/notes/2026-11-28-swedish-review.md`
 lists what to read. The builder's toolbar has a language menu (English,
-Suomi, Svenska) and Settings › CV language offers all three.
+Suomi, Svenska) and Settings › CV language offers all three. Content
+pages stay English and Finnish: the content-page header's language switch
+treats a stored `sv` as "not Finnish" (it goes to the Finnish twin, then
+back to English), and entering the builder from an English content page
+keeps a stored `sv` (`goToBuilder` writes nothing then), while a `/fi/`
+page still stores `fi`.
 
 **The CV has its own language (1.7.5).** `formData.cvLanguage` (`''` =
 follow the app, `'en'`, `'fi'`, `'sv'`; Settings › CV language) decides the

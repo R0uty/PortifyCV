@@ -25,11 +25,6 @@ import CvStyleSwitcher from './CvStyleSwitcher'
 import CvHeadingColorSwitcher from './CvHeadingColorSwitcher'
 import { builderShell } from '../i18n/builderShell'
 
-// Open/close plumbing shared by the toolbar's three popovers (Design,
-// More, Export): an outside click, Escape or tabbing out closes one, and
-// opening it moves focus to its first item (the ARIA menu-button pattern,
-// so keyboard users don't have to Tab past the trigger). `itemSelector`
-// picks the focusable items for that and for the arrow keys.
 // The language menu's choices; names stay in their own language.
 const LANGUAGE_CHOICES = [
   ['en', 'English'],
@@ -37,6 +32,11 @@ const LANGUAGE_CHOICES = [
   ['sv', 'Svenska'],
 ]
 
+// Open/close plumbing shared by the toolbar's four popovers (Design,
+// More, Export, Language): an outside click, Escape or tabbing out closes one, and
+// opening it moves focus to its first item (the ARIA menu-button pattern,
+// so keyboard users don't have to Tab past the trigger). `itemSelector`
+// picks the focusable items for that and for the arrow keys.
 function useToolbarPopover(itemSelector) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)

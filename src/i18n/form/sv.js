@@ -275,9 +275,9 @@ export default {
     moveSectionUp: 'Flytta avsnittet uppåt',
     moveSectionDown: 'Flytta avsnittet nedåt',
     close: 'Stäng',
-    column: 'Kolumn',
+    column: 'Spalt',
     columns: {
-      main: 'Huvudkolumn',
+      main: 'Huvudspalt',
       sidebar: 'Sidofält',
     },
   },

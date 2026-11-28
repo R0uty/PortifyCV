@@ -47,7 +47,7 @@ export default {
     strong: 'Stark',
     solid: 'Bra',
     needsPolish: 'Behöver putsas',
-    needsWork: 'Behöver arbete',
+    needsWork: 'Behöver förbättras',
     keywordMissing: 'Lägg till fler sökord för tjänsten i din titel, dina kompetenser och din erfarenhet.',
     keywordGood: 'Bra täckning av sökord i sammanfattningen och erfarenheten.',
     keywordImprove: 'Upprepa viktiga sökord från tjänsten du söker i sammanfattningen och i punkterna under erfarenhet.',
