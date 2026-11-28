@@ -154,7 +154,6 @@ export default function EuropeanShowcase({
   accentColor = EUROPEAN_DEFAULT_ACCENT_COLOR,
   directEditDispatch = null,
 }) {
-  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
   const rootRef = useRef(null)
@@ -190,14 +189,14 @@ export default function EuropeanShowcase({
   ]
 
   const skillCategories = useMemo(
-    () => parseSkillCategories(snapshot.skills, isFinnish),
-    [snapshot.skills, isFinnish],
+    () => parseSkillCategories(snapshot.skills, locale),
+    [snapshot.skills, locale],
   )
   // Editing branch only: the same grouping over formData.skills, each chip
   // carrying its ORIGINAL flat-array index so removal hits the right skill.
   const editableSkillCategories = useMemo(
-    () => buildEditableSkillCategories(formData.skills, isFinnish),
-    [formData.skills, isFinnish],
+    () => buildEditableSkillCategories(formData.skills, locale),
+    [formData.skills, locale],
   )
 
   const sectionVisibility = {

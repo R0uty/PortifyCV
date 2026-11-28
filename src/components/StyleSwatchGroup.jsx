@@ -12,26 +12,27 @@ import { getTemplateVariants, getVariantSwatches } from '../utils/templateVarian
 // a caption after them (1.6.7): touch users can't hover for the tooltip.
 // The caption is aria-hidden — each radio already announces its own name.
 function StyleSwatchGroup({ templateId, value, onChange, locale = 'en', name, label, size = 'card' }) {
-  const lang = locale === 'fi' ? 'fi' : 'en'
+  // The look's name in the page's language (templateVariants.js's { en, fi, sv }).
+  const labelOf = (label) => label[locale] ?? label.en
   const variants = getTemplateVariants(templateId)
 
   if (variants.length < 2) {
     return null
   }
 
-  const checkedLabel = (variants.find((variant) => variant.id === value) ?? variants[0]).label[lang]
+  const checkedLabel = labelOf((variants.find((variant) => variant.id === value) ?? variants[0]).label)
 
   return (
     <div role="radiogroup" aria-label={label} className={`style-swatches style-swatches--${size}`}>
       {variants.map((variant) => (
-        <label key={variant.id} className="style-swatches__option" title={variant.label[lang]}>
+        <label key={variant.id} className="style-swatches__option" title={labelOf(variant.label)}>
           <input
             type="radio"
             name={name}
             value={variant.id}
             checked={variant.id === value}
             onChange={() => onChange(variant.id)}
-            aria-label={variant.label[lang]}
+            aria-label={labelOf(variant.label)}
           />
           <span className="style-swatches__strip" aria-hidden="true">
             {getVariantSwatches(templateId, variant).map((color, index) => (
@@ -39,7 +40,7 @@ function StyleSwatchGroup({ templateId, value, onChange, locale = 'en', name, la
             ))}
           </span>
           {size === 'page' ? (
-            <span className="style-swatches__label" aria-hidden="true">{variant.label[lang]}</span>
+            <span className="style-swatches__label" aria-hidden="true">{labelOf(variant.label)}</span>
           ) : null}
         </label>
       ))}

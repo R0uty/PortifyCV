@@ -202,7 +202,6 @@ export default function ExecutiveShowcase({
   accentColor = EXECUTIVE_DEFAULT_ACCENT_COLOR,
   directEditDispatch = null,
 }) {
-  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
   const showSidebar = showcaseConfig.showSidebar !== false
@@ -234,16 +233,16 @@ export default function ExecutiveShowcase({
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
-    () => parseSkillCategories(snapshot.skills, isFinnish),
-    [snapshot.skills, isFinnish],
+    () => parseSkillCategories(snapshot.skills, locale),
+    [snapshot.skills, locale],
   )
   // Editing-branch-only: the same categorization, but computed off the raw
   // formData.skills array (not the trimmed snapshot) and with each item's
   // ORIGINAL flat-array index attached — see buildEditableSkillCategories
   // in shared.jsx for why a per-text queue is used instead of a plain Map.
   const editableSkillCategories = useMemo(
-    () => buildEditableSkillCategories(formData.skills, isFinnish),
-    [formData.skills, isFinnish],
+    () => buildEditableSkillCategories(formData.skills, locale),
+    [formData.skills, locale],
   )
 
   const sectionVisibility = {

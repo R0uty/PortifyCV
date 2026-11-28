@@ -184,7 +184,6 @@ export default function DeveloperShowcase({
   showcaseConfig = {},
   directEditDispatch = null,
 }) {
-  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
   // Config flags read from the template config object (see developer.js's
@@ -220,14 +219,14 @@ export default function DeveloperShowcase({
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
-    () => parseSkillCategories(snapshot.skills, isFinnish),
-    [snapshot.skills, isFinnish],
+    () => parseSkillCategories(snapshot.skills, locale),
+    [snapshot.skills, locale],
   )
   // Editing branch only: the same grouping over formData.skills, each chip
   // carrying its ORIGINAL flat-array index so removal hits the right skill.
   const editableSkillCategories = useMemo(
-    () => buildEditableSkillCategories(formData.skills, isFinnish),
-    [formData.skills, isFinnish],
+    () => buildEditableSkillCategories(formData.skills, locale),
+    [formData.skills, locale],
   )
 
   const sectionVisibility = {

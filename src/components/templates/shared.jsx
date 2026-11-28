@@ -262,19 +262,24 @@ const contactIcons = {
   ),
 }
 
+// Regex patterns for each skill category, per CV language. The first
+// matching pattern determines the category assignment; the Finnish and
+// Swedish sets keep the English words, since skills are often written in
+// English whatever the CV's language.
+const SKILL_CATEGORY_PATTERNS = {
+  en: { languages: /language|programming|lang/i, frameworks: /framework|library/i, databases: /database|db|sql/i, cloud: /cloud|aws|azure|gcp/i, devops: /devops|ci\/cd|docker|kubernetes|k8s|jenkins|pipeline/i, security: /security/i },
+  fi: { languages: /kiel|ohjelmointikiel|programming/i, frameworks: /framework|kehyk|library|kirjasto/i, databases: /tietokanta|database|db|sql/i, cloud: /pilvi|cloud|aws|azure|gcp/i, devops: /devops|ci\/cd|docker|kubernetes|k8s|jenkins|pipeline/i, security: /turva|security|tietoturva/i },
+  sv: { languages: /språk|programmering|programming|language/i, frameworks: /ramverk|bibliotek|framework|library/i, databases: /databas|database|db|sql/i, cloud: /moln|cloud|aws|azure|gcp/i, devops: /devops|ci\/cd|docker|kubernetes|k8s|jenkins|pipeline/i, security: /säkerhet|security/i },
+}
+
 // Groups an array of skill strings into categorized buckets using regex pattern matching.
 // Returns an array of { label, items } objects sorted by category definition order.
-// Supports Finnish and English category labels and matching patterns.
+// `locale` is the CV's language; its labels come from the cv namespace.
 // Skills that don't match any pattern fall into the "Other" bucket.
-function parseSkillCategories(skills, isFinnish) {
+function parseSkillCategories(skills, locale) {
   // Accumulator object — keys are category names, values are arrays of matching skill strings
   const categories = {}
-
-  // Regex patterns for each skill category, with Finnish and English variants.
-  // The first matching pattern determines the category assignment.
-  const categoryPatterns = isFinnish
-    ? { languages: /kiel|ohjelmointikiel|programming/i, frameworks: /framework|kehyk|library|kirjasto/i, databases: /tietokanta|database|db|sql/i, cloud: /pilvi|cloud|aws|azure|gcp/i, devops: /devops|ci\/cd|docker|kubernetes|k8s|jenkins|pipeline/i, security: /turva|security|tietoturva/i }
-    : { languages: /language|programming|lang/i, frameworks: /framework|library/i, databases: /database|db|sql/i, cloud: /cloud|aws|azure|gcp/i, devops: /devops|ci\/cd|docker|kubernetes|k8s|jenkins|pipeline/i, security: /security/i }
+  const categoryPatterns = SKILL_CATEGORY_PATTERNS[locale] ?? SKILL_CATEGORY_PATTERNS.en
 
   // Iterate each skill and test against category patterns in order
   for (const skill of skills) {
@@ -296,8 +301,7 @@ function parseSkillCategories(skills, isFinnish) {
     }
   }
 
-  // Human-readable labels for each category key, with Finnish translations
-  const locale = isFinnish ? 'fi' : 'en'
+  // Human-readable labels for each category key, in the CV's language
   const categoryLabels = {
     languages: cv.t(locale, 'skillCategories.languages'),
     frameworks: cv.t(locale, 'skillCategories.frameworks'),
@@ -321,8 +325,8 @@ function parseSkillCategories(skills, isFinnish) {
 // (not a plain Map — a Map collapses duplicate skill text to one index, which
 // Round 5's final review found reachable via the app's JSON-import feature and
 // fixed). Used by every categorized-skills template's Direct Edit wiring.
-function buildEditableSkillCategories(skills, isFinnish) {
-  const grouped = parseSkillCategories(skills, isFinnish)
+function buildEditableSkillCategories(skills, locale) {
+  const grouped = parseSkillCategories(skills, locale)
   const indexQueueByText = new Map()
   skills.forEach((skill, index) => {
     const queue = indexQueueByText.get(skill)

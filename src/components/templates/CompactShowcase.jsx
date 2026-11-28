@@ -149,7 +149,6 @@ export default function CompactShowcase({
   accentColor = COMPACT_DEFAULT_ACCENT_COLOR,
   directEditDispatch = null,
 }) {
-  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
   const showTwoColumn = showcaseConfig.compactTwoColumn === true
@@ -182,8 +181,8 @@ export default function CompactShowcase({
 
   const linkEntries = Object.entries(snapshot.links)
   const skillCategories = useMemo(
-    () => parseSkillCategories(snapshot.skills, isFinnish),
-    [snapshot.skills, isFinnish],
+    () => parseSkillCategories(snapshot.skills, locale),
+    [snapshot.skills, locale],
   )
   // Editing-branch-only: the same categorization, but computed off the raw
   // formData.skills array (not the trimmed snapshot) and with each item's
@@ -193,8 +192,8 @@ export default function CompactShowcase({
   // shared.jsx for why a per-text queue is used instead of a plain Map
   // (duplicate-text skills are reachable via JSON import).
   const editableSkillCategories = useMemo(
-    () => buildEditableSkillCategories(formData.skills, isFinnish),
-    [formData.skills, isFinnish],
+    () => buildEditableSkillCategories(formData.skills, locale),
+    [formData.skills, locale],
   )
 
   const sectionVisibility = {

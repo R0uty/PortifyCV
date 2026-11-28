@@ -535,14 +535,122 @@ const templateLocalization = {
       chips: ['Taulukko', 'Yksi sivu'],
     },
   },
+  // The builder's gallery and the CV page in Swedish (1.7.14). Content
+  // pages have no Swedish address, so nothing outside the builder reads it.
+  sv: {
+    minimal: {
+      label: 'Minimalistisk',
+      description: 'Bara typografi, tunna avdelare och kontaktuppgifterna i sidhuvudet – en ren, avskalad layout som passar alla roller.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['Om mig', 'Kompetenser'],
+    },
+    developer: {
+      label: 'Utvecklare',
+      description: 'Mörk sidopanel med projekt- och prestationskort – passar bra om ditt arbete naturligt kretsar kring projekt.',
+      summaryBadgeLabel: 'Fokus',
+      chips: ['Erfarenhet', 'Stack'],
+    },
+    creative: {
+      label: 'Kreativ',
+      description: 'Redaktionell layout i två spalter med numrerade avsnittsrubriker, ett sidhuvud i full bredd och en anpassningsbar accentfärg. Passar alla kreativa yrken.',
+      summaryBadgeLabel: 'Anteckningar',
+      chips: ['Berättelse', 'Länkar'],
+    },
+    modern: {
+      label: 'Modern professionell',
+      description: 'Layout i konsultstil med en rosa tidslinje och ett runt profilfoto – byggd för en tydlig karriärberättelse steg för steg.',
+      summaryBadgeLabel: 'Sammanfattning',
+      chips: ['Erfarenhet', 'Kompetenser'],
+    },
+    executive: {
+      label: 'Chef',
+      description: 'Stram layout i styrelserumsstil med en anpassningsbar accentfärg och ingen tidslinje – passar ett CV som lyfter fram resultat framför kronologi.',
+      summaryBadgeLabel: 'Ledarprofil',
+      chips: ['Sammanfattning', 'Ledarskap'],
+    },
+    timeline: {
+      label: 'Modern tidslinje',
+      description: 'Layout i en spalt med en tydlig lodrät tidslinje för din karriär och en anpassningsbar accentfärg – stram, modern och passar nästan alla yrken.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['Tidslinje', 'Projekt'],
+    },
+    graduate: {
+      label: 'Nyutexaminerad',
+      description: 'En layout som sätter utbildningen först och inleder med din examen, dina studieprojekt och din praktik, med en anpassningsbar accentfärg – passar bra när de är den starkaste delen av din berättelse.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['Utbildning', 'Kompetenser'],
+    },
+    compact: {
+      label: 'Kompakt',
+      description: 'Ett tätt ensidigt CV i en spalt med en anpassningsbar accentfärg, som krymper sina egna avstånd tills allt ryms på en sida – byggt för en lång och detaljerad karriär.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['CV', '1 sida'],
+    },
+    portfolio: {
+      label: 'Portfoliohybrid',
+      description: 'Kort för utvalda projekt, fallstudier och märken för teknikstacken – passar bra när ditt arbete talar för sig självt genom projekt.',
+      summaryBadgeLabel: 'Om mig',
+      chips: ['Portfolio', 'Länkar'],
+    },
+    techExec: {
+      label: 'Teknisk chef',
+      description: 'En layout i årsredovisningsstil – ett mörkt marinblått sidhuvud och sidfot kring en brödtext i två spalter, med en sidopanel för kärnstyrkor och en anpassningsbar accentfärg. Byggd för berättelser om ledarskap.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['Styrkor', 'Projekt'],
+    },
+    classicProfessional: {
+      label: 'Klassisk professionell',
+      description: 'Traditionell layout i en spalt med tunna avdelare och ett namn i antikva som du kan centrera eller vänsterjustera – ett säkert val för alla branscher.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['Sammanfattning', 'Erfarenhet'],
+    },
+    navyProfessional: {
+      label: 'Marinblå professionell',
+      description: 'Modern layout i två spalter med en mörkt marinblå sidopanel och blå accenter – professionell och ATS-vänlig.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['Kontakt', 'Kompetenser'],
+    },
+    modernOrange: {
+      label: 'Modern orange',
+      description: 'Exklusiv layout i två spalter med en varm krämfärgad sidopanel, orange accenter, kompetenser med punktskala och tidslinjer för utbildning och erfarenhet – passar nästan alla yrken.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['Kompetenser', 'Tidslinje'],
+    },
+    colorfulCompact: {
+      label: 'Färgglad kompakt',
+      description: 'Ett mörkt redaktionellt sidhuvud över en tät brödtext i två spalter, där varje avsnitt – Kompetenser, Arbetserfarenhet, Projekt, Språk – har en egen accentfärg ur regnbågen. Passar alla kreativa profiler och produktprofiler.',
+      summaryBadgeLabel: 'Om mig',
+      chips: ['Kompetenser', 'Projekt'],
+    },
+    quadrant: {
+      label: 'Kvadrant',
+      description: 'Ett bokstavligt rutnät på 2x2 – personuppgifter, sammanfattning och kompetenser, arbetslivserfarenhet och allt annat fördelat på fyra överskådliga fält, med en anpassningsbar accentfärg. Passar bra om du vill att ditt CV ska gå att överblicka med en gång i stället för att läsas uppifrån och ned.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['Kompetenser', 'Utbildning'],
+    },
+    editorial: {
+      label: 'Redaktionell',
+      description: 'En spalt i tidningsstil – ett stort namn som byline, numrerade avsnitt och en bred textspalt. Ingen sidopanel, inget brus.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['Byline', 'Avsnitt'],
+    },
+    portrait: {
+      label: 'Porträtt',
+      description: 'Ett foto i full höjd fyller den vänstra spalten; personuppgifter och alla avsnitt löper till höger, med en anpassningsbar accentfärg. Fotot är själva strukturen, inte en dekoration – det starkaste valet om du vill att ditt ansikte ska stå i centrum.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['Foto', 'Avsnitt'],
+    },
+    european: {
+      label: 'Europeisk',
+      description: 'Ett verkligt minimalistiskt ensidigt format i Europass-anda – varje avsnitt visas som en tabell med rubrik och värde (datum, kategorier, länktyper) i stället för löpande text, med en anpassningsbar accentfärg. Stramar åt avstånden för att rymmas på en sida när det går.',
+      summaryBadgeLabel: 'Profil',
+      chips: ['Tabell', 'En sida'],
+    },
+  },
 }
 
 function localizeTemplate(template, locale = 'en') {
-  if (locale !== 'fi') {
-    return template
-  }
-
-  const localized = templateLocalization.fi[template.id]
+  const localized = templateLocalization[locale]?.[template.id]
 
   if (!localized) {
     return template

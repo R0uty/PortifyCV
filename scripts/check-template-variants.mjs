@@ -178,7 +178,7 @@ for (const templateId of templateIds) {
   check(`${templateId}: variant #1 id is '${DEFAULT_STYLE_VARIANT_ID}'`, variants[0]?.id === DEFAULT_STYLE_VARIANT_ID)
   check(`${templateId}: ids are unique and well-formed`,
     new Set(variants.map((v) => v.id)).size === variants.length && variants.every((v) => ID.test(v.id)))
-  for (const lang of ['en', 'fi']) {
+  for (const lang of ['en', 'fi', 'sv']) {
     check(`${templateId}: ${lang} labels are non-empty and unique`,
       variants.every((v) => typeof v.label?.[lang] === 'string' && v.label[lang].trim())
         && new Set(variants.map((v) => v.label[lang])).size === variants.length)
@@ -352,6 +352,23 @@ console.log('\nLooks outside the builder (Phase 4)\n')
   check('styleVariantSearch: variant #1 writes nothing', styleVariantSearch(DEFAULT_STYLE_VARIANT_ID) === '')
   check('styleVariantSearch: no id writes nothing', styleVariantSearch(undefined) === '')
   check('styleVariantSearch: a look writes ?style=', styleVariantSearch(developerIds[1]) === `?style=${developerIds[1]}`)
+}
+
+// The accent swatches and the headings-colour presets the builder shows
+// (Settings, the headings-colour menu) carry a label in every builder
+// language (1.7.14: Swedish).
+{
+  const { CV_HEADING_COLOR_PRESETS } = await importSrc('utils/cvHeadingColors.js')
+  const missing = []
+  for (const [setId, swatches] of Object.entries(ACCENT_SWATCH_SETS)) {
+    swatches.forEach((swatch) => {
+      if (typeof swatch.label?.sv !== 'string' || !swatch.label.sv.trim()) missing.push(`accent ${setId}/${swatch.color}`)
+    })
+  }
+  CV_HEADING_COLOR_PRESETS.forEach((preset) => {
+    if (typeof preset.label?.sv !== 'string' || !preset.label.sv.trim()) missing.push(`heading colour ${preset.color}`)
+  })
+  check('every accent swatch and headings-colour preset has a Swedish label', missing.length === 0, missing.join(', '))
 }
 
 // The cover letter's name colour (coverLetterLook.js) reads each

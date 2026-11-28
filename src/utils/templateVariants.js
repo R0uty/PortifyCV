@@ -30,7 +30,7 @@ import { DEFAULT_CV_FONT_ID, getCvFontStack } from './cvFonts.js'
 
 export const DEFAULT_STYLE_VARIANT_ID = 'default'
 
-const ORIGINAL_LABEL = { en: 'Original', fi: 'Alkuperäinen' }
+const ORIGINAL_LABEL = { en: 'Original', fi: 'Alkuperäinen', sv: 'Original' }
 
 function original(templateId, palette) {
   return {
@@ -68,7 +68,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'slate',
-        label: { en: 'Slate', fi: 'Liuske' },
+        label: { en: 'Slate', fi: 'Liuske', sv: 'Skiffer' },
         fontId: 'helvetica',
         palette: {
           '--min-ink': '#0f172a',
@@ -85,7 +85,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'forest',
-        label: { en: 'Forest', fi: 'Metsä' },
+        label: { en: 'Forest', fi: 'Metsä', sv: 'Skogsgrön' },
         fontId: 'georgia',
         palette: {
           '--min-ink': '#1c1917',
@@ -131,7 +131,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'graphite',
-        label: { en: 'Graphite', fi: 'Grafiitti' },
+        label: { en: 'Graphite', fi: 'Grafiitti', sv: 'Grafit' },
         fontId: 'helvetica',
         palette: {
           '--dev-primary': '#18181b',
@@ -160,7 +160,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'midnight',
-        label: { en: 'Midnight', fi: 'Keskiyö' },
+        label: { en: 'Midnight', fi: 'Keskiyö', sv: 'Midnatt' },
         fontId: 'lato',
         palette: {
           '--dev-primary': '#1e1b4b',
@@ -205,7 +205,7 @@ export const TEMPLATE_VARIANTS = {
       // lands on sidebar dates at body size and measured 4.14:1 there.
       look({
         id: 'sage',
-        label: { en: 'Sage', fi: 'Salvia' },
+        label: { en: 'Sage', fi: 'Salvia', sv: 'Salvia' },
         fontId: 'lato',
         accent: '#1f7a6c',
         palette: {
@@ -220,7 +220,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'violet',
-        label: { en: 'Violet', fi: 'Violetti' },
+        label: { en: 'Violet', fi: 'Violetti', sv: 'Violett' },
         fontId: 'georgia',
         accent: '#7c3aed',
         palette: {
@@ -253,7 +253,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'ocean',
-        label: { en: 'Ocean', fi: 'Meri' },
+        label: { en: 'Ocean', fi: 'Meri', sv: 'Hav' },
         fontId: 'helvetica',
         palette: {
           '--ms-navy': '#0c4a6e',
@@ -271,7 +271,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'plum',
-        label: { en: 'Plum', fi: 'Luumu' },
+        label: { en: 'Plum', fi: 'Luumu', sv: 'Plommon' },
         fontId: 'georgia',
         palette: {
           '--ms-navy': '#3b0764',
@@ -303,7 +303,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'navy',
-        label: { en: 'Navy', fi: 'Laivasto' },
+        label: { en: 'Navy', fi: 'Laivasto', sv: 'Marinblå' },
         fontId: 'timesNewRoman',
         accent: '#1e3a8a',
         palette: {
@@ -318,7 +318,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'burgundy',
-        label: { en: 'Burgundy', fi: 'Viini' },
+        label: { en: 'Burgundy', fi: 'Viini', sv: 'Vinröd' },
         fontId: 'georgia',
         accent: '#9f1239',
         palette: {
@@ -345,7 +345,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'blue',
-        label: { en: 'Blue', fi: 'Sininen' },
+        label: { en: 'Blue', fi: 'Sininen', sv: 'Blå' },
         fontId: 'lato',
         accent: '#2563eb',
         palette: {
@@ -358,7 +358,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'rose',
-        label: { en: 'Rose', fi: 'Ruusu' },
+        label: { en: 'Rose', fi: 'Ruusu', sv: 'Rosa' },
         fontId: 'georgia',
         accent: '#be123c',
         palette: {
@@ -382,7 +382,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'blue',
-        label: { en: 'Blue', fi: 'Sininen' },
+        label: { en: 'Blue', fi: 'Sininen', sv: 'Blå' },
         fontId: 'lato',
         accent: '#2563eb',
         palette: {
@@ -394,7 +394,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'rose',
-        label: { en: 'Rose', fi: 'Ruusu' },
+        label: { en: 'Rose', fi: 'Ruusu', sv: 'Rosa' },
         fontId: 'georgia',
         accent: '#be123c',
         palette: {
@@ -418,7 +418,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'slate',
-        label: { en: 'Slate', fi: 'Liuske' },
+        label: { en: 'Slate', fi: 'Liuske', sv: 'Skiffer' },
         fontId: 'arial',
         accent: '#334155',
         palette: {
@@ -431,7 +431,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'indigo',
-        label: { en: 'Indigo', fi: 'Indigo' },
+        label: { en: 'Indigo', fi: 'Indigo', sv: 'Indigo' },
         fontId: 'calibri',
         accent: '#4f46e5',
         palette: {
@@ -461,7 +461,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'sky',
-        label: { en: 'Sky', fi: 'Taivas' },
+        label: { en: 'Sky', fi: 'Taivas', sv: 'Himmelsblå' },
         fontId: 'lato',
         accent: '#0369a1',
         palette: {
@@ -479,7 +479,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'slate',
-        label: { en: 'Slate', fi: 'Liuske' },
+        label: { en: 'Slate', fi: 'Liuske', sv: 'Skiffer' },
         fontId: 'georgia',
         accent: '#334155',
         palette: {
@@ -514,7 +514,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'teal',
-        label: { en: 'Teal', fi: 'Sinivihreä' },
+        label: { en: 'Teal', fi: 'Sinivihreä', sv: 'Blågrön' },
         fontId: 'calibri',
         accent: '#0f766e',
         palette: {
@@ -532,7 +532,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'slate',
-        label: { en: 'Slate', fi: 'Liuske' },
+        label: { en: 'Slate', fi: 'Liuske', sv: 'Skiffer' },
         fontId: 'helvetica',
         accent: '#4f46e5',
         palette: {
@@ -561,7 +561,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'navy',
-        label: { en: 'Navy', fi: 'Laivasto' },
+        label: { en: 'Navy', fi: 'Laivasto', sv: 'Marinblå' },
         fontId: 'timesNewRoman',
         headingColor: '#1e3a8a',
         palette: {
@@ -573,7 +573,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'warm',
-        label: { en: 'Warm', fi: 'Lämmin' },
+        label: { en: 'Warm', fi: 'Lämmin', sv: 'Varm' },
         fontId: 'georgia',
         headingColor: '#7f1d1d',
         palette: {
@@ -600,7 +600,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'forest',
-        label: { en: 'Forest', fi: 'Metsä' },
+        label: { en: 'Forest', fi: 'Metsä', sv: 'Skogsgrön' },
         fontId: 'lato',
         palette: {
           '--np-navy': '#14352a',
@@ -615,7 +615,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'charcoal',
-        label: { en: 'Charcoal', fi: 'Hiili' },
+        label: { en: 'Charcoal', fi: 'Hiili', sv: 'Kolgrå' },
         fontId: 'georgia',
         palette: {
           '--np-navy': '#27272a',
@@ -643,7 +643,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'blue',
-        label: { en: 'Blue', fi: 'Sininen' },
+        label: { en: 'Blue', fi: 'Sininen', sv: 'Blå' },
         fontId: 'lato',
         accent: '#1d4ed8',
         palette: {
@@ -657,7 +657,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'rose',
-        label: { en: 'Rose', fi: 'Ruusu' },
+        label: { en: 'Rose', fi: 'Ruusu', sv: 'Rosa' },
         fontId: 'georgia',
         accent: '#be123c',
         palette: {
@@ -708,7 +708,7 @@ export const TEMPLATE_VARIANTS = {
       // Original's hues), each with its -text and -soft partners.
       look({
         id: 'ocean',
-        label: { en: 'Ocean', fi: 'Meri' },
+        label: { en: 'Ocean', fi: 'Meri', sv: 'Hav' },
         fontId: 'helvetica',
         palette: {
           '--cc-pink': '#0ea5e9',
@@ -741,7 +741,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'sunset',
-        label: { en: 'Sunset', fi: 'Iltarusko' },
+        label: { en: 'Sunset', fi: 'Iltarusko', sv: 'Solnedgång' },
         fontId: 'lato',
         palette: {
           '--cc-pink': '#f43f5e',
@@ -786,7 +786,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'teal',
-        label: { en: 'Teal', fi: 'Sinivihreä' },
+        label: { en: 'Teal', fi: 'Sinivihreä', sv: 'Blågrön' },
         fontId: 'lato',
         accent: '#0f766e',
         palette: {
@@ -799,7 +799,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'indigo',
-        label: { en: 'Indigo', fi: 'Indigo' },
+        label: { en: 'Indigo', fi: 'Indigo', sv: 'Indigo' },
         fontId: 'calibri',
         accent: '#4f46e5',
         palette: {
@@ -824,7 +824,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'navy',
-        label: { en: 'Navy', fi: 'Laivasto' },
+        label: { en: 'Navy', fi: 'Laivasto', sv: 'Marinblå' },
         fontId: 'timesNewRoman',
         accent: '#1e3a8a',
         palette: {
@@ -837,7 +837,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'teal',
-        label: { en: 'Teal', fi: 'Sinivihreä' },
+        label: { en: 'Teal', fi: 'Sinivihreä', sv: 'Blågrön' },
         fontId: 'georgia',
         accent: '#0f766e',
         palette: {
@@ -862,7 +862,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'slate',
-        label: { en: 'Slate', fi: 'Liuske' },
+        label: { en: 'Slate', fi: 'Liuske', sv: 'Skiffer' },
         fontId: 'helvetica',
         accent: '#334155',
         palette: {
@@ -875,7 +875,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'crimson',
-        label: { en: 'Crimson', fi: 'Karmiini' },
+        label: { en: 'Crimson', fi: 'Karmiini', sv: 'Karmosin' },
         fontId: 'georgia',
         accent: '#9f1239',
         palette: {
@@ -900,7 +900,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'forest',
-        label: { en: 'Forest', fi: 'Metsä' },
+        label: { en: 'Forest', fi: 'Metsä', sv: 'Skogsgrön' },
         fontId: 'calibri',
         accent: '#15803d',
         palette: {
@@ -913,7 +913,7 @@ export const TEMPLATE_VARIANTS = {
       }),
       look({
         id: 'slate',
-        label: { en: 'Slate', fi: 'Liuske' },
+        label: { en: 'Slate', fi: 'Liuske', sv: 'Skiffer' },
         fontId: 'arial',
         accent: '#334155',
         palette: {

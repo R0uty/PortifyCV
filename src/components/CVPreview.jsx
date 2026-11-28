@@ -107,7 +107,6 @@ function CVPreview({
   )
   const t = getTemplateConfig(templateConfig.variant)
   const variant = templateConfig.variant
-  const isFinnish = locale === 'fi'
   const isCompact = t.isCompact === true
   // The variant's palette, set as inline CSS variables on the Showcase
   // root (Minimalist: the flat renderer's article, normal view only).
@@ -1111,7 +1110,7 @@ function CVPreview({
     if (section === 'skills') {
       // Categorized layout — skills grouped under category headings
       if (t.skillsLayout === 'categorized') {
-        const categories = parseSkillCategories(skills, isFinnish)
+        const categories = parseSkillCategories(skills, locale)
         return renderSectionCard({
           section,
           placement,

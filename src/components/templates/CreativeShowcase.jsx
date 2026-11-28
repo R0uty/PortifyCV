@@ -158,7 +158,6 @@ export default function CreativeShowcase({
   accentColor = CREATIVE_DEFAULT_ACCENT_COLOR,
   directEditDispatch = null,
 }) {
-  const isFinnish = locale === 'fi'
   const snapshot = useMemo(() => createCvSnapshot(formData), [formData])
 
   const fullName = snapshot.fullName || cv.t(locale, 'placeholders.name')
@@ -193,8 +192,8 @@ export default function CreativeShowcase({
   // Flattened, not grouped by category — the "Toolkit" pill row has no
   // category labels above it.
   const flatSkills = useMemo(
-    () => parseSkillCategories(snapshot.skills, isFinnish).flatMap((cat) => cat.items),
-    [snapshot.skills, isFinnish],
+    () => parseSkillCategories(snapshot.skills, locale).flatMap((cat) => cat.items),
+    [snapshot.skills, locale],
   )
 
   const sectionVisibility = {

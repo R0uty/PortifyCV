@@ -158,6 +158,14 @@ testauksesta (Jest, Playwright) ja CI/CD-putkista katsotaan eduksi. Hyvä englan
   const fi = generateCoverLetterDraft(data, { locale: 'fi', jobAd: ad })
   check('the Finnish draft signs off in Finnish', fi.includes('Ystävällisin terveisin'))
   check('the Finnish draft for an ad uses the Finnish line', fi.includes('Kokemukseni kattaa sen, mitä tehtävässä haetaan:'))
+  // Swedish (1.7.14): the letter's sentences are Swedish; the ad is still
+  // read with the English/Finnish tables, so the same requirements are found.
+  const sv = generateCoverLetterDraft(data, { locale: 'sv', jobAd: ad })
+  check('the Swedish draft opens with the Swedish greeting', sv.startsWith('Hej,'), sv.slice(0, 80))
+  check('the Swedish draft signs off in Swedish', sv.includes('Med vänlig hälsning'), sv)
+  const svAdLine = sv.match(/Min erfarenhet motsvarar det som tjänsten kräver: ([^.]*)\./)?.[1] ?? ''
+  same('the Swedish draft lists the same requirements as the English one', svAdLine, 'Frontend, TypeScript och React')
+  check('the Swedish draft has no English sentence', !/I'm writing|Sincerely|My experience|Dear /.test(sv), sv)
   const plain = generateCoverLetterDraft(data, { locale: 'en' })
   check('with no ad the draft names the CV skills', plain.includes('Figma') && plain.includes('SQL') && plain.includes('My background includes'))
   const noMatch = generateCoverLetterDraft(data, { locale: 'en', jobAd: 'Nurse wanted for night shifts.' })

@@ -122,7 +122,7 @@ console.log(`      ${namespaces.size} namespace(s)`)
 // --- 2. Parity ------------------------------------------------------------------
 // Namespaces whose sv.js is not written yet (1.7.14). Tasks 4-6 remove each
 // one as it gets Swedish; Task 7 deletes this list.
-const SWEDISH_PENDING = ['common', 'builderShell', 'cvForm', 'formInline', 'fieldFilter', 'cv', 'exports', 'letter', 'builder', 'form', 'dialogs', 'feedback', 'share']
+const SWEDISH_PENDING = ['common', 'builderShell', 'fieldFilter', 'builder', 'form', 'dialogs', 'feedback', 'share']
 // Content pages have no Swedish address, so their namespaces stay en/fi.
 const CONTENT_ONLY_NAMESPACES = [
   'pages/about', 'pages/atsGuide', 'pages/coverLetterExamples', 'pages/cvExamples', 'pages/cvSkills',
@@ -349,19 +349,19 @@ const ALLOWLIST = [
   { file: 'src/utils/templatePageCopy.js', reason: 'per-template page copy, content data kept as { en, fi } (out of scope)' },
   { file: 'src/utils/landingFaq.js', reason: 'landing FAQ data, also feeds JSON-LD (out of scope)' },
   { file: 'src/utils/exampleCvs.js', reason: 'example CV registry: which language file to load (out of scope)' },
-  { file: 'src/utils/templateVariants.js', reason: 'registry label maps { en, fi }, read as .label.en by checks and e2e' },
-  { file: 'src/utils/templateAccents.js', reason: 'registry label maps { en, fi }, read as .label.en by checks and e2e' },
-  { file: 'src/utils/templateFields.js', reason: 'registry label maps { en, fi }, read as .label.en by checks and e2e' },
-  { file: 'src/utils/cvHeadingColors.js', reason: 'registry label maps { en, fi }, read as .label.en by checks and e2e' },
+  { file: 'src/utils/templateVariants.js', reason: 'registry label maps { en, fi, sv }, read as .label.en by checks and e2e' },
+  { file: 'src/utils/templateAccents.js', reason: 'registry label maps { en, fi, sv }, read as .label.en by checks and e2e' },
+  { file: 'src/utils/templateFields.js', reason: 'registry label maps { en, fi, sv }, read as .label.en by checks and e2e' },
+  { file: 'src/utils/cvHeadingColors.js', reason: 'registry label maps { en, fi, sv }, read as .label.en by checks and e2e' },
   { file: 'src/utils/cvTemplates.js', reason: 'template registry: labels/descriptions per language (templateLocalization) and the gate that applies them' },
   { file: 'src/components/LocaleFlagIcon.jsx', reason: 'logic: draws the Finnish, Swedish or British flag SVG, no text' },
-  { file: 'src/components/templates/shared.jsx', pattern: /^isFinnish\s*\?\s*\{\s*languages:\s*\//, reason: 'logic: parseSkillCategories matches skills with per-language regexes (its labels are in the cv namespace)' },
+  { file: 'src/components/templates/shared.jsx', pattern: /^\s?(?:fi|sv): \{ languages: \/|^S\[locale\] \?\? SKILL_CATEGORY_PATTERNS\.en$/, reason: 'logic: parseSkillCategories matches skills with per-language regexes, SKILL_CATEGORY_PATTERNS (its labels are in the cv namespace)' },
   // Registry label maps read in the builder (the registries stay, see above).
-  { file: 'src/components/CvHeadingColorSwitcher.jsx', pattern: /^l\[locale\] \?\? (?:activePreset|preset)\.label\.en\b/, reason: "reads cvHeadingColors.js's preset label map { en, fi }" },
-  { file: 'src/components/CvStyleSwitcher.jsx', pattern: /^l\[lang\]/, reason: "reads templateVariants.js's variant label map { en, fi }" },
-  { file: 'src/components/StyleSwatchGroup.jsx', pattern: /^l\[lang\]/, reason: "reads templateVariants.js's variant label map { en, fi }" },
-  { file: 'src/components/SettingsModal.jsx', pattern: /^l\[locale\] \?\? swatch\.label\.en\b/, reason: "reads templateAccents.js's swatch label map { en, fi }" },
-  { file: 'src/components/TemplateFieldFilter.jsx', pattern: /^l\[lang\]/, reason: "reads templateFields.js's field label map { en, fi } (ALL_FIELDS_LABEL included)" },
+  { file: 'src/components/CvHeadingColorSwitcher.jsx', pattern: /^l\[locale\] \?\? (?:activePreset|preset)\.label\.en\b/, reason: "reads cvHeadingColors.js's preset label map { en, fi, sv }" },
+  { file: 'src/components/CvStyleSwitcher.jsx', pattern: /^l\[locale\] \?\? label\.en$/, reason: "reads templateVariants.js's variant label map { en, fi, sv }" },
+  { file: 'src/components/StyleSwatchGroup.jsx', pattern: /^l\[locale\] \?\? label\.en$/, reason: "reads templateVariants.js's variant label map { en, fi, sv }" },
+  { file: 'src/components/SettingsModal.jsx', pattern: /^l\[locale\] \?\? swatch\.label\.en\b/, reason: "reads templateAccents.js's swatch label map { en, fi, sv }" },
+  { file: 'src/components/TemplateFieldFilter.jsx', pattern: /^l\[locale\] \?\? label\.en$/, reason: "reads templateFields.js's field label map { en, fi, sv } (ALL_FIELDS_LABEL included)" },
   { file: 'src/components/LandingTemplatesByField.jsx', pattern: /^l\[lang\]$/, reason: "reads templateVariants.js's variant label map { en, fi } (the card's look name)" },
   { file: 'src/pages/TemplateDetailPage.jsx', pattern: /^\?\.\[resolvedLocale\]$/, reason: "reads templatePageCopy.js's per-template copy { en, fi } (out of scope)" },
   // Logic in one file: the guide pages' updated date, a different Intl

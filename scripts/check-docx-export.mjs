@@ -751,13 +751,14 @@ console.log('\ndocxExport: what reaches the file (1.6.65)\n')
   // One per Word archetype: oneColumn, railTable, darkSidebarTable,
   // gridTable, labelGridTable.
   for (const template of ['minimal', 'executive', 'developer', 'quadrant', 'european']) {
-    for (const locale of ['en', 'fi']) {
+    const presentWord = { en: 'Present', fi: 'Nykyinen', sv: 'nu' }
+    for (const locale of ['en', 'fi', 'sv']) {
       const { text, rels } = await readDocx(demoCvData, template, locale)
       const label = `${template}/${locale}`
       check(`${label}: every experience bullet is in the file`, job.achievements.every((line) => text.includes(line)))
       check(`${label}: the job's technologies are in the file`, text.includes(job.technologies.join(', ')))
-      check(`${label}: a current job ends in "${locale === 'fi' ? 'Nykyinen' : 'Present'}"`,
-        text.includes(`${job.startDate} - ${locale === 'fi' ? 'Nykyinen' : 'Present'}`), text.slice(0, 400))
+      check(`${label}: a current job ends in "${presentWord[locale]}"`,
+        text.includes(`${job.startDate} - ${presentWord[locale]}`), text.slice(0, 400))
       check(`${label}: the job's location is in the file`, text.includes(job.location))
       check(`${label}: link labels use the app's names (Dev.to, not Devto)`, text.includes('Dev.to') && !text.includes('Devto'))
       check(`${label}: links are clickable`, rels.includes('Target="https://github.example.com/john-doe"') && rels.includes('TargetMode="External"'))
@@ -770,9 +771,20 @@ console.log('\ndocxExport: what reaches the file (1.6.65)\n')
       !/Your Name|Professional Title|Add a professional summary|No (experience|education|links) added yet/.test(text), text)
   }
 
+  // A Swedish CV (1.7.14): Swedish section headings and no English ones.
+  for (const template of ['minimal', 'executive', 'developer', 'quadrant', 'european']) {
+    const { text } = await readDocx(demoCvData, template, 'sv')
+    check(`${template}/sv: the experience heading is Swedish (Arbetserfarenhet)`, /ARBETSERFARENHET|Arbetserfarenhet/.test(text), text.slice(0, 400))
+    const english = ['Experience', 'Education', 'Skills', 'Languages', 'Projects', 'Certificates', 'Present']
+      .filter((word) => new RegExp(`\\b(?:${word}|${word.toUpperCase()})\\b`).test(text))
+    check(`${template}/sv: no English section heading or date word`, english.length === 0, english.join(', '))
+  }
+
   const expiring = { ...demoCvData, certificates: [{ ...demoCvData.certificates[0], expiry: '2027', credentialUrl: 'https://cert.example.com/1' }] }
   const fi = await readDocx(expiring, 'minimal', 'fi')
   check('fi: a certificate\'s expiry reads "Vanhenee", not "expires"', fi.text.includes('(Vanhenee 2027)') && !fi.text.includes('expires'))
+  const sv = await readDocx(expiring, 'minimal', 'sv')
+  check('sv: a certificate\'s expiry reads "Giltigt till", not "Expires"', sv.text.includes('(Giltigt till 2027)') && !sv.text.includes('Expires'), sv.text.slice(0, 400))
   check('a certificate\'s credential URL is a link', fi.rels.includes('Target="https://cert.example.com/1"'))
 }
 

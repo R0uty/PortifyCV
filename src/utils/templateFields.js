@@ -7,15 +7,15 @@
 // own: its templates don't also appear under the other chips.
 
 export const TEMPLATE_FIELDS = [
-  { id: 'tech', label: { en: 'Tech', fi: 'Tekniikka ja IT' } },
-  { id: 'creative', label: { en: 'Creative', fi: 'Luova ala' } },
-  { id: 'business', label: { en: 'Business', fi: 'Liiketoiminta' } },
-  { id: 'leadership', label: { en: 'Leadership', fi: 'Johto' } },
-  { id: 'graduate', label: { en: 'Graduate', fi: 'Vastavalmistuneet' } },
-  { id: 'any', label: { en: 'Any field', fi: 'Kaikki alat' } },
+  { id: 'tech', label: { en: 'Tech', fi: 'Tekniikka ja IT', sv: 'Teknik och IT' } },
+  { id: 'creative', label: { en: 'Creative', fi: 'Luova ala', sv: 'Kreativa yrken' } },
+  { id: 'business', label: { en: 'Business', fi: 'Liiketoiminta', sv: 'Affärsliv' } },
+  { id: 'leadership', label: { en: 'Leadership', fi: 'Johto', sv: 'Ledning' } },
+  { id: 'graduate', label: { en: 'Graduate', fi: 'Vastavalmistuneet', sv: 'Nyutexaminerade' } },
+  { id: 'any', label: { en: 'Any field', fi: 'Kaikki alat', sv: 'Alla branscher' } },
 ]
 
-export const ALL_FIELDS_LABEL = { en: 'All', fi: 'Kaikki' }
+export const ALL_FIELDS_LABEL = { en: 'All', fi: 'Kaikki', sv: 'Alla' }
 
 const FIELD_IDS = new Set(TEMPLATE_FIELDS.map((field) => field.id))
 

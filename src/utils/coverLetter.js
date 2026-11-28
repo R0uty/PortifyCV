@@ -32,7 +32,7 @@ function joinWithAnd(items, locale) {
  * data is missing rather than emitting an empty or grammatically broken line.
  * @param {CvSnapshot} snapshot
  * (`snapshotSource` is the CV the snapshot came from, for matching the ad)
- * @param {{ locale: 'en' | 'fi', companyName: string, roleTitle: string, hiringManagerName: string, jobAd?: string }} options
+ * @param {{ locale: 'en' | 'fi' | 'sv', companyName: string, roleTitle: string, hiringManagerName: string, jobAd?: string }} options
  */
 function buildParagraphs(snapshot, options, snapshotSource) {
   const { locale } = options
@@ -93,7 +93,7 @@ function buildParagraphs(snapshot, options, snapshotSource) {
  * app's "nothing ever touches a server" story — so quality is bounded by
  * template phrasing rather than free-form generation.
  * @param {CvData} formData
- * @param {{ locale?: 'en' | 'fi', companyName?: string, roleTitle?: string, hiringManagerName?: string, jobAd?: string }} [options]
+ * @param {{ locale?: 'en' | 'fi' | 'sv', companyName?: string, roleTitle?: string, hiringManagerName?: string, jobAd?: string }} [options]
  * @returns {string}
  */
 export function generateCoverLetterDraft(formData, options = {}) {

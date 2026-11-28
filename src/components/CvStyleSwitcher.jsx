@@ -18,8 +18,8 @@ function CvStyleSwitcher({
   onSelectVariant = () => {},
   locale = 'en',
 }) {
-  const isFinnish = locale === 'fi'
-  const lang = isFinnish ? 'fi' : 'en'
+  // The look's name in the app's language (templateVariants.js's { en, fi, sv }).
+  const labelOf = (label) => label[locale] ?? label.en
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
   const panelRef = useRef(null)
@@ -29,7 +29,7 @@ function CvStyleSwitcher({
   const modifiedText = builderShell.t(locale, 'styleSwitcher.modified')
   const groupLabel = builderShell.t(locale, 'styleSwitcher.select')
   const triggerLabel = builderShell.t(locale, isModified ? 'styleSwitcher.triggerModified' : 'styleSwitcher.trigger', {
-    variant: activeVariant?.label[lang] ?? '',
+    variant: activeVariant ? labelOf(activeVariant.label) : '',
   })
 
   useEffect(() => {
@@ -117,7 +117,7 @@ function CvStyleSwitcher({
           ))}
         </span>
         <span className="cv-style-switcher__trigger-label" aria-hidden="true">
-          {activeVariant?.label[lang]}
+          {activeVariant ? labelOf(activeVariant.label) : null}
         </span>
         {isModified ? (
           <span className="cv-style-switcher__modified" aria-hidden="true">{modifiedText}</span>
@@ -144,14 +144,14 @@ function CvStyleSwitcher({
                 type="button"
                 role="radio"
                 aria-checked={isActive}
-                aria-label={variant.label[lang]}
+                aria-label={labelOf(variant.label)}
                 aria-description={font?.label}
                 tabIndex={isActive ? 0 : -1}
                 className={`cv-style-switcher__option${isActive ? ' cv-style-switcher__option--active' : ''}`}
                 onClick={() => handleSelect(variant.id)}
               >
                 <span className="cv-style-switcher__option-text">
-                  <span className="cv-style-switcher__option-label">{variant.label[lang]}</span>
+                  <span className="cv-style-switcher__option-label">{labelOf(variant.label)}</span>
                   <span className="cv-style-switcher__option-font" style={{ fontFamily: font?.stack }}>
                     {font?.label}
                   </span>

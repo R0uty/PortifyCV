@@ -280,11 +280,28 @@ for (const field of TEMPLATE_FIELDS) {
   const count = cvTemplates.filter((template) => template.fields?.includes(field.id)).length
   check(`field ${field.id} has at least two templates`, count >= 2, `has ${count}`)
 }
-for (const lang of ['en', 'fi']) {
+for (const lang of ['en', 'fi', 'sv']) {
   const labels = [ALL_FIELDS_LABEL, ...TEMPLATE_FIELDS.map((field) => field.label)].map((label) => label?.[lang])
   check(`field labels are non-empty and unique in ${lang}`,
     labels.every((label) => typeof label === 'string' && label.trim()) && new Set(labels).size === labels.length,
     labels.join(' | '))
+}
+// The builder's gallery shows each template in the app's language, Swedish
+// included (1.7.14); content pages stay English and Finnish.
+{
+  const { getCvTemplates } = await importSrc('utils/cvTemplates.js')
+  const sv = getCvTemplates('sv')
+  const en = new Map(cvTemplates.map((template) => [template.id, template]))
+  const filled = (value) => typeof value === 'string' && value.trim() !== ''
+  const incomplete = sv.filter((template) => !filled(template.label) || !filled(template.description)
+    || !filled(template.summaryBadgeLabel)
+    || !Array.isArray(template.thumbnail?.chips) || template.thumbnail.chips.length !== en.get(template.id).thumbnail.chips.length
+    || !template.thumbnail.chips.every(filled))
+  check('every template has a Swedish label, description, badge and chips', incomplete.length === 0, incomplete.map((t) => t.id).join(', '))
+  const untranslated = sv.filter((template) => template.description === en.get(template.id).description)
+  check('every Swedish template description differs from the English one', untranslated.length === 0, untranslated.map((t) => t.id).join(', '))
+  check('Swedish template labels differ from English for at least one template', sv.some((template) => template.label !== en.get(template.id).label))
+  check('Swedish template labels are unique', new Set(sv.map((template) => template.label)).size === sv.length)
 }
 check('parseFieldParam accepts a known id', parseFieldParam('tech') === 'tech')
 check('parseFieldParam: unknown, empty, missing or wrong-case → null',
