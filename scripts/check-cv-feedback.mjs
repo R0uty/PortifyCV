@@ -264,6 +264,10 @@ console.log('\ngetBulletHints — one bullet at a time (1.7.3)\n')
   same('Swedish: the same opening verb as an earlier bullet', ids(['Ledde ett team på 5.', 'Ledde migreringen 2024.', 'Byggde ett verktyg för 40 utvecklare.'], 'sv'), [[], ['repeated-opener'], []])
   same('Swedish: å, ä and ö stay in the opener', ids(['Ökade försäljningen med 20 %.', 'Ökade antalet kunder till 300.'], 'sv'), [[], ['repeated-opener']])
   same('Swedish: no number in a full sentence', ids(['Ledde migreringen av betalplattformen till TypeScript.'], 'sv'), [['no-number']])
+  // Swedish duty phrases match whole words only.
+  check('Swedish: "arbetade med" inside "samarbetade med" is not duty phrasing', !ids(['Samarbetade med 5 team för att korta ledtiden med 30 %'], 'sv')[0].includes('weak-phrase'))
+  check('Swedish: "deltog i" is not a prefix match of "deltog inte"', !ids(['Deltog inte bara i 3 projekt utan ledde 2 av dem'], 'sv')[0].includes('weak-phrase'))
+  same('Swedish: "Samarbetade" is an action verb, no hint', ids(['Samarbetade med 5 team för att korta ledtiden med 30 %'], 'sv'), [[]])
   same('English: "diverse" is not filler', ids(['Built a diverse team of 8 engineers.']), [[]])
 
   // The example CVs are what visitors copy from: their bullets should

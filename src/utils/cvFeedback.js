@@ -34,15 +34,21 @@ const WEAK_PHRASES = [
   'tehtäviini kuului',
   'olin mukana',
   'osallistuin',
-  // Swedish (1.7.14): the same duty-list phrasing. "Ansvarar för" (present
-  // tense) is not on it: like Finnish "Vastaan", it's the usual active way
-  // to describe a current role.
+]
+
+// Swedish (1.7.14): the same duty-list phrasing, matched as whole words
+// (not as substrings like the lists above, whose Finnish entries rely on
+// compounds such as "päävastuualue"): "arbetade med" sits inside
+// "samarbetade med", and "deltog i" starts "deltog inte". "Ansvarar för"
+// (present tense) is not on it: like Finnish "Vastaan", it's the usual
+// active way to describe a current role.
+const WHOLE_WORD_WEAK_PHRASES = [
   'ansvarade för',
   'ansvarig för',
   'arbetade med',
   'deltog i',
   'var med och',
-]
+].map((phrase) => ({ phrase, pattern: new RegExp(`(?<!\\p{L})${phrase}(?!\\p{L})`, 'u') }))
 
 // Common strong resume action verbs, past tense. Used to check the opening
 // word of a description or bullet — not exhaustive, just enough to catch the
@@ -88,7 +94,7 @@ const STRONG_ACTION_VERBS = new Set([
   'handledde', 'utbildade', 'rekryterade', 'analyserade', 'migrerade', 'moderniserade',
   'standardiserade', 'förenklade', 'omarbetade', 'skrev', 'sänkte', 'höjde', 'halverade',
   'fördubblade', 'säkrade', 'vann', 'drev', 'styrde', 'hanterade', 'tog', 'sålde',
-  'expanderade', 'strukturerade', 'digitaliserade', 'producerade', 'publicerade',
+  'expanderade', 'samarbetade', 'strukturerade', 'digitaliserade', 'producerade', 'publicerade',
   'leder', 'bygger', 'utvecklar', 'driver', 'planerar', 'samordnar', 'utbildar',
   'hanterar', 'skapar', 'designar', 'styr',
 ])
@@ -118,7 +124,9 @@ function hasMetric(text) {
 function findWeakPhrase(text) {
   const lowerText = text.toLowerCase()
 
-  return WEAK_PHRASES.find((phrase) => lowerText.includes(phrase)) ?? null
+  return WEAK_PHRASES.find((phrase) => lowerText.includes(phrase))
+    ?? WHOLE_WORD_WEAK_PHRASES.find(({ pattern }) => pattern.test(lowerText))?.phrase
+    ?? null
 }
 
 function startsWithActionVerb(text) {
