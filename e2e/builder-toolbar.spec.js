@@ -1,5 +1,5 @@
 import { test, expect } from './fixtures/base.js'
-import { fontTrigger, openDesign } from './helpers/builderToolbar.js'
+import { chooseBuilderLanguage, fontTrigger, openDesign } from './helpers/builderToolbar.js'
 
 // 1.6.67: the builder toolbar keeps the mode switch, Template, Design,
 // language, More and Export in one row on a laptop. Style, Font and
@@ -105,4 +105,25 @@ test.describe('Builder toolbar on a phone', () => {
     const bar = await page.getByRole('tablist', { name: 'View selector' }).locator('xpath=..').boundingBox()
     expect(bar.height).toBeLessThan(70)
   })
+})
+
+test('the language menu switches the builder to Swedish', async ({ page }) => {
+  await page.goto('/cv')
+  const button = page.getByRole('banner').getByRole('button', { name: 'Language' })
+  await button.click()
+  const items = page.getByRole('menuitemradio')
+  await expect(items).toHaveCount(3)
+  await expect(items.nth(0)).toHaveAccessibleName(/^English\b/)
+  await expect(items.nth(1)).toHaveAccessibleName(/^Suomi\b/)
+  await expect(items.nth(2)).toHaveAccessibleName(/^Svenska\b/)
+  await expect(items.nth(0)).toHaveAttribute('aria-checked', 'true')
+  await page.keyboard.press('Escape')
+  await expect(items).toHaveCount(0)
+  await expect(button).toBeFocused()
+
+  await chooseBuilderLanguage(page, 'Svenska')
+  await expect(page.locator('html')).toHaveAttribute('lang', 'sv')
+  await expect(page.getByRole('banner').locator('.app-toolbar__locale-flag').first()).toBeVisible()
+  await page.reload()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'sv')
 })

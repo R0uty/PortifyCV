@@ -27,7 +27,7 @@ export default {
     headings: 'Otsikot',
   },
   language: {
-    switch: 'Vaihda kieli',
+    menu: 'Kieli',
     code: 'FI',
   },
   save: {

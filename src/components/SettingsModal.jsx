@@ -82,6 +82,7 @@ function SettingsModal({
               ['', t('settings.cvLanguageApp')],
               ['en', 'English'],
               ['fi', 'Suomi'],
+              ['sv', 'Svenska'],
             ].map(([value, label]) => {
               const isActive = cvLanguage === value
               return (

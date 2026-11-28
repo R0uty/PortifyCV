@@ -99,3 +99,12 @@ test('a stored Swedish locale leaves content pages English', async ({ page }) =>
   await expect(page).toHaveURL(/\/$/)
   expect(await page.evaluate(() => document.documentElement.lang)).toBe('en')
 })
+
+test('Settings offers Swedish as the CV language', async ({ page }) => {
+  await page.goto('/cv')
+  await page.getByRole('banner').getByRole('button', { name: 'More actions' }).click()
+  await page.getByRole('menuitem', { name: 'Settings' }).click()
+  const dialog = page.getByRole('dialog', { name: 'Settings' })
+  await dialog.getByRole('button', { name: 'Svenska', exact: true }).click()
+  await expect(dialog.getByRole('button', { name: 'Svenska', exact: true })).toHaveAttribute('aria-pressed', 'true')
+})

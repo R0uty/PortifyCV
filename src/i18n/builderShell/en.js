@@ -28,7 +28,7 @@ export default {
     headings: 'Headings',
   },
   language: {
-    switch: 'Switch language',
+    menu: 'Language',
     code: 'EN',
   },
   save: {

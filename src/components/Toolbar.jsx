@@ -30,6 +30,13 @@ import { builderShell } from '../i18n/builderShell'
 // opening it moves focus to its first item (the ARIA menu-button pattern,
 // so keyboard users don't have to Tab past the trigger). `itemSelector`
 // picks the focusable items for that and for the arrow keys.
+// The language menu's choices; names stay in their own language.
+const LANGUAGE_CHOICES = [
+  ['en', 'English'],
+  ['fi', 'Suomi'],
+  ['sv', 'Svenska'],
+]
+
 function useToolbarPopover(itemSelector) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef(null)
@@ -174,7 +181,6 @@ function Toolbar({
   onOpenSavedCvs = () => {},
   onMarkApplied = () => {},
 }) {
-  const isFinnish = locale === 'fi'
   const {
     isOpen: isExportOpen,
     toggle: exportToggle,
@@ -203,6 +209,17 @@ function Toolbar({
     triggerRef: moreTriggerRef,
     panelRef: morePanelRef,
   } = useToolbarPopover('[role="menuitem"], [role="menuitemcheckbox"]')
+
+  const {
+    isOpen: isLanguageOpen,
+    toggle: languageToggle,
+    close: languageClose,
+    handleBlur: languageHandleBlur,
+    handleMenuKeyDown: languageHandleMenuKeyDown,
+    containerRef: languageContainerRef,
+    triggerRef: languageTriggerRef,
+    panelRef: languagePanelRef,
+  } = useToolbarPopover('[role="menuitemradio"]')
 
   function handleExportSelect(format) {
     exportClose()
@@ -413,16 +430,49 @@ function Toolbar({
             </div>
           </div>
 
-          <button
-            type="button"
-            className="app-toolbar__icon-button app-toolbar__icon-button--text"
-            onClick={() => onLocaleChange(isFinnish ? 'en' : 'fi')}
-            aria-label={builderShell.t(locale, 'language.switch')}
-            title={builderShell.t(locale, 'language.switch')}
-          >
-            <LocaleFlagIcon locale={isFinnish ? 'fi' : 'en'} className="app-toolbar__locale-flag" />
-            {builderShell.t(locale, 'language.code')}
-          </button>
+          <div className="app-toolbar__popover" ref={languageContainerRef} onBlur={languageHandleBlur}>
+            <button
+              type="button"
+              ref={languageTriggerRef}
+              className="app-toolbar__icon-button app-toolbar__icon-button--text"
+              aria-haspopup="menu"
+              aria-expanded={isLanguageOpen}
+              aria-label={builderShell.t(locale, 'language.menu')}
+              title={builderShell.t(locale, 'language.menu')}
+              onClick={languageToggle}
+            >
+              <LocaleFlagIcon locale={locale} className="app-toolbar__locale-flag" />
+              {builderShell.t(locale, 'language.code')}
+            </button>
+
+            {isLanguageOpen ? (
+              <div
+                className="app-toolbar__menu"
+                role="menu"
+                aria-label={builderShell.t(locale, 'language.menu')}
+                ref={languagePanelRef}
+                onKeyDown={languageHandleMenuKeyDown}
+              >
+                {LANGUAGE_CHOICES.map(([code, name]) => (
+                  <button
+                    key={code}
+                    type="button"
+                    role="menuitemradio"
+                    aria-checked={locale === code}
+                    lang={code}
+                    className="app-toolbar__menu-item"
+                    onClick={() => {
+                      languageClose()
+                      onLocaleChange(code)
+                    }}
+                  >
+                    <LocaleFlagIcon locale={code} />
+                    {name}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
 
           {/* Save on this device (1.7.1). Nothing is stored until this is
               pressed; once the CV is saved it opens My CVs instead. */}

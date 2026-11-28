@@ -3,7 +3,7 @@ import { pickTemplate } from './helpers/templateGallery.js'
 import { getTemplateVariants } from '../src/utils/templateVariants.js'
 import { cvTemplates } from '../src/utils/cvTemplates.js'
 import { CV_FONT_OPTIONS } from '../src/utils/cvFonts.js'
-import { clearCv, copyShareLink, fontTrigger, styleTrigger } from './helpers/builderToolbar.js'
+import { chooseBuilderLanguage, clearCv, copyShareLink, fontTrigger, styleTrigger } from './helpers/builderToolbar.js'
 import { copyLinkFromBuilder, shareEditUrl } from './helpers/shareLinks.js'
 
 // The Style picker (Phase 3) in both builder modes, and how a picked
@@ -71,7 +71,7 @@ test('the picker follows the selected template', async ({ page }) => {
 
 test('Finnish labels', async ({ page }) => {
   await page.goto('/cv?template=developer')
-  await page.getByRole('button', { name: 'Switch language' }).click()
+  await chooseBuilderLanguage(page, 'Suomi')
   await expect(page.getByRole('banner').getByRole('button', { name: 'Ulkoasu' })).toBeVisible()
   await expect(await styleTrigger(page)).toHaveAccessibleName('Valitse tyyli: Alkuperäinen')
 })
