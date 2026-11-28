@@ -580,7 +580,7 @@ function parseTopBlock(lines, contact, hasHeadings, { loneLocation = false } = {
 /**
  * Parse the text lines of a CV into CV data.
  * @param {string[]} lines Lines in reading order.
- * @param {{ locale?: 'en' | 'fi' }} [options] Only picks the error language.
+ * @param {{ locale?: 'en' | 'fi' | 'sv' }} [options] Only picks the error language.
  * @returns {{ data: CvData, summary: { hasName: boolean, experience: number, education: number, skills: number, languages: number } }}
  */
 export function parseCvText(lines, options = {}) {

@@ -218,7 +218,7 @@ function createImprovementTips(breakdown, options, copy) {
 
 /**
  * @param {CvData} formData
- * @param {{ locale?: 'en' | 'fi', jobDescription?: string }} [options]
+ * @param {{ locale?: 'en' | 'fi' | 'sv', jobDescription?: string }} [options]
  */
 export function evaluateAtsScore(formData, options = {}) {
   const snapshot = createCvSnapshot(formData)

@@ -120,9 +120,6 @@ for (const file of namespaceFiles) {
 console.log(`      ${namespaces.size} namespace(s)`)
 
 // --- 2. Parity ------------------------------------------------------------------
-// Namespaces whose sv.js is not written yet (1.7.14). Tasks 4-6 remove each
-// one as it gets Swedish; Task 7 deletes this list.
-const SWEDISH_PENDING = []
 // Content pages have no Swedish address, so their namespaces stay en/fi.
 const CONTENT_ONLY_NAMESPACES = [
   'pages/about', 'pages/atsGuide', 'pages/coverLetterExamples', 'pages/cvExamples', 'pages/cvSkills',
@@ -134,14 +131,8 @@ const notListed = partial.filter((name) => !CONTENT_ONLY_NAMESPACES.includes(nam
 check('namespaces lacking a language are in CONTENT_ONLY_NAMESPACES', notListed.length === 0, `not listed: ${notListed.join(', ')}`)
 const staleContentOnly = CONTENT_ONLY_NAMESPACES.filter((name) => !partial.includes(name))
 check('every CONTENT_ONLY_NAMESPACES entry still lacks a language', staleContentOnly.length === 0, `stale: ${staleContentOnly.join(', ')}`)
-const stalePending = SWEDISH_PENDING.filter((name) => !namespaces.has(name) || namespaces.get(name).namespace.locales.includes('sv') === false)
-check('every SWEDISH_PENDING entry is a namespace that takes sv', stalePending.length === 0, `stale: ${stalePending.join(', ')}`)
-console.log(`      Swedish pending: ${SWEDISH_PENDING.join(', ') || '(none)'}`)
 for (const { namespace } of namespaces.values()) {
-  const checked = SWEDISH_PENDING.includes(namespace.name)
-    ? { ...namespace, locales: namespace.locales.filter((locale) => locale !== 'sv') }
-    : namespace
-  const errors = parityErrors(checked)
+  const errors = parityErrors(namespace)
   check(`parity: ${namespace.name}`, errors.length === 0, errors.join('\n        '))
 }
 
@@ -544,7 +535,6 @@ const pluralCases = [
 ]
 // Swedish cases are added with each namespace's sv.js, as { ns, key, locale: 'sv', count, expected }.
 for (const { ns: name, key, locale, count, expected, vars = {} } of pluralCases) {
-  if (locale === 'sv' && SWEDISH_PENDING.includes(name)) continue
   const owner = namespaces.get(name)
   same(`plural ${name}:${key} ${locale} ${count}`, owner ? owner.namespace.t(locale, key, { ...vars, count }) : `(no namespace ${name})`, expected)
 }

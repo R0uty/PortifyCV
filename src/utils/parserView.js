@@ -148,7 +148,7 @@ export function compareParsedCv(formData, parsed, lines) {
  * Reads a PDF the way a parser would and compares it with the CV.
  * @param {Blob} pdfBlob the PDF exactly as it would download
  * @param {CvData} formData
- * @param {'en' | 'fi'} locale
+ * @param {'en' | 'fi' | 'sv'} locale
  * @returns {Promise<{ lines: string[], rows: ParserRow[] }>}
  */
 export async function readCvPdfAsParser(pdfBlob, formData, locale) {

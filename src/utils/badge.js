@@ -11,7 +11,7 @@ export const PORTIFYCV_SITE_URL = 'https://portifycv.app'
  * either a network request out to portifycv.app on every page load of
  * whoever embeds this, or bloating the snippet with a large base64 blob —
  * both worse than just not including a mark.
- * @param {'en' | 'fi'} [locale]
+ * @param {'en' | 'fi' | 'sv'} [locale]
  * @returns {string}
  */
 export function buildPortifyCvBadgeSnippet(locale = 'en') {

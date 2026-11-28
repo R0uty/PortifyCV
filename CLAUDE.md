@@ -467,17 +467,20 @@ TypeScript build). All form/UI state changes go through
 CV array-item type to `ARRAY_ITEM_FACTORIES` there, not ad hoc in a
 component.
 
-**Bilingual throughout (`en`/`fi`), from translation files (1.7.13).**
+**Trilingual builder (`en`/`fi`/`sv`), from translation files (1.7.13, Swedish 1.7.14).**
 Locale is threaded as a prop from `App.jsx` down, and interface text lives
 in `src/i18n/`, our own small module, no library. `src/i18n/index.js` has
 `LOCALES`, `DEFAULT_LOCALE`, `normalizeLocale` and
-`createNamespace(name, { en, fi }, { kind })`, which returns
+`createNamespace(name, { en, fi, sv }, { kind, locales })`, which returns
 `ns.t(locale, key, vars)` (a dotted key; the locale's text, else English,
 else the key; `{name}` filled from `vars`; a `{ one, other }` value picked
 by `Intl.PluralRules` on `vars.count`; a function value called with
-`vars`) and `ns.copy(locale)` (a whole copy object). It is plain JS with
-no `window`, so it runs in the Node pre-render and in the check scripts.
-Each namespace is a folder, `src/i18n/<namespace>/en.js`, `fi.js` and an
+`vars`) and `ns.copy(locale)` (a whole copy object). `locales` (default: all of
+`LOCALES`) names the languages a namespace has files for; any other
+language reads English. The module is plain JS with no `window`, so it
+runs in the Node pre-render and in the check scripts (`INTL_LOCALES` there
+maps each language to its `Intl` tag). Each namespace is a folder,
+`src/i18n/<namespace>/en.js`, `fi.js`, `sv.js` and an
 `index.js` that calls `createNamespace`, and only the modules that show
 its text import it, so a lazy page's text stays in that page's chunk. The
 lazy ones are `cv` (CVPreview, the Showcases, `atsDetails.js`), `exports`
@@ -485,7 +488,11 @@ lazy ones are `cv` (CVPreview, the Showcases, `atsDetails.js`), `exports`
 `dialogs`, `feedback`, `share` and one `pages/<page>` per content page
 except `pages/landing` and `pages/privacy`, which are in the entry because
 `App.jsx` imports those two pages eagerly (`kind: 'page'`, read whole with `copy(locale)`, its shape kept: nested
-arrays, functions such as `minRead`). A few small ones exist only so the
+arrays, functions such as `minRead`). The content pages have no Swedish
+address, so every `pages/*` namespace passes `locales: ['en', 'fi']` and
+is listed in `CONTENT_ONLY_NAMESPACES` in `check-i18n.mjs` (a namespace
+lacking a language must be listed, and a listed one must still lack it);
+a Swedish app language reading a content page gets English. A few small ones exist only so the
 lazy text stays out of the entry or a shared chunk: `common` (App.jsx's
 shell), `builderShell` (Toolbar, its switchers, the leave dialog) and
 `cvForm` (`cvForm.js`) are in the entry; `formInline` (`EditableList.jsx`,
@@ -515,23 +522,33 @@ format in `GuideLayout.jsx`) and the per-language data the scan sees:
 route metadata (`pageMeta.js`, `routes.js`), `templatePageCopy.js`,
 `landingFaq.js`, `exampleCvs.js`, and the `{ en, fi }` label maps in
 `templateVariants.js`, `templateAccents.js`, `templateFields.js`,
-`cvHeadingColors.js` and `cvTemplates.js` (checks and e2e read
-`.label.en`) with their readers. Also per-language data on purpose,
+`cvHeadingColors.js` and `cvTemplates.js` (now `{ en, fi, sv }`; checks
+and e2e read `.label.en`) with their readers. Also per-language data on purpose,
 though the scan doesn't see them: the example CVs in
 `src/utils/examples/`, `templateMetaDescriptionsFi.js`, the sitemap, the
 import tables in `cvTextImport.js`/`linkedInImport.js`,
-`jobTerms.js`/`jobMatch.js` and `bulletIdeas.js`; `worker/` and
-`index.html` are outside `src/` and keep their own copy. To add a string, put the key (dotted by place, `toolbar.save`)
-in `en.js` and `fi.js` of the namespace that chunk already imports, call
-`ns.t`, keep a sentence whole with `{placeholders}` (never Finnish built
-from fragments), give a plural a `pluralCases` entry, and run
+`jobTerms.js`/`jobMatch.js` and `bulletIdeas.js`, none of which has
+Swedish: for `sv` the example CVs, bullet ideas, paste parser and
+PDF/Word import, job-ad match, `templatePageCopy.js` and `landingFaq.js`
+fall back to English (a Swedish "Kompetenser:" line is not read);
+`worker/` and `index.html` are outside `src/` and keep their own copy. To add a string, put the key (dotted by place, `toolbar.save`)
+in `en.js`, `fi.js` and `sv.js` of the namespace that chunk already imports, call
+`ns.t`, keep a sentence whole with `{placeholders}` (never Finnish or Swedish
+built from fragments), give a plural a `pluralCases` entry, and run
 `check:i18n`. To add a language, add its file to every namespace folder
-and to that `index.js`'s `createNamespace` call, add it to `LOCALES`
-(parity then fails on any namespace that lacks it), and extend the
-allowlisted places above, which are still two-way.
+and to that `index.js`'s `createNamespace` call (or leave it out of a
+content namespace's `locales` and list that in `CONTENT_ONLY_NAMESPACES`),
+add it to `LOCALES`, `CV_LANGUAGES` and `INTL_LOCALES` (parity then fails
+on any namespace that lacks it), give every registry label map its key,
+add the language's lists in `cvFeedback.js` (`WHOLE_WORD_WEAK_PHRASES`
+and the other closed phrase lists) and the skill patterns in `shared.jsx`,
+and extend the allowlisted places above. Swedish was written without a
+native reviewer; `docs/superpowers/notes/2026-11-28-swedish-review.md`
+lists what to read. The builder's toolbar has a language menu (English,
+Suomi, Svenska) and Settings › CV language offers all three.
 
 **The CV has its own language (1.7.5).** `formData.cvLanguage` (`''` =
-follow the app, `'en'`, `'fi'`; Settings › CV language) decides the
+follow the app, `'en'`, `'fi'`, `'sv'`; Settings › CV language) decides the
 language of everything drawn on the CV page and of every export.
 `CVPreview` resolves it itself (`resolveCvLocale` in `cvForm.js`) from its
 `locale` prop, which stays the app's language and still feeds

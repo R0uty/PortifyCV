@@ -241,7 +241,7 @@ export interface CvData {
   /** Per template id, the chosen style variant (templateVariants.js). Variant #1 ('default') is never stored. */
   styleVariantByTemplate: Record<string, string>
   /** The CV's own language (1.7.5); '' follows the app's language. */
-  cvLanguage: '' | 'en' | 'fi'
+  cvLanguage: '' | 'en' | 'fi' | 'sv'
   /** The cover letter (1.7.9); kept in JSON and saved CVs, never in a share link. */
   coverLetter: CoverLetter
   sectionOrder: CvSectionKey[]
